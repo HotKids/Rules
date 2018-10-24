@@ -1,6 +1,5 @@
 // Spotify
 USER-AGENT,*Spotify*
 DOMAIN-KEYWORD,spotify
-DOMAIN-SUFFIX,spoto.fi
+DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,scdn.co
-DOMAIN-SUFFIX,spotify.com
