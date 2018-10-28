@@ -30,8 +30,8 @@ IP-CIDR,198.38.0.0/12
 IP-CIDR,198.45.0.0/12
 // Spotify
 USER-AGENT,*Spotify*
-DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,scdn.co
+DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,spotify.com
 DOMAIN-KEYWORD,spotify
 // HBO
@@ -43,6 +43,7 @@ USER-AGENT,Hulu*
 DOMAIN-SUFFIX,hulu.com
 DOMAIN-SUFFIX,huluim.com
 DOMAIN-SUFFIX,happyon.jp
+DOMAIN-KEYWORD,hulu
 DOMAIN-KEYWORD,bbcfmt
 DOMAIN-KEYWORD,uk-live
 // VSCO
