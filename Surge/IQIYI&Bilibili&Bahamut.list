@@ -13,8 +13,8 @@ IP-CIDR,119.176.0.0/12,no-resolve
 USER-AGENT,*bili*
 DOMAIN-SUFFIX,bilibili.com
 DOMAIN-SUFFIX,acgvideo.com
-DOMAIN-SUFFIX,hdslb.com
 DOMAIN-SUFFIX,acg.tv
+DOMAIN-SUFFIX,hdslb.com
 DOMAIN-KEYWORD,bilibili
 // Bahamut
 USER-AGENT,Anime*
