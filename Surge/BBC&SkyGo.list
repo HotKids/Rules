@@ -8,3 +8,7 @@ DOMAIN-SUFFIX,bbc.co.uk
 DOMAIN-SUFFIX,bbc.com
 DOMAIN-SUFFIX,bbci.co
 DOMAIN-SUFFIX,bbci.co.uk
+// Sky GO
+USER-AGENT,skygo*
+DOMAIN-SUFFIX,sky.com
+DOMAIN-SUFFIX,b
