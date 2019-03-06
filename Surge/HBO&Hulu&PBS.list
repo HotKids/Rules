@@ -9,3 +9,5 @@ DOMAIN-SUFFIX,happyon.jp
 // PBS
 USER-AGENT,PBS*
 DOMAIN-SUFFIX,pbs.org
+// VSCO
+DOMAIN-SUFFIX,vsco.co
