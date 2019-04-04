@@ -35,7 +35,7 @@ dns:
      - tls://dns.rubyfish.cn:853 # dns over tls
   fallback: # 与 nameserver 内的服务器列表同时发起请求，当规则符合 GEOIP 在 CN 以外时，fallback 列表内的域名服务器生效。
      - tls://dns.rubyfish.cn:853
-     - tls://dns.google:853
+     - tls://dns.google
 
 # clash DNS 请求逻辑：
 # (1) 当访问一个域名时，nameserver 与 fallback 列表内的所有服务器并发请求，得到域名对应的 IP 地址。
