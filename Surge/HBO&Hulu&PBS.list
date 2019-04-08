@@ -4,7 +4,7 @@ DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
-DOMAIN,execute-api.ap-southeast-1.amazonaws.com
+DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
 // Hulu
 USER-AGENT,Hulu*
 DOMAIN-KEYWORD,hulu
