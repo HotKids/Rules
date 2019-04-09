@@ -1,3 +1,8 @@
+// JOOX
+USER-AGENT,WeMusic*
+USER-AGENT,JOOX*
+DOMAIN-SUFFIX,joox.com
+DOMAIN-KEYWORD,joox
 // Fox Now
 USER-AGENT,FOX%20NOW*
 DOMAIN-SUFFIX,fox.com
@@ -9,8 +14,3 @@ DOMAIN-SUFFIX,foxplus.com
 DOMAIN-SUFFIX,theplatform.com
 DOMAIN,staticasiafox.akamaized.net
 DOMAIN,dashasiafox.akamaized.net
-// JOOX
-USER-AGENT,WeMusic*
-USER-AGENT,JOOX*
-DOMAIN-SUFFIX,joox.com
-DOMAIN-KEYWORD,joox
