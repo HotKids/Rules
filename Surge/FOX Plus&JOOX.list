@@ -9,11 +9,6 @@ DOMAIN-SUFFIX,foxplus.com
 DOMAIN-SUFFIX,theplatform.com
 DOMAIN,staticasiafox.akamaized.net
 DOMAIN,dashasiafox.akamaized.net
-// Now E
-USER-AGENT,PCCW*
-DOMAIN-SUFFIX,nowe.com
-DOMAIN-SUFFIX,youboranqs01.com
-DOMAIN,bcbolthboa-a.akamaihd.net
 // JOOX
 USER-AGENT,WeMusic*
 USER-AGENT,JOOX*
