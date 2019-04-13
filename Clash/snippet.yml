@@ -46,22 +46,22 @@ Proxy Group:
   - name: "\U0001F424 Gold HK"
     type: load-balance
     proxies:
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 01 | Gold"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 02 | Gold"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 03 | Gold"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 04 | Gold"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 05 | Gold"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 06 | Gold"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 01"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 02"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 03"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 04"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 05"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 06"
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
   - name: "\U0001F424 Gold JP"
     type: load-balance
     proxies:
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 01 | Gold"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 02 | Gold"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 03 | Gold"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 04 | Gold"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 05 | Gold"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 06 | Gold"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 01"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 02"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 03"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 04"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 05"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 06"
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
