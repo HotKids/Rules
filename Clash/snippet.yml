@@ -43,7 +43,7 @@ dns:
 # (3) 若解析结果中，IP 地址属于国外，那么 clash 将选择 fallback 列表内，解析最快的结果。
 
 Proxy Group:
-  - name: "\U0001F424 Gold HK"
+  - name: "\U0001F424 IPLC HK"
     type: load-balance
     proxies:
       - "\U0001F1ED\U0001F1F0 香港 - IPLC 01"
@@ -54,7 +54,7 @@ Proxy Group:
       - "\U0001F1ED\U0001F1F0 香港 - IPLC 06"
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
-  - name: "\U0001F424 Gold JP"
+  - name: "\U0001F424 IPLC JP"
     type: load-balance
     proxies:
       - "\U0001F1EF\U0001F1F5 日本 - IPLC 01"
