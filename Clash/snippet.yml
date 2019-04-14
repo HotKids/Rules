@@ -46,22 +46,21 @@ Proxy Group:
   - name: "\U0001F424 IPLC HK"
     type: load-balance
     proxies:
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 01"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 02"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 03"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 04"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 05"
-      - "\U0001F1ED\U0001F1F0 香港 - IPLC 06"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 01 -> 香港 - HKBN"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 02 -> 香港 - HKBN"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 03 -> 香港 - HKBN"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 04 -> 香港 - HKBN"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 05 -> 香港 - HKBN"
+      - "\U0001F1ED\U0001F1F0 香港 - IPLC 06 -> 香港 - HKBN"
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
   - name: "\U0001F424 IPLC JP"
     type: load-balance
     proxies:
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 01"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 02"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 03"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 04"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 05"
-      - "\U0001F1EF\U0001F1F5 日本 - IPLC 06"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 01 -> 日本 - ABLENET"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 02 -> 日本 - ABLENET"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 03 -> 日本 - ABLENET"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 04 -> 日本 - ABLENET"
+      - "\U0001F1EF\U0001F1F5 日本 - IPLC 05 -> 日本 - ABLENET"
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
