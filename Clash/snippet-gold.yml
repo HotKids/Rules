@@ -44,7 +44,7 @@ dns:
 
 Proxy Group:
  - name: 🐤 IPLC HK
-   type: load-balance
+   type: fallback
    proxies:
     - 🇭🇰 香港 - IPLC 01 -> 香港 - HKBN
     - 🇭🇰 香港 - IPLC 02 -> 香港 - HKBN
@@ -55,7 +55,7 @@ Proxy Group:
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐤 IPLC JP
-   type: load-balance
+   type: fallback
    proxies:
     - 🇯🇵 日本 - IPLC 01 -> 日本 - ABLENET
     - 🇯🇵 日本 - IPLC 02 -> 日本 - ABLENET
@@ -65,7 +65,7 @@ Proxy Group:
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐦 IPLC HK
-   type: fallback
+   type: load-balance
    proxies:
     - 🇭🇰 香港 - IPLC 01 -> 香港 - HKBN
     - 🇭🇰 香港 - IPLC 02 -> 香港 - HKBN
@@ -76,7 +76,7 @@ Proxy Group:
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐦 IPLC JP
-   type: fallback
+   type: load-balance
    proxies:
     - 🇯🇵 日本 - IPLC 01 -> 日本 - ABLENET
     - 🇯🇵 日本 - IPLC 02 -> 日本 - ABLENET
