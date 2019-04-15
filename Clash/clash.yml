@@ -15,7 +15,7 @@ mode: Rule
 
 # 设置日志输出级别 (默认级别：info，级别越高日志输出量越大，越倾向于调试)
 # 四个级别：info / warning / error / debug
-log-level: silent
+log-level: info
 
 # clash 的 RESTful API
 external-controller: 127.0.0.1:9090
