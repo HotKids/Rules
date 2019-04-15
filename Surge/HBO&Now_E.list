@@ -4,7 +4,9 @@ DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
+DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
+DOMAIN-KEYWORD,hbo
 // Viu
 USER-AGENT,Viu*
 DOMAIN-SUFFIX,viu.com
