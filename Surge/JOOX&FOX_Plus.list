@@ -6,6 +6,7 @@ DOMAIN-KEYWORD,joox
 // Fox Now
 USER-AGENT,FOX%20NOW*
 DOMAIN-SUFFIX,fox.com
+DOMAIN-SUFFIX,now.com
 DOMAIN-SUFFIX,foxdcg.com
 DOMAIN-SUFFIX,uplynk.com
 // Fox Plus
