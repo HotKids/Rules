@@ -5,6 +5,9 @@ DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
+// Viu
+USER-AGENT,Viu*
+DOMAIN-SUFFIX,viu.com
 // Now E
 USER-AGENT,PCCW*
 DOMAIN-SUFFIX,nowe.com
