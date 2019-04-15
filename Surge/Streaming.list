@@ -34,6 +34,9 @@ DOMAIN-SUFFIX,bbc.com
 DOMAIN-SUFFIX,bbci.co
 DOMAIN-SUFFIX,bbci.co.uk
 
+// Deezer
+DOMAIN-SUFFIX,deezer.com
+
 // Fox Now
 USER-AGENT,FOX%20NOW*
 DOMAIN-SUFFIX,fox.com
