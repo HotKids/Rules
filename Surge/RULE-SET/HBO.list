@@ -7,13 +7,3 @@ DOMAIN-SUFFIX,hbogoasia.hk
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
 DOMAIN-KEYWORD,hbo
-// Viu
-USER-AGENT,Viu*
-DOMAIN-SUFFIX,viu.com
-DOMAIN-SUFFIX,viu.tv
-// Now E
-USER-AGENT,PCCW*
-DOMAIN-SUFFIX,nowe.com
-DOMAIN-SUFFIX,youboranqs01.com
-DOMAIN,bcbolthboa-a.akamaihd.net
-DOMAIN-KEYWORD,nowe
