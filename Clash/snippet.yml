@@ -46,42 +46,42 @@ Proxy Group:
  - name: 🐤 IPLC HK
    type: fallback
    proxies:
-    - 🇭🇰 香港 - IPLC 01
-    - 🇭🇰 香港 - IPLC 02
-    - 🇭🇰 香港 - IPLC 03
-    - 🇭🇰 香港 - IPLC 04
-    - 🇭🇰 香港 - IPLC 05
-    - 🇭🇰 香港 - IPLC 06
+    - 🇭🇰 香港 - IPLC 1
+    - 🇭🇰 香港 - IPLC 2
+    - 🇭🇰 香港 - IPLC 3
+    - 🇭🇰 香港 - IPLC 4
+    - 🇭🇰 香港 - IPLC 5
+    - 🇭🇰 香港 - IPLC 6
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐤 IPLC JP
    type: fallback
    proxies:
-    - 🇯🇵 日本 - IPLC 01
-    - 🇯🇵 日本 - IPLC 02
-    - 🇯🇵 日本 - IPLC 03
-    - 🇯🇵 日本 - IPLC 04
-    - 🇯🇵 日本 - IPLC 05
+    - 🇯🇵 日本 - IPLC 1
+    - 🇯🇵 日本 - IPLC 2
+    - 🇯🇵 日本 - IPLC 3
+    - 🇯🇵 日本 - IPLC 4
+    - 🇯🇵 日本 - IPLC 5
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐦 IPLC HK
    type: load-balance
    proxies:
-    - 🇭🇰 香港 - IPLC 01
-    - 🇭🇰 香港 - IPLC 02
-    - 🇭🇰 香港 - IPLC 03
-    - 🇭🇰 香港 - IPLC 04
-    - 🇭🇰 香港 - IPLC 05
-    - 🇭🇰 香港 - IPLC 06
+    - 🇭🇰 香港 - IPLC 1
+    - 🇭🇰 香港 - IPLC 2
+    - 🇭🇰 香港 - IPLC 3
+    - 🇭🇰 香港 - IPLC 4
+    - 🇭🇰 香港 - IPLC 5
+    - 🇭🇰 香港 - IPLC 6
    url: http://www.gstatic.com/generate_204
    interval: 300
  - name: 🐦 IPLC JP
    type: load-balance
    proxies:
-    - 🇯🇵 日本 - IPLC 01
-    - 🇯🇵 日本 - IPLC 02
-    - 🇯🇵 日本 - IPLC 03
-    - 🇯🇵 日本 - IPLC 04
-    - 🇯🇵 日本 - IPLC 05
+    - 🇯🇵 日本 - IPLC 1
+    - 🇯🇵 日本 - IPLC 2
+    - 🇯🇵 日本 - IPLC 3
+    - 🇯🇵 日本 - IPLC 4
+    - 🇯🇵 日本 - IPLC 5
    url: http://www.gstatic.com/generate_204
    interval: 300
