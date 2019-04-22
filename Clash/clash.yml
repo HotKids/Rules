@@ -43,27 +43,6 @@ dns:
 # (3) 若解析结果中，IP 地址属于国外，那么 clash 将选择 fallback 列表内，解析最快的结果。
 
 Proxy Group:
- - name: 🐤 IPLC HK
-   type: fallback
-   proxies:
-    - 🇭🇰 中国深圳 -> 香港 1 | IPLC
-    - 🇭🇰 中国深圳 -> 香港 2 | IPLC
-    - 🇭🇰 中国深圳 -> 香港 3 | IPLC
-    - 🇭🇰 中国深圳 -> 香港 4 | IPLC
-    - 🇭🇰 中国深圳 -> 香港 5 | IPLC
-    - 🇭🇰 中国深圳 -> 香港 6 | IPLC
-   url: http://www.gstatic.com/generate_204
-   interval: 300
- - name: 🐤 IPLC JP
-   type: fallback
-   proxies:
-    - 🇯🇵 中国上海 -> 日本 1 | IPLC
-    - 🇯🇵 中国上海 -> 日本 2 | IPLC
-    - 🇯🇵 中国上海 -> 日本 3 | IPLC
-    - 🇯🇵 中国上海 -> 日本 4 | IPLC
-    - 🇯🇵 中国上海 -> 日本 5 | IPLC
-   url: http://www.gstatic.com/generate_204
-   interval: 300
  - name: 🐦 IPLC HK
    type: load-balance
    proxies:
