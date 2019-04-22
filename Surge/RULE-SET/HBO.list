@@ -2,8 +2,14 @@
 USER-AGENT,HBO%20NOW*
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
+DOMAIN-SUFFIX,boltdns.net
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
+DOMAIN,bcbolthboa-a.akamaihd.net
+DOMAIN,hbogeo.cust.footprint.net
 DOMAIN-KEYWORD,hbo
+
+OR,((DOMAIN-SUFFIX,brightcove.net), (DOMAIN-SUFFIX,brightcove.com))
