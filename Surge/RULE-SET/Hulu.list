@@ -1,4 +1,6 @@
 // Hulu
 USER-AGENT,Hulu*
-DOMAIN-KEYWORD,hulu
+DOMAIN-SUFFIX,hulu.com
+DOMAIN-SUFFIX,hulustream.com
 DOMAIN-SUFFIX,happyon.jp
+DOMAIN-KEYWORD,hulu
