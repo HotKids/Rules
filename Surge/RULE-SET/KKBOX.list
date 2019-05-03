@@ -5,6 +5,6 @@ DOMAIN-SUFFIX,kkbox.com.tw
 DOMAIN-SUFFIX,kfs.io
 
 // KKTV
-USER-AGENT,KKOBX
+USER-AGENT,KKTV
 USER-AGENT,com.kktv*
 DOMAIN-SUFFIX,kktv.com.tw
