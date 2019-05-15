@@ -21,5 +21,6 @@ DOMAIN,gateway.icloud.com
 DOMAIN,apple.comscoreresearch.com
 DOMAIN,play.itunes.apple.com
 DOMAIN,play-cdn.itunes-apple.com.akadns.net
-# > Apple TV
+// Apple TV
 DOMAIN,ocvideo.apple.com
+USER-AGENT,AppleTV*
