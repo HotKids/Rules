@@ -1,3 +1,11 @@
+/*
+ * @repo: https://github.com/Choler/Surge/blob/master/WeChat.js
+ * @script: https://raw.githubusercontent.com/JO2EY/Rules/master/Surge/Script/WeChat.js
+ * @regular: https?://mp\.weixin\.qq\.com/
+ * @hostname: mp.weixin.qq.com
+ */
+
+
 let result = body;
 
 // Subscriptions articles
