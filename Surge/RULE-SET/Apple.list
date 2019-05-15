@@ -1,0 +1,13 @@
+DOMAIN-SUFFIX,aaplimg.com
+DOMAIN-SUFFIX,cdn-apple.com
+DOMAIN-SUFFIX,icloud-content.com
+# > App Store Download || iBooks Sample
+DOMAIN-SUFFIX,itunes.apple.com
+# > Apple Music
+DOMAIN,aod.itunes.apple.com
+DOMAIN,audio.itunes.apple.com
+DOMAIN,audio-ssl.itunes.apple.com
+DOMAIN,streamingaudio.itunes.apple.com
+# > Apple TV
+DOMAIN,ocvideo.apple.com
+USER-AGENT,AppleTV*
