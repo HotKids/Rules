@@ -23,4 +23,5 @@ DOMAIN,play.itunes.apple.com
 DOMAIN,play-cdn.itunes-apple.com.akadns.net
 // Apple TV
 DOMAIN,ocvideo.apple.com
+DOMAIN-SUFFIX,icloud-content.com
 USER-AGENT,AppleTV*
