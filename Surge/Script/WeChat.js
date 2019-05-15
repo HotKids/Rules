@@ -5,7 +5,6 @@
  * @hostname: mp.weixin.qq.com
  */
 
-
 let result = body;
 
 // Subscriptions articles
@@ -18,9 +17,3 @@ if (url.indexOf(subscriptionsArticles) != -1) {
 }
 
 result;
-
-/*************************************************************
- *来源：https://github.com/Choler/Surge/blob/master/WeChat.js
- *http-response ^https?://mp\.weixin\.qq\.com/ script-path=https://raw.githubusercontent.com/Choler/Surge/master/WeChat.js
- *hostname = mp.weixin.qq.com
- ************************************************************/
