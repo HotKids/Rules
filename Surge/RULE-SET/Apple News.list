@@ -21,9 +21,3 @@ DOMAIN,gateway.icloud.com
 DOMAIN,apple.comscoreresearch.com
 DOMAIN,play.itunes.apple.com
 DOMAIN,play-cdn.itunes-apple.com.akadns.net
-// Apple TV
-DOMAIN,ocvideo.apple.com
-DOMAIN,is1-ssl.mzstatic.com:443
-DOMAIN-SUFFIX,icloud-content.com
-DOMAIN-SUFFIX,itunes.apple.com
-USER-AGENT,AppleTV*
