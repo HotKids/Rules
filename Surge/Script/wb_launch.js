@@ -1,7 +1,7 @@
 /*
  * @repo: https://github.com/yichahucha/surge
  * @script: https://raw.githubusercontent.com/JO2EY/Rules/master/Surge/Script/wb_launch.js
- * @regular: ^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua)
+ * @regular: https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua)
  * @hostname: *.uve.weibo.com
  */
 
