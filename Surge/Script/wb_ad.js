@@ -1,6 +1,6 @@
 /*
  * @repo: https://github.com/yichahucha/surge
- * @script: https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js
+ * @script: https://raw.githubusercontent.com/JO2EY/Rules/master/Surge/Script/wb_ad.js
  * @regular: ^https?:\/\/(api|mapi)\.weibo\.(cn|com)\/2(\/groups\/timeline|\/statuses\/unread|\/statuses\/extend|\/comments\/build_comments|\/photo\/recommend_list|\/stories\/video_stream|\/statuses\/positives\/get|\/stories\/home_list|\/profile\/statuses|\/statuses\/friends\/timeline)
  */
 
