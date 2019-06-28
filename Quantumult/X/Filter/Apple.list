@@ -1,0 +1,10 @@
+DOMAIN-SUFFIX, aaplimg.com, Apple
+DOMAIN-SUFFIX, cdn-apple.com, Apple
+DOMAIN-SUFFIX, icloud-content.com, Apple
+DOMAIN-SUFFIX, itunes.apple.com, Apple
+DOMAIN, aod.itunes.apple.com, Apple
+DOMAIN, audio.itunes.apple.com, Apple
+DOMAIN, audio-ssl.itunes.apple.com, Apple
+DOMAIN, streamingaudio.itunes.apple.com, Apple
+DOMAIN, ocvideo.apple.com, Apple
+USER-AGENT, AppleTV*, Apple
