@@ -1,0 +1,155 @@
+// AbemaTV
+USER-AGENT,AbemaTV*,AbemaTV
+DOMAIN-SUFFIX,abema.io,AbemaTV
+DOMAIN-SUFFIX,ameba.jp,AbemaTV
+DOMAIN-SUFFIX,hayabusa.io,AbemaTV
+DOMAIN,abematv.akamaized.net,AbemaTV
+DOMAIN,ds-linear-abematv.akamaized.net,AbemaTV
+DOMAIN,ds-vod-abematv.akamaized.net,AbemaTV
+DOMAIN,linear-abematv.akamaized.net,AbemaTV
+
+// Amazon Prime Video
+USER-AGENT,InstantVideo.US*,Prime Video
+USER-AGENT,Prime%20Video*,Prime Video
+DOMAIN-SUFFIX,primevideo.com,Prime Video
+DOMAIN-SUFFIX,amazonvideo.com,Prime Video
+DOMAIN-SUFFIX,media-amazon.com,Prime Video
+DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
+DOMAIN-SUFFIX,llnwd.net,Prime Video
+
+// Bahamut
+USER-AGENT,Anime*,Bahamut
+DOMAIN-SUFFIX,bahamut.com.tw,Bahamut
+DOMAIN-SUFFIX,gamer.com.tw,Bahamut
+DOMAIN-SUFFIX,hinet.net,Bahamut
+
+// BBC
+USER-AGENT,BBCiPlayer*,BBC
+DOMAIN-KEYWORD,bbcfmt,BBC
+DOMAIN-KEYWORD,co.uk,BBC
+DOMAIN-KEYWORD,uk-live,BBC
+DOMAIN-SUFFIX,bbc.co,BBC
+DOMAIN-SUFFIX,bbc.co.uk,BBC
+DOMAIN-SUFFIX,bbc.com,BBC
+DOMAIN-SUFFIX,bbci.co,BBC
+DOMAIN-SUFFIX,bbci.co.uk,BBC
+
+// Fox Now
+USER-AGENT,FOX%20NOW*,Fox Plus
+DOMAIN-SUFFIX,fox.com,Fox Plus
+DOMAIN-SUFFIX,now.com,Fox Plus
+DOMAIN-SUFFIX,foxdcg.com,Fox Plus
+DOMAIN-SUFFIX,uplynk.com,Fox Plus
+
+// Fox Plus
+USER-AGENT,FOXPlus*,Fox Plus
+DOMAIN-SUFFIX,foxplus.com,Fox Plus
+DOMAIN-SUFFIX,theplatform.com,Fox Plus
+DOMAIN,staticasiafox.akamaized.net,Fox Plus
+DOMAIN,dashasiafox.akamaized.net,Fox Plus
+  
+// HBO
+USER-AGENT,HBO%20NOW*,HBO
+DOMAIN-SUFFIX,hbo.com,HBO
+DOMAIN-SUFFIX,hbogo.com,HBO
+DOMAIN-SUFFIX,hboasia.com,HBO
+DOMAIN-SUFFIX,hbogoasia.hk,HBO
+DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
+DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
+DOMAIN-KEYWORD,hbo,HBO
+   
+// Hulu
+USER-AGENT,Hulu*,Hulu
+DOMAIN-KEYWORD,hulu,Hulu
+DOMAIN-SUFFIX,happyon.jp,Hulu
+
+// JOOX
+# USER-AGENT,WeMusic*,JOOX
+# USER-AGENT,JOOX*,JOOX
+# DOMAIN-SUFFIX,joox.com,JOOX
+
+// KKBOX
+USER-AGENT,*KKBOX,KKBOX&KKTV
+DOMAIN-SUFFIX,kkbox.com,KKBOX&KKTV
+DOMAIN-SUFFIX,kkbox.com.tw,KKBOX&KKTV
+DOMAIN-SUFFIX,kfs.io,KKBOX&KKTV
+
+// KKTV
+USER-AGENT,KKTV,KKBOX&KKTV
+USER-AGENT,com.kktv*,KKBOX&KKTV
+DOMAIN-SUFFIX,kktv.me,KKBOX&KKTV
+DOMAIN-SUFFIX,kktv.com.tw,KKBOX&KKTV
+
+// MytvSUPER
+USER-AGENT,mytv*,TVB
+DOMAIN-KEYWORD,nowtv100,TVB
+DOMAIN-KEYWORD,rthklive,TVB
+DOMAIN-SUFFIX,tvb.com,TVB
+DOMAIN-SUFFIX,mytvsuper.com,TVB
+
+// Netflix
+DOMAIN-SUFFIX,netflix.com,Netflix
+DOMAIN-SUFFIX,netflix.net,Netflix
+DOMAIN-SUFFIX,nflxext.com,Netflix
+DOMAIN-SUFFIX,nflximg.com,Netflix
+DOMAIN-SUFFIX,nflximg.net,Netflix
+DOMAIN-SUFFIX,nflxso.net,Netflix
+DOMAIN-SUFFIX,nflxvideo.net,Netflix
+
+// Now E
+USER-AGENT,PCCW*,HBO
+DOMAIN-SUFFIX,nowe.com,HBO
+DOMAIN-SUFFIX,youboranqs01.com,HBO
+DOMAIN,bcbolthboa-a.akamaihd.net,HBO
+DOMAIN-KEYWORD,nowe,HBO
+
+// Pandora
+DOMAIN-SUFFIX,pandora.com,Pandora
+
+// PBS
+USER-AGENT,PBS*,PBS
+DOMAIN-SUFFIX,pbs.org,PBS
+
+// SoundCloud
+USER-AGENT,SoundCloud*,SoundCloud
+DOMAIN-SUFFIX,soundcloud.com,SoundCloud
+
+// Spotify
+USER-AGENT,*Spotify*,Spotify
+DOMAIN-SUFFIX,scdn.co,Spotify
+DOMAIN-SUFFIX,spoti.fi,Spotify
+DOMAIN-KEYWORD,spotify,Spotify
+
+// Sky GO
+# USER-AGENT,skygo*,Sky GO
+# DOMAIN-SUFFIX,sky.com,Sky GO
+# DOMAIN-SUFFIX,skygo.co.nz,Sky GO
+
+// YouTube
+USER-AGENT,*YouTube*,YouTube
+USER-AGENT,*youtube*,YouTube
+DOMAIN-SUFFIX,youtu.be,YouTube
+DOMAIN-SUFFIX,googlevideo.com,YouTube
+DOMAIN,youtubei.googleapis.com,YouTube
+DOMAIN-KEYWORD,youtube,YouTube
+
+// Viu
+USER-AGENT,Viu*,Viu
+DOMAIN-SUFFIX,viu.com,Viu
+DOMAIN-SUFFIX,viu.tv,Viu
+
+// Bilibili
+USER-AGENT,*bili*,IQIYI&Bilibili
+DOMAIN-SUFFIX,bilibili.com,IQIYI&Bilibili
+DOMAIN-SUFFIX,acgvideo.com,IQIYI&Bilibili
+DOMAIN-SUFFIX,acg.tv,IQIYI&Bilibili
+DOMAIN-SUFFIX,hdslb.com,IQIYI&Bilibili
+DOMAIN-KEYWORD,bilibili,IQIYI&Bilibili
+// IQIYI
+USER-AGENT,QIYI*,IQIYI&Bilibili
+USER-AGENT,iQiYi*,IQIYI&Bilibili
+DOMAIN-KEYWORD,qiyi,IQIYI&Bilibili
+DOMAIN-SUFFIX,qy.net,IQIYI&Bilibili
+IP-CIDR,101.227.0.0/16,IQIYI&Bilibili
+IP-CIDR,101.224.0.0/13,IQIYI&Bilibili
+IP-CIDR,119.176.0.0/12,IQIYI&Bilibili
