@@ -101,6 +101,11 @@ DOMAIN-SUFFIX,pandora.com
 USER-AGENT,PBS*
 DOMAIN-SUFFIX,pbs.org
 
+// Pornhub
+DOMAIN-SUFFIX,phncdn.com
+DOMAIN-SUFFIX,pornhub.com
+DOMAIN-SUFFIX,pornhubpremium.com
+
 // SoundCloud
 USER-AGENT,SoundCloud*
 DOMAIN-SUFFIX,soundcloud.com
