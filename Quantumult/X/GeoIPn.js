@@ -7,7 +7,7 @@ function ValidCheck(para) {
   return para
   } else
   {
-  return obj['location'>'capital']
+  return obj[['location'>'capital']]
   }
 }
 
@@ -17,7 +17,7 @@ var bd=body.split('\n')[1];
 //$notify("test","test",bd);
 var obj = JSON.parse(bd);
 var title = flags.get(obj['country_code'])+' '+obj['country_name'];
-var subtitle ='⛱️ '+ValidCheck(obj['city'])+' '+obj['ip'];
+var subtitle ='⛱️ '+ValidCheck(obj['city'])+' '+obj['connection'];
 var ip = obj['ip'];
 var description = obj['country_name'] + '-' + ValidCheck(obj['city']) + '\n' + obj['type'] + '\n' + obj['ip'];
 $done({title, subtitle, ip, description});
