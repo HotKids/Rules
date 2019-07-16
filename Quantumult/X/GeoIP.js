@@ -2,10 +2,6 @@
 //   $done(Null);
 // }
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
-}
-
 function ValidCheck(para) {
   if(para) {
   return para
