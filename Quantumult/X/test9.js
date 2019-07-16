@@ -3,7 +3,7 @@
 // }
 
 // var body = $response.body;
-// var obj = JSON.parse(body);
+// var obj = jsonp.parse(body);
 
 if ($response.statusCode != 200) {
   $done(Null);
