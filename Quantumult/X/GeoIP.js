@@ -15,7 +15,7 @@ function ValidCheck(para) {
   }
 }
 
-var flags = new Map([[ "TW" , "🇨🇳" ])
+var flags = new Map([ "TW" , "🇨🇳" ])
 var body = $response.body;
 var bd=body.split('\n')[1];
 //$notify("test","test",bd);
