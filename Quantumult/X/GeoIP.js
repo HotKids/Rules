@@ -7,7 +7,7 @@ function ValidCheck(para) {
   return para
   } else
   {
-  return obj['country_name']
+  return obj['location.capital']
   }
 }
 
