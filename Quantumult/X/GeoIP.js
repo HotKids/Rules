@@ -7,7 +7,7 @@ function ValidCheck(para) {
   return para
   } else
   {
-  return obj['location'.'capital']
+  return obj['location>capital']
   }
 }
 
