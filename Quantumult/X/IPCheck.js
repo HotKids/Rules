@@ -14,9 +14,6 @@ function ValidCheck(para) {
   return para
   } else
   {
-  return obj['subdivisions']
-  } else
-  {
   return obj['country']
 }
 
