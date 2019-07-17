@@ -5,10 +5,6 @@
 // var body = $response.body;
 // var obj = JSON.parse(body);
 
-if ($response.statusCode != 200) {
-  $done(Null);
-}
-
 function ValidCheck(para) {
   if(para) {
   return para
