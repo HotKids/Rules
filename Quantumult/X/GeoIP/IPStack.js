@@ -2,12 +2,16 @@
 //   $done(Null);
 // }
 
+var location = obj['location'];
+var obj = JSON.parse(location);
+var captial = obj['captial'];
+
 function ValidCheck(para) {
   if(para) {
   return para
   } else
   {
-  return obj['country_name']
+  return obj['capital']
   }
 }
 
