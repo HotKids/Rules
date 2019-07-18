@@ -7,7 +7,7 @@ function ValidCheck(para) {
   return para
   } else
   {
-  return ob['capital']
+  return ob['country_name']
   }
 }
 
@@ -16,9 +16,6 @@ var body = $response.body;
 var bd=body.split('\n')[1];
 $notify("test","test",bd);
 var obj = JSON.parse(bd);
-var location = obj['location'];
-var ob = JSON.parse(location);
-var captial = ob['captial'];
 var title = flags.get(obj['country_code'])+' '+obj['country_name'];
 var subtitle ='⛱️ '+ValidCheck(obj['city'])+' '+obj['ip'];
 var ip = obj['ip'];
