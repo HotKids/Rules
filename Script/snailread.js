@@ -1,13 +1,6 @@
 var body = $response.body;
-const path = "/gain/readtime/info.json";
-var path = $request.path;
-function modify_time() {
-  let obj = JSON.parse(body);
-  obj["tradeEndTime"] = 1357924680;
-  body = JSON.stringify(obj);
-   }
+var obj = JSON.parse(body);
 
-if (path.indexOf(path) != -1){
-  modify_time();
-}
+obj.data["tradeEndTime"] = "1357924680";
+body = JSON.stringify(obj);
 $done(body);
