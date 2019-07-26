@@ -3,7 +3,7 @@ const path = "/gain/readtime/info.json";
 var path = $request.path;
 function modify_time() {
   let obj = JSON.parse(body);
-  obj["tradeEndTime"] = 1679685290;
+  obj["tradeEndTime"] = 1357924680;
   body = JSON.stringify(obj);
    }
 
