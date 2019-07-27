@@ -30,8 +30,6 @@ $done(body);
 /**********************************************************
 微信读书 Forked from yxiaocai
 Surge
-[URL Rewrite]
-^https?:\/\/p\.du\.163\.com\/readtime\/info\.json - reject
 [Script]
 http-response ^https?:\/\/i.weread.qq.com\/pay script-path=https://raw.githubusercontent.com/JO2EY/Rules/master/Script/iweread.js,requires-body=true
 [MITM]
