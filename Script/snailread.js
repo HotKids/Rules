@@ -9,7 +9,7 @@ $done(body);
 网易蜗牛读书
 Surge
 [URL Rewrite]
-^https?:\/\/p\.du\.163\.com\/readtime\/info\.json reject
+^https?:\/\/p\.du\.163\.com\/readtime\/info\.json - reject
 [Script]
 http-response ^https?:\/\/p\.du\.163\.com\/gain\/readtime\/info\.json script-path=https://raw.githubusercontent.com/JO2EY/Rules/master/Script/snailread.js,requires-body=true
 [MITM]
