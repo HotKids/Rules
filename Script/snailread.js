@@ -15,7 +15,7 @@ http-response ^https?:\/\/p\.du\.163\.com\/gain\/readtime\/info\.json script-pat
 [MITM]
 hostname = p.du.163.com
 
-Quantumult X
+Quantumult X Forked from yxiaocai
 hostname = p.du.163.com
 ^https?:\/\/p\.du\.163\.com\/readtime\/info.json url reject-img
 以下二选一
