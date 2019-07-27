@@ -17,8 +17,8 @@ hostname = p.du.163.com
 
 Quantumult X Forked from yxiaocai
 hostname = p.du.163.com
-^https?:\/\/p\.du\.163\.com\/readtime\/info.json url reject-img
+^https?:\/\/p\.du\.163\.com\/readtime\/info\.json url reject-img
 以下二选一
 ^https?:\/\/p\.du\.163\.com\/gain\/readtime\/info\.json url script-response-body https://raw.githubusercontent.com/JO2EY/Rules/master/Script/snailread.js
-^https?:\/\/p\.du\.163\.com\/gain\/readtime\/info.json url response-body "tradeEndTime":\d{10} response-body "tradeEndTime":1679685290
+^https?:\/\/p\.du\.163\.com\/gain\/readtime\/info\.json url response-body "tradeEndTime":\d{10} response-body "tradeEndTime":1679685290
 **********************************************************/
