@@ -115,6 +115,7 @@ USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,scdn.co
 DOMAIN-SUFFIX,spoti.fi
 DOMAIN-KEYWORD,spotify
+IP-CIDR,35.186.224.47/32
 
 // Sky GO
 USER-AGENT,skygo*
