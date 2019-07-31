@@ -3,3 +3,4 @@ USER-AGENT,*Spotify*,Spotify
 DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-KEYWORD,spotify,Spotify
+IP-CIDR,35.186.224.47/32,Spotify
