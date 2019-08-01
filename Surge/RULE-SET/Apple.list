@@ -7,13 +7,23 @@ DOMAIN-SUFFIX,icloud.com
 DOMAIN-SUFFIX,itunes.com
 DOMAIN-SUFFIX,me.com
 DOMAIN-SUFFIX,mzstatic.com
-# > App Store Download || iBooks Sample
+# > Siri
+DOMAIN,guzzoni.apple.com
+# > geod
+DOMAIN-SUFFIX,ls.apple.com
+# > TestFlight
+DOMAIN,testflight.apple.com
+# > iTunes Store and App Store
 DOMAIN-SUFFIX,itunes.apple.com
 # > Apple Music
+USER-AGENT,Music*
 DOMAIN,aod.itunes.apple.com
 DOMAIN,audio.itunes.apple.com
 DOMAIN,audio-ssl.itunes.apple.com
 DOMAIN,streamingaudio.itunes.apple.com
+# > Apple Podcasts
+USER-AGENT,Podcasts*
 # > Apple TV
-DOMAIN,ocvideo.apple.com
 USER-AGENT,AppleTV*
+USER-AGENT,com.apple.tv*
+DOMAIN,ocvideo.apple.com
