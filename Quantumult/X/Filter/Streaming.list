@@ -35,7 +35,7 @@ DOMAIN-SUFFIX,bbci.co,BBC
 DOMAIN-SUFFIX,bbci.co.uk,BBC
 
 // Disney Plus
-USER-AGENT,Disney+,Disney Plus
+USER-AGENT,Disney*,Disney Plus
 DOMAIN-SUFFIX,disneyplus.com,Disney Plus
 DOMAIN-SUFFIX,disney-plus.net,Disney Plus
 DOMAIN-SUFFIX,dssott.com,Disney Plus
