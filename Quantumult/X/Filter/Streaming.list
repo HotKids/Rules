@@ -38,9 +38,8 @@ DOMAIN-SUFFIX,bbci.co.uk,BBC
 USER-AGENT,Disney+,Disney Plus
 DOMAIN-SUFFIX,disneyplus.com,Disney Plus
 DOMAIN-SUFFIX,disney-plus.net,Disney Plus
+DOMAIN-SUFFIX,dssott.com,Disney Plus
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
-DOMAIN-SUFFIX,vod-l3c-eu-west-1.media.dssott.com,Disney Plus
-DOMAIN,search-api-disney.svcs.dssott.com,Disney Plus
 
 // Fox Now
 USER-AGENT,FOX%20NOW*,Fox Plus
