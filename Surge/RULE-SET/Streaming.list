@@ -59,16 +59,20 @@ DOMAIN-SUFFIX,foxplus.com
 DOMAIN-SUFFIX,theplatform.com
 DOMAIN,staticasiafox.akamaized.net
 DOMAIN,dashasiafox.akamaized.net
-  
+
 // HBO
 USER-AGENT,HBO%20NOW*
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
+DOMAIN-SUFFIX,boltdns.net
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
-DOMAIN-KEYWORD,hbo
+DOMAIN,bcbolthboa-a.akamaihd.net
+DOMAIN,hbogeo.cust.footprint.net
+OR,((DOMAIN-SUFFIX,brightcove.net), (DOMAIN-SUFFIX,brightcove.com))
    
 // Hulu
 USER-AGENT,Hulu*
@@ -78,7 +82,6 @@ DOMAIN-SUFFIX,hulustream.com
 DOMAIN-SUFFIX,hulu.jp
 DOMAIN-SUFFIX,happyon.jp
 DOMAIN-KEYWORD,hulu
-
 
 // JOOX
 USER-AGENT,WeMusic*
