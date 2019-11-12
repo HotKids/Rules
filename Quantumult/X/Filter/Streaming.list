@@ -41,6 +41,7 @@ DOMAIN-SUFFIX,disney-plus.net,Disney Plus
 DOMAIN-SUFFIX,dssott.com,Disney Plus
 DOMAIN-SUFFIX,bamgrid.com,Disney Plus
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
+DOMAIN,cdn.registerdisney.go.com,Disney Plus
 
 // Fox Now
 USER-AGENT,FOX%20NOW*,Fox Plus
@@ -64,6 +65,8 @@ DOMAIN-SUFFIX,hboasia.com,HBO
 DOMAIN-SUFFIX,hbogoasia.hk,HBO
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
+DOMAIN,bcbolthboa-a.akamaihd.net,HBO
+DOMAIN,hbogeo.cust.footprint.net,HBO
 
 // Hulu
 USER-AGENT,Hulu*,Hulu
