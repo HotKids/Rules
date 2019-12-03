@@ -1,0 +1,5 @@
+// Apple TV
+PROCESS-NAME,TV
+USER-AGENT,AppleTV*
+USER-AGENT,com.apple.tv*
+DOMAIN-SUFFIX,tv.apple.com
