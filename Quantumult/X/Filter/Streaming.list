@@ -59,6 +59,7 @@ DOMAIN,staticasiafox.akamaized.net,Fox Plus
 DOMAIN,dashasiafox.akamaized.net,Fox Plus
   
 // HBO
+USER-AGENT,HBO*,HBO
 USER-AGENT,HBO%20NOW*,HBO
 DOMAIN-SUFFIX,hbo.com,HBO
 DOMAIN-SUFFIX,hbogo.com,HBO
