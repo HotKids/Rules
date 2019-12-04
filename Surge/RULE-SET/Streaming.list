@@ -27,16 +27,17 @@ DOMAIN,gamer2-cds.cdn.hinet.net
 // BBC
 USER-AGENT,BBCiPlayer*
 DOMAIN-KEYWORD,bbcfmt
-DOMAIN-KEYWORD,co.uk
 DOMAIN-KEYWORD,uk-live
+DOMAIN-SUFFIX,bbc.com
 DOMAIN-SUFFIX,bbc.co
 DOMAIN-SUFFIX,bbc.co.uk
-DOMAIN-SUFFIX,bbc.com
 DOMAIN-SUFFIX,bbci.co
 DOMAIN-SUFFIX,bbci.co.uk
 
 // Deezer
+USER-AGENT,Deezer*
 DOMAIN-SUFFIX,deezer.com
+DOMAIN-SUFFIX,dzcdn.net
 
 // Disney Plus
 USER-AGENT,Disney*
@@ -62,6 +63,7 @@ DOMAIN,staticasiafox.akamaized.net
 DOMAIN,dashasiafox.akamaized.net
 
 // HBO
+USER-AGENT,HBO*
 USER-AGENT,HBO%20NOW*
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
