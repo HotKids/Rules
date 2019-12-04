@@ -21,7 +21,8 @@ DOMAIN-SUFFIX,llnwd.net
 USER-AGENT,Anime*
 DOMAIN-SUFFIX,bahamut.com.tw
 DOMAIN-SUFFIX,gamer.com.tw
-DOMAIN-SUFFIX,hinet.net
+DOMAIN,gamer-cds.cdn.hinet.net
+DOMAIN,gamer2-cds.cdn.hinet.net
 
 // BBC
 USER-AGENT,BBCiPlayer*
