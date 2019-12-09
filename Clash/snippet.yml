@@ -7,7 +7,7 @@ allow-lan: true
 # "*": bind all IP addresses
 # 192.168.122.11: bind a single IPv4 address
 # "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
-bind-address: "*"
+# bind-address: "*"
 
 # Rule / Global/ Direct (default is Rule)
 mode: Rule
@@ -50,10 +50,10 @@ dns:
     - 223.5.5.5
     - tls://dns.rubyfish.cn:853 # dns over tls
     - tls://dns.google
-  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
+#  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
     - tls://dns.rubyfish.cn:853 # dns over tls
     - https://1.1.1.1/dns-query # dns over https
-  fallback-filter:
+#  fallback-filter:
     geoip: true # default
     ipcidr: # ips in these subnets will be considered polluted
       - 240.0.0.0/4
