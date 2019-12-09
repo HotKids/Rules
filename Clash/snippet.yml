@@ -1,41 +1,59 @@
-# HTTP 代理端口
-port: 7890
-
-# SOCKS5 代理端口
-socks-port: 7891
-
-# Linux 和 macOS 的 redir 代理端口 (如需使用此功能，请取消注释)
-redir-port: 7892
-
-# 允许局域网的连接（可用来共享代理）
+port: 7890 # port of HTTP
+socks-port: 7891 # port of SOCKS5
+redir-port: 7892 # redir port for Linux and macOS
 allow-lan: true
 
-# 规则模式：Rule（规则） / Global（全局代理）/ Direct（全局直连）
+# Only applicable when setting allow-lan to true
+# "*": bind all IP addresses
+# 192.168.122.11: bind a single IPv4 address
+# "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
+bind-address: "*"
+
+# Rule / Global/ Direct (default is Rule)
 mode: Rule
 
-# 设置日志输出级别 (默认级别：info，级别越高日志输出量越大，越倾向于调试)
-# 四个级别：info / warning / error / debug
+# set log level to stdout (default is info)
+# info / warning / error / debug / silent
 log-level: info
 
-# clash 的 RESTful API
-external-controller: 127.0.0.1:9090
+external-controller: 127.0.0.1:9090 # RESTful API for clash
 
-# RESTful API 的口令 (可选)
-secret: ""
+# you can put the static web resource (such as clash-dashboard) to a directory, and clash would serve in `${API}/ui`
+# input is a relative path to the configuration directory or an absolute path
+external-ui: "path/to/local/clash-dashboard"
+
+secret: "" # Secret for RESTful API (Optional)
+
+experimental: # experimental feature
+  ignore-resolve-fail: true # ignore dns resolve fail, default value is true
+
+# authentication of local SOCKS5/HTTP(S) server
+authentication:
+  - "user1:pass1"
+  - "user2:pass2"
+
+# experimental hosts, support wildcard (e.g. *.clash.dev Even *.foo.*.example.com)
+# static domain has a higher priority than wildcard domain (foo.example.com > *.example.com)
+hosts:
+  '*.clash.dev': 127.0.0.1
+  'alpha.clash.dev': '::1'
 
 dns:
-  enable: true
-  ipv6: false
+  enable: true # set true to enable dns (default is false)
+  ipv6: false # default is false
   listen: 0.0.0.0:53
-  enhanced-mode: fake-ip
+  enhanced-mode: fake-ip # or redir-host
+  fake-ip-range: 198.18.0.1/16 # if you don't know what it is, don't change it
   nameserver:
-     - 117.50.10.10
-     - 119.29.29.29
-     - 223.5.5.5
-     - tls://dns.rubyfish.cn:853 # dns over tls
-     - tls://dns.google
-
-# clash DNS 请求逻辑：
-# (1) 当访问一个域名时，nameserver 与 fallback 列表内的所有服务器并发请求，得到域名对应的 IP 地址。
-# (2) clash 将选取 nameserver 列表内，解析最快的结果。
-# (3) 若解析结果中，IP 地址属于国外，那么 clash 将选择 fallback 列表内，解析最快的结果。
+    - 117.50.10.10
+    - 119.29.29.29
+    - 223.5.5.5
+    - tls://dns.rubyfish.cn:853 # dns over tls
+    - tls://dns.google
+  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
+    - tls://dns.rubyfish.cn:853 # dns over tls
+    - https://1.1.1.1/dns-query # dns over https
+  fallback-filter:
+    geoip: true # default
+    ipcidr: # ips in these subnets will be considered polluted
+      - 240.0.0.0/4
