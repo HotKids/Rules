@@ -20,15 +20,15 @@ external-controller: 127.0.0.1:9090 # RESTful API for clash
 
 # you can put the static web resource (such as clash-dashboard) to a directory, and clash would serve in `${API}/ui`
 # input is a relative path to the configuration directory or an absolute path
-external-ui: "path/to/local/clash-dashboard"
+# external-ui: "path/to/local/clash-dashboard"
 
 secret: "" # Secret for RESTful API (Optional)
 
-experimental: # experimental feature
-  ignore-resolve-fail: true # ignore dns resolve fail, default value is true
+# experimental: # experimental feature
+ # ignore-resolve-fail: true # ignore dns resolve fail, default value is true
 
 # authentication of local SOCKS5/HTTP(S) server
-authentication:
+# authentication:
   - "user1:pass1"
   - "user2:pass2"
 
@@ -50,10 +50,10 @@ dns:
     - 223.5.5.5
     - tls://dns.rubyfish.cn:853 # dns over tls
     - tls://dns.google
-#  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
+ # fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
     - tls://dns.rubyfish.cn:853 # dns over tls
     - https://1.1.1.1/dns-query # dns over https
-#  fallback-filter:
+ # fallback-filter:
     geoip: true # default
     ipcidr: # ips in these subnets will be considered polluted
       - 240.0.0.0/4
