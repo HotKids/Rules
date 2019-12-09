@@ -1,7 +1,13 @@
-port: 7890 # port of HTTP
-socks-port: 7891 # port of SOCKS5
-redir-port: 7892 # redir port for Linux and macOS
-allow-lan: true
+# HTTP 端口
+port: 7890
+
+# SOCKS5 端口
+socks-port: 7891
+
+# Linux 及 macOS 的 redir 端口
+# redir-port: 7892
+
+allow-lan: false
 
 # Only applicable when setting allow-lan to true
 # "*": bind all IP addresses
@@ -9,35 +15,39 @@ allow-lan: true
 # "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
 # bind-address: "*"
 
-# Rule / Global/ Direct (default is Rule)
+# Rule / Global/ Direct (默认为 Rule 模式)
 mode: Rule
 
-# set log level to stdout (default is info)
+# 设置日志等级 (默认为 info)
 # info / warning / error / debug / silent
 log-level: info
 
-external-controller: 127.0.0.1:9090 # RESTful API for clash
+# RESTful API for clash
+external-controller: 127.0.0.1:9090
 
 # you can put the static web resource (such as clash-dashboard) to a directory, and clash would serve in `${API}/ui`
 # input is a relative path to the configuration directory or an absolute path
-# external-ui: "path/to/local/clash-dashboard"
+# external-ui: folder
 
-secret: "" # Secret for RESTful API (Optional)
+# RESTful API 的口令 (可选)
+# secret: ""
 
-# experimental: # experimental feature
- # ignore-resolve-fail: true # ignore dns resolve fail, default value is true
+# experimental feature
+experimental:
+  ignore-resolve-fail: true # ignore dns resolve fail, default value is true
 
 # authentication of local SOCKS5/HTTP(S) server
 # authentication:
-  - "user1:pass1"
-  - "user2:pass2"
+#  - "user1:pass1"
+#  - "user2:pass2"
 
-# experimental hosts, support wildcard (e.g. *.clash.dev Even *.foo.*.example.com)
-# static domain has a higher priority than wildcard domain (foo.example.com > *.example.com)
-hosts:
-  '*.clash.dev': 127.0.0.1
-  'alpha.clash.dev': '::1'
+# # experimental hosts, support wildcard (e.g. *.clash.dev Even *.foo.*.example.com)
+# # static domain has a higher priority than wildcard domain (foo.example.com > *.example.com)
+# hosts:
+#   '*.clash.dev': 127.0.0.1
+#   'alpha.clash.dev': '::1'
 
+# DNS 设置
 dns:
   enable: true # set true to enable dns (default is false)
   ipv6: false # default is false
@@ -50,10 +60,10 @@ dns:
     - 223.5.5.5
     - tls://dns.rubyfish.cn:853 # dns over tls
     - tls://dns.google
- # fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
+  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
     - tls://dns.rubyfish.cn:853 # dns over tls
     - https://1.1.1.1/dns-query # dns over https
- # fallback-filter:
+  fallback-filter:
     geoip: true # default
     ipcidr: # ips in these subnets will be considered polluted
       - 240.0.0.0/4
