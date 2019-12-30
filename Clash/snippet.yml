@@ -51,7 +51,7 @@ experimental:
 dns:
   enable: true # set true to enable dns (default is false)
   ipv6: false # default is false
-  listen: 0.0.0.0:53
+  listen: 0.0.0.0:5450
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # if you don't know what it is, don't change it
   nameserver:
