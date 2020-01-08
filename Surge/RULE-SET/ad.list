@@ -1,8 +1,0 @@
-# by onewayticket255
-
-//WeChat Article
-AND,((DOMAIN,mp.weixin.qq.com), (NOT,((URL-REGEX,https://mp.weixin.qq.com/(s|mp/(getappmsgext|profile|author|homepage|lifedetail|videoplayer|app))))))
-
-//Weibo International
-URL-REGEX,https://weibointl.api.weibo.cn/portal.php\?a=get_coopen_ads
-USER-AGENT,Weibo%20intl*
