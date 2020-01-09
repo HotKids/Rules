@@ -334,7 +334,7 @@ URL-REGEX,^https?:\/\/r\.inews\.qq\.com\/(adsBlacklist|getFullScreenPic|getQQNew
 # >> 腾讯体育		
 URL-REGEX,^https?:\/\/news\.ssp\.qq\.com\/app		
 # >> 微信		
-AND,((DOMAIN,mp.weixin.qq.com), (NOT,((URL-REGEX,https://mp.weixin.qq.com/(s|mp/(getappmsgext|profile|author|homepage|lifedetail|videoplayer|app))))))
+// AND,((DOMAIN,mp.weixin.qq.com), (NOT,((URL-REGEX,https://mp.weixin.qq.com/(s|mp/(getappmsgext|profile|author|homepage|lifedetail|videoplayer|app))))))
 # > 澎湃新闻		
 URL-REGEX,^https?:\/\/adpai\.thepaper\.cn\/.+&ad=		
 # > 太平洋		
