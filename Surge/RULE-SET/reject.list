@@ -452,7 +452,6 @@ URL-REGEX,^https?:\/\/api\.zhihu\.com\/(launch|real_time)
 URL-REGEX,^https?:\/\/api\.zhihu\.com\/commercial_api\/(launch|real_time)		
 URL-REGEX,^https?:\/\/api\.zhihu\.com\/fringe\/ad		
 URL-REGEX,^https?:\/\/api\.zhihu\.com\/ad-
-USER-AGENT,AVOS*
 URL-REGEX,https?:\/\/www\.zhihu\.com\/api\/v4\/mcn\/
 URL-REGEX,https?:\/\/api\.zhihu\.com/(ab|adx|drama|fringe|zst|commercial|ad-style-service|market\/popover|search\/(top|tab|preset)|.*(guide|recommendations|extended|featured-comment-ad))
 # > 追书神器		
