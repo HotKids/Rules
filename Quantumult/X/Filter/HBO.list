@@ -4,12 +4,14 @@ USER-AGENT,HBO%20NOW*,HBO
 DOMAIN-SUFFIX,hbo.com,HBO
 DOMAIN-SUFFIX,hbogo.com,HBO
 DOMAIN-SUFFIX,hboasia.com,HBO
+DOMAIN-SUFFIX,hbogoasia.com,HBO
 DOMAIN-SUFFIX,hbogoasia.hk,HBO
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
 DOMAIN,bcbolthboa-a.akamaihd.net,HBO
 DOMAIN,hbogeo.cust.footprint.net,HBO
 DOMAIN,firebasedynamiclinks-ipv4.googleapis.com,HBO
+
 // Now E
 USER-AGENT,PCCW*,HBO
 DOMAIN-SUFFIX,nowe.com,HBO
