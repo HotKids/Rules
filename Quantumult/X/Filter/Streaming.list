@@ -70,6 +70,8 @@ DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
 DOMAIN,bcbolthboa-a.akamaihd.net,HBO
 DOMAIN,hbogeo.cust.footprint.net,HBO
+DOMAIN,hbolb.onwardsmg.com,HBO
+DOMAIN,hbounify-prod.evergent.com,HBO
 DOMAIN,firebasedynamiclinks-ipv4.googleapis.com,HBO
 
 // Hulu
