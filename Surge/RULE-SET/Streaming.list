@@ -65,12 +65,15 @@ DOMAIN,dashasiafox.akamaized.net
 // HBO
 USER-AGENT,HBO*
 USER-AGENT,HBO%20NOW*
+DOMAIN-KEYWORD,hbogoasia
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
-DOMAIN-SUFFIX,hbonow.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.com
 DOMAIN-SUFFIX,hbogoasia.hk
+DOMAIN-SUFFIX,hbogoasia.sg
+DOMAIN-SUFFIX,hbogoasia.ph
+DOMAIN-SUFFIX,hbogoasia.id
 DOMAIN-SUFFIX,boltdns.net
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
