@@ -61,11 +61,16 @@ DOMAIN,dashasiafox.akamaized.net,Fox Plus
 // HBO
 USER-AGENT,HBO*,HBO
 USER-AGENT,HBO%20NOW*,HBO
+
+DOMAIN-KEYWORD,hbogoasia,HBO
 DOMAIN-SUFFIX,hbo.com,HBO
 DOMAIN-SUFFIX,hbogo.com,HBO
 DOMAIN-SUFFIX,hboasia.com,HBO
 DOMAIN-SUFFIX,hbogoasia.com,HBO
 DOMAIN-SUFFIX,hbogoasia.hk,HBO
+DOMAIN-SUFFIX,hbogoasia.sg,HBO
+DOMAIN-SUFFIX,hbogoasia.ph,HBO
+DOMAIN-SUFFIX,hbogoasia.id,HBO
 DOMAIN-SUFFIX,onwardsmg.com,HBO
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
