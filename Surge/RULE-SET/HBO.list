@@ -1,6 +1,5 @@
 // HBO
 USER-AGENT,HBO*
-USER-AGENT,HBO%20NOW*
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
@@ -10,12 +9,17 @@ DOMAIN-SUFFIX,hbogoasia.hk
 DOMAIN-SUFFIX,hbogoasia.sg
 DOMAIN-SUFFIX,hbogoasia.ph
 DOMAIN-SUFFIX,hbogoasia.id
-DOMAIN-SUFFIX,boltdns.net
 DOMAIN-SUFFIX,onwardsmg.com
 DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
 DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,bcbolthboa-a.akamaihd.net
+DOMAIN,hboasia1-i.akamaihd.net
+DOMAIN,hboasia2-i.akamaihd.net
+DOMAIN,hboasia3-i.akamaihd.net
+DOMAIN,hboasia4-i.akamaihd.net
+DOMAIN,hboasia5-i.akamaihd.net
 DOMAIN,hbogeo.cust.footprint.net
 DOMAIN,hbounify-prod.evergent.com
-DOMAIN,firebasedynamiclinks-ipv4.googleapis.com
-DOMAIN,firebasedynamiclinks-ipv6.googleapis.com
+DOMAIN,players.brightcove.net
+DOMAIN,dai3fd1oh325y.cloudfront.net
+DOMAIN,cf-images.ap-southeast-1.prod.boltdns.net
