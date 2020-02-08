@@ -82,7 +82,7 @@ DOMAIN,hbogeo.cust.footprint.net
 DOMAIN,hbolb.onwardsmg.com
 DOMAIN,hbounify-prod.evergent.com
 DOMAIN,firebasedynamiclinks-ipv4.googleapis.com
- 
+
 // Hulu
 USER-AGENT,Hulu*
 DOMAIN-SUFFIX,hulu.com
