@@ -1,4 +1,4 @@
-// YouTube
+# > YouTube
 USER-AGENT,*YouTube*
 USER-AGENT,*youtube*
 DOMAIN-SUFFIX,youtu.be
