@@ -1,10 +1,10 @@
-// Fox Now
+# > Fox Now
 USER-AGENT,FOX%20NOW*
 DOMAIN-SUFFIX,fox.com
 DOMAIN-SUFFIX,now.com
 DOMAIN-SUFFIX,foxdcg.com
 DOMAIN-SUFFIX,uplynk.com
-// Fox Plus
+# > Fox Plus
 USER-AGENT,FOXPlus*
 DOMAIN-SUFFIX,foxplus.com
 DOMAIN-SUFFIX,theplatform.com
