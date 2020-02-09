@@ -1,4 +1,4 @@
-// Spotify
+# > Spotify
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,scdn.co
 DOMAIN-SUFFIX,spoti.fi
