@@ -1,4 +1,4 @@
-// AbemaTV
+# > AbemaTV
 USER-AGENT,AbemaTV*
 DOMAIN-SUFFIX,abema.io
 DOMAIN-SUFFIX,ameba.jp
@@ -8,7 +8,7 @@ DOMAIN,ds-linear-abematv.akamaized.net
 DOMAIN,ds-vod-abematv.akamaized.net
 DOMAIN,linear-abematv.akamaized.net
 
-// Amazon Prime Video
+# > Amazon Prime Video
 USER-AGENT,InstantVideo.US*
 USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com
@@ -17,14 +17,14 @@ DOMAIN-SUFFIX,media-amazon.com
 DOMAIN-SUFFIX,aiv-cdn.net
 DOMAIN-SUFFIX,llnwd.net
 
-// Bahamut
+# > Bahamut
 USER-AGENT,Anime*
 DOMAIN-SUFFIX,bahamut.com.tw
 DOMAIN-SUFFIX,gamer.com.tw
 DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
 
-// BBC
+# > BBC
 USER-AGENT,BBCiPlayer*
 DOMAIN-KEYWORD,bbcfmt
 DOMAIN-KEYWORD,uk-live
@@ -34,12 +34,12 @@ DOMAIN-SUFFIX,bbc.co.uk
 DOMAIN-SUFFIX,bbci.co
 DOMAIN-SUFFIX,bbci.co.uk
 
-// Deezer
+# > Deezer
 USER-AGENT,Deezer*
 DOMAIN-SUFFIX,deezer.com
 DOMAIN-SUFFIX,dzcdn.net
 
-// Disney Plus
+# > Disney Plus
 USER-AGENT,Disney*
 DOMAIN-SUFFIX,disneyplus.com
 DOMAIN-SUFFIX,disney-plus.net
@@ -48,21 +48,21 @@ DOMAIN-SUFFIX,bamgrid.com
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 DOMAIN,cdn.registerdisney.go.com
 
-// Fox Now
+# > Fox Now
 USER-AGENT,FOX%20NOW*
 DOMAIN-SUFFIX,fox.com
 DOMAIN-SUFFIX,now.com
 DOMAIN-SUFFIX,foxdcg.com
 DOMAIN-SUFFIX,uplynk.com
 
-// Fox Plus
+# > Fox Plus
 USER-AGENT,FOXPlus*
 DOMAIN-SUFFIX,foxplus.com
 DOMAIN-SUFFIX,theplatform.com
 DOMAIN,staticasiafox.akamaized.net
 DOMAIN,dashasiafox.akamaized.net
 
-// HBO
+# > HBO
 USER-AGENT,HBO*
 USER-AGENT,HBO%20NOW*
 DOMAIN-KEYWORD,hbogoasia
@@ -83,7 +83,7 @@ DOMAIN,hbolb.onwardsmg.com
 DOMAIN,hbounify-prod.evergent.com
 DOMAIN,firebasedynamiclinks-ipv4.googleapis.com
 
-// Hulu
+# > Hulu
 USER-AGENT,Hulu*
 DOMAIN-SUFFIX,hulu.com
 DOMAIN-SUFFIX,huluim.com
@@ -92,32 +92,32 @@ DOMAIN-SUFFIX,hulu.jp
 DOMAIN-SUFFIX,happyon.jp
 DOMAIN-KEYWORD,hulu
 
-// JOOX
+# > JOOX
 USER-AGENT,WeMusic*
 USER-AGENT,JOOX*
 DOMAIN-SUFFIX,joox.com
 
-// KKBOX
+# > KKBOX
 USER-AGENT,*KKBOX
 DOMAIN-SUFFIX,kkbox.com
 DOMAIN-SUFFIX,kkbox.com.tw
 DOMAIN-SUFFIX,kfs.io
 
-// KKTV
+# > KKTV
 USER-AGENT,KKTV*
 USER-AGENT,com.kktv*
 DOMAIN-SUFFIX,kktv.me
 DOMAIN-SUFFIX,kktv.com.tw
 DOMAIN,kktv-theater.kk.stream
 
-// MytvSUPER
+# > MytvSUPER
 USER-AGENT,mytv*
 DOMAIN-KEYWORD,nowtv100
 DOMAIN-KEYWORD,rthklive
 DOMAIN-SUFFIX,tvb.com
 DOMAIN-SUFFIX,mytvsuper.com
 
-// Netflix
+# > Netflix
 DOMAIN-SUFFIX,netflix.com
 DOMAIN-SUFFIX,netflix.net
 DOMAIN-SUFFIX,nflxext.com
@@ -126,42 +126,37 @@ DOMAIN-SUFFIX,nflximg.net
 DOMAIN-SUFFIX,nflxso.net
 DOMAIN-SUFFIX,nflxvideo.net
 
-// Now E
+# > Now E
 USER-AGENT,PCCW*
 DOMAIN-SUFFIX,nowe.com
 DOMAIN-SUFFIX,youboranqs01.com
 DOMAIN,bcbolthboa-a.akamaihd.net
 DOMAIN-KEYWORD,nowe
 
-// Pandora
+# > Pandora
 DOMAIN-SUFFIX,pandora.com
 
-// PBS
+# > PBS
 USER-AGENT,PBS*
 DOMAIN-SUFFIX,pbs.org
 
-// Pornhub
-DOMAIN-SUFFIX,phncdn.com
-DOMAIN-SUFFIX,pornhub.com
-DOMAIN-SUFFIX,pornhubpremium.com
-
-// SoundCloud
+# > SoundCloud
 USER-AGENT,SoundCloud*
 DOMAIN-SUFFIX,soundcloud.com
 
-// Spotify
+# > Spotify
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,scdn.co
 DOMAIN-SUFFIX,spoti.fi
 DOMAIN-KEYWORD,spotify
 IP-CIDR,35.186.224.47/32
 
-// Sky GO
+# > Sky GO
 USER-AGENT,skygo*
 DOMAIN-SUFFIX,sky.com
 DOMAIN-SUFFIX,skygo.co.nz
 
-// YouTube
+# > YouTube
 USER-AGENT,*YouTube*
 USER-AGENT,*youtube*
 DOMAIN-SUFFIX,youtu.be
@@ -169,7 +164,7 @@ DOMAIN-SUFFIX,googlevideo.com
 DOMAIN,youtubei.googleapis.com
 DOMAIN-KEYWORD,youtube
 
-// Viu
+# > Viu
 USER-AGENT,Viu*
 USER-AGENT,ViuTV*
 DOMAIN-SUFFIX,viu.com
