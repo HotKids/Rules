@@ -1,10 +1,10 @@
 # > AbemaTV
-USER-AGENT*
+USER-AGENT,AbemaTV*
 DOMAIN-SUFFIX,abema.io
 DOMAIN-SUFFIX,abema.tv
 DOMAIN-SUFFIX,ameba.jp
 DOMAIN-SUFFIX,hayabusa.io
-DOMAIN.akamaized.net
+DOMAIN,abematv.akamaized.net
 DOMAIN,ds-vod-abematv.akamaized.net
 DOMAIN,linear-abematv.akamaized.net
 DOMAIN,ds-linear-abematv.akamaized.net
@@ -20,21 +20,21 @@ DOMAIN-SUFFIX,llnwd.net
 
 # > Bahamut
 USER-AGENT,Anime*
-DOMAIN-SUFFIX.com.tw
+DOMAIN-SUFFIX,bahamut.com.tw
 DOMAIN-SUFFIX,gamer.com.tw
 DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
 
 # > BBC
-USER-AGENTiPlayer*
-DOMAIN-KEYWORDfmt
+USER-AGENT,BBCiPlayer*
+DOMAIN-KEYWORD,bbcfmt
 DOMAIN-KEYWORD,co.uk
 DOMAIN-KEYWORD,uk-live
-DOMAIN-SUFFIX.com
-DOMAIN-SUFFIX.co
-DOMAIN-SUFFIX.co.uk
-DOMAIN-SUFFIXi.co
-DOMAIN-SUFFIXi.co.uk
+DOMAIN-SUFFIX,bbc.com
+DOMAIN-SUFFIX,bbc.co
+DOMAIN-SUFFIX,bbc.co.uk
+DOMAIN-SUFFIX,bbci.co
+DOMAIN-SUFFIX,bbci.co.uk
 DOMAIN,vod-dash-uk-live.akamaized.net
 DOMAIN,vod-thumb-uk-live.akamaized.net
 DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
@@ -64,20 +64,20 @@ DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hbonow.com
 
 # > Hulu
-DOMAIN-SUFFIX.com
-DOMAIN-SUFFIXim.com
-DOMAIN-SUFFIXstream.com
+DOMAIN-SUFFIX,hulu.com
+DOMAIN-SUFFIX,huluim.com
+DOMAIN-SUFFIX,hulustream.com
 
 # > Hulu JP
-DOMAIN-SUFFIX.jp
+DOMAIN-SUFFIX,hulu.jp
 DOMAIN-SUFFIX,happyon.jp
 DOMAIN-SUFFIX,prod.hjholdings.tv
 
 # > JOOX
 USER-AGENT,WeMusic*
-USER-AGENT*
-DOMAIN-SUFFIX.com
-DOMAIN-KEYWORD
+USER-AGENT,JOOX*
+DOMAIN-SUFFIX,joox.com
+DOMAIN-KEYWORD,joox
 
 # > KKBOX
 USER-AGENT,*KKBOX
@@ -95,12 +95,12 @@ DOMAIN-SUFFIX,kktv.com.tw
 USER-AGENT,mytv*
 DOMAIN-KEYWORD,nowtv100
 DOMAIN-KEYWORD,rthklive
-DOMAIN-SUFFIX.com
+DOMAIN-SUFFIX,tvb.com
 DOMAIN-SUFFIX,mytvsuper.com
 
 # > Netflix
-DOMAIN-SUFFIX.com
-DOMAIN-SUFFIX.net
+DOMAIN-SUFFIX,netflix.com
+DOMAIN-SUFFIX,netflix.net
 DOMAIN-SUFFIX,nflxext.com
 DOMAIN-SUFFIX,nflximg.com
 DOMAIN-SUFFIX,nflximg.net
