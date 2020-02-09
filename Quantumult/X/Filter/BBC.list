@@ -8,3 +8,7 @@ DOMAIN-SUFFIX,bbc.co,BBC
 DOMAIN-SUFFIX,bbc.co.uk,BBC
 DOMAIN-SUFFIX,bbci.co,BBC
 DOMAIN-SUFFIX,bbci.co.uk,BBC
+DOMAIN,vod-dash-uk-live.akamaized.net,BBC
+DOMAIN,vod-thumb-uk-live.akamaized.net,BBC
+DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC
+DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC
