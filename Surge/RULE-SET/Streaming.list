@@ -1,12 +1,13 @@
 # > AbemaTV
-USER-AGENT,AbemaTV*
+USER-AGENT*
 DOMAIN-SUFFIX,abema.io
+DOMAIN-SUFFIX,abema.tv
 DOMAIN-SUFFIX,ameba.jp
 DOMAIN-SUFFIX,hayabusa.io
-DOMAIN,abematv.akamaized.net
-DOMAIN,ds-linear-abematv.akamaized.net
+DOMAIN.akamaized.net
 DOMAIN,ds-vod-abematv.akamaized.net
 DOMAIN,linear-abematv.akamaized.net
+DOMAIN,ds-linear-abematv.akamaized.net
 
 # > Amazon Prime Video
 USER-AGENT,InstantVideo.US*
@@ -19,25 +20,25 @@ DOMAIN-SUFFIX,llnwd.net
 
 # > Bahamut
 USER-AGENT,Anime*
-DOMAIN-SUFFIX,bahamut.com.tw
+DOMAIN-SUFFIX.com.tw
 DOMAIN-SUFFIX,gamer.com.tw
 DOMAIN,gamer-cds.cdn.hinet.net
 DOMAIN,gamer2-cds.cdn.hinet.net
 
 # > BBC
-USER-AGENT,BBCiPlayer*
-DOMAIN-KEYWORD,bbcfmt
+USER-AGENTiPlayer*
+DOMAIN-KEYWORDfmt
+DOMAIN-KEYWORD,co.uk
 DOMAIN-KEYWORD,uk-live
-DOMAIN-SUFFIX,bbc.com
-DOMAIN-SUFFIX,bbc.co
-DOMAIN-SUFFIX,bbc.co.uk
-DOMAIN-SUFFIX,bbci.co
-DOMAIN-SUFFIX,bbci.co.uk
-
-# > Deezer
-USER-AGENT,Deezer*
-DOMAIN-SUFFIX,deezer.com
-DOMAIN-SUFFIX,dzcdn.net
+DOMAIN-SUFFIX.com
+DOMAIN-SUFFIX.co
+DOMAIN-SUFFIX.co.uk
+DOMAIN-SUFFIXi.co
+DOMAIN-SUFFIXi.co.uk
+DOMAIN,vod-dash-uk-live.akamaized.net
+DOMAIN,vod-thumb-uk-live.akamaized.net
+DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
+DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
 
 # > Disney Plus
 USER-AGENT,Disney*
@@ -48,54 +49,35 @@ DOMAIN-SUFFIX,bamgrid.com
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 DOMAIN,cdn.registerdisney.go.com
 
-# > Fox Now
-USER-AGENT,FOX%20NOW*
-DOMAIN-SUFFIX,fox.com
-DOMAIN-SUFFIX,now.com
-DOMAIN-SUFFIX,foxdcg.com
-DOMAIN-SUFFIX,uplynk.com
-
-# > Fox Plus
-USER-AGENT,FOXPlus*
-DOMAIN-SUFFIX,foxplus.com
-DOMAIN-SUFFIX,theplatform.com
-DOMAIN,staticasiafox.akamaized.net
-DOMAIN,dashasiafox.akamaized.net
-
-# > HBO
-USER-AGENT,HBO*
-USER-AGENT,HBO%20NOW*
+# > HBO GO Asia
+USER-AGENT,HBO%20GO%20PROD*
 DOMAIN-KEYWORD,hbogoasia
-DOMAIN-SUFFIX,hbo.com
-DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.com
-DOMAIN-SUFFIX,hbogoasia.hk
-DOMAIN-SUFFIX,hbogoasia.sg
-DOMAIN-SUFFIX,hbogoasia.ph
-DOMAIN-SUFFIX,hbogoasia.id
-DOMAIN-SUFFIX,boltdns.net
-DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com
-DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com
 DOMAIN,bcbolthboa-a.akamaihd.net
-DOMAIN,hbogeo.cust.footprint.net
-DOMAIN,hbolb.onwardsmg.com
-DOMAIN,hbounify-prod.evergent.com
-DOMAIN,firebasedynamiclinks-ipv4.googleapis.com
+DOMAIN,dai3fd1oh325y.cloudfront.net
+
+# > HBO NOW
+USER-AGENT,HBO%20NOW*
+DOMAIN-SUFFIX,hbo.com
+DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
 
 # > Hulu
-USER-AGENT,Hulu*
-DOMAIN-SUFFIX,hulu.com
-DOMAIN-SUFFIX,huluim.com
-DOMAIN-SUFFIX,hulustream.com
-DOMAIN-SUFFIX,hulu.jp
+DOMAIN-SUFFIX.com
+DOMAIN-SUFFIXim.com
+DOMAIN-SUFFIXstream.com
+
+# > Hulu JP
+DOMAIN-SUFFIX.jp
 DOMAIN-SUFFIX,happyon.jp
-DOMAIN-KEYWORD,hulu
+DOMAIN-SUFFIX,prod.hjholdings.tv
 
 # > JOOX
 USER-AGENT,WeMusic*
-USER-AGENT,JOOX*
-DOMAIN-SUFFIX,joox.com
+USER-AGENT*
+DOMAIN-SUFFIX.com
+DOMAIN-KEYWORD
 
 # > KKBOX
 USER-AGENT,*KKBOX
@@ -104,34 +86,35 @@ DOMAIN-SUFFIX,kkbox.com.tw
 DOMAIN-SUFFIX,kfs.io
 
 # > KKTV
-USER-AGENT,KKTV*
+USER-AGENT,KKTV
 USER-AGENT,com.kktv*
 DOMAIN-SUFFIX,kktv.me
 DOMAIN-SUFFIX,kktv.com.tw
-DOMAIN,kktv-theater.kk.stream
 
 # > MytvSUPER
 USER-AGENT,mytv*
 DOMAIN-KEYWORD,nowtv100
 DOMAIN-KEYWORD,rthklive
-DOMAIN-SUFFIX,tvb.com
+DOMAIN-SUFFIX.com
 DOMAIN-SUFFIX,mytvsuper.com
 
 # > Netflix
-DOMAIN-SUFFIX,netflix.com
-DOMAIN-SUFFIX,netflix.net
+DOMAIN-SUFFIX.com
+DOMAIN-SUFFIX.net
 DOMAIN-SUFFIX,nflxext.com
 DOMAIN-SUFFIX,nflximg.com
 DOMAIN-SUFFIX,nflximg.net
 DOMAIN-SUFFIX,nflxso.net
 DOMAIN-SUFFIX,nflxvideo.net
-
-# > Now E
-USER-AGENT,PCCW*
-DOMAIN-SUFFIX,nowe.com
-DOMAIN-SUFFIX,youboranqs01.com
-DOMAIN,bcbolthboa-a.akamaihd.net
-DOMAIN-KEYWORD,nowe
+IP-CIDR,23.246.0.0/18
+IP-CIDR,37.77.184.0/21
+IP-CIDR,45.57.0.0/17
+IP-CIDR,64.120.128.0/17
+IP-CIDR,66.197.128.0/17
+IP-CIDR,108.175.32.0/20
+IP-CIDR,192.173.64.0/18
+IP-CIDR,198.38.96.0/19
+IP-CIDR,198.45.48.0/20
 
 # > Pandora
 DOMAIN-SUFFIX,pandora.com
@@ -153,9 +136,9 @@ DOMAIN-SUFFIX,spotify.com
 IP-CIDR,35.186.224.47/32
 
 # > Sky GO
-USER-AGENT,skygo*
-DOMAIN-SUFFIX,sky.com
-DOMAIN-SUFFIX,skygo.co.nz
+# USER-AGENT,skygo*
+# DOMAIN-SUFFIX,sky.com
+# DOMAIN-SUFFIX,skygo.co.nz
 
 # > YouTube
 USER-AGENT,*YouTube*
