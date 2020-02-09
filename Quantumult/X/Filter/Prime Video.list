@@ -1,4 +1,4 @@
-// Amazon Prime Video
+# > Amazon Prime Video
 USER-AGENT,InstantVideo.US*,Prime Video
 USER-AGENT,Prime%20Video*,Prime Video
 DOMAIN-SUFFIX,primevideo.com,Prime Video
