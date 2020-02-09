@@ -1,14 +1,15 @@
-// AbemaTV
+# > AbemaTV
 USER-AGENT,AbemaTV*,AbemaTV
 DOMAIN-SUFFIX,abema.io,AbemaTV
+DOMAIN-SUFFIX,abema.tv,AbemaTV
 DOMAIN-SUFFIX,ameba.jp,AbemaTV
 DOMAIN-SUFFIX,hayabusa.io,AbemaTV
 DOMAIN,abematv.akamaized.net,AbemaTV
-DOMAIN,ds-linear-abematv.akamaized.net,AbemaTV
 DOMAIN,ds-vod-abematv.akamaized.net,AbemaTV
 DOMAIN,linear-abematv.akamaized.net,AbemaTV
+DOMAIN,ds-linear-abematv.akamaized.net,AbemaTV
 
-// Amazon Prime Video
+# > Amazon Prime Video
 USER-AGENT,InstantVideo.US*,Prime Video
 USER-AGENT,Prime%20Video*,Prime Video
 DOMAIN-SUFFIX,primevideo.com,Prime Video
@@ -17,25 +18,29 @@ DOMAIN-SUFFIX,media-amazon.com,Prime Video
 DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
 DOMAIN-SUFFIX,llnwd.net,Prime Video
 
-// Bahamut
+# > Bahamut
 USER-AGENT,Anime*,Bahamut
 DOMAIN-SUFFIX,bahamut.com.tw,Bahamut
 DOMAIN-SUFFIX,gamer.com.tw,Bahamut
 DOMAIN,gamer-cds.cdn.hinet.net,Bahamut
 DOMAIN,gamer2-cds.cdn.hinet.net,Bahamut
 
-// BBC
+# > BBC
 USER-AGENT,BBCiPlayer*,BBC
 DOMAIN-KEYWORD,bbcfmt,BBC
 DOMAIN-KEYWORD,co.uk,BBC
 DOMAIN-KEYWORD,uk-live,BBC
+DOMAIN-SUFFIX,bbc.com,BBC
 DOMAIN-SUFFIX,bbc.co,BBC
 DOMAIN-SUFFIX,bbc.co.uk,BBC
-DOMAIN-SUFFIX,bbc.com,BBC
 DOMAIN-SUFFIX,bbci.co,BBC
 DOMAIN-SUFFIX,bbci.co.uk,BBC
+DOMAIN,vod-dash-uk-live.akamaized.net,BBC
+DOMAIN,vod-thumb-uk-live.akamaized.net,BBC
+DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC
+DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC
 
-// Disney Plus
+# > Disney Plus
 USER-AGENT,Disney*,Disney Plus
 DOMAIN-SUFFIX,disneyplus.com,Disney Plus
 DOMAIN-SUFFIX,disney-plus.net,Disney Plus
@@ -44,76 +49,56 @@ DOMAIN-SUFFIX,bamgrid.com,Disney Plus
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
 DOMAIN,cdn.registerdisney.go.com,Disney Plus
 
-// Fox Now
-USER-AGENT,FOX%20NOW*,Fox Plus
-DOMAIN-SUFFIX,fox.com,Fox Plus
-DOMAIN-SUFFIX,now.com,Fox Plus
-DOMAIN-SUFFIX,foxdcg.com,Fox Plus
-DOMAIN-SUFFIX,uplynk.com,Fox Plus
+# > HBO GO Asia
+USER-AGENT,HBO%20GO%20PROD*,HBO GO Asia
+DOMAIN-KEYWORD,hbogoasia,HBO GO Asia
+DOMAIN-SUFFIX,hboasia.com,HBO GO Asia
+DOMAIN-SUFFIX,hbogoasia.com,HBO GO Asia
+DOMAIN,bcbolthboa-a.akamaihd.net,HBO GO Asia
+DOMAIN,dai3fd1oh325y.cloudfront.net,HBO GO Asia
 
-// Fox Plus
-USER-AGENT,FOXPlus*,Fox Plus
-DOMAIN-SUFFIX,foxplus.com,Fox Plus
-DOMAIN-SUFFIX,theplatform.com,Fox Plus
-DOMAIN,staticasiafox.akamaized.net,Fox Plus
-DOMAIN,dashasiafox.akamaized.net,Fox Plus
-  
-// HBO
-USER-AGENT,HBO*,HBO
-USER-AGENT,HBO%20NOW*,HBO
+# > HBO NOW
+USER-AGENT,HBO%20NOW*,HBO NOW
+DOMAIN-SUFFIX,hbo.com,HBO NOW
+DOMAIN-SUFFIX,hbogo.com,HBO NOW
+DOMAIN-SUFFIX,hbonow.com,HBO NOW
 
-DOMAIN-KEYWORD,hbogoasia,HBO
-DOMAIN-SUFFIX,hbo.com,HBO
-DOMAIN-SUFFIX,hbogo.com,HBO
-DOMAIN-SUFFIX,hboasia.com,HBO
-DOMAIN-SUFFIX,hbogoasia.com,HBO
-DOMAIN-SUFFIX,hbogoasia.hk,HBO
-DOMAIN-SUFFIX,hbogoasia.sg,HBO
-DOMAIN-SUFFIX,hbogoasia.ph,HBO
-DOMAIN-SUFFIX,hbogoasia.id,HBO
-DOMAIN-SUFFIX,onwardsmg.com,HBO
-DOMAIN-SUFFIX,s3-ap-southeast-1.amazonaws.com,HBO
-DOMAIN-SUFFIX,execute-api.ap-southeast-1.amazonaws.com,HBO
-DOMAIN,bcbolthboa-a.akamaihd.net,HBO
-DOMAIN,hbogeo.cust.footprint.net,HBO
-DOMAIN,hbounify-prod.evergent.com,HBO
-DOMAIN,firebasedynamiclinks-ipv4.googleapis.com,HBO
-DOMAIN,firebasedynamiclinks-ipv6.googleapis.com,HBO
-
-// Hulu
-USER-AGENT,Hulu*,Hulu
+# > Hulu
 DOMAIN-SUFFIX,hulu.com,Hulu
 DOMAIN-SUFFIX,huluim.com,Hulu
 DOMAIN-SUFFIX,hulustream.com,Hulu
-DOMAIN-SUFFIX,hulu.jp,Hulu
-DOMAIN-SUFFIX,happyon.jp,Hulu
-DOMAIN-KEYWORD,hulu,Hulu
 
-// JOOX
-# USER-AGENT,WeMusic*,JOOX
-# USER-AGENT,JOOX*,JOOX
-# DOMAIN-SUFFIX,joox.com,JOOX
+# > Hulu JP
+DOMAIN-SUFFIX,hulu.jp,Hulu JP
+DOMAIN-SUFFIX,happyon.jp,Hulu JP
+DOMAIN-SUFFIX,prod.hjholdings.tv,Hulu JP
 
-// KKBOX
+# > JOOX
+USER-AGENT,WeMusic*,JOOX
+USER-AGENT,JOOX*,JOOX
+DOMAIN-SUFFIX,joox.com,JOOX
+DOMAIN-KEYWORD,joox,JOOX
+
+# > KKBOX
 USER-AGENT,*KKBOX,KKBOX&KKTV
 DOMAIN-SUFFIX,kkbox.com,KKBOX&KKTV
 DOMAIN-SUFFIX,kkbox.com.tw,KKBOX&KKTV
 DOMAIN-SUFFIX,kfs.io,KKBOX&KKTV
 
-// KKTV
+# > KKTV
 USER-AGENT,KKTV,KKBOX&KKTV
 USER-AGENT,com.kktv*,KKBOX&KKTV
 DOMAIN-SUFFIX,kktv.me,KKBOX&KKTV
 DOMAIN-SUFFIX,kktv.com.tw,KKBOX&KKTV
 
-// MytvSUPER
+# > MytvSUPER
 USER-AGENT,mytv*,TVB
 DOMAIN-KEYWORD,nowtv100,TVB
 DOMAIN-KEYWORD,rthklive,TVB
 DOMAIN-SUFFIX,tvb.com,TVB
 DOMAIN-SUFFIX,mytvsuper.com,TVB
 
-// Netflix
+# > Netflix
 DOMAIN-SUFFIX,netflix.com,Netflix
 DOMAIN-SUFFIX,netflix.net,Netflix
 DOMAIN-SUFFIX,nflxext.com,Netflix
@@ -131,30 +116,18 @@ IP-CIDR,192.173.64.0/18,Netflix
 IP-CIDR,198.38.96.0/19,Netflix
 IP-CIDR,198.45.48.0/20,Netflix
 
-// Now E
-USER-AGENT,PCCW*,HBO
-DOMAIN-SUFFIX,nowe.com,HBO
-DOMAIN-SUFFIX,youboranqs01.com,HBO
-DOMAIN,bcbolthboa-a.akamaihd.net,HBO
-DOMAIN-KEYWORD,nowe,HBO
-
-// Pandora
+# > Pandora
 DOMAIN-SUFFIX,pandora.com,Pandora
 
-// PBS
+# > PBS
 USER-AGENT,PBS*,PBS
 DOMAIN-SUFFIX,pbs.org,PBS
 
-// Pornhub
-DOMAIN-SUFFIX,phncdn.com,Pornhub
-DOMAIN-SUFFIX,pornhub.com,Pornhub
-DOMAIN-SUFFIX,pornhubpremium.com,Pornhub
-
-// SoundCloud
+# > SoundCloud
 USER-AGENT,SoundCloud*,SoundCloud
 DOMAIN-SUFFIX,soundcloud.com,SoundCloud
 
-// Spotify
+# > Spotify
 USER-AGENT,*Spotify*,Spotify
 DOMAIN-SUFFIX,pscdn.co,Spotify
 DOMAIN-SUFFIX,scdn.co,Spotify
@@ -162,12 +135,12 @@ DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-SUFFIX,spotify.com,Spotify
 IP-CIDR,35.186.224.47/32,Spotify
 
-// Sky GO
+# > Sky GO
 # USER-AGENT,skygo*,Sky GO
 # DOMAIN-SUFFIX,sky.com,Sky GO
 # DOMAIN-SUFFIX,skygo.co.nz,Sky GO
 
-// YouTube
+# > YouTube
 USER-AGENT,*YouTube*,YouTube
 USER-AGENT,*youtube*,YouTube
 DOMAIN-SUFFIX,youtu.be,YouTube
@@ -175,7 +148,7 @@ DOMAIN-SUFFIX,googlevideo.com,YouTube
 DOMAIN,youtubei.googleapis.com,YouTube
 DOMAIN-KEYWORD,youtube,YouTube
 
-// Viu
+# > Viu
 USER-AGENT,Viu*,Viu
 USER-AGENT,ViuTV*,Viu
 DOMAIN-SUFFIX,viu.com,Viu
@@ -185,7 +158,7 @@ DOMAIN,d1k2us671qcoau.cloudfront.net,Viu
 DOMAIN,d2anahhhmp1ffz.cloudfront.net,Viu
 DOMAIN,dfp6rglgjqszk.cloudfront.net,Viu
 
-// Bilibili
+# > Bilibili
 USER-AGENT,*bili*,IQIYI&Bilibili
 DOMAIN-SUFFIX,bilibili.com,IQIYI&Bilibili
 DOMAIN-SUFFIX,acgvideo.com,IQIYI&Bilibili
@@ -194,11 +167,14 @@ DOMAIN-SUFFIX,hdslb.com,IQIYI&Bilibili
 DOMAIN,upos-hz-mirrorakam.akamaized.net,IQIYI&Bilibili
 DOMAIN-KEYWORD,bilibili,IQIYI&Bilibili
 
-// IQIYI
-USER-AGENT,QIYI*,IQIYI&Bilibili
-USER-AGENT,iQiYi*,IQIYI&Bilibili
-DOMAIN-KEYWORD,qiyi,IQIYI&Bilibili
-DOMAIN-SUFFIX,qy.net,IQIYI&Bilibili
-IP-CIDR,101.227.0.0/16,IQIYI&Bilibili
-IP-CIDR,101.224.0.0/13,IQIYI&Bilibili
-IP-CIDR,119.176.0.0/12,IQIYI&Bilibili
+# > IQIYI
+# USER-AGENT,QIYI*,IQIYI&Bilibili
+# USER-AGENT,iQiYi*,IQIYI&Bilibili
+# DOMAIN-KEYWORD,qiyi,IQIYI&Bilibili
+# DOMAIN-SUFFIX,qy.net,IQIYI&Bilibili
+# DOMAIN-SUFFIX,71.am,IQIYI&Bilibili
+# 爱奇艺检测ip
+DOMAIN,cache.video.iqiyi.com,IQIYI&Bilibili
+# IP-CIDR,101.227.0.0/16,IQIYI&Bilibili
+# IP-CIDR,101.224.0.0/13,IQIYI&Bilibili
+# IP-CIDR,119.176.0.0/12,IQIYI&Bilibili
