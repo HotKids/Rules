@@ -69,6 +69,7 @@ DOMAIN-SUFFIX,hbonow.com,HBO NOW
 DOMAIN-SUFFIX,hulu.com,Hulu
 DOMAIN-SUFFIX,huluim.com,Hulu
 DOMAIN-SUFFIX,hulustream.com,Hulu
+DOMAIN,assetshuluimcom-a.akamaihd.net,Hulu
 
 # > Hulu JP
 DOMAIN-SUFFIX,hulu.jp,Hulu JP
