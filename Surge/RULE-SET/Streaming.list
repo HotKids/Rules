@@ -54,8 +54,9 @@ USER-AGENT,HBO%20GO%20PROD*
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.com
-DOMAIN,bcbolthboa-a.akamaihd.net
+DOMAIN,hbolb.onwardsmg.com
 DOMAIN,hbounify-prod.evergent.com
+DOMAIN,bcbolthboa-a.akamaihd.net
 DOMAIN,dai3fd1oh325y.cloudfront.net
 
 # > HBO NOW
