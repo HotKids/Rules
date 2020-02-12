@@ -49,6 +49,10 @@ DOMAIN-SUFFIX,bamgrid.com,Disney Plus
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
 DOMAIN,cdn.registerdisney.go.com,Disney Plus
 
+# > friDay
+USER-AGENT,friDay*,friDay
+DOMAIN-SUFFIX,friday.tw,friDay
+
 # > HBO GO Asia
 USER-AGENT,HBO%20GO%20PROD*,HBO GO Asia
 DOMAIN-KEYWORD,hbogoasia,HBO GO Asia
