@@ -7,14 +7,12 @@ const path2 = "wareBusiness";
 const console_log = false;
 const url = $request.url;
 const body = $response.body;
+const $tool = tool();
 
 if (url.indexOf(path1) != -1) {
     let obj = JSON.parse(body);
     delete obj.serverConfig.httpdns;
-    delete obj.serverConfig.dnsvip;
-    delete obj.serverConfig.dnsvip_v6;
     $done({ body: JSON.stringify(obj) });
-    if (console_log) $notify("JD", "", "httpdns closed");
 }
 
 if (url.indexOf(path2) != -1) {
@@ -75,6 +73,7 @@ function history_price_msg(data) {
     let history_price_msg = "";
     let start_date = "";
     let end_date = "";
+    let date_range_msg = `(最近一年)`;
     let list = data.jiagequshiyh.match(rex_match);
     list = list.reverse().slice(0, 365);
     list.forEach((item, index) => {
@@ -98,15 +97,13 @@ function history_price_msg(data) {
             history_price_msg += msg;
         }
     });
-    // const date_range_msg = `(${start_date} ~ ${end_date})`;
-    const date_range_msg = `(最近一年)`;
+    // date_range_msg = `(${start_date} ~ ${end_date})`;
     const price_msg = title_msg + "  " + date_range_msg + "\n\n" + title_table_msg + "\n" + history_price_msg;
     return [lower_price_msg, price_msg];
 }
 
 function request_history_price(share_url, callback) {
     const options = {
-        method: "POST",
         url: "https://apapia-history.manmanbuy.com/ChromeWidgetServices/WidgetServices.ashx",
         headers: {
             "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
@@ -114,15 +111,15 @@ function request_history_price(share_url, callback) {
         },
         body: "methodName=getBiJiaInfo_wxsmall&p_url=" + encodeURIComponent(share_url)
     }
-    $task.fetch(options).then(response => {
-        // response.statusCode, response.headers, response.body
-        callback(JSON.parse(response.body));
-        if (console_log) $notify("Body", "", response.body); // Success!
-    }, reason => {
-        // reason.error
-        callback(null, null);
-        if (console_log) $notify("Error", "", reason.error); // Error!
-    });
+    $tool.post(options, function (error, response, data) {
+        if (!error) {
+            callback(JSON.parse(data));
+            if (console_log) console.log("Data:\n" + data);
+        } else {
+            callback(null, null);
+            if (console_log) console.log("Error:\n" + error);
+        }
+    })
 }
 
 function changeDateFormat(cellval) {
@@ -163,6 +160,80 @@ function adword_obj() {
         "refId": "eAdword_0000000028",
         "sortId": 13
     }
+}
+
+function tool() {
+    const isSurge = typeof $httpClient != "undefined"
+    const isQuanX = typeof $task != "undefined"
+    const isResponse = typeof $response != "undefined"
+    const node = (() => {
+        if (typeof require == "function") {
+            const request = require('request')
+            return ({ request })
+        } else {
+            return (null)
+        }
+    })()
+    const notify = (title, subtitle, message) => {
+        if (isQuanX) $notify(title, subtitle, message)
+        if (isSurge) $notification.post(title, subtitle, message)
+        if (node) console.log(JSON.stringify({ title, subtitle, message }));
+    }
+    const write = (value, key) => {
+        if (isQuanX) return $prefs.setValueForKey(value, key)
+        if (isSurge) return $persistentStore.write(value, key)
+    }
+    const read = (key) => {
+        if (isQuanX) return $prefs.valueForKey(key)
+        if (isSurge) return $persistentStore.read(key)
+    }
+    const adapterStatus = (response) => {
+        if (response) {
+            if (response.status) {
+                response["statusCode"] = response.status
+            } else if (response.statusCode) {
+                response["status"] = response.statusCode
+            }
+        }
+        return response
+    }
+    const get = (options, callback) => {
+        if (isQuanX) {
+            if (typeof options == "string") options = { url: options }
+            options["method"] = "GET"
+            $task.fetch(options).then(response => {
+                callback(null, adapterStatus(response), response.body)
+            }, reason => callback(reason.error, null, null))
+        }
+        if (isSurge) $httpClient.get(options, (error, response, body) => {
+            callback(error, adapterStatus(response), body)
+        })
+        if (node) {
+            node.request(options, (error, response, body) => {
+                callback(error, adapterStatus(response), body)
+            })
+        }
+    }
+    const post = (options, callback) => {
+        if (isQuanX) {
+            if (typeof options == "string") options = { url: options }
+            options["method"] = "POST"
+            $task.fetch(options).then(response => {
+                callback(null, adapterStatus(response), response.body)
+            }, reason => callback(reason.error, null, null))
+        }
+        if (isSurge) {
+            $httpClient.post(options, (error, response, body) => {
+                callback(error, adapterStatus(response), body)
+            })
+        }
+        if (node) {
+            node.request.post(options, (error, response, body) => {
+                callback(error, adapterStatus(response), body)
+            })
+        }
+    }
+    return { isQuanX, isSurge, isResponse, notify, write, read, get, post }
 }
 
 Array.prototype.insert = function (index, item) {
