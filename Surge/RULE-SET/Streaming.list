@@ -98,6 +98,10 @@ USER-AGENT,com.kktv*
 DOMAIN-SUFFIX,kktv.me
 DOMAIN-SUFFIX,kktv.com.tw
 
+# > LINE TV
+USER-AGENT,LINE%20TV*
+DOMAIN-SUFFIX,linetv.tw
+
 # > MytvSUPER
 USER-AGENT,mytv*
 DOMAIN-KEYWORD,nowtv100
