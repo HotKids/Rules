@@ -38,6 +38,7 @@ https://raw.githubusercontent.com/Choler/Surge/master/Script/Super.js
 https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bahamut.js
 https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bahamut.js
 https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/DingXiangDrugs.js
+https://raw.githubusercontent.com/langkhach270389/Scripting/master/CamScaner.js
 https://raw.githubusercontent.com/eHpo1/Surge/master/Script/wps.js
 https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js
 https://raw.githubusercontent.com/langkhach270389/Scripting/master/musixmatch.miao.js
