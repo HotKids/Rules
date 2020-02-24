@@ -8,7 +8,7 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/quanx/neteasemusic.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/wmmeituan/wmmeituan.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_DailyBonus_QX.js
 
 https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
@@ -20,7 +20,7 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cook
 https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/quanx/neteasemusic.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/wmmeituan/wmmeituan.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_GetCookie_QX.js
 
 https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
