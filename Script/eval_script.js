@@ -18,7 +18,7 @@
 
 const __conf = {
     "https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js": "^https?:\/\/api\.m\.jd.com",
-    "https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js": ["^https?:\/\/trade-acs\.m\.taobao\.com", "^https?://amdc\.m\.taobao\.com"],
+    "https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js": ["^https?:\/\/trade-acs\.m\.taobao\.com", "^https?:\/\/amdc\.m\.taobao\.com"],
     "https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js": "^https?:\/\/ios\.prod\.ftl\.netflix\.com",
     "https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js": "^https?:\/\/m?api\.weibo\.c(n|om)",
     "https://raw.githubusercontent.com/yichahucha/surge/master/wb_launch.js": "^https?:\/\/(sdk|wb)app\.uve\.weibo\.com",
