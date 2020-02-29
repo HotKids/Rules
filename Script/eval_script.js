@@ -17,40 +17,23 @@
  */
 
 const __conf = {
-    // JD App 显示历史价格 by yichahucha
     "https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js": "^https?:\/\/api\.m\.jd.com",
-    // Taobao App 显示历史价格 by yichahucha
     "https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js": ["^https?:\/\/trade-acs\.m\.taobao\.com", "^https?://amdc\.m\.taobao\.com"],
-    // Netflix 获取 IMDb 分数 by yichahucha
     "https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js": "^https?:\/\/ios\.prod\.ftl\.netflix\.com",
-    // 微博应用内去广告 by yichahucha
     "https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js": "^https?:\/\/m?api\.weibo\.c(n|om)",
-    // 微博启动页去广告 by yichahucha
     "https://raw.githubusercontent.com/yichahucha/surge/master/wb_launch.js": "^https?:\/\/(sdk|wb)app\.uve\.weibo\.com",
-    // 微信公众号去广告 by Choler&NoByDa
     "https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js": "^https?:\/\/mp\.weixin\.qq\.com",
-    // 哔哩哔哩 App 去广告 by onewayticket255&Primovist
     "https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Bilibili.js": "^https?:\/\/ap(i|p)\.bilibili\.com",
-    // 抖音去广告去水印 By Choler
     "https://raw.githubusercontent.com/Choler/Surge/master/Script/Aweme.js": "^https?:\/\/.*\.amemv\.com",
     "https://raw.githubusercontent.com/Choler/Surge/master/Script/Super.js": "^https?:\/\/[a-z]*\.snssdk\.com",
-    // 動畫瘋去广告 by NoByDa
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bahamut.js": "^https?:\/\/api\.gamer\.com",
-    // 用药助手专业版 By Primovist
     "https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/DingXiangDrugs.js": "^https?:\/\/(i|newdrugs)\.dxy\.cn",
-    // WPS VIP By eHpo
     "https://raw.githubusercontent.com/eHpo1/Surge/master/Script/wps.js": "^https?:\/\/account\.wps\.cn",
-    // CamScanner by langkhach270389
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/CamScaner.js": "^https?:\/\/(api|api-cs)\.intsig\.net",
-    // PicsArt Pro by langkhach270389&NoByDa
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js": "^https?:\/\/api\.(picsart|meiease)\.c(n|om)",
-    // Musixmatch Premium by langkhach270389
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/musixmatch.miao.js": "^https?:\/\/apic\.musixmatch\.com",
-    // VUE Vlog Pro by NoByDa
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/VUE.js": "^https?:\/\/api\.vuevideo\.net",
-    // Documents Professional by langkhach270389
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js", "^https?:\/\/license\.pdfexpert\.com",
-    // PDF Expert PRO by langkhach270389
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/Pdfexpert.vip.js": "^https?:\/\/license\.pdfexpert\.com"
 }
 
