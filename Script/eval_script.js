@@ -33,7 +33,7 @@ const __conf = {
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js": "^https?:\/\/api\.(picsart|meiease)\.c(n|om)",
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/musixmatch.miao.js": "^https?:\/\/apic\.musixmatch\.com",
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/VUE.js": "^https?:\/\/api\.vuevideo\.net",
-    "https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js", "^https?:\/\/license\.pdfexpert\.com",
+    "https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js": "^https?:\/\/license\.pdfexpert\.com",
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/Pdfexpert.vip.js": "^https?:\/\/license\.pdfexpert\.com"
 }
 
