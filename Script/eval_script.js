@@ -34,7 +34,19 @@ const __conf = {
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/musixmatch.miao.js": "^https?:\/\/apic\.musixmatch\.com",
     "https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/VUE.js": "^https?:\/\/api\.vuevideo\.net",
     "https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js": "^https?:\/\/license\.pdfexpert\.com",
-    "https://raw.githubusercontent.com/langkhach270389/Scripting/master/Pdfexpert.vip.js": "^https?:\/\/license\.pdfexpert\.com"
+    "https://raw.githubusercontent.com/langkhach270389/Scripting/master/Pdfexpert.vip.js": "^https?:\/\/license\.pdfexpert\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js": "^https?:\/\/act.10010.com",
+    "https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js": "^https?:\/\/api\.m\.jd\.com",
+    "https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/iQIYI-DailyBonus/iQIYI_GetCookie_QX.js": "^https?:\/\/.*\.iqiyi\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js": "^https?:\/\/(www|live)\.bilibili\.com",
+    "https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js": "^https?:\/\/manga\.bilibili\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.cookie.js": "^https?:\/\/tieba\.baidu\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js": ["^https?:\/\/access.video.qq.com", "^https?:\/\/v.qq.com", "^https?:\/\/vip\.video\.qq\.com"],
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.cookie.js": "^https?:\/\/music\.163\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js": "^https?:\/\/www\.smzdm\.com",
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js": ["^https?:\/\/(www\.)?rrys2019\.com", "^https?:\/\/ios.zmzapi.com"],
+    "https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js": "^https?:\/\/i\.meituan\.com",
+    "https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_GetCookie_QX.js": "^https?:\/\/www\.52pojie\.cn"
 }
 
 const __tool = new __Tool()
