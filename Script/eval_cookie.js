@@ -32,7 +32,7 @@ const __conf = String.raw`
 [remote]
 //custom remote...
 
-https://raw.githubusercontent.com/JO2EY/Rules/master/Quantumult/X/Script_eval.conf
+https://raw.githubusercontent.com/JO2EY/Rules/master/Quantumult/X/GetCookie_eval.conf
 
 
 
