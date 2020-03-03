@@ -101,7 +101,7 @@ if (url.indexOf(path1) != -1) {
 if (url.indexOf(path2) != -1) {
   let blacklist = [];
   body['data']['items'].forEach((element, index) => {
-    if (element.hasOwnProperty('ad_info') || element.hasOwnProperty('banner_item') || element['card_type'] != 'small_cover_v2' || blacklist.includes(element['args']['up_name'])) {
+    if (element.hasOwnProperty('ad_info') || element.hasOwnProperty('banner_item') || element['card_type'] != 'small_cover_v2' ||blacklist.includes(element['args']['up_name'])) {
       body['data']['items'].splice(index, 1);
     }
   })
@@ -129,6 +129,11 @@ if (url.indexOf(path3) != -1) {
         "title": "创作首页",
         "icon": "http://i0.hdslb.com/bfs/archive/d3aad2d07538d2d43805f1fa14a412d7a45cc861.png",
         "uri": "bilibili://uper/homevc"
+      },
+      {
+      "title": "投稿",
+      "icon": "http://i0.hdslb.com/bfs/archive/86a8fdc40f4a5842d9b6454dead1f049db64ffc5.png",
+      "uri": "/uper/user_center/add_archive"
       }
     ]
   }]
@@ -190,14 +195,14 @@ if (url.indexOf(path11) != -1) {
       "uri": "/uper/user_center/add_archive"
     },
     {
-      "title": "创作中心",
-      "icon": "http://i0.hdslb.com/bfs/archive/f4da9a7940d29f6b01676b039f685053f77615fd.png",
-      "uri": "/uper/homevc"
-    },
-    {
       "title": "稿件管理",
       "icon": "http://i0.hdslb.com/bfs/archive/eec4a9f65dad19b5e92130d236ba3bf46248309e.png",
       "uri": "/uper/user_center/archive_list"
+    },
+    {
+      "title": "创作中心",
+      "icon": "http://i0.hdslb.com/bfs/archive/f4da9a7940d29f6b01676b039f685053f77615fd.png",
+      "uri": "/uper/homevc"
     }
   ];
   body['data']['ipad_sections'] = [{
