@@ -10,6 +10,7 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
 https://raw.githubusercontent.com/songyangzz/QuantumultX/master/elem/elemSign.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_DailyBonus_QX.js
 
@@ -24,6 +25,7 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.co
 https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
 https://raw.githubusercontent.com/songyangzz/QuantumultX/master/elem/elemGetCookies.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_GetCookie_QX.js
 
