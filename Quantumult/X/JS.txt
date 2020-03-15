@@ -11,6 +11,13 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
 https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Script/elemSign.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_DailyBonus_QX.js
 
@@ -26,12 +33,20 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/quanx/smzdm.co
 https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
 https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Script/elemGetCookies.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_GetCookie_QX.js
 
 https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
 https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js
 https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js
+https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/JDAdRemove.js
 https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js
 https://raw.githubusercontent.com/yichahucha/surge/master/wb_launch.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
@@ -45,6 +60,7 @@ https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/DingX
 https://raw.githubusercontent.com/eHpo1/Surge/master/Script/wps.js
 https://raw.githubusercontent.com/langkhach270389/Scripting/master/CamScaner.js
 https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js
+https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Script/fantastical.js
 https://raw.githubusercontent.com/langkhach270389/Scripting/master/musixmatch.miao.js
 https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/VUE.js
 https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js
