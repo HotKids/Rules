@@ -14,10 +14,9 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_DailyBonus_QX.js
 
@@ -36,10 +35,9 @@ https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/wykl/wykl.cookie.js
+https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
-https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
 https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/52pojie-DailyBonus/52pojie_GetCookie_QX.js
 
