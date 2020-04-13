@@ -17,6 +17,8 @@ videoqq.js = type=cron,cronexp=2 6 * * *,script-path=https://raw.githubuserconte
 
 # > 哔哩哔哩直播签到 by chavyleung
 bilibili.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js
+// 如需银瓜子转硬币，添加以下内容 
+bilibili.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
 
 # > 哔哩哔哩漫画 App 签到 by NoByDa
 Manga.js = type=cron,cronexp=4 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
