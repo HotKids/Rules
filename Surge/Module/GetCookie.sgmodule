@@ -1,5 +1,5 @@
 #!name=GetCookies
-#!desc=获取成功后请关闭此模块
+#!desc=Cookies 获取成功后可关闭此模块
 #!system=ios
 
 [MITM]
