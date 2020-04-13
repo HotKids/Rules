@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.weibo.cn,api.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,trade-acs.m.taobao.com
+hostname = %APPEND% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.weibo.cn,api.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,trade-acs.m.taobao.com
 
 [Script]
 # > JD App 显示历史价格 by yichahucha
