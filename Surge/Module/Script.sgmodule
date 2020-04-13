@@ -6,8 +6,6 @@
 hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.weibo.cn,api.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,trade-acs.m.taobao.com
 
 [Script]
-// 部分脚本仅作收藏不代表本人观点，请合理使用并力所能及范围内支持正版（。
-
 # > JD App 显示历史价格 by yichahucha
 jd_price.js = type=http-response,requires-body=1,pattern=^https?://api\.m\.jd\.com/client\.action\?functionId=(wareBusiness|serverConfig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
 
