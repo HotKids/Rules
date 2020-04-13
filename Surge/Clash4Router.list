@@ -1,4 +1,0 @@
-# 需搭配 Clash 使用，Clash 配置中开启 allow-lan: true
-
-▶️ ON = socks5, 192.168.199.1, 7891
-⏸ OFF = direct
