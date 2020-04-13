@@ -1,9 +1,9 @@
 #!name=GetCookies
 #!desc=获取成功后请关闭此模块
-#!system=iOS
+#!system=ios
 
 [MITM]
-hostname = *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,act.10010.com,api.m.jd.com,daojia.jd.com,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn
+hostname = %INSERT% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,act.10010.com,api.m.jd.com,daojia.jd.com,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn
 
 [Script]
 # > 中国联通 App 签到 by chavyleung
@@ -21,48 +21,48 @@ videoqq.cookie.js = type=http-request,pattern=^https?:\/\/access.video.qq.com\/u
 videoqq.cookie.js = type=http-request,pattern=^https?:\/\/vip\.video\.qq\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
 
 # > 哔哩哔哩直播签到 by chavyleung
-bilibili.cookie.js = type=http-request,pattern=^https?:\/\/(www|live)\.bilibili\.com\/?.? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js
+bilibili.cookie.js = type=http-request,pattern=^https?:\/\/(www|live)\.bilibili\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js
 
 # > 哔哩哔哩漫画 App 签到 by NoByDa
-Manga.js = type=http-request,pattern=^https?:\/\/manga\.bilibili\.com\/.*\.User\/GetWallet max-size=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
+Manga.js = type=http-request,pattern=^https?:\/\/manga\.bilibili\.com\/.*\.User\/GetWallet,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐签到 by chavyleung
-neteasemusic.cookie.js = type=http-request,pattern=^https?:\/\/music\.163\.com\/?.? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.cookie.js
+neteasemusic.cookie.js = type=http-request,pattern=^https?:\/\/music\.163\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.cookie.js
 
 # > 人人字幕组（网页+App）签到 by chavyleung
-zimuzu.cookie.js = type=http-request,pattern=^https?:\/\/(www\.)?rrys2019\.com\/?.? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
-zimuzu.cookie.js = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
+zimuzu.cookie.js = type=http-request,pattern=^https?:\/\/(www\.)?rrys2019\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
+zimuzu.cookie.js = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
 # > 百度贴吧签到 by chavyleung
-tieba.cookie.js = type=http-request,pattern=^https?:\/\/tieba\.baidu\.com\/?.? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.cookie.js
+tieba.cookie.js = type=http-request,pattern=^https?:\/\/tieba\.baidu\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.cookie.js
 
 # > 什么值得买签到 by chavyleung
-smzdm.cookie.js = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.? script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
+smzdm.cookie.js = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
 
 # > 苏宁易购 App 签到 by chavyleung
-suning.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/passport\.suning\.com\/ids\/login$ script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
-suning.cookie.js = type=http-request,pattern=^https?:\/\/luckman\.suning\.com\/luck-web\/sign\/api\/clock_sign.do script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
-suning.cookie.js = type=http-request,pattern=^https?:\/\/sign\.suning\.com\/sign-web\/m\/promotion\/sign\/doSign.do script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
-suning.cookie.js = type=http-request,pattern=^https?:\/\/gameapi\.suning\.com\/sngame-web\/(api\/signin\/private\/customerSignOperation.do|gateway\/api\/queryPrize.do) script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+suning.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/passport\.suning\.com\/ids\/login$,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+suning.cookie.js = type=http-request,pattern=^https?:\/\/luckman\.suning\.com\/luck-web\/sign\/api\/clock_sign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+suning.cookie.js = type=http-request,pattern=^https?:\/\/sign\.suning\.com\/sign-web\/m\/promotion\/sign\/doSign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+suning.cookie.js = type=http-request,pattern=^https?:\/\/gameapi\.suning\.com\/sngame-web\/(api\/signin\/private\/customerSignOperation.do|gateway\/api\/queryPrize.do),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 
 # > 美团 App 签到 by chavyleung
-meituan.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/ script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
+meituan.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
 
 # > 叮咚买菜 App 签到 by chavyleung
-mcdd.cookie.js = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
+mcdd.cookie.js = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
 
 # > 京东到家签到 by barrymchen&GideonSenku
-jddj.cookie.js = type=http-request,pattern=^https?:\/\/daojia\.jd\.com\/client(.*?)functionId=signin(.*?)userSigninNew script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
+jddj.cookie.js = type=http-request,pattern=^https?:\/\/daojia\.jd\.com\/client(.*?)functionId=signin(.*?)userSigninNew,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
 
 # > 海底捞 App 签到 GetCookie by danchaw
-hdl.js = type=http-request,requires-body=1,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/doSign$ script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
+hdl.js = type=http-request,requires-body=1,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/doSign$,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
 
 # > 喜马拉雅 FM App 签到 by chavyleung
-ximalaya.cookie.js = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/homePage\/.* script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
+ximalaya.cookie.js = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
 
 # > 顺丰（小程序+App）签到 by chavyleung
-sfexpress.cookie.js = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share\/(.*?)Redirect script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
-sfexpress.cookie.js = type=http-request,pattern=^https?:\/\/sf-integral-sign-in.weixinjia.net\/app\/index script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
+sfexpress.cookie.js = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share\/(.*?)Redirect,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
+sfexpress.cookie.js = type=http-request,pattern=^https?:\/\/sf-integral-sign-in.weixinjia.net\/app\/index,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
 
 # > 吾爱破解签到 by NoByDa
-52pojieGet-Cookie.js = type=http-request,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\? script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/Get-Cookie.js
+52pojieGet-Cookie.js = type=http-request,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/Get-Cookie.js
