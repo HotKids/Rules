@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.flexibits.com,api.meiease.c*,api.picsart.c*,api.resso.app,api.weibo.cn,api.zhihu.com,license.pdfexpert.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,newdrugs.dxy.cn,trade-acs.m.taobao.com
+hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.weibo.cn,api.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,trade-acs.m.taobao.com
 
 [Script]
 // 部分脚本仅作收藏不代表本人观点，请合理使用并力所能及范围内支持正版（。
@@ -43,18 +43,3 @@ com.poizon.js = type=http-response,requires-body=1,pattern=^https?:\/\/m\.poizon
 
 # > 什么值得买去广告 By Primovist
 SMZDM.js = type=http-response,requires-body=1,pattern=^https?:\/\/(h(aojia|omepage)|(articl|baik)e|s)-api\.smzdm\.com\/(home|sou),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/SMZDM.js
-
-# > 用药助手专业版 By Primovist
-DingXiangDrugs.js = type=http-response,requires-body=1,pattern=^https?:\/\/(i|newdrugs)\.dxy\.cn\/(snsapi\/username\/|app\/user\/(pro\/stat\?|init\?timestamp=)),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/DingXiangDrugs.js
-
-# > Documents Professional by langkhach270389
-documents.js = type=http-response,requires-body=1,pattern=^https?:\/\/license\.pdfexpert\.com\/api\/.*\/documents\/subscription\/(refresh$|check$),script-path=https://raw.githubusercontent.com/langkhach270389/Scripting/master/documents.js
-
-# > PDF Expert PRO by langkhach270389
-Pdfexpert.vip.js = type=http-response,requires-body=1,pattern=^https?:\/\/license\.pdfexpert\.com\/api\/1\.0\/pdfexpert6\/subscription\/(refresh$|check$),script-path=https://raw.githubusercontent.com/langkhach270389/Scripting/master/Pdfexpert.vip.js
-
-# > PicsArt Pro by langkhach270389&NoByDa
-PicsArt.js = type=http-response,requires-body=1,pattern=^https?:\/\/api\.(picsart|meiease)\.c(n|om)\/users\/show\/me\.json,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/PicsArt.js
-
-# > Fantastical Pro by nzw9314
-fantastical.js = type=http-response,requires-body=1,pattern=^https?:\/\/api\.flexibits\.com\/v1\/(auth|account)\/(device|details|appstore-receipt)\/$,script-path=https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Script/fantastical.js
