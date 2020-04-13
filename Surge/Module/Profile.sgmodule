@@ -1,4 +1,5 @@
 #!name=Profile Module
+#!desc=基础配置
 
 [MITM]
 skip-server-cert-verify = true
