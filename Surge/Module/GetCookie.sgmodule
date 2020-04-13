@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,act.10010.com,api.m.jd.com,daojia.jd.com,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,act.10010.com,api.m.jd.com,daojia.jd.com,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn
 
 [Script]
 # > 中国联通 App 签到 by chavyleung
