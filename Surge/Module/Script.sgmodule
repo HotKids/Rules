@@ -1,4 +1,5 @@
 #!name=Script Module
+#!desc=JS 脚本集合
 
 [MITM]
 hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.flexibits.com,api.meiease.c*,api.picsart.c*,api.resso.app,api.weibo.cn,api.zhihu.com,license.pdfexpert.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,newdrugs.dxy.cn,trade-acs.m.taobao.com
