@@ -2,7 +2,6 @@
 #!system=ios
 
 [Script]
-
 # > 中国联通 App 签到 by chavyleung
 10010.js = type=cron,cronexp=30 8,23 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
 
