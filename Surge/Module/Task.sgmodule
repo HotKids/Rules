@@ -1,4 +1,5 @@
 #!name=Task Module
+#!desc=Cron 脚本集合
 #!system=ios
 
 [Script]
