@@ -4,57 +4,57 @@
 
 [Script]
 # > 中国联通 App 签到 by chavyleung
-type=cron,cronexp=30 8,23 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
+10010.js = type=cron,cronexp=30 8,23 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
 
 # > JD 签到 by NoByDa
-type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
+JD_DailyBonus.js = type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 # > 爱奇艺 App 签到 by NoByDa
-type=cron,cronexp=1 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/iQIYI-DailyBonus/iQIYI_DailyBonus.js
+iQIYI_DailyBonus.js = type=cron,cronexp=1 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/iQIYI-DailyBonus/iQIYI_DailyBonus.js
 
 # > 腾讯视频（网页+App）签到 by chavyleung
-type=cron,cronexp=2 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
+videoqq.js = type=cron,cronexp=2 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
 
 # > 哔哩哔哩直播签到 by chavyleung
-type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js
+bilibili.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js
 // 如需银瓜子转硬币，添加以下内容 
-type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
+bilibili.silver2coin.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
 
 # > 哔哩哔哩漫画 App 签到 by NoByDa
-type=cron,cronexp=4 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
+Manga.js = type=cron,cronexp=4 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐签到 by chavyleung
-type=cron,cronexp=5 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js
+neteasemusic.js = type=cron,cronexp=5 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js
 
 # > 人人字幕组（网页+App）签到 by chavyleung
-type=cron,cronexp=6 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
+zimuzu.js = type=cron,cronexp=6 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
 
 # > 百度贴吧签到 by chavyleung
-type=cron,cronexp=7 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.js
+tieba.js = type=cron,cronexp=7 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.js
 
 # > 什么值得买签到 by chavyleung
-type=cron,cronexp=8 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.js
+smzdm.js = type=cron,cronexp=8 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.js
 
 # > 苏宁易购 App 签到 by chavyleung
-type=cron,cronexp=9 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
+suning.js = type=cron,cronexp=9 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
 
 # > 美团 App 签到 by chavyleung
-type=cron,cronexp=10 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
+meituan.js = type=cron,cronexp=10 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
 
 # > 叮咚买菜 App 签到 by chavyleung
-type=cron,cronexp=11 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
+mcdd.js = type=cron,cronexp=11 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 
 # > 京东到家签到 GetCookie by barrymchen&GideonSenku
-type=cron,cronexp=12 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
+jddj.js = type=cron,cronexp=12 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
 
 # > 海底捞 App 签到 GetCookie by danchaw
-type=cron,cronexp=13 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
+hdl.js = type=cron,cronexp=13 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
 
 # > 喜马拉雅 FM App 签到 by chavyleung
-type=cron,cronexp=14 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
+ximalaya.js = type=cron,cronexp=14 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 
 # > 顺丰 App 签到 by chavyleung
-type=cron,cronexp=15 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
+sfexpress.js = type=cron,cronexp=15 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
 
 # > 吾爱破解签到 by NoByDa
-// type=cron,cronexp=16 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/52pojie.js
+// 52pojie.js = type=cron,cronexp=16 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/52pojie.js
