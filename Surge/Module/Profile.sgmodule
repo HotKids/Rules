@@ -9,7 +9,7 @@ hostname = *.amemv.com,*.iydsj.com,*.k.sohu.com,*.tv.sohu.com,*.kakamobi.cn,*.ki
 http-listen = 0.0.0.0:7890
 socks5-listen = 0.0.0.0:7891
 
-external-controller-access = jo2ey@0.0.0.0:6170
+external-controller-access = hotkids@0.0.0.0:6170
 allow-wifi-access = true
 
 internet-test-url = http://www.aliyun.com
