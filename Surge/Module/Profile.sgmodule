@@ -9,7 +9,7 @@ hostname = *.amemv.com,*.iydsj.com,*.k.sohu.com,*.tv.sohu.com,*.kakamobi.cn,*.ki
 http-listen = 0.0.0.0:7890
 socks5-listen = 0.0.0.0:7891
 
-external-controller-access = hotkids@0.0.0.0:6170
+external-controller-access = HotKids@0.0.0.0:6170
 allow-wifi-access = true
 
 internet-test-url = http://www.aliyun.com
@@ -133,7 +133,7 @@ hdslb.com = server:119.29.29.29
 (.*video_id=\w{32})(.*watermark=)(.*) $1 302
 (?<=(carrier|account|sys)_region=)CN JP 307
 #(?<=version_code=)\d{1,}.\d{1}\.\d{1} 8.4.0 307
-# Resso (By JO2EY)
+# Resso
 (?<=(carrier|account|sys|sim)_region=)cn in 307
 
 # Advertising Block
