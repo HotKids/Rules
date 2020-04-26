@@ -5,6 +5,20 @@
 [MITM]
 hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,api.weibo.cn,api.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,trade-acs.m.taobao.com
 
+[Rule]
+DOMAIN,adimg.vue.weibo.com,REJECT
+DOMAIN,sugar.zhihu.com,REJECT
+DOMAIN,appcloud2.in.zhihu.com,REJECT
+URL-REGEX,^https:\/\/pic\d\.zhimg\.com\/70\/,REJECT
+URL-REGEX,https:\/\/(api|www)\.zhihu\.com\/(ab|adx|fringe|commercial|ad-style-service|.*(recommendations|extended|featured-comment-ad)|api\/v4\/(brand|mcn|(answer|question)s\/\d+\/meta_related_topics)(\/|\?)),REJECT
+AND,((USER-AGENT,osee2*), (OR,((IP-CIDR,0.0.0.0/0,no-resolve),(IP-CIDR6,::/0,no-resolve)))),REJECT
+URL-REGEX,^https:\/\/ap(p|i)\.bilibili\.com\/(pgc\/season\/rank\/cn|x\/v2\/(dm\/ad|rank.*rid=(168|5)|dataflow\/report|search\/(defaultword|trending|recommend|resource)|splash)),REJECT
+URL-REGEX,^https?:\/\/(app-)?api\.smzdm\.com\/(v\d\/)?util\/(loading|banner),REJECT
+URL-REGEX,^https?:\/\/dxy\.com\/app\/i\/ask\/biz\/feed\/launch,REJECT
+URL-REGEX,^https?:\/\/dq\.dxy\.cn\/api\.php\?action=getpostbanners&sys_id=,REJECT
+URL-REGEX,^https?:\/\/drugs\.dxy\.cn\/api\/ad\?productType=,REJECT
+URL-REGEX,^https?:\/\/www\.dxy\.cn\/webservices\/app\/specialAd\/list\?ac=,REJECT
+
 [Script]
 # > JD App 显示历史价格 by yichahucha
 jd_price.js = type=http-response,requires-body=1,pattern=^https?://api\.m\.jd\.com/client\.action\?functionId=(wareBusiness|serverConfig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
