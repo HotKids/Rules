@@ -6,6 +6,9 @@
 # > 中国联通 App 签到 by chavyleung
 10010.js = type=cron,cronexp=30 8,23 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
 
+# > 中国联通 App 签到 by chavyleung
+10000.js = type=cron,cronexp=30 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
+
 # > JD 签到 by NoByDa
 JD_DailyBonus.js = type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
