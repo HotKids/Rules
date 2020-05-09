@@ -9,11 +9,11 @@
 # > 中国联通 App 签到 DailyBonus by chavyleung
 10000.js = type=cron,cronexp=30 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
 
-# > JD 签到 DailyBonus by NoDailyBonus byDa
-JD_DailyBonus.js = type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NoDailyBonus byDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
+# > JD 签到 DailyBonus by NobyDa
+JD_DailyBonus.js = type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
-# > 爱奇艺 App 签到 DailyBonus by NoDailyBonus byDa
-iQIYI_DailyBonus.js = type=cron,cronexp=1 6 * * *,script-path=https://raw.githubusercontent.com/NoDailyBonus byDa/Script/master/Surge/iQIYI-DailyBonus/iQIYI_DailyBonus.js
+# > 爱奇艺 App 签到 DailyBonus by NobyDa
+iQIYI_DailyBonus.js = type=cron,cronexp=1 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/iQIYI-DailyBonus/iQIYI_DailyBonus.js
 
 # > 腾讯视频（网页+App）签到 DailyBonus by chavyleung
 videoqq.js = type=cron,cronexp=2 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
@@ -23,8 +23,8 @@ bilibili.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercont
 // 如需银瓜子转硬币，添加以下内容 
 bilibili.silver2coin.js = type=cron,cronexp=3 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
 
-# > 哔哩哔哩漫画 App 签到 DailyBonus by NoDailyBonus byDa
-Manga.js = type=cron,cronexp=4 6 * * *,script-path=https://raw.githubusercontent.com/NoDailyBonus byDa/Script/master/Bilibili-DailyBonus/Manga.js
+# > 哔哩哔哩漫画 App 签到 DailyBonus by NobyDa
+Manga.js = type=cron,cronexp=4 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐签到 DailyBonus by chavyleung
 neteasemusic.js = type=cron,cronexp=5 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js
@@ -68,5 +68,5 @@ hellobike.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubuserco
 # > 飞客茶馆 App 签到 DailyBonus by chavyleung
 flyertea.js = type=cron,cronexp=18 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
-# > 吾爱破解签到 DailyBonus by NoDailyBonus byDa
-// 52pojie.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubusercontent.com/NoDailyBonus byDa/Script/master/Surge/52pojieDailyBonus/52pojie.js
+# > 吾爱破解签到 DailyBonus by NobyDa
+// 52pojie.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/52pojie.js
