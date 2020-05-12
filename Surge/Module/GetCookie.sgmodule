@@ -38,7 +38,7 @@ zimuzu.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/(www\.)
 zimuzu.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
 # > 百度贴吧签到 GetCookie by chavyleung
-tieba.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/tieba\.baidu\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/tieba/tieba.cookie.js
+TieBa.js = type=http-request,requires-body=1,pattern=^https?:\/\/tieba\.baidu\.com\/?.?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/BDTieBa-DailyBonus/TieBa.js
 
 # > 什么值得买签到 GetCookie by chavyleung
 smzdm.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
@@ -78,4 +78,4 @@ hellobike.js = type=http-request,requires-body=1,pattern=^https?:\/\/gameapi\.he
 flyertea.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/www\.flyertea\.com\/source\/plugin\/mobile\/mobile\.php\?module=getdata&.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.cookie.js
 
 # > 吾爱破解签到 GetCookie by NobyDa
-52pojieDailyBonus.Get-Cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
+52pojie.js = type=http-request,requires-body=1,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
