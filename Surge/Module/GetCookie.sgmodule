@@ -18,7 +18,7 @@ hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suni
 JD_DailyBonus.js = type=http-request,requires-body=1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean(Index|GroupStageIndex),script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 # > 爱奇艺 App 签到 GetCookie by NobyDa
-iQIYI_GetCookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/.*\.iqiyi\.com\/.*authcookie=,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/iQIYI-DailyBonus/iQIYI_GetCookie.js
+iQIYI_GetCookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/.*\.iqiyi\.com\/.*authcookie=,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 腾讯视频（网页+App）签到 GetCookie by chavyleung
 videoqq.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/access.video.qq.com\/user\/auth_refresh,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
