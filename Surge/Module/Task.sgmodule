@@ -69,4 +69,4 @@ hellobike.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubuserco
 flyertea.js = type=cron,cronexp=18 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解签到 DailyBonus by NobyDa
-// 52pojie.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/52pojieDailyBonus/52pojie.js
+// 52pojie.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
