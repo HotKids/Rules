@@ -7,7 +7,10 @@
 10010.js = type=cron,cronexp=0 8,23 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
 
 # > 中国电信 App 签到 DailyBonus by chavyleung
-10000.js = type=cron,cronexp=0 8 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
+// 10000.js = type=cron,cronexp=0 8 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
+
+# > 电信套餐信息查询 (天翼账号中心 App) DailyBonus by uchvk&Macsuny
+telecomInfinity.js = type=cron,cronexp=0 8,23 * * *,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/telecomInfinity.js
 
 # > JD 签到 DailyBonus by NobyDa
 JD_DailyBonus.js = type=cron,cronexp=0 1,6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
@@ -68,5 +71,9 @@ hellobike.js = type=cron,cronexp=17 6 * * *,script-path=https://raw.githubuserco
 # > 飞客茶馆 App 签到 DailyBonus by chavyleung
 flyertea.js = type=cron,cronexp=18 6 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
+# > 同程艺龙微信小程序签到 DailyBonus by barrymchen
+tongc_sign.js = type=cron,cronexp=19 6 * * *,script-path=https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Task/tongc_sign.js
+tongc_info.js = type=cron,cronexp=19 6 * * *,script-path=https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Task/tongc_info.js
+
 # > 吾爱破解签到 DailyBonus by NobyDa
-// 52pojie.js = type=cron,cronexp=19 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
+// 52pojie.js = type=cron,cronexp=20 6 * * *,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
