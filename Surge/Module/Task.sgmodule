@@ -65,9 +65,5 @@ hellobike.js = type=cron,cronexp="17 6 * * *",script-path=https://raw.githubuser
 # > 飞客茶馆 App 签到 DailyBonus by chavyleung
 flyertea.js = type=cron,cronexp="18 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
-# > 同程艺龙微信小程序签到 DailyBonus by barrymchen
-tongc_sign.js = type=cron,cronexp="19 6 * * *",script-path=https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Task/tongc_sign.js
-tongc_info.js = type=cron,cronexp="19 6 * * *",script-path=https://raw.githubusercontent.com/nzw9314/QuantumultX/master/Task/tongc_info.js
-
 # > 吾爱破解签到 DailyBonus by NobyDa
 // 52pojie.js = type=cron,cronexp="20 6 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
