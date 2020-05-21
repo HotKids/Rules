@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,act.10010.com,api.m.jd.com,daojia.jd.com,gameapi.hellobike.com,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn,www.duokan.com,www.flyertea.com
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,api.m.jd.com,daojia.jd.com,gameapi.hellobike.com,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,tieba.baidu.com,www.52pojie.cn,www.duokan.com,www.flyertea.com
 
 [Script]
 # > 中国联通 App 签到 GetCookie by chavyleung
@@ -54,9 +54,6 @@ mcdd.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/maicai\.a
 
 # > 京东到家签到 GetCookie by barrymchen&GideonSenku
 jddj.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/daojia\.jd\.com\/client(.*?)functionId=signin(.*?)userSigninNew,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
-
-# > 海底捞 App 签到 GetCookie GetCookie by danchaw
-hdl.js = type=http-request,requires-body=1,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/doSign$,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
 
 # > 喜马拉雅 FM App 签到 GetCookie by chavyleung
 ximalaya.cookie.js = type=http-request,requires-body=1,pattern=^https?:\/\/.*\/mobile\-user\/homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
