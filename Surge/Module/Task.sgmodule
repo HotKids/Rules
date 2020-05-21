@@ -47,23 +47,20 @@ mcdd.js = type=cron,cronexp="11 6 * * *",script-path=https://raw.githubuserconte
 # > 京东到家签到 GetCookie DailyBonus by barrymchen&GideonSenku
 jddj.js = type=cron,cronexp="12 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
 
-# > 海底捞 App 签到 GetCookie DailyBonus by danchaw
-hdl.js = type=cron,cronexp="13 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/haidilao/hdl.js
-
 # > 喜马拉雅 FM App 签到 DailyBonus by chavyleung
-ximalaya.js = type=cron,cronexp="14 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
+ximalaya.js = type=cron,cronexp="13 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 
 # > 顺丰 App 签到 DailyBonus by chavyleung
-sfexpress.js = type=cron,cronexp="15 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
+sfexpress.js = type=cron,cronexp="14 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
 
 # > 多看阅读 App 签到 DailyBonus by chavyleung
-duokan.js = type=cron,cronexp="16 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
+duokan.js = type=cron,cronexp="15 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
 
 # > 哈啰出行 App 签到 DailyBonus by chavyleung
-hellobike.js = type=cron,cronexp="17 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/hellobike/hellobike.js
+hellobike.js = type=cron,cronexp="16 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/hellobike/hellobike.js
 
 # > 飞客茶馆 App 签到 DailyBonus by chavyleung
-flyertea.js = type=cron,cronexp="18 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+flyertea.js = type=cron,cronexp="17 6 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解签到 DailyBonus by NobyDa
 // 52pojie.js = type=cron,cronexp="20 6 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
