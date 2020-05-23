@@ -60,4 +60,4 @@ Bilibili.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\
 com.poizon.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m\.poizon\.com\/client\/init,script-path=https://raw.githubusercontent.com/ConnersHua/Profiles/master/Surge/Script/com.poizon.js
 
 # > 什么值得买去广告 By Primovist
-SMZDM.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(h(aojia|omepage)|(articl|baik)e|s)-api\.smzdm\.com\/(home|sou),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/SMZDM.js
+SMZDM.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(h(aojia|omepage)|(articl|baik)e|s)-api\.smzdm\.com\/(home|sou)(?!\/list_filter),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/SMZDM.js
