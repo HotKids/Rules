@@ -160,6 +160,12 @@ DOMAIN-SUFFIX,googlevideo.com
 DOMAIN,youtubei.googleapis.com
 DOMAIN-KEYWORD,youtube
 
+# > Viki
+USER-AGENT,Viki*
+DOMAIN-SUFFIX,viki.io
+DOMAIN-SUFFIX,viki.net
+DOMAIN-SUFFIX,viki.com
+
 # > Viu
 USER-AGENT,Viu*
 USER-AGENT,ViuTV*
