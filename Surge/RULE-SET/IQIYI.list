@@ -5,7 +5,6 @@ DOMAIN-SUFFIX,iqiyi.com
 DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,qy.net
 DOMAIN-SUFFIX,71.am
-
 DOMAIN,cache.video.iqiyi.com
 DOMAIN-KEYWORD,qiyi
 # IP-CIDR,101.227.0.0/16,no-resolve
