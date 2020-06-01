@@ -63,11 +63,12 @@ DOMAIN,hbounify-prod.evergent.com
 DOMAIN,bcbolthboa-a.akamaihd.net
 DOMAIN,dai3fd1oh325y.cloudfront.net
 
-# > HBO NOW
-USER-AGENT,HBO%20NOW*
+# > HBO Max
+USER-AGENT,HBOMAX*
 DOMAIN-SUFFIX,hbo.com
 DOMAIN-SUFFIX,hbogo.com
 DOMAIN-SUFFIX,hbonow.com
+DOMAIN-SUFFIX,hbomax.com
 
 # > Hulu
 DOMAIN-SUFFIX,hulu.com
