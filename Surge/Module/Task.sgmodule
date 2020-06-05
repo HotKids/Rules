@@ -56,11 +56,8 @@ Crontab: 顺丰速运 = type=cron,cronexp="13 5 * * *",script-path=https://raw.g
 # > 多看阅读签到 DailyBonus by chavyleung
 Crontab: 多看阅读 = type=cron,cronexp="14 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
 
-# > 不背单词签到 DailyBonus by chavyleung
-Crontab: 不背单词 = type=cron,cronexp="15 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bubei/bubei.js
-
 # > 飞客茶馆签到 DailyBonus by chavyleung
-Crontab: 飞客茶馆 = type=cron,cronexp="16 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+Crontab: 飞客茶馆 = type=cron,cronexp="15 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解签到 DailyBonus by NobyDa
-// Crontab: 吾爱破解 = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
+// Crontab: 吾爱破解 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
