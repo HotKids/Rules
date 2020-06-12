@@ -1,0 +1,8 @@
+payload:
+  # > YouTube
+  # USER-AGENT,*YouTube*
+  # USER-AGENT,*youtube*
+  - DOMAIN-SUFFIX,youtu.be
+  - DOMAIN-SUFFIX,googlevideo.com
+  - DOMAIN,youtubei.googleapis.com
+  - DOMAIN-KEYWORD,youtube
