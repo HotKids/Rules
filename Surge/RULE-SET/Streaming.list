@@ -103,6 +103,7 @@ DOMAIN,kktv-theater.kk.stream
 # > LINE TV
 USER-AGENT,LINE%20TV*
 DOMAIN-SUFFIX,linetv.tw
+DOMAIN,d3c7rimkq79yfu.cloudfront.net
 
 # > MytvSUPER
 USER-AGENT,mytv*
