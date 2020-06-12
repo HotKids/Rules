@@ -1,0 +1,180 @@
+payload:
+  # Streaming Media
+  # > AbemaTV
+  # USER-AGENT,AbemaTV*
+  - DOMAIN-SUFFIX,abema.io
+  - DOMAIN-SUFFIX,abema.tv
+  - DOMAIN-SUFFIX,ameba.jp
+  - DOMAIN-SUFFIX,hayabusa.io
+  - DOMAIN,abematv.akamaized.net
+  - DOMAIN,ds-vod-abematv.akamaized.net
+  - DOMAIN,linear-abematv.akamaized.net
+  - DOMAIN,ds-linear-abematv.akamaized.net
+
+  # > Amazon Prime Video
+  # USER-AGENT,InstantVideo.US*
+  # USER-AGENT,Prime%20Video*
+  - DOMAIN-SUFFIX,primevideo.com
+  - DOMAIN-SUFFIX,amazonvideo.com
+  - DOMAIN-SUFFIX,media-amazon.com
+  - DOMAIN-SUFFIX,aiv-cdn.net
+  - DOMAIN-SUFFIX,llnwd.net
+
+  # > Bahamut
+  # USER-AGENT,Anime*
+  - DOMAIN-SUFFIX,bahamut.com.tw
+  - DOMAIN-SUFFIX,gamer.com.tw
+  - DOMAIN,gamer-cds.cdn.hinet.net
+  - DOMAIN,gamer2-cds.cdn.hinet.net
+
+  # > BBC
+  # USER-AGENT,BBCiPlayer*
+  - DOMAIN-KEYWORD,bbcfmt
+  - DOMAIN-KEYWORD,co.uk
+  - DOMAIN-KEYWORD,uk-live
+  - DOMAIN-SUFFIX,bbc.com
+  - DOMAIN-SUFFIX,bbc.co
+  - DOMAIN-SUFFIX,bbc.co.uk
+  - DOMAIN-SUFFIX,bbci.co
+  - DOMAIN-SUFFIX,bbci.co.uk
+  - DOMAIN,vod-dash-uk-live.akamaized.net
+  - DOMAIN,vod-thumb-uk-live.akamaized.net
+  - DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
+  - DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
+
+  # > Disney Plus
+  # USER-AGENT,Disney*
+  - DOMAIN-SUFFIX,disneyplus.com
+  - DOMAIN-SUFFIX,disney-plus.net
+  - DOMAIN-SUFFIX,dssott.com
+  - DOMAIN-SUFFIX,bamgrid.com
+  - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
+  - DOMAIN,cdn.registerdisney.go.com
+
+  # > friDay
+  # USER-AGENT,friDay*
+  - DOMAIN-SUFFIX,friday.tw
+
+  # > HBO GO Asia
+  # USER-AGENT,HBO%20GO%20PROD*
+  - DOMAIN-KEYWORD,hbogoasia
+  - DOMAIN-SUFFIX,hboasia.com
+  - DOMAIN-SUFFIX,hbogoasia.com
+  - DOMAIN,hbolb.onwardsmg.com
+  - DOMAIN,hbounify-prod.evergent.com
+  - DOMAIN,bcbolthboa-a.akamaihd.net
+  - DOMAIN,dai3fd1oh325y.cloudfront.net
+
+  # > HBO Max
+  # USER-AGENT,HBOMAX*
+  - DOMAIN-SUFFIX,hbo.com
+  - DOMAIN-SUFFIX,hbogo.com
+  - DOMAIN-SUFFIX,hbonow.com
+  - DOMAIN-SUFFIX,hbomax.com
+
+  # > Hulu
+  - DOMAIN-SUFFIX,hulu.com
+  - DOMAIN-SUFFIX,huluim.com
+  - DOMAIN-SUFFIX,hulustream.com
+  - DOMAIN,assetshuluimcom-a.akamaihd.net
+
+  # > Hulu JP
+  - DOMAIN-SUFFIX,hulu.jp
+  - DOMAIN-SUFFIX,happyon.jp
+  - DOMAIN-SUFFIX,prod.hjholdings.tv
+
+  # > JOOX
+  # USER-AGENT,WeMusic*
+  # USER-AGENT,JOOX*
+  - DOMAIN-SUFFIX,joox.com
+  - DOMAIN-KEYWORD,joox
+
+  # > KKBOX
+  # USER-AGENT,*KKBOX
+  - DOMAIN-SUFFIX,kkbox.com
+  - DOMAIN-SUFFIX,kkbox.com.tw
+  - DOMAIN-SUFFIX,kfs.io
+
+  # > KKTV
+  # USER-AGENT,KKTV*
+  # USER-AGENT,com.kktv*
+  - DOMAIN-SUFFIX,kktv.me
+  - DOMAIN-SUFFIX,kktv.com.tw
+  - DOMAIN,kktv-theater.kk.stream
+
+  # > LINE TV
+  # USER-AGENT,LINE%20TV*
+  - DOMAIN-SUFFIX,linetv.tw
+
+  # > MytvSUPER
+  # USER-AGENT,mytv*
+  - DOMAIN-KEYWORD,nowtv100
+  - DOMAIN-KEYWORD,rthklive
+  - DOMAIN-SUFFIX,tvb.com
+  - DOMAIN-SUFFIX,mytvsuper.com
+
+  # > Netflix
+  - DOMAIN-SUFFIX,netflix.com
+  - DOMAIN-SUFFIX,netflix.net
+  - DOMAIN-SUFFIX,nflxext.com
+  - DOMAIN-SUFFIX,nflximg.com
+  - DOMAIN-SUFFIX,nflximg.net
+  - DOMAIN-SUFFIX,nflxso.net
+  - DOMAIN-SUFFIX,nflxvideo.net
+  - IP-CIDR,23.246.0.0/18,no-resolve
+  - IP-CIDR,37.77.184.0/21,no-resolve
+  - IP-CIDR,45.57.0.0/17,no-resolve
+  - IP-CIDR,64.120.128.0/17,no-resolve
+  - IP-CIDR,66.197.128.0/17,no-resolve
+  - IP-CIDR,108.175.32.0/20,no-resolve
+  - IP-CIDR,192.173.64.0/18,no-resolve
+  - IP-CIDR,198.38.96.0/19,no-resolve
+  - IP-CIDR,198.45.48.0/20,no-resolve
+
+  # > Pandora
+  - DOMAIN-SUFFIX,pandora.com
+
+  # > PBS
+  # USER-AGENT,PBS*
+  - DOMAIN-SUFFIX,pbs.org
+
+  # > SoundCloud
+  # USER-AGENT,SoundCloud*
+  - DOMAIN-SUFFIX,soundcloud.com
+
+  # > Spotify
+  # USER-AGENT,*Spotify*
+  - DOMAIN-SUFFIX,pscdn.co
+  - DOMAIN-SUFFIX,scdn.co
+  - DOMAIN-SUFFIX,spoti.fi
+  - DOMAIN-SUFFIX,spotify.com
+  - IP-CIDR,35.186.224.47/32
+
+  # > Sky GO
+  # USER-AGENT,skygo*
+  - DOMAIN-SUFFIX,sky.com
+  - DOMAIN-SUFFIX,skygo.co.nz
+
+  # > YouTube
+  # USER-AGENT,*YouTube*
+  # USER-AGENT,*youtube*
+  - DOMAIN-SUFFIX,youtu.be
+  - DOMAIN-SUFFIX,googlevideo.com
+  - DOMAIN,youtubei.googleapis.com
+  - DOMAIN-KEYWORD,youtube
+
+  # > Viki
+  # USER-AGENT,Viki*
+  - DOMAIN-SUFFIX,viki.io
+  - DOMAIN-SUFFIX,viki.net
+  - DOMAIN-SUFFIX,viki.com
+
+  # > Viu
+  # USER-AGENT,Viu*
+  # USER-AGENT,ViuTV*
+  - DOMAIN-SUFFIX,viu.com
+  - DOMAIN-SUFFIX,viu.tv
+  - DOMAIN,api.viu.now.com
+  - DOMAIN,d1k2us671qcoau.cloudfront.net
+  - DOMAIN,d2anahhhmp1ffz.cloudfront.net
+  - DOMAIN,dfp6rglgjqszk.cloudfront.net
