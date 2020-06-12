@@ -1,0 +1,15 @@
+payload:
+  # > BBC
+  # USER-AGENT,BBCiPlayer*
+  - DOMAIN-KEYWORD,bbcfmt
+  - DOMAIN-KEYWORD,co.uk
+  - DOMAIN-KEYWORD,uk-live
+  - DOMAIN-SUFFIX,bbc.com
+  - DOMAIN-SUFFIX,bbc.co
+  - DOMAIN-SUFFIX,bbc.co.uk
+  - DOMAIN-SUFFIX,bbci.co
+  - DOMAIN-SUFFIX,bbci.co.uk
+  - DOMAIN,vod-dash-uk-live.akamaized.net
+  - DOMAIN,vod-thumb-uk-live.akamaized.net
+  - DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
+  - DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
