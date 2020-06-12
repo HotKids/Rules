@@ -1,0 +1,5 @@
+payload:
+  # > Hulu JP
+  - DOMAIN-SUFFIX,hulu.jp
+  - DOMAIN-SUFFIX,happyon.jp
+  - DOMAIN-SUFFIX,prod.hjholdings.tv
