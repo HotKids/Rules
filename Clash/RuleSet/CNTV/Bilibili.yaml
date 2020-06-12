@@ -1,0 +1,9 @@
+payload:
+  # > Bilibili
+  # USER-AGENT,*bili*
+  - DOMAIN-SUFFIX,bilibili.com
+  - DOMAIN-SUFFIX,acgvideo.com
+  - DOMAIN-SUFFIX,acg.tv
+  - DOMAIN-SUFFIX,hdslb.com
+  - DOMAIN,upos-hz-mirrorakam.akamaized.net
+  - DOMAIN-KEYWORD,bilibili
