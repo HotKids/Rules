@@ -76,99 +76,99 @@ proxies:
 
 # 服务器节点订阅
 proxy-providers:
-  HK
+  HK:
     type: http
-    path: ./HK.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=HK
+    path: ./Provider/HK.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=hk
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  MO
+  MO:
     type: http
-    path: ./MO.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=MO
+    path: ./Provider/MO.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=mo
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  TW
+  TW:
     type: http
-    path: ./TW.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=TW
+    path: ./Provider/TW.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=tw
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  JP
+  JP:
     type: http
-    path: ./JP.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=JP
+    path: ./Provider/JP.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=jp
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  KR
+  KR:
     type: http
-    path: ./KR.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=KR
+    path: ./Provider/KR.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=kr
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  SG
+  SG:
     type: http
-    path: ./SG.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=SG
+    path: ./Provider/SG.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=sg
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  PH
+  PH:
     type: http
-    path: ./PH.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=PH
+    path: ./Provider/PH.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=ph
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  DE
+  DE:
     type: http
-    path: ./DE.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=DE
+    path: ./Provider/DE.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=de
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  UK
+  UK:
     type: http
-    path: ./UK.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=UK
+    path: ./Provider/UK.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=uk
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  US
+  US:
     type: http
-    path: ./US.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=US
+    path: ./Provider/US.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=us
     interval: 3600
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  UN
+  UN:
     type: http
-    path: ./UN.yaml
+    path: ./Provider/UN.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash
     interval: 3600
     health-check: 
@@ -178,7 +178,7 @@ proxy-providers:
 
 proxy-groups:
   # 代理节点选项
-  - name: “🔰 Proxy”
+  - name: "🔰 Proxy"
     type: select
     proxies:
       - 🇭🇰 Hong Kong
@@ -195,7 +195,7 @@ proxy-groups:
       - 🔘 DIRECT
 
   # 海外流媒体服务
-  - name: “🎬 Streaming"
+  - name: "🎬 Streaming"
     type: select
     proxies:
       - 🇭🇰 Hong Kong
@@ -254,10 +254,10 @@ proxy-groups:
     interval: 300
 
   # MO
-  - name: "🇹🇼 Taiwan"
+  - name: "🇲🇴 Macao"
     type: url-test
     use:
-      - TW
+      - MO
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
       
@@ -313,7 +313,7 @@ proxy-groups:
   - name: "🇬🇧 England"
     type: url-test
     use:
-      - PH
+      - UK
     url: 'http://www.gstatic.com/generate_204'
     interval: 300 
     
@@ -377,7 +377,6 @@ rule-providers:
     interval: 86400
 
   IQIYI:
-  Bilibili:
     type: http
     behavior: classical
     path: ./RuleSet/IQIYI.yaml
@@ -419,7 +418,7 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO.yaml
     interval: 86400
 
-  HBO_Asia:
+  HBO Asia:
     type: http
     behavior: classical
     path: ./RuleSet/HBO_Asia.yaml
@@ -433,7 +432,7 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Hulu.yaml
     interval: 86400
 
-  Hulu_JP:
+  Hulu JP:
     type: http
     behavior: classical
     path: ./RuleSet/Hulu_JP.yaml
@@ -447,7 +446,7 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/KKBOX&KKTV.yaml
     interval: 86400
 
-  LINETV:
+  LINE TV:
     type: http
     behavior: classical
     path: ./RuleSet/LINETV.yaml
@@ -473,6 +472,13 @@ rule-providers:
     behavior: classical
     path: ./RuleSet/WeTV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
+    interval: 86400
+
+  Streaming:
+    type: http
+    behavior: classical
+    path: ./RuleSet/Streaming.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
   TV:
@@ -542,11 +548,11 @@ rules:
   - RULE-SET,Disney,🇺🇸 America
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO,🇺🇸 America
-  - RULE-SET,HBO_Asia,🇵🇭 Philippines
+  - RULE-SET,HBO Asia,🇵🇭 Philippines
   - RULE-SET,Hulu,🇺🇸 America
-  - RULE-SET,Hulu_JP,🇯🇵 Japan
+  - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
-  - RULE-SET,LINETV,🇹🇼 Taiwan
+  - RULE-SET,LINE TV,🇹🇼 Taiwan
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,YouTube,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
