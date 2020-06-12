@@ -1,0 +1,4 @@
+payload:
+  # > LINE TV
+  # USER-AGENT,LINE%20TV*
+  - DOMAIN-SUFFIX,linetv.tw
