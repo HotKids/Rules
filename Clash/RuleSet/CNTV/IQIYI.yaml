@@ -1,0 +1,15 @@
+payload:
+  # > IQIYI
+  # USER-AGENT,*QIYI*,IQIYI
+  # USER-AGENT,iQiYi*,IQIYI
+  - DOMAIN-SUFFIX,iqiyi.com,IQIYI
+  - DOMAIN-SUFFIX,iqiyipic.com,IQIYI
+  - DOMAIN-SUFFIX,iq.com,IQIYI
+  - DOMAIN-SUFFIX,qy.net,IQIYI
+  - DOMAIN-SUFFIX,71.am,IQIYI
+  - DOMAIN-KEYWORD,qiyi,IQIYI
+# 爱奇艺检测ip
+  - DOMAIN,cache.video.iqiyi.com,IQIYI
+  # IP-CIDR,101.227.0.0/16,IQIYI
+  # IP-CIDR,101.224.0.0/13,IQIYI
+  # IP-CIDR,119.176.0.0/12,IQIYI
