@@ -243,7 +243,7 @@ proxy-groups:
       - 🇺🇸 America
 
   # 去广告以及隐私追踪保护、反运营商劫持开关
-  - name: "🚧 AdBlock"
+  - name: "🚧 AdGuard"
     type: select
     proxies:
       - REJECT
@@ -552,9 +552,9 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
-  - RULE-SET,Advertising,🚧 AdBlock
-  - RULE-SET,Hijacking,🚧 AdBlock
-  - RULE-SET,Privacy,🚧 AdBlock
+  - RULE-SET,Advertising,🚧 AdGuard
+  - RULE-SET,Hijacking,🚧 AdGuard
+  - RULE-SET,Privacy,🚧 AdGuard
 
   # Global Area Network
 
