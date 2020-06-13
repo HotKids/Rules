@@ -73,12 +73,11 @@ dns:
 
 proxies:
 
-
 # 服务器节点订阅
 proxy-providers:
   HK:
     type: http
-    path: ./Provider/HK.yaml
+    path: ./Provider/Proxy/Dler/HK.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=hk
     interval: 3600
     health-check: 
@@ -87,7 +86,7 @@ proxy-providers:
       interval: 600
   MO:
     type: http
-    path: ./Provider/MO.yaml
+    path: ./Provider/Proxy/Dler/MO.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=mo
     interval: 3600
     health-check: 
@@ -96,8 +95,8 @@ proxy-providers:
       interval: 600
   TW:
     type: http
-    path: ./Provider/TW.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=tw
+    path: ./Provider/Proxy/Dler/TW.yaml
+    url: https://dove.589669.xyz/all2clash?sub=https%3A%2F%2Fdler.cloud%2Fsubscribe%2FQWERTYUIOP%3Fprotocols%3Dss%26list%3Dsurge&udp=1&tfo=1&emoji=1&filter=.*%E5%8F%B0
     interval: 3600
     health-check: 
       enable: true
@@ -105,7 +104,7 @@ proxy-providers:
       interval: 600
   JP:
     type: http
-    path: ./Provider/JP.yaml
+    path: ./Provider/Proxy/Dler/JP.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=jp
     interval: 3600
     health-check: 
@@ -114,7 +113,7 @@ proxy-providers:
       interval: 600
   KR:
     type: http
-    path: ./Provider/KR.yaml
+    path: ./Provider/Proxy/Dler/KR.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=kr
     interval: 3600
     health-check: 
@@ -123,7 +122,7 @@ proxy-providers:
       interval: 600
   SG:
     type: http
-    path: ./Provider/SG.yaml
+    path: ./Provider/Proxy/Dler/SG.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=sg
     interval: 3600
     health-check: 
@@ -132,7 +131,7 @@ proxy-providers:
       interval: 600
   PH:
     type: http
-    path: ./Provider/PH.yaml
+    path: ./Provider/Proxy/Dler/PH.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=ph
     interval: 3600
     health-check: 
@@ -141,7 +140,7 @@ proxy-providers:
       interval: 600
   DE:
     type: http
-    path: ./Provider/DE.yaml
+    path: ./Provider/Proxy/Dler/DE.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=de
     interval: 3600
     health-check: 
@@ -150,7 +149,7 @@ proxy-providers:
       interval: 600
   UK:
     type: http
-    path: ./Provider/UK.yaml
+    path: ./Provider/Proxy/Dler/UK.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=uk
     interval: 3600
     health-check: 
@@ -159,8 +158,17 @@ proxy-providers:
       interval: 600
   US:
     type: http
-    path: ./Provider/US.yaml
+    path: ./Provider/Proxy/Dler/US.yaml
     url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=us
+    interval: 3600
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  CN:
+    type: http
+    path: ./Provider/Proxy/Dler/CN.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&type=back
     interval: 3600
     health-check: 
       enable: true
@@ -168,8 +176,8 @@ proxy-providers:
       interval: 600
   UN:
     type: http
-    path: ./Provider/UN.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash
+    path: ./Provider/Proxy/Dler/UN.yaml
+    url: https://dove.589669.xyz/all2clash?sub=https%3A%2F%2Fdler.cloud%2Fsubscribe%2FQWERTYUIOP%3Fprotocols%3Dss%26list%3Dsurge&udp=1&tfo=1&emoji=1
     interval: 3600
     health-check: 
       enable: true
@@ -191,6 +199,7 @@ proxy-groups:
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
+      - 🇨🇳 China
       - 🇺🇳 Server
       - 🔘 DIRECT
 
@@ -215,6 +224,7 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
+      - 🇨🇳 China
       - 🇹🇼 Taiwan
 
   # 特殊代理服务
@@ -244,6 +254,12 @@ proxy-groups:
     type: select
     proxies:
       - DIRECT
+
+  # UN
+  - name: "🇺🇳 Server"
+    type: select
+    use:
+      - UN
 
   # HK
   - name: "🇭🇰 Hong Kong"
@@ -324,12 +340,12 @@ proxy-groups:
       - US
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
-      
-  # UN
-  - name: "🇺🇳 Server"
+ 
+   # CN
+  - name: "🇨🇳 China"
     type: select
     use:
-      - UN
+      - CN      
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
@@ -344,189 +360,189 @@ rule-providers:
   Unbreak:
     type: http
     behavior: classical
-    path: ./RuleSet/Unbreak.yaml
+    path: ./Provider/RuleSet/Unbreak.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
   Advertising:
     type: http
     behavior: classical
-    path: ./RuleSet/Guard/Advertising.yaml
+    path: ./Provider/RuleSet/Guard/Advertising.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Advertising.yaml
     interval: 86400
 
   Hijacking:
     type: http
     behavior: classical
-    path: ./RuleSet/Guard/Hijacking.yaml
+    path: ./Provider/RuleSet/Guard/Hijacking.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Hijacking.yaml
     interval: 86400
 
   Privacy:
     type: http
     behavior: classical
-    path: ./RuleSet/Guard/Privacy.yaml
+    path: ./Provider/RuleSet/Guard/Privacy.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
     interval: 86400
 
   Bilibili:
     type: http
     behavior: classical
-    path: ./RuleSet/Bilibili.yaml
+    path: ./Provider/RuleSet/Streaming/Bilibili.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
     interval: 86400
 
   IQIYI:
     type: http
     behavior: classical
-    path: ./RuleSet/IQIYI.yaml
+    path: ./Provider/RuleSet/Streaming/IQIYI.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQIYI.yaml
     interval: 86400
 
   Bahamut:
     type: http
     behavior: classical
-    path: ./RuleSet/Bahamut.yaml
+    path: ./Provider/RuleSet/Streaming/Bahamut.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bahamut.yaml
     interval: 86400
 
   BBC:
     type: http
     behavior: classical
-    path: ./RuleSet/BBC.yaml
+    path: ./Provider/RuleSet/Streaming/BBC.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/BBC.yaml
     interval: 86400
 
-  Disney:
+  Disney+:
     type: http
     behavior: classical
-    path: ./RuleSet/Disney.yaml
+    path: ./Provider/RuleSet/Streaming/Disney+.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Disney.yaml
     interval: 86400
 
   friDay:
     type: http
     behavior: classical
-    path: ./RuleSet/friDay.yaml
+    path: ./Provider/RuleSet/Streaming/friDay.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/friDay.yaml
     interval: 86400
 
   HBO:
     type: http
     behavior: classical
-    path: ./RuleSet/HBO.yaml
+    path: ./Provider/RuleSet/Streaming/HBO.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO.yaml
     interval: 86400
 
   HBO Asia:
     type: http
     behavior: classical
-    path: ./RuleSet/HBO_Asia.yaml
+    path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO_Asia.yaml
     interval: 86400
 
   Hulu:
     type: http
     behavior: classical
-    path: ./RuleSet/Hulu.yaml
+    path: ./Provider/RuleSet/Streaming/Hulu.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Hulu.yaml
     interval: 86400
 
   Hulu JP:
     type: http
     behavior: classical
-    path: ./RuleSet/Hulu_JP.yaml
+    path: ./Provider/RuleSet/Streaming/Hulu_JP.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Hulu_JP.yaml
     interval: 86400
 
   KKBOX&KKTV:
     type: http
     behavior: classical
-    path: ./RuleSet/KKBOX&KKTV.yaml
+    path: ./Provider/RuleSet/Streaming/KKBOX&KKTV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/KKBOX&KKTV.yaml
     interval: 86400
 
   LINE TV:
     type: http
     behavior: classical
-    path: ./RuleSet/LINETV.yaml
+    path: ./Provider/RuleSet/Streaming/LINETV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LINETV.yaml
     interval: 86400
 
   Spotify:
     type: http
     behavior: classical
-    path: ./RuleSet/Spotify.yaml
+    path: ./Provider/RuleSet/Streaming/Spotify.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Spotify.yaml
     interval: 86400
 
   YouTube:
     type: http
     behavior: classical
-    path: ./RuleSet/YouTube.yaml
+    path: ./Provider/RuleSet/Streaming/YouTube.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
     interval: 86400
 
   WeTV:
     type: http
     behavior: classical
-    path: ./RuleSet/WeTV.yaml
+    path: ./Provider/RuleSet/Streaming/WeTV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
 
   Streaming:
     type: http
     behavior: classical
-    path: ./RuleSet/Streaming.yaml
+    path: ./Provider/RuleSet/Streaming/Streaming.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
-  TV:
+  Apple TV+:
     type: http
     behavior: classical
-    path: ./RuleSet/Extra/Apple/TV.yaml
+    path: ./Provider/RuleSet/Streaming/AppleTV.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/Apple/TV.yaml
     interval: 86400
 
   Telegram:
     type: http
     behavior: classical
-    path: ./RuleSet/Extra/Telegram/Telegram.yaml
+    path: ./Provider/RuleSet/Extra/Telegram.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/Telegram/Telegram.yaml
     interval: 86400
 
   PayPal:
     type: http
     behavior: classical
-    path: ./RuleSet/Extra/PayPal.yaml
+    path: ./Provider/RuleSet/Extra/PayPal.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/PayPal.yaml
     interval: 86400
 
   Global:
     type: http
     behavior: classical
-    path: ./RuleSet/Global.yaml
+    path: ./Provider/RuleSet/Global.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Global.yaml
     interval: 86400
 
   China:
     type: http
     behavior: classical
-    path: ./RuleSet/China.yaml
+    path: ./Provider/RuleSet/China.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
     interval: 86400
 
   IP-Blackhole:
     type: http
     behavior: classical
-    path: ./RuleSet/Extra/IP-Blackhole.yaml
+    path: ./Provider/RuleSet/Extra/IP-Blackhole.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/IP-Blackhole.yaml
     interval: 86400
 
   ChinaIP:
     type: http
     behavior: classical
-    path: ./RuleSet/Extra/ChinaIP.yaml
+    path: ./Provider/RuleSet/Extra/ChinaIP.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/ChinaIP.yaml
     interval: 86400
 
@@ -545,7 +561,7 @@ rules:
   # Streaming
   - RULE-SET,Bahamut,🇹🇼 Taiwan
   - RULE-SET,BBC,🇬🇧 England
-  - RULE-SET,Disney,🇺🇸 America
+  - RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO,🇺🇸 America
   - RULE-SET,HBO Asia,🇵🇭 Philippines
@@ -562,8 +578,8 @@ rules:
   - RULE-SET,Bilibili,📺 CNTV
   - RULE-SET,IQIYI,📺 CNTV
 
-  # Apple TV
-  - RULE-SET,TV,🇺🇸 America
+  # Apple TV+
+  - RULE-SET,Apple TV+,🇺🇸 America
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
