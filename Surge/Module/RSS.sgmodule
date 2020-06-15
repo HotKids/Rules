@@ -1,0 +1,10 @@
+
+#!name=RSS Module
+#!desc=RSS Feed Pack
+ 
+[Script]
+# > 每日汇率 by Peng-YM
+Crontab: Exchange = type=cron,cronexp="0 9 * * *",script-path=https://raw.githubusercontent.com/Peng-YM/QuanX/master/Tasks/exchange.js
+
+# > 每周 Epic 游戏限免 DailyBonus by Peng-YM
+Crontab: Epic = type=cron,cronexp="0 9 * * 1",script-path=script-path=https://raw.githubusercontent.com/Peng-YM/QuanX/master/Tasks/epic.js
