@@ -1,5 +1,5 @@
 #!name=Crontab Module
-#!desc=Crontab Pack
+#!desc=Cron Task Pack
 #!system=ios
 
 [Script]
