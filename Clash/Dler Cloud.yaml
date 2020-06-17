@@ -249,12 +249,27 @@ proxy-groups:
       - REJECT
       - DIRECT
 
+  # 国内服务
+  - name: "🚓 Inbound"
+    type: select
+    proxies:
+      - 🔘 DIRECT
+    use:
+      - CN
+      
+  # Final
+  - name: "🚁 Outbound"
+    type: select
+    proxies:
+      - 🔰 Proxy
+      - 🔘 DIRECT
+ 
   # 直连
   - name: "🔘 DIRECT"
     type: select
     proxies:
       - DIRECT
-
+  
   # UN
   - name: "🇺🇳 Server"
     type: select
@@ -591,7 +606,7 @@ rules:
   - RULE-SET,Global,🔰 Proxy
 
   # China Area Network
-  - RULE-SET,China,🔘 DIRECT
+  - RULE-SET,China,🚓 Inbound
 
   # Local Area Network
   - IP-CIDR,192.168.0.0/16,🔘 DIRECT
@@ -605,11 +620,11 @@ rules:
   - RULE-SET,IP-Blackhole,🔰 Proxy
 
   # Tencent
-  - IP-CIDR,119.28.28.28/32,🔘 DIRECT
-  - IP-CIDR,182.254.116.0/24,🔘 DIRECT
+  - IP-CIDR,119.28.28.28/32,🚓 Inbound
+  - IP-CIDR,182.254.116.0/24,🚓 Inbound
   # 使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时禁用「GEOIP,CN」规则
-  # - RULE-SET,ChinaIP,🔘 DIRECT
+  # - RULE-SET,ChinaIP,🚓 Inbound
   # GeoIP China
-  - GEOIP,CN,🔘 DIRECT
+  - GEOIP,CN,🚓 Inbound
 
-  - MATCH,🔰 Proxy
+  - MATCH,🚁 Outbound
