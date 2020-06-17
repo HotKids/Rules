@@ -263,13 +263,7 @@ proxy-groups:
     proxies:
       - 🔰 Proxy
       - 🔘 DIRECT
- 
-  # 直连
-  - name: "🔘 DIRECT"
-    type: select
-    proxies:
-      - DIRECT
-  
+   
   # UN
   - name: "🇺🇳 Server"
     type: select
@@ -361,7 +355,13 @@ proxy-groups:
   - name: "🇨🇳 China"
     type: select
     use:
-      - CN      
+      - CN
+      
+   # 直连
+  - name: "🔘 DIRECT"
+    type: select
+    proxies:
+      - DIRECT
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
