@@ -254,8 +254,8 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
-    use:
-      - CN
+      - 🔰 Proxy
+      - 🇨🇳 China
       
   # Final
   - name: "🚁 Outbound"
