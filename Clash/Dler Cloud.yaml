@@ -548,12 +548,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
     interval: 86400
 
-  IP-Blackhole:
-    type: http
-    behavior: ipcidr
-    path: ./Provider/RuleSet/Extra/IP-Blackhole.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/IP-Blackhole.yaml
-    interval: 86400
+  # IP-Blackhole:
+    # type: http
+    # behavior: ipcidr
+    # path: ./Provider/RuleSet/Extra/IP-Blackhole.yaml
+    # url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/IP-Blackhole.yaml
+    # interval: 86400
 
   # ChinaIP:
     # type: http
@@ -618,7 +618,7 @@ rules:
   - IP-CIDR,224.0.0.0/4,🔘 DIRECT
 
   # IP Blackhole
-  - RULE-SET,IP-Blackhole,🔰 Proxy
+  # RULE-SET,IP-Blackhole,🔰 Proxy
 
   # Tencent
   - IP-CIDR,119.28.28.28/32,🚓 Inbound
