@@ -65,5 +65,8 @@ Crontab: 多看阅读 = type=cron,cronexp="15 5 * * *",script-path=https://raw.g
 # > 飞客茶馆签到 DailyBonus by chavyleung
 Crontab: 飞客茶馆 = type=cron,cronexp="16 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
+# > QQ 会员成长值签到 DailyBonus by lowking
+Crontab: QQ VIP = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/lowking/Scripts/master/QQVip/qqVipCheckIn.js
+
 # > 吾爱破解签到 DailyBonus by NobyDa
 // Crontab: 吾爱破解 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
