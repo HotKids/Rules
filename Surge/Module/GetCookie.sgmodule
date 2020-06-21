@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,api.m.jd.com,daojia.jd.com,gameapi.hellobike.com,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,api.m.jd.com,daojia.jd.com,gameapi.hellobike.com,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,proxy.vac.qq.com,sf-integral-sign-in.weixinjia.net,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通签到 GetCookie by chavyleung
@@ -72,6 +72,9 @@ Cookie: 多看阅读 = type=http-request,requires-body=1,pattern=^https?:\/\/www
 
 # > 飞客茶馆签到 GetCookie by chavyleung
 Cookie: 飞客茶馆 = type=http-request,requires-body=1,pattern=^https?:\/\/www\.flyertea\.com\/source\/plugin\/mobile\/mobile\.php\?module=getdata&.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.cookie.js
+
+# > QQ 会员成长值签到 GetCookie by lowking
+Cookie: QQ VIP = type=http-requestrequires-body=1,pattern=^https?:\/\/proxy\.vac\.qq\.com\/cgi-bin\/srfentry.fcgi,script-path=https://raw.githubusercontent.com/lowking/Scripts/master/QQVip/qqVipCheckIn.js
 
 # > 吾爱破解签到 GetCookie by NobyDa
 Cookie: 吾爱破解 = type=http-request,requires-body=1,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
