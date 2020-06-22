@@ -138,7 +138,7 @@ USER-AGENT,PBS*
 DOMAIN-SUFFIX,pbs.org
 
 # > Pocket Casts
-USER-AGENT,Pocket%20Casts
+USER-AGENT,Pocket%20Casts*
 DOMAIN-SUFFIX,pocketcasts.com
 
 # > SoundCloud
