@@ -7,7 +7,7 @@ socks-port: 7891
 # Linux 及 macOS 的 redir 端口
 # redir-port: 7892
 
-allow-lan: false
+allow-lan: true
 
 # 仅适用于设置 allow-lan 为 true 时
 # "*": 绑定所有 IP 地址
@@ -54,16 +54,20 @@ dns:
   ipv6: false # default is false
   listen: 0.0.0.0:53
   # default-nameserver: # resolve dns nameserver host, should fill pure IP
-  #   - 114.114.114.114
-  #   - 8.8.8.8
-  enhanced-mode: redir-host # or fake-ip
+  #   - 119.29.29.29
+  #   - 119.28.28.28
+  enhanced-mode: fake-ip # or redir-host
   # fake-ip-range: 198.18.0.1/16 # if you don't know what it is, don't change it
   fake-ip-filter: # fake ip white domain list
     - '*.lan'
     - localhost.ptlogin2.qq.com
   nameserver:
-    - 119.29.29.29
-    - 223.5.5.5
+    - 'https://doh.rixcloud.dev/dns-query'
+    - 'https://47.108.56.233/dns-query'
+    - 'https://118.31.13.131/dns-query'
+    - 'https://120.25.25.166/dns-query'
+    - 'https://139.224.112.177/dns-query'
+    - 'https://59.110.53.209/dns-query'
   fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
     - tcp://1.1.1.1
   fallback-filter:
