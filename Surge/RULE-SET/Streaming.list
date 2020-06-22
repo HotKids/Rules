@@ -141,6 +141,7 @@ DOMAIN-SUFFIX,pbs.org
 USER-AGENT,Pocket%20Casts*
 DOMAIN-SUFFIX,pocketcasts.com
 DOMAIN-SUFFIX,shiftyjelly.com.au
+DOMAIN,refresh.pocketcasts.com
 
 # > SoundCloud
 USER-AGENT,SoundCloud*
