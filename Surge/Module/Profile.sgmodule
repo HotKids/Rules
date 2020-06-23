@@ -18,8 +18,8 @@ show-error-page-for-reject = true
 
 // DNS
 doh-format=json
-dns-server = https://neatdns.ustclug.org/resolve
-// dns-server = 119.29.29.29, 119.28.28.28, 223.5.5.5, 223.6.6.6, 180.76.76.76, 1.2.4.8
+// dns-server = https://neatdns.ustclug.org/resolve
+dns-server = 119.29.29.29, 119.28.28.28, 223.5.5.5, 223.6.6.6, 180.76.76.76, 1.2.4.8
 doh-server = https://doh.rixcloud.dev/dns-query
 
 // Advanced
