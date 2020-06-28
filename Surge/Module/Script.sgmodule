@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,*acs.m.taobao.com,api.weibo.cn,api.m.jd.com,api.zhihu.com,gw.alicdn.com,mapi.weibo.com,mp.weixin.qq.com,m.poizon.com,render.alipay.com
+hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,*acs.m.taobao.com,api.weibo.cn,api.m.jd.com,api.zhihu.com,gw.alicdn.com,mapi.weibo.com,mp.weixin.qq.com,render.alipay.com
 
 [Rule]
 DOMAIN,adimg.vue.weibo.com,REJECT
@@ -56,8 +56,6 @@ Zhihu.js = type=http-response,requires-body=1,max-size=-1,pattern=^https:\/\/(ap
 
 # > 哔哩哔哩 App 去广告 by onewayticket255&Primovist
 Bilibili.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ap(i|p)\.bilibili\.com\/x\/(resource\/show\/tab|v2\/(reply\/main|view\/material|account\/mine|view|feed\/index))\?access_key,script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Bilibili.js
-# > 毒 App 去启动页广告 by ConnersHua
-com.poizon.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m\.poizon\.com\/client\/init,script-path=https://raw.githubusercontent.com/ConnersHua/Profiles/master/Surge/Script/com.poizon.js
 
 # > 什么值得买去广告 By Primovist
 SMZDM.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(h(aojia|omepage)|(articl|baik)e|s)-api\.smzdm\.com\/(home|sou)(?!\/list_filter),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/SMZDM.js
