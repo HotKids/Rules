@@ -220,6 +220,7 @@ proxy-groups:
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
+      - 🇨🇳 China
       - 🇺🇳 Server
 
   # 大陆流媒体服务（面向港台版本）
@@ -227,6 +228,7 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
+      - 🇨🇳 China
       - 🇹🇼 Taiwan
 
   # 特殊代理服务
