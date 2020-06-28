@@ -169,15 +169,15 @@ proxy-providers:
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  CN:
-    type: http
-    path: ./Provider/Proxy/Dler/CN.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&type=back
-    interval: 3600
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
+  # CN:
+    # type: http
+    # path: ./Provider/Proxy/Dler/CN.yaml
+    # url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&type=back
+    # interval: 3600
+    # health-check: 
+      # enable: true
+      # url: http://www.gstatic.com/generate_204
+      # interval: 600
   UN:
     type: http
     path: ./Provider/Proxy/Dler/UN.yaml
@@ -203,7 +203,6 @@ proxy-groups:
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
-      - 🇨🇳 China
       - 🇺🇳 Server
       - 🔘 DIRECT
 
@@ -228,7 +227,6 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
-      - 🇨🇳 China
       - 🇹🇼 Taiwan
 
   # 特殊代理服务
@@ -356,10 +354,10 @@ proxy-groups:
     interval: 300
  
    # CN
-  - name: "🇨🇳 China"
-    type: select
-    use:
-      - CN
+   # - name: "🇨🇳 China"
+    # type: select
+    # use:
+      # - CN
       
    # 直连
   - name: "🔘 DIRECT"
