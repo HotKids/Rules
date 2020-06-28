@@ -352,13 +352,13 @@ proxy-groups:
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
  
-   # CN
-   - name: "🇨🇳 China"
+  # CN
+  - name: "🇨🇳 China"
     type: select
     use:
       - CN
       
-   # 直连
+  # DIRECT
   - name: "🔘 DIRECT"
     type: select
     proxies:
