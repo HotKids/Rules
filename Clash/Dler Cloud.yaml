@@ -257,7 +257,6 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
-      - 🇨🇳 China
       
   # Final
   - name: "🚁 Outbound"
