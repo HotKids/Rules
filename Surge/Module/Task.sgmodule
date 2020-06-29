@@ -7,7 +7,10 @@
 Crontab: 中国联通 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
 
 # > 中国移动 by chavyleung
-Crontab: 中国移动 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/10086.png
+Crontab: 中国移动 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
+
+# > 中国电信 by chavyleung
+Crontab: 中国电信 = type=cron,cronexp="30 8 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
 
 # > WPS 签到 DailyBonus by chavyleung
 Crontab: WPS = type=cron,cronexp="0 8 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js
@@ -68,14 +71,17 @@ Crontab: 顺丰速运 = type=cron,cronexp="15 5 * * *",script-path=https://raw.g
 # > 多看阅读签到 DailyBonus by chavyleung
 Crontab: 多看阅读 = type=cron,cronexp="16 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
 
+# > 海底捞签到 DailyBonus by zZPiglet
+Crontab: 海底捞 = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js
+
 # > 喜茶GO小程序签到 DailyBonus by zZPiglet
-Crontab: 喜茶 = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/HEYTEA/HEYTEA.js
+Crontab: 喜茶 = type=cron,cronexp="18 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/HEYTEA/HEYTEA.js
 
 # > 奈雪の茶小程序签到 DailyBonus by zZPiglet
-Crontab: 奈雪の茶 = type=cron,cronexp="18 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Naixue/Naixue.js
+Crontab: 奈雪の茶 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Naixue/Naixue.js
 
 # > 飞客茶馆签到 DailyBonus by chavyleung
-Crontab: 飞客茶馆 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+Crontab: 飞客茶馆 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解签到 DailyBonus by NobyDa
 // Crontab: 吾爱破解 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
