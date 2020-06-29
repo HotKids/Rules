@@ -3,8 +3,11 @@
 #!system=ios
 
 [Script]
-# > 中国联通签到 by chavyleung
+# > 中国联通 by chavyleung
 Crontab: 中国联通 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
+
+# > 中国移动 by chavyleung
+Crontab: 中国移动 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/10086.png
 
 # > WPS 签到 DailyBonus by chavyleung
 Crontab: WPS = type=cron,cronexp="0 8 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js
@@ -18,52 +21,61 @@ Crontab: 苏宁易购 = type=cron,cronexp="0 5 * * *",script-path=https://raw.gi
 # > 美团签到 DailyBonus by chavyleung
 Crontab: 美团 = type=cron,cronexp="1 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.js
 
+# > 饿了么签到 DailyBonus by songyangzz&zZPiglet
+Crontab: 饿了么 = type=cron,cronexp="1 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/elem/elemCheckIn.js
+
 # > 京东到家签到 GetCookie DailyBonus by barrymchen&GideonSenku
-Crontab: 京东到家 = type=cron,cronexp="2 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
+Crontab: 京东到家 = type=cron,cronexp="3 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
 
 # > 叮咚买菜签到 DailyBonus by chavyleung
-Crontab: 叮咚买菜 = type=cron,cronexp="3 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
+Crontab: 叮咚买菜 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 
 # > 爱奇艺签到 DailyBonus by NobyDa
-Crontab: 爱奇艺 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+Crontab: 爱奇艺 = type=cron,cronexp="5 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 腾讯视频签到 DailyBonus by chavyleung
-Crontab: 腾讯视频 = type=cron,cronexp="5 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
+Crontab: 腾讯视频 = type=cron,cronexp="6 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
 
 # > 芒果 TV 签到 DailyBonus by chavyleung
-Crontab: 芒果 TV = type=cron,cronexp="6 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.js
+Crontab: 芒果 TV = type=cron,cronexp="7 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.js
 
 # > 哔哩哔哩直播签到 DailyBonus by chavyleung
-Crontab: 哔哩哔哩 = type=cron,cronexp="7 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js
+Crontab: 哔哩哔哩 = type=cron,cronexp="8 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.js
 // 如需银瓜子转硬币，添加以下内容 
-// Tasks: 哔哩哔哩银瓜子转硬币 = type=cron,cronexp="7 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
+// Tasks: 哔哩哔哩银瓜子转硬币 = type=cron,cronexp="8 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js
 
 # > 哔哩哔哩漫画签到 DailyBonus by NobyDa
-Crontab: 哔哩哔哩漫画 = type=cron,cronexp="8 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
+Crontab: 哔哩哔哩漫画 = type=cron,cronexp="9 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐签到 DailyBonus by chavyleung
-Crontab: 网易云音乐 = type=cron,cronexp="9 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js
+Crontab: 网易云音乐 = type=cron,cronexp="10 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.js
 
 # > 喜马拉雅 FM 签到 DailyBonus by chavyleung
-Crontab: 喜马拉雅 = type=cron,cronexp="10 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
+Crontab: 喜马拉雅 = type=cron,cronexp="11 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.js
 
 # > 人人字幕组签到 DailyBonus by chavyleung
-Crontab: 字幕组 = type=cron,cronexp="11 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
+Crontab: 字幕组 = type=cron,cronexp="12 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
 
 # > 什么值得买签到 DailyBonus by chavyleung
-Crontab: 什么值得买 = type=cron,cronexp="12 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.js
+Crontab: 什么值得买 = type=cron,cronexp="13 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.js
 
 # > 哈啰出行签到 DailyBonus by chavyleung
-Crontab: 哈啰出行 = type=cron,cronexp="13 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/hellobike/hellobike.js
+Crontab: 哈啰出行 = type=cron,cronexp="14 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/hellobike/hellobike.js
 
 # > 顺丰速运签到 DailyBonus by chavyleung
-Crontab: 顺丰速运 = type=cron,cronexp="14 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
+Crontab: 顺丰速运 = type=cron,cronexp="15 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
 
 # > 多看阅读签到 DailyBonus by chavyleung
-Crontab: 多看阅读 = type=cron,cronexp="15 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
+Crontab: 多看阅读 = type=cron,cronexp="16 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.js
+
+# > 喜茶GO小程序签到 DailyBonus by zZPiglet
+Crontab: 喜茶 = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/HEYTEA/HEYTEA.js
+
+# > 奈雪の茶小程序签到 DailyBonus by zZPiglet
+Crontab: 奈雪の茶 = type=cron,cronexp="18 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Naixue/Naixue.js
 
 # > 飞客茶馆签到 DailyBonus by chavyleung
-Crontab: 飞客茶馆 = type=cron,cronexp="16 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+Crontab: 飞客茶馆 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解签到 DailyBonus by NobyDa
 // Crontab: 吾爱破解 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
