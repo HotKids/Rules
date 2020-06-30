@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,ap*.bilibili.com,*.uve.weibo.com,ap*.zhihu.com,api.m.jd.com,api.weibo.cn,api.zhihu.com,gw.alicdn.com,lens.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,www.zhihu.com
+hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,*.uve.weibo.com,ap*.bilibili.com,ap*.zhihu.com,api.m.jd.com,api.weibo.cn,api.zhihu.com,gw.alicdn.com,lens.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,www.zhihu.com
 
 [Rule]
 # > 微博
