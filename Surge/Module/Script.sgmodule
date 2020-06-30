@@ -6,18 +6,19 @@
 hostname = %INSERT% *.bilibili.com,*.smzdm.com,*.uve.weibo.com,*acs.m.taobao.com,api.weibo.cn,api.m.jd.com,api.zhihu.com,gw.alicdn.com,mapi.weibo.com,mp.weixin.qq.com,render.alipay.com
 
 [Rule]
+# > 微博
 DOMAIN,adimg.vue.weibo.com,REJECT
+# > 知乎
 DOMAIN,118.89.204.198,REJECT
 DOMAIN,sugar.zhihu.com,REJECT
 DOMAIN,appcloud2.in.zhihu.com,REJECT
 URL-REGEX,^https?:\/\/pic\d\.zhimg\.com\/70\/,REJECT
 URL-REGEX,^https?:\/\/(api|www)\.zhihu\.com\/(ab|adx|fringe|commercial|ad-style-service|.*(recommendations|extended|featured-comment-ad)|api\/v4\/(brand|mcn|(answer|question)s\/\d+\/meta_related_topics)|brand\/questions\/\d+\/activity\/answers\/red-packet(\/|\?|$)),REJECT
+# > 哔哩哔哩
 URL-REGEX,^https?:\/\/ap(p|i)\.bilibili\.com\/(pgc\/season\/rank\/cn|x\/v2\/(dm\/ad|rank.*rid=(168|5)|dataflow\/report|search\/(defaultword|trending|recommend|resource)|splash)),REJECT
+# > 什么值得买
 URL-REGEX,^https?:\/\/(app-)?api\.smzdm\.com\/(v\d\/)?util\/(loading|banner),REJECT
-URL-REGEX,^https?:\/\/dxy\.com\/app\/i\/ask\/biz\/feed\/launch,REJECT
-URL-REGEX,^https?:\/\/dq\.dxy\.cn\/api\.php\?action=getpostbanners&sys_id=,REJECT
-URL-REGEX,^https?:\/\/drugs\.dxy\.cn\/api\/ad\?productType=,REJECT
-URL-REGEX,^https?:\/\/www\.dxy\.cn\/webservices\/app\/specialAd\/list\?ac=,REJECT
+# > 淘宝
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.((trip\.activity|film\.mtopadvertiseapi)\.querytmsresources|(taobao\.idle\.home|aliyun\.mobile)\.welcome(page)?|.*?\.ads?\.),REJECT
 URL-REGEX,^https?://gw.alicdn.com/(t(f|p)s/.+\d{3,4}-\d{4}|mt),REJECT
 URL-REGEX,^https?:\/\/render\.alipay\.com\/p\/s\/h5data\/prod\/spring-festival-2019-h5data\/popup-h5data\.json,REJECT
