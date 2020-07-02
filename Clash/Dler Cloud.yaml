@@ -488,6 +488,13 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/LINETV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LINETV.yaml
     interval: 86400
+    
+  Peacock:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Peacock.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Peacock.yaml
+    interval: 86400
 
   Spotify:
     type: http
@@ -589,6 +596,7 @@ rules:
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
   - RULE-SET,LINE TV,🇹🇼 Taiwan
+  - RULE-SET,Peacock,🇺🇸 America  
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
   - RULE-SET,YouTube,🔰 Proxy
