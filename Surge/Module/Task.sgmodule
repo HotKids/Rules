@@ -10,6 +10,7 @@ Crontab: 中国联通 = type=cron,cronexp="30 8,23 * * *",script-path=https://ra
 Crontab: 中国移动 = type=cron,cronexp="30 8,23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.js
 
 # > 中国电信 by chavyleung
+// 自行使用 Chavy Box 管理手机号
 Crontab: 中国电信 = type=cron,cronexp="30 8 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
 
 # > WPS 签到 DailyBonus by chavyleung
