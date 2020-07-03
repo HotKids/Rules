@@ -153,7 +153,6 @@ DOMAIN-SUFFIX,pscdn.co
 DOMAIN-SUFFIX,scdn.co
 DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,spotify.com
-IP-CIDR,35.186.224.47/32
 
 # > Sky GO
 # USER-AGENT,skygo*
