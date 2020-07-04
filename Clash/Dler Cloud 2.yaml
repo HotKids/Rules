@@ -68,8 +68,8 @@ dns:
     - 'https://120.25.25.166/dns-query'
     - 'https://139.224.112.177/dns-query'
     - 'https://59.110.53.209/dns-query'
-  fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
-    - tcp://1.1.1.1
+  # fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
+    # - tcp://1.1.1.1
   fallback-filter:
     geoip: true # default
     ipcidr: # ips in these subnets will be considered polluted
