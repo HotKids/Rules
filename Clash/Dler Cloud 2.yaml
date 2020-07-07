@@ -416,12 +416,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO.yaml
     interval: 86400
 
-  HBO Asia:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO_Asia.yaml
-    interval: 86400
+  # HBO Asia:
+    # type: http
+    # behavior: classical
+    # path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
+    # url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO_Asia.yaml
+    # interval: 86400
 
   Hulu:
     type: http
@@ -553,7 +553,7 @@ rules:
   - RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO,🇺🇸 America
-  - RULE-SET,HBO Asia,🔰 Proxy
+  # RULE-SET,HBO Asia,🔰 Proxy
   - RULE-SET,Hulu,🇺🇸 America
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
