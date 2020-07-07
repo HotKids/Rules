@@ -22,13 +22,13 @@ Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_che
 Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 # > 苏宁易购签到 GetCookie by chavyleung
-Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/passport\.suning\.com\/ids\/login$,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/passport\.suning\.com\/ids\/login$,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js,requires-body=true
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/luckman\.suning\.com\/luck-web\/sign\/api\/clock_sign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/sign\.suning\.com\/sign-web\/m\/promotion\/sign\/doSign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/gameapi\.suning\.com\/sngame-web\/(api\/signin\/private\/customerSignOperation.do|gateway\/api\/queryPrize.do),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 
 # > 美团签到 GetCookie by chavyleung
-Cookie: 美团 = type=http-request,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js
+Cookie: 美团 = type=http-request,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js,requires-body=true
 
 # > 饿了么签到 GetCookie by songyangzz&zZPiglet
 Cookie: 饿了么 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/eus\/v\d\/current_user$,script-path=https://raw.githubusercontent.com/songyangzz/QuantumultX/master/elem/elemGetCookies.js
@@ -55,7 +55,7 @@ Cookie: 哔哩哔哩 = type=http-request,pattern=^https?:\/\/(www|live)\.bilibil
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/manga\.bilibili\.com\/.*\.User\/GetWallet,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐签到 GetCookie by chavyleung
-Cookie: 网易云音乐 = type=http-request,pattern=^https?:\/\/music\.163\.com\/weapi\/user\/level,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.cookie.js
+Cookie: 网易云音乐 = type=http-request,pattern=^https?:\/\/music\.163\.com\/weapi\/user\/level,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/neteasemusic.cookie.js,requires-body=true
 
 # > 喜马拉雅 FM 签到 GetCookie by chavyleung
 Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
@@ -78,7 +78,7 @@ Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/sf-integral-sign-in
 Cookie: 多看阅读 = type=http-request,pattern=^https?:\/\/www\.duokan\.com\/checkin\/v0\/status,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.cookie.js
 
 # > 海底捞签到 GetCookie by zZPiglet
-Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js
+Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js,requires-body=true
 Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js
 
 # > 喜茶小程序签到 GetCookie by zZPiglet
