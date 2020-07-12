@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,activity-1.m.duiba.com.cn,api.m.jd.com,clientaccess.10086.cn,credits.bz.mgtv.com,daojia.jd.com,gameapi.hellobike.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,vip.heytea.com,webapi.qmai.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,activity-1.m.duiba.com.cn,api.m.jd.com,clientaccess.10086.cn,credits.bz.mgtv.com,daojia.jd.com,gameapi.hellobike.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通 GetCookie by chavyleung
@@ -81,13 +81,7 @@ Cookie: 多看阅读 = type=http-request,pattern=^https?:\/\/www\.duokan\.com\/c
 Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js,requires-body=true
 Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js
 
-# > 喜茶小程序签到 GetCookie by zZPiglet
-Cookie: 喜茶 = type=http-request,pattern=^https?:\/\/vip\.heytea\.com\/api\/service-member\/vip\/task$,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/HEYTEA/HEYTEA.js
-
-# > 奈雪小程序签到 GetCookie by zZPiglet
-Cookie: 奈雪の茶 = type=http-request,pattern=^https?:\/\/webapi\.qmai\.cn\/web\/cy\/v\d\/store\/template-scene,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Naixue/Naixue.js
-
-;无忧行签到 GetCookie by vinewx
+# > 无忧行签到 GetCookie by vinewx
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/task\.jegotrip\.com\.cn\:8080\/app\/tasks\?userid,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
 
