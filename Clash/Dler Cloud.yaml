@@ -599,7 +599,7 @@ rules:
   - RULE-SET,Peacock,🇺🇸 America  
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
-  - RULE-SET,YouTube,🔰 Proxy
+  # RULE-SET,YouTube,🔰 Proxy
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
