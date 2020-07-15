@@ -510,12 +510,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
     
-  YouTube:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/YouTube.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
-    interval: 86400
+  # YouTube:
+    # type: http
+    # behavior: classical
+    # path: ./Provider/RuleSet/Streaming/YouTube.yaml
+    # url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
+    # interval: 86400
 
   Streaming:
     type: http
