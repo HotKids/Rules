@@ -472,12 +472,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
     
-  YouTube:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/YouTube.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
-    interval: 86400
+  # YouTube:
+    # type: http
+    # behavior: classical
+    # path: ./Provider/RuleSet/Streaming/YouTube.yaml
+    # url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
+    # interval: 86400
 
   Streaming:
     type: http
@@ -561,7 +561,7 @@ rules:
   - RULE-SET,Peacock,🇺🇸 America  
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
-  - RULE-SET,YouTube,🔰 Proxy
+  # RULE-SET,YouTube,🔰 Proxy
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
