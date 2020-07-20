@@ -84,8 +84,8 @@ Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/sf-integral-sign-in
 Cookie: 多看阅读 = type=http-request,pattern=^https?:\/\/www\.duokan\.com\/checkin\/v0\/status,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.cookie.js
 
 # > 海底捞签到 GetCookie by zZPiglet
-Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js,requires-body=true
-Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/HaidilaoUsebonus.js
+Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
+Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
 
 # > 无忧行签到 GetCookie by vinewx
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
