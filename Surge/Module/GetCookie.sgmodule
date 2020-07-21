@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,activity-1.m.duiba.com.cn,api.m.jd.com,clientaccess.10086.cn,credits.bz.mgtv.com,daojia.jd.com,gameapi.hellobike.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2019.com,*.smzdm.com,*.suning.com,*.video.qq.com,act.10010.com,activity-1.m.duiba.com.cn,api.m.jd.com,clientaccess.10086.cn,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,frodo.douban.com,gameapi.hellobike.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通 GetCookie by chavyleung
@@ -12,9 +12,12 @@ Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/act.10010.com\/Sign
 Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/act.10010.com\/SigninApp(.*?)\/signin\/daySign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
 Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(textdl\/userLogin|active\/findActivityInfo),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
 
-# > 中国移动-查话费 GetCookie by chavyleung
-Cookie: 中国移动 = type=http-request,pattern=^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/LN\/uamrandcodelogin\/autoLogin,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.cookie.js
-Cookie: 中国移动 = type=http-request,pattern=^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/BN\/realFeeQuery\/getRealFee,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.cookie.js
+# > 中国移动 GetCookie by chavyleung
+Cookie: 中国移动-查话费 = type=http-request,pattern=^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/LN\/uamrandcodelogin\/autoLogin,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.cookie.js
+Cookie: 中国移动-查话费 = type=http-request,pattern=^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/BN\/realFeeQuery\/getRealFee,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.cookie.js
+
+# > 中国电信 GetCookie by uchvk
+Cookie: 天翼账号中心 = type=http-request,pattern=^https?:\/\/e\.189\.cn\/store\/user\/package_detail\.do,script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/telecomInfinity.js
 
 # > WPS 签到 GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
@@ -39,8 +42,9 @@ Cookie: 饿了么 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/
 # > 京东到家签到 GetCookie by barrymchen&GideonSenku
 Cookie: 京东到家 = type=http-request,pattern=^https?:\/\/daojia\.jd\.com\/client(.*?)functionId=signin(.*?)userSigninNew,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
 
-# > 叮咚买菜签到 GetCookie by chavyleung
-Cookie: 叮咚买菜 = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
+# > 叮咚买菜签到 GetCookie by chavyleung&iepngs
+Cookie: 叮咚买菜-签到 = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.cookie.js
+Cookie: 叮咚买菜-农场 = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/user\/checkLogin,script-path=https://raw.githubusercontent.com/iepngs/Script/master/dingdong/index.js
 
 # > 爱奇艺签到 GetCookie by NobyDa
 Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/.*\.iqiyi\.com\/.*authcookie=,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
@@ -83,9 +87,15 @@ Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/sf-integral-sign-in
 # > 多看阅读签到 GetCookie by chavyleung
 Cookie: 多看阅读 = type=http-request,pattern=^https?:\/\/www\.duokan\.com\/checkin\/v0\/status,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/duokan/duokan.cookie.js
 
+# > 豆瓣时间签到 GetCookie by chavyleung
+Cookie: 豆瓣时间 = type=http-request,pattern=^https?:\/\/frodo\.douban\.com\/api\/v2\/niffler\/check_in\/status,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/dbsj/dbsj.cookie.js
+
 # > 海底捞签到 GetCookie by zZPiglet
 Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
 Cookie: 海底捞 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
+
+# > 百果园签到 GetCookie by chavyleung
+Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
 
 # > 无忧行签到 GetCookie by vinewx
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
@@ -93,9 +103,6 @@ Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/task\.jegotrip\.com\.c
 
 # > 飞客茶馆签到 GetCookie by chavyleung
 Cookie: 飞客茶馆 = type=http-request,pattern=^https?:\/\/www\.flyertea\.com\/source\/plugin\/mobile\/mobile\.php\?module=getdata&.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.cookie.js
-
-# > 百果园签到 GetCookie by chavyleung
-Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
 
 # > 吾爱破解签到 GetCookie by NobyDa
 Cookie: 吾爱破解 = type=http-request,pattern=^https?:\/\/www\.52pojie\.cn\/home\.php\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
