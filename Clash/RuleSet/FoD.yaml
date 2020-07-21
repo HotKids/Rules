@@ -1,0 +1,4 @@
+payload:  
+  # > FoD
+  # USER-AGENT,FoDPlayer*
+  - DOMAIN-SUFFIX,fod.fujitv.co.jp
