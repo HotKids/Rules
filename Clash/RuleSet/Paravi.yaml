@@ -1,0 +1,4 @@
+payload:  
+  # > Paravi
+  # USER-AGENT,Paravi*
+  - DOMAIN-SUFFIX,paravi.jp
