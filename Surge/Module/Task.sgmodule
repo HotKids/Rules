@@ -87,7 +87,7 @@ Crontab: 海底捞 = type=cron,cronexp="18 5 * * *",script-path=https://raw.gith
 # > 百果园 DailyBonus by chavyleung
 Crontab: 百果园 = type=cron,cronexp=19 5 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js,wake-system=true
 
-# > 无忧行 DailyBonu by vinewx
+# > 无忧行 DailyBonus by vinewx
 Crontab: 无忧行 = type=cron,cronexp="20 5 * * *",script-path=https://ooxx.be/js/jegotrip.js
 
 # > 飞客茶馆 DailyBonus by chavyleung
