@@ -5,7 +5,7 @@
 // General
 http-listen = 0.0.0.0:7890
 socks5-listen = 0.0.0.0:7891
-
+http-api = examplekey@0.0.0.0:6166
 external-controller-access = HotKids@0.0.0.0:6170
 allow-wifi-access = true
 
