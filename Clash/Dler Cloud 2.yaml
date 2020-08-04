@@ -250,7 +250,6 @@ proxy-groups:
     type: select
     use:
       - UN
-      - CN
 
   # HK
   - name: "🇭🇰 Hong Kong"
