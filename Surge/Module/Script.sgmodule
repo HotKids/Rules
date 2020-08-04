@@ -27,7 +27,7 @@ AND,((URL-REGEX,\/amdc\/mobileDispatch),(USER-AGENT,%E6%89%8B%E6%9C%BA%E6%B7%98%
 
 [Script]
 # > JD App 显示历史价格 by yichahucha
-jd_price.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(wareBusiness|serverConfig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
+jd_price.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(wareBusiness|serverConfig|basicConfigig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
 
 # > Taobao App 显示历史价格 by yichahucha
 tb_price.js = type=http-request,requires-body=1,max-size=-1,pattern=^http:\/\/.+\/amdc\/mobileDispatch,script-path=https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js
