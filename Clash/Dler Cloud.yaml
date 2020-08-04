@@ -258,8 +258,8 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
-      - 🇨🇳 China
       - 🔰 Proxy
+      - 🇨🇳 China
       
   # Final
   - name: "🚁 Outbound"
@@ -267,7 +267,7 @@ proxy-groups:
     proxies:
       - 🔰 Proxy
       - 🔘 DIRECT
-   
+
   # UN
   - name: "🇺🇳 Server"
     type: select
@@ -355,13 +355,13 @@ proxy-groups:
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
  
-  # CN
+   # CN
   - name: "🇨🇳 China"
     type: select
     use:
       - CN
       
-  # DIRECT
+   # 直连
   - name: "🔘 DIRECT"
     type: select
     proxies:
@@ -461,12 +461,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO.yaml
     interval: 86400
 
-  # HBO Asia:
-    # type: http
-    # behavior: classical
-    # path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
-    # url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO_Asia.yaml
-    # interval: 86400
+  HBO Asia:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/HBO_Asia.yaml
+    interval: 86400
 
   Hulu:
     type: http
@@ -496,20 +496,20 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LINETV.yaml
     interval: 86400
     
-  Paravi:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Paravi.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Paravi.yaml
-    interval: 86400   
-    
   Peacock:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Peacock.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Peacock.yaml
     interval: 86400
-
+    
+  Paravi:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Paravi.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Paravi.yaml
+    interval: 86400  
+    
   Spotify:
     type: http
     behavior: classical
@@ -524,12 +524,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
     
-  # YouTube:
-    # type: http
-    # behavior: classical
-    # path: ./Provider/RuleSet/Streaming/YouTube.yaml
-    # url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
-    # interval: 86400
+  YouTube:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/YouTube.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/YouTube.yaml
+    interval: 86400
 
   Streaming:
     type: http
@@ -606,7 +606,7 @@ rules:
   - RULE-SET,FoD,🇯🇵 Japan
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO,🇺🇸 America
-  # RULE-SET,HBO Asia,🇹🇼 Taiwan
+  - RULE-SET,HBO Asia,🇵🇭 Philippines
   - RULE-SET,Hulu,🇺🇸 America
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
@@ -615,7 +615,7 @@ rules:
   - RULE-SET,Peacock,🇺🇸 America 
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
-  # RULE-SET,YouTube,🔰 Proxy
+  - RULE-SET,YouTube,🔰 Proxy
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
