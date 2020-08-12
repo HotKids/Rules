@@ -12,8 +12,8 @@ Cookie: 中国移动-查话费 = type=http-request,pattern=^https?:\/\/clientacc
 
 # > 中国联通 GetCookie by chavyleung
 // 「我的签到」「天天抽奖」
-Cookie: 中国联通-掌上营业厅 = type=http-request,pattern=^https?:\/\/act.10010.com\/SigninApp\/signin\/querySigninActivity.htm,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
-Cookie: 中国联通-掌上营业厅 = type=http-request,pattern=^https?:\/\/act.10010.com\/SigninApp(.*?)\/signin\/daySign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
+Cookie: 中国联通-掌上营业厅 = type=http-request,pattern=^https?:\/\/act\.10010\.com\/SigninApp\/signin\/querySigninActivity.htm,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
+Cookie: 中国联通-掌上营业厅 = type=http-request,pattern=^https?:\/\/act\.10010\.com\/SigninApp(.*?)\/signin\/daySign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
 Cookie: 中国联通-掌上营业厅 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(textdl\/userLogin|active\/findActivityInfo),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.cookie.js
 
 # > 中国电信 GetCookie by uchvk
