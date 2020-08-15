@@ -246,13 +246,6 @@ proxy-groups:
       - 🔰 Proxy
       - 🇺🇸 America
 
-  # 去广告以及隐私追踪保护、反运营商劫持开关
-  - name: "🚧 AdGuard"
-    type: select
-    proxies:
-      - REJECT
-      - DIRECT
-
   # 国内服务
   - name: "🚓 Inbound"
     type: select
@@ -360,6 +353,13 @@ proxy-groups:
     type: select
     use:
       - CN
+      
+   # 去广告以及隐私追踪保护、反运营商劫持开关
+  - name: "🚧 AdGuard"
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
       
    # 直连
   - name: "🔘 DIRECT"
