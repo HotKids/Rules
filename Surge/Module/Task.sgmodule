@@ -3,17 +3,6 @@
 #!system=ios
 
 [Script]
-# > 中国移动 by chavyleung
-Crontab: 中国移动 = type=cron,cronexp="30 23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10086/10086.fee.js
-
-# > 中国联通 by chavyleung
-Crontab: 中国联通 = type=cron,cronexp="30 23 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10010/10010.js
-
-# > 中国电信 by chavyleung
-Crontab: 天翼账号中心 = type=cron,cronexp="30 23 * * *",script-path=https://raw.githubusercontent.com/Sunert/Scripts/master/Task/telecomInfinity.js
-//需自行在 BoxJS 中配置账号信息
-Crontab: 中国电信-签到 = type=cron,cronexp="30 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/10000/10000.js
-
 # > 索尼俱乐部 by lowking
 //需自行在 BoxJS 中配置账号信息
 Crontab: My SONY Club = type=cron,cronexp="30 6 * * *",wake-system=1,script-path=https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js
