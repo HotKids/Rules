@@ -3,17 +3,11 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,*.uve.weibo.com,ap*.bilibili.com,ap*.zhihu.com,api.m.jd.com,api.weibo.cn,api.zhihu.com,gw.alicdn.com,lens.zhihu.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,www.zhihu.com
+hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,*.uve.weibo.com,ap*.bilibili.com,api.m.jd.com,api.weibo.cn,gw.alicdn.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,www.zhihu.com
 
 [Rule]
 # > 微博
 DOMAIN,adimg.vue.weibo.com,REJECT
-# > 知乎
-DOMAIN,118.89.204.198,REJECT
-DOMAIN,sugar.zhihu.com,REJECT
-DOMAIN,appcloud2.in.zhihu.com,REJECT
-URL-REGEX,^https?:\/\/pic\d\.zhimg\.com\/70\/,REJECT
-URL-REGEX,^https?:\/\/(api|www)\.zhihu\.com\/(ab|adx|fringe|commercial|ad-style-service|.*(recommendations|extended|featured-comment-ad)|api\/v4\/(brand|mcn|(answer|question)s\/\d+\/meta_related_topics)|brand\/questions\/\d+\/activity\/answers\/red-packet(\/|\?|$)),REJECT
 # > 哔哩哔哩
 URL-REGEX,^https?:\/\/ap(p|i)\.bilibili\.com\/(pgc\/season\/rank\/cn|x\/v2\/(dm\/ad|rank.*rid=(168|5)|dataflow\/report|search\/(defaultword|trending|recommend|resource)|splash)),REJECT
 # > 什么值得买
@@ -51,9 +45,6 @@ wb_launch.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/
 
 # > 微信公众号去广告 by Choler&NoByDa
 WeChat.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/WeChat.js
-
-# > 知乎 App 去广告 by onewayticket255&Primovist
-Zhihu.js = type=http-response,requires-body=1,max-size=-1,pattern=^https:\/\/(api|lens|www)\.zhihu\.com\/(moments(\/recommend)?\?(action|feed_type|limit)|topstory\/recommend|.*\/questions|market\/header|people|appview\/(v2|p)\/(answer\/)?\d+\?no\_image\=false(\&article\_fixed\_bottom\=1)?\&X\-SUGER\=|api\/videos\/\d+\/recommend),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Zhihu.js
 
 # > 哔哩哔哩 App 去广告 by onewayticket255&Primovist
 Bilibili.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ap(i|p)\.bilibili\.com\/x\/(resource\/show\/tab|v2\/(reply\/main|view\/material|account\/mine|view|feed\/index))\?access_key,script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Bilibili.js
