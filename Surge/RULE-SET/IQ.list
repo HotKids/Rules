@@ -1,7 +1,7 @@
 # > IQIYI Global
 DOMAIN,intl-rcd.iqiyi.com
 DOMAIN,intel-cache.video.iqiyi.com
-# DOMAIN,intl-cmonitor.iqiyi.com
-# DOMAIN,intl.iqiyi.com
-# DOMAIN,msg-intl.qy.net
+DOMAIN,intl-cmonitor.iqiyi.com
+DOMAIN,intl.iqiyi.com
+DOMAIN,msg-intl.qy.net
 # DOMAIN-SUFFIX,iq.com
