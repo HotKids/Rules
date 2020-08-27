@@ -7,3 +7,6 @@ payload:
   - DOMAIN-SUFFIX,hdslb.com
   - DOMAIN,upos-hz-mirrorakam.akamaized.net
   - DOMAIN-KEYWORD,bilibili
+  # > 港台版 Bilibili App
+  # USER-AGENT,bili-inter*
+  - DOMAIN,apiintl.biliapi.net
