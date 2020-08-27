@@ -1,6 +1,7 @@
 # > Bilibili
 USER-AGENT,*bili*
 DOMAIN-SUFFIX,bilibili.com
+DOMAIN-SUFFIX,biliapi.net
 DOMAIN-SUFFIX,acgvideo.com
 DOMAIN-SUFFIX,acg.tv
 DOMAIN-SUFFIX,hdslb.com
