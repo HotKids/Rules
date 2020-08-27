@@ -1,7 +1,11 @@
 # > IQIYI Intl
+// 地区
 DOMAIN,intel-cache.video.iqiyi.com
 DOMAIN,intl.iqiyi.com
+// 历史
 DOMAIN,intl-rcd.iqiyi.com
 DOMAIN,intl-cmonitor.iqiyi.com
+// 收藏
+DOMAIN,intl-subscription.iqiyi.com
 DOMAIN,msg-intl.qy.net
 # DOMAIN-SUFFIX,iq.com
