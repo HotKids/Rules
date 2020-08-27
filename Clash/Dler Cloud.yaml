@@ -411,6 +411,13 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Bilibili.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
     interval: 86400
+    
+  IQIYI Intl:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/IQ.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQ.yaml
+    interval: 86400
 
   IQIYI:
     type: http
@@ -620,6 +627,7 @@ rules:
 
   # CNTV
   - RULE-SET,Bilibili,📺 CNTV
+  - RULE-SET,IQIYI Intl,🇹🇼 Taiwan
   - RULE-SET,IQIYI,📺 CNTV
 
   # Apple TV+
