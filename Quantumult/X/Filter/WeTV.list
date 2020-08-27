@@ -2,5 +2,7 @@
 USER-AGENT,WeTV*,WeTV
 DOMAIN-SUFFIX,wetv.vip,WeTV
 DOMAIN-SUFFIX,wetvinfo.com,WeTV
+DOMAIN-SUFFIX,meovse.com,WeTV
 DOMAIN,wetv.acc.qq.com,WeTV
 DOMAIN,oth.eve.mdt.qq.com,WeTV
+DOMAIN,oth.str.mdt.qq.com,WeTV
