@@ -1,4 +1,6 @@
 # > iQIYI Intl
+USER-AGENT,iQIYI,iQIYI Intl
+USER-AGENT,QYPlayer,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
 DOMAIN-SUFFIX,inter.iqiyi.com,iQIYI Intl
 // 视频播放版权地区验证
