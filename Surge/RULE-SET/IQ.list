@@ -1,12 +1,17 @@
-# > IQIYI Intl
+# > iQIYI Intl
 // 视频播放版权地区验证
 DOMAIN,intel-cache.video.iqiyi.com
+DOMAIN,intel-cache.m.iqiyi.com
 // 主页瀑布流
 DOMAIN,intl.iqiyi.com
-// 视频历史版权地区验证
+// 视频历史记录版权地区验证
 DOMAIN,intl-rcd.iqiyi.com
-// 视频收藏版权地区验证
+// 视频个人收藏版权地区验证
 DOMAIN,intl-subscription.iqiyi.com
+// 以下暂未验证（可直连）
+DOMAIN,intl-cmonitor.iqiyi.com
+DOMAIN,intl-passport.iqiyi.com
+DOMAIN,intl-sns.iqiyi.com
 DOMAIN,msg-intl.qy.net
-# DOMAIN,intl-cmonitor.iqiyi.com
+DOMAIN-SUFFIX,inter.iqiyi.com
 # DOMAIN-SUFFIX,iq.com
