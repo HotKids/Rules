@@ -1,8 +1,8 @@
 payload:
   # > IQIYI Intl
-  - DOMAIN,intel-cache.video.iqiyi.com,IQIYI Intl
-  - DOMAIN,intl.iqiyi.com,IQIYI Intl
-  - DOMAIN,intl-rcd.iqiyi.com,IQIYI Intl
-  - DOMAIN,intl-cmonitor.iqiyi.com,IQIYI Intl
-  - DOMAIN,intl-subscription.iqiyi.com,IQIYI Intl
-  - DOMAIN,msg-intl.qy.net,IQIYI Intl
+  - DOMAIN,intel-cache.video.iqiyi.com
+  - DOMAIN,intl.iqiyi.com
+  - DOMAIN,intl-rcd.iqiyi.com
+  - DOMAIN,intl-cmonitor.iqiyi.com
+  - DOMAIN,intl-subscription.iqiyi.com
+  - DOMAIN,msg-intl.qy.net
