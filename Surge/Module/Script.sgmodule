@@ -21,7 +21,7 @@ AND,((URL-REGEX,\/amdc\/mobileDispatch),(USER-AGENT,%E6%89%8B%E6%9C%BA%E6%B7%98%
 
 [Script]
 # > JD App 显示历史价格 by yichahucha
-jd_price.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(wareBusiness|serverConfig|basicConfigig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
+jd_price.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(wareBusiness|serverConfig|basicConfig),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/jd_price.js
 
 # > Taobao App 显示历史价格 by yichahucha
 tb_price.js = type=http-request,requires-body=1,max-size=-1,pattern=^http:\/\/.+\/amdc\/mobileDispatch,script-path=https://raw.githubusercontent.com/yichahucha/surge/master/tb_price.js
@@ -33,9 +33,6 @@ tb_price.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\
 // nf_rating.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/user\/.+path=%5B%22videos%22%2C%\d+%22%2C%22summary%22%5D,script-path=https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating.js
 // 单集评分
 // nf_rating_season.js = type=http-response,pattern=^https?:\/\/ios\.prod\.ftl\.netflix\.com\/iosui\/warmer\/.+type=show-ath,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/yichahucha/surge/master/nf_rating_season.js
-
-# > 京东 App 去广告 By Primovist
-JDAdRemove.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(start|myOrderInfo|orderTrackBusiness),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/JDAdRemove.js
 
 # > 微博应用内去广告 by yichahucha
 wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(statuses\/(unread|extend|positives\/get|(friends|video)(\/|_)(mix)?timeline)|stories\/(video_stream|home_list)|(groups|fangle)\/timeline|profile\/statuses|comments\/build_comments|photo\/recommend_list|service\/picfeed|searchall|cardlist|page|!\/photos\/pic_recommend_status|video\/tiny_stream_video_list|photo/info),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js
