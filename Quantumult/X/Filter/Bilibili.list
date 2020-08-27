@@ -1,8 +1,11 @@
 # > Bilibili
-USER-AGENT, *bili*, IQIYI&Bilibili
-DOMAIN-SUFFIX, bilibili.com, IQIYI&Bilibili
-DOMAIN-SUFFIX, acgvideo.com, IQIYI&Bilibili
-DOMAIN-SUFFIX, acg.tv, IQIYI&Bilibili
-DOMAIN-SUFFIX, hdslb.com, IQIYI&Bilibili
-DOMAIN,upos-hz-mirrorakam.akamaized.net, IQIYI&Bilibili
-DOMAIN-KEYWORD, bilibili, IQIYI&Bilibili
+USER-AGENT,*bili*,Bilibili
+DOMAIN-SUFFIX,bilibili.com,Bilibili
+DOMAIN-SUFFIX,acgvideo.com,Bilibili
+DOMAIN-SUFFIX,acg.tv,Bilibili
+DOMAIN-SUFFIX,hdslb.com,Bilibili
+DOMAIN,upos-hz-mirrorakam.akamaized.net,Bilibili
+DOMAIN-KEYWORD,bilibili,Bilibili
+// 港台版 Bilibili App
+USER-AGENT,bili-inter*,Bilibili
+DOMAIN,apiintl.biliapi.net,Bilibili
