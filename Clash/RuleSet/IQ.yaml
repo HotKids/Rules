@@ -3,6 +3,4 @@ payload:
   - DOMAIN,intel-cache.video.iqiyi.com
   - DOMAIN,intl.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
-  - DOMAIN,intl-cmonitor.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
-  - DOMAIN,msg-intl.qy.net
