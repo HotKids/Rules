@@ -1,5 +1,7 @@
 payload:
   # > iQIYI Intl
+  - DOMAIN-SUFFIX,iq.com
+  - DOMAIN-SUFFIX,inter.iqiyi.com
   - DOMAIN,intel-cache.video.iqiyi.com
   - DOMAIN,intel-cache.m.iqiyi.com
   - DOMAIN,intl.iqiyi.com
@@ -9,4 +11,3 @@ payload:
   - DOMAIN,intl-passport.iqiyi.com
   - DOMAIN,intl-sns.iqiyi.com
   - DOMAIN,msg-intl.qy.net
-  - DOMAIN-SUFFIX,inter.iqiyi.com
