@@ -1,7 +1,8 @@
 # > IQIYI Intl
-DOMAIN,intel-cache.video.iqiyi.com,IQIYI
-DOMAIN,intl.iqiyi.com,IQIYI
-DOMAIN,intl-rcd.iqiyi.com,IQIYI
-DOMAIN,intl-cmonitor.iqiyi.com,IQIYI
-DOMAIN,msg-intl.qy.net,IQIYI
-# DOMAIN-SUFFIX,iq.com,IQIYI
+DOMAIN,intel-cache.video.iqiyi.com,IQIYI Intl
+DOMAIN,intl.iqiyi.com,IQIYI Intl
+DOMAIN,intl-rcd.iqiyi.com,IQIYI Intl
+DOMAIN,intl-cmonitor.iqiyi.com,IQIYI Intl
+DOMAIN,intl-subscription.iqiyi.com,IQIYI Intl
+DOMAIN,msg-intl.qy.net,IQIYI Intl
+# DOMAIN-SUFFIX,iq.com,IQIYI Intl
