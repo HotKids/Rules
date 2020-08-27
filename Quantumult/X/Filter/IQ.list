@@ -1,4 +1,5 @@
 # > iQIYI Intl
+DOMAIN-SUFFIX,iq.com,iQIYI Intl
 // 视频播放版权地区验证
 DOMAIN,intel-cache.video.iqiyi.com,iQIYI Intl
 DOMAIN,intel-cache.m.iqiyi.com,iQIYI Intl
@@ -14,4 +15,3 @@ DOMAIN,intl-passport.iqiyi.com,iQIYI Intl
 DOMAIN,intl-sns.iqiyi.com,iQIYI Intl
 DOMAIN,msg-intl.qy.net,iQIYI Intl
 DOMAIN-SUFFIX,inter.iqiyi.com,iQIYI Intl
-# DOMAIN-SUFFIX,iq.com,iQIYI Intl
