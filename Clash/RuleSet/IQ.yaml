@@ -10,5 +10,6 @@ payload:
   - DOMAIN,intl-cmonitor.iqiyi.com
   - DOMAIN,intl-passport.iqiyi.com
   - DOMAIN,intl-sns.iqiyi.com
+  - DOMAIN,intl-im-hist-api.iqiyi.com
   - DOMAIN,intl-i.vip.iqiyi.com
   - DOMAIN,msg-intl.qy.net
