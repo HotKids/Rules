@@ -3,10 +3,10 @@ payload:
   # USER-AGENT,iQIYI
   # USER-AGENT,QYPlayer
   - DOMAIN-SUFFIX,iq.com
+  - DOMAIN-SUFFIX,intl.iqiyi.com
   - DOMAIN-SUFFIX,inter.iqiyi.com
   - DOMAIN,intel-cache.video.iqiyi.com
   - DOMAIN,intel-cache.m.iqiyi.com
-  - DOMAIN,intl.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
   - DOMAIN,intl-cmonitor.iqiyi.com
@@ -15,4 +15,6 @@ payload:
   - DOMAIN,intl-im-hist-api.iqiyi.com
   - DOMAIN,intl-act.vip.iqiyi.com
   - DOMAIN,intl-i.vip.iqiyi.com
+  - DOMAIN,intl.policy.iqiyi.com
+  - DOMAIN,du-feige-intl.iqiyi.com 
   - DOMAIN,msg-intl.qy.net
