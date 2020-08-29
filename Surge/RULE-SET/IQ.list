@@ -2,7 +2,7 @@
 USER-AGENT,iQIYI
 USER-AGENT,QYPlayer
 DOMAIN-SUFFIX,iq.com
-DDOMAIN-SUFFIX,intl.iqiyi.com
+DOMAIN-SUFFIX,intl.iqiyi.com
 DOMAIN-SUFFIX,inter.iqiyi.com
 // 视频播放版权地区验证
 DOMAIN,intel-cache.video.iqiyi.com
