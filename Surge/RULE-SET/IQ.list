@@ -2,12 +2,11 @@
 USER-AGENT,iQIYI
 USER-AGENT,QYPlayer
 DOMAIN-SUFFIX,iq.com
+DDOMAIN-SUFFIX,intl.iqiyi.com
 DOMAIN-SUFFIX,inter.iqiyi.com
 // 视频播放版权地区验证
 DOMAIN,intel-cache.video.iqiyi.com
 DOMAIN,intel-cache.m.iqiyi.com
-// 主页瀑布流
-DOMAIN,intl.iqiyi.com
 // 视频历史记录版权地区验证
 DOMAIN,intl-rcd.iqiyi.com
 // 视频个人收藏版权地区验证
@@ -19,6 +18,8 @@ DOMAIN,intl-sns.iqiyi.com
 DOMAIN,intl-im-hist-api.iqiyi.com
 DOMAIN,intl-act.vip.iqiyi.com
 DOMAIN,intl-i.vip.iqiyi.com
+DOMAIN,intl.policy.iqiyi.com
+DOMAIN,du-feige-intl.iqiyi.com 
 DOMAIN,msg-intl.qy.net
 
 URL-REGEX,^https?:\/\/int[\w-\.]+iqiyi\.com
