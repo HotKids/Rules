@@ -34,7 +34,7 @@ Cookie: 叮咚买菜-签到 = type=http-request,pattern=^https?:\/\/maicai\.api\
 Cookie: 叮咚买菜-农场 = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/user\/checkLogin,script-path=https://raw.githubusercontent.com/iepngs/Script/master/dingdong/index.js
 
 # > 爱奇艺 GetCookie by NobyDa
-Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/iface\d\.iqiyi\.com\/.+?psp_cki=,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/iface\d\.iqiyi\.com\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 腾讯视频 GetCookie by chavyleung
 // https://film.qq.com/ 随便选一部电影观看
