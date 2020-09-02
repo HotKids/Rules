@@ -41,7 +41,7 @@ wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?
 wb_launch.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/wb_launch.js
 
 # > 微信公众号去广告 by Choler&NoByDa
-WeChat.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/WeChat.js
+WeChat.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 哔哩哔哩 App 去广告 by onewayticket255&Primovist
 Bilibili.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ap(i|p)\.bilibili\.com\/x\/(resource\/show\/tab|v2\/(reply\/main|view\/material|account\/mine|view|feed\/index))\?access_key,script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Bilibili.js
