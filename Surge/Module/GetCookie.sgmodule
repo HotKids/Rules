@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > WPS GetCookie by chavyleung
@@ -48,7 +48,7 @@ Cookie: 芒果 TV = type=http-request,pattern=^https?:\/\/credits.bz.mgtv.com\/u
 Cookie: 哔哩哔哩 = type=http-request,pattern=^https?:\/\/(www|live)\.bilibili\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js
 
 # > 哔哩哔哩漫画 GetCookie by NobyDa
-Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/manga\.bilibili\.com\/.*\.User\/GetWallet,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
+Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/passport\.biligame\.com\/api\/login\/sso.+?version%22%3A%22(3|4|5),script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 网易云音乐 GetCookie by chavyleung
 // 先登录: https://music.163.com/m/login，再访问: https://music.163.com/#/user/level
