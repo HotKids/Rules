@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.manmanbuy.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > WPS GetCookie by chavyleung
@@ -61,10 +61,12 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/h
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/(www\.)?rrys2020\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
-# > 什么值得买 GetCookie by chavyleung&blackmatrix7
-// Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
-Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
-Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/user-api\.smzdm\.com\/user_login\/normal$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
+# > 什么值得买 GetCookie by chavyleung
+Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
+
+# > 慢慢买 GetCookie by blackmatrix7
+Cookie: 慢慢买 = type=http-request,pattern=^https?:\/\/m\.manmanbuy\.com\/taolijin\/(login.aspx|logserver.aspx),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/manmanbuy/manmanbuy_checkin.js,requires-body=true
+
 # > 顺丰速运 GetCookie by chavyleung
 Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share\/(.*?)Redirect,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
 Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/sf-integral-sign-in.weixinjia.net\/app\/index,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
