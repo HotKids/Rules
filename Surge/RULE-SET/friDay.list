@@ -1,8 +1,3 @@
 # > friDay
 USER-AGENT,friDay*
 DOMAIN-SUFFIX,friday.tw
-
-# > myVideo
-USER-AGENT,myVideo*
-DOMAIN-SUFFIX,myvideo.net.tw
-DOMAIN-SUFFIX,catch.net.tw
