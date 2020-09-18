@@ -2,7 +2,6 @@
 #!desc=RSS Feed Pack
 
 [Script]
-
 # > iDaily·每日环球视野 by evilbutcher
 Crontab: iDaily = type=cron,cronexp="0 10,17 * * *",script-path=https://raw.githubusercontent.com/evilbutcher/Quantumult_X/master/check_in/idaily/idaily.js
 
