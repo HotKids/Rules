@@ -65,7 +65,7 @@ Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.
 Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
 
 # > 慢慢买 GetCookie by blackmatrix7
-Cookie: 慢慢买 = type=http-request,pattern=^https?:\/\/m\.manmanbuy\.com\/taolijin\/(login.aspx|logserver.aspx),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/manmanbuy/manmanbuy_checkin.js,requires-body=true
+Cookie: 慢慢买 = type=http-request,pattern=^https?:\/\/apph5\.manmanbuy\.com\/taolijin\/(login.aspx|logserver.aspx),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/manmanbuy/manmanbuy_checkin.js,requires-body=true
 
 # > 顺丰速运 GetCookie by chavyleung
 Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share\/(.*?)Redirect,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
