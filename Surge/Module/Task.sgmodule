@@ -13,6 +13,9 @@ Crontab: WPS = type=cron,cronexp="0 8 * * *",script-path=https://raw.githubuserc
 # > 京东 DailyBonus by NobyDa
 Crontab: 京东 = type=cron,cronexp="0 1,6 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
+// 取关京东店铺及商品 by lxk0301
+Crontab: 取关京东店铺及商品 = type=cron,cronexp="10 6 * * 1",script-path=https://raw.githubusercontent.com/lxk0301/scripts/master/jd_unsubscribe.js
+
 # > 苏宁易购 DailyBonus by chavyleung
 Crontab: 苏宁易购 = type=cron,cronexp="0 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
 
@@ -77,11 +80,14 @@ Crontab: 海底捞 = type=cron,cronexp="18 5 * * *",script-path=https://raw.gith
 # > 百果园 DailyBonus by chavyleung
 Crontab: 百果园 = type=cron,cronexp=19 5 * * *,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js,wake-system=true
 
+# > 便利蜂 DailyBonus by zZPiglet
+Crontab: 便利蜂 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
+
 # > 无忧行 DailyBonus by vinewx
-Crontab: 无忧行 = type=cron,cronexp="20 5 * * *",script-path=https://ooxx.be/js/jegotrip.js
+Crontab: 无忧行 = type=cron,cronexp="21 5 * * *",script-path=https://ooxx.be/js/jegotrip.js
 
 # > 飞客茶馆 DailyBonus by chavyleung
-Crontab: 飞客茶馆 = type=cron,cronexp="21 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+Crontab: 飞客茶馆 = type=cron,cronexp="22 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
 
 # > 吾爱破解 DailyBonus by NobyDa
-Crontab: 吾爱破解 = type=cron,cronexp="22 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
+Crontab: 吾爱破解 = type=cron,cronexp="23 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/52pojie-DailyBonus/52pojie.js
