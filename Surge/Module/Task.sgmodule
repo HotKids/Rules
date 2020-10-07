@@ -82,7 +82,7 @@ Crontab: 百果园 = type=cron,cronexp=19 5 * * *,script-path=https://raw.github
 # > 便利蜂 DailyBonus by zZPiglet
 Crontab: 便利蜂 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
 
-# > 航旅纵横 GetCookie by zZPiglet
+# > 航旅纵横 DailyBonus by zZPiglet
 Crontab: 航旅纵横 = type=cron,cronexp="21 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
 
 # > 无忧行 DailyBonus by vinewx
