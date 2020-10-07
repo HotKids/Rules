@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > WPS GetCookie by chavyleung
@@ -86,6 +86,9 @@ Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.
 
 # > 便利蜂 GetCookie by zZPiglet
 Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/meepo\/taskCenter\/home\/v\d,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
+
+# > 航旅纵横 GetCookie by zZPiglet
+Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com\/gateway\/api\/web\/rest\/polite\/app\/sign\/signpageinitdata,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
 
 # > 无忧行 GetCookie by vinewx
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
