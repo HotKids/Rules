@@ -2,6 +2,7 @@
 # PROCESS-NAME,TV
 # USER-AGENT,AppleTV*
 # USER-AGENT,com.apple.tv*
-# DOMAIN,hls.itunes.apple.com
 DOMAIN-SUFFIX,tv.apple.com
-DOMAIN,play-edge.itunes.apple.com
+# DOMAIN,hls.itunes.apple.com // Trailers
+# DOMAIN,hls-amt.itunes.apple.com // Trailers
+DOMAIN,play-edge.itunes.apple.com // Unblock Region
