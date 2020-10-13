@@ -2,7 +2,7 @@ const $ = new cmp()
 
 let checkin = "xiami://"
 
-$.notify("虾米", "", "打开虾米音乐签到", checkin)
+$.notify("🎵虾米音乐", "", "打开虾米音乐签到", checkin)
 
 $done()
 
