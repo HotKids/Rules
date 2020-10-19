@@ -1,10 +1,23 @@
-/**
- * @江湖中人
- * https://weixin110.qq.com/cgi-bin/mmspamsupport-bin/newredirectconfirmcgi url script-response-body https://raw.githubusercontent.com/HotKids/Rules/master/JS/tbopener.js
- */
+/*
+ 在微信中点击淘宝链接，点击 Surge/QuantumultX 通知自动跳转到淘宝 App
+ @江湖中人
 
- // 在微信中点击淘宝链接，点击通知自动跳转到淘宝 App
- 
+/*********************
+QuantumultX 远程脚本配置:
+**********************
+[rewrite_local]
+^https?:\/\/weixin110\.qq\.com\/cgi-bin\/mmspamsupport-bin\/newredirectconfirmcgi url script-response-body https://raw.githubusercontent.com/HotKids/Rules/master/JS/tbopener.js
+[mitm] 
+hostname= weixin110.qq.com
+**********************
+Surge 4.2.0+ 脚本配置:
+**********************
+[Script]
+tbopener.js = type=http-response,pattern=^https?:\/\/weixin110\.qq\.com\/cgi-bin\/mmspamsupport-bin\/newredirectconfirmcgi,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/JS/tbopener.js
+[MITM] 
+hostname= weixin110.qq.com
+*/
+
 var str = ($response.body);
 
 str = str.match(/:&#x2f;&#x2f;(\S*)"}/)[1]
