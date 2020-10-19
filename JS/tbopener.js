@@ -27,7 +27,7 @@ console.log(str);//结果bbbcccdddeee
 
 const $ = new cmp()
 
-let opener = "xiami://"
+let opener = "taobao://"
 
 $.notify(``, "", "🛍️点击打开淘宝", opener)
 
