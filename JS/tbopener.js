@@ -1,6 +1,6 @@
 /*
  在微信中点击淘宝链接，点击 Surge/QuantumultX 通知自动跳转到淘宝 App
- @江湖中人
+ 修改自@江湖中人
 
 /*********************
 QuantumultX 远程脚本配置:
@@ -23,7 +23,7 @@ var str = ($response.body);
 str = str.match(/:&#x2f;&#x2f;(\S*)"}/)[1]
 str = str.replace(/&#x2f;/g, '/');
 str = str.replace(/&amp;/g, '&');
-console.log(str);//结果bbbcccdddeee 
+console.log(str);
 
 const $ = new cmp()
 
