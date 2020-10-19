@@ -4,6 +4,9 @@
 
 [Script]
 // 可自行保存到本地删减
+# > 虾米音乐半自动签到
+Crontab: 虾米音乐 = type=cron,cronexp="0 9 * * *",script-path=https://raw.githubusercontent.com/HotKids/Rules/master/JS/xiami.js
+
 # > 索尼俱乐部 by lowking
 // 需自行在 BoxJS 中配置账号信息
 Crontab: My SONY Club = type=cron,cronexp="30 6 * * *",wake-system=1,script-path=https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js
