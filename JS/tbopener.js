@@ -14,7 +14,7 @@ console.log(str);//结果bbbcccdddeee
 
 var option1={"open-url": "taobao://"}
 	option1["open-url"]="taobao://"+str
-	$notify(``, "","点击打开淘宝", option1);
+	$notify(``, "","🛍️点击打开淘宝", option1);
 console.log(option1["open-url"])
 
 $done({body: $response.body});
