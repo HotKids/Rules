@@ -1,6 +1,6 @@
 /*
  在微信中打开淘宝等被屏蔽链接，点击 Surge/QuantumultX 通知跳转到 Safari 或淘宝 App
- 修改自@江湖中人
+  by @HotKids & @XIAO_KOP,修改自 @江湖中人
 
 /*********************
 QuantumultX 远程脚本配置:
