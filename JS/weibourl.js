@@ -17,12 +17,16 @@ weibourl.js = type=http-request,pattern=^https?:\/\/weibo\.cn\/sinaurl,script-pa
 hostname= weibo.cn
 */
 
-var url = decodeURIComponent($request.url.split("toasturl=")[1])
-
+var url = $request.url
+url = url.indexOf("toasturl") != -1? url.split("toasturl=")[1] : url.split("composer&u=")[1].split("&sourcetype")[0]
+url = decodeURIComponent(url)
 
 const $ = new cmp()
 
-$.notify(``, "👽去你大爷的内置浏览器", "🔗点击打开链接", url)
+if (url.indexOf("shop.sc.weibo") == -1) {
+	$.notify(``, "👽去你大爷的内置浏览器", "🔗点击打开链接", url)
+}
+
 
 $done({});
 
