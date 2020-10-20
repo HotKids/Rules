@@ -22,7 +22,7 @@ var url = decodeURIComponent($request.url.split("toasturl=")[1])
 
 const $ = new cmp()
 
-$.notify(``, "去你大爷的内置浏览器", "🔗点击打开链接", url)
+$.notify("👽去你大爷的内置浏览器", "", "🔗点击打开链接", url)
 
 $done({});
 
