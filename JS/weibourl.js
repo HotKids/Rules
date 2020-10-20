@@ -17,6 +17,7 @@ weibourl.js = type=http-request,pattern=^https?:\/\/weibo\.cn\/sinaurl,script-pa
 hostname= weibo.cn
 */
 
+
 var url = $request.url
 url = url.indexOf("toasturl") != -1? url.split("toasturl=")[1] : url.split("composer&u=")[1].split("&sourcetype")[0]
 url = decodeURIComponent(url)
