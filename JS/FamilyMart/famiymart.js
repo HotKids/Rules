@@ -1,37 +1,35 @@
-const cookieName = 'Fa米家'
+const cookieName = ' Fa米家'
 const signurlKey = 'hotkids_signurl_familymart'
 const signheaderKey = 'hotkids_signheader_familymart'
 const signbodyKey = 'hotkids_signbody_familymart'
 const hotkids = init()
 const signurlVal = hotkids.getdata(signurlKey)
 const signheaderVal = hotkids.getdata(signheaderKey)
+const signBodyVal = hotkids.getdata(signbodyKey)
 
 sign()
 
 function sign() {
-
-  const url = { url: signurlVal, headers: JSON.parse(signheaderVal)}
-  hotkids.get(url, (error, response, data) => {
+  const url = { url: signurlVal, headers: JSON.parse(signheaderVal), body: signBodyVal }
+  hotkids.post(url, (error, response, data) => {
     const result = JSON.parse(data)
     let subTitle = ``
     let detail = ``
     const code = result.code
     const message = result.message
-    const todayRewardNum = result.data['todayRewardNum']
-    const resWordDown = result.data['resWordDown']
-    const signCount = result.data['signCount']
     if (code == "200") {
-      subTitle = `签到结果：成功`
+      const signCount = result.data['signCount']
+      subTitle = `🇸🇱签到结果：成功`
       detail = ` 连续签到天数 ${signCount} 天 `
     } else if (code == "1000") {
-      const message = result.message
       subTitle = ` ${message}`
+    } else {
+      subTitle = `签到结果：失败`
     }
     hotkids.msg(cookieName, subTitle, detail)
     hotkids.done()
   })
 }
-
 
 function init() {
   isSurge = () => {
