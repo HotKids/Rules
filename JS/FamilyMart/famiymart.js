@@ -18,13 +18,13 @@ function sign() {
     const code = result.code
     const message = result.message
     if (code == "200") {
-      const signCount = result.data['signCount']
+      const signCount = result.signCount
       subTitle = `🇸🇱签到结果：成功`
       detail = ` 连续签到天数 ${signCount} 天 `
     } else if (code == "1000") {
       subTitle = ` ${message}`
     } else {
-      subTitle = `签到结果：失败`
+      subTitle = `🇸🇱签到结果：失败`
     }
     hotkids.msg(cookieName, subTitle, detail)
     hotkids.done()
