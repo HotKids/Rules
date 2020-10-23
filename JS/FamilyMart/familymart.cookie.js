@@ -1,4 +1,4 @@
-const cookieName = ' 全民 K 歌'
+const cookieName = ' Fa米家'
 const signurlKey = 'hotkids_signurl_familymart'
 const signheaderKey = 'hotkids_signheader_familymart'
 const signbodyKey = 'hotkids_signbody_familymart'
