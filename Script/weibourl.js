@@ -5,14 +5,14 @@
 QuantumultX 远程脚本配置:
 **********************
 [rewrite_local]
-^https?:\/\/weibo\.cn\/sinaurl url script-request-header https://raw.githubusercontent.com/HotKids/Rules/master/JS/weibourl.js
+^https?:\/\/weibo\.cn\/sinaurl url script-request-header https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibourl.js
 [mitm] 
 hostname= weibo.cn
 **********************
 Surge 4.2.0+ 脚本配置:
 **********************
 [Script]
-weibourl.js = type=http-request,pattern=^https?:\/\/weibo\.cn\/sinaurl,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/JS/weibourl.js
+weibourl.js = type=http-request,pattern=^https?:\/\/weibo\.cn\/sinaurl,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibourl.js
 [MITM] 
 hostname= weibo.cn
 */
