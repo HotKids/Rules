@@ -1,4 +1,4 @@
-const cookieName = ' Fa米家'
+const cookieName = 'Fa米家'
 const signurlKey = 'hotkids_signurl_familymart'
 const signheaderKey = 'hotkids_signheader_familymart'
 const signbodyKey = 'hotkids_signbody_familymart'
@@ -17,7 +17,7 @@ if ($request && $request.method != 'OPTIONS') {
   if (signheaderVal) hotkids.setdata(signheaderVal, signheaderKey)
   if (signbodyVal && cmd=='task.revisionSignInGetAward') {
     hotkids.setdata(signbodyVal, signbodyKey)
-    hotkids.msg(cookieName, `获取 Cookie: 成功`, ``)
+    hotkids.msg(cookieName, `🇸🇱获取 Cookie: 成功`, ``)
   }  
 }
 
