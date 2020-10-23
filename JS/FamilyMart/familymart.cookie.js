@@ -1,7 +1,7 @@
-const cookieName = 'Fa米家'
-const signurlKey = 'hotkids_signurl_dbsj'
-const signheaderKey = 'hotkids_signheader_dbsj'
-const signbodyKey = 'hotkids_signbody_dbsj'
+ const cookieName = 'Fa米家'
+const signurlKey = 'hotkids_signurl_familymart'
+const signheaderKey = 'hotkids_signheader_familymart'
+const signbodyKey = 'hotkids_signbody_familymart'
 const hotkids = init()
 
 const requrl = $request.url
