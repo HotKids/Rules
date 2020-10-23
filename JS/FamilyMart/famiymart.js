@@ -20,9 +20,9 @@ function sign() {
     if (code == "200") {
       const signCount = result.signCount
       subTitle = `🇸🇱签到结果：成功`
-      detail = ` 连续签到天数 ${signCount} 天 `
+      detail = `连续签到天数 ${signCount} 天 `
     } else if (code == "1000") {
-      subTitle = ` ${message}`
+      subTitle = `${message}`
     } else {
       subTitle = `🇸🇱签到结果：失败`
     }
