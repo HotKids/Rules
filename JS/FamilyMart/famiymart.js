@@ -17,9 +17,9 @@ function sign() {
     let detail = ``
     const code = result.code
     const message = result.message
-    const todayRewardNum = result.todayRewardNum
-    const resWordDown = result.resWordDown
-    const signCount = result.signCount
+    const todayRewardNum = result.data['todayRewardNum']
+    const resWordDown = result.data['resWordDown']
+    const signCount = result.data['signCount']
     if (code == "200") {
       subTitle = `签到结果：成功`
       detail = ` 连续签到天数 ${signCount} 天 `
