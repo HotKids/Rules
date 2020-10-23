@@ -1,4 +1,4 @@
- const cookieName = 'Fa米家'
+const cookieName = ' 全民 K 歌'
 const signurlKey = 'hotkids_signurl_familymart'
 const signheaderKey = 'hotkids_signheader_familymart'
 const signbodyKey = 'hotkids_signbody_familymart'
@@ -8,10 +8,17 @@ const requrl = $request.url
 if ($request && $request.method != 'OPTIONS') {
   const signurlVal = requrl
   const signheaderVal = JSON.stringify($request.headers)
-
+  const signbodyVal = $request.body
+  const cmd = JSON.parse($request.body).cmd
+  hotkids.log(`signurlVal:${signurlVal}`)
+  hotkids.log(`signheaderVal:${signheaderVal}`)
+  hotkids.log(`signbodyVal:${signbodyVal}`)
   if (signurlVal) hotkids.setdata(signurlVal, signurlKey)
   if (signheaderVal) hotkids.setdata(signheaderVal, signheaderKey)
-  hotkids.msg(cookieName, `获取 Cookie: 成功`, ``)
+  if (signbodyVal && cmd=='task.revisionSignInGetAward') {
+    hotkids.setdata(signbodyVal, signbodyKey)
+    hotkids.msg(cookieName, `获取 Cookie: 成功`, ``)
+  }  
 }
 
 function init() {
