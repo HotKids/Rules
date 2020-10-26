@@ -447,11 +447,11 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Disney.yaml
     interval: 86400
 
-  FoD:
+  FOD:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/FoD.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/FoD.yaml
+    path: ./Provider/RuleSet/Streaming/FOD.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/FOD.yaml
     interval: 86400
     
   friDay:
@@ -617,7 +617,7 @@ rules:
   - RULE-SET,Bahamut,🇹🇼 Taiwan
   - RULE-SET,BBC,🇬🇧 England
   - RULE-SET,Disney+,🇺🇸 America
-  - RULE-SET,FoD,🇯🇵 Japan
+  - RULE-SET,FOD,🇯🇵 Japan
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO,🇺🇸 America
   - RULE-SET,HBO Asia,🇵🇭 Philippines
