@@ -1,3 +1,5 @@
-# > FoD
-USER-AGENT,FoDPlayer*
+# > FOD
+USER-AGENT,FOD*
 DOMAIN-SUFFIX,fujitv.co.jp
+DOMAIN-SUFFIX,stream.ne.jp
+DOMAIN,measure.ic.tver.jp
