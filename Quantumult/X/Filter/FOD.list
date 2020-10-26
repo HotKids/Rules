@@ -1,0 +1,5 @@
+# > FOD
+USER-AGENT,FOD*,FOD
+DOMAIN-SUFFIX,fujitv.co.jp,FOD
+DOMAIN-SUFFIX,stream.ne.jp,FOD
+DOMAIN,measure.ic.tver.jp,FOD
