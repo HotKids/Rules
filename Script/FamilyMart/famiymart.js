@@ -12,19 +12,18 @@ sign()
 function sign() {
   const url = { url: signurlVal, headers: JSON.parse(signheaderVal), body: signBodyVal }
   hotkids.post(url, (error, response, data) => {
+    hotkids.log(`${cookieName}, data: ${data}`)
     const result = JSON.parse(data)
     let subTitle = ``
     let detail = ``
-    const code = result.code
-    const message = result.message
-    if (code == "200") {
-      const signCount = result.data['signCount']
+    if (result.code == 0) {
       subTitle = `🇸🇱签到结果：成功`
-      detail = `连续签到天数 ${signCount} 天 `
-    } else if (code == "1000") {
-      subTitle = `${message}`
+      detail = `连续签到天数 ${result.data.signCount} 天 `
+    } else if (result.code == 2002) {
+      subTitle = `${result.message}`
     } else {
-      subTitle = `🇸🇱签到结果：失败`
+      subTitle = `签到结果: 失败`
+      detail = `编码: ${result.code}, 说明: ${result.message}`
     }
     hotkids.msg(cookieName, subTitle, detail)
     hotkids.done()
