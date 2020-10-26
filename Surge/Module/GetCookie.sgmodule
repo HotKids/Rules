@@ -3,9 +3,13 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.52pojie.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
+# > 电信余额提醒 by id77
+// 公众号：「天翼账号中心」
+Cookie: 电信余额提醒 = type=http-request,pattern=^https?:\/\/e\.189\.cn\/store\/user\/balance_new\.do,script-path=https://raw.githubusercontent.com/id77/QuantumultX/master/task/10000.cookie.js
+
 # > WPS GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
 
