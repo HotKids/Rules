@@ -7,6 +7,7 @@ hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com
 
 [Script]
 # > 中国联通每日签到和抽奖 GetCookie by blackmatrix7
+// App: 我的-天天抽奖
 Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js,requires-body=true
 
 # > 电信余额提醒 GetCookie by id77
@@ -102,6 +103,9 @@ Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/m
 
 # > 航旅纵横 GetCookie by zZPiglet
 Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com\/gateway\/api\/web\/rest\/polite\/app\/sign\/signpageinitdata,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
+
+# > 哈啰单车 GetCookie by chavyleung&blackmatrix7
+Cookie: 哈啰单车 = type=http-request,pattern=^https:\/\/gameapi\.hellobike\.com\/api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/hellobike/hellobike.js,requires-body=true
 
 # > 无忧行 GetCookie by vinewx
 Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
