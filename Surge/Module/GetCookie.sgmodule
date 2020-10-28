@@ -6,13 +6,13 @@
 hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,m.xiaomiyoupin.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
-# > 中国联通每日签到和抽奖 GetCookie by blackmatrix7
-// App: 我的-天天抽奖
-Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js,requires-body=true
-
 # > 电信余额提醒 GetCookie by id77
 // 公众号：「天翼账号中心」
 Cookie: 电信余额提醒 = type=http-request,pattern=^https?:\/\/e\.189\.cn\/store\/user\/balance_new\.do,script-path=https://raw.githubusercontent.com/id77/QuantumultX/master/task/10000.cookie.js
+
+# > 中国联通 GetCookie by blackmatrix7
+// App: 我的-天天抽奖
+Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js,requires-body=true
 
 # > WPS GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
