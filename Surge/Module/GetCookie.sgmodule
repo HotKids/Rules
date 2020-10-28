@@ -3,10 +3,13 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,m.xiaomiyoupin.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
-# > 电信余额提醒 by id77
+# > 中国联通每日签到和抽奖 GetCookie by blackmatrix7
+Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js,requires-body=true
+
+# > 电信余额提醒 GetCookie by id77
 // 公众号：「天翼账号中心」
 Cookie: 电信余额提醒 = type=http-request,pattern=^https?:\/\/e\.189\.cn\/store\/user\/balance_new\.do,script-path=https://raw.githubusercontent.com/id77/QuantumultX/master/task/10000.cookie.js
 
@@ -23,6 +26,9 @@ Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/passport\.suning\.c
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/luckman\.suning\.com\/luck-web\/sign\/api\/clock_sign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/sign\.suning\.com\/sign-web\/m\/promotion\/sign\/doSign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/gameapi\.suning\.com\/sngame-web\/(api\/signin\/private\/customerSignOperation.do|gateway\/api\/queryPrize.do),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
+
+# > 小米有品 GetCookie by blackmatrix7
+Cookie: 小米有品 = type=http-request,pattern=^https?:\/\/m\.xiaomiyoupin\.com\/mtop\/coupon\/redpacket\/get_user_balance,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/youpin/youpin_checkin.js
 
 # > 美团 GetCookie by chavyleung
 Cookie: 美团 = type=http-request,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js,requires-body=true
@@ -65,8 +71,11 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/h
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/(www\.)?rrys2020\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
-# > 什么值得买 GetCookie by chavyleung
-Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
+# > 什么值得买 GetCookie by chavyleung&blackmatrix7
+// Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
+Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
+// 需将 App 降级至版本号 9.5.17 
+Rewrite: 什么值得买_获取账号密码 = type=http-request,pattern=^https?:\/\/user-api\.smzdm\.com\/user_login\/normal$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
 
 # > 慢慢买 GetCookie by blackmatrix7
 Cookie: 慢慢买 = type=http-request,pattern=^https?:\/\/apph5\.manmanbuy\.com\/taolijin\/(login.aspx|logserver.aspx),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/manmanbuy/manmanbuy_checkin.js,requires-body=true
