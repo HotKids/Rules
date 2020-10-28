@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,*.uve.weibo.com,ap*.bilibili.com,api.m.jd.com,api.weibo.cn,gw.alicdn.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,weixin110.qq.com,www.zhihu.com
+hostname = %INSERT% *acs.m.taobao.com,*api.smzdm.com,*.uve.weibo.com,ap*.bilibili.com,api.m.jd.com,api.weibo.cn,gw.alicdn.com,haojia.m.smzdm.com,mapi.weibo.com,mp.weixin.qq.com,pic*.zhimg.com,render.alipay.com,weixin110.qq.com,www.zhihu.com
 
 [Rule]
 # > 微博
@@ -11,7 +11,7 @@ DOMAIN,adimg.vue.weibo.com,REJECT
 # > 哔哩哔哩
 URL-REGEX,^https?:\/\/ap(p|i)\.bilibili\.com\/(pgc\/season\/rank\/cn|x\/v2\/(dm\/ad|rank.*rid=(168|5)|dataflow\/report|search\/(defaultword|trending|recommend|resource)|splash)),REJECT
 # > 什么值得买
-URL-REGEX,^https?:\/\/(app-)?api\.smzdm\.com\/(v\d\/)?util\/(loading|banner),REJECT
+URL-REGEX,^https?:\/\/((app-)?api|haojia\.m)\.smzdm\.com\/((v\d\/)?uti|detail_modu)l\/(loading|banner),REJECT
 # > 淘宝
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.((trip\.activity|film\.mtopadvertiseapi)\.querytmsresources|(taobao\.idle\.home|aliyun\.mobile)\.welcome(page)?|.*?\.ads?\.),REJECT
 URL-REGEX,^https?://gw.alicdn.com/(t(f|p)s/.+\d{3,4}-\d{4}|mt),REJECT
@@ -42,5 +42,5 @@ WeChat.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m
 # > 哔哩哔哩 App 去广告 by onewayticket255&Primovist
 Bilibili.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ap(i|p).(live.)?bilibili.com\/x(live)?\/(resource\/show\/tab|v2\/(reply\/main|view\/material|account\/(mine(\/ipad)?|teenagers\/status)|view|feed\/index|rank|channel\/region\/list)|app-room/v1/index/getInfoByRoom)\?access_key,script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/Bilibili.js,
 
-# > 什么值得买去广告 By Primovist
-SMZDM.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(s|h(aojia|omepage)|(articl|baik)e)-api\.smzdm\.com\/(home|sou)(?!\/list_filter),script-path=https://raw.githubusercontent.com/primovist/ScriptsForSurge/master/Scripts/SMZDM.js
+# > 什么值得买去广告 By blackmatrix7
+SMZDM.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(a(pp|rticle)|h(aojia|omepage))-api\.smzdm\.com\/((hom|util\/updat|article\/index_home_pag)e)(\/list\?)?,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_remove_ads.js
