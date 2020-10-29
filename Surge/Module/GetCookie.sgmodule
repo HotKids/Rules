@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,fmapp.chinafamilymart.com.cn,frodo.douban.com,gameapi.hellobike.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,m.xiaomiyoupin.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,e.189.cn,fmapp.chinafamilymart.com.cn,frodo.douban.com,gameapi.hellobike.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,i.meituan.com,m.client.10010.com,maicai.api.ddxq.mobi,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 电信余额提醒 GetCookie by id77
@@ -30,9 +30,6 @@ Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/passport\.suning\.c
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/luckman\.suning\.com\/luck-web\/sign\/api\/clock_sign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/sign\.suning\.com\/sign-web\/m\/promotion\/sign\/doSign.do,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
 Cookie: 苏宁易购 = type=http-request,pattern=^https?:\/\/gameapi\.suning\.com\/sngame-web\/(api\/signin\/private\/customerSignOperation.do|gateway\/api\/queryPrize.do),script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.cookie.js
-
-# > 小米有品 GetCookie by blackmatrix7
-Cookie: 小米有品 = type=http-request,pattern=^https?:\/\/m\.xiaomiyoupin\.com\/mtop\/coupon\/redpacket\/get_user_balance,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/youpin/youpin_checkin.js
 
 # > 美团 GetCookie by chavyleung
 Cookie: 美团 = type=http-request,pattern=^https?:\/\/i\.meituan\.com\/evolve\/signin\/signpost\/,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/meituan/meituan.cookie.js,requires-body=true
