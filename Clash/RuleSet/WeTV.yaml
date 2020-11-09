@@ -3,7 +3,7 @@ payload:
   # USER-AGENT,WeTV*
   - DOMAIN-SUFFIX,wetv.vip
   - DOMAIN-SUFFIX,wetvinfo.com
-  - DOMAIN-SUFFIX,meovse.com
-  - DOMAIN,wetv.acc.qq.com
-  - DOMAIN,oth.eve.mdt.qq.com
-  - DOMAIN,oth.str.mdt.qq.com
+  # DOMAIN-SUFFIX,meovse.com
+  # DOMAIN,wetv.acc.qq.com
+  # DOMAIN,oth.eve.mdt.qq.com
+  # DOMAIN,oth.str.mdt.qq.com
