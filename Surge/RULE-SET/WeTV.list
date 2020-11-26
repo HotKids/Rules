@@ -1,5 +1,5 @@
 # > WeTV
-// USER-AGENT,WeTV*
+USER-AGENT,WeTV*
 DOMAIN-SUFFIX,wetv.vip
 DOMAIN-SUFFIX,wetvinfo.com
 // DOMAIN-SUFFIX,meovse.com
