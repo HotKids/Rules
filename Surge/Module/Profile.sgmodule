@@ -30,6 +30,7 @@ use-default-policy-if-wifi-not-primary = false
 
 // Others
 enhanced-mode-by-rule = false
+force-http-engine-hosts = 203.205.13?.*
 always-real-ip = *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com
 
 [Replica]
