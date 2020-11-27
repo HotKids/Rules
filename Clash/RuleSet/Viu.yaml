@@ -8,3 +8,6 @@ payload:
   - DOMAIN,d1k2us671qcoau.cloudfront.net
   - DOMAIN,d2anahhhmp1ffz.cloudfront.net
   - DOMAIN,dfp6rglgjqszk.cloudfront.net
+  
+  # > WeTV add-on
+  - IP-CIDR,203.205.136.0/23
