@@ -1,66 +1,105 @@
-# HTTP 端口
-port: 7890
+# Port of HTTP(S) proxy server on the local end
+# port: 7890
 
-# SOCKS5 端口
-socks-port: 7891
+# Port of SOCKS5 proxy server on the local end
+# socks-port: 7891
 
-# Linux 及 macOS 的 redir 端口
+# Transparent proxy server port for Linux and macOS
 # redir-port: 7892
 
-allow-lan: true
+# HTTP(S) and SOCKS5 server on the same port
+mixed-port: 7890
 
-# 仅适用于设置 allow-lan 为 true 时
-# "*": 绑定所有 IP 地址
-# 192.168.122.11: 绑定单个 IPv4 地址
-# "[aaaa::a8aa:ff:fe09:57d8]": 绑定单个 IPv6 地址
-# bind-address: "*"
-
-# Rule / Global / Direct (默认为 Rule 模式)
-mode: Rule
-
-# 设置输出日志的等级 (默认为 info)
-# info / warning / error / debug / silent
-log-level: info
-
-# RESTful API for clash
-external-controller: 127.0.0.1:9090
-
-# you can put the static web resource (such as clash-dashboard) to a directory, and clash would serve in `${API}/ui`
-# input is a relative path to the configuration directory or an absolute path
-# external-ui: folder
-
-# Secret for RESTful API (Optional)
-# secret: ""
-
-# 实验性功能
-experimental:
-  ignore-resolve-fail: true # 忽略 DNS 解析失败，默认值为true
-  # interface-name: en0 # 出站接口名称
-
-# 本地 SOCKS5/HTTP(S) 服务器认证
+# authentication of local SOCKS5/HTTP(S) server
 # authentication:
 #  - "user1:pass1"
 #  - "user2:pass2"
 
-# # 实验性 hosts, 支持通配符（如 *.clash.dev 甚至 *.foo.*.examplex.com ）
-# # 静态域的优先级高于通配符域（foo.example.com > *.example.com）
+# Set to true to allow connections to local-end server from
+# other LAN IP addresses
+allow-lan: false
+
+# This is only applicable when `allow-lan` is `true`
+# '*': bind all IP addresses
+# 192.168.122.11: bind a single IPv4 address
+# "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
+bind-address: '*'
+
+# Clash router working mode
+# rule: rule-based packet routing
+# global: all packets will be forwarded to a single endpoint
+# direct: directly forward the packets to the Internet
+mode: rule
+
+# Clash by default prints logs to STDOUT
+# info / warning / error / debug / silent
+log-level: info
+
+# When set to false, resolver won't translate hostnames to IPv6 addresses
+ipv6: false
+
+# RESTful web API listening address
+external-controller: 127.0.0.1:9090
+
+# A relative path to the configuration directory or an absolute path to a
+# directory in which you put some static web resource. Clash core will then
+# serve it at `${API}/ui`.
+# external-ui: folder
+
+# Secret for the RESTful API (optional)
+# Authenticate by spedifying HTTP header `Authorization: Bearer ${secret}`
+# ALWAYS set a secret if RESTful API is listening on 0.0.0.0
+# secret: ""
+
+# Outbound interface name
+# interface-name: en0
+
+# Static hosts for DNS server and connection establishment, only works
+# when `dns.enhanced-mode` is `redir-host`.
+#
+# Wildcard hostnames are supported (e.g. *.clash.dev, *.foo.*.example.com)
+# Non-wildcard domain names has a higher priority than wildcard domain names
+# e.g. foo.example.com > *.example.com > .example.com
+# P.S. +.foo.com equals to .foo.com and foo.com
 hosts:
   'mtalk.google.com': 108.177.125.188
-#   '*.clash.dev': 127.0.0.1
-#   'alpha.clash.dev': '::1'
+  't.cn': 203.107.55.116
+  # '*.clash.dev': 127.0.0.1
+  # '.dev': 127.0.0.1
+  # 'alpha.clash.dev': '::1'
 
+# DNS server settings
+# This section is optional. When not present, DNS server will be disabled.
 dns:
-  enable: true # set true to enable dns (default is false)
-  ipv6: false # default is false
+  enable: true
   listen: 0.0.0.0:53
-  # default-nameserver: # resolve dns nameserver host, should fill pure IP
-  #   - 119.29.29.29
-  #   - 119.28.28.28
+  # ipv6: false # when false, response to AAAA questions will be empty
+
+  # These nameservers are used to resolve the DNS nameserver hostnames below.
+  # Specify IP addresses only
+  default-nameserver:
+    - 119.29.29.29
+    - 1.0.0.1
   enhanced-mode: fake-ip # or redir-host
-  # fake-ip-range: 198.18.0.1/16 # if you don't know what it is, don't change it
-  fake-ip-filter: # fake ip white domain list
+  fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
+  
+  # Hostnames in this list will not be resolved with fake IPs
+  # i.e. questions to these domain names will always be answered with their
+  # real IP addresses
+  fake-ip-filter:
     - '*.lan'
     - localhost.ptlogin2.qq.com
+    - '+.srv.nintendo.net'
+    - '+.stun.playstation.net'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
+    - '+.xboxlive.com'
+    - 'msftconnecttest.com'
+    - 'xbox.*.microsoft.com'
+  
+  # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
+  # All DNS questions are sent directly to the nameserver, without proxies
+  # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
     - 'https://47.108.56.233/dns-query'
     - 'https://118.31.13.131/dns-query'
@@ -68,12 +107,29 @@ dns:
     - 'https://139.224.112.177/dns-query'
     - 'https://59.110.53.209/dns-query'
     - 'https://doh.rixcloud.dev/dns-query'
-  # fallback: # concurrent request with nameserver, fallback used when GEOIP country isn't CN
-    # - tcp://1.1.1.1
+
+  # When `fallback` is present, the DNS server will send concurrent requests
+  # to the servers in this section along with servers in `nameservers`.
+  # The answers from fallback servers are used when the GEOIP country
+  # is not `CN`.
+  fallback:
+    - https://cloudflare-dns.com/dns-query
+
+  # If IP addresses resolved with servers in `nameservers` are in the specified
+  # subnets below, they are considered invalid and results from `fallback`
+  # servers are used instead.
+  #
+  # IP address resolved with servers in `nameserver` is used when
+  # `fallback-filter.geoip` is true and when GEOIP of the IP address is `CN`.
+  #
+  # If `fallback-filter.geoip` is false, results from `fallback` nameservers
+  # are always used, and answers from `nameservers` are discarded.
+  #
+  # This is a countermeasure against DNS pollution attacks.
   fallback-filter:
-    geoip: true # default
-    ipcidr: # ips in these subnets will be considered polluted
-      - 240.0.0.0/4
+    geoip: true
+    ipcidr:
+      # - 240.0.0.0/4
 
 proxies:
 
@@ -587,19 +643,12 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
     interval: 86400
 
-  # IP-Blackhole:
-    # type: http
-    # behavior: ipcidr
-    # path: ./Provider/RuleSet/Extra/IP-Blackhole.yaml
-    # url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/IP-Blackhole.yaml
-    # interval: 86400
-
-  # ChinaIP:
-    # type: http
-    # behavior: ipcidr
-    # path: ./Provider/RuleSet/Extra/ChinaIP.yaml
-    # url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/ChinaIP.yaml
-    # interval: 86400
+  ChinaIP:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/Extra/ChinaIP.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/ChinaIP.yaml
+    interval: 86400
 
 # 规则
 rules:
@@ -660,16 +709,13 @@ rules:
   - IP-CIDR,127.0.0.0/8,🔘 DIRECT
   - IP-CIDR,100.64.0.0/10,🔘 DIRECT
   - IP-CIDR,224.0.0.0/4,🔘 DIRECT
-
-  # IP Blackhole
-  # - RULE-SET,IP-Blackhole,🔰 Proxy
-
+  
+  # 使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时禁用「GEOIP,CN」规则
+  - RULE-SET,ChinaIP,🚓 Inbound
   # Tencent
   - IP-CIDR,119.28.28.28/32,🚓 Inbound
   - IP-CIDR,182.254.116.0/24,🚓 Inbound
-  # 使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时禁用「GEOIP,CN」规则
-  # - RULE-SET,ChinaIP,🚓 Inbound
   # GeoIP China
-  - GEOIP,CN,🚓 Inbound
+  # GEOIP,CN,🚓 Inbound
 
   - MATCH,🚁 Outbound
