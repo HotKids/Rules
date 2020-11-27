@@ -9,4 +9,4 @@ DOMAIN,d2anahhhmp1ffz.cloudfront.net
 DOMAIN,dfp6rglgjqszk.cloudfront.net
 
 # > WeTV add-on
-URL-REGEX,^https?:\/\/((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\/varietyts\.tc\.qq\.com
+IP-CIDR,203.205.136.0/23
