@@ -7,6 +7,3 @@ DOMAIN,api.viu.now.com,Viu
 DOMAIN,d1k2us671qcoau.cloudfront.net,Viu
 DOMAIN,d2anahhhmp1ffz.cloudfront.net,Viu
 DOMAIN,dfp6rglgjqszk.cloudfront.net,Viu
-
-# > WeTV add-on
-ip-cidr,203.205.136.0/23,WeTV
