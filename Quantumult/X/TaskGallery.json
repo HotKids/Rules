@@ -7,7 +7,7 @@
         "0 9 * * * https://raw.githubusercontent.com/zZPiglet/Task/master/MovieCalendar/MovieCalendar.js, tag=豆瓣·电影日历, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/douban.png",
         "0 10 * * * https://raw.githubusercontent.com/Peng-YM/QuanX/master/Tasks/exchange.js, tag=每日汇率, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/exchange.png",
         "30 23 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js, tag=中国联通, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/10010.png",
-        "50 23 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js, tag=滴滴出行, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/didi.png",
+        "0 9 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js, tag=滴滴出行, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/didi.png",
         "0 9 * * * https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiami.js, tag=虾米音乐, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/xiami.png",      
         "0 6 * * * https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js, tag=My SONY Club, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/sony.png",
         "0 6 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js, tag=WPS, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/wps.png",
