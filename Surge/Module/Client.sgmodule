@@ -19,3 +19,5 @@ PROCESS-NAME,Transmission,DIRECT
 PROCESS-NAME,uTorrent,DIRECT
 PROCESS-NAME,WebTorrent,DIRECT
 PROCESS-NAME,WebTorrent Helper,DIRECT
+# > Router
+DOMAIN,router.asus.com,DIRECT
