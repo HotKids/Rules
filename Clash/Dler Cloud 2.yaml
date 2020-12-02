@@ -101,12 +101,14 @@ dns:
   # All DNS questions are sent directly to the nameserver, without proxies
   # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
-    - 'https://47.108.56.233/dns-query'
-    - 'https://118.31.13.131/dns-query'
-    - 'https://120.25.25.166/dns-query'
-    - 'https://139.224.112.177/dns-query'
-    - 'https://59.110.53.209/dns-query'
-    - 'https://doh.rixcloud.dev/dns-query'
+    - 119.29.29.29
+    - 119.28.28.28
+    - 223.5.5.5
+    - 223.6.6.6
+    - 180.76.76.76
+    - 1.2.4.8
+    # - tls://dns.rubyfish.cn:853 # DNS over TLS
+    # - https://1.1.1.1/dns-query # DNS over HTTPS  
 
   # When `fallback` is present, the DNS server will send concurrent requests
   # to the servers in this section along with servers in `nameservers`.
