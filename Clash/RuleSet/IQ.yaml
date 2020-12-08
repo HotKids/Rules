@@ -18,4 +18,5 @@ payload:
   - DOMAIN,intl.policy.iqiyi.com
   - DOMAIN,du-feige-intl.iqiyi.com 
   - DOMAIN,msg-intl.qy.net
+  - IP-CIDR,118.26.120.0/24
   - PROCESS-NAME,com.iqiyi.i18n
