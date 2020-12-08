@@ -2,3 +2,4 @@ payload:
   # > Peacock
   # USER-AGENT,Peacock*
   - DOMAIN-SUFFIX,peacocktv.com
+  - PROCESS-NAME,com.peacocktv.peacockandroid
