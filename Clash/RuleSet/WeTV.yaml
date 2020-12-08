@@ -3,7 +3,7 @@ payload:
   # USER-AGENT,WeTV*
   - DOMAIN-SUFFIX,wetv.vip
   - DOMAIN-SUFFIX,wetvinfo.com
-  # IP-CIDR,203.205.136.0/23
+  # IP-CIDR,203.205.136.0/23,no-resolve
   # DOMAIN-SUFFIX,meovse.com
   # DOMAIN,wetv.acc.qq.com
   # DOMAIN,oth.eve.mdt.qq.com
