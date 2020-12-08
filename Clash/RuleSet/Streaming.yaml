@@ -10,6 +10,7 @@ payload:
   - DOMAIN,ds-vod-abematv.akamaized.net
   - DOMAIN,linear-abematv.akamaized.net
   - DOMAIN,ds-linear-abematv.akamaized.net
+  - PROCESS-NAME,tv.abema
 
   # > Amazon Prime Video
   # USER-AGENT,InstantVideo.US*
@@ -19,6 +20,7 @@ payload:
   - DOMAIN-SUFFIX,media-amazon.com
   - DOMAIN-SUFFIX,aiv-cdn.net
   - DOMAIN-SUFFIX,llnwd.net
+  - PROCESS-NAME,com.amazon.avod.thirdpartyclient
 
   # > Bahamut
   # USER-AGENT,Anime*
@@ -26,6 +28,7 @@ payload:
   - DOMAIN-SUFFIX,gamer.com.tw
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
+  - PROCESS-NAME,tw.com.gamer.android.animad
 
   # > BBC
   # USER-AGENT,BBCiPlayer*
@@ -50,6 +53,7 @@ payload:
   - DOMAIN-SUFFIX,bamgrid.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
   - DOMAIN,cdn.registerdisney.go.com
+  - PROCESS-NAME,com.disney.disneyplus
 
   # > friDay
   # USER-AGENT,friDay*
@@ -64,6 +68,7 @@ payload:
   - DOMAIN,hbounify-prod.evergent.com
   - DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net
+  - PROCESS-NAME,sg.hbo.hbogo
 
   # > HBO Max
   # USER-AGENT,HBOMAX*
@@ -71,6 +76,7 @@ payload:
   - DOMAIN-SUFFIX,hbogo.com
   - DOMAIN-SUFFIX,hbonow.com
   - DOMAIN-SUFFIX,hbomax.com
+  - PROCESS-NAME,com.hbo.hbonow
 
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
@@ -78,6 +84,7 @@ payload:
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
   - DOMAIN,assetshuluimcom-a.akamaihd.net
+  - PROCESS-NAME,com.hulu.plus
 
   # > Hulu JP
   - DOMAIN-SUFFIX,hulu.jp
@@ -102,6 +109,7 @@ payload:
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw
   - DOMAIN,kktv-theater.kk.stream
+  - PROCESS-NAME,com.kktv.kktv
 
   # > LINE TV
   # USER-AGENT,LINE%20TV*
