@@ -146,15 +146,6 @@ proxy-providers:
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  MO:
-    type: http
-    path: ./Provider/Proxy/Dler/MO.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=mo
-    interval: 3600
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
   TW:
     type: http
     path: ./Provider/Proxy/Dler/TW.yaml
@@ -227,15 +218,6 @@ proxy-providers:
       enable: true
       url: http://www.gstatic.com/generate_204
       interval: 600
-  CN:
-    type: http
-    path: ./Provider/Proxy/Dler/CN.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&type=back
-    interval: 3600
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
   UN:
     type: http
     path: ./Provider/Proxy/Dler/UN.yaml
@@ -252,7 +234,6 @@ proxy-groups:
     type: select
     proxies:
       - 🇭🇰 Hong Kong
-      - 🇲🇴 Macao
       - 🇹🇼 Taiwan
       - 🇯🇵 Japan
       - 🇰🇷 Korea
@@ -261,7 +242,6 @@ proxy-groups:
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
-      - 🇨🇳 China
       - 🇺🇳 Server
       - 🔘 DIRECT
 
@@ -270,7 +250,6 @@ proxy-groups:
     type: select
     proxies:
       - 🇭🇰 Hong Kong
-      - 🇲🇴 Macao
       - 🇹🇼 Taiwan
       - 🇯🇵 Japan
       - 🇰🇷 Korea
@@ -286,7 +265,6 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
-      - 🇨🇳 China
       - 🇹🇼 Taiwan
 
   # 特殊代理服务
@@ -310,7 +288,6 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
-      - 🇨🇳 China
       
   # Final
   - name: "🚁 Outbound"
@@ -324,21 +301,12 @@ proxy-groups:
     type: select
     use:
       - UN
-      - CN
 
   # HK
   - name: "🇭🇰 Hong Kong"
     type: url-test
     use:
       - HK
-    url: 'http://www.gstatic.com/generate_204'
-    interval: 300
-
-  # MO
-  - name: "🇲🇴 Macao"
-    type: url-test
-    use:
-      - MO
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
       
@@ -405,12 +373,6 @@ proxy-groups:
       - US
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
- 
-   # CN
-  - name: "🇨🇳 China"
-    type: select
-    use:
-      - CN
       
    # 去广告以及隐私追踪保护、反运营商劫持开关
   - name: "🚧 AdGuard"
