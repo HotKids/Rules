@@ -11,13 +11,14 @@ DOMAIN,intel-cache.m.iqiyi.com,iQIYI Intl
 DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
 // 视频个人收藏版权地区验证
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
+IP-CIDR,118.26.120.0/24,iQIYI Intl
 // 以下暂未验证（可选择直连）
-DOMAIN,intl-cmonitor.iqiyi.com,iQIYI Intl
-DOMAIN,intl-passport.iqiyi.com,iQIYI Intl
-DOMAIN,intl-sns.iqiyi.com,iQIYI Intl
-DOMAIN,intl-im-hist-api.iqiyi.com,iQIYI Intl
-DOMAIN,intl-act.vip.iqiyi.com,iQIYI Intl
-DOMAIN,intl-i.vip.iqiyi.com,iQIYI Intl
-DOMAIN,intl.policy.iqiyi.com,iQIYI Intl
-DOMAIN,du-feige-intl.iqiyi.com,iQIYI Intl
-DOMAIN,msg-intl.qy.net,iQIYI Intl
+// DOMAIN,intl-cmonitor.iqiyi.com,iQIYI Intl
+// DOMAIN,intl-passport.iqiyi.com,iQIYI Intl
+// DOMAIN,intl-sns.iqiyi.com,iQIYI Intl
+// DOMAIN,intl-im-hist-api.iqiyi.com,iQIYI Intl
+// DOMAIN,intl-act.vip.iqiyi.com,iQIYI Intl
+// DOMAIN,intl-i.vip.iqiyi.com,iQIYI Intl
+// DOMAIN,intl.policy.iqiyi.com,iQIYI Intl
+// DOMAIN,du-feige-intl.iqiyi.com,iQIYI Intl
+// DOMAIN,msg-intl.qy.net,iQIYI Intl
