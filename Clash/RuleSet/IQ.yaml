@@ -9,14 +9,5 @@ payload:
   - DOMAIN,intel-cache.m.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
-  - DOMAIN,intl-cmonitor.iqiyi.com
-  - DOMAIN,intl-passport.iqiyi.com
-  - DOMAIN,intl-sns.iqiyi.com
-  - DOMAIN,intl-im-hist-api.iqiyi.com
-  - DOMAIN,intl-act.vip.iqiyi.com
-  - DOMAIN,intl-i.vip.iqiyi.com
-  - DOMAIN,intl.policy.iqiyi.com
-  - DOMAIN,du-feige-intl.iqiyi.com 
-  - DOMAIN,msg-intl.qy.net
-  - IP-CIDR,118.26.120.0/24
   - PROCESS-NAME,com.iqiyi.i18n
+  - IP-CIDR,118.26.120.0/24
