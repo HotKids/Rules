@@ -11,3 +11,4 @@ payload:
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw
   - DOMAIN,kktv-theater.kk.stream
+  - PROCESS-NAME,com.kktv.kktv
