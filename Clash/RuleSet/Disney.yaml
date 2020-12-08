@@ -7,3 +7,4 @@ payload:
   - DOMAIN-SUFFIX,bamgrid.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
   - DOMAIN,cdn.registerdisney.go.com
+  - PROCESS-NAME,com.disney.disneyplus
