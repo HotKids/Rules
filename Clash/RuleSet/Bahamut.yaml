@@ -5,3 +5,4 @@ payload:
   - DOMAIN-SUFFIX,gamer.com.tw
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
+  - PROCESS-NAME,tw.com.gamer.android.animad
