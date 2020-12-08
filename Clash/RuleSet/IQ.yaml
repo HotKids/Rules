@@ -10,4 +10,4 @@ payload:
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
   - PROCESS-NAME,com.iqiyi.i18n
-  - IP-CIDR,118.26.120.0/24
+  - IP-CIDR,118.26.120.0/24,no-resolve
