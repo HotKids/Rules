@@ -147,6 +147,11 @@ payload:
   # > PBS
   # USER-AGENT,PBS*
   - DOMAIN-SUFFIX,pbs.org
+  
+  # > Peacock
+  # USER-AGENT,Peacock*
+  - DOMAIN-SUFFIX,peacocktv.com
+  - PROCESS-NAME,com.peacocktv.peacockandroid
 
   # > SoundCloud
   # USER-AGENT,SoundCloud*
