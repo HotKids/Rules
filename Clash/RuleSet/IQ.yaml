@@ -18,3 +18,4 @@ payload:
   - DOMAIN,intl.policy.iqiyi.com
   - DOMAIN,du-feige-intl.iqiyi.com 
   - DOMAIN,msg-intl.qy.net
+  - PROCESS-NAME,com.iqiyi.i18n
