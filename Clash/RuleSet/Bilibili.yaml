@@ -1,6 +1,7 @@
 payload:
   # > Bilibili
   # USER-AGENT,*bili*
+  # PROCESS-NAME,tv.danmaku.bili
   - DOMAIN-SUFFIX,bilibili.com
   - DOMAIN-SUFFIX,bilibili.tv
   - DOMAIN-SUFFIX,biliapi.net
@@ -10,8 +11,7 @@ payload:
   - DOMAIN-SUFFIX,hdslb.com
   - DOMAIN,upos-hz-mirrorakam.akamaized.net
   - DOMAIN-KEYWORD,bilibili
-  - PROCESS-NAME,tv.danmaku.bili
   # > 港台版 Bilibili App
   # USER-AGENT,bili-inter*
+  # PROCESS-NAME,com.bilibili.app.in
   - DOMAIN,apiintl.biliapi.net
-  - PROCESS-NAME,com.bilibili.app.in
