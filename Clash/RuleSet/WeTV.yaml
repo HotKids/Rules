@@ -1,6 +1,8 @@
 payload:
   # > WeTV
-  # USER-AGENT,WeTV*
+  # USER-AGENT,WeTV*  
+  # PROCESS-NAME,com.tencent.qqlivei18n
+  # PROCESS-NAME,com.tencent.qqlivei18n.us
   - DOMAIN-SUFFIX,wetv.vip
   - DOMAIN-SUFFIX,wetvinfo.com
   # IP-CIDR,203.205.136.0/23,no-resolve
@@ -8,5 +10,3 @@ payload:
   # DOMAIN,wetv.acc.qq.com
   # DOMAIN,oth.eve.mdt.qq.com
   # DOMAIN,oth.str.mdt.qq.com
-  - PROCESS-NAME,com.tencent.qqlivei18n
-  - PROCESS-NAME,com.tencent.qqlivei18n.us
