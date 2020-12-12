@@ -1,7 +1,7 @@
 payload:
   # > HBO GO Asia
   # USER-AGENT,HBO%20GO%20PROD*
-  # PROCESS-NAME,sg.hbo.hbogo
+  - PROCESS-NAME,sg.hbo.hbogo
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
   - DOMAIN-SUFFIX,hbogoasia.com
