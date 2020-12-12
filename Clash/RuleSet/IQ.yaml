@@ -3,6 +3,7 @@ payload:
   # USER-AGENT,iQIYI
   # USER-AGENT,QYPlayer
   - PROCESS-NAME,com.iqiyi.i18n
+  - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
   - DOMAIN-SUFFIX,intl.iqiyi.com
   - DOMAIN-SUFFIX,inter.iqiyi.com
