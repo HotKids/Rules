@@ -5,15 +5,8 @@
 [Script]
 // 可自行保存到本地删减
 
-# > 虾米音乐半自动签到
-Tasks: 虾米音乐 = type=cron,cronexp="0 9 * * *",script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiami.js
-
 # > 中国联通 DailyBonus by blackmatrix7
 Tasks: 中国联通 = type=cron,cronexp="30 23 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js
-
-# > 滴滴出行 DailyBonus by blackmatrix7
-// GetCookie: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.sgmodule
-Tasks: 滴滴出行 = type=cron,timeout=120,cronexp="0 9 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js
 
 # > 索尼俱乐部 DailyBonus by lowking
 // 需自行在 BoxJS 中配置账号信息
@@ -22,8 +15,12 @@ Tasks: My SONY Club = type=cron,cronexp="30 6 * * *",wake-system=1,script-path=h
 # > WPS DailyBonus by chavyleung
 Tasks: WPS = type=cron,cronexp="0 8 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.js
 
-# > 全家 DailyBonus by blackmatrix7
-Tasks: Fa米家 = type=cron,cronexp="0 7 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
+# > 爱奇艺 DailyBonus by NobyDa
+Tasks: 爱奇艺 = type=cron,cronexp="30 8 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+
+# > 滴滴出行 DailyBonus by blackmatrix7
+// GetCookie: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.sgmodule
+Tasks: 滴滴出行 = type=cron,cronexp="0 9 * * *",timeout=120,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js
 
 # > 京东 DailyBonus by NobyDa
 Tasks: 京东 = type=cron,cronexp="0 1,6 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
@@ -37,6 +34,9 @@ Tasks: 京东物流派件提醒 = type=cron,cronexp="30 9 * * *",script-path=htt
 # > 饿了么_吃货豆 DailyBonus by blackmatrix7
 // Tasks: 饿了么_领取任务 = type=cron,cronexp="0 10 * * *",timeout=60,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_mission.js
 Tasks: 饿了么_领取吃货豆 = type=cron,cronexp="10 0 * * *",timeout=60,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js
+
+# > 腾讯视频 DailyBonus by chavyleung
+Tasks: 腾讯视频 = type=cron,cronexp="10 0 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
 
 # > 苏宁易购 DailyBonus by chavyleung
 Tasks: 苏宁易购 = type=cron,cronexp="0 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/suning/suning.js
@@ -55,11 +55,11 @@ Tasks: 叮咚买菜-签到 = type=cron,cronexp="4 5 * * *",timeout=30,script-pat
 Tasks: 叮咚买菜-签到 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 Tasks: 叮咚买菜-农场 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/iepngs/Script/master/dingdong/index.js
 
-# > 爱奇艺 DailyBonus by NobyDa
-Tasks: 爱奇艺 = type=cron,cronexp="5 5 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+# > 美团买菜 DailyBonus by blackmatrix7
+Tasks: 美团买菜 = type=cron,cronexp="5 5 * * *",timeout=30,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/meituan/maicai_checkin.js
 
-# > 腾讯视频 DailyBonus by chavyleung
-Tasks: 腾讯视频 = type=cron,cronexp="6 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.js
+# > 海底捞 DailyBonus by zZPiglet
+Tasks: 海底捞 = type=cron,cronexp="6 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
 
 # > 芒果 TV DailyBonus by chavyleung
 Tasks: 芒果 TV = type=cron,cronexp="7 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.js
@@ -97,11 +97,11 @@ Tasks: 多看阅读 = type=cron,cronexp="16 5 * * *",script-path=https://raw.git
 # > 豆瓣时间 DailyBonus by chavyleung
 Tasks: 豆瓣时间 = type=cron,cronexp="17 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/dbsj/dbsj.js
 
-# > 海底捞 DailyBonus by zZPiglet
-Tasks: 海底捞 = type=cron,cronexp="18 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
-
 # > 百果园 DailyBonus by chavyleung
-Tasks: 百果园 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js,wake-system=true
+Tasks: 百果园 = type=cron,cronexp="18 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js,wake-system=true
+
+# > 全家 DailyBonus by blackmatrix7
+Tasks: Fa米家 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
 # > 便利蜂 DailyBonus by zZPiglet
 Tasks: 便利蜂 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
