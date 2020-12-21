@@ -13,8 +13,12 @@ Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.c
 # > WPS GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
 
-# > 全家 GetCookie by blackmatrix7
-Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/signin\/usersign,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
+# > 爱奇艺 GetCookie by NobyDa
+Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/iface(\d)?\.iqiyi\.com\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+
+# > 腾讯视频 GetCookie by chavyleung
+// https://film.qq.com/ 随便选一部电影观看
+Cookie: 腾讯视频 = type=http-request,pattern=^https?:\/\/access.video.qq.com\/user\/auth_refresh,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
 
 # > 京东 GetCookie by NobyDa
 // https://bean.m.jd.com/
@@ -45,15 +49,12 @@ Cookie: 叮咚买菜-农场 = type=http-request,pattern=^https?:\/\/maicai\.api\
 # > 美团买菜 GetCookie by blackmatrix7
 Cookie: 美团买菜 = type=http-request,pattern=^https?:\/\/mall\.meituan\.com\/api\/c\/mallcoin\/checkIn\/getWeekCheckInProgressBar\?,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/meituan/maicai_checkin.js
 
-# > 爱奇艺 GetCookie by NobyDa
-Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/iface(\d)?\.iqiyi\.com\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
-
-# > 腾讯视频 GetCookie by chavyleung
-// https://film.qq.com/ 随便选一部电影观看
-Cookie: 腾讯视频 = type=http-request,pattern=^https?:\/\/access.video.qq.com\/user\/auth_refresh,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
-
 # > 芒果 TV GetCookie by chavyleung
 Cookie: 芒果 TV = type=http-request,pattern=^https?:\/\/credits.bz.mgtv.com\/user\/creditsTake,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.cookie.js
+
+# > 海底捞 GetCookie by zZPiglet
+Cookie: 海底捞_获取用户信息 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
+Cookie: 海底捞_获取签到信息 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
 
 # > 哔哩哔哩直播 GetCookie by chavyleung
 // https://live.bilibili.com/
@@ -89,12 +90,11 @@ Cookie: 多看阅读 = type=http-request,pattern=^https?:\/\/www\.duokan\.com\/c
 # > 豆瓣时间 GetCookie by chavyleung
 Cookie: 豆瓣时间 = type=http-request,pattern=^https?:\/\/frodo\.douban\.com\/api\/v2\/niffler\/check_in\/status,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/dbsj/dbsj.cookie.js
 
-# > 海底捞 GetCookie by zZPiglet
-Cookie: 海底捞_获取用户信息 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
-Cookie: 海底捞_获取签到信息 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
-
 # > 百果园 GetCookie by chavyleung
 Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
+
+# > 全家 GetCookie by blackmatrix7
+Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/signin\/usersign,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
 # > 便利蜂 GetCookie by zZPiglet
 Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/meepo\/taskCenter\/home\/v\d,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
