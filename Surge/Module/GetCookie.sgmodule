@@ -49,12 +49,12 @@ Cookie: 叮咚买菜-农场 = type=http-request,pattern=^https?:\/\/maicai\.api\
 # > 美团买菜 GetCookie by blackmatrix7
 Cookie: 美团买菜 = type=http-request,pattern=^https?:\/\/mall\.meituan\.com\/api\/c\/mallcoin\/checkIn\/getWeekCheckInProgressBar\?,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/meituan/maicai_checkin.js
 
-# > 芒果 TV GetCookie by chavyleung
-Cookie: 芒果 TV = type=http-request,pattern=^https?:\/\/credits.bz.mgtv.com\/user\/creditsTake,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.cookie.js
-
 # > 海底捞 GetCookie by zZPiglet
 Cookie: 海底捞_获取用户信息 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
 Cookie: 海底捞_获取签到信息 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
+
+# > 芒果 TV GetCookie by chavyleung
+Cookie: 芒果 TV = type=http-request,pattern=^https?:\/\/credits.bz.mgtv.com\/user\/creditsTake,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mgtv/mgtv.cookie.js
 
 # > 哔哩哔哩直播 GetCookie by chavyleung
 // https://live.bilibili.com/
