@@ -428,7 +428,7 @@ rule-providers:
   Bilibili Intl:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Bilibili.yaml
+    path: ./Provider/RuleSet/Streaming/BiliIntl.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili_Intl.yaml
     interval: 86400
 
