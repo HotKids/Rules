@@ -425,6 +425,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
     interval: 86400
 
+  Bilibili Intl:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Bilibili.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili_Intl.yaml
+    interval: 86400
+
   Bilibili:
     type: http
     behavior: classical
@@ -647,6 +654,7 @@ rules:
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
+  - RULE-SET,Bilibili Intl,🇵🇭 Philippines
   - RULE-SET,Bilibili,📺 CNTV
   - RULE-SET,IQIYI Intl,🇹🇼 Taiwan
   - RULE-SET,IQIYI,📺 CNTV
