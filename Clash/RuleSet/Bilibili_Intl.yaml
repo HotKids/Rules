@@ -1,3 +1,4 @@
 payload:
   # > 东南亚版 Bilibili App
   - PROCESS-NAME,com.bstar.intl
+  - DOMAIN,interface.bilibili.com
