@@ -23,4 +23,4 @@ URL-REGEX,^https?:\/\/int[\w-\.]+iqiyi\.com
 // DOMAIN,intl-i.vip.iqiyi.com
 // DOMAIN,intl.policy.iqiyi.com
 // DOMAIN,du-feige-intl.iqiyi.com 
-// DOMAIN,msg-intl.qy.net
+DOMAIN,msg-intl.qy.net
