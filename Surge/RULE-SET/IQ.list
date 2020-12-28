@@ -1,5 +1,5 @@
 # > iQIYI Intl
-USER-AGENT,iQIYI
+USER-AGENT,iQIYI*
 USER-AGENT,QYPlayer*
 DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,intl.iqiyi.com
@@ -12,6 +12,7 @@ DOMAIN,intl-rcd.iqiyi.com
 // 视频个人收藏版权地区验证
 DOMAIN,intl-subscription.iqiyi.com
 IP-CIDR,118.26.120.0/24,no-resolve
+IP-CIDR,203.205.254.0/23,no-resolve
 URL-REGEX,^https?:\/\/int[\w-\.]+iqiyi\.com
 
 // 以下暂未验证（可选择直连）
@@ -23,4 +24,4 @@ URL-REGEX,^https?:\/\/int[\w-\.]+iqiyi\.com
 // DOMAIN,intl-i.vip.iqiyi.com
 // DOMAIN,intl.policy.iqiyi.com
 // DOMAIN,du-feige-intl.iqiyi.com 
-DOMAIN,msg-intl.qy.net
+// DOMAIN,msg-intl.qy.net
