@@ -13,6 +13,7 @@ DOMAIN,intl-rcd.iqiyi.com
 DOMAIN,intl-subscription.iqiyi.com
 IP-CIDR,118.26.120.0/24,no-resolve
 IP-CIDR,23.40.240.0/22,no-resolve
+
 URL-REGEX,^https?:\/\/int[\w-\.]+iqiyi\.com
 
 // 以下暂未验证（可选择直连）
