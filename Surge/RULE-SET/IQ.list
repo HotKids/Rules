@@ -12,6 +12,7 @@ DOMAIN,intel-cache.m.iqiyi.com
 DOMAIN,intl-rcd.iqiyi.com
 // 视频个人收藏版权地区验证
 DOMAIN,intl-subscription.iqiyi.com
+
 IP-CIDR,103.44.56.0/22,no-resolve
 IP-CIDR,118.26.32.0/23,no-resolve
 IP-CIDR,118.26.120.0/24,no-resolve
