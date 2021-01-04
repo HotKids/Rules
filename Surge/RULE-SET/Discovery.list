@@ -1,0 +1,6 @@
+# > Discovery+ IN
+USER-AGENT,discovery+
+DOMAIN-SUFFIX,litix.io
+DOMAIN-SUFFIX,discoveryplus.in
+DOMAIN,ap2-prod-images.disco-api.com
+DOMAIN,prod-realmservice.mercury.dnitv.com
