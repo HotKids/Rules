@@ -1,0 +1,9 @@
+payload:
+  # > Discovery+ IN
+  # USER-AGENT,discovery+
+  - PROCESS-NAME,com.discoveryplus.mobile.android
+  - PROCESS-NAME,com.discoveryplus.tv.android
+  - DOMAIN-SUFFIX,litix.io
+  - DOMAIN-SUFFIX,discoveryplus.in
+  - DOMAIN,ap2-prod-images.disco-api.com
+  - DOMAIN,prod-realmservice.mercury.dnitv.com
