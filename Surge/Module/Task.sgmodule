@@ -81,7 +81,8 @@ Tasks: 喜马拉雅 = type=cron,cronexp="11 5 * * *",script-path=https://raw.git
 # > 人人字幕组 DailyBonus by chavyleung
 Tasks: 字幕组 = type=cron,cronexp="12 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.js
 
-# > 什么值得买 DailyBonus by chavyleung
+# > 什么值得买 DailyBonus by blackmatrix7&chavyleung
+Tasks: 什么值得买 = type=cron,cronexp="13 5 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js
 // App 端签到需自行在 BoxJS 中配置账号信息
 Tasks: 什么值得买 = type=cron,cronexp="13 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.js
 
