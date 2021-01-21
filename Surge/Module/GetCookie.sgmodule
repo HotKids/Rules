@@ -74,7 +74,8 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/h
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/(www\.)?rrys2020\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
-# > 什么值得买 GetCookie by chavyleung
+# > 什么值得买 GetCookie by blackmatrix7&chavyleung
+Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
 Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/www\.smzdm\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/smzdm/smzdm.cookie.js
 
 # > 慢慢买 GetCookie by blackmatrix7
