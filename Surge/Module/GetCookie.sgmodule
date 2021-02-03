@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.rrys2020.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,gameapi.hellobike.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,m.ctrip.com,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.smzdm.com,*.suning.com,*.video.qq.com,activity-1.m.duiba.com.cn,api.m.jd.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,gameapi.hellobike.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,m.ctrip.com,mcs-mimp-web.sf-express.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,sf-integral-sign-in.weixinjia.net,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
@@ -69,10 +69,6 @@ Cookie: 网易云音乐 = type=http-request,pattern=^https?:\/\/music\.163\.com\
 
 # > 喜马拉雅 FM GetCookie by chavyleung
 Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
-
-# > 人人字幕组 GetCookie by chavyleung
-Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/(www\.)?rrys2020\.com\/?.?,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
-Cookie: 字幕组 = type=http-request,pattern=^https?:\/\/ios.zmzapi.com\/index.php.*a=(mobile_)?login,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/zimuzu/zimuzu.cookie.js
 
 # > 什么值得买 GetCookie by blackmatrix7&chavyleung
 Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_checkin.js,requires-body=true
