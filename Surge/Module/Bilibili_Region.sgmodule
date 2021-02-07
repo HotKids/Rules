@@ -3,9 +3,9 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.bilibili.com
+hostname = %INSERT% ap?.bilibili.com
 
 [Script]
 # > Bilibli 番剧自动切换地区 by NobyDa
 // 需自行通过 BoxJs 设置策略名和子策略名
-Bilibili Auto Region = type=http-response,pattern=^https?:\/\/api\.bilibili\.com\/pgc\/view\/(v\d\/)?app\/season\?access_key,requires-body=1,max-size=0,control-api=1,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bili_Auto_Regions.js
+Bilibili Auto Region = type=http-response,pattern=^https?:\/\/ap(p|i)\.bilibili\.com\/(pgc\/view\/(v\d\/)?app|x(\/v\d)?\/view\/video)\/(season|online)\?access_key,requires-body=1,max-size=0,control-api=1,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Bili_Auto_Regions.js
