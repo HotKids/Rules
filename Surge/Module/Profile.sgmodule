@@ -11,7 +11,9 @@ proxy-test-url = http://www.gstatic.com/generate_204
 # > 测试超时（秒）
 # test-timeout = 5
 # TLS 引擎
-tls-provider = openssl
+ tls-provider = openssl
+# GeoIP 数据库
+ geoip-maxmind-url = https://raw.githubusercontent.com/JMVoid/ipip2mmdb/release/Country.mmdb
 # IPv6 支持（关闭）
 ipv6 = false
 # ------
@@ -25,16 +27,16 @@ wifi-access-socks5-port = 6153
 # ---(远程控制器)---
 # 允许 Surge 请求查看器或 Surge CLI 进行管理控制。
 # 如果允许由 Wi-Fi 控制则将「127.0.0.1」修改为「0.0.0.0」
-# external-controller-access = HotKids@127.0.0.1:6170
+# external-controller-access = password@127.0.0.1:6170
 # ------
 
 # ---(兼容性)---
 # 兼容模式
 # compatibility-mode = 0
 # 跳过代理
-skip-proxy = 127.0.0.1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local, mfs.ykimg.com*.ttf
+ skip-proxy = 127.0.0.1, 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12, 100.64.0.0/10, localhost, *.local
 # 排除简单主机名
-exclude-simple-hostnames = true
+ exclude-simple-hostnames = true
 # SSID 组策略
 # 当 Wi-Fi 不是首选网络时 SSID 组策略使用默认策略（仅 macOS 版）
 use-default-policy-if-wifi-not-primary = false
@@ -47,7 +49,6 @@ use-default-policy-if-wifi-not-primary = false
 // dns-server = https://neatdns.ustclug.org/resolve
 dns-server = 119.29.29.29, 119.28.28.28, 223.5.5.5, 223.6.6.6, 180.76.76.76, 1.2.4.8
 // doh-server = https://47.108.56.233/dns-query, https://118.31.13.131/dns-query, https://120.25.25.166/dns-query, https://139.224.112.177/dns-query, https://59.110.53.209/dns-query, https://doh.rixcloud.dev/dns-query
-
 # ------
 
 # ---(实验性功能)---
@@ -57,10 +58,10 @@ dns-server = 119.29.29.29, 119.28.28.28, 223.5.5.5, 223.6.6.6, 180.76.76.76, 1.2
 
 # ---(高级)---
 # 日志级别
-loglevel = notify
+ loglevel = notify
 
 # 当遇到 REJECT 策略时返回错误页
-show-error-page-for-reject = true
+ show-error-page-for-reject = true
 
 # Always Real IP Hosts
 # 当 Surge VIF 处理 DNS 问题时，此选项要求 Surge 返回一个真正的 IP 地址，而不是一个假 IP 地址。
@@ -68,7 +69,7 @@ show-error-page-for-reject = true
 always-real-ip = msftconnecttest.com, msftncsi.com, *.msftconnecttest.com, *.msftncsi.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com
 
 # Hijack DNS
-# 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址(198.18.0.2)。
+# 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址 (198.18.0.2)。
 # 有些设备或软件总是使用硬编码的 DNS 服务器。 (例如 Google Speakers 总是使用 8.8.8.8)。 您可以使用此选项劫持查询，以获得一个假地址。
 # hijack-dns = 8.8.8.8:53, 8.8.4.4:53
 
@@ -89,19 +90,24 @@ force-http-engine-hosts = *.ott.cibntv.net,123.59.31.1,119.18.193.135,122.14.246
 # ---(实验性功能)---
 # 0 为关闭，1 为开启
 # > 隐藏 Apple 请求
-hide-apple-request=0
+ hide-apple-request=0
 # > 隐藏崩溃追踪器请求
-hide-crash-reporter-request=1
+ hide-crash-reporter-request=1
 # > 隐藏 UDP 会话
-hide-udp=0
+ hide-udp=0
 # > 关键词过滤器
-# none（关闭关键词过滤器） / whitelist（blacklist（仅记录包含关键字的请求）） / blacklist（仅记录不包含关键字的请求） / pattern（匹配通配符的请求）
+# none（关闭关键词过滤器） /whitelist（blacklist（仅记录包含关键字的请求）） /blacklist（仅记录不包含关键字的请求） /pattern（匹配通配符的请求）
 # keyword-filter-type = none
 # > 关键词
 # keyword-filter = (null)
 # ------
 
 [Host]
+# Firebase Cloud Messaging
+mtalk.google.com = 108.177.125.188
+# Google Dl
+dl.google.com = server:119.29.29.29
+dl.l.google.com = server:119.29.29.29
 neatdns.ustclug.org = server:202.141.178.13
 *.1688.com = server:223.5.5.5
 *.taobao.com = server:223.5.5.5
