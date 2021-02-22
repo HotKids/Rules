@@ -40,6 +40,13 @@ DOMAIN,vod-thumb-uk-live.akamaized.net
 DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
 DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
 
+# > Discovery+ IN
+USER-AGENT,discovery+
+DOMAIN-SUFFIX,litix.io
+DOMAIN-SUFFIX,discoveryplus.in
+DOMAIN,ap2-prod-images.disco-api.com
+DOMAIN,prod-realmservice.mercury.dnitv.com
+
 # > Disney Plus
 USER-AGENT,Disney*
 DOMAIN-SUFFIX,disneyplus.com
