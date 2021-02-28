@@ -1,0 +1,5 @@
+payload:
+  # > Paramount+
+  # USER-AGENT,CBS*
+  - PROCESS-NAME,com.cbs.app
+  - DOMAIN-KEYWORD,cbs
