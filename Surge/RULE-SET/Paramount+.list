@@ -1,0 +1,15 @@
+# > Paramount+
+USER-AGENT,CBS*
+DOMAIN-KEYWORD,cbs
+DOMAIN-SUFFIX,cbs.com
+DOMAIN-SUFFIX,cbsi.com
+DOMAIN-SUFFIX,cbsivideo.com
+DOMAIN-SUFFIX,cbsaavideo.com
+DOMAIN-SUFFIX,cbsstatic.com
+DOMAIN-SUFFIX,cbsig.net
+DOMAIN-SUFFIX,branch.io
+DOMAIN-SUFFIX,imrworldwide.com
+DOMAIN-SUFFIX,cws.conviva.com
+DOMAIN,kvinit-prod.api.kochava.com
+DOMAIN,i-amlg-prod.appspot.com
+DOMAIN,cbs.penthera.com
