@@ -536,6 +536,20 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/myVideo.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/myVideo.yaml
     interval: 86400 
+  
+  Paravi:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Paravi.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paravi.yaml
+    interval: 86400
+    
+  Paramount+:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Paramount+.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paramount+.yaml
+    interval: 86400 
     
   Peacock:
     type: http
@@ -543,13 +557,6 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Peacock.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Peacock.yaml
     interval: 86400
-    
-  Paravi:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Paravi.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paravi.yaml
-    interval: 86400  
     
   Spotify:
     type: http
@@ -647,6 +654,7 @@ rules:
   - RULE-SET,LINE TV,🇹🇼 Taiwan
   - RULE-SET,myVideo,🇹🇼 Taiwan
   - RULE-SET,Paravi,🇯🇵 Japan
+  - RULE-SET,Paramount+,🇺🇸 America
   - RULE-SET,Peacock,🇺🇸 America 
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
