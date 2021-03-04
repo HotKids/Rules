@@ -1,16 +1,8 @@
 # > Paramount+
 USER-AGENT,PPlus*
-DOMAIN-KEYWORD,cbs
-DOMAIN-SUFFIX,paramountplus.com
-DOMAIN-SUFFIX,cbs.com
-DOMAIN-SUFFIX,cbsi.com
-DOMAIN-SUFFIX,cbsivideo.com
+// DOMAIN-SUFFIX,cbsi.com
 DOMAIN-SUFFIX,cbsaavideo.com
-DOMAIN-SUFFIX,cbsstatic.com
-DOMAIN-SUFFIX,cbsig.net
-DOMAIN-SUFFIX,branch.io
-DOMAIN-SUFFIX,imrworldwide.com
-DOMAIN-SUFFIX,cws.conviva.com
-DOMAIN,kvinit-prod.api.kochava.com
-DOMAIN,i-amlg-prod.appspot.com
-DOMAIN,cbs.penthera.com
+DOMAIN-SUFFIX,cbsivideo.com
+DOMAIN-SUFFIX,paramountplus.com
+// DOMAIN-SUFFIX,pplusstatic.com
+DOMAIN,cbsi.live.ott.irdeto.com
