@@ -1,5 +1,5 @@
 # > Paramount+
-USER-AGENT,CBS*
+USER-AGENT,PPlus*
 DOMAIN-KEYWORD,cbs
 DOMAIN-SUFFIX,paramountplus.com
 DOMAIN-SUFFIX,cbs.com
