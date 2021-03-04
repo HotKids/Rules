@@ -6,3 +6,5 @@ DOMAIN-SUFFIX,cbsivideo.com
 DOMAIN-SUFFIX,paramountplus.com
 // DOMAIN-SUFFIX,pplusstatic.com
 DOMAIN,cbsi.live.ott.irdeto.com
+
+// DOMAIN,pubads.g.doubleclick.net 不可屏蔽
