@@ -471,7 +471,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Disney+.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Disney.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Disney+.yaml
     interval: 86400
 
   FOD:
@@ -488,18 +488,18 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/friDay.yaml
     interval: 86400
 
-  HBO:
+  HBO Max:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/HBO.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO.yaml
+    path: ./Provider/RuleSet/Streaming/HBO_Max.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_Max.yaml
     interval: 86400
 
-  HBO Asia:
+  HBO Go:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/HBO_Asia.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_Asia.yaml
+    path: ./Provider/RuleSet/Streaming/HBO_Go.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_GO.yaml
     interval: 86400
 
   Hulu:
@@ -646,8 +646,8 @@ rules:
   - RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,FOD,🇯🇵 Japan
   - RULE-SET,friDay,🇹🇼 Taiwan
-  - RULE-SET,HBO,🇺🇸 America
-  - RULE-SET,HBO Asia,🇵🇭 Philippines
+  - RULE-SET,HBO Max,🇺🇸 America
+  - RULE-SET,HBO Go,🇵🇭 Philippines
   - RULE-SET,Hulu,🇺🇸 America
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
