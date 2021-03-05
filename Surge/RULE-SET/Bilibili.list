@@ -12,6 +12,3 @@ DOMAIN-KEYWORD,bilibili
 // 港台版 Bilibili App
 USER-AGENT,bili-inter*
 DOMAIN,apiintl.biliapi.net
-# > Surfboard Android
-PROCESS-NAME,tv.danmaku.bili
-PROCESS-NAME,com.bilibili.app.in
