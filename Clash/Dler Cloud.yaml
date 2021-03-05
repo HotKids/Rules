@@ -499,7 +499,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/HBO_Go.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_GO.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_Go.yaml
     interval: 86400
 
   Hulu:
