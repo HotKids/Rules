@@ -36,7 +36,7 @@ Cookie: 美团 = type=http-request,pattern=^https?:\/\/i\.meituan\.com\/evolve\/
 
 # > 饿了么 GetCookie by songyangzz&zZPiglet&blackmatrix7
 Cookie: 饿了么 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/eus\/v\d\/current_user$,script-path=https://raw.githubusercontent.com/songyangzz/QuantumultX/master/elem/elemGetCookies.js
-Cookie: 饿了么吃货豆 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/svip_biz\/v1\/supervip\/query_mission_list\?longitude=([^&]*).*latitude=([^&]*),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js
+Cookie: 饿了么吃货豆 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/svip_biz\/v1\/supervip\/queryMissionCollect\??longitude=([^&]*).*latitude=([^&]*),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js
 
 # > 京东到家 GetCookie by barrymchen&GideonSenku
 Cookie: 京东到家 = type=http-request,pattern=^https?:\/\/daojia\.jd\.com\/client(.*?)functionId=signin(.*?)userSigninNew,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.cookie.js
