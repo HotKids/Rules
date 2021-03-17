@@ -8,6 +8,7 @@ DOMAIN-SUFFIX,pplusstatic.com
 DOMAIN,cbsi.live.ott.irdeto.com
 
 // CBS live
+DOMAIN,cbsservice.aws.syncbak.com
 DOMAIN,cbsplaylistserver.aws.syncbak.com
 
 # DOMAIN,pubads.g.doubleclick.net 不可屏蔽
