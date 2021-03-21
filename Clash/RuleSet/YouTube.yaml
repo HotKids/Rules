@@ -6,3 +6,4 @@ payload:
   - DOMAIN-SUFFIX,googlevideo.com
   - DOMAIN,youtubei.googleapis.com
   - DOMAIN-KEYWORD,youtube
+  - DOMAIN,android.clients.google.com
