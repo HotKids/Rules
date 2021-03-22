@@ -689,13 +689,14 @@ rules:
   - IP-CIDR,127.0.0.0/8,🔘 DIRECT
   - IP-CIDR,100.64.0.0/10,🔘 DIRECT
   - IP-CIDR,224.0.0.0/4,🔘 DIRECT
-  
-  # 使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时禁用「GEOIP,CN」规则
+  - IP-CIDR,fe80::/10,🔘 DIRECT
+
+  # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
   - RULE-SET,ChinaIP,🚓 Inbound
   # Tencent
-  - IP-CIDR,119.28.28.28/32,🚓 Inbound
-  - IP-CIDR,182.254.116.0/24,🚓 Inbound
-  # GeoIP China
+  # IP-CIDR,119.28.28.28/32,🚓 Inbound
+  # IP-CIDR,182.254.116.0/24,🚓 Inbound
+  # GeoIP China(若启用，则禁用 ChinaIP.list)
   # GEOIP,CN,🚓 Inbound
 
   - MATCH,🚁 Outbound
