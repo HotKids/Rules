@@ -8,7 +8,7 @@ hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
 // App: 我的-天天抽奖
-Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_checkin.js,
+Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.js,
 
 # > WPS GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
