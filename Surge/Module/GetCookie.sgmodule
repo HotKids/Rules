@@ -106,8 +106,8 @@ Cookie: 携程 小程序 = type=http-request,pattern=^https?:\/\/m\.ctrip\.com\/
 Cookie: 哈啰出行 = type=http-request,pattern=^https?:\/\/gameapi\.hellobike\.com\/api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/hellobike/hellobike.js,requires-body=true
 
 # > 无忧行 GetCookie by vinewx
-Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
-Cookie: 无忧行 = type=http-request,pattern=^https?:\/\/task\.jegotrip\.com\.cn\:8080\/app\/tasks\?userid,script-path=https://ooxx.be/js/jegotrip.js,requires-body=true
+Cookie: 无忧行 = type=http-response,pattern=https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js, requires-body=true
+Cookie: 无忧行 = type=http-response,pattern=https?:\/\/task\.jegotrip\.com\.cn\:8080\/app\/tasks\?userid,script-path=https://ooxx.be/js/jegotrip.js, requires-body=true
 
 # > 飞客茶馆 GetCookie by chavyleung
 Cookie: 飞客茶馆 = type=http-request,pattern=^https?:\/\/www\.flyertea\.com\/source\/plugin\/mobile\/mobile\.php\?module=getdata&.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.cookie.js
