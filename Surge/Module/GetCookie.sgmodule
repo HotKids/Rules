@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.smzdm.com,*.suning.com,*.video.qq.com,*.wandafilm.com,activity-1.m.duiba.com.cn,api.m.jd.com,ccsp-egmas.sf-express.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,gameapi.hellobike.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,m.ctrip.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.smzdm.com,*.suning.com,*.video.qq.com,*.wandafilm.com,activity-1.m.duiba.com.cn,api.m.jd.com,ccsp-egmas.sf-express.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,m.ctrip.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
@@ -95,6 +95,12 @@ Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\
 # > 便利蜂 GetCookie by zZPiglet
 Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/meepo\/taskCenter\/home\/v\d,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
 
+# > 万达电影 GetCookie by chavyleung&blackmatrix7
+// 签到页面获取网页端:https://act-m.wandacinemas.com/2005/17621a8caacc4d190dadd/
+Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wanda/wanda.cookie.js,debug=true
+// Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com\/user\/query_user_level\.api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
+// Cookie: 万达电影_获取 ActivityCode = type=http-request,pattern=^https?:\/\/cms\-activity\-api\-prd\-mx\.wandafilm\.com\/activity\/activity_count\.api\?activityCode=(\d*),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
+
 # > 航旅纵横 GetCookie by zZPiglet
 Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com\/gateway\/api\/web\/rest\/polite\/app\/sign\/signpageinitdata,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
 
@@ -102,18 +108,9 @@ Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com
 Cookie: 携程 App = type=http-request,pattern=^https?:\/\/m\.ctrip\.com\/restapi\/soa2\/14946\/json\/userBaseInfo,script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip/ctrip_cookie.js
 Cookie: 携程 小程序 = type=http-request,pattern=^https?:\/\/m\.ctrip\.com\/restapi\/soa2\/16575\/signin,script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip_wx/ct_cookie.js,requires-body=true
 
-# > 哈啰出行 GetCookie by chavyleung&blackmatrix7
-Cookie: 哈啰出行 = type=http-request,pattern=^https?:\/\/gameapi\.hellobike\.com\/api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/hellobike/hellobike.js,requires-body=true
-
 # > 无忧行 GetCookie by vinewx
 Cookie: 无忧行 = type=http-response,pattern=https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js, requires-body=true
 Cookie: 无忧行 = type=http-response,pattern=https?:\/\/task\.jegotrip\.com\.cn\:8080\/app\/tasks\?userid,script-path=https://ooxx.be/js/jegotrip.js, requires-body=true
 
 # > 飞客茶馆 GetCookie by chavyleung
 Cookie: 飞客茶馆 = type=http-request,pattern=^https?:\/\/www\.flyertea\.com\/source\/plugin\/mobile\/mobile\.php\?module=getdata&.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.cookie.js
-
-# > 万达电影 GetCookie by chavyleung&blackmatrix7
-// 签到页面获取网页端:https://act-m.wandacinemas.com/2005/17621a8caacc4d190dadd/
-Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wanda/wanda.cookie.js,debug=true
-// Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com\/user\/query_user_level\.api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
-// Cookie: 万达电影_获取 ActivityCode = type=http-request,pattern=^https?:\/\/cms\-activity\-api\-prd\-mx\.wandafilm\.com\/activity\/activity_count\.api\?activityCode=(\d*),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
