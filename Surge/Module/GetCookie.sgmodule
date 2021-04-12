@@ -90,7 +90,7 @@ Cookie: 豆瓣时间 = type=http-request,pattern=^https?:\/\/frodo\.douban\.com\
 Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
 
 # > 全家 GetCookie by blackmatrix7
-Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/signin\/usersign,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
+Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/(signin\/usersign|sign\/current),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
 # > 便利蜂 GetCookie by zZPiglet
 Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/meepo\/taskCenter\/home\/v\d,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
