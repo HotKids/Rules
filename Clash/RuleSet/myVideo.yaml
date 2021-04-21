@@ -2,5 +2,6 @@ payload:
   # > myVideo
   # USER-AGENT,myVideo*
   - PROCESS-NAME,com.taiwanmobile.myVideo
+  - PROCESS-NAME,com.taiwanmobile.myVideotv
   - DOMAIN-SUFFIX,myvideo.net.tw
   - DOMAIN-SUFFIX,catch.net.tw
