@@ -1,4 +1,6 @@
-payload:
+payload:  
   # > friDay
   # USER-AGENT,friDay*
+  - PROCESS-NAME,net.fetnet.fetvod
+  - PROCESS-NAME,net.fetnet.fetvod.tv
   - DOMAIN-SUFFIX,friday.tw
