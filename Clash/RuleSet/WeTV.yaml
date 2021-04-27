@@ -5,9 +5,10 @@ payload:
   # PROCESS-NAME,com.tencent.qqlivei18n.us
   - PROCESS-NAME,com.ktcp.osvideo
   - DOMAIN-SUFFIX,wetv.vip
-  - DOMAIN-SUFFIX,wetvinfo.com
-  # IP-CIDR,203.205.136.0/23,no-resolve
-  # DOMAIN-SUFFIX,meovse.com
-  # DOMAIN,wetv.acc.qq.com
+  - DOMAIN-SUFFIX,wetvinfo.com  
+  - DOMAIN,wetv.tv.qq.com
+  - DOMAIN,wetv.acc.qq.com
   # DOMAIN,oth.eve.mdt.qq.com
   # DOMAIN,oth.str.mdt.qq.com
+  # DOMAIN-SUFFIX,meovse.com
+  # ip-cidr,203.205.136.0/23
