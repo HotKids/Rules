@@ -551,7 +551,7 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paramount+.yaml
     interval: 86400 
     
-  Peacock:
+  Peacock TV:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Peacock.yaml
@@ -655,7 +655,7 @@ rules:
   - RULE-SET,myVideo,🇹🇼 Taiwan
   - RULE-SET,Paravi,🇯🇵 Japan
   - RULE-SET,Paramount+,🇺🇸 America
-  - RULE-SET,Peacock,🇺🇸 America 
+  - RULE-SET,Peacock TV,🇺🇸 America 
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,WeTV,🇹🇼 Taiwan
   - RULE-SET,YouTube,🔰 Proxy
