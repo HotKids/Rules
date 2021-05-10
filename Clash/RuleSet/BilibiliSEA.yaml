@@ -1,4 +1,8 @@
 payload:
   # > 东南亚版 Bilibili App
   - PROCESS-NAME,com.bstar.intl
+  - DOMAIN-SUFFIX,biliintl.com
+  - DOMAIN-SUFFIX,bstarstatic.com
   - DOMAIN,interface.bilibili.com
+  - DOMAIN,apm-misaka.biliapi.net
+  - DOMAIN,upos-bstar-mirrorakam.akamaized.net
