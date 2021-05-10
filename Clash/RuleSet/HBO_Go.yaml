@@ -7,5 +7,6 @@ payload:
   - DOMAIN-SUFFIX,hbogoasia.com
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
+  - DOMAIN,hbogoprod-vod.akamaized.net
   - DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net
