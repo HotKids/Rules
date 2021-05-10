@@ -2,5 +2,5 @@
 // USER-AGENT,bilibili,BilibiliSEA
 DOMAIN-SUFFIX,biliintl.com,BilibiliSEA
 DOMAIN,interface.bilibili.com,BilibiliSEA
-DOMAIN,apm-misaka.biliapi.net
+DOMAIN,apm-misaka.biliapi.net,BilibiliSEA
 DOMAIN,upos-bstar-mirrorakam.akamaized.net,BilibiliSEA
