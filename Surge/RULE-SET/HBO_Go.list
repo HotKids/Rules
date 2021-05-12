@@ -1,5 +1,6 @@
 # > HBO GO Asia
 USER-AGENT,HBO%20GO%20PROD*
+DOMAIN-KEYWORD,hboasia
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.com
