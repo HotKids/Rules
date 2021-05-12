@@ -7,6 +7,7 @@ payload:
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
-  - DOMAIN,cbsi.live.ott.irdeto.com
+  - DOMAIN,cbsi.live.ott.irdeto.com 
+  - DOMAIN,link.theplatform.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
