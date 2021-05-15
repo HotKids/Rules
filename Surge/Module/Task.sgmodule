@@ -105,22 +105,15 @@ Tasks: 百果园 = type=cron,cronexp="18 5 * * *",script-path=https://raw.github
 # > 全家 DailyBonus by blackmatrix7
 Tasks: Fa米家 = type=cron,cronexp="19 5 * * *",script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
-# > 便利蜂 DailyBonus by zZPiglet
-Tasks: 便利蜂 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
-
 # > 万达电影 DailyBonus by chavyleung&blackmatrix7
-Tasks: 万达电影 = type=cron,cronexp="21 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wanda/wanda.js,wake-system=true
-// Tasks: 万达电影 = type=cron,cronexp="21 5 * * *",timeout=10,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
+Tasks: 万达电影 = type=cron,cronexp="20 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wanda/wanda.js,wake-system=true
+// Tasks: 万达电影 = type=cron,cronexp="20 5 * * *",timeout=10,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
 
 # > 航旅纵横 DailyBonus by zZPiglet
-Tasks: 航旅纵横 = type=cron,cronexp="22 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
-
-# > 携程 DailyBonus by barrym-chen
-Tasks: 携程 App = type=cron,cronexp="23 5 * * *",script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip/ctrip.js
-Tasks: 携程 小程序 = type=cron,cronexp="23 5 * * *",script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip_wx/ct_sign.js
+Tasks: 航旅纵横 = type=cron,cronexp="21 5 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
 
 # > 无忧行 DailyBonus by vinewx
-Tasks: 无忧行 = type=cron,cronexp="24 5 * * *",script-path=https://ooxx.be/js/jegotrip.js
+Tasks: 无忧行 = type=cron,cronexp="22 5 * * *",script-path=https://ooxx.be/js/jegotrip.js
 
 # > 飞客茶馆 DailyBonus by chavyleung
-Tasks: 飞客茶馆 = type=cron,cronexp="25 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
+Tasks: 飞客茶馆 = type=cron,cronexp="23 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/flyertea/flyertea.js
