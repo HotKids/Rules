@@ -3,12 +3,12 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.smzdm.com,*.suning.com,*.video.qq.com,*.wandafilm.com,activity-1.m.duiba.com.cn,api.m.jd.com,ccsp-egmas.sf-express.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,h5.bianlifeng.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,m.ctrip.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
+hostname = %APPEND% *.api.ddxq.mobi,*.bilibili.com,*.iqiyi.com,*.jegotrip.com.cn,*.manmanbuy.com,*.meituan.com,*.smzdm.com,*.suning.com,*.video.qq.com,*.wandafilm.com,activity-1.m.duiba.com.cn,api.m.jd.com,ccsp-egmas.sf-express.com,cloud.umetrip.com,credits.bz.mgtv.com,daojia.jd.com,fmapp.chinafamilymart.com.cn,frodo.douban.com,h5.ele.me,ios.zmzapi.com,m.client.10010.com,mobwsa.ximalaya.com,music.163.com,passport.biligame.com,superapp.kiwa-tech.com,wx-mini.pagoda.com.cn,www.duokan.com,www.flyertea.com,zt.wps.cn
 
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
 // App: 我的-天天抽奖
-Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.js,
+Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.js
 
 # > WPS GetCookie by chavyleung
 Cookie: WPS = type=http-request,pattern=^https?:\/\/zt\.wps\.cn\/2018\/docer_check_in\/api\/act_list,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wps/wps.cookie.js
@@ -92,9 +92,6 @@ Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.
 # > 全家 GetCookie by blackmatrix7
 Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/(signin\/usersign|sign\/current),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
-# > 便利蜂 GetCookie by zZPiglet
-Cookie: 便利蜂 = type=http-request,pattern=^https?:\/\/h5\.bianlifeng\.com\/meepo\/taskCenter\/home\/v\d,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Blibee/Blibee.js
-
 # > 万达电影 GetCookie by chavyleung&blackmatrix7
 // 签到页面获取网页端:https://act-m.wandacinemas.com/2005/17621a8caacc4d190dadd/
 Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/wanda/wanda.cookie.js,debug=true
@@ -103,10 +100,6 @@ Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\
 
 # > 航旅纵横 GetCookie by zZPiglet
 Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com\/gateway\/api\/web\/rest\/polite\/app\/sign\/signpageinitdata,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
-
-# > 携程旅行 GetCookie by barrym-chen
-Cookie: 携程 App = type=http-request,pattern=^https?:\/\/m\.ctrip\.com\/restapi\/soa2\/14946\/json\/userBaseInfo,script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip/ctrip_cookie.js
-Cookie: 携程 小程序 = type=http-request,pattern=^https?:\/\/m\.ctrip\.com\/restapi\/soa2\/16575\/signin,script-path=https://raw.githubusercontent.com/barrym-chen/Script/master/ctrip_wx/ct_cookie.js,requires-body=true
 
 # > 无忧行 GetCookie by vinewx
 Cookie: 无忧行 = type=http-response,pattern=https?:\/\/app.*\.jegotrip\.com\.cn\/.*getUser\?,script-path=https://ooxx.be/js/jegotrip.js, requires-body=true
