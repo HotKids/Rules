@@ -52,10 +52,9 @@ Tasks: 饿了么 = type=cron,cronexp="2 5 * * *",script-path=https://raw.githubu
 # > 京东到家 GetCookie DailyBonus by barrymchen&GideonSenku
 Tasks: 京东到家 = type=cron,cronexp="3 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/jddj/jddj.js
 
-# > 叮咚买菜 DailyBonus by blackmatrix7&chavyleung&iepngs
+# > 叮咚买菜 DailyBonus by blackmatrix7&chavyleung
 Tasks: 叮咚买菜-签到 = type=cron,cronexp="4 5 * * *",timeout=30,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js
-Tasks: 叮咚买菜-签到 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
-Tasks: 叮咚买菜-农场 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/iepngs/Script/master/dingdong/index.js
+// Tasks: 叮咚买菜-签到 = type=cron,cronexp="4 5 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/mcdd/mcdd.js
 
 # > 美团买菜 DailyBonus by blackmatrix7
 Tasks: 美团买菜 = type=cron,cronexp="5 5 * * *",timeout=30,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/meituan/maicai_checkin.js
