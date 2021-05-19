@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *acs.m.taobao.com,api.m.jd.com
+hostname = %INSERT% api.m.jd.com,trade-acs.m.taobao.com
 
 [Script]
 # > JD App 显示历史价格 by yichahucha
