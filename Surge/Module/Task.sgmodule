@@ -52,7 +52,7 @@ Tasks: 百果园 = type=cron,cronexp="19 0 * * *",script-path=https://raw.github
 # > 海底捞 DailyBonus by zZPiglet
 Tasks: 海底捞 = type=cron,cronexp="20 0 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
 
-# > 饿了么_吃货豆 DailyBonus by blackmatrix7
+# > 饿了么 DailyBonus by blackmatrix7
 Tasks: 饿了么_领取吃货豆 = type=cron,cronexp="21 0 * * *",timeout=60,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js
 // Tasks: 饿了么_领取任务 = type=cron,cronexp="21 0 * * *",timeout=60,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_mission.js
 
