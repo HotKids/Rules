@@ -1,10 +1,12 @@
 # > iQIYI Intl
 USER-AGENT,iQIYI*
 USER-AGENT,QYPlayer*
+USER-AGENT,QTP*
 DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,intl.iqiyi.com
 DOMAIN-SUFFIX,inter.iqiyi.com
 DOMAIN-SUFFIX,inter.ptqy.gitv.tv
+DOMAIN,ndct-data.video.iqiyi.com
 // 视频播放版权地区验证
 DOMAIN,intel-cache.video.iqiyi.com
 DOMAIN,intel-cache.m.iqiyi.com
