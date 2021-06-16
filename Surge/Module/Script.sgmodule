@@ -25,9 +25,8 @@ AND,((URL-REGEX,\/amdc\/mobileDispatch),(USER-AGENT,%E6%89%8B%E6%9C%BA%E6%B7%98%
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 
 [URL Rewrite]
-# > Bilibili SEA 解除 SIM 卡及系统语言限制
+# > Bilibili SEA 解除 SIM 卡地区限制
 (^https?:\/\/app\.biliintl\.com\/intl\/.+)(&sim_code=\d+)(.+) $1$3 302
-// (^https?:\/\/app\.biliintl\.com\/intl\/.+)(&s_locale=zh-Hans_[A-Z]{2})(.+) $1&s_locale=en-US_US$3 302
 
 [Script]
 # > 微信 App 内被屏蔽链接快捷跳转
