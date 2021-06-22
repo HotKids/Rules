@@ -2,6 +2,7 @@ payload:
   # > Viu
   # USER-AGENT,Viu*
   # USER-AGENT,ViuTV*
+  - PROCESS-NAME,com.viu.phone
   - DOMAIN-SUFFIX,viu.com
   - DOMAIN-SUFFIX,viu.tv
   - DOMAIN,api.viu.now.com
