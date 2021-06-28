@@ -1,6 +1,8 @@
 # > iQIYI Intl
 USER-AGENT,iQIYI*,iQIYI Intl
+USER-AGENT,QIYIVideo*,iQIYI Intl
 USER-AGENT,QYPlayer*,iQIYI Intl
+USER-AGENT,QTP*,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
@@ -8,5 +10,5 @@ DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
 DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
-
+// 播放
 IP-CIDR,110.238.107.47/32,iQIYI Intl
