@@ -2,32 +2,11 @@
 USER-AGENT,iQIYI*,iQIYI Intl
 USER-AGENT,QYPlayer*,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
+// 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
-DOMAIN-SUFFIX,inter.iqiyi.com,iQIYI Intl
-DOMAIN-SUFFIX,inter.ptqy.gitv.tv,iQIYI Intl
-// 视频播放版权地区验证
-DOMAIN,intel-cache.video.iqiyi.com,iQIYI Intl
-DOMAIN,intel-cache.m.iqiyi.com,iQIYI Intl
-// 视频历史记录版权地区验证
+// 历史
 DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
-// 视频个人收藏版权地区验证
+// 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
-IP-CIDR,103.44.56.0/22,iQIYI Intl
-IP-CIDR,118.26.32.0/23,iQIYI Intl
-IP-CIDR,118.26.120.0/24,iQIYI Intl
-IP-CIDR,110.238.107.47/32,iQIYI Intl
-IP-CIDR,223.119.62.225/28,iQIYI Intl
-IP-CIDR,23.40.241.251/32,iQIYI Intl
-IP-CIDR,23.40.242.10/32,iQIYI Intl
-IP-CIDR,159.138.102.146/32,iQIYI Intl
 
-// 以下暂未验证（可选择直连）
-// DOMAIN,intl-cmonitor.iqiyi.com,iQIYI Intl
-// DOMAIN,intl-passport.iqiyi.com,iQIYI Intl
-// DOMAIN,intl-sns.iqiyi.com,iQIYI Intl
-// DOMAIN,intl-im-hist-api.iqiyi.com,iQIYI Intl
-// DOMAIN,intl-act.vip.iqiyi.com,iQIYI Intl
-// DOMAIN,intl-i.vip.iqiyi.com,iQIYI Intl
-// DOMAIN,intl.policy.iqiyi.com,iQIYI Intl
-// DOMAIN,du-feige-intl.iqiyi.com,iQIYI Intl
-// DOMAIN,msg-intl.qy.net,iQIYI Intl
+IP-CIDR,110.238.107.47/32,iQIYI Intl
