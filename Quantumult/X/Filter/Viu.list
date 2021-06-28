@@ -1,9 +1,4 @@
 # > Viu
-USER-AGENT,Viu*,Viu
-USER-AGENT,ViuTV*,Viu
+// USER-AGENT,Viu*,Viu
 DOMAIN-SUFFIX,viu.com,Viu
-DOMAIN-SUFFIX,viu.tv,Viu
-DOMAIN,api.viu.now.com,Viu
-DOMAIN,d1k2us671qcoau.cloudfront.net,Viu
-DOMAIN,d2anahhhmp1ffz.cloudfront.net,Viu
 DOMAIN,dfp6rglgjqszk.cloudfront.net,Viu
