@@ -191,11 +191,7 @@ DOMAIN-SUFFIX,viki.net
 DOMAIN-SUFFIX,viki.com
 
 # > Viu
-USER-AGENT,Viu*
-USER-AGENT,ViuTV*
+// USER-AGENT,Viu*
 DOMAIN-SUFFIX,viu.com
-DOMAIN-SUFFIX,viu.tv
-DOMAIN,api.viu.now.com
-DOMAIN,d1k2us671qcoau.cloudfront.net
-DOMAIN,d2anahhhmp1ffz.cloudfront.net
+// 地区验证
 DOMAIN,dfp6rglgjqszk.cloudfront.net
