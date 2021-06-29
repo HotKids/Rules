@@ -175,34 +175,3 @@ USER-AGENT,Viki*,Viki
 DOMAIN-SUFFIX,viki.io,Viki
 DOMAIN-SUFFIX,viki.net,Viki
 DOMAIN-SUFFIX,viki.com,Viki
-
-# > Viu
-USER-AGENT,Viu*,Viu
-USER-AGENT,ViuTV*,Viu
-DOMAIN-SUFFIX,viu.com,Viu
-DOMAIN-SUFFIX,viu.tv,Viu
-DOMAIN,api.viu.now.com,Viu
-DOMAIN,d1k2us671qcoau.cloudfront.net,Viu
-DOMAIN,d2anahhhmp1ffz.cloudfront.net,Viu
-DOMAIN,dfp6rglgjqszk.cloudfront.net,Viu
-
-# > Bilibili
-USER-AGENT,*bili*,IQIYI&Bilibili
-DOMAIN-SUFFIX,bilibili.com,IQIYI&Bilibili
-DOMAIN-SUFFIX,acgvideo.com,IQIYI&Bilibili
-DOMAIN-SUFFIX,acg.tv,IQIYI&Bilibili
-DOMAIN-SUFFIX,hdslb.com,IQIYI&Bilibili
-DOMAIN,upos-hz-mirrorakam.akamaized.net,IQIYI&Bilibili
-DOMAIN-KEYWORD,bilibili,IQIYI&Bilibili
-
-# > IQIYI
-# USER-AGENT,QIYI*,IQIYI&Bilibili
-# USER-AGENT,iQiYi*,IQIYI&Bilibili
-# DOMAIN-KEYWORD,qiyi,IQIYI&Bilibili
-# DOMAIN-SUFFIX,qy.net,IQIYI&Bilibili
-# DOMAIN-SUFFIX,71.am,IQIYI&Bilibili
-# 爱奇艺检测ip
-DOMAIN,cache.video.iqiyi.com,IQIYI&Bilibili
-# IP-CIDR,101.227.0.0/16,IQIYI&Bilibili
-# IP-CIDR,101.224.0.0/13,IQIYI&Bilibili
-# IP-CIDR,119.176.0.0/12,IQIYI&Bilibili
