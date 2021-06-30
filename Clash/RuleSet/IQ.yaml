@@ -11,3 +11,4 @@ payload:
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
   - IP-CIDR,110.238.107.47/32,no-resolve
+  - IP-CIDR,203.74.95.130/28,no-resolve
