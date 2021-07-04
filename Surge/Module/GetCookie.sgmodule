@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,passport.biligame.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,superapp.kiwa-tech.com,activity-1.m.duiba.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,cloud.umetrip.com
+hostname = %APPEND% m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,passport.biligame.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,superapp.kiwa-tech.com,activity-1.m.duiba.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,cloud.umetrip.com,*.qunar.com
 
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
@@ -60,3 +60,6 @@ Cookie: 万达电影_获取ActivityCode = type=http-request,pattern=^https?:\/\/
 
 # > 航旅纵横 GetCookie by zZPiglet
 Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com\/gateway\/api\/web\/rest\/polite\/app\/sign\/signpageinitdata,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
+
+# > 去哪儿 GetCookie by chavyleung
+Cookie: 去哪儿 = type=http-request,pattern=^https:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
