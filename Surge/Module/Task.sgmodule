@@ -65,6 +65,3 @@ Tasks: 万达电影 = type=cron,cronexp="23 0 * * *",timeout=10,script-path=http
 
 # > 航旅纵横 DailyBonus by zZPiglet
 Tasks: 航旅纵横 = type=cron,cronexp="24 0 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
-
-# > 无忧行 DailyBonus by vinewx
-Tasks: 无忧行 = type=cron,cronexp="25 0 * * *",script-path=https://ooxx.be/js/jegotrip.js
