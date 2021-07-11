@@ -1,6 +1,6 @@
 # > Discovery+
 USER-AGENT,discovery+*
-USER-AGENT,DPlus
+USER-AGENT,DPlus*
 DOMAIN-KEYWORD,discoveryplus
 DOMAIN-SUFFIX,litix.io
 DOMAIN-SUFFIX,discoveryplus.com
