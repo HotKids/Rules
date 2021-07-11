@@ -1,7 +1,9 @@
 # > Discovery+
-USER-AGENT,discovery+
+USER-AGENT,discovery+*
+USER-AGENT,DPlus
+DOMAIN-KEYWORD,discoveryplus
 DOMAIN-SUFFIX,litix.io
 DOMAIN-SUFFIX,discoveryplus.com
-DOMAIN-SUFFIX,discoveryplus.in
-DOMAIN,ap2-prod-images.disco-api.com
-DOMAIN,prod-realmservice.mercury.dnitv.com
+DOMAIN-SUFFIX,disco-api.com
+DOMAIN-SUFFIX,dnitv.com
+DOMAIN,kvinit-prod.api.kochava.com
