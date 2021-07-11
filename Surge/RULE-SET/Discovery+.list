@@ -2,8 +2,9 @@
 USER-AGENT,discovery+*
 USER-AGENT,DPlus*
 DOMAIN-KEYWORD,discoveryplus
-DOMAIN-SUFFIX,litix.io
 DOMAIN-SUFFIX,discoveryplus.com
 DOMAIN-SUFFIX,disco-api.com
 DOMAIN-SUFFIX,dnitv.com
+DOMAIN-SUFFIX,uplynk.com
+DOMAIN-SUFFIX,litix.io
 DOMAIN,kvinit-prod.api.kochava.com
