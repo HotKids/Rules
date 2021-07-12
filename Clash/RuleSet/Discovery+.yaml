@@ -3,7 +3,7 @@ payload:
   # USER-AGENT,discovery+*
   # USER-AGENT,DPlus*
   - PROCESS-NAME,com.discovery.discoveryplus.mobile
-  - PROCESS-NAME,com.discovery.discoveryplus.tv
+  - PROCESS-NAME,com.discovery.discoveryplus.androidtv
   - PROCESS-NAME,com.discoveryplus.mobile.android
   - PROCESS-NAME,com.discoveryplus.tv.android
   - DOMAIN-KEYWORD,discoveryplus
