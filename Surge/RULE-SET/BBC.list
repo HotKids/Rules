@@ -1,4 +1,4 @@
-# > BBC
+# > BBC iPlayer
 USER-AGENT,BBCiPlayer*
 DOMAIN-KEYWORD,bbcfmt
 DOMAIN-KEYWORD,co.uk
