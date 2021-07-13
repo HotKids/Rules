@@ -1,8 +1,13 @@
 # > Amazon Prime Video
-USER-AGENT,InstantVideo.US*,Prime Video
-USER-AGENT,Prime%20Video*,Prime Video
+// USER-AGENT,InstantVideo.US*,Prime Video
+// USER-AGENT,Prime%20Video*,Prime Video
 DOMAIN-SUFFIX,primevideo.com,Prime Video
 DOMAIN-SUFFIX,amazonvideo.com,Prime Video
 DOMAIN-SUFFIX,media-amazon.com,Prime Video
 DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
-DOMAIN-SUFFIX,llnwd.net,Prime Video
+DOMAIN-SUFFIX,aiv-delivery.net,Prime Video
+DOMAIN,atv-ps.amazon.com,Prime Video
+DOMAIN,fls-na.amazon.com,Prime Video
+DOMAIN,www.amazon.com,Prime Video
+DOMAIN,aiv-cdn.net.c.footprint.net,Prime Video
+DOMAIN,avodmp4s3ww-a.akamaihd.net,Prime Video
