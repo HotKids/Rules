@@ -10,13 +10,32 @@ DOMAIN,linear-abematv.akamaized.net,AbemaTV
 DOMAIN,ds-linear-abematv.akamaized.net,AbemaTV
 
 # > Amazon Prime Video
-USER-AGENT,InstantVideo.US*,Prime Video
-USER-AGENT,Prime%20Video*,Prime Video
+// USER-AGENT,InstantVideo.US*,Prime Video
+// USER-AGENT,Prime%20Video*,Prime Video
 DOMAIN-SUFFIX,primevideo.com,Prime Video
 DOMAIN-SUFFIX,amazonvideo.com,Prime Video
 DOMAIN-SUFFIX,media-amazon.com,Prime Video
 DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
-DOMAIN-SUFFIX,llnwd.net,Prime Video
+DOMAIN-SUFFIX,aiv-delivery.net,Prime Video
+DOMAIN,atv-ps.amazon.com,Prime Video
+DOMAIN,fls-na.amazon.com,Prime Video
+DOMAIN,www.amazon.com,Prime Video
+DOMAIN,avodmp4s3ww-a.akamaihd.net,Prime Video
+
+# > BBC iPlayer
+USER-AGENT,BBCiPlayer*,BBC iPlayer
+DOMAIN-KEYWORD,bbcfmt,BBC iPlayer
+DOMAIN-KEYWORD,co.uk,BBC iPlayer
+DOMAIN-KEYWORD,uk-live,BBC iPlayer
+DOMAIN-SUFFIX,bbc.com,BBC iPlayer
+DOMAIN-SUFFIX,bbc.co,BBC iPlayer
+DOMAIN-SUFFIX,bbc.co.uk,BBC iPlayer
+DOMAIN-SUFFIX,bbci.co,BBC iPlayer
+DOMAIN-SUFFIX,bbci.co.uk,BBC iPlayer
+DOMAIN,vod-dash-uk-live.akamaized.net,BBC iPlayer
+DOMAIN,vod-thumb-uk-live.akamaized.net,BBC iPlayer
+DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC iPlayer
+DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC iPlayer
 
 # > Bahamut
 USER-AGENT,Anime*,Bahamut
@@ -25,20 +44,11 @@ DOMAIN-SUFFIX,gamer.com.tw,Bahamut
 DOMAIN,gamer-cds.cdn.hinet.net,Bahamut
 DOMAIN,gamer2-cds.cdn.hinet.net,Bahamut
 
-# > BBC
-USER-AGENT,BBCiPlayer*,BBC
-DOMAIN-KEYWORD,bbcfmt,BBC
-DOMAIN-KEYWORD,co.uk,BBC
-DOMAIN-KEYWORD,uk-live,BBC
-DOMAIN-SUFFIX,bbc.com,BBC
-DOMAIN-SUFFIX,bbc.co,BBC
-DOMAIN-SUFFIX,bbc.co.uk,BBC
-DOMAIN-SUFFIX,bbci.co,BBC
-DOMAIN-SUFFIX,bbci.co.uk,BBC
-DOMAIN,vod-dash-uk-live.akamaized.net,BBC
-DOMAIN,vod-thumb-uk-live.akamaized.net,BBC
-DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC
-DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC
+# > Britbox
+USER-AGENT,Britbox*,Britbox
+DOMAIN-SUFFIX,britbox.com,Britbox
+DOMAIN-SUFFIX,bbc.co.uk,Britbox
+DOMAIN,d2z3p34itxwaj7.cloudfront.net,Britbox
 
 # > DAZN
 USER-AGENT,DAZN*,DAZN
@@ -48,80 +58,58 @@ DOMAIN-SUFFIX,dazn-api.com,DAZN
 DOMAIN,d151l6v8er5bdm.cloudfront.net,DAZN
 DOMAIN-KEYWORD,voddazn,DAZN
 
-# > Disney Plus
-USER-AGENT,Disney*,Disney Plus
-DOMAIN-SUFFIX,disneyplus.com,Disney Plus
-DOMAIN-SUFFIX,disney-plus.net,Disney Plus
-DOMAIN-SUFFIX,disneystreaming.com,Disney Plus
-DOMAIN-SUFFIX,dssott.com,Disney Plus
-DOMAIN-SUFFIX,bamgrid.com,Disney Plus
-DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
-DOMAIN,cdn.registerdisney.go.com,Disney Plus
+# > Discovery+
+USER-AGENT,discovery+*,Discovery+
+USER-AGENT,DPlus*,Discovery+
+DOMAIN-KEYWORD,discoveryplus,Discovery+
+DOMAIN-SUFFIX,discoveryplus.com,Discovery+
+DOMAIN-SUFFIX,disco-api.com,Discovery+
+DOMAIN-SUFFIX,dnitv.com,Discovery+
+DOMAIN-SUFFIX,uplynk.com,Discovery+
+DOMAIN-SUFFIX,litix.io,Discovery+
+DOMAIN,kvinit-prod.api.kochava.com,Discovery+
 
-# > friDay
-USER-AGENT,friDay*,friDay
-DOMAIN-SUFFIX,friday.tw,friDay
+# > Disney+
+USER-AGENT,Disney*,Disney+
+DOMAIN-SUFFIX,disneyplus.com,Disney+
+DOMAIN-SUFFIX,disney-plus.net,Disney+
+DOMAIN-SUFFIX,disneystreaming.com,Disney+
+DOMAIN-SUFFIX,dssott.com,Disney+
+DOMAIN-SUFFIX,bamgrid.com,Disney+
+DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney+
+DOMAIN,cdn.registerdisney.go.com,Disney+
 
 # > HBO GO Asia
-USER-AGENT,HBO%20GO%20PROD*,HBO GO Asia
-DOMAIN-KEYWORD,hbogoasia,HBO GO Asia
-DOMAIN-SUFFIX,hboasia.com,HBO GO Asia
-DOMAIN-SUFFIX,hbogoasia.com,HBO GO Asia
-DOMAIN,hbolb.onwardsmg.com,HBO GO Asia
-DOMAIN,hbounify-prod.evergent.com,HBO GO Asia
-DOMAIN,bcbolthboa-a.akamaihd.net,HBO GO Asia
-DOMAIN,dai3fd1oh325y.cloudfront.net,HBO GO Asia
+USER-AGENT,HBO%20GO%20PROD*,HBO GO
+DOMAIN-KEYWORD,hboasia,HBO GO
+DOMAIN-KEYWORD,hbogoasia,HBO GO
+DOMAIN-SUFFIX,hboasia.com,HBO GO
+DOMAIN-SUFFIX,hbogoasia.com,HBO GO
+DOMAIN,hbolb.onwardsmg.com,HBO GO
+DOMAIN,hbounify-prod.evergent.com,HBO GO
+DOMAIN,hbogoprod-vod.akamaized.net,HBO GO
+DOMAIN,hboasialive.akamaized.net,HBO GO
+DOMAIN,bcbolthboa-a.akamaihd.net,HBO GO
+DOMAIN,dai3fd1oh325y.cloudfront.net,HBO GO
 
-# > HBO NOW
-USER-AGENT,HBO%20NOW*,HBO NOW
-DOMAIN-SUFFIX,hbo.com,HBO NOW
-DOMAIN-SUFFIX,hbogo.com,HBO NOW
-DOMAIN-SUFFIX,hbonow.com,HBO NOW
+# > HBO Max
+USER-AGENT,HBOMAX*,HBO Max
+DOMAIN-SUFFIX,hbo.com,HBO Max
+// DOMAIN-SUFFIX,hbogo.com,HBO Max
+DOMAIN-SUFFIX,hbonow.com,HBO Max
+DOMAIN-SUFFIX,hbomax.com,HBO Max
+DOMAIN-SUFFIX,hbomaxcdn.com,HBO Max
 
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Hulu
+DOMAIN-SUFFIX,hulu.tv,Hulu
 DOMAIN-SUFFIX,huluim.com,Hulu
 DOMAIN-SUFFIX,hulustream.com,Hulu
 DOMAIN,cws-hulu.conviva.com,Hulu
 DOMAIN,assetshuluimcom-a.akamaihd.net,Hulu
 
-# > Hulu JP
-DOMAIN-SUFFIX,hulu.jp,Hulu JP
-DOMAIN-SUFFIX,happyon.jp,Hulu JP
-DOMAIN-SUFFIX,prod.hjholdings.tv,Hulu JP
-
-# > JOOX
-USER-AGENT,WeMusic*,JOOX
-USER-AGENT,JOOX*,JOOX
-DOMAIN-SUFFIX,joox.com,JOOX
-DOMAIN-KEYWORD,joox,JOOX
-
-# > KKBOX
-USER-AGENT,*KKBOX,KKBOX&KKTV
-DOMAIN-SUFFIX,kkbox.com,KKBOX&KKTV
-DOMAIN-SUFFIX,kkbox.com.tw,KKBOX&KKTV
-DOMAIN-SUFFIX,kfs.io,KKBOX&KKTV
-
-# > KKTV
-USER-AGENT,KKTV*,KKBOX&KKTV
-USER-AGENT,com.kktv*,KKBOX&KKTV
-DOMAIN-SUFFIX,kktv.me,KKBOX&KKTV
-DOMAIN-SUFFIX,kktv.com.tw,KKBOX&KKTV
-DOMAIN,kktv-theater.kk.stream,KKBOX&KKTV
-
-# > LINE TV
-USER-AGENT,LINE%20TV*,LINE TV
-DOMAIN-SUFFIX,linetv.tw,LINE TV
-DOMAIN,d3c7rimkq79yfu.cloudfront.net,LINE TV
-
-# > MytvSUPER
-USER-AGENT,mytv*,TVB
-DOMAIN-KEYWORD,nowtv100,TVB
-DOMAIN-KEYWORD,rthklive,TVB
-DOMAIN-SUFFIX,tvb.com,TVB
-DOMAIN-SUFFIX,mytvsuper.com,TVB
-
 # > Netflix
+USER-AGENT,Argo*,Netflix
 DOMAIN-SUFFIX,netflix.com,Netflix
 DOMAIN-SUFFIX,netflix.net,Netflix
 DOMAIN-SUFFIX,nflxext.com,Netflix
@@ -129,26 +117,33 @@ DOMAIN-SUFFIX,nflximg.com,Netflix
 DOMAIN-SUFFIX,nflximg.net,Netflix
 DOMAIN-SUFFIX,nflxso.net,Netflix
 DOMAIN-SUFFIX,nflxvideo.net,Netflix
-IP-CIDR,23.246.0.0/18,Netflix
-IP-CIDR,37.77.184.0/21,Netflix
-IP-CIDR,45.57.0.0/17,Netflix
-IP-CIDR,64.120.128.0/17,Netflix
-IP-CIDR,66.197.128.0/17,Netflix
-IP-CIDR,108.175.32.0/20,Netflix
-IP-CIDR,192.173.64.0/18,Netflix
-IP-CIDR,198.38.96.0/19,Netflix
-IP-CIDR,198.45.48.0/20,Netflix
+IP-CIDR,23.246.0.0/18,no-resolve,Netflix
+IP-CIDR,37.77.184.0/21,no-resolve,Netflix
+IP-CIDR,45.57.0.0/17,no-resolve,Netflix
+IP-CIDR,64.120.128.0/17,no-resolve,Netflix
+IP-CIDR,66.197.128.0/17,no-resolve,Netflix
+IP-CIDR,108.175.32.0/20,no-resolve,Netflix
+IP-CIDR,192.173.64.0/18,no-resolve,Netflix
+IP-CIDR,198.38.96.0/19,no-resolve,Netflix
+IP-CIDR,198.45.48.0/20,no-resolve,Netflix
 
-# > Pandora
-DOMAIN-SUFFIX,pandora.com,Pandora
+# > Paramount+
+USER-AGENT,PPlus*,Paramount+
+DOMAIN-SUFFIX,cbsi.com,Paramount+
+DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
+DOMAIN-SUFFIX,cbsivideo.com,Paramount+
+DOMAIN-SUFFIX,paramountplus.com,Paramount+
+DOMAIN-SUFFIX,pplusstatic.com,Paramount+
+DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
+DOMAIN,link.theplatform.com,Paramount+
+// CBS live
+DOMAIN,cbsservice.aws.syncbak.com,Paramount+
+DOMAIN,cbsplaylistserver.aws.syncbak.com,Paramount+
+# DOMAIN,pubads.g.doubleclick.net,Paramount+
 
-# > PBS
-USER-AGENT,PBS*,PBS
-DOMAIN-SUFFIX,pbs.org,PBS
-
-# > SoundCloud
-USER-AGENT,SoundCloud*,SoundCloud
-DOMAIN-SUFFIX,soundcloud.com,SoundCloud
+# > Peacock
+USER-AGENT,peacock*,Peacock
+DOMAIN-SUFFIX,peacocktv.com,Peacock
 
 # > Spotify
 USER-AGENT,*Spotify*,Spotify
@@ -157,11 +152,6 @@ DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-SUFFIX,spotify.com,Spotify
 
-# > Sky GO
-# USER-AGENT,skygo*,Sky GO
-# DOMAIN-SUFFIX,sky.com,Sky GO
-# DOMAIN-SUFFIX,skygo.co.nz,Sky GO
-
 # > YouTube
 USER-AGENT,*YouTube*,YouTube
 USER-AGENT,*youtube*,YouTube
@@ -169,9 +159,3 @@ DOMAIN-SUFFIX,youtu.be,YouTube
 DOMAIN-SUFFIX,googlevideo.com,YouTube
 DOMAIN,youtubei.googleapis.com,YouTube
 DOMAIN-KEYWORD,youtube,YouTube
-
-# > Viki
-USER-AGENT,Viki*,Viki
-DOMAIN-SUFFIX,viki.io,Viki
-DOMAIN-SUFFIX,viki.net,Viki
-DOMAIN-SUFFIX,viki.com,Viki
