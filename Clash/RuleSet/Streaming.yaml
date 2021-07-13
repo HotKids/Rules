@@ -15,23 +15,21 @@ payload:
   # > Amazon Prime Video
   # USER-AGENT,InstantVideo.US*
   # USER-AGENT,Prime%20Video*
-  - PROCESS-NAME,com.amazon.avod.thirdpartyclient
+  # PROCESS-NAME,com.amazon.avod.thirdpartyclient
+  # PROCESS-NAME,com.amazon.amazonvideo.livingroom
   - DOMAIN-SUFFIX,primevideo.com
   - DOMAIN-SUFFIX,amazonvideo.com
   - DOMAIN-SUFFIX,media-amazon.com
   - DOMAIN-SUFFIX,aiv-cdn.net
-  - DOMAIN-SUFFIX,llnwd.net
+  - DOMAIN-SUFFIX,aiv-delivery.net
+  - DOMAIN,atv-ps.amazon.com
+  - DOMAIN,fls-na.amazon.com
+  - DOMAIN,www.amazon.com
+  - DOMAIN,avodmp4s3ww-a.akamaihd.net
 
-  # > Bahamut
-  # USER-AGENT,Anime*
-  - PROCESS-NAME,tw.com.gamer.android.animad
-  - DOMAIN-SUFFIX,bahamut.com.tw
-  - DOMAIN-SUFFIX,gamer.com.tw
-  - DOMAIN,gamer-cds.cdn.hinet.net
-  - DOMAIN,gamer2-cds.cdn.hinet.net
-  
-  # > BBC
+  # > BBC iPlayer
   # USER-AGENT,BBCiPlayer*
+  - PROCESS-NAME,bbc.iplayer.android
   - DOMAIN-KEYWORD,bbcfmt
   - DOMAIN-KEYWORD,co.uk
   - DOMAIN-KEYWORD,uk-live
@@ -44,7 +42,23 @@ payload:
   - DOMAIN,vod-thumb-uk-live.akamaized.net
   - DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
   - DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
-  
+
+  # > Bahamut
+  # USER-AGENT,Anime*
+  - PROCESS-NAME,tw.com.gamer.android.animad
+  - DOMAIN-SUFFIX,bahamut.com.tw
+  - DOMAIN-SUFFIX,gamer.com.tw
+  - DOMAIN,gamer-cds.cdn.hinet.net
+  - DOMAIN,gamer2-cds.cdn.hinet.net
+
+  # > Britbox
+  # USER-AGENT,Britbox*
+  - PROCESS-NAME,com.britbox.us
+  - PROCESS-NAME,uk.co.itv.britbox
+  - DOMAIN-SUFFIX,britbox.com
+  - DOMAIN-SUFFIX,bbc.co.uk
+  - DOMAIN,d2z3p34itxwaj7.cloudfront.net
+
   # > DAZN
   # USER-AGENT,DAZN*
   - PROCESS-NAME,com.dazn
@@ -54,7 +68,22 @@ payload:
   - DOMAIN,d151l6v8er5bdm.cloudfront.net
   - DOMAIN-KEYWORD,voddazn
 
-  # > Disney Plus
+  # > Discovery+
+  # USER-AGENT,discovery+*
+  # USER-AGENT,DPlus*
+  - PROCESS-NAME,com.discovery.discoveryplus.mobile
+  - PROCESS-NAME,com.discovery.discoveryplus.androidtv
+  - PROCESS-NAME,com.discoveryplus.mobile.android
+  - PROCESS-NAME,com.discoveryplus.tv.android
+  - DOMAIN-KEYWORD,discoveryplus
+  - DOMAIN-SUFFIX,discoveryplus.com
+  - DOMAIN-SUFFIX,disco-api.com
+  - DOMAIN-SUFFIX,dnitv.com
+  - DOMAIN-SUFFIX,uplynk.com
+  - DOMAIN-SUFFIX,litix.io
+  - DOMAIN,kvinit-prod.api.kochava.com
+
+  # > Disney+
   # USER-AGENT,Disney*
   - PROCESS-NAME,com.disney.disneyplus
   - DOMAIN-SUFFIX,disneyplus.com
@@ -65,18 +94,17 @@ payload:
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
   - DOMAIN,cdn.registerdisney.go.com
 
-  # > friDay
-  # USER-AGENT,friDay*
-  - DOMAIN-SUFFIX,friday.tw
-
   # > HBO GO Asia
   # USER-AGENT,HBO%20GO%20PROD*
   - PROCESS-NAME,sg.hbo.hbogo
+  - DOMAIN-KEYWORD,hboasia
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
   - DOMAIN-SUFFIX,hbogoasia.com
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
+  - DOMAIN,hbogoprod-vod.akamaized.net
+  - DOMAIN,hboasialive.akamaized.net
   - DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net
 
@@ -84,55 +112,22 @@ payload:
   # USER-AGENT,HBOMAX*
   - PROCESS-NAME,com.hbo.hbonow
   - DOMAIN-SUFFIX,hbo.com
-  - DOMAIN-SUFFIX,hbogo.com
+  # DOMAIN-SUFFIX,hbogo.com
   - DOMAIN-SUFFIX,hbonow.com
   - DOMAIN-SUFFIX,hbomax.com
+  - DOMAIN-SUFFIX,hbomaxcdn.com
 
   # > Hulu
   - PROCESS-NAME,com.hulu.plus
   - DOMAIN-SUFFIX,hulu.com
+  - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
   - DOMAIN,assetshuluimcom-a.akamaihd.net
 
-  # > Hulu JP
-  - DOMAIN-SUFFIX,hulu.jp
-  - DOMAIN-SUFFIX,happyon.jp
-  - DOMAIN-SUFFIX,prod.hjholdings.tv
-
-  # > JOOX
-  # USER-AGENT,WeMusic*
-  # USER-AGENT,JOOX*
-  - DOMAIN-SUFFIX,joox.com
-  - DOMAIN-KEYWORD,joox
-
-  # > KKBOX
-  # USER-AGENT,*KKBOX
-  - DOMAIN-SUFFIX,kkbox.com
-  - DOMAIN-SUFFIX,kkbox.com.tw
-  - DOMAIN-SUFFIX,kfs.io
-
-  # > KKTV
-  # USER-AGENT,KKTV*
-  # USER-AGENT,com.kktv*
-  - PROCESS-NAME,com.kktv.kktv
-  - DOMAIN-SUFFIX,kktv.me
-  - DOMAIN-SUFFIX,kktv.com.tw
-  - DOMAIN,kktv-theater.kk.stream
-
-  # > LINE TV
-  # USER-AGENT,LINE%20TV*
-  - DOMAIN-SUFFIX,linetv.tw
-
-  # > MytvSUPER
-  # USER-AGENT,mytv*
-  - DOMAIN-KEYWORD,nowtv100
-  - DOMAIN-KEYWORD,rthklive
-  - DOMAIN-SUFFIX,tvb.com
-  - DOMAIN-SUFFIX,mytvsuper.com
-
   # > Netflix
+  # USER-AGENT,Argo*
   - PROCESS-NAME,com.netflix.mediaclient
   - DOMAIN-SUFFIX,netflix.com
   - DOMAIN-SUFFIX,netflix.net
@@ -151,21 +146,26 @@ payload:
   - IP-CIDR,198.38.96.0/19,no-resolve
   - IP-CIDR,198.45.48.0/20,no-resolve
 
-  # > Pandora
-  - DOMAIN-SUFFIX,pandora.com
+  # > Paramount+
+  # USER-AGENT,PPlus*
+  - PROCESS-NAME,com.cbs.app
+  - PROCESS-NAME,com.cbs.ott
+  - DOMAIN-SUFFIX,cbsi.com
+  - DOMAIN-SUFFIX,cbsaavideo.com
+  - DOMAIN-SUFFIX,cbsivideo.com
+  - DOMAIN-SUFFIX,paramountplus.com
+  - DOMAIN-SUFFIX,pplusstatic.com
+  - DOMAIN,cbsi.live.ott.irdeto.com
+  - DOMAIN,link.theplatform.com
+  # CBS live
+  - DOMAIN,cbsservice.aws.syncbak.com
+  - DOMAIN,cbsplaylistserver.aws.syncbak.com
+  # DOMAIN,pubads.g.doubleclick.net 不可屏蔽
 
-  # > PBS
-  # USER-AGENT,PBS*
-  - DOMAIN-SUFFIX,pbs.org
-  
   # > Peacock
-  # USER-AGENT,Peacock*
+  # USER-AGENT,peacock*
   - PROCESS-NAME,com.peacocktv.peacockandroid
   - DOMAIN-SUFFIX,peacocktv.com
-
-  # > SoundCloud
-  # USER-AGENT,SoundCloud*
-  - DOMAIN-SUFFIX,soundcloud.com
 
   # > Spotify
   # USER-AGENT,*Spotify*
@@ -174,11 +174,6 @@ payload:
   - DOMAIN-SUFFIX,spoti.fi
   - DOMAIN-SUFFIX,spotify.com
 
-  # > Sky GO
-  # USER-AGENT,skygo*
-  - DOMAIN-SUFFIX,sky.com
-  - DOMAIN-SUFFIX,skygo.co.nz
-
   # > YouTube
   # USER-AGENT,*YouTube*
   # USER-AGENT,*youtube*
@@ -186,9 +181,3 @@ payload:
   - DOMAIN-SUFFIX,googlevideo.com
   - DOMAIN,youtubei.googleapis.com
   - DOMAIN-KEYWORD,youtube
-
-  # > Viki
-  # USER-AGENT,Viki*
-  - DOMAIN-SUFFIX,viki.io
-  - DOMAIN-SUFFIX,viki.net
-  - DOMAIN-SUFFIX,viki.com
