@@ -1,0 +1,15 @@
+payload:
+  # > Amazon Prime Video
+  # USER-AGENT,InstantVideo.US*
+  # USER-AGENT,Prime%20Video*
+  # PROCESS-NAME,com.amazon.avod.thirdpartyclient
+  # PROCESS-NAME,com.amazon.amazonvideo.livingroom
+  - DOMAIN-SUFFIX,primevideo.com
+  - DOMAIN-SUFFIX,amazonvideo.com
+  - DOMAIN-SUFFIX,media-amazon.com
+  - DOMAIN-SUFFIX,aiv-cdn.net
+  - DOMAIN-SUFFIX,aiv-delivery.net
+  - DOMAIN,atv-ps.amazon.com
+  - DOMAIN,fls-na.amazon.com
+  - DOMAIN,www.amazon.com
+  - DOMAIN,avodmp4s3ww-a.akamaihd.net
