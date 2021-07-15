@@ -4,8 +4,11 @@
 # Port of SOCKS5 proxy server on the local end
 # socks-port: 7891
 
-# Transparent proxy server port for Linux and macOS
+# Transparent proxy server port for Linux and macOS (Redirect TCP and TProxy UDP)
 # redir-port: 7892
+
+# Transparent proxy server port for Linux (TProxy TCP and TProxy UDP)
+# tproxy-port: 7893
 
 # HTTP(S) and SOCKS5 server on the same port
 mixed-port: 7890
@@ -15,9 +18,9 @@ mixed-port: 7890
 #  - "user1:pass1"
 #  - "user2:pass2"
 
-# Set to true to allow connections to local-end server from
+# Set to true to allow connections to the local-end server from
 # other LAN IP addresses
-allow-lan: false
+allow-lan: true
 
 # This is only applicable when `allow-lan` is `true`
 # '*': bind all IP addresses
@@ -52,37 +55,41 @@ external-controller: 127.0.0.1:9090
 # secret: ""
 
 # Outbound interface name
-# interface-name: en0
+interface-name: eth0
 
-# Static hosts for DNS server and connection establishment, only works
-# when `dns.enhanced-mode` is `redir-host`.
+# Static hosts for DNS server and connection establishment (like /etc/hosts)
 #
 # Wildcard hostnames are supported (e.g. *.clash.dev, *.foo.*.example.com)
-# Non-wildcard domain names has a higher priority than wildcard domain names
+# Non-wildcard domain names have a higher priority than wildcard domain names
 # e.g. foo.example.com > *.example.com > .example.com
 # P.S. +.foo.com equals to .foo.com and foo.com
 hosts:
-  'mtalk.google.com': 108.177.125.188
-  't.cn': 203.107.55.116
   # '*.clash.dev': 127.0.0.1
   # '.dev': 127.0.0.1
   # 'alpha.clash.dev': '::1'
 
+  # Firebase Cloud Messaging
+  'mtalk.google.com': 108.177.125.188
+  # Google Dl
+  'dl.google.com': 180.163.151.161
+  'dl.l.google.com': 180.163.151.161
+
 # DNS server settings
-# This section is optional. When not present, DNS server will be disabled.
+# This section is optional. When not present, the DNS server will be disabled.
 dns:
   enable: true
-  listen: 0.0.0.0:53
-  # ipv6: false # when false, response to AAAA questions will be empty
+  listen: 0.0.0.0:1053
+  # ipv6: false # when the false, response to AAAA questions will be empty
 
   # These nameservers are used to resolve the DNS nameserver hostnames below.
   # Specify IP addresses only
   default-nameserver:
     - 119.29.29.29
-    - 1.0.0.1
+    - 223.5.5.5
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
-  
+  # use-hosts: true # lookup hosts and return IP record
+
   # Hostnames in this list will not be resolved with fake IPs
   # i.e. questions to these domain names will always be answered with their
   # real IP addresses
@@ -96,26 +103,30 @@ dns:
     - '+.xboxlive.com'
     - 'msftconnecttest.com'
     - 'xbox.*.microsoft.com'
+    - '*.battlenet.com.cn'
+    - '*.battlenet.com'
+    - '*.blzstatic.cn'
+    - '*.battle.net'
   
   # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
   # All DNS questions are sent directly to the nameserver, without proxies
   # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
-    - 119.29.29.29
-    - 119.28.28.28
-    - 223.5.5.5
-    - 223.6.6.6
-    - 180.76.76.76
-    - 1.2.4.8
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
     # - tls://dns.rubyfish.cn:853 # DNS over TLS
-    # - https://1.1.1.1/dns-query # DNS over HTTPS    
+    # - https://1.1.1.1/dns-query # DNS over HTTPS
 
   # When `fallback` is present, the DNS server will send concurrent requests
   # to the servers in this section along with servers in `nameservers`.
   # The answers from fallback servers are used when the GEOIP country
   # is not `CN`.
   fallback:
-    - https://cloudflare-dns.com/dns-query
+    - tls://one.one.one.one:853
+    - tls://dns.google:853
+    - https://dns.twnic.tw/dns-query
+    - https://dns.adguard.com/dns-query
+    - https://doh.dns.sb/dns-query
 
   # If IP addresses resolved with servers in `nameservers` are in the specified
   # subnets below, they are considered invalid and results from `fallback`
@@ -124,14 +135,30 @@ dns:
   # IP address resolved with servers in `nameserver` is used when
   # `fallback-filter.geoip` is true and when GEOIP of the IP address is `CN`.
   #
-  # If `fallback-filter.geoip` is false, results from `fallback` nameservers
-  # are always used, and answers from `nameservers` are discarded.
+  # If `fallback-filter.geoip` is false, results from `nameserver` nameservers
+  # are always used if not match `fallback-filter.ipcidr`.
   #
   # This is a countermeasure against DNS pollution attacks.
   fallback-filter:
     geoip: true
     ipcidr:
       # - 240.0.0.0/4
+    # domain:
+    #   - '+.google.com'
+    #   - '+.facebook.com'
+    #   - '+.youtube.com'
+
+#
+# https://github.com/Dreamacro/clash/wiki/premium-core-features
+#
+tun:
+  enable: true
+  stack: system # or gvisor
+  dns-hijack:
+    - 198.18.0.2:53
+    - tcp://198.18.0.2:53
+  auto-route: true # auto set global route
+  auto-detect-interface: true # conflict with interface-name
 
 proxies:
 
@@ -266,6 +293,7 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🇹🇼 Taiwan
+      - 🇵🇭 Philippines
 
   # 特殊代理服务
   - name: "📬 Telegram"
@@ -453,6 +481,20 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/IQIYI.yaml
     interval: 86400
 
+  WeTV:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/WeTV.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/WeTV.yaml
+    interval: 86400
+
+  Apple TV+:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/AppleTV.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20TV.yaml
+    interval: 86400
+    
   Bahamut:
     type: http
     behavior: classical
@@ -466,7 +508,28 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/BBC.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/BBC.yaml
     interval: 86400
+    
+  CATCHPLAY+:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/CATCHPLAY+.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CATCHPLAY+.yaml
+    interval: 86400
 
+  DAZN:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Discovery+.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/DAZN.yaml
+    interval: 86400
+    
+  Discovery+:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Discovery+.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Discovery+.yaml
+    interval: 86400
+    
   Disney+:
     type: http
     behavior: classical
@@ -502,6 +565,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_Go.yaml
     interval: 86400
 
+  Hotstar:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Hotstar.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Hotstar.yaml
+    interval: 86400
+    
   Hulu:
     type: http
     behavior: classical
@@ -557,6 +627,13 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Peacock.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Peacock.yaml
     interval: 86400
+ 
+  Roku:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Roku.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Roku.yaml
+    interval: 86400
     
   Spotify:
     type: http
@@ -565,13 +642,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spotify.yaml
     interval: 86400
 
-  WeTV:
+  Viu:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/WeTV.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/WeTV.yaml
+    path: ./Provider/RuleSet/Streaming/Viu.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Viu.yaml
     interval: 86400
-    
+        
   YouTube:
     type: http
     behavior: classical
@@ -584,13 +661,6 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml
-    interval: 86400
-
-  Apple TV+:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/AppleTV.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20TV.yaml
     interval: 86400
 
   Telegram:
@@ -641,13 +711,18 @@ rules:
   # Global Area Network
 
   # Streaming
+  - RULE-SET,Apple TV+,🇺🇸 America
   - RULE-SET,Bahamut,🇹🇼 Taiwan
   - RULE-SET,BBC,🇬🇧 England
+  - RULE-SET,CATCHPLAY+,🇹🇼 Taiwan
+  - RULE-SET,DAZN,🇩🇪 Germany
+  - RULE-SET,Discovery+,🇺🇸 America
   - RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,FOD,🇯🇵 Japan
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO Max,🇺🇸 America
   - RULE-SET,HBO Go,🇵🇭 Philippines
+  - RULE-SET,Hotstar,🇵🇭 Philippines
   - RULE-SET,Hulu,🇺🇸 America
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
@@ -656,19 +731,18 @@ rules:
   - RULE-SET,Paravi,🇯🇵 Japan
   - RULE-SET,Paramount+,🇺🇸 America
   - RULE-SET,Peacock TV,🇺🇸 America 
+  - RULE-SET,Roku,🇺🇸 America
   - RULE-SET,Spotify,🔰 Proxy
-  - RULE-SET,WeTV,🇹🇼 Taiwan
+  - RULE-SET,Viu,🇵🇭 Philippines
   - RULE-SET,YouTube,🔰 Proxy
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
-  - RULE-SET,Bilibili SEA,🇵🇭 Philippines
+  - RULE-SET,Bilibili SEA,🇸🇬 Singapore
   - RULE-SET,Bilibili,📺 CNTV
   - RULE-SET,IQIYI Intl,🇹🇼 Taiwan
-  - RULE-SET,IQIYI,📺 CNTV
-
-  # Apple TV+
-  - RULE-SET,Apple TV+,🇺🇸 America
+  - RULE-SET,IQIYI,🔘 DIRECT
+  - RULE-SET,WeTV,📺 CNTV
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
