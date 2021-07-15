@@ -590,7 +590,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/AppleTV.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/Apple/TV.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20TV.yaml
     interval: 86400
 
   Telegram:
