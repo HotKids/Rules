@@ -26,7 +26,7 @@ http-request ^https:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo
 
 All app:
 [mitm]
-hostname = superapp.kiwa-tech.com, activity-1.m.duiba.com.cn,
+hostname = superapp.kiwa-tech.com, activity-1.m.duiba.com.cn
 
 获取完 Token 后可不注释 rewrite / mitm，Token 更新时会弹窗。若因 mitm 导致"海底捞"网络不稳定，可注释掉 mtim。
 */
