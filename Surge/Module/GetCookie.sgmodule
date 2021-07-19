@@ -45,8 +45,8 @@ Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\
 Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
 
 # > 海底捞 GetCookie by zZPiglet
-Cookie: 海底捞_获取用户信息 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js,requires-body=true
-Cookie: 海底捞_获取签到信息 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/Haidilao/Haidilao.js
+Cookie: 海底捞_获取用户信息 = type=http-request,pattern=^https?:\/\/superapp\.kiwa-tech\.com\/app\/coupon\/customerLevelShow,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/Haidilao.js,requires-body=true
+Cookie: 海底捞_获取签到信息 = type=http-request,pattern=^https?:\/\/activity-1\.m\.duiba\.com\.cn\/signactivity\/getSignInfo,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/Haidilao.js
 
 # > 饿了么 GetCookie by blackmatrix7
 Cookie: 饿了么 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/biz\.svip_scene\/svip\/engine\/queryTrafficSupply,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js
