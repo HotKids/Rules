@@ -15,6 +15,9 @@ DOMAIN,mtrace.qq.com,REJECT
 DOMAIN-KEYWORD,adstats,REJECT
 DOMAIN,adstats.tencentmusic.com,REJECT
 
+# > Viu
+DOMAIN,events3alt.adcolony.com,REJECT
+
 # > WeTV
 DOMAIN,btrace.wetvinfo.com,REJECT
 DOMAIN,mtrace.wetvinfo.com,REJECT
