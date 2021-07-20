@@ -6,22 +6,6 @@
 hostname = %INSERT% *acs.m.taobao.com,*.uve.weibo.com,api.weibo.cn,app.biliintl.com,gw.alicdn.com,haojia.m.smzdm.com,mapi.weibo.com,mp.weixin.qq.com,render.alipay.com,weixin110.qq.com
 
 [Rule]
-# > PeacockTV
-DOMAIN,video-ads-module.ad-tech.nbcuni.com,REJECT
-
-# > Tencent
-DOMAIN,btrace.qq.com,REJECT
-DOMAIN,mtrace.qq.com,REJECT
-DOMAIN-KEYWORD,adstats,REJECT
-DOMAIN,adstats.tencentmusic.com,REJECT
-
-# > Viu
-DOMAIN,r2---sn-j5o76n7e.gvt1.com,REJECT
-
-# > WeTV
-DOMAIN,btrace.wetvinfo.com,REJECT
-DOMAIN,mtrace.wetvinfo.com,REJECT
-
 # > 微信公众号
 URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
