@@ -16,7 +16,6 @@ DOMAIN-KEYWORD,adstats,REJECT
 DOMAIN,adstats.tencentmusic.com,REJECT
 
 # > Viu
-DOMAIN,events3alt.adcolony.com,REJECT
 DOMAIN,r2---sn-j5o76n7e.gvt1.com,REJECT
 
 # > WeTV
