@@ -167,7 +167,7 @@ proxy-providers:
   HK:
     type: http
     path: ./Provider/Proxy/Dler/HK.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=hk
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=hk
     interval: 3600
     health-check: 
       enable: true
@@ -176,7 +176,7 @@ proxy-providers:
   TW:
     type: http
     path: ./Provider/Proxy/Dler/TW.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https%3A%2F%2Fdler.cloud%2Fsubscribe%2FQWERTYUIOP%3Fprotocols%3Dss%26list%3Dsurge&udp=1&tfo=1&emoji=1&filter=.*%E5%8F%B0
+    url: https://api.dler.io/sub?config=https://git.io/JIRRU&udp=true&tfo=true&sort=true&target=clash&list=true&url=https://dler.cloud/subscribe/QWERTYUIOP?mu=smart&include=%E5%8F%B0
     interval: 3600
     health-check: 
       enable: true
@@ -185,7 +185,7 @@ proxy-providers:
   JP:
     type: http
     path: ./Provider/Proxy/Dler/JP.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=jp
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=jp
     interval: 3600
     health-check: 
       enable: true
@@ -194,7 +194,7 @@ proxy-providers:
   KR:
     type: http
     path: ./Provider/Proxy/Dler/KR.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=kr
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=kr
     interval: 3600
     health-check: 
       enable: true
@@ -203,7 +203,7 @@ proxy-providers:
   SG:
     type: http
     path: ./Provider/Proxy/Dler/SG.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=sg
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=sg
     interval: 3600
     health-check: 
       enable: true
@@ -212,7 +212,16 @@ proxy-providers:
   PH:
     type: http
     path: ./Provider/Proxy/Dler/PH.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=ph
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=ph
+    interval: 3600
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  IN:
+    type: http
+    path: ./Provider/Proxy/Dler/IN.yaml
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=in
     interval: 3600
     health-check: 
       enable: true
@@ -221,7 +230,7 @@ proxy-providers:
   DE:
     type: http
     path: ./Provider/Proxy/Dler/DE.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=de
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=de
     interval: 3600
     health-check: 
       enable: true
@@ -230,7 +239,7 @@ proxy-providers:
   UK:
     type: http
     path: ./Provider/Proxy/Dler/UK.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=uk
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=uk
     interval: 3600
     health-check: 
       enable: true
@@ -239,7 +248,7 @@ proxy-providers:
   US:
     type: http
     path: ./Provider/Proxy/Dler/US.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=ss&list=clash&area=us
+    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=us&nomatch=gia
     interval: 3600
     health-check: 
       enable: true
@@ -248,7 +257,7 @@ proxy-providers:
   UN:
     type: http
     path: ./Provider/Proxy/Dler/UN.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https%3A%2F%2Fdler.cloud%2Fsubscribe%2FQWERTYUIOP%3Fprotocols%3Dss%26list%3Dsurge&udp=1&tfo=1&emoji=1
+    url: https://api.dler.io/sub?config=https://git.io/JIRRU&udp=true&tfo=true&sort=true&target=clash&list=true&url=https://dler.cloud/subscribe/QWERTYUIOP?mu=smart
     interval: 3600
     health-check: 
       enable: true
@@ -266,6 +275,7 @@ proxy-groups:
       - 🇰🇷 Korea
       - 🇸🇬 Singapore
       - 🇵🇭 Philippines
+      - 🇮🇳 India
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
@@ -282,6 +292,7 @@ proxy-groups:
       - 🇰🇷 Korea
       - 🇸🇬 Singapore
       - 🇵🇭 Philippines
+      - 🇮🇳 India
       - 🇩🇪 Germany
       - 🇬🇧 England
       - 🇺🇸 America
@@ -293,7 +304,6 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🇹🇼 Taiwan
-      - 🇵🇭 Philippines
 
   # 特殊代理服务
   - name: "📬 Telegram"
@@ -310,19 +320,18 @@ proxy-groups:
       - 🔰 Proxy
       - 🇺🇸 America
 
-  # 国内服务
-  - name: "🚓 Inbound"
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  - name: "🚧 AdGuard"
     type: select
     proxies:
-      - 🔘 DIRECT
-      - 🔰 Proxy
-      
-  # Final
-  - name: "🚁 Outbound"
+      - REJECT
+      - DIRECT
+
+  # 直连
+  - name: "🔘 DIRECT"
     type: select
     proxies:
-      - 🔰 Proxy
-      - 🔘 DIRECT
+      - DIRECT
 
   # UN
   - name: "🇺🇳 Server"
@@ -377,7 +386,15 @@ proxy-groups:
       - PH
     url: 'http://www.gstatic.com/generate_204'
     interval: 300
- 
+
+  # IN
+  - name: "🇮🇳 India"
+    type: url-test
+    use:
+      - IN
+    url: 'http://www.gstatic.com/generate_204'
+    interval: 300
+    
    # DE
   - name: "🇩🇪 Germany"
     type: url-test
@@ -400,20 +417,7 @@ proxy-groups:
     use:
       - US
     url: 'http://www.gstatic.com/generate_204'
-    interval: 300
-      
-   # 去广告以及隐私追踪保护、反运营商劫持开关
-  - name: "🚧 AdGuard"
-    type: select
-    proxies:
-      - REJECT
-      - DIRECT
-      
-   # 直连
-  - name: "🔘 DIRECT"
-    type: select
-    proxies:
-      - DIRECT
+    interval: 300      
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
@@ -432,6 +436,13 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
+  Adblock:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Adblock.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
+    interval: 86400
+    
   Advertising:
     type: http
     behavior: classical
@@ -445,21 +456,21 @@ rule-providers:
     path: ./Provider/RuleSet/Guard/Hijacking.yaml
     url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Hijacking.yaml
     interval: 86400
-
+    
   Privacy:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Privacy.yaml
     url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Privacy.yaml
     interval: 86400
-
+    
   Bilibili SEA:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/BilibiliSEA.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/BilibiliSEA.yaml
     interval: 86400
-
+    
   Bilibili:
     type: http
     behavior: classical
@@ -467,14 +478,14 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bilibili.yaml
     interval: 86400
     
-  IQIYI Intl:
+  iQIYI Intl:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/IQ.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/IQ.yaml
     interval: 86400
-
-  IQIYI:
+    
+  iQIYI:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/IQIYI.yaml
@@ -487,7 +498,7 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/WeTV.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/WeTV.yaml
     interval: 86400
-
+    
   Apple TV+:
     type: http
     behavior: classical
@@ -508,7 +519,7 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/BBC.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/BBC.yaml
     interval: 86400
-    
+   
   CATCHPLAY+:
     type: http
     behavior: classical
@@ -516,13 +527,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CATCHPLAY+.yaml
     interval: 86400
 
-  DAZN:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Discovery+.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/DAZN.yaml
-    interval: 86400
-    
   Discovery+:
     type: http
     behavior: classical
@@ -530,12 +534,12 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Discovery+.yaml
     interval: 86400
     
-  Disney+:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Disney+.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Disney+.yaml
-    interval: 86400
+  # Disney+:
+    # type: http
+    # behavior: classical
+    # path: ./Provider/RuleSet/Streaming/Disney+.yaml
+    # url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Disney+.yaml
+    # interval: 86400
 
   FOD:
     type: http
@@ -565,13 +569,6 @@ rule-providers:
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/HBO_Go.yaml
     interval: 86400
 
-  Hotstar:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Hotstar.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Hotstar.yaml
-    interval: 86400
-    
   Hulu:
     type: http
     behavior: classical
@@ -606,7 +603,7 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/myVideo.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/myVideo.yaml
     interval: 86400 
-  
+    
   Paravi:
     type: http
     behavior: classical
@@ -619,7 +616,7 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Paramount+.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paramount+.yaml
-    interval: 86400 
+    interval: 86400   
     
   Peacock TV:
     type: http
@@ -627,13 +624,13 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Peacock.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Peacock.yaml
     interval: 86400
- 
-  Roku:
+    
+  Prime Video:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Roku.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Roku.yaml
-    interval: 86400
+    path: ./Provider/RuleSet/Streaming/Prime%20Video.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Prime%20Video.yaml
+    interval: 86400   
     
   Spotify:
     type: http
@@ -641,7 +638,7 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Spotify.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spotify.yaml
     interval: 86400
-
+    
   Viu:
     type: http
     behavior: classical
@@ -704,6 +701,7 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
+  - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
   - RULE-SET,Hijacking,🚧 AdGuard
   - RULE-SET,Privacy,🚧 AdGuard
@@ -715,14 +713,12 @@ rules:
   - RULE-SET,Bahamut,🇹🇼 Taiwan
   - RULE-SET,BBC,🇬🇧 England
   - RULE-SET,CATCHPLAY+,🇹🇼 Taiwan
-  - RULE-SET,DAZN,🇩🇪 Germany
+  # RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,Discovery+,🇺🇸 America
-  - RULE-SET,Disney+,🇺🇸 America
   - RULE-SET,FOD,🇯🇵 Japan
   - RULE-SET,friDay,🇹🇼 Taiwan
   - RULE-SET,HBO Max,🇺🇸 America
   - RULE-SET,HBO Go,🇵🇭 Philippines
-  - RULE-SET,Hotstar,🇵🇭 Philippines
   - RULE-SET,Hulu,🇺🇸 America
   - RULE-SET,Hulu JP,🇯🇵 Japan
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
@@ -731,7 +727,7 @@ rules:
   - RULE-SET,Paravi,🇯🇵 Japan
   - RULE-SET,Paramount+,🇺🇸 America
   - RULE-SET,Peacock TV,🇺🇸 America 
-  - RULE-SET,Roku,🇺🇸 America
+  - RULE-SET,Prime Video,🎬 Streaming
   - RULE-SET,Spotify,🔰 Proxy
   - RULE-SET,Viu,🇵🇭 Philippines
   - RULE-SET,YouTube,🔰 Proxy
@@ -740,9 +736,9 @@ rules:
   # CNTV
   - RULE-SET,Bilibili SEA,🇸🇬 Singapore
   - RULE-SET,Bilibili,📺 CNTV
-  - RULE-SET,IQIYI Intl,🇹🇼 Taiwan
-  - RULE-SET,IQIYI,🔘 DIRECT
-  - RULE-SET,WeTV,📺 CNTV
+  - RULE-SET,iQIYI Intl,🇹🇼 Taiwan
+  - RULE-SET,iQIYI,📺 CNTV
+  - RULE-SET,WeTV,🇹🇼 Taiwan
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
@@ -754,7 +750,7 @@ rules:
   - RULE-SET,Global,🔰 Proxy
 
   # China Area Network
-  - RULE-SET,China,🚓 Inbound
+  - RULE-SET,China,🔘 DIRECT
 
   # Local Area Network
   - IP-CIDR,192.168.0.0/16,🔘 DIRECT
@@ -766,11 +762,11 @@ rules:
   - IP-CIDR,fe80::/10,🔘 DIRECT
 
   # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
-  - RULE-SET,ChinaIP,🚓 Inbound
+  - RULE-SET,ChinaIP,🔘 DIRECT
   # Tencent
-  # IP-CIDR,119.28.28.28/32,🚓 Inbound
-  # IP-CIDR,182.254.116.0/24,🚓 Inbound
+  # IP-CIDR,119.28.28.28/32,🔘 DIRECT
+  # IP-CIDR,182.254.116.0/24,🔘 DIRECT
   # GeoIP China(若启用，则禁用 ChinaIP.list)
-  # GEOIP,CN,🚓 Inbound
+  # GEOIP,CN,🔘 DIRECT
 
-  - MATCH,🚁 Outbound
+  - MATCH,🔰 Proxy
