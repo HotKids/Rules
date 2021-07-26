@@ -10,4 +10,4 @@ DOMAIN,atv-ps.amazon.com
 DOMAIN,fls-na.amazon.com
 DOMAIN,avodmp4s3ww-a.akamaihd.net
 // DOMAIN,www.amazon.com
-URL-REGEX,^https?:\/\/www\.amazon\.com\/(gp\/)?(Amazon-V|v)ideo\/
+URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
