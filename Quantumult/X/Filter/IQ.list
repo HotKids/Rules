@@ -11,6 +11,6 @@ DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
 // 播放
+IP-CIDR,23.211.15.99/32,iQIYI Intl
 IP-CIDR,110.238.107.47/32,iQIYI Intl
-IP-CIDR,118.26.32.16/32,iQIYI Intl
 IP-CIDR,203.74.95.130/28,iQIYI Intl
