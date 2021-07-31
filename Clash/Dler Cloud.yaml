@@ -602,13 +602,6 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Streaming/myVideo.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/myVideo.yaml
-    interval: 86400 
-    
-  Paravi:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Paravi.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paravi.yaml
     interval: 86400
     
   Paramount+:
@@ -616,8 +609,15 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Paramount+.yaml
     url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paramount+.yaml
-    interval: 86400   
+    interval: 86400
     
+  Paravi:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Paravi.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Paravi.yaml
+    interval: 86400
+        
   Peacock TV:
     type: http
     behavior: classical
@@ -724,8 +724,8 @@ rules:
   - RULE-SET,KKBOX&KKTV,🇹🇼 Taiwan
   - RULE-SET,LINE TV,🇹🇼 Taiwan
   - RULE-SET,myVideo,🇹🇼 Taiwan
-  - RULE-SET,Paravi,🇯🇵 Japan
   - RULE-SET,Paramount+,🇺🇸 America
+  - RULE-SET,Paravi,🇯🇵 Japan
   - RULE-SET,Peacock TV,🇺🇸 America 
   - RULE-SET,Prime Video,🎬 Streaming
   - RULE-SET,Spotify,🔰 Proxy
