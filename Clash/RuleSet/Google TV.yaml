@@ -1,3 +1,4 @@
 payload:
   # > Chromecast with Google TV Home
+  - PROCESS-NAME,com.google.android.videos
   - DOMAIN-KEYWORD,pa.google
