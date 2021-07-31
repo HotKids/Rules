@@ -3,6 +3,8 @@ USER-AGENT,iQIYI*
 USER-AGENT,QIYIVideo*
 USER-AGENT,QYPlayer*
 USER-AGENT,QTP*
+PROCESS-NAME,com.iqiyi.i18n
+PROCESS-NAME,com.iqiyi.i18n.tv
 DOMAIN-SUFFIX,iq.com
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com
