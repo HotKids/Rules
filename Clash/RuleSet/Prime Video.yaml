@@ -2,6 +2,7 @@ payload:
   # > Amazon Prime Video
   # USER-AGENT,InstantVideo.US*
   # USER-AGENT,Prime%20Video*
+  # PROCESS-NAME,com.amazon.firebat
   # PROCESS-NAME,com.amazon.avod.thirdpartyclient
   # PROCESS-NAME,com.amazon.amazonvideo.livingroom
   - DOMAIN-SUFFIX,primevideo.com
