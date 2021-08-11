@@ -24,6 +24,7 @@ payload:
   - DOMAIN-SUFFIX,aiv-delivery.net
   - DOMAIN,atv-ps.amazon.com
   - DOMAIN,fls-na.amazon.com
+  # DOMAIN,ktpx.amazon.com
   - DOMAIN,www.amazon.com
   - DOMAIN,avodmp4s3ww-a.akamaihd.net
 
