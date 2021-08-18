@@ -1,0 +1,4 @@
+# > Apple Books
+USER-AGENT,Books*
+DOMAIN,books.itunes.apple.com
+DOMAIN,bookkeeper.itunes.apple.com
