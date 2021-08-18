@@ -1,4 +1,5 @@
 # > Apple Books
 USER-AGENT,Books*
-DOMAIN-SUFFIX,books.itunes.apple.com
+DOMAIN-SUFFIX,books.apple.com
+DOMAIN,books.itunes.apple.com
 DOMAIN,bookkeeper.itunes.apple.com
