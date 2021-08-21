@@ -90,11 +90,11 @@ force-http-engine-hosts = *.ott.cibntv.net,123.59.31.1,119.18.193.135,122.14.246
 # ---(实验性功能)---
 # 0 为关闭，1 为开启
 # > 隐藏 Apple 请求
- hide-apple-request=0
+hide-apple-request=1
 # > 隐藏崩溃追踪器请求
- hide-crash-reporter-request=1
+hide-crash-reporter-request=1
 # > 隐藏 UDP 会话
- hide-udp=0
+hide-udp=0
 # > 关键词过滤器
 # none（关闭关键词过滤器） /whitelist（blacklist（仅记录包含关键字的请求）） /blacklist（仅记录不包含关键字的请求） /pattern（匹配通配符的请求）
 # keyword-filter-type = none
