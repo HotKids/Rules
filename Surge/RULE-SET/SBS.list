@@ -1,3 +1,5 @@
 # > SBS On Demand
 USER-AGENT,SBS*
+DOMAIN-SUFFIX,sbsod.com
 DOMAIN-SUFFIX,sbs.com.au
+DOMAIN,sbsvoddai-vh.akamaihd.net
