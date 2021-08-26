@@ -1,5 +1,5 @@
 payload:
-  # > CATCHPLAY+
+  # > CATCHPLAY+｜TW
   # USER-AGENT,CATCHPLAY*
   - PROCESS-NAME,com.catchplay.asiaplay
   - PROCESS-NAME,com.catchplay.asiaplay.tv
