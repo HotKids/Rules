@@ -1,5 +1,5 @@
 payload:  
-  # > FOD
+  # > FOD｜JP
   # USER-AGENT,FOD*
   - DOMAIN-SUFFIX,fujitv.co.jp
   - DOMAIN-SUFFIX,stream.ne.jp
