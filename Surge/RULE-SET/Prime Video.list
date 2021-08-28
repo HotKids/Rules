@@ -1,6 +1,7 @@
 # > Amazon Prime Video
 // USER-AGENT,InstantVideo.US*
 // USER-AGENT,Prime%20Video*
+DOMAIN-SUFFIX,amazon.com
 DOMAIN-SUFFIX,primevideo.com
 DOMAIN-SUFFIX,amazonvideo.com
 DOMAIN-SUFFIX,media-amazon.com
@@ -12,4 +13,4 @@ DOMAIN,avodmp4s3ww-a.akamaihd.net
 
 // 二选一,URL-REGEX 则需 MITM www.amazon.com
 // DOMAIN,www.amazon.com
-URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
+// URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
