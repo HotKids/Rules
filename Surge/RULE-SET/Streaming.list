@@ -20,7 +20,7 @@ DOMAIN-SUFFIX,aiv-delivery.net
 DOMAIN,atv-ps.amazon.com
 DOMAIN,fls-na.amazon.com
 DOMAIN,avodmp4s3ww-a.akamaihd.net
-URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
+// URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*
