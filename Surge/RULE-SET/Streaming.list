@@ -12,6 +12,7 @@ DOMAIN,ds-linear-abematv.akamaized.net
 # > Amazon Prime Video
 // USER-AGENT,InstantVideo.US*
 // USER-AGENT,Prime%20Video*
+// DOMAIN-SUFFIX,amazon.com
 DOMAIN-SUFFIX,primevideo.com
 DOMAIN-SUFFIX,amazonvideo.com
 DOMAIN-SUFFIX,media-amazon.com
