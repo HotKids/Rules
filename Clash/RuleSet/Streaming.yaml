@@ -84,16 +84,6 @@ payload:
   - DOMAIN-SUFFIX,litix.io
   - DOMAIN,kvinit-prod.api.kochava.com
 
-  # > Disney Star+
-  # USER-AGENT,Star+
-  - PROCESS-NAME,com.disney.starplus
-  - DOMAIN-SUFFIX,starplus.com
-  - DOMAIN-SUFFIX,starott.com
-  - DOMAIN,prod-ripcut-delivery.disney-plus.net
-  - DOMAIN,star.connections.edge.bamgrid.com
-  - DOMAIN,star.content.edge.bamgrid.com
-  - DOMAIN,star.api.edge.bamgrid.com
-  
   # > Disney+
   # USER-AGENT,Disney*
   - PROCESS-NAME,com.disney.disneyplus
@@ -102,9 +92,9 @@ payload:
   - DOMAIN-SUFFIX,disneystreaming.com
   - DOMAIN-SUFFIX,dssott.com
   # DOMAIN-SUFFIX,bamgrid.com
+  - DOMAIN,disney.api.edge.bamgrid.com
   - DOMAIN,disney.connections.edge.bamgrid.com
   - DOMAIN,disney.content.edge.bamgrid.com
-  - DOMAIN,disney.api.edge.bamgrid.com
   - DOMAIN,disney.playback.edge.bamgrid.com
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
@@ -189,6 +179,16 @@ payload:
   - DOMAIN-SUFFIX,scdn.co
   - DOMAIN-SUFFIX,spoti.fi
   - DOMAIN-SUFFIX,spotify.com
+
+  # > Star+
+  # USER-AGENT,Star+
+  - PROCESS-NAME,com.disney.starplus
+  - DOMAIN-SUFFIX,starplus.com
+  - DOMAIN-SUFFIX,starott.com
+  - DOMAIN,star.api.edge.bamgrid.com
+  - DOMAIN,star.connections.edge.bamgrid.com
+  - DOMAIN,star.content.edge.bamgrid.com
+  - DOMAIN,star.playback.edge.bamgrid.com
 
   # > YouTube
   # USER-AGENT,*YouTube*
