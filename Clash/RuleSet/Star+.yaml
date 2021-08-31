@@ -1,5 +1,5 @@
 payload:
-  # > Star Plus
+  # > Star+
   # USER-AGENT,Star+
   - PROCESS-NAME,com.disney.starplus
   - DOMAIN-SUFFIX,starplus.com
