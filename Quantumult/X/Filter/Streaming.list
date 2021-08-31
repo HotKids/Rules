@@ -69,6 +69,15 @@ DOMAIN-SUFFIX,uplynk.com,Discovery+
 DOMAIN-SUFFIX,litix.io,Discovery+
 DOMAIN,kvinit-prod.api.kochava.com,Discovery+
 
+# > Disney Star+
+USER-AGENT,Star+,Star Plus
+DOMAIN-SUFFIX,starplus.com,Star Plus
+DOMAIN-SUFFIX,starott.com,Star Plus
+DOMAIN,prod-ripcut-delivery.disney-plus.net,Star Plus
+DOMAIN,star.connections.edge.bamgrid.com,Star Plus
+DOMAIN,star.content.edge.bamgrid.com,Star Plus
+DOMAIN,star.api.edge.bamgrid.com,Star Plus
+
 # > Disney+
 USER-AGENT,Disney*,Disney+
 DOMAIN-SUFFIX,disneyplus.com,Disney+
