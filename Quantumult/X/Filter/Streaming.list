@@ -69,15 +69,6 @@ DOMAIN-SUFFIX,uplynk.com,Discovery+
 DOMAIN-SUFFIX,litix.io,Discovery+
 DOMAIN,kvinit-prod.api.kochava.com,Discovery+
 
-# > Disney Star+
-USER-AGENT,Star+,Star Plus
-DOMAIN-SUFFIX,starplus.com,Star Plus
-DOMAIN-SUFFIX,starott.com,Star Plus
-DOMAIN,prod-ripcut-delivery.disney-plus.net,Star Plus
-DOMAIN,star.connections.edge.bamgrid.com,Star Plus
-DOMAIN,star.content.edge.bamgrid.com,Star Plus
-DOMAIN,star.api.edge.bamgrid.com,Star Plus
-
 # > Disney+
 USER-AGENT,Disney*,Disney+
 DOMAIN-SUFFIX,disneyplus.com,Disney+
@@ -85,9 +76,9 @@ DOMAIN-SUFFIX,disney-plus.net,Disney+
 DOMAIN-SUFFIX,disneystreaming.com,Disney+
 DOMAIN-SUFFIX,dssott.com,Disney+
 // DOMAIN-SUFFIX,bamgrid.com,Disney Plus
+DOMAIN,disney.api.edge.bamgrid.com,Disney Plus
 DOMAIN,disney.connections.edge.bamgrid.com,Disney Plus
 DOMAIN,disney.content.edge.bamgrid.com,Disney Plus
-DOMAIN,disney.api.edge.bamgrid.com,Disney Plus
 DOMAIN,disney.playback.edge.bamgrid.com,Disney Plus
 DOMAIN,cdn.registerdisney.go.com,Disney Plus
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Disney Plus
@@ -164,6 +155,15 @@ DOMAIN-SUFFIX,pscdn.co,Spotify
 DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-SUFFIX,spotify.com,Spotify
+
+# > Star+
+USER-AGENT,Star+,Star Plus
+DOMAIN-SUFFIX,starplus.com,Star Plus
+DOMAIN-SUFFIX,starott.com,Star Plus
+DOMAIN,star.api.edge.bamgrid.com,Star Plus
+DOMAIN,star.connections.edge.bamgrid.com,Star Plus
+DOMAIN,star.content.edge.bamgrid.com,Star Plus
+DOMAIN,star.playback.edge.bamgrid.com,Star Plus
 
 # > YouTube
 USER-AGENT,*YouTube*,YouTube
