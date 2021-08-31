@@ -2,7 +2,7 @@
 USER-AGENT,Star+
 DOMAIN-SUFFIX,starplus.com
 DOMAIN-SUFFIX,starott.com
-DOMAIN,prod-ripcut-delivery.disney-plus.net
+DOMAIN,star.api.edge.bamgrid.com
 DOMAIN,star.connections.edge.bamgrid.com
 DOMAIN,star.content.edge.bamgrid.com
-DOMAIN,star.api.edge.bamgrid.com
+DOMAIN,star.playback.edge.bamgrid.com
