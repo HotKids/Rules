@@ -18,7 +18,7 @@ Tasks: Bahamut = type=cron,cronexp="0 8 * * *",wake-system=1,timeout=300,script-
 
 # > 滴滴出行 DailyBonus by blackmatrix7
 // GetCookie: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.sgmodule
-Tasks: 滴滴出行 = type=cron,cronexp="0 9 * * *",timeout=120,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js
+// Tasks: 滴滴出行 = type=cron,cronexp="0 9 * * *",timeout=120,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/didichuxing/didi_checkin.js
 
 # > 京东 DailyBonus by NobyDa
 Tasks: 京东 = type=cron,cronexp="30 0,6 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
@@ -66,7 +66,7 @@ Tasks: 饿了么_领取吃货豆 = type=cron,cronexp="21 0 * * *",timeout=60,scr
 Tasks: 叮咚买菜 = type=cron,cronexp="22 0 * * *",timeout=30,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js
 
 # > 万达电影 DailyBonus by blackmatrix7
-Tasks: 万达电影 = type=cron,cronexp="23 0 * * *",timeout=10,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
+// Tasks: 万达电影 = type=cron,cronexp="23 0 * * *",timeout=10,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
 
 # > 航旅纵横 DailyBonus by zZPiglet
 Tasks: 航旅纵横 = type=cron,cronexp="24 0 * * *",script-path=https://raw.githubusercontent.com/zZPiglet/Task/master/umetrip/umetrip.js
