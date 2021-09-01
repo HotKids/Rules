@@ -189,7 +189,13 @@ payload:
   - DOMAIN,star.connections.edge.bamgrid.com
   - DOMAIN,star.content.edge.bamgrid.com
   - DOMAIN,star.playback.edge.bamgrid.com
-
+  
+  # > U-Next
+  - PROCESS-NAME,jp.unext.mediaplayer
+  - PROCESS-NAME,jp.unext.tv.player
+  - DOMAIN-SUFFIX,unext.jp
+  - DOMAIN-SUFFIX,nxtv.jp
+  
   # > YouTube
   # USER-AGENT,*YouTube*
   # USER-AGENT,*youtube*
