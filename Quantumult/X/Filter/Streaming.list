@@ -165,6 +165,10 @@ DOMAIN,star.connections.edge.bamgrid.com,Star Plus
 DOMAIN,star.content.edge.bamgrid.com,Star Plus
 DOMAIN,star.playback.edge.bamgrid.com,Star Plus
 
+# > U-Next
+DOMAIN-SUFFIX,unext.jp,U-Next
+DOMAIN-SUFFIX,nxtv.jp,U-Next
+
 # > YouTube
 USER-AGENT,*YouTube*,YouTube
 USER-AGENT,*youtube*,YouTube
