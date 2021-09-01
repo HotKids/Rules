@@ -7,3 +7,5 @@ DOMAIN,star.api.edge.bamgrid.com
 DOMAIN,star.connections.edge.bamgrid.com
 DOMAIN,star.content.edge.bamgrid.com
 DOMAIN,star.playback.edge.bamgrid.com
+// 此条加载海报用可注释。注释后打开 App 会提示账号漫游，但不影响正常使用。
+// DOMAIN,prod-ripcut-delivery.disney-plus.net:443
