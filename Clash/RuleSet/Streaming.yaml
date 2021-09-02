@@ -86,7 +86,7 @@ payload:
 
   # > Disney+
   # USER-AGENT,Disney*
-  - PROCESS-NAME,com.disney.disneyplus
+  # PROCESS-NAME,com.disney.disneyplus
   - DOMAIN-SUFFIX,disneyplus.com
   - DOMAIN-SUFFIX,disney-plus.net
   - DOMAIN-SUFFIX,disneystreaming.com
@@ -101,17 +101,17 @@ payload:
 
   # > HBO GO Asia
   # USER-AGENT,HBO%20GO%20PROD*
-  - PROCESS-NAME,sg.hbo.hbogo
-  - PROCESS-NAME,com.hbo.asia.androidtv
-  - DOMAIN-KEYWORD,hboasia
+  # PROCESS-NAME,sg.hbo.hbogo
+  # PROCESS-NAME,com.hbo.asia.androidtv
+  # DOMAIN-KEYWORD,hboasia
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
   - DOMAIN-SUFFIX,hbogoasia.com
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
-  - DOMAIN,hbogoprod-vod.akamaized.net
-  - DOMAIN,hboasialive.akamaized.net
-  - DOMAIN,bcbolthboa-a.akamaihd.net
+  # DOMAIN,hbogoprod-vod.akamaized.net
+  # DOMAIN,hboasialive.akamaized.net
+  # DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net
 
   # > HBO Max
@@ -124,13 +124,13 @@ payload:
   - DOMAIN-SUFFIX,hbomaxcdn.com
 
   # > Hulu
-  - PROCESS-NAME,com.hulu.plus
+  # PROCESS-NAME,com.hulu.plus
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
-  - DOMAIN,assetshuluimcom-a.akamaihd.net
+  # DOMAIN,assetshuluimcom-a.akamaihd.net
 
   # > Netflix
   # USER-AGENT,Argo*
@@ -182,7 +182,7 @@ payload:
 
   # > Star+
   # USER-AGENT,Star+
-  - PROCESS-NAME,com.disney.starplus
+  # PROCESS-NAME,com.disney.starplus
   - DOMAIN-SUFFIX,starplus.com
   - DOMAIN-SUFFIX,starott.com
   - DOMAIN,star.api.edge.bamgrid.com
