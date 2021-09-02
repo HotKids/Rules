@@ -85,16 +85,16 @@ DOMAIN,cdn.registerdisney.go.com
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
 # > HBO GO Asia
-USER-AGENT,HBO%20GO%20PROD*
-DOMAIN-KEYWORD,hboasia
+// USER-AGENT,HBO%20GO%20PROD*
+// DOMAIN-KEYWORD,hboasia
 DOMAIN-KEYWORD,hbogoasia
 DOMAIN-SUFFIX,hboasia.com
 DOMAIN-SUFFIX,hbogoasia.com
 DOMAIN,hbolb.onwardsmg.com
 DOMAIN,hbounify-prod.evergent.com
-DOMAIN,hbogoprod-vod.akamaized.net
-DOMAIN,hboasialive.akamaized.net
-DOMAIN,bcbolthboa-a.akamaihd.net
+// DOMAIN,hbogoprod-vod.akamaized.net
+// DOMAIN,hboasialive.akamaized.net
+// DOMAIN,bcbolthboa-a.akamaihd.net
 DOMAIN,dai3fd1oh325y.cloudfront.net
 
 # > HBO Max
@@ -111,7 +111,7 @@ DOMAIN-SUFFIX,hulu.tv
 DOMAIN-SUFFIX,huluim.com
 DOMAIN-SUFFIX,hulustream.com
 DOMAIN,cws-hulu.conviva.com
-DOMAIN,assetshuluimcom-a.akamaihd.net
+// DOMAIN,assetshuluimcom-a.akamaihd.net
 
 # > Netflix
 USER-AGENT,Argo*
