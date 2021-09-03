@@ -10,9 +10,10 @@ payload:
   - DOMAIN-SUFFIX,intl.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
+  - IP-CIDR,23.59.252.131/24,no-resolve
   - IP-CIDR,23.211.15.0/24,no-resolve
   - IP-CIDR,23.219.172.0/24,no-resolve
   - IP-CIDR,184.51.102.0/24,no-resolve
   - IP-CIDR,110.238.107.47/32,no-resolve
   - IP-CIDR,203.74.95.130/28,no-resolve
-  - IP-CIDR,210.71.227.202/32,iQIYI Intl,no-resolve
+  - IP-CIDR,210.71.227.202/32,no-resolve
