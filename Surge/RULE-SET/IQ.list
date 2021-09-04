@@ -14,6 +14,7 @@ DOMAIN,intl-rcd.iqiyi.com
 DOMAIN,intl-subscription.iqiyi.com
 // 播放
 IP-CIDR,23.59.252.0/24,no-resolve
+IP-CIDR,23.200.145.146/32,no-resolve
 IP-CIDR,23.211.15.0/24,no-resolve
 IP-CIDR,23.219.172.0/24,no-resolve
 IP-CIDR,184.51.102.0/24,no-resolve
