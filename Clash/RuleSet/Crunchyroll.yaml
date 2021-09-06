@@ -1,3 +1,4 @@
+payload:
   # > Crunchyroll
   # USER-AGENT,Crunchyroll*
   - DOMAIN-SUFFIX,crunchyroll.com
