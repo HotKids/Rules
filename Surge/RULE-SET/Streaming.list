@@ -51,6 +51,11 @@ DOMAIN-SUFFIX,britbox.com
 DOMAIN-SUFFIX,bbc.co.uk
 DOMAIN,d2z3p34itxwaj7.cloudfront.net
 
+# > Crunchyroll
+USER-AGENT,Crunchyroll*
+DOMAIN-SUFFIX,crunchyroll.com
+// DOMAIN-SUFFIX,vrv.co
+
 # > DAZN
 USER-AGENT,DAZN*
 DOMAIN-SUFFIX,dazn.com
