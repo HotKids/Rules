@@ -1,8 +1,7 @@
 payload:
-  # > Bilibili SEA｜SEA
-  - PROCESS-NAME,com.bstar.intl
-  - DOMAIN-SUFFIX,biliintl.com
-  - DOMAIN,apm-misaka.biliapi.net
-  - DOMAIN,p-bstarstatic.akamaized.net
-  - DOMAIN,upos-bstar-mirrorakam.akamaized.net
-  - DOMAIN,upos-bstar1-mirrorakam.akamaized.net
+  # > Goole Play
+  # 解决谷歌商店访问不了的问题
+  # 通过将 services.googleapis.cn 对应的IP段加入代理解决
+  # 原理是 services.googleapis.cn  会解析到国内ip，导致下载不了。将对应国内ip加入代理就可以下载了
+  - DOMAIN-SUFFIX,xn--ngstr-lra8j.com
+  - DOMAIN-SUFFIX,services.googleapis.cn
