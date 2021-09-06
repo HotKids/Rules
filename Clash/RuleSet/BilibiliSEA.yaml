@@ -1,5 +1,5 @@
 payload:
-  # > Goole Play
-  # 解决国行设备 Google Play 无法正常下载的问题
-  - DOMAIN-SUFFIX,xn--ngstr-lra8j.com
-  - DOMAIN-SUFFIX,services.googleapis.cn
+  # > Bilibili SEA｜SEA
+  - PROCESS-NAME,com.bstar.intl
+  - DOMAIN-SUFFIX,biliintl.com
+  - DOMAIN,apm-misaka.biliapi.net
