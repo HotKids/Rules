@@ -53,7 +53,7 @@ DOMAIN,d2z3p34itxwaj7.cloudfront.net,Britbox
 # > Crunchyroll
 USER-AGENT,Crunchyroll*,Crunchyroll
 DOMAIN-SUFFIX,crunchyroll.com,Crunchyroll
-// DOMAIN-SUFFIX,vrv.co,Crunchyroll
+DOMAIN-SUFFIX,vrv.co,Crunchyroll
 
 # > DAZN
 USER-AGENT,DAZN*,DAZN
