@@ -163,7 +163,7 @@ DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,spotify.com
 
 # > Star+
-USER-AGENT,Star+
+USER-AGENT,Star+*
 DOMAIN-SUFFIX,starplus.com
 DOMAIN-SUFFIX,starott.com
 DOMAIN,star.api.edge.bamgrid.com
