@@ -3,8 +3,8 @@ payload:
   - DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
   # > Tencent
-  - DOMAIN,btrace.qq.com
-  - DOMAIN,mtrace.qq.com
+  # DOMAIN,btrace.qq.com
+  # DOMAIN,mtrace.qq.com
   - DOMAIN-KEYWORD,adstats
   - DOMAIN,adstats.tencentmusic.com
 
