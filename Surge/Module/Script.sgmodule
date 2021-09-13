@@ -7,7 +7,7 @@ hostname = %INSERT% *.uve.weibo.com,api.weibo.cn,app.biliintl.com,haojia.m.smzdm
 
 [Rule]
 # > 微信公众号
-// URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
+URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
 # > 携程
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
