@@ -5,7 +5,7 @@ payload:
   # PROCESS-NAME,com.amazon.firebat
   # PROCESS-NAME,com.amazon.avod.thirdpartyclient
   # PROCESS-NAME,com.amazon.amazonvideo.livingroom
-  - DOMAIN-SUFFIX,amazon.com
+  # DOMAIN-SUFFIX,amazon.com
   - DOMAIN-SUFFIX,primevideo.com
   - DOMAIN-SUFFIX,amazonvideo.com
   - DOMAIN-SUFFIX,media-amazon.com
