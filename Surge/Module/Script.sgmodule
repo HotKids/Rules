@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% *.uve.weibo.com,api.weibo.cn,app.biliintl.com,haojia.m.smzdm.com,mapi.weibo.com,mp.weixin.qq.com,socketio.ctrip.com,static.zhihu.com
+hostname = %INSERT% *.uve.weibo.com,api.weibo.cn,app.biliintl.com,boxer.baidu.com,haojia.m.smzdm.com,mapi.weibo.com,mp.weixin.qq.com,socketio.ctrip.com,static.zhihu.com
 
 [Rule]
 # > 微信公众号
@@ -31,3 +31,6 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)ap
 
 # > 微信公众号去广告 by Choler&yjqiang
 WeChat.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/yjqiang/surge_scripts/main/scripts/wechat/wechat_public_accounts.js
+
+# > 百度搜索防跳转 App Store by app2smile
+baidu-no-redirect.js = type=http-response,pattern=^https?\:\/\/boxer\.baidu\.com\/scheme,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
