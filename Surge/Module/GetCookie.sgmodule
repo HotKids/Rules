@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,passport.biligame.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,cloud.umetrip.com,*.qunar.com,*.ximalaya.com,113.96.156.178
+hostname = %APPEND% m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,passport.biligame.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,cloud.umetrip.com,*.qunar.com
 
 [Script]
 # > 中国联通 GetCookie by blackmatrix7
@@ -32,6 +32,9 @@ Cookie: 哔哩哔哩 = type=http-request,pattern=^https?:\/\/(www|live)\.bilibil
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/passport\.biligame\.com\/api\/login\/sso.+?version%22%3A%22(3|4|5),script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
+# > 喜马拉雅 GetCookie by chavyleung
+Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/(v1\/)?homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
+
 # > 什么值得买 GetCookie by blackmatrix7
 Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_signin.js,requires-body=true
 
@@ -59,6 +62,3 @@ Cookie: 航旅纵横 = type=http-request,pattern=^https?:\/\/cloud\.umetrip\.com
 
 # > 去哪儿 GetCookie by chavyleung
 Cookie: 去哪儿 = type=http-request,pattern=^https?:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
-
-# > 喜马拉雅 GetCookie by chavyleung
-Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/(v1\/)?homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
