@@ -55,7 +55,7 @@ external-controller: 127.0.0.1:9090
 # secret: ""
 
 # Outbound interface name
-interface-name: eth0
+# interface-name: eth0
 
 # Static hosts for DNS server and connection establishment (like /etc/hosts)
 #
