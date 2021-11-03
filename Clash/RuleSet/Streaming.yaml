@@ -97,6 +97,7 @@ payload:
   - DOMAIN-SUFFIX,disneystreaming.com
   - DOMAIN-SUFFIX,dssott.com
   # DOMAIN-SUFFIX,bamgrid.com
+  - DOMAIN,playback-certs.bamgrid.com
   - DOMAIN,disney.api.edge.bamgrid.com
   - DOMAIN,disney.connections.edge.bamgrid.com
   - DOMAIN,disney.content.edge.bamgrid.com
