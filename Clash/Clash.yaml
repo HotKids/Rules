@@ -166,8 +166,8 @@ proxies:
 proxy-providers:
   HK:
     type: http
-    path: ./Provider/Proxy/Dler/HK.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=hk
+    path: ./Provider/Proxy/Sub/HK.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%AD%F0%9F%87%B0
     interval: 3600
     health-check: 
       enable: true
@@ -175,8 +175,8 @@ proxy-providers:
       interval: 600
   TW:
     type: http
-    path: ./Provider/Proxy/Dler/TW.yaml
-    url: https://api.dler.io/sub?config=https://git.io/JIRRU&udp=true&tfo=true&sort=true&target=clash&list=true&url=https://dler.cloud/subscribe/QWERTYUIOP?mu=smart&include=%E5%8F%B0
+    path: ./Provider/Proxy/Sub/TW.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%B9%F0%9F%87%BC
     interval: 3600
     health-check: 
       enable: true
@@ -184,8 +184,8 @@ proxy-providers:
       interval: 600
   JP:
     type: http
-    path: ./Provider/Proxy/Dler/JP.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=jp
+    path: ./Provider/Proxy/Sub/JP.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%AF%F0%9F%87%B5
     interval: 3600
     health-check: 
       enable: true
@@ -193,8 +193,8 @@ proxy-providers:
       interval: 600
   SG:
     type: http
-    path: ./Provider/Proxy/Dler/SG.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=sg
+    path: ./Provider/Proxy/Sub/SG.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%B8%F0%9F%87%AC
     interval: 3600
     health-check: 
       enable: true
@@ -202,8 +202,8 @@ proxy-providers:
       interval: 600
   US:
     type: http
-    path: ./Provider/Proxy/Dler/US.yaml
-    url: https://dler.cloud/subscribe/QWERTYUIOP?protocols=smart&list=clash&area=us&nomatch=gia
+    path: ./Provider/Proxy/Sub/US.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%BA%F0%9F%87%B8
     interval: 3600
     health-check: 
       enable: true
@@ -211,8 +211,8 @@ proxy-providers:
       interval: 600
   UN:
     type: http
-    path: ./Provider/Proxy/Dler/UN.yaml
-    url: https://api.dler.io/sub?config=https://git.io/JIRRU&udp=true&tfo=true&sort=true&target=clash&list=true&url=https://dler.cloud/subscribe/QWERTYUIOP?mu=smart
+    path: ./Provider/Proxy/Sub/UN.yaml
+    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me
     interval: 3600
     health-check: 
       enable: true
