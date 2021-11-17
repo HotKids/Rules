@@ -1,0 +1,18 @@
+# > FOD
+USER-AGENT,FOD*
+DOMAIN-SUFFIX,fujitv.co.jp
+DOMAIN-SUFFIX,stream.ne.jp
+DOMAIN,measure.ic.tver.jp
+
+# > Hulu JP
+DOMAIN-SUFFIX,hulu.jp
+DOMAIN-SUFFIX,happyon.jp
+DOMAIN-SUFFIX,prod.hjholdings.tv
+
+# > Paravi
+USER-AGENT,Paravi*
+DOMAIN-SUFFIX,paravi.jp
+
+# > U-Next
+DOMAIN-SUFFIX,unext.jp
+DOMAIN-SUFFIX,nxtv.jp
