@@ -244,7 +244,7 @@ proxy-groups:
       - 🇺🇳 Server
 
   # 大陆流媒体服务（面向港台版本）
-  - name: "📺 CNTV"
+  - name: "📺 Bilibili"
     type: select
     proxies:
       - 🔘 DIRECT
@@ -463,7 +463,7 @@ rules:
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
-  - RULE-SET,Bilibili,📺 CNTV
+  - RULE-SET,Bilibili,📺 Bilibili
   - RULE-SET,iQIYI Intl,🇹🇼 Taiwan
   - RULE-SET,WeTV,🇹🇼 Taiwan
 
