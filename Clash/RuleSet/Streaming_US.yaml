@@ -1,4 +1,63 @@
 payload:
-  # > LINE TV
-  # USER-AGENT,LINE%20TV*
-  - DOMAIN-SUFFIX,linetv.tw
+  # > Crunchyroll
+  # USER-AGENT,Crunchyroll*
+  - DOMAIN-SUFFIX,crunchyroll.com
+  - DOMAIN-SUFFIX,vrv.co
+  
+  # > Discovery+
+  # USER-AGENT,discovery+*
+  # USER-AGENT,DPlus*
+  - PROCESS-NAME,com.discovery.discoveryplus.mobile
+  - PROCESS-NAME,com.discovery.discoveryplus.androidtv
+  - PROCESS-NAME,com.discoveryplus.mobile.android
+  - PROCESS-NAME,com.discoveryplus.tv.android
+  - DOMAIN-KEYWORD,discoveryplus
+  - DOMAIN-SUFFIX,discoveryplus.com
+  - DOMAIN-SUFFIX,disco-api.com
+  - DOMAIN-SUFFIX,dnitv.com
+  - DOMAIN-SUFFIX,uplynk.com
+  - DOMAIN-SUFFIX,litix.io
+  - DOMAIN,kvinit-prod.api.kochava.com
+
+  # > HBO Max
+  # USER-AGENT,HBOMAX*
+  - PROCESS-NAME,com.hbo.hbonow
+  - DOMAIN-SUFFIX,hbo.com
+  # DOMAIN-SUFFIX,hbogo.com
+  - DOMAIN-SUFFIX,hbonow.com
+  - DOMAIN-SUFFIX,hbomax.com
+  - DOMAIN-SUFFIX,hbomaxcdn.com
+  
+  # > Hulu
+  # PROCESS-NAME,com.hulu.plus
+  - DOMAIN-SUFFIX,hulu.com
+  - DOMAIN-SUFFIX,huluim.com
+  - DOMAIN-SUFFIX,hulustream.com
+  - DOMAIN,cws-hulu.conviva.com
+  # DOMAIN,assetshuluimcom-a.akamaihd.net
+  
+  # > Paramount+
+  # USER-AGENT,PPlus*
+  - PROCESS-NAME,com.cbs.app
+  - DOMAIN-SUFFIX,cbsi.com
+  - DOMAIN-SUFFIX,cbsaavideo.com
+  - DOMAIN-SUFFIX,cbsivideo.com
+  - DOMAIN-SUFFIX,paramountplus.com
+  - DOMAIN-SUFFIX,pplusstatic.com
+  - DOMAIN,cbsi.live.ott.irdeto.com 
+  - DOMAIN,link.theplatform.com
+  - DOMAIN,cbsservice.aws.syncbak.com
+  - DOMAIN,cbsplaylistserver.aws.syncbak.com
+  
+  # > Peacock
+  # USER-AGENT,Peacock*
+  - PROCESS-NAME,com.peacocktv.peacockandroid
+  - DOMAIN-SUFFIX,peacocktv.com
+  
+  # > Roku
+  - DOMAIN-SUFFIX,roku.com
+  - DOMAIN-SUFFIX,rokutime.com
+  
+  # > Star+
+  # 此条分流只是让 Star+ 串流时走 US 节点，需搭配 Star+ 相关分流使用
+  - DOMAIN-SUFFIX,media.starott.com
