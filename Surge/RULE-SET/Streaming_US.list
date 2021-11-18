@@ -1,3 +1,8 @@
+# > Crunchyroll
+USER-AGENT,Crunchyroll*
+DOMAIN-SUFFIX,crunchyroll.com
+DOMAIN-SUFFIX,vrv.co
+
 # > Discovery+
 USER-AGENT,discovery+*
 USER-AGENT,DPlus*
@@ -46,6 +51,10 @@ DOMAIN,cbsplaylistserver.aws.syncbak.com
 # > Peacock
 USER-AGENT,peacock*
 DOMAIN-SUFFIX,peacocktv.com
+
+# > Roku
+DOMAIN-SUFFIX,roku.com
+DOMAIN-SUFFIX,rokutime.com
 
 # > Star+
 // 此条分流只是让 Star+ 串流时走 US 节点，需搭配 Star+ 相关分流使用
