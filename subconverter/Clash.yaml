@@ -1,0 +1,442 @@
+# Port of HTTP(S) proxy server on the local end
+# port: 7890
+
+# Port of SOCKS5 proxy server on the local end
+# socks-port: 7891
+
+# Transparent proxy server port for Linux and macOS (Redirect TCP and TProxy UDP)
+# redir-port: 7892
+
+# Transparent proxy server port for Linux (TProxy TCP and TProxy UDP)
+# tproxy-port: 7893
+
+# HTTP(S) and SOCKS5 server on the same port
+mixed-port: 7890
+
+# authentication of local SOCKS5/HTTP(S) server
+# authentication:
+#  - "user1:pass1"
+#  - "user2:pass2"
+
+# Set to true to allow connections to the local-end server from
+# other LAN IP addresses
+allow-lan: true
+
+# This is only applicable when `allow-lan` is `true`
+# '*': bind all IP addresses
+# 192.168.122.11: bind a single IPv4 address
+# "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
+bind-address: '*'
+
+# Clash router working mode
+# rule: rule-based packet routing
+# global: all packets will be forwarded to a single endpoint
+# direct: directly forward the packets to the Internet
+mode: rule
+
+# Clash by default prints logs to STDOUT
+# info / warning / error / debug / silent
+log-level: info
+
+# When set to false, resolver won't translate hostnames to IPv6 addresses
+ipv6: false
+
+# RESTful web API listening address
+external-controller: 127.0.0.1:9090
+
+# A relative path to the configuration directory or an absolute path to a
+# directory in which you put some static web resource. Clash core will then
+# serve it at `${API}/ui`.
+# external-ui: folder
+
+# Secret for the RESTful API (optional)
+# Authenticate by spedifying HTTP header `Authorization: Bearer ${secret}`
+# ALWAYS set a secret if RESTful API is listening on 0.0.0.0
+# secret: ""
+
+# Outbound interface name
+interface-name: eth0
+
+# Static hosts for DNS server and connection establishment (like /etc/hosts)
+#
+# Wildcard hostnames are supported (e.g. *.clash.dev, *.foo.*.example.com)
+# Non-wildcard domain names have a higher priority than wildcard domain names
+# e.g. foo.example.com > *.example.com > .example.com
+# P.S. +.foo.com equals to .foo.com and foo.com
+hosts:
+  # '*.clash.dev': 127.0.0.1
+  # '.dev': 127.0.0.1
+  # 'alpha.clash.dev': '::1'
+
+  # Firebase Cloud Messaging
+  'mtalk.google.com': 108.177.125.188
+  # Google Dl
+  'dl.google.com': 180.163.151.161
+  'dl.l.google.com': 180.163.151.161
+
+# DNS server settings
+# This section is optional. When not present, the DNS server will be disabled.
+dns:
+  enable: true
+  listen: 0.0.0.0:1053
+  # ipv6: false # when the false, response to AAAA questions will be empty
+
+  # These nameservers are used to resolve the DNS nameserver hostnames below.
+  # Specify IP addresses only
+  default-nameserver:
+    - 119.29.29.29
+    - 223.5.5.5
+  enhanced-mode: fake-ip # or redir-host
+  fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
+  # use-hosts: true # lookup hosts and return IP record
+
+  # Hostnames in this list will not be resolved with fake IPs
+  # i.e. questions to these domain names will always be answered with their
+  # real IP addresses
+  fake-ip-filter:
+    - '*.lan'
+    - localhost.ptlogin2.qq.com
+    - '+.srv.nintendo.net'
+    - '+.stun.playstation.net'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
+    - '+.xboxlive.com'
+    - 'msftconnecttest.com'
+    - 'xbox.*.microsoft.com'
+    - '*.battlenet.com.cn'
+    - '*.battlenet.com'
+    - '*.blzstatic.cn'
+    - '*.battle.net'
+  
+  # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
+  # All DNS questions are sent directly to the nameserver, without proxies
+  # involved. Clash answers the DNS question with the first result gathered.
+  nameserver:
+    - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
+    # - tls://dns.rubyfish.cn:853 # DNS over TLS
+    # - https://1.1.1.1/dns-query # DNS over HTTPS
+
+  # When `fallback` is present, the DNS server will send concurrent requests
+  # to the servers in this section along with servers in `nameservers`.
+  # The answers from fallback servers are used when the GEOIP country
+  # is not `CN`.
+  fallback:
+    - tls://one.one.one.one:853
+    - tls://dns.google:853
+    - https://dns.twnic.tw/dns-query
+    - https://dns.adguard.com/dns-query
+    - https://doh.dns.sb/dns-query
+
+  # If IP addresses resolved with servers in `nameservers` are in the specified
+  # subnets below, they are considered invalid and results from `fallback`
+  # servers are used instead.
+  #
+  # IP address resolved with servers in `nameserver` is used when
+  # `fallback-filter.geoip` is true and when GEOIP of the IP address is `CN`.
+  #
+  # If `fallback-filter.geoip` is false, results from `nameserver` nameservers
+  # are always used if not match `fallback-filter.ipcidr`.
+  #
+  # This is a countermeasure against DNS pollution attacks.
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      # - 240.0.0.0/4
+    # domain:
+    #   - '+.google.com'
+    #   - '+.facebook.com'
+    #   - '+.youtube.com'
+
+#
+# https://github.com/Dreamacro/clash/wiki/premium-core-features
+#
+tun:
+  enable: true
+  stack: system # or gvisor
+  dns-hijack:
+    - 198.18.0.2:53
+    - tcp://198.18.0.2:53
+  auto-route: true # auto set global route
+  auto-detect-interface: true # conflict with interface-name
+
+proxies:
+
+proxy-groups:
+  # 代理节点选项
+  - name: "🔰 Proxy"
+    type: select
+    proxies:
+      - 🇭🇰 Hong Kong
+      - 🇹🇼 Taiwan
+      - 🇸🇬 Singapore
+      - 🇯🇵 Japan
+      - 🇺🇸 America
+      - 🇺🇳 Server
+      - 🔘 DIRECT
+
+  # 海外流媒体服务
+  - name: "🎬 Streaming"
+    type: select
+    proxies:
+      - 🇭🇰 Hong Kong
+      - 🇹🇼 Taiwan
+      - 🇸🇬 Singapore
+      - 🇯🇵 Japan
+      - 🇺🇸 America
+      - 🇺🇳 Server
+
+  # 大陆流媒体服务（面向港台版本）
+  - name: "📺 CNTV"
+    type: select
+    proxies:
+      - 🔘 DIRECT
+      - 🇹🇼 Taiwan
+
+  # 特殊代理服务
+  - name: "📬 Telegram"
+    type: select
+    proxies:
+      - 🔰 Proxy
+      - 🇸🇬 Singapore
+      - 🔘 DIRECT
+
+  - name: "💳 PayPal"
+    type: select
+    proxies:
+      - 🔘 DIRECT
+      - 🔰 Proxy
+      - 🇺🇸 America
+
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  - name: "🚧 AdGuard"
+    type: select
+    proxies:
+      - REJECT
+      - DIRECT
+
+  # 直连
+  - name: "🔘 DIRECT"
+    type: select
+    proxies:
+      - DIRECT
+
+  # UN
+  - name: "🇺🇳 Server"
+    type: select
+    use:
+      - UN
+
+  # HK
+  - name: "🇭🇰 Hong Kong"
+    type: select
+    use:
+      - HK
+      
+  # TW
+  - name: "🇹🇼 Taiwan"
+    type: select
+    use:
+      - TW
+
+  # SG
+  - name: "🇸🇬 Singapore"
+    type: select
+    use:
+      - SG
+      
+  # JP
+  - name: "🇯🇵 Japan"
+    type: select
+    use:
+      - JP
+    
+  # US
+  - name: "🇺🇸 America"
+    type: select
+    use:
+      - US
+
+# 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
+
+rule-providers:
+# name: # Provider 名称
+#   type: http # http 或 file
+#   behavior: classical # 或 ipcidr、domain
+#   path: # 文件路径
+#   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。
+#   interval: # 自动更新间隔，仅在类型为 HTTP 时可用
+
+  Unbreak:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Unbreak.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Unbreak.yaml
+    interval: 86400
+
+  Adblock:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Adblock.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
+    interval: 86400
+    
+  Advertising:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Advertising.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Advertising.yaml
+    interval: 86400
+
+  Hijacking:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Hijacking.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Hijacking.yaml
+    interval: 86400
+    
+  Privacy:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Privacy.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Privacy.yaml
+    interval: 86400
+    
+  Bilibili:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Bilibili.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bilibili.yaml
+    interval: 86400
+    
+  iQIYI Intl:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/IQ.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/IQ.yaml
+    interval: 86400
+   
+  WeTV:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/WeTV.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/WeTV.yaml
+    interval: 86400
+
+  Streaming TW:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming_TW.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml
+    interval: 86400
+
+  Streaming JP:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming_JP.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml
+    interval: 86400
+
+  Streaming US:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming_US.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml
+    interval: 86400
+
+  Streaming:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming.yaml
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Extra/Telegram.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/Telegram/Telegram.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Extra/PayPal.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/PayPal.yaml
+    interval: 86400
+
+  Global:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Global.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Global.yaml
+    interval: 86400
+
+  China:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/China.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/China.yaml
+    interval: 86400
+
+  ChinaIP:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/Extra/ChinaIP.yaml
+    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/ChinaIP.yaml
+    interval: 86400
+
+# 规则
+rules:
+  # Unbreak
+  - RULE-SET,Unbreak,🔘 DIRECT
+
+  # AdBlock
+  - RULE-SET,Adblock,🚧 AdGuard
+  - RULE-SET,Advertising,🚧 AdGuard
+  - RULE-SET,Hijacking,🚧 AdGuard
+  - RULE-SET,Privacy,🚧 AdGuard
+
+  # Global Area Network
+
+  # Streaming
+  - RULE-SET,Streaming TW,🇹🇼 Taiwan
+  - RULE-SET,Streaming JP,🇯🇵 Japan
+  - RULE-SET,Streaming US,🇺🇸 America
+  - RULE-SET,Streaming,🎬 Streaming
+
+  # CNTV
+  - RULE-SET,Bilibili,📺 CNTV
+  - RULE-SET,iQIYI Intl,🇹🇼 Taiwan
+  - RULE-SET,WeTV,🇹🇼 Taiwan
+
+  # Telegram
+  - RULE-SET,Telegram,📬 Telegram
+
+  # PayPal
+  - RULE-SET,PayPal,💳 PayPal
+
+  # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
+  - RULE-SET,Global,🔰 Proxy
+
+  # China Area Network
+  - RULE-SET,China,🔘 DIRECT
+
+  # Local Area Network
+  - IP-CIDR,192.168.0.0/16,🔘 DIRECT
+  - IP-CIDR,10.0.0.0/8,🔘 DIRECT
+  - IP-CIDR,172.16.0.0/12,🔘 DIRECT
+  - IP-CIDR,127.0.0.0/8,🔘 DIRECT
+  - IP-CIDR,100.64.0.0/10,🔘 DIRECT
+  - IP-CIDR,224.0.0.0/4,🔘 DIRECT
+  - IP-CIDR,fe80::/10,🔘 DIRECT
+
+  # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
+  - RULE-SET,ChinaIP,🔘 DIRECT
+  # Tencent
+  # IP-CIDR,119.28.28.28/32,🔘 DIRECT
+  # IP-CIDR,182.254.116.0/24,🔘 DIRECT
+  # GeoIP China(若启用，则禁用 ChinaIP.list)
+  # GEOIP,CN,🔘 DIRECT
+
+  - MATCH,🔰 Proxy
