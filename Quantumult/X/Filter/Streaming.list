@@ -22,6 +22,15 @@ DOMAIN,atv-ps.amazon.com,Prime Video
 DOMAIN,fls-na.amazon.com,Prime Video
 DOMAIN,avodmp4s3ww-a.akamaihd.net,Prime Video
 
+# > Apple TV
+# USER-AGENT,AppleTV*,Apple TV
+# USER-AGENT,com.apple.tv*,Apple TV
+DOMAIN-SUFFIX,tv.apple.com,Apple TV
+DOMAIN,hls.itunes.apple.com,Apple TV
+DOMAIN,hls-amt.itunes.apple.com,Apple TV
+DOMAIN,uts-api.itunes.apple.com,Apple TV
+DOMAIN,play-edge.itunes.apple.com,Apple TV
+
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*,BBC iPlayer
 DOMAIN-KEYWORD,bbcfmt,BBC iPlayer
