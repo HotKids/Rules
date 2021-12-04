@@ -157,5 +157,10 @@ tun:
   dns-hijack:
     - 198.18.0.2:53
     - tcp://198.18.0.2:53
+    - 8.8.8.8:53
+    - tcp://8.8.8.8:53
+    - 8.8.4.4:53
+    - tcp://8.8.4.4:53
+
   auto-route: true # auto set global route
   auto-detect-interface: true # conflict with interface-name
