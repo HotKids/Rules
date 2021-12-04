@@ -1,5 +1,5 @@
 #!name=Prime Video 🇺🇸
-#!desc=在不影响 Amazon 的情况下使用美区 Prime Video
+#!desc=在不影响 Amazon 的情况下使用美区 Prime Video 网页版
 
 [MITM]
 hostname = %INSERT% www.amazon.com
