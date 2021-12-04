@@ -1,0 +1,9 @@
+#!name=Prime Video 🇺🇸
+#!desc=在不影响 Amazon 的情况下使用美区 Prime Video
+
+[MITM]
+hostname = %INSERT% www.amazon.com
+
+[Rule]
+# > Prime Video 🇺🇸 Homepage
+URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/,🇺🇸 America
