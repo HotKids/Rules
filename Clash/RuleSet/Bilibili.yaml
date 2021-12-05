@@ -6,11 +6,13 @@ payload:
   - DOMAIN-SUFFIX,bilibili.tv
   - DOMAIN-SUFFIX,biliapi.net
   - DOMAIN-SUFFIX,biliapi.com
+  - DOMAIN-SUFFIX,bilivideo.com
   - DOMAIN-SUFFIX,acgvideo.com
   - DOMAIN-SUFFIX,acg.tv
   - DOMAIN-SUFFIX,hdslb.com
   - DOMAIN,upos-hz-mirrorakam.akamaized.net
   - DOMAIN-KEYWORD,bilibili
+  - IP-CIDR,203.107.1.65/32,no-resolve
   # > 港台版 Bilibili App
   # USER-AGENT,bili-inter*
   - PROCESS-NAME,com.bilibili.app.in
