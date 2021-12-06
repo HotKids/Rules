@@ -9,6 +9,7 @@ payload:
   - DOMAIN-SUFFIX,bilivideo.com
   - DOMAIN-SUFFIX,acgvideo.com
   - DOMAIN-SUFFIX,acg.tv
+  - DOMAIN-SUFFIX,b23.tv
   - DOMAIN-SUFFIX,hdslb.com
   - DOMAIN,upos-hz-mirrorakam.akamaized.net
   - DOMAIN-KEYWORD,bilibili
