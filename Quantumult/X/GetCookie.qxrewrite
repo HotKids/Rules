@@ -1,4 +1,4 @@
-hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,passport.biligame.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com
+hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com
 
 ;中国联通 GetCookie by blackmatrix7
 // App: 我的-天天抽奖
@@ -20,7 +20,7 @@ hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.
 ^https?:\/\/(www|live)\.bilibili\.com\/?.? url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js
 
 ;哔哩哔哩漫画 GetCookie by NoByDa
-^https?:\/\/passport\.biligame\.com\/api\/login\/sso.+?version%22%3A%22(3|4|5) url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
+^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 ;喜马拉雅 GetCookie by chavyleung
 ^https?:\/\/.*\/mobile\-user\/(v1\/)?homePage\/.* url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
