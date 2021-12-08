@@ -1,0 +1,10 @@
+# > Discovery+ PH
+// DOMAIN-SUFFIX,discoveryplus.com,Discovery+
+DOMAIN-SUFFIX,discoveryplus.ph,Discovery+
+DOMAIN,ap2-prod.disco-api.com,Discovery+
+DOMAIN,ap2-prod-images.disco-api.com,Discovery+
+DOMAIN,discovery-ap.conax.cloud,Discovery+
+DOMAIN,ap2-prod-direct.discoveryplus.com,Discovery+
+DOMAIN,gdvm0o88gc3qseqotiavvvhim.litix.io,Discovery+
+// DOMAIN,dplus-ph-prod-vod.akamaized.net,Discovery+
+// DOMAIN,dplus-ph-google-v2.prod-vod.h264.io,Discovery+
