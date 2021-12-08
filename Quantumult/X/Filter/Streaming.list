@@ -41,6 +41,7 @@ DOMAIN-SUFFIX,bbc.co,BBC iPlayer
 DOMAIN-SUFFIX,bbc.co.uk,BBC iPlayer
 DOMAIN-SUFFIX,bbci.co,BBC iPlayer
 DOMAIN-SUFFIX,bbci.co.uk,BBC iPlayer
+DOMAIN,ssl-bbcsmarttv.2cnt.net,BBC iPlayer
 DOMAIN,vod-dash-uk-live.akamaized.net,BBC iPlayer
 DOMAIN,vod-thumb-uk-live.akamaized.net,BBC iPlayer
 DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC iPlayer
