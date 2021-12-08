@@ -4,6 +4,7 @@
 
 [MITM]
 hostname = %INSERT% ifac*.iqiyi.com
+
 [Script]
 # > 爱奇艺 GetCookie by NobyDa
 Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/iface(\d)?\.iqiyi\.com\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
