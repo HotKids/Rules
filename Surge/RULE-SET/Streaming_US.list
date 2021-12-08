@@ -15,6 +15,8 @@ DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
 DOMAIN,content-ause1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 // DOMAIN,go-prod-vz.akamaized.net
+DOMAIN-SUFFIX,dnitv.com
+DOMAIN,kvinit-prod.api.kochava.com
 
 # > HBO Max
 USER-AGENT,HBOMAX*
