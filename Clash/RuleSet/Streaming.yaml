@@ -52,6 +52,7 @@ payload:
   - DOMAIN-SUFFIX,bbc.co.uk
   - DOMAIN-SUFFIX,bbci.co
   - DOMAIN-SUFFIX,bbci.co.uk
+  - DOMAIN,ssl-bbcsmarttv.2cnt.net
   - DOMAIN,vod-dash-uk-live.akamaized.net
   - DOMAIN,vod-thumb-uk-live.akamaized.net
   - DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
