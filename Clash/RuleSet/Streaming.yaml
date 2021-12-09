@@ -166,6 +166,11 @@ payload:
   - DOMAIN,cws-hulu.conviva.com
   # DOMAIN,assetshuluimcom-a.akamaihd.net
 
+  # > MUBI
+  - PROCESS-NAME,com.mubi
+  - DOMAIN-SUFFIX,mubi.com
+  - DOMAIN-SUFFIX,mubicdn.net
+
   # > Netflix
   # USER-AGENT,Argo*
   - PROCESS-NAME,com.netflix.mediaclient
