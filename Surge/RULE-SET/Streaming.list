@@ -207,7 +207,7 @@ DOMAIN,star.connections.edge.bamgrid.com
 DOMAIN,star.content.edge.bamgrid.com
 DOMAIN,star.playback.edge.bamgrid.com
 
-# > U-Next
+# > U-NEXT
 DOMAIN-SUFFIX,unext.jp
 DOMAIN-SUFFIX,nxtv.jp
 // streamd01ca-nxtv-jp.akamaized.net
