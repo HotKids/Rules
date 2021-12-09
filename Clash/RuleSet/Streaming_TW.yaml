@@ -51,3 +51,5 @@ payload:
   - PROCESS-NAME,com.taiwanmobile.myVideotv
   - DOMAIN-SUFFIX,myvideo.net.tw
   - DOMAIN-SUFFIX,catch.net.tw
+
+  - DOMAIN-KEYWORD,.tw
