@@ -1,0 +1,5 @@
+payload:
+  # > MUBI
+  - PROCESS-NAME,com.mubi
+  - DOMAIN-SUFFIX,mubi.com
+  - DOMAIN-SUFFIX,mubicdn.net
