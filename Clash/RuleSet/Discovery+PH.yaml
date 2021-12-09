@@ -1,5 +1,7 @@
 payload:
   # > Discovery+ PH
+  # PROCESS-NAME,com.discovery.discoveryplus.mobile.apac
+  # PROCESS-NAME,com.discovery.discoveryplus.androidtv.apac
   # DOMAIN-SUFFIX,discoveryplus.com
   - DOMAIN-SUFFIX,discoveryplus.ph
   - DOMAIN,ap2-prod.disco-api.com
