@@ -210,7 +210,7 @@ DOMAIN,star.playback.edge.bamgrid.com
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp
 DOMAIN-SUFFIX,nxtv.jp
-// streamd01ca-nxtv-jp.akamaized.net
+// DOMAIN,streamd01ca-nxtv-jp.akamaized.net
 DOMAIN,us-central1-u-next-apps.cloudfunctions.net
   
 # > YouTube
