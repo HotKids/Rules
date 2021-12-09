@@ -98,6 +98,7 @@ payload:
   - DOMAIN,us1-prod-images.disco-api.com
   - DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
   - DOMAIN,content-ause1-ur-discovery1.uplynk.com
+  - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
   # DOMAIN,go-prod-vz.akamaized.net
   ## PH
