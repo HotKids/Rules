@@ -146,6 +146,10 @@ DOMAIN-SUFFIX,hulustream.com
 DOMAIN,cws-hulu.conviva.com
 // DOMAIN,assetshuluimcom-a.akamaihd.net
 
+# > MUBI
+DOMAIN-SUFFIX,mubi.com
+DOMAIN-SUFFIX,mubicdn.net
+
 # > Netflix
 USER-AGENT,Argo*
 DOMAIN-SUFFIX,netflix.com
