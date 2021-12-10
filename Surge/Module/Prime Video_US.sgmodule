@@ -5,5 +5,16 @@
 hostname = %INSERT% www.amazon.com
 
 [Rule]
-# > Prime Video 🇺🇸 Homepage
+# > Amazon Prime Video US
+// USER-AGENT,InstantVideo.US*,🇺🇸 America
+// USER-AGENT,Prime%20Video*,🇺🇸 America
+// DOMAIN-SUFFIX,amazon.com,🇺🇸 America
+DOMAIN-SUFFIX,primevideo.com,🇺🇸 America
+DOMAIN-SUFFIX,amazonvideo.com,🇺🇸 America
+DOMAIN-SUFFIX,media-amazon.com,🇺🇸 America
+DOMAIN-SUFFIX,aiv-cdn.net,🇺🇸 America
+DOMAIN-SUFFIX,aiv-delivery.net,🇺🇸 America
+DOMAIN,atv-ps.amazon.com,🇺🇸 America
+DOMAIN,fls-na.amazon.com,🇺🇸 America
+DOMAIN,avodmp4s3ww-a.akamaihd.net,🇺🇸 America
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/,🇺🇸 America
