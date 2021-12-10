@@ -4,7 +4,6 @@ USER-AGENT,QIYIVideo*,iQIYI Intl
 USER-AGENT,QYPlayer*,iQIYI Intl
 USER-AGENT,QTP*,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
-DOMAIN-SUFFIX,ptqy.gitv.tv,iQIYI Intl
 DOMAIN-SUFFIX,inter.iqiyi.com,iQIYI Intl
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
