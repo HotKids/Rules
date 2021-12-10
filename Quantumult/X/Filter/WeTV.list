@@ -8,5 +8,5 @@ DOMAIN,hwvip.video.qq.com,WeTV
 // DOMAIN,oth.eve.mdt.qq.com,WeTV
 // DOMAIN,oth.str.mdt.qq.com,WeTV
 // DOMAIN-SUFFIX,meovse.com,WeTV
-ip-cidr,150.109.28.51/32,WeTV
-// ip-cidr,203.205.136.0/23,WeTV
+IP-CIDR,150.109.28.51/32,WeTV
+// IP-CIDR,203.205.136.0/23,WeTV
