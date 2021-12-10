@@ -6,7 +6,6 @@ USER-AGENT,QTP*
 PROCESS-NAME,com.iqiyi.i18n
 PROCESS-NAME,com.iqiyi.i18n.tv
 DOMAIN-SUFFIX,iq.com
-DOMAIN-SUFFIX,ptqy.gitv.tv
 DOMAIN-SUFFIX,inter.iqiyi.com
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com
