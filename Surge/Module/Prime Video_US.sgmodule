@@ -2,9 +2,7 @@
 #!desc=在不影响 Amazon 的情况下使用 Prime Video US 网页版
 
 [MITM]
-hostname = %INSERT% www.amazon.com,www.discoveryplus.com
-
-// 此处 MITM www.discoveryplus.com 为方便本人使用 discovery+ PH
+hostname = %INSERT% www.amazon.com
 
 [Rule]
 # > Amazon Prime Video US
