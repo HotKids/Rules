@@ -1,5 +1,5 @@
 payload:
-  # > Spark
+  # > Spark Mail
   # USER-AGENT, *spark
   # USER-AGENT, *Spark
   - PROCESS-NAME,*spark
