@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% mp.weixin.qq.com,socketio.ctrip.com,static.zhihu.com,app.biliintl.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,boxer.baidu.com
+hostname = %INSERT% socketio.ctrip.com,static.zhihu.com,app.biliintl.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,boxer.baidu.com
 
 [Rule]
 # > 微信公众号
