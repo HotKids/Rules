@@ -1,7 +1,7 @@
 payload:
   # > Spark
-  - USER-AGENT, *spark
-  - USER-AGENT, *Spark
+  # USER-AGENT, *spark
+  # USER-AGENT, *Spark
   - PROCESS-NAME,*spark
   - PROCESS-NAME,com.readdle.spark
   - DOMAIN-SUFFIX,gmail.com
