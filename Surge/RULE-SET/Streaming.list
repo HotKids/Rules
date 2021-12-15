@@ -202,6 +202,12 @@ DOMAIN,cbsplaylistserver.aws.syncbak.com
 USER-AGENT,peacock*
 DOMAIN-SUFFIX,peacocktv.com
 
+# > SBS On Demand
+USER-AGENT,SBS*
+DOMAIN-SUFFIX,sbsod.com
+DOMAIN-SUFFIX,sbs.com.au
+// DOMAIN,sbsvoddai-vh.akamaihd.net
+
 # > Spotify
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,pscdn.co
