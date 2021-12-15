@@ -209,6 +209,11 @@ DOMAIN-SUFFIX,scdn.co
 DOMAIN-SUFFIX,spoti.fi
 DOMAIN-SUFFIX,spotify.com
 
+# > Stan
+DOMAIN-SUFFIX,stan.com.au
+DOMAIN,aws.stan.video
+DOMAIN,streamcoimg-a.akamaihd.net
+
 # > Star+
 USER-AGENT,Star+*
 DOMAIN-SUFFIX,starplus.com
