@@ -1,5 +1,5 @@
 payload:
-  # > Bilibili｜CN HK TW
+  # > Bilibili
   # USER-AGENT,*bili*
   - PROCESS-NAME,tv.danmaku.bili
   - DOMAIN-SUFFIX,bilibili.com
