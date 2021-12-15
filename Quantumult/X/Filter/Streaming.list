@@ -208,6 +208,12 @@ DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-SUFFIX,spotify.com,Spotify
 
+# > SBS On Demand
+USER-AGENT,SBS*,SBS On Demand
+DOMAIN-SUFFIX,sbsod.com,SBS On Demand
+DOMAIN-SUFFIX,sbs.com.au,SBS On Demand
+// DOMAIN,sbsvoddai-vh.akamaihd.net,SBS On Demand
+
 # > Stan
 DOMAIN-SUFFIX,stan.com.au,Stan
 DOMAIN,aws.stan.video,Stan
