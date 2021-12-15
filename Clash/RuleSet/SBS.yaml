@@ -1,5 +1,5 @@
 payload:
-  # > SBS On Demand｜AU
+  # > SBS On Demand
   # USER-AGENT,SBS*
   - PROCESS-NAME,com.sbs.ondemand.android
   - PROCESS-NAME,com.sbs.ondemand.tv
