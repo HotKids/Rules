@@ -1,5 +1,5 @@
 payload:
-  # > Bilibili SEA｜SEA
+  # > Bilibili SEA
   - PROCESS-NAME,com.bstar.intl
   - DOMAIN-SUFFIX,biliintl.com
   - DOMAIN,apm-misaka.biliapi.net
