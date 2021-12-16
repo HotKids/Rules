@@ -17,6 +17,8 @@ DOMAIN,dkfhw9rzsr80z.cloudfront.net
 # > friDay
 USER-AGENT,friDay*
 DOMAIN-SUFFIX,friday.tw
+DOMAIN-SUFFIX,fridaylogger.com
+DOMAIN,aka01p.akamaized.net
 
 # > KKBOX
 USER-AGENT,*KKBOX
