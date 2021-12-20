@@ -329,7 +329,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Unbreak.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Unbreak.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
   Adblock:
@@ -343,21 +343,21 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Advertising.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Advertising.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Advertising.yaml
     interval: 86400
 
   Hijacking:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Hijacking.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Hijacking.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Hijacking.yaml
     interval: 86400
     
   Privacy:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Privacy.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Guard/Privacy.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
     interval: 86400
     
   Bilibili:
@@ -413,35 +413,35 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/Telegram.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/Telegram/Telegram.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/Telegram/Telegram.yaml
     interval: 86400
 
   PayPal:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/PayPal.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/PayPal.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/PayPal.yaml
     interval: 86400
 
   Global:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Global.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Global.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Global.yaml
     interval: 86400
 
   China:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/China.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/China.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
     interval: 86400
 
   ChinaIP:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/ChinaIP.yaml
-    url: https://cdn.jsdelivr.net/gh/DivineEngine/Profiles@master/Clash/RuleSet/Extra/ChinaIP.yaml
+    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/ChinaIP.yaml
     interval: 86400
 
 # 规则
