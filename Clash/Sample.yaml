@@ -336,7 +336,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Adblock.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
     interval: 86400
     
   Advertising:
@@ -364,49 +364,49 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Bilibili.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bilibili.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
     interval: 86400
     
   iQIYI Intl:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/IQ.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/IQ.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQ.yaml
     interval: 86400
    
   WeTV:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/WeTV.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/WeTV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
 
   Streaming TW:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming_TW.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_TW.yaml
     interval: 86400
 
   Streaming JP:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming_JP.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_JP.yaml
     interval: 86400
 
   Streaming US:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming_US.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_US.yaml
     interval: 86400
 
   Streaming:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming.yaml
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
   Telegram:
