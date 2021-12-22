@@ -18,12 +18,12 @@ DOMAIN-SUFFIX,aiv-delivery.net,🇺🇸 America
 DOMAIN,ktpx.amazon.com,🇺🇸 America
 DOMAIN,atv-ps.amazon.com,🇺🇸 America
 DOMAIN,avodmp4s3ww-a.akamaihd.net,🇺🇸 America
-DOMAIN,d1xfray82862hr.cloudfront.net,🇺🇸 America
-DOMAIN,d1v5ir2lpwr8os.cloudfront.net,🇺🇸 America
-DOMAIN,d22qjgkvxw22r6.cloudfront.net,🇺🇸 America
-DOMAIN,d25xi40x97liuc.cloudfront.net,🇺🇸 America
-DOMAIN,d27xxe7juh1us6.cloudfront.net,🇺🇸 America
-DOMAIN,d3196yreox78o9.cloudfront.net,🇺🇸 America
-DOMAIN,dmqdd6hw24ucf.cloudfront.net,🇺🇸 America
-DOMAIN-KEYWORD,avoddashs,🇺🇸 America
+// DOMAIN,d1xfray82862hr.cloudfront.net,🇺🇸 America
+// DOMAIN,d1v5ir2lpwr8os.cloudfront.net,🇺🇸 America
+// DOMAIN,d22qjgkvxw22r6.cloudfront.net,🇺🇸 America
+// DOMAIN,d25xi40x97liuc.cloudfront.net,🇺🇸 America
+// DOMAIN,d27xxe7juh1us6.cloudfront.net,🇺🇸 America
+// DOMAIN,d3196yreox78o9.cloudfront.net,🇺🇸 America
+// DOMAIN,dmqdd6hw24ucf.cloudfront.net,🇺🇸 America
+// DOMAIN-KEYWORD,avoddashs,🇺🇸 America
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/,🇺🇸 America
