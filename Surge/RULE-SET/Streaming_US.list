@@ -41,10 +41,12 @@ DOMAIN-SUFFIX,pbs.org
 
 # > Paramount+ US
 USER-AGENT,PPlus*
+// DOMAIN-SUFFIX,cbsi.com
 // DOMAIN-SUFFIX,cbsaavideo.com
 DOMAIN-SUFFIX,cbsivideo.com
 DOMAIN-SUFFIX,paramountplus.com
 DOMAIN-SUFFIX,pplusstatic.com
+// DOMAIN-SUFFIX,mtvnservices.com
 DOMAIN,link.theplatform.com
 DOMAIN,cbsi.live.ott.irdeto.com
 // iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
