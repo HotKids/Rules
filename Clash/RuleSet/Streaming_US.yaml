@@ -37,9 +37,10 @@ payload:
   - DOMAIN,cws-hulu.conviva.com
   # DOMAIN,assetshuluimcom-a.akamaihd.net
   
-  # > Paramount+ US
+  # > Paramount+
   # USER-AGENT,PPlus*
   # PROCESS-NAME,com.cbs.app
+  # PROCESS-NAME,com.cbs.ott
   # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
@@ -48,7 +49,8 @@ payload:
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
-  
+  # DOMAIN,pubads.g.doubleclick.net 不可屏蔽
+
   # > Peacock
   # USER-AGENT,Peacock*
   - PROCESS-NAME,com.peacocktv.peacockandroid
