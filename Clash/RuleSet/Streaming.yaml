@@ -216,7 +216,7 @@ payload:
   # USER-AGENT,PPlus*
   # PROCESS-NAME,com.cbs.app
   # PROCESS-NAME,com.cbs.ott
-  # DOMAIN-SUFFIX,cbsi.com
+  - DOMAIN-SUFFIX,cbsi.com
   # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
