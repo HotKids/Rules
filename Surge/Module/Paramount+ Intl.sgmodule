@@ -1,5 +1,5 @@
 #!name=Paramount+ Intl.
-#!desc=Paramount+ 国际版分流
+#!desc=Paramount+ 国际版，可在美国之外 Paramount+ 上线的地区使用
 
 [MITM]
 hostname = %INSERT% cbsi.live.ott.irdeto.com
