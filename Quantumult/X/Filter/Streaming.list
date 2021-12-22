@@ -182,6 +182,12 @@ IP-CIDR,192.173.64.0/18,Netflix
 IP-CIDR,198.38.96.0/19,Netflix
 IP-CIDR,198.45.48.0/20,Netflix
 
+# > Paramount+ Intl.
+USER-AGENT,ParamountPlus*,Paramount+
+DOMAIN-SUFFIX,intl.paramountplus.com,Paramount+
+DOMAIN,wwwimage-intl.pplusstatic.com,Paramount+
+DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
+
 # > Paramount+ US
 USER-AGENT,PPlus*,Paramount+
 // DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
