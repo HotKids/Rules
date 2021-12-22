@@ -1,0 +1,6 @@
+# > Paramount+ Intl.
+USER-AGENT,ParamountPlus*,Paramount+
+DOMAIN-SUFFIX,intl.paramountplus.com,Paramount+
+DOMAIN,wwwimage-intl.pplusstatic.com,Paramount+
+// 此条与美国版冲突，暂不可同时使用
+DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
