@@ -14,8 +14,8 @@ proxy-test-url = http://www.gstatic.com/generate_204
  tls-provider = openssl
 # GeoIP 数据库
  geoip-maxmind-url = https://raw.githubusercontent.com/JMVoid/ipip2mmdb/release/Country.mmdb
-# IPv6 支持（关闭）
-ipv6 = false
+# IPv6 支持（默认关闭）
+ipv6 = true
 # ------
 
 # ---(Wi-Fi 访问)---
