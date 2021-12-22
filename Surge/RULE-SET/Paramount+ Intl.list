@@ -2,4 +2,5 @@
 USER-AGENT,ParamountPlus**
 DOMAIN-KEYWORD,intl.pplus
 DOMAIN-KEYWORD,intl.paramountplus
+// iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,ParamountPlus*))
