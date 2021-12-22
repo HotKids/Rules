@@ -186,7 +186,6 @@ IP-CIDR,198.45.48.0/20,no-resolve
 # > Paramount+
 // Intl.
 USER-AGENT,ParamountPlus*
-
 DOMAIN-SUFFIX,intl.paramountplus.com
 DOMAIN,wwwimage-intl.pplusstatic.com
 DOMAIN-KEYWORD,intl.pplus
