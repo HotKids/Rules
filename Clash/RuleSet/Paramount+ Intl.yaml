@@ -1,5 +1,5 @@
 # > Paramount+ Intl.
-  # 此处只作存档，可直接使用美国版分流
+  # 此处只作存档。暂时无法与美国版分流分离。如需同时使用，建议使用美国版分流创建创建策略组进行切换
   # USER-AGENT,ParamountPlus*
   # PROCESS-NAME,com.cbs.ca
   - DOMAIN-SUFFIX,intl.paramountplus.com
