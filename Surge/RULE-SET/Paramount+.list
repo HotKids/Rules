@@ -9,6 +9,8 @@ DOMAIN,link.theplatform.com
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
 // 播放验证，此条 Paramount+ 国际版与美国版冲突，故使用 AND 语法区分
 DOMAIN,cbsi.live.ott.irdeto.com
+// 片头动画，可屏蔽
+// DOMAIN,ads.play.cbsi.video
 
 // CBS live
 DOMAIN,cbsservice.aws.syncbak.com
