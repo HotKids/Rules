@@ -206,25 +206,26 @@ payload:
   - IP-CIDR,198.45.48.0/20,no-resolve
 
   # > Paramount+
-  # Intl.
+  ## Intl.
   # USER-AGENT,ParamountPlus*
   # PROCESS-NAME,com.cbs.ca
   - DOMAIN-SUFFIX,intl.paramountplus.com
   - DOMAIN,wwwimage-intl.pplusstatic.com
   - DOMAIN,cbsi.live.ott.irdeto.com
-  # US
+  ## US
   # USER-AGENT,PPlus*
   # PROCESS-NAME,com.cbs.app
   # PROCESS-NAME,com.cbs.ott
+  # DOMAIN-SUFFIX,cbsi.com
   # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
+  # DOMAIN-SUFFIX,mtvnservices.com
   - DOMAIN,link.theplatform.com
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
-  # DOMAIN,pubads.g.doubleclick.net 不可屏蔽
 
   # > Peacock
   # USER-AGENT,peacock*
