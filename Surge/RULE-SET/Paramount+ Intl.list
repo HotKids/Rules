@@ -1,0 +1,5 @@
+# > Paramount+ Intl.
+USER-AGENT,ParamountPlus**
+DOMAIN-KEYWORD,intl.pplus
+DOMAIN-KEYWORD,intl.paramountplus
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,ParamountPlus*))
