@@ -5,4 +5,19 @@ DOMAIN-KEYWORD,intl.paramountplus
 // iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,ParamountPlus*))
 // 播放验证，此条 Paramount+ 国际版与美国版冲突，故使用 AND 语法区分
-// DOMAIN,cbsi.live.ott.irdeto.com
+DOMAIN,cbsi.live.ott.irdeto.com
+
+# > Paramount+ US
+USER-AGENT,PPlus*
+// DOMAIN-SUFFIX,cbsaavideo.com
+DOMAIN-SUFFIX,cbsivideo.com
+DOMAIN-SUFFIX,paramountplus.com
+DOMAIN-SUFFIX,pplusstatic.com
+DOMAIN,link.theplatform.com
+// iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
+// 播放验证，此条 Paramount+ 国际版与美国版冲突，故使用 AND 语法区分
+DOMAIN,cbsi.live.ott.irdeto.com
+// CBS live
+DOMAIN,cbsservice.aws.syncbak.com
+DOMAIN,cbsplaylistserver.aws.syncbak.com
