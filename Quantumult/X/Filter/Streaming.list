@@ -182,19 +182,16 @@ IP-CIDR,192.173.64.0/18,Netflix
 IP-CIDR,198.38.96.0/19,Netflix
 IP-CIDR,198.45.48.0/20,Netflix
 
-# > Paramount+
+# > Paramount+ US
 USER-AGENT,PPlus*,Paramount+
-DOMAIN-SUFFIX,cbsi.com,Paramount+
-DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
+// DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
 DOMAIN-SUFFIX,cbsivideo.com,Paramount+
 DOMAIN-SUFFIX,paramountplus.com,Paramount+
 DOMAIN-SUFFIX,pplusstatic.com,Paramount+
-DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
 DOMAIN,link.theplatform.com,Paramount+
-// CBS live
+DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
 DOMAIN,cbsservice.aws.syncbak.com,Paramount+
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Paramount+
-# DOMAIN,pubads.g.doubleclick.net,Paramount+
 
 # > Peacock
 USER-AGENT,peacock*,Peacock
