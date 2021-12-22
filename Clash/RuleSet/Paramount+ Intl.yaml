@@ -1,0 +1,7 @@
+# > Paramount+ Intl.
+  # 此处只作存档，可直接使用美国版分流
+  # USER-AGENT,ParamountPlus*
+  # PROCESS-NAME,com.cbs.ca
+  - DOMAIN-SUFFIX,intl.paramountplus.com
+  - DOMAIN,wwwimage-intl.pplusstatic.com
+  - DOMAIN,cbsi.live.ott.irdeto.com
