@@ -1,13 +1,14 @@
 payload:
   # > Paramount+
   # USER-AGENT,PPlus*
-  - PROCESS-NAME,com.cbs.app
-  - DOMAIN-SUFFIX,cbsi.com
-  - DOMAIN-SUFFIX,cbsaavideo.com
+  # PROCESS-NAME,com.cbs.app
+  # PROCESS-NAME,com.cbs.ott
+  # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
-  - DOMAIN,cbsi.live.ott.irdeto.com 
   - DOMAIN,link.theplatform.com
+  - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
+  # DOMAIN,pubads.g.doubleclick.net 不可屏蔽
