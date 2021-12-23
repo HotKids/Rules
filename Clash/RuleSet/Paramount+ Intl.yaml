@@ -1,3 +1,4 @@
+payload:
   # > Paramount+ Intl.
   # 仅在同时使用 Paramount+ 国际版及美国版时需要此分流以作分离
   # USER-AGENT,ParamountPlus*
