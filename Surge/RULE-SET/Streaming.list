@@ -189,11 +189,12 @@ USER-AGENT,PPlus*
 // Intl. UA
 USER-AGENT,ParamountPlus*
 DOMAIN-SUFFIX,cbsi.com
-// DOMAIN-SUFFIX,cbsaavideo.com
+// DOMAIN-SUFFIX,cbsaavideo.com #播放
 DOMAIN-SUFFIX,cbsivideo.com
 DOMAIN-SUFFIX,paramountplus.com
 DOMAIN-SUFFIX,pplusstatic.com
-// DOMAIN-SUFFIX,mtvnservices.com
+// DOMAIN-SUFFIX,mtvnservices.com #MTV
+// DOMAIN-SUFFIX,cws.conviva.com
 DOMAIN,link.theplatform.com
 // US
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
@@ -201,8 +202,11 @@ AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
 // 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
-// 片头动画，可屏蔽
-// DOMAIN,ads.play.cbsi.video
+// DOMAIN,thumbnails.cbsig.net #缩略图
+// DOMAIN,cbsinteractive.hb.omtrdc.net
+// DOMAIN,ads.play.cbsi.video #片头动画，可屏蔽
+// DOMAIN,pubads.g.doubleclick.net #不可屏蔽
+// DOMAIN,cbsnews.akamaized.net #CBSN Live
 // CBS live丨US
 DOMAIN,cbsservice.aws.syncbak.com
 DOMAIN,cbsplaylistserver.aws.syncbak.com
