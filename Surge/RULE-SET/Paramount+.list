@@ -10,12 +10,11 @@ DOMAIN-SUFFIX,paramountplus.com
 DOMAIN-SUFFIX,pplusstatic.com
 // DOMAIN-SUFFIX,mtvnservices.com
 DOMAIN,link.theplatform.com
-// iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
 // US
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
 // Intl.
 AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
-// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分
+// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
 // 片头动画，可屏蔽
 // DOMAIN,ads.play.cbsi.video
