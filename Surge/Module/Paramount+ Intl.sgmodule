@@ -1,5 +1,5 @@
 #!name=Paramount+ Intl.
-#!desc=Paramount+ 国际版，上线地区：Canada, Latin American, Nordic Combined
+#!desc=Paramount+ 国际版，上线地区：Canada, Australia, Latin American, Nordic Combined
 
 [MITM]
 hostname = %INSERT% cbsi.live.ott.irdeto.com
