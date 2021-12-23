@@ -184,7 +184,7 @@ IP-CIDR,198.45.48.0/20,Netflix
 
 # > Paramount+
 USER-AGENT,PPlus*,Paramount+
-USER-AGENT,Paramountlus*,Paramount+
+USER-AGENT,ParamountPlus*,Paramount+
 DOMAIN-SUFFIX,cbsi.com,Paramount+
 // DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
 DOMAIN-SUFFIX,cbsivideo.com,Paramount+
