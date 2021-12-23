@@ -2,7 +2,7 @@
 // US UA
 USER-AGENT,PPlus*
 // Intl. UA
-USER-AGENT,Paramountlus*
+USER-AGENT,ParamountPlus*
 DOMAIN-SUFFIX,cbsi.com
 // DOMAIN-SUFFIX,cbsaavideo.com
 DOMAIN-SUFFIX,cbsivideo.com
