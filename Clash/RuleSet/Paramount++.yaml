@@ -1,5 +1,6 @@
 payload:
   # > Paramount+
+  # 一些无需验证 IP 区域的 HOST
   # USER-AGENT,PPlus*
   # USER-AGENT,Paramountlus*
   # PROCESS-NAME,com.cbs.app
