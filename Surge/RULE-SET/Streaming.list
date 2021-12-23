@@ -184,14 +184,10 @@ IP-CIDR,198.38.96.0/19,no-resolve
 IP-CIDR,198.45.48.0/20,no-resolve
 
 # > Paramount+
-// Intl.
-USER-AGENT,ParamountPlus*
-DOMAIN-SUFFIX,intl.paramountplus.com
-DOMAIN,wwwimage-intl.pplusstatic.com
-DOMAIN-KEYWORD,intl.pplus
-DOMAIN-KEYWORD,intl.paramountplus
-// US
+// US UA
 USER-AGENT,PPlus*
+// Intl. UA
+USER-AGENT,Paramountlus*
 DOMAIN-SUFFIX,cbsi.com
 // DOMAIN-SUFFIX,cbsaavideo.com
 DOMAIN-SUFFIX,cbsivideo.com
@@ -199,9 +195,15 @@ DOMAIN-SUFFIX,paramountplus.com
 DOMAIN-SUFFIX,pplusstatic.com
 // DOMAIN-SUFFIX,mtvnservices.com
 DOMAIN,link.theplatform.com
-// 播放验证，此条 Paramount+ 国际版与美国版冲突
+// US
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
+// Intl.
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
+// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
-// CBS live
+// 片头动画，可屏蔽
+// DOMAIN,ads.play.cbsi.video
+// CBS live丨US
 DOMAIN,cbsservice.aws.syncbak.com
 DOMAIN,cbsplaylistserver.aws.syncbak.com
 
