@@ -1,5 +1,5 @@
 # > Paramount+ Intl.丨Canada, Australia, Latin America, Nordic Combined
-# 仅在同时使用 Parmount+ 美国版与国际版时需要此分流以作分离
+# 仅在同时使用 Parmount+ 美国版与国际版时需要此分流以作分离，建议使用 sgmodule
 USER-AGENT,ParamountPlus*
 DOMAIN-KEYWORD,intl.pplus
 DOMAIN-KEYWORD,intl.paramountplus
