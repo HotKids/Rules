@@ -6,14 +6,14 @@ hostname = %INSERT% cbsi.live.ott.irdeto.com
 
 [Rule]
 # > Paramount+ Intl.
-USER-AGENT,ParamountPlus*,🇺🇳 Server
-DOMAIN-KEYWORD,intl.pplus,🇺🇳 Server
-DOMAIN-KEYWORD,intl.paramountplus,🇺🇳 Server
-DOMAIN-SUFFIX,intl.paramountplus.com,🇺🇳 Server
-DOMAIN,wwwimage-intl.pplusstatic.com,🇺🇳 Server
+USER-AGENT,ParamountPlus*,🎬 Streaming
+DOMAIN-KEYWORD,intl.pplus,🎬 Streaming
+DOMAIN-KEYWORD,intl.paramountplus,🎬 Streaming
+DOMAIN-SUFFIX,intl.paramountplus.com,🎬 Streaming
+DOMAIN,wwwimage-intl.pplusstatic.com,🎬 Streaming
 // iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
-AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,ParamountPlus*)),🇺🇳 Server
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,ParamountPlus*)),🎬 Streaming
 // 播放验证，此条 Paramount+ 国际版与美国版冲突，故使用 AND 语法区分
-// DOMAIN,cbsi.live.ott.irdeto.com,🇺🇳 Server
+// DOMAIN,cbsi.live.ott.irdeto.com,🎬 Streaming
 // 片头动画，可屏蔽
-DOMAIN,ads.play.cbsi.video,🚧 AdGuard
+// DOMAIN,ads.play.cbsi.video,🚧 AdGuard
