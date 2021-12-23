@@ -1,5 +1,6 @@
 # > Paramount+
 USER-AGENT,PPlus*,Paramount+
+USER-AGENT,Paramountlus*,Paramount+
 DOMAIN-SUFFIX,cbsi.com,Paramount+
 // DOMAIN-SUFFIX,cbsaavideo.com,Paramount+
 DOMAIN-SUFFIX,cbsivideo.com,Paramount+
@@ -8,5 +9,6 @@ DOMAIN-SUFFIX,pplusstatic.com,Paramount+
 // DOMAIN-SUFFIX,mtvnservices.com,Paramount+
 DOMAIN,link.theplatform.com,Paramount+
 DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
+// DOMAIN,ads.play.cbsi.video,Paramount+
 DOMAIN,cbsservice.aws.syncbak.com,Paramount+
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Paramount+
