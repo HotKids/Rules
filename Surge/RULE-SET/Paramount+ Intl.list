@@ -1,6 +1,7 @@
 # > Paramount+ Intl.丨Canada, Australia, Latin America, Nordic Combined
 # 仅在同时使用 Paramount+ 国际版及美国版时需要此分流以作分离，建议使用 sgmodule
 USER-AGENT,ParamountPlus*
+PROCESS-NAME,com.cbs.ca
 DOMAIN-KEYWORD,intl.pplus
 DOMAIN-KEYWORD,intl.paramountplus
 DOMAIN-SUFFIX,intl.paramountplus.com
