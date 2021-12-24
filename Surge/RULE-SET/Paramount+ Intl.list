@@ -1,5 +1,5 @@
 # > Paramount+ Intl.丨Canada, Australia, Latin America, Nordic Combined
-# 仅在同时使用 Paramount+ 国际版及美国版时需要此分流以作分离，建议使用 sgmodule
+# 仅在同时使用 Paramount+ 国际版及美国版时需要此分流以作分离，Surge 可通过 USER-AGENT 区分（iOS 15 需 MITM 相关域名），Clash Surfboard 可通过 PROCESS-NAME 区分
 USER-AGENT,ParamountPlus*
 PROCESS-NAME,com.cbs.ca
 DOMAIN-KEYWORD,intl.pplus
