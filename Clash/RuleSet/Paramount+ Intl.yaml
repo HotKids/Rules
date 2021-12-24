@@ -4,7 +4,7 @@ payload:
   # Paramount+ Intl. 上线地区较冷门，通过 PROCESS-NAME 分流时部分冷门地区节点串流效果不佳，可前置 Paramount++.yaml 使部分无需验证地区的 HOST 走其他节点代理
   ## 参考：
   ### RULE-SET,Paramount++,🔰 Proxy
-  ### RULE-SET,Paramount+ Intl,🎬 Streaming
+  ### RULE-SET,Paramount+ Intl,🇦🇺 Australia
   ### RULE-SET,Paramount+,🇺🇸 America
   #
   # USER-AGENT,ParamountPlus*
