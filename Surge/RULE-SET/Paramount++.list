@@ -1,0 +1,8 @@
+# > Paramount+
+# 一些无需验证地区的 HOST
+DOMAIN-SUFFIX,cbsaavideo.com
+DOMAIN-SUFFIX,mtvnservices.com
+DOMAIN-SUFFIX,cws.conviva.com
+DOMAIN,thumbnails.cbsig.net
+DOMAIN,cbsinteractive.hb.omtrdc.net
+DOMAIN,cbsnews.akamaized.net
