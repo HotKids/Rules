@@ -10,7 +10,7 @@
 
 # > 索尼俱乐部 DailyBonus by lowking
 // 需自行在 BoxJS 中配置账号信息
-// Tasks: My SONY Club = type=cron,cronexp="0 0 * * *",wake-system=1,script-path=https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js
+Tasks: My SONY Club = type=cron,cronexp="0 0 * * *",wake-system=1,script-path=https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js
 
 # > Bahamut DailyBonus by NobyDa
 // 需自行在 BoxJS 中配置账号信息
@@ -65,3 +65,6 @@ Tasks: 叮咚买菜 = type=cron,cronexp="22 0 * * *",timeout=30,script-path=http
 
 # > 去哪儿 DailyBonus by chavyleung
 Tasks: 去哪儿 = type=cron,cronexp="24 0 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.js
+
+# > 无忧行 DailyBonus by OOXX.BE
+Tasks: 无忧行 = type=cron,cronexp="25 0 * * *",script-path=https://ooxx.be/js/jegotrip.js
