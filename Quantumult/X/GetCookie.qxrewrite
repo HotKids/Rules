@@ -1,4 +1,4 @@
-hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com
+hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
 
 ;中国联通 GetCookie by blackmatrix7
 // App: 我的-天天抽奖
@@ -50,3 +50,6 @@ hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.
 
 ;去哪儿 GetCookie by chavyleung
 ^https:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
+
+;无忧行 GetCookie by OOXX.BE
+^https?:\/\/app\.jegotrip\.com\.cn\/.*(call_phone|logonFree) url script-response-body https://ooxx.be/js/jegotrip.js
