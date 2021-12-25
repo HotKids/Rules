@@ -31,16 +31,6 @@ DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
-# > Apple TV
-# PROCESS-NAME,TV
-# USER-AGENT,AppleTV*
-# USER-AGENT,com.apple.tv*
-DOMAIN-SUFFIX,tv.apple.com
-DOMAIN,hls.itunes.apple.com // Trailers
-DOMAIN,hls-amt.itunes.apple.com // Trailers
-DOMAIN,uts-api.itunes.apple.com
-DOMAIN,play-edge.itunes.apple.com // Unblock Region
-
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*
 DOMAIN-KEYWORD,bbcfmt
