@@ -31,15 +31,6 @@ DOMAIN,d3196yreox78o9.cloudfront.net,Prime Video
 DOMAIN,dmqdd6hw24ucf.cloudfront.net,Prime Video
 DOMAIN-KEYWORD,avoddashs,Prime Video
 
-# > Apple TV
-# USER-AGENT,AppleTV*,Apple TV
-# USER-AGENT,com.apple.tv*,Apple TV
-DOMAIN-SUFFIX,tv.apple.com,Apple TV
-DOMAIN,hls.itunes.apple.com,Apple TV
-DOMAIN,hls-amt.itunes.apple.com,Apple TV
-DOMAIN,uts-api.itunes.apple.com,Apple TV
-DOMAIN,play-edge.itunes.apple.com,Apple TV
-
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*,BBC iPlayer
 DOMAIN-KEYWORD,bbcfmt,BBC iPlayer
