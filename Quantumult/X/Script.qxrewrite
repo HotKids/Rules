@@ -37,4 +37,4 @@ hostname = socketio.ctrip.com,static.zhihu.com,app.biliintl.com,tieba.baidu.com,
 ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad url script-response-body https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 ;百度搜索防跳转 App Store by app2smile
-^https?\:\/\/boxer\.baidu\.com\/scheme\?scheme url script-response-body https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
+^https?:\/\/boxer\.baidu\.com\/scheme\?scheme url script-response-body https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
