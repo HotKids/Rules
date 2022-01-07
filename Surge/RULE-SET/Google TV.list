@@ -1,3 +1,4 @@
 # > Chromecast with Google TV
 PROCESS-NAME,com.google.android.videos
-DOMAIN-KEYWORD,pa.google
+DOMAIN,androidtvlauncherxfe-pa.googleapis.com
+// DOMAIN-KEYWORD,pa.google
