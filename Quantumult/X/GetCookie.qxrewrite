@@ -1,4 +1,4 @@
-hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
+hostname = m.client.10010.com,api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
 
 ;中国联通 GetCookie by blackmatrix7
 // App: 我的-天天抽奖
@@ -8,7 +8,7 @@ hostname = m.client.10010.com,api.m.jd.com,ifac*.iqiyi.com,*.video.qq.com,music.
 ^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 ;爱奇艺 GetCookie by NoByDa
-^https?:\/\/iface(\d)?\.iqiyi\.com\/ url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+^https?:\/\/passport\.iqiyi\.com\/apis\/user\/info\.action url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 ;腾讯视频 GetCookie by chavyleung
 ^https?:\/\/access\.video\.qq\.com\/user\/auth_refresh url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
