@@ -1,5 +1,5 @@
 payload:
-  # > Bahamut｜TW
+  # > Bahamut
   # USER-AGENT,Anime*
   - PROCESS-NAME,tw.com.gamer.android.animad
   - DOMAIN-SUFFIX,bahamut.com.tw
@@ -7,7 +7,7 @@ payload:
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
   
-  # > CATCHPLAY+｜TW
+  # > CATCHPLAY+
   # USER-AGENT,CATCHPLAY*
   - PROCESS-NAME,com.catchplay.asiaplay
   - PROCESS-NAME,com.catchplay.asiaplay.tv
@@ -53,5 +53,7 @@ payload:
   - PROCESS-NAME,com.taiwanmobile.myVideotv
   - DOMAIN-SUFFIX,myvideo.net.tw
   - DOMAIN-SUFFIX,catch.net.tw
+  - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
+  - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
 
   - DOMAIN-KEYWORD,.tw
