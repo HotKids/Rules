@@ -247,8 +247,9 @@ proxy-providers:
   HK:
     type: http
     path: ./Provider/Proxy/Sub/HK.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%AD%F0%9F%87%B0
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
+    filter: '香港|HK|Hong Kong|🇭🇰'
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
@@ -256,8 +257,9 @@ proxy-providers:
   TW:
     type: http
     path: ./Provider/Proxy/Sub/TW.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%B9%F0%9F%87%BC
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
+    filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
@@ -265,8 +267,9 @@ proxy-providers:
   SG:
     type: http
     path: ./Provider/Proxy/Sub/SG.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%B8%F0%9F%87%AC
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
+    filter: '新加坡|狮城|SG|Singapore|🇸🇬'
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
@@ -274,8 +277,9 @@ proxy-providers:
   JP:
     type: http
     path: ./Provider/Proxy/Sub/JP.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%AF%F0%9F%87%B5
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
+    filter: '日本|JP|Japan|🇯🇵'
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
@@ -283,8 +287,9 @@ proxy-providers:
   US:
     type: http
     path: ./Provider/Proxy/Sub/US.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me&in=%F0%9F%87%BA%F0%9F%87%B8
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
+    filter: '美国|US|USA|America|United States|🇺🇸'
     health-check: 
       enable: true
       url: http://www.gstatic.com/generate_204
@@ -292,7 +297,7 @@ proxy-providers:
   UN:
     type: http
     path: ./Provider/Proxy/Sub/UN.yaml
-    url: https://dove.589669.xyz/all2clash?udp=1&tfo=1&emoji=1&sub=https://sub.hotkids.me
+    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
     interval: 3600
     health-check: 
       enable: true
@@ -305,7 +310,7 @@ proxy-groups:
     type: select
     proxies:
       - 🇭🇰 Hong Kong
-      - 🇹🇼 Taiwan
+      - 🇨🇳 Taiwan
       - 🇸🇬 Singapore
       - 🇯🇵 Japan
       - 🇺🇸 America
@@ -317,7 +322,7 @@ proxy-groups:
     type: select
     proxies:
       - 🇭🇰 Hong Kong
-      - 🇹🇼 Taiwan
+      - 🇨🇳 Taiwan
       - 🇸🇬 Singapore
       - 🇯🇵 Japan
       - 🇺🇸 America
@@ -328,7 +333,7 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
-      - 🇹🇼 Taiwan
+      - 🇨🇳 Taiwan
 
   # 特殊代理服务
   - name: "📬 Telegram"
@@ -371,7 +376,7 @@ proxy-groups:
       - HK
       
   # TW
-  - name: "🇹🇼 Taiwan"
+  - name: "🇨🇳 Taiwan"
     type: select
     use:
       - TW
@@ -537,15 +542,15 @@ rules:
   # Global Area Network
 
   # Streaming
-  - RULE-SET,Streaming TW,🇹🇼 Taiwan
+  - RULE-SET,Streaming TW,🇨🇳 Taiwan
   - RULE-SET,Streaming JP,🇯🇵 Japan
   - RULE-SET,Streaming US,🇺🇸 America
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
   - RULE-SET,Bilibili,📺 CNTV
-  - RULE-SET,iQIYI Intl,🇹🇼 Taiwan
-  - RULE-SET,WeTV,🇹🇼 Taiwan
+  - RULE-SET,iQIYI Intl,🇨🇳 Taiwan
+  - RULE-SET,WeTV,🇨🇳 Taiwan
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
