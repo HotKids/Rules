@@ -7,3 +7,4 @@ DOMAIN,hls.itunes.apple.com // Trailers
 DOMAIN,hls-amt.itunes.apple.com // Trailers
 DOMAIN,uts-api.itunes.apple.com
 DOMAIN,play-edge.itunes.apple.com // Unblock Region
+DOMAIN,tv.applemusic.com
