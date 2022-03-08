@@ -1,8 +1,4 @@
-hostname = m.client.10010.com,api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
-
-;中国联通 GetCookie by blackmatrix7
-// App: 我的-天天抽奖
-^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage url script-request-header https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.min.js
+hostname = api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
 
 ;京东 GetCookie by NoByDa
 ^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
