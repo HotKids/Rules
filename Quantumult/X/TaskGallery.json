@@ -2,7 +2,6 @@
     "name":"HotKids",
     "description":"Crontab Task Gallery",
     "task":[
-        "30 23 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.min.js, tag=中国联通, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/10010.png",
         "0 0 * * * https://raw.githubusercontent.com/lowking/Scripts/master/sony/sonyClub.js, tag=My SONY Club, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/sony.png",
         "5 0,6 * * * https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js, tag=京东, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/jd.png",
         "10 0 * * * https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js, tag=爱奇艺, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/iqiyi.png",
