@@ -1,4 +1,4 @@
 # > Crunchyroll
 USER-AGENT,Crunchyroll*,Crunchyroll
 DOMAIN-SUFFIX,crunchyroll.com,Crunchyroll
-DOMAIN-SUFFIX,vrv.co,Crunchyroll
+// DOMAIN-SUFFIX,vrv.co,Crunchyroll
