@@ -249,6 +249,12 @@ payload:
   - DOMAIN,star.content.edge.bamgrid.com
   - DOMAIN,star.playback.edge.bamgrid.com
   
+  # > TVer
+  - DOMAIN-SUFFIX,tver.jp
+  - DOMAIN-SUFFIX,interactive-circle.jp
+  - DOMAIN-SUFFIX,brightcove.com
+  - DOMAIN-SUFFIX,prod.boltdns.net
+  
   # > U-NEXT
   - PROCESS-NAME,jp.unext.mediaplayer
   - PROCESS-NAME,jp.unext.tv.player
