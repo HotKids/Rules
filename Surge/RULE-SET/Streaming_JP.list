@@ -24,6 +24,12 @@ DOMAIN-SUFFIX,prod.hjholdings.tv
 USER-AGENT,Paravi*
 DOMAIN-SUFFIX,paravi.jp
 
+# > TVer
+DOMAIN-SUFFIX,tver.jp
+DOMAIN-SUFFIX,interactive-circle.jp
+DOMAIN-SUFFIX,brightcove.com
+DOMAIN-SUFFIX,prod.boltdns.net
+
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp
 DOMAIN-SUFFIX,nxtv.jp
