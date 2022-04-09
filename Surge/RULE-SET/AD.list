@@ -7,6 +7,9 @@ DOMAIN,video-ads-module.ad-tech.nbcuni.com
 DOMAIN-KEYWORD,adstats
 DOMAIN,adstats.tencentmusic.com
 
+# > TVer
+DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
+
 # > Viu
 DOMAIN,r2---sn-j5o76n7e.gvt1.com
 
@@ -19,5 +22,3 @@ DOMAIN-SUFFIX,cupid.iqiyi.com
 
 # > Youku 视频暂停广告
 DOMAIN,iyes.youku.com
-
-
