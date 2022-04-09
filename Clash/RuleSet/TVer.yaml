@@ -1,0 +1,6 @@
+payload:  
+  # > TVer
+  - DOMAIN-SUFFIX,tver.jp
+  - DOMAIN-SUFFIX,interactive-circle.jp
+  - DOMAIN-SUFFIX,brightcove.com
+  - DOMAIN-SUFFIX,prod.boltdns.net
