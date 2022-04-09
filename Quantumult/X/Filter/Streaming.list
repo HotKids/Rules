@@ -228,6 +228,12 @@ DOMAIN,star.connections.edge.bamgrid.com,Star Plus
 DOMAIN,star.content.edge.bamgrid.com,Star Plus
 DOMAIN,star.playback.edge.bamgrid.com,Star Plus
 
+# > TVer
+DOMAIN-SUFFIX,tver.jp,TVer
+DOMAIN-SUFFIX,interactive-circle.jp,TVer
+DOMAIN-SUFFIX,brightcove.com,TVer
+DOMAIN-SUFFIX,prod.boltdns.net,TVer
+
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp,U-NEXT
 DOMAIN-SUFFIX,nxtv.jp,U-NEXT
