@@ -236,6 +236,13 @@ DOMAIN,star.connections.edge.bamgrid.com
 DOMAIN,star.content.edge.bamgrid.com
 DOMAIN,star.playback.edge.bamgrid.com
 
+# > TVer
+DOMAIN-SUFFIX,tver.jp
+DOMAIN-SUFFIX,interactive-circle.jp
+DOMAIN-SUFFIX,brightcove.com
+DOMAIN-SUFFIX,prod.boltdns.net
+// DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
+
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp
 DOMAIN-SUFFIX,nxtv.jp
