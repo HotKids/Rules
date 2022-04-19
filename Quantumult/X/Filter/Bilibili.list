@@ -11,6 +11,7 @@ DOMAIN-SUFFIX,b23.tv,Bilibili
 DOMAIN-SUFFIX,hdslb.com,Bilibili
 DOMAIN,upos-hz-mirrorakam.akamaized.net,Bilibili
 DOMAIN-KEYWORD,bilibili,Bilibili
+DOMAIN-KEYWORD,cn-hk-eq-bcache-,Bilibili
 IP-CIDR,203.107.1.65/32,Bilibili
 // 港台版 Bilibili App
 USER-AGENT,bili-inter*,Bilibili
