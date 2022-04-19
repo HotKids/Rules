@@ -1,4 +1,4 @@
-hostname = socketio.ctrip.com,static.zhihu.com,app.biliintl.com,tieba.baidu.com,jump2.bdimg.com,zhidao.baidu.com,www.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,boxer.baidu.com
+hostname = socketio.ctrip.com,static.zhihu.com,app.biliintl.com,tieba.baidu.com,jump2.bdimg.com,zhidao.baidu.com,www.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,*.xiaohongshu.com,boxer.baidu.com
 
 // 需 TF 版本
 
@@ -35,6 +35,9 @@ hostname = socketio.ctrip.com,static.zhihu.com,app.biliintl.com,tieba.baidu.com,
 
 ;微信公众号去广告 by Choler&NobyDa
 ^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad url script-response-body https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
+
+;小红书去开屏广告 by chouchoui
+ ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v2\/system_service\/splash_config url script-response-body https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js
 
 ;百度搜索防跳转 App Store by app2smile
 ^https?:\/\/boxer\.baidu\.com\/scheme\?scheme url script-response-body https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
