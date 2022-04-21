@@ -1,9 +1,8 @@
 #!name=Bilibili Auto Region
 #!desc=Bilibli 番剧自动切换地区 by NobyDa
-#!system=ios
 
 [MITM]
-hostname = %INSERT% ap?.bilibili.com,ap?.biliapi.net
+hostname = %APPEND% ap?.bilibili.com,ap?.biliapi.net
 
 [Script]
 # > Bilibli 番剧自动切换地区 by NobyDa
