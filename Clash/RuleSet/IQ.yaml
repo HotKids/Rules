@@ -15,6 +15,7 @@ payload:
   - DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv
   - DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com
   - DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
+  - IP-CIDR,159.138.102.146/32,no-resolve
   # IP-CIDR,23.40.242.10/32,no-resolve
   # IP-CIDR,23.59.252.0/24,no-resolve
   # IP-CIDR,23.200.145.146/32,no-resolve
