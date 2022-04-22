@@ -7,6 +7,7 @@ PROCESS-NAME,com.iqiyi.i18n
 PROCESS-NAME,com.iqiyi.i18n.tv
 DOMAIN-SUFFIX,iq.com
 DOMAIN-SUFFIX,inter.iqiyi.com
+DOMAIN-SUFFIX,inter.ptqy.gitv.tv
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com
 // 历史
