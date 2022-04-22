@@ -55,6 +55,7 @@ DOMAIN,akmcdnoversea-tw.inter.iqiyi.com
 DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv
 DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com
 DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
+IP-CIDR,23.40.241.251/32,no-resolve
 IP-CIDR,159.138.102.146/32,no-resolve
 
 # > LINE TV
