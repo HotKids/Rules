@@ -468,8 +468,8 @@ rule-providers:
   CNTV:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming_US.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_CN.yaml
+    path: ./Provider/RuleSet/Streaming/CNTV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
     interval: 86400
     
   Telegram:
