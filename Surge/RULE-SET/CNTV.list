@@ -1,0 +1,63 @@
+# > Bilibili
+USER-AGENT,*bili*
+DOMAIN-SUFFIX,bilibili.com
+DOMAIN-SUFFIX,bilibili.tv
+DOMAIN-SUFFIX,biliapi.net
+DOMAIN-SUFFIX,biliapi.com
+DOMAIN-SUFFIX,bilivideo.com
+DOMAIN-SUFFIX,acgvideo.com
+DOMAIN-SUFFIX,acg.tv
+DOMAIN-SUFFIX,b23.tv
+DOMAIN-SUFFIX,hdslb.com
+DOMAIN,upos-hz-mirrorakam.akamaized.net
+DOMAIN-KEYWORD,bilibili
+DOMAIN-KEYWORD,cn-hk-eq-bcache-
+IP-CIDR,203.107.1.65/32,no-resolve
+// 港台版 Bilibili App
+USER-AGENT,bili-inter*
+DOMAIN,apiintl.biliapi.net
+
+# > Bilibili SEA
+// USER-AGENT,bilibili
+DOMAIN-SUFFIX,biliintl.com
+DOMAIN,apm-misaka.biliapi.net
+DOMAIN,p-bstarstatic.akamaized.net
+DOMAIN,upos-bstar-mirrorakam.akamaized.net
+DOMAIN,upos-bstar1-mirrorakam.akamaized.net
+
+# > iQIYI Intl
+USER-AGENT,iQIYI*
+USER-AGENT,QIYIVideo*
+USER-AGENT,QYPlayer*
+USER-AGENT,QTP*
+PROCESS-NAME,com.iqiyi.i18n
+PROCESS-NAME,com.iqiyi.i18n.tv
+DOMAIN-SUFFIX,iq.com
+DOMAIN-SUFFIX,inter.iqiyi.com
+DOMAIN-SUFFIX,inter.ptqy.gitv.tv
+// 首页
+DOMAIN-SUFFIX,intl.iqiyi.com
+// 历史
+DOMAIN,intl-rcd.iqiyi.com
+// 收藏
+DOMAIN,intl-subscription.iqiyi.com
+// 播放
+IP-CIDR,23.40.241.251/32,no-resolve
+IP-CIDR,23.40.242.10/32,no-resolve
+IP-CIDR,159.138.102.146/32,no-resolve
+
+# > WeTV
+// USER-AGENT,WeTV*
+DOMAIN-SUFFIX,wetv.vip
+DOMAIN-SUFFIX,wetvinfo.com
+DOMAIN,wetv.tv.qq.com
+DOMAIN,wetv.acc.qq.com
+DOMAIN,hwvip.video.qq.com
+// DOMAIN,oth.eve.mdt.qq.com
+// DOMAIN,oth.str.mdt.qq.com
+// DOMAIN-SUFFIX,meovse.com
+IP-CIDR,150.109.28.51/32,no-resolve
+// IP-CIDR,203.205.136.0/23,no-resolve #如直连，请加入代理
+
+ // URL-REGEX,^https?:\/\/((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\/varietyts\.tc\.qq\.com
+// force-http-engine-hosts = %APPEND% 203.205.13?.*
