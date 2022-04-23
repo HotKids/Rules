@@ -1,0 +1,63 @@
+payload:
+  # 大陆流媒体海外版本
+  # > Bilibili
+  # USER-AGENT,*bili*
+  - PROCESS-NAME,tv.danmaku.bili
+  - DOMAIN-SUFFIX,bilibili.com
+  - DOMAIN-SUFFIX,bilibili.tv
+  - DOMAIN-SUFFIX,biliapi.net
+  - DOMAIN-SUFFIX,biliapi.com
+  - DOMAIN-SUFFIX,bilivideo.com
+  - DOMAIN-SUFFIX,acgvideo.com
+  - DOMAIN-SUFFIX,acg.tv
+  - DOMAIN-SUFFIX,b23.tv
+  - DOMAIN-SUFFIX,hdslb.com
+  - DOMAIN,upos-hz-mirrorakam.akamaized.net
+  - DOMAIN-KEYWORD,bilibili
+  - DOMAIN-KEYWORD,cn-hk-eq-bcache-
+  - IP-CIDR,203.107.1.65/32,no-resolve
+  # > 港台版 Bilibili App
+  # USER-AGENT,bili-inter*
+  - PROCESS-NAME,com.bilibili.app.in
+  - DOMAIN,apiintl.biliapi.net
+
+  # > Bilibili SEA
+  - PROCESS-NAME,com.bstar.intl
+  - DOMAIN-SUFFIX,biliintl.com
+  - DOMAIN,apm-misaka.biliapi.net
+
+  # > iQIYI Intl
+  # USER-AGENT,iQIYI*
+  # USER-AGENT,QIYIVideo*
+  # USER-AGENT,QYPlayer*
+  # USER-AGENT,QTP*
+  - PROCESS-NAME,com.iqiyi.i18n
+  - PROCESS-NAME,com.iqiyi.i18n.tv
+  - DOMAIN-SUFFIX,iq.com
+  - DOMAIN-SUFFIX,intl.iqiyi.com
+  - DOMAIN-SUFFIX,inter.iqiyi.com
+  - DOMAIN-SUFFIX,inter.ptqy.gitv.tv
+  - DOMAIN,intl-rcd.iqiyi.com
+  - DOMAIN,intl-subscription.iqiyi.com
+  - IP-CIDR,23.40.241.251/32,no-resolve
+  - IP-CIDR,23.40.242.10/32,no-resolve
+  - IP-CIDR,159.138.102.146/32,no-resolve
+
+  # > WeTV
+  # USER-AGENT,WeTV*
+  - PROCESS-NAME,com.tencent.qqlivei18n
+  # PROCESS-NAME,com.tencent.qqlivei18n.us
+  - PROCESS-NAME,com.ktcp.osvideo
+  - DOMAIN-SUFFIX,wetv.vip
+  - DOMAIN-SUFFIX,wetvinfo.com  
+  - DOMAIN,wetv.tv.qq.com
+  - DOMAIN,wetv.acc.qq.com
+  - DOMAIN,hwvip.video.qq.com
+  # DOMAIN,oth.eve.mdt.qq.com
+  # DOMAIN,oth.str.mdt.qq.com
+  # DOMAIN-SUFFIX,meovse.com
+  - IP-CIDR,150.109.28.51/32,no-resolve
+  # IP-CIDR,203.205.136.0/23,no-resolve
+
+  # > iFlix
+  - DOMAIN-SUFFIX,iflix.com
