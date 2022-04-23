@@ -1,4 +1,7 @@
 payload:
+  # > Advertising
+  - DOMAIN-KEYWORD,adservice
+  
   # > PeacockTV
   - DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
@@ -22,7 +25,6 @@ payload:
   # > iQIYI 
   # 视频暂停广告
   - DOMAIN-SUFFIX,cupid.iqiyi.com
-  - DOMAIN,msg-intl.qy.net
   
   # > Youku 视频暂停广告
   - DOMAIN,iyes.youku.com
