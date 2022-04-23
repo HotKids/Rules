@@ -26,7 +26,24 @@ payload:
   - DOMAIN-SUFFIX,friday.tw
   - DOMAIN-SUFFIX,fridaylogger.com
   - DOMAIN,aka01p.akamaized.net
-  
+
+  # > iQIYI Intl
+  # USER-AGENT,iQIYI*
+  # USER-AGENT,QIYIVideo*
+  # USER-AGENT,QYPlayer*
+  # USER-AGENT,QTP*
+  - PROCESS-NAME,com.iqiyi.i18n
+  - PROCESS-NAME,com.iqiyi.i18n.tv
+  - DOMAIN-SUFFIX,iq.com
+  - DOMAIN-SUFFIX,intl.iqiyi.com
+  - DOMAIN-SUFFIX,inter.iqiyi.com
+  - DOMAIN-SUFFIX,inter.ptqy.gitv.tv
+  - DOMAIN,intl-rcd.iqiyi.com
+  - DOMAIN,intl-subscription.iqiyi.com
+  - IP-CIDR,23.40.241.251/32,no-resolve
+  - IP-CIDR,23.40.242.10/32,no-resolve
+  - IP-CIDR,159.138.102.146/32,no-resolve
+
   # > KKBOX
   # USER-AGENT,*KKBOX
   - DOMAIN-SUFFIX,kkbox.com
@@ -55,5 +72,3 @@ payload:
   - DOMAIN-SUFFIX,catch.net.tw
   - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
   - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
-
-  - DOMAIN-KEYWORD,.tw
