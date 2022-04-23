@@ -416,18 +416,11 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
-  Adblock:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Guard/Adblock.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
-    interval: 86400
-    
   Advertising:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Advertising.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Advertising.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
     interval: 86400
 
   Hijacking:
@@ -442,27 +435,6 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Guard/Privacy.yaml
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
-    interval: 86400
-    
-  Bilibili:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/Bilibili.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
-    interval: 86400
-    
-  iQIYI Intl:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/IQ.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQ.yaml
-    interval: 86400
-   
-  WeTV:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/WeTV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
     interval: 86400
 
   Streaming TW:
@@ -493,6 +465,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
+  CNTV:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming_US.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_CN.yaml
+    interval: 86400
+    
   Telegram:
     type: http
     behavior: classical
@@ -521,11 +500,18 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
     interval: 86400
 
-  ChinaIP:
+  CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/Extra/ChinaIP.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/ChinaIP.yaml
+    path: ./Provider/RuleSet/Extra/CNCIDR.yaml
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    interval: 86400
+    
+  LANCIDR:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/Extra/LANCIDR.yaml
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
     interval: 86400
 
 # 规则
@@ -534,7 +520,6 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
-  - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
   - RULE-SET,Hijacking,🚧 AdGuard
   - RULE-SET,Privacy,🚧 AdGuard
@@ -548,9 +533,7 @@ rules:
   - RULE-SET,Streaming,🎬 Streaming
 
   # CNTV
-  - RULE-SET,Bilibili,📺 CNTV
-  - RULE-SET,iQIYI Intl,🇨🇳 Taiwan
-  - RULE-SET,WeTV,🇨🇳 Taiwan
+  - RULE-SET,CNTV,📺 CNTV
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
@@ -565,20 +548,11 @@ rules:
   - RULE-SET,China,🔘 DIRECT
 
   # Local Area Network
-  - IP-CIDR,192.168.0.0/16,🔘 DIRECT
-  - IP-CIDR,10.0.0.0/8,🔘 DIRECT
-  - IP-CIDR,172.16.0.0/12,🔘 DIRECT
-  - IP-CIDR,127.0.0.0/8,🔘 DIRECT
-  - IP-CIDR,100.64.0.0/10,🔘 DIRECT
-  - IP-CIDR,224.0.0.0/4,🔘 DIRECT
-  - IP-CIDR,fe80::/10,🔘 DIRECT
+  - RULE-SET,LANCIDR,🔘 DIRECT
 
-  # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 ChinaIP.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
-  - RULE-SET,ChinaIP,🔘 DIRECT
-  # Tencent
-  # IP-CIDR,119.28.28.28/32,🔘 DIRECT
-  # IP-CIDR,182.254.116.0/24,🔘 DIRECT
-  # GeoIP China(若启用，则禁用 ChinaIP.list)
+  # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 CNCIDR.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
+  - RULE-SET,CNCIDR,🔘 DIRECT
+  # GeoIP China(若启用，则禁用 CNCIDR.list)
   # GEOIP,CN,🔘 DIRECT
 
   - MATCH,🔰 Proxy
