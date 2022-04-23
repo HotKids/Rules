@@ -333,7 +333,9 @@ proxy-groups:
     type: select
     proxies:
       - 🔘 DIRECT
+      - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
+      - 🇸🇬 Singapore
 
   # 特殊代理服务
   - name: "📬 Telegram"
