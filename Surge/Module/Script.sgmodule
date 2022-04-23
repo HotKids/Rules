@@ -9,7 +9,7 @@ hostname = %INSERT% socketio.ctrip.com,static.zhihu.com,app.biliintl.com,api.wei
 # > Apple CDN
 DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT
 
-# > anti-ad
+# > AntiAD
 DOMAIN-SET,https://anti-ad.net/surge2.txt,REJECT
 
 # > 微信公众号
