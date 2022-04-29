@@ -6,8 +6,6 @@ USER-AGENT,QTP*,iQIYI Intl
 // PROCESS-NAME,com.iqiyi.i18n,iQIYI Intl
 // PROCESS-NAME,com.iqiyi.i18n.tv,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
-DOMAIN-SUFFIX,inter.iqiyi.com,iQIYI Intl
-DOMAIN-SUFFIX,inter.ptqy.gitv.tv,iQIYI Intl
 // 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
 // 历史
@@ -15,6 +13,10 @@ DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
 // 播放
+DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,iQIYI Intl
+DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
+DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,iQIYI Intl
+DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
 IP-CIDR,23.40.241.251/32,iQIYI Intl
 IP-CIDR,23.40.242.10/32,iQIYI Intl
 IP-CIDR,159.138.102.146/32,iQIYI Intl
