@@ -35,10 +35,12 @@ payload:
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
   - DOMAIN-SUFFIX,intl.iqiyi.com
-  - DOMAIN-SUFFIX,inter.iqiyi.com
-  - DOMAIN-SUFFIX,inter.ptqy.gitv.tv
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
+  - DOMAIN,akmcdnoversea-tw.inter.iqiyi.com
+  - DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv
+  - DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com
+  - DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
   - IP-CIDR,23.40.241.251/32,no-resolve
   - IP-CIDR,23.40.242.10/32,no-resolve
   - IP-CIDR,159.138.102.146/32,no-resolve
