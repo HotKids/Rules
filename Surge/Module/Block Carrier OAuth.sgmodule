@@ -1,0 +1,15 @@
+#!name=Block Carrier OAuth
+#!desc=屏蔽三大运营商本机号码一键认证登陆
+#!system=ios
+
+[Rule]
+# > 移动
+DOMAIN,www.cmpassport.com,REJECT
+DOMAIN,wap.cmpassport.com,REJECT
+DOMAIN,config.cmpassport.com,REJECT
+# > 电信
+DOMAIN,id6.me,REJECT
+DOMAIN,open.e.189.cn,REJECT
+# > 联通
+DOMAIN,opencloud.wostore.cn,REJECT
+DOMAIN,nishub1.10010.com,REJECT
