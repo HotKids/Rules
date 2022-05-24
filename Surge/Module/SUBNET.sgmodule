@@ -1,0 +1,6 @@
+#!name=SUBNET
+#!desc=连接特定的 SSID 选择直连
+
+[Rule]
+# SSID 匹配
+SUBNET,JOEY,🔘 DIRECT
