@@ -1,0 +1,9 @@
+#!name=Prime Video US
+#!desc=在不影响 Amazon 的情况下使用 Prime Video US 网页版
+
+[MITM]
+hostname = %INSERT% www.amazon.com
+
+[Script]
+# > Amazon Prime Video US
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Prime%20Video.list,🇺🇸 America
