@@ -1,0 +1,5 @@
+payload:
+  # > PlayStation
+  - DOMAIN-SUFFIX,playstation.com
+  - DOMAIN-SUFFIX,playstation.net
+  - DOMAIN,psn.akadns.net
