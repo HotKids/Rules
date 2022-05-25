@@ -5,6 +5,7 @@ DOMAIN-SUFFIX,disney-plus.net
 DOMAIN-SUFFIX,disneystreaming.com
 DOMAIN-SUFFIX,dssott.com
 // DOMAIN-SUFFIX,bamgrid.com
+DOMAIN,config-cd-dmgz.bamgrid.com
 DOMAIN,playback-certs.bamgrid.com
 DOMAIN,disney.api.edge.bamgrid.com
 DOMAIN,disney.connections.edge.bamgrid.com
