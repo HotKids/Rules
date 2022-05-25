@@ -11,13 +11,14 @@ DOMAIN-SUFFIX,aiv-delivery.net
 DOMAIN,ktpx.amazon.com
 DOMAIN,atv-ps.amazon.com
 DOMAIN,avodmp4s3ww-a.akamaihd.net
-DOMAIN,d1xfray82862hr.cloudfront.net
-DOMAIN,d1v5ir2lpwr8os.cloudfront.net
-DOMAIN,d22qjgkvxw22r6.cloudfront.net
-DOMAIN,d25xi40x97liuc.cloudfront.net
-DOMAIN,d27xxe7juh1us6.cloudfront.net
-DOMAIN,d3196yreox78o9.cloudfront.net
-DOMAIN,dmqdd6hw24ucf.cloudfront.net
+// DOMAIN,d184dfn36gombl.cloudfront.net
+// DOMAIN,d1xfray82862hr.cloudfront.net
+// DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+// DOMAIN,d22qjgkvxw22r6.cloudfront.net
+// DOMAIN,d25xi40x97liuc.cloudfront.net
+// DOMAIN,d27xxe7juh1us6.cloudfront.net
+// DOMAIN,d3196yreox78o9.cloudfront.net
+// DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs
 
 // 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
