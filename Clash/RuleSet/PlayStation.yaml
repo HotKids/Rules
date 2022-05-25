@@ -5,3 +5,5 @@ payload:
   - DOMAIN-SUFFIX,playstationnetwork.com
   - DOMAIN-SUFFIX,sonyentertainmentnetwork.com
   - DOMAIN,psn.akadns.net
+  # > PlayStation 局域网内兜底
+  - SRC-IP-CIDR,192.168.31.50/32
