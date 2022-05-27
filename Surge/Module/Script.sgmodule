@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,static.zhihu.com,app.biliintl.com,app.bilibili.com,grpc.biliapi.net,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,api.coolapk.com
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,app.biliintl.com,app.bilibili.com,grpc.biliapi.net,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,api.coolapk.com
 
 [Rule]
 # > Apple CDN
@@ -28,6 +28,9 @@ RULE-SET,https://raw.githubusercontent.com/app2smile/rules/master/rule/zhihu-ad.
 
 # > 携程
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
+
+# > 云闪付
+URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
 
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
