@@ -1,4 +1,4 @@
-hostname = ap?.bilibili.com,ap?.biliapi.net
+hostname = ap?.bili*i.com,ap?.bili*i.net
 
 // ip-cidr, 203.107.1.1/24, reject
 
