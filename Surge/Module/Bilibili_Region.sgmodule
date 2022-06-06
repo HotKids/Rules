@@ -2,7 +2,7 @@
 #!desc=Bilibli 番剧自动切换地区 by NobyDa
 
 [MITM]
-hostname = %APPEND% ap?.bilibili.com,ap?.biliapi.net
+hostname = %APPEND% ap?.bili*i.com,ap?.bili*i.net
 
 [Script]
 # > Bilibli 番剧自动切换地区 by NobyDa
