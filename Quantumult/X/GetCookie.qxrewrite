@@ -1,4 +1,4 @@
-hostname = api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com,app.jegotrip.com.cn
+hostname = api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,113.96.156.178,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com
 
 ;京东 GetCookie by NoByDa
 ^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
@@ -46,6 +46,3 @@ hostname = api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibi
 
 ;去哪儿 GetCookie by chavyleung
 ^https:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
-
-;无忧行 GetCookie by OOXX.BE
-^https?:\/\/app\.jegotrip\.com\.cn\/.*(call_phone|logonFree) url script-response-body https://ooxx.be/js/jegotrip.js
