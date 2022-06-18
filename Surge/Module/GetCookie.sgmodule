@@ -16,7 +16,7 @@ Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.
 
 # > 爱奇艺 GetCookie by NobyDa
 // https://m.iqiyi.com/user.html
-Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/apis\/user\/info\.action,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/apis\/user\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 腾讯视频 GetCookie by chavyleung
 // https://film.qq.com/ 随便选一部电影观看
