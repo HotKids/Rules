@@ -65,6 +65,3 @@ Tasks: 叮咚买菜 = type=cron,cronexp="22 0 * * *",timeout=30,script-path=http
 
 # > 去哪儿 DailyBonus by chavyleung
 Tasks: 去哪儿 = type=cron,cronexp="24 0 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.js
-
-# > 无忧行 DailyBonus by OOXX.BE
-Tasks: 无忧行 = type=cron,cronexp="25 0 * * *",script-path=https://ooxx.be/js/jegotrip.js
