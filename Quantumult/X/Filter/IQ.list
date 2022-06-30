@@ -1,8 +1,8 @@
 # > iQIYI Intl
-USER-AGENT,iQIYI*,iQIYI Intl
-USER-AGENT,QIYIVideo*,iQIYI Intl
-USER-AGENT,QYPlayer*,iQIYI Intl
-USER-AGENT,QTP*,iQIYI Intl
+// USER-AGENT,iQIYI*,iQIYI Intl
+// USER-AGENT,QIYIVideo*,iQIYI Intl
+// USER-AGENT,QYPlayer*,iQIYI Intl
+// USER-AGENT,QTP*,iQIYI Intl
 // PROCESS-NAME,com.iqiyi.i18n,iQIYI Intl
 // PROCESS-NAME,com.iqiyi.i18n.tv,iQIYI Intl
 DOMAIN-SUFFIX,iq.com,iQIYI Intl
