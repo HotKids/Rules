@@ -36,10 +36,10 @@ DOMAIN,kktv-theater.kk.stream
 DOMAIN,theater-kktv.cdn.hinet.net
 
 # > iQIYI Intl
-USER-AGENT,iQIYI*
-USER-AGENT,QIYIVideo*
-USER-AGENT,QYPlayer*
-USER-AGENT,QTP*
+// USER-AGENT,iQIYI*
+// USER-AGENT,QIYIVideo*
+// USER-AGENT,QYPlayer*
+// USER-AGENT,QTP*
 PROCESS-NAME,com.iqiyi.i18n
 PROCESS-NAME,com.iqiyi.i18n.tv
 DOMAIN-SUFFIX,iq.com
