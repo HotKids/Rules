@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,app.biliintl.com,app.bilibili.com,grpc.biliapi.net,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,api.coolapk.com
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,app.biliintl.com,app.bilibili.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com
 
 [Rule]
 # > Apple CDN
@@ -21,6 +21,7 @@ RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ru
 
 # > AntiAD
 DOMAIN-SET,https://anti-ad.net/surge2.txt,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/app2smile/rules/master/rule/bilibili-ad.list,REJECT-NO-DROP
 RULE-SET,https://raw.githubusercontent.com/app2smile/rules/master/rule/zhihu-ad.list,REJECT-DROP
 
 # > 微信公众号
@@ -44,11 +45,11 @@ URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+
 Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.githubusercontent.com/mieqq/mieqq/master/sub_info.js,timeout=10
 
 # > 哔哩哔哩去广告 by app2smile
-bili_json = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js,script-update-interval=0
-bili_proto = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/bilibili\.app\.(view\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,script-update-interval=0
+bili-json.js = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js,script-update-interval=0
+bili-proto.js = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/bilibili\.app\.(view\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,script-update-interval=0
 
 # > 知乎去广告 by app2smile
-zhihu_json = type=http-response,pattern=^https:\/\/(appcloud2\.zhihu\.com\/v3\/config$|www\.zhihu\.com\/api\/v4\/answers\/\d+\/recommendations|api\.zhihu\.com\/(topstory\/recommend|commercial_api\/(real_time_launch_v2|app_float_layer$)|questions\/\d+\/feeds\?|v4\/questions\/\d+\/answers\?)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/zhihu.js
+zhihu_json.js = type=http-response,pattern=^https:\/\/(appcloud2\.zhihu\.com\/v3\/config$|www\.zhihu\.com\/api\/v4\/(answers\/\d+\/recommendations|articles\/\d+\/recommendation)|api\.zhihu\.com\/(topstory\/recommend|commercial_api\/(real_time_launch_v2|app_float_layer$)|questions\/\d+\/feeds\?|v4\/questions\/\d+\/answers\?)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/zhihu.js
 
 # > 微博应用内去广告 by yichahucha
 wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(statuses\/(unread|extend|positives\/get|(friends|video)(\/|_)(mix)?timeline)|stories\/(video_stream|home_list)|(groups|fangle)\/timeline|profile\/statuses|comments\/build_comments|photo\/recommend_list|service\/picfeed|searchall|cardlist|page|!\/(photos\/pic_recommend_status|live\/media_homelist)|video\/tiny_stream_video_list|photo\/info|remind\/unread_count),script-path=https://raw.githubusercontent.com/yichahucha/surge/master/wb_ad.js
@@ -73,6 +74,9 @@ famijia.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/f
 
 # > 百度搜索防跳转 App Store by app2smile
 baidu-no-redirect.js = type=http-response,pattern=^https?:\/\/boxer\.baidu\.com\/scheme\?scheme,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
+
+# > 百度地图去广告 by app2smile
+baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
 # > 酷安去好物推荐 by Eric
 coolapk.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.coolapk\.com\/v6\/feed\/detail.*,script-path=https://raw.githubusercontent.com/Alex0510/Eric/master/surge/Script/KA.js
