@@ -84,8 +84,12 @@ dns:
   # These nameservers are used to resolve the DNS nameserver hostnames below.
   # Specify IP addresses only
   default-nameserver:
-    - 119.29.29.29
-    - 223.5.5.5
+    - 221.179.38.7
+    - 120.196.165.7
+    - 211.136.192.6
+    - 120.196.165.24
+    - 211.136.17.107
+    - 211.136.20.203
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
   # use-hosts: true # lookup hosts and return IP record
@@ -144,9 +148,10 @@ dns:
     - 'dl.stream.qqmusic.qq.com'
     - 'aqqmusic.tc.qq.com'
     - 'amobile.music.tc.qq.com'
-    - '*.xiami.com'
     - '*.music.migu.cn'
     - 'music.migu.cn'
+    - '+.msftconnecttest.com'
+    - '+.msftncsi.com'
     - '*.msftconnecttest.com'
     - '*.msftncsi.com'
     - 'msftconnecttest.com'
@@ -190,8 +195,12 @@ dns:
   # All DNS questions are sent directly to the nameserver, without proxies
   # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
+    - 221.179.38.7
+    - 120.196.165.7
+    - 211.136.192.6
+    - 120.196.165.24
+    - 211.136.17.107
+    - 211.136.20.203
     # - tls://dns.rubyfish.cn:853 # DNS over TLS
     # - https://1.1.1.1/dns-query # DNS over HTTPS
 
@@ -200,10 +209,18 @@ dns:
   # The answers from fallback servers are used when the GEOIP country
   # is not `CN`.
   fallback:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-    - https://dns.adguard.com/dns-query
-    - tls://dns.google:853
+    - https://162.14.132.76/dns-query
+    - tls://162.14.132.76:853
+    - https://162.14.132.109/dns-query
+    - tls://162.14.132.109:853
+    - https://101.6.6.6:8443/dns-query
+    - tls://101.6.6.6:8853
+    - https://i.passcloud.xyz/dns-query
+    - tls://i.passcloud.xyz:5432
+    - tls://c.passcloud.xyz:853
+    - tls://x.passcloud.xyz:853
+    - tls://b.iqiq.io:853
+    - tls://h.iqiq.io:853
 
   # If IP addresses resolved with servers in `nameservers` are in the specified
   # subnets below, they are considered invalid and results from `fallback`
@@ -218,12 +235,25 @@ dns:
   # This is a countermeasure against DNS pollution attacks.
   fallback-filter:
     geoip: true
-    ipcidr:
-      # - 240.0.0.0/4
-    # domain:
-    #   - '+.google.com'
-    #   - '+.facebook.com'
-    #   - '+.youtube.com'
+    geoip-code: CN
+    domain:
+      - '+.google.+'
+      - '+.googleapis.com'
+      - '+.googlevideo.com'
+      - '+.gstatic.cn'
+      - '+.gstatic.com'
+      - '+.gvt1.com'
+      - '+.gvt2.com'
+      - '+.recaptcha.net'
+      - '+.twimg.com'
+      - '+.twitter.com'
+      - '+.youtube.com'
+      - '+.ytimg.com'
+      - 'twitter.com'
+      - 't.co'
+      - 't.me'
+      - 'telegra.ph'
+      - 'youtu.be'
 
 #
 # https://github.com/Dreamacro/clash/wiki/premium-core-features
@@ -234,7 +264,7 @@ tun:
   dns-hijack:
     - 198.18.0.2:53
     - tcp://198.18.0.2:53
-    - tcp://8.8.8.8:53
+    - 8.8.8.8:53
     - tcp://8.8.4.4:53
 
   auto-route: true # auto set global route
