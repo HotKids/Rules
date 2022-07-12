@@ -11,7 +11,7 @@
 # tproxy-port: 7893
 
 # HTTP(S) and SOCKS5 server on the same port
-mixed-port: 7890
+mixed-port: 7893
 
 # authentication of local SOCKS5/HTTP(S) server
 # authentication:
@@ -78,16 +78,16 @@ hosts:
 # This section is optional. When not present, the DNS server will be disabled.
 dns:
   enable: true
-  listen: 0.0.0.0:1053
+  listen: 0.0.0.0:53
   # ipv6: false # when the false, response to AAAA questions will be empty
 
   # These nameservers are used to resolve the DNS nameserver hostnames below.
   # Specify IP addresses only
-  default-nameserver:  
-    -223.5.5.5
-    -119.29.29.29
-    -8.8.4.4
-    -1.0.0.1
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - 8.8.4.4
+    - 1.0.0.1
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
   # use-hosts: true # lookup hosts and return IP record
@@ -96,6 +96,14 @@ dns:
   # i.e. questions to these domain names will always be answered with their
   # real IP addresses
   fake-ip-filter:
+    - '*.lan'
+    - '*.localdomain'
+    - '*.example'
+    - '*.invalid'
+    - '*.localhost'
+    - '*.test'
+    - '*.local'
+    - '*.home.arpa'
     # Stun Services
     - '+.stun.*.*'
     - '+.stun.*.*.*'
@@ -122,6 +130,8 @@ dns:
   # All DNS questions are sent directly to the nameserver, without proxies
   # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
+    - 192.168.31.1
+    - 119.29.29.29
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
     # - tls://dns.rubyfish.cn:853 # DNS over TLS
@@ -132,10 +142,11 @@ dns:
   # The answers from fallback servers are used when the GEOIP country
   # is not `CN`.
   fallback:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-    - https://dns.adguard.com/dns-query
-    - tls://dns.google:853
+    - https://dns.cloudflare.com/dns-query
+    - https://public.dns.iij.jp/dns-query
+    - https://jp.tiar.app/dns-query
+    - https://jp.tiarap.org/dns-query
+    - tls://dot.tiar.app
 
   # If IP addresses resolved with servers in `nameservers` are in the specified
   # subnets below, they are considered invalid and results from `fallback`
