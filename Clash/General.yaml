@@ -85,9 +85,9 @@ dns:
   # Specify IP addresses only
   default-nameserver:  
     -223.5.5.5
-		-119.29.29.29
-		-8.8.4.4
-		-1.0.0.1
+    -119.29.29.29
+    -8.8.4.4
+    -1.0.0.1
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
   # use-hosts: true # lookup hosts and return IP record
@@ -97,26 +97,26 @@ dns:
   # real IP addresses
   fake-ip-filter:
     # Stun Services
-	  - '+.stun.*.*'
-		- '+.stun.*.*.*'
-		- '+.stun.*.*.*.*'
-		- '+.stun.*.*.*.*.*'
-		# Google Voices
-		- 'lens.l.google.com'
+    - '+.stun.*.*'
+    - '+.stun.*.*.*'
+    - '+.stun.*.*.*.*'
+    - '+.stun.*.*.*.*.*'
+    # Google Voices
+    - 'lens.l.google.com'
     # Nintendo Switch STUN
-		- '*.n.n.srv.nintendo.net'
-		# PlayStation STUN
-		- '+.stun.playstation.net'
-		# XBox
-		- 'xbox.*.*.microsoft.com'
-		- '*.*.xboxlive.com'
-		# Microsoft Captive Portal
-		- '*.msftncsi.com'
-		- '*.msftconnecttest.com'
-		# Bilibili CDN
-		- '*.mcdn.bilivideo.cn'
-		# Windows Default LAN WorkGroup
-	  - 'WORKGROUP'
+    - '*.n.n.srv.nintendo.net'
+    # PlayStation STUN
+    - '+.stun.playstation.net'
+    # XBox
+    - 'xbox.*.*.microsoft.com'
+    - '*.*.xboxlive.com'
+    # Microsoft Captive Portal
+    - '*.msftncsi.com'
+    - '*.msftconnecttest.com'
+    # Bilibili CDN
+    - '*.mcdn.bilivideo.cn'
+    # Windows Default LAN WorkGroup
+    - 'WORKGROUP'
   
   # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
   # All DNS questions are sent directly to the nameserver, without proxies
