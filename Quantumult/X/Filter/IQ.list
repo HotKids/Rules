@@ -13,10 +13,16 @@ DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
 // 播放
+DOMAIN,akmcdnoversea.inter.iqiyi.com,iQIYI Intl
+DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,iQIYI Intl
+DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,iQIYI Intl
+DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,iQIYI Intl
 DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,iQIYI Intl
 DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
 DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,iQIYI Intl
 DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
+DOMAIN-KEYWORD,akmcdnoverse,iQIYI Intl
+DOMAIN-KEYWORD,chuangcachecdnoversea,iQIYI Intl
 IP-CIDR,23.40.241.251/32,iQIYI Intl
 IP-CIDR,23.40.242.10/32,iQIYI Intl
 IP-CIDR,110.238.107.47/32,iQIYI Intl
