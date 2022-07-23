@@ -20,6 +20,7 @@ DOMAIN,mtrace.wetvinfo.com
 
 # > iQIYI 视频暂停广告
 DOMAIN-SUFFIX,cupid.iqiyi.com
+DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 
 # > Youku 视频暂停广告
 DOMAIN,iyes.youku.com
