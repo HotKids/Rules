@@ -36,6 +36,7 @@ payload:
   - DOMAIN-SUFFIX,iq.com
   - DOMAIN-SUFFIX,intl.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
+  - DOMAIN,intl-im-hist-api.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
   - DOMAIN,akmcdnoversea.inter.iqiyi.com
   - DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
