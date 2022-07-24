@@ -10,6 +10,7 @@ DOMAIN-SUFFIX,iq.com,iQIYI Intl
 DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
 // 历史
 DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
+DOMAIN,intl-im-hist-api.iqiyi.com,iQIYI Intl
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
 // 播放
