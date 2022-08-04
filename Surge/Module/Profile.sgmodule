@@ -58,7 +58,7 @@ dns-server = 119.29.29.29, 119.28.28.28, 223.5.5.5, 223.6.6.6, 180.76.76.76, 1.2
 # > Always Real IP Hosts
 # 当 Surge VIF 处理 DNS 问题时，此选项要求 Surge 返回一个真正的 IP 地址，而不是一个假 IP 地址。
 # DNS 数据包将被转发到上游 DNS 服务器。
-always-real-ip = %INSERT% *.lan, cable.auth.com, *.msftconnecttest.com, *.msftncsi.com, network-test.debian.org, detectportal.firefox.com, resolver1.opendns.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, localhost.*.qq.com, *.logon.battlenet.com.cn, *.logon.battle.net, *.blzstatic.cn, music.163.com, *.music.163.com, *.126.net, musicapi.taihe.com, music.taihe.com, songsearch.kugou.com, trackercdn.kugou.com, *.kuwo.cn, api-jooxtt.sanook.com, api.joox.com, joox.com, y.qq.com, *.y.qq.com, streamoc.music.tc.qq.com, mobileoc.music.tc.qq.com, isure.stream.qqmusic.qq.com, dl.stream.qqmusic.qq.com, aqqmusic.tc.qq.com, amobile.music.tc.qq.com, *.xiami.com, *.music.migu.cn, music.migu.cn, proxy.golang.org, *.mcdn.bilivideo.cn, *.cmpassport.com, id6.me, open.e.189.cn, mdn.open.wo.cn, auth.wosms.cn, *.jegotrip.com.cn, *.icitymobile.mobi, *.pingan.com.cn, *.cmbchina.com, pool.ntp.org, *.pool.ntp.org, ntp.*.com, time.*.com, ntp?.*.com, time?.*.com, time.*.gov, time.*.edu.cn, *.ntp.org.cn, PDC._msDCS.*.*, DC._msDCS.*.*, GC._msDCS.*.*
+always-real-ip = %APPEND% *.lan, cable.auth.com, *.msftconnecttest.com, *.msftncsi.com, network-test.debian.org, detectportal.firefox.com, resolver1.opendns.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, localhost.*.qq.com, *.logon.battlenet.com.cn, *.logon.battle.net, *.blzstatic.cn, music.163.com, *.music.163.com, *.126.net, musicapi.taihe.com, music.taihe.com, songsearch.kugou.com, trackercdn.kugou.com, *.kuwo.cn, api-jooxtt.sanook.com, api.joox.com, joox.com, y.qq.com, *.y.qq.com, streamoc.music.tc.qq.com, mobileoc.music.tc.qq.com, isure.stream.qqmusic.qq.com, dl.stream.qqmusic.qq.com, aqqmusic.tc.qq.com, amobile.music.tc.qq.com, *.xiami.com, *.music.migu.cn, music.migu.cn, proxy.golang.org, *.mcdn.bilivideo.cn, *.cmpassport.com, id6.me, open.e.189.cn, mdn.open.wo.cn, auth.wosms.cn, *.jegotrip.com.cn, *.icitymobile.mobi, *.pingan.com.cn, *.cmbchina.com, pool.ntp.org, *.pool.ntp.org, ntp.*.com, time.*.com, ntp?.*.com, time?.*.com, time.*.gov, time.*.edu.cn, *.ntp.org.cn, PDC._msDCS.*.*, DC._msDCS.*.*, GC._msDCS.*.*
 
 # > Hijack DNS
 # 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址 (198.18.0.2)。
@@ -67,7 +67,7 @@ always-real-ip = %INSERT% *.lan, cable.auth.com, *.msftconnecttest.com, *.msftnc
 
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理。Surge HTTP 引擎将处理这些请求，所有的高级功能，如捕获、重写和脚本等都可以使用。
-force-http-engine-hosts = %INSERT% *.ott.cibntv.net,123.59.31.1,119.18.193.135,122.14.246.33,175.102.178.52
+force-http-engine-hosts = %APPEND% *.ott.cibntv.net,123.59.31.1,119.18.193.135,122.14.246.33,175.102.178.52
 
 # > VIF Excluded Routes
 # Surge VIF 只能处理 TCP 和 UDP 协议。使用此选项可以绕过特定的 IP 范围，允许所有流量通过。
@@ -123,6 +123,44 @@ tplogin.cn = server:syslib // TP-Link Router
 tplinklogin.net = server:syslib // TP-Link Router
 melogin.cn = server:syslib // MERCURY Router
 falogin.cn = server:syslib // FAST Router
+
+# > Apple
+networking.apple = server:https://doh.dns.apple.com/dns-query // Apple
+# *.apple.com = server:https://doh.dns.apple.com/dns-query // Apple.com
+*.icloud.com = server:https://doh.dns.apple.com/dns-query // iCloud.com
+
+# > Alibaba
+*.alibaba.cn = server:223.5.5.5 // 阿里巴巴
+*.alibaba.com.cn = server:223.5.5.5 // 阿里巴巴
+*.china.alibaba.com = server:223.5.5.5 // Alibaba 中国
+*.1688.com = server:223.5.5.5 // 1688
+*.taobao.com = server:223.5.5.5 // 淘宝
+*.tbcache.com = server:223.5.5.5 // 淘宝 缓存
+*.tmall.com = server:223.5.5.5 // 天猫
+*.alicdn.com = server:223.5.5.5 // 阿里 CDN
+*.aliyundrive.com = server:223.5.5.5 // 阿里云盘
+*.aliyun.* = server:223.5.5.5 // 阿里云
+*.aliyuncdn.* = server:223.5.5.5 // 阿里云 CDN
+*.aliyunddos????.com = server:223.5.5.5 // 阿里云 DDoS防护
+*.aliyuncs.com = server:223.5.5.5 // 阿里云API服务
+*.aliyundunwaf.com = server:223.5.5.5 // 阿里云Web应用防火墙
+*.aliapp.com = server:223.5.5.5 // 云引擎应用平台
+*.aliapp.org = server:223.5.5.5 // 上云平台
+*.alibabausercontent.com = server:223.5.5.5 // 阿里用户上传资料
+*.mmstat.com = server:223.5.5.5 // mmstat 数据统计 广告追踪
+tb.cn = server:223.5.5.5 // 淘宝短网址
+
+# > Taiwan
+# 中华电信
+*.cht.com.tw  = server:https://dns.hinet.net/dns-query // 中华电信
+*.hinet.net = server:https://dns.hinet.net/dns-query // 中华电信HiNet
+*.emome.net = server:https://dns.hinet.net/dns-query // 中华电信emome
+# So-net
+# so-net.net.tw = server:ns1.so-net.net.tw // So-net Entertainment Taiwan
+# so-net.tw = server:ns1.so-net.net.tw // So-net Entertainment Taiwan
+# Taiwan Network Information Center
+*.tw = server:https://dns.twnic.tw/dns-query // TWNIC DNS
+*.taipei = server:https://dns.twnic.tw/dns-query // TWNIC DNS
 
 [Header Rewrite]
 # > 知乎（部分替换为手机百度 Quark 的 User-Agent）
