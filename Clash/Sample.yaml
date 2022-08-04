@@ -536,14 +536,14 @@ rule-providers:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/CNCIDR.yaml
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
     
   LANCIDR:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/LANCIDR.yaml
-    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
+    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
     interval: 86400
 
 # 规则
