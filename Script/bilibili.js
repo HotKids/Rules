@@ -1,4 +1,4 @@
-# forked from /xOS/Config
+// forked from /xOS/Config
 
 let body = JSON.parse($response.body);
 // 删除了“推荐服务”
