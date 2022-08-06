@@ -3,6 +3,8 @@
 #!system=ios
 
 [Rule]
+# forked from /xOS/Config
+
 # > 哔哩哔哩
 URL-REGEX,^https?:\/\/.+\.(bilibili|biliapi)\.(com|net)\/x\/v2\/splash\/list, REJECT
 DOMAIN-SUFFIX, grpc.biliapi.net, REJECT-NO-DROP
@@ -21,15 +23,6 @@ http-response ^https?:\/\/.+\.(biliapi|bilibili)\.(net|com)/x/v2/feed/index(/sto
 
 # >>  “我的”的修改
 http-response ^https:\/\/.+\.(bilibili|biliapi)\.(com|net)/x/v2/account/mine\?access_key requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bilibili.js
-
-# >>  “我的信息”的修改
-// http-response ^https?:\/\/.+\.(bilibili|biliapi)\.(com|net)\/x\/v2\/account\/myinfo\?access_key requires-body=1,max-size=0,script-path=https://hub.qste.com/Script/Bilibili/MyInfo.js
-
-# >>  “空间”的修改
-// http-response ^https?:\/\/.+\.(bilibili|biliapi)\.(com|net)\/x\/v2\/space\?access_key requires-body=1,max-size=0,script-path=https://hub.qste.com/Script/Bilibili/Space.js
-
-# >>  “大会员”的修改
-// http-response ^https?:\/\/.+\.(bilibili|biliapi)\.(com|net)\/x\/vip\/web\/vip_center\/combine requires-body=1,max-size=0,script-path=https://hub.qste.com/Script/Bilibili/Center.js
 
 # >>  动态广告
 http-response ^https?:\/\/.+\.(bilibili|biliapi)\.(com|net)/bilibili\.app\.dynamic\.v2\.Dynamic/DynAll$ requires-body=1,binary-body-mode=1,max-size=0,script-path=https://hub.qste.com/Script/Bilibili/Dynamic.js
