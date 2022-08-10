@@ -1,5 +1,5 @@
-#!name=SUBNET
-#!desc=连接特定的 SSID 选择直连
+#!name=DIRECT MODE
+#!desc=私人使用，一些需要直连的场景
 
 [Rule]
 # CARRIER 匹配
