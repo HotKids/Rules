@@ -51,9 +51,9 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_getdotinfo data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
 
 # > 微博超话看帖
-^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_channel_list data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
-^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/unread_topic_timeline data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
-^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topic data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_channel_list data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/unread_topic_timeline data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topic data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
 
 # > 微博网络检测
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/carrier\/get\/info data="https://hub.nange.cn/Mock/Weibo/carrier.json"
