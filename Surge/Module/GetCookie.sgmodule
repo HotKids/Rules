@@ -3,13 +3,9 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% 113.96.156.178,m.client.10010.com,api.m.jd.com,passport.iqiyi.com,*.video.qq.com,music.163.com,*.bilibili.com,*.ximalaya.com,zhiyou.smzdm.com,ccsp-egmas.sf-express.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,user-api-prd-mx.wandafilm.com,cms-activity-api-prd-mx.wandafilm.com,*.qunar.com
+hostname = %INSERT% m.client.10010.com,api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,*.qunar.com
 
 [Script]
-# > 中国联通 GetCookie by blackmatrix7
-// App: 我的-天天抽奖
-Cookie: 中国联通 = type=http-request,pattern=^https?:\/\/m\.client\.10010\.com\/dailylottery\/static\/(integral|doubleball)\/firstpage,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/10010/unicom_signin.min.js
-
 # > 京东 GetCookie by NobyDa
 // https://bean.m.jd.com/
 Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
@@ -17,10 +13,6 @@ Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.
 # > 爱奇艺 GetCookie by NobyDa
 // https://m.iqiyi.com/user.html
 Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/apis\/user\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
-
-# > 腾讯视频 GetCookie by chavyleung
-// https://film.qq.com/ 随便选一部电影观看
-Cookie: 腾讯视频 = type=http-request,pattern=^https?:\/\/access.video.qq.com\/user\/auth_refresh,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/videoqq/videoqq.cookie.js
 
 # > 网易云音乐 GetCookie by chavyleung
 // 先登录: https://music.163.com/m/login，再访问: https://music.163.com/#/user/level
@@ -33,15 +25,6 @@ Cookie: 哔哩哔哩直播 = type=http-request,pattern=^https?:\/\/(www|live)\.b
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
-# > 喜马拉雅 GetCookie by chavyleung
-Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/.*\/mobile\-user\/(v1\/)?homePage\/.*,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/ximalaya/ximalaya.cookie.js
-
-# > 什么值得买 GetCookie by blackmatrix7
-Cookie: 什么值得买 = type=http-request,pattern=^https?:\/\/zhiyou\.smzdm\.com\/user$,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/smzdm/smzdm_signin.js,requires-body=true
-
-# > 顺丰速运 GetCookie by chavyleung
-Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/ccsp-egmas.sf-express.com\/cx-app-member\/member\/app\/user\/universalSign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js,requires-body=true
-
 # > 全家 GetCookie by blackmatrix7
 Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/(signin\/usersign|sign\/current),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
@@ -53,10 +36,6 @@ Cookie: 饿了么 = type=http-request,pattern=^https?:\/\/h5\.ele\.me\/restapi\/
 
 # > 叮咚买菜 GetCookie by blackmatrix7
 Cookie: 叮咚买菜 = type=http-request,pattern=^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home\?api_version,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js
-
-# > 万达电影 GetCookie by blackmatrix7
-Cookie: 万达电影 = type=http-request,pattern=^https?:\/\/user\-api\-prd\-mx\.wandafilm\.com\/user\/query_user_level_tip\.api,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
-Cookie: 万达电影_获取ActivityCode = type=http-request,pattern=^https?:\/\/cms\-activity\-api\-prd\-mx\.wandafilm\.com\/activity\/activity_count\.api\?activityCode=(\d*),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/wanda/wanda_checkin.js
 
 # > 去哪儿 GetCookie by chavyleung
 Cookie: 去哪儿 = type=http-request,pattern=^https?:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
