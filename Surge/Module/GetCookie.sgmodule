@@ -3,11 +3,13 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% m.client.10010.com,api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,*.qunar.com
+hostname = %INSERT% m.client.10010.com,api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,*.qunar.com
 
 [Script]
 # > 京东 GetCookie by NobyDa
-// https://bean.m.jd.com/
+// Safari浏览器打开登录 https://home.m.jd.com/myJd/newhome.action 点击"我的"页面
+// 或者使用旧版网址 https://bean.m.jd.com/bean/signIndex.action 点击签到并且出现签到日历
+// 如果通知获取Cookie成功, 则可以使用此签到脚本. 注: 请勿在京东APP内获取!!!
 Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 # > 爱奇艺 GetCookie by NobyDa
@@ -24,9 +26,6 @@ Cookie: 哔哩哔哩直播 = type=http-request,pattern=^https?:\/\/(www|live)\.b
 
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
-
-# > 全家 GetCookie by blackmatrix7
-Cookie: Fa米家 = type=http-request,pattern=^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/(signin\/usersign|sign\/current),script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
 # > 百果园 GetCookie by chavyleung
 Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
