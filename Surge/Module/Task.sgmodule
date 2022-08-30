@@ -34,3 +34,6 @@ Tasks: 叮咚买菜 = type=cron,cronexp="17 0 * * *",timeout=30,script-path=http
 
 # > 去哪儿 DailyBonus by chavyleung
 Tasks: 去哪儿 = type=cron,cronexp="18 0 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.js
+
+# > 顺丰速运 DailyBonus by chavyleung
+Tasks: 顺丰速运 = type=cron,cronexp="19 0 * * *",script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js
