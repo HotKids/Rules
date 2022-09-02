@@ -1,0 +1,7 @@
+#!name=MitM All
+#!desc=临时对所有网站开启MitM，不建议长久开启，比较耗费性能，主profile配置下还是需要进行证书安装/配置
+
+[MITM]
+skip-server-cert-verify = true
+tcp-connection = true
+hostname = -*.github.com,-*.apple.com, -*.icloud.com, -*.mzstatic.com, -*.crashlytics.com, -*.facebook.com, -*.instagram.com, *
