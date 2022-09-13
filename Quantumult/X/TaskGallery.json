@@ -8,10 +8,10 @@
         "13 0 * * 1 https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.silver2coin.js, tag=B站银瓜子转硬币, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/bilibiliblue.png",
         "14 0 * * * https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js, tag=哔哩哔哩漫画, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/bilibilimanga.png",
         "10,20,30 0 12 * * https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/ExchangePoints.js, tag=哔哩哔哩漫画积分兑换, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/bilibilimanga.png",
-        "15 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js, tag=全家, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/famijia.png",
-        "16 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js, tag=百果园, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/pagoda.png",
-        "17 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js, tag=饿了么_领取吃货豆, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/ele.png",
-        "18 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js, tag=叮咚买菜, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/ddmc.png",
-        "19 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.js, tag=去哪儿, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/qunar.png"
+        "15 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.js, tag=百果园, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/pagoda.png",
+        "16 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/eleme/eleme_daily.js, tag=饿了么_领取吃货豆, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/ele.png",
+        "17 0 * * * https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js, tag=叮咚买菜, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/ddmc.png",
+        "18 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.js, tag=去哪儿, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/qunar.png",
+        "19 0 * * * https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.js, tag=顺丰速运, img-url=https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Task/sfexpress.png"
     ]
 }
