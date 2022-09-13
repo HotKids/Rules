@@ -12,7 +12,7 @@ DOMAIN-SUFFIX,hdslb.com
 DOMAIN,upos-hz-mirrorakam.akamaized.net
 DOMAIN-KEYWORD,bilibili
 DOMAIN-KEYWORD,cn-hk-eq-bcache-
-IP-CIDR,203.107.1.65/32,no-resolve
+IP-CIDR,121.11.192.0/24,no-resolve
 // 港台版 Bilibili App
 USER-AGENT,bili-inter*
 DOMAIN,apiintl.biliapi.net
