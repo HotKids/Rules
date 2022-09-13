@@ -1,22 +1,25 @@
-hostname = api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,fmapp.chinafamilymart.com.cn,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,*.qunar.com
+hostname = api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,wx-mini.pagoda.com.cn,h5.ele.me,maicai.api.ddxq.mobi,*.qunar.com,ccsp-egmas.sf-express.com
 
 ;京东 GetCookie by NoByDa
+;Safari 浏览器打开登录 https://home.m.jd.com/myJd/newhome.action 点击 "我的" 页面
+;或者使用旧版网址 https://bean.m.jd.com/bean/signIndex.action 点击签到并且出现签到日历
+;如果通知获取 Cookie 成功，则可以使用此签到脚本。注：请勿在京东 APP 内获取！！！
 ^https?:\/\/api\.m\.jd\.com\/client\.action.*functionId=signBean url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/JD-DailyBonus/JD_DailyBonus.js
 
 ;爱奇艺 GetCookie by NoByDa
+;https://m.iqiyi.com/user.html
 ^https?:\/\/passport\.iqiyi\.com\/apis\/user\/ url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 ;网易云音乐 GetCookie by chavyleung
+;先登录: https://music.163.com/m/login，再访问: https://music.163.com/#/user/level
 ^https?:\/\/music\.163\.com\/weapi\/user\/level url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/neteasemusic/quanx/neteasemusic.cookie.js
 
 ;哔哩哔哩直播 GetCookie by chavyleung
+;https://live.bilibili.com/
 ^https?:\/\/(www|live)\.bilibili\.com\/?.? url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/bilibili/bilibili.cookie.js
 
 ;哔哩哔哩漫画 GetCookie by NoByDa
 ^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo url script-request-header https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
-
-;全家 GetCookie by blackmatrix7
-^https?:\/\/fmapp\.chinafamilymart\.com\.cn\/api\/app\/market\/member\/(signin\/usersign|sign\/current) url script-request-header https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/famijia/famijia_checkin.js
 
 ;百果园 GetCookie by chavyleung
 ^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
@@ -28,4 +31,7 @@ hostname = api.m.jd.com,passport.iqiyi.com,music.163.com,*.bilibili.com,fmapp.ch
 ^https?:\/\/maicai\.api\.ddxq\.mobi\/point\/home\?api_version url script-request-header https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/dingdong/dingdong_checkin.js
 
 ;去哪儿 GetCookie by chavyleung
-^https:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
+^https?:\/\/user.qunar.com\/webapi\/member\/signIndexV2.htm url script-request-header https://raw.githubusercontent.com/chavyleung/scripts/master/qunar/qunar.cookie.js
+
+;顺丰速运 GetCookie by chavyleung
+^https?:\/\/ccsp-egmas.sf-express.com\/cx-app-member\/member\/app\/user\/universalSign url script-request-body https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js
