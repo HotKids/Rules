@@ -3,7 +3,7 @@
 #!system=ios
 
 [Rule]
-# forked from /xOS/Config
+# forked from GitHub.com/xOS/Config
 
 # > 微博其它
 URL-REGEX,^https?:\/\/.+\/wbts\.png$,REJECT
