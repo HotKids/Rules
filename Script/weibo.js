@@ -1,3 +1,5 @@
+// forked from /xOS/Config
+
 const version = 'v0717.0220';
 
 let $ = new nobyda();
