@@ -26,7 +26,7 @@ const mainConfig = storeMainConfig ? JSON.parse(storeMainConfig) : {
     removeInterestFriendInTopic: true, //超话：超话里的好友
     removeInterestTopic: true, //超话：可能感兴趣的超话 + 好友关注
     removeInterestUser: true, //用户页：可能感兴趣的人
-
+    
     removeLvZhou: true, //绿洲模块
     profileSkin1: null, //用户页：自定义图标1
     profileSkin2: null, //用户页：自定义图标2
@@ -634,34 +634,26 @@ function containerHandler(data) {
 
 //可能感兴趣的人
 function userHandler(data) {
-	data = removeMain(data);
-	if(!mainConfig.removeInterestUser) {
-		return data;
-	}
-
-	if(!data.items) {
-		return data;
-	}
-	let newItems = [];
-	for (let item of data.items) {
-		let isAdd = true;
-		if(item.category == 'group') {
-			try {
-				if(item.items[0]['data']['desc'] == '可能感兴趣的人') {
-					isAdd = false;
-				}
-			} catch (error) {
-			}
-		}
-		if(isAdd) {
-			newItems.push(item);
-		}
-	}
-	data.items = newItems;
-	log('removeMain sub success');
-	return data;
+    if (!mainConfig.removeInterestUser) {
+        return;
+    }
+    let items = data.cards || [];
+    if (items.length === 0) {
+        return;
+    }
+    let newItems = [];
+    for (const item of items) {
+        if (item.itemid == 'INTEREST_PEOPLE') {
+            log('remove 感兴趣的人');
+        } else {
+            if (!isAd(item.mblog)) {
+                lvZhouHandler(item.mblog);
+                newItems.push(item);
+            }
+        }
+    }
+    data.cards = newItems;
 }
-
 
 function nextVideoHandler(data) {
     if (mainConfig.removeNextVideo) {
