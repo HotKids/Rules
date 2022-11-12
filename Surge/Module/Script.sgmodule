@@ -60,12 +60,9 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 # > 知乎去广告 by app2smile
 zhihu_json.js = type=http-response,pattern=^https:\/\/(appcloud2\.zhihu\.com\/v3\/config$|www\.zhihu\.com\/api\/v4\/(answers\/\d+\/recommendations|articles\/\d+\/recommendation)|api\.zhihu\.com\/(topstory\/recommend|commercial_api\/(real_time_launch_v2|app_float_layer$)|questions\/\d+\/feeds\?|v4\/questions\/\d+\/answers\?)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/zhihu.js
 
-# > 微博应用内去广告 by yichahucha&chouchoui
+# > 微博去广告 by yichahucha&chouchoui
 // 请使用微博净化模块
 // wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|searchall|page|messageflow|statuses\/(unread_)?friends(\/|_)timeline|groups\/timeline|statuses\/container_timeline|statuses\/(unread_hot_timeline|extend|video_mixtimeline|unread_topic_timeline)|profile\/(me|statuses)|video\/(community_tab|remind_info|tiny_stream_video_list)|checkin\/show|\!\/live\/media_homelist|comments\/build_comments|container\/get_item|search\/(finder|container_timeline|container_discover)),script-path=https://raw.githubusercontent.com/chouchoui/zmqcherish.proxy-script/main/weibo_main.js
-
-# > 微博启动页去广告 by yichahucha&chouchoui
-// 请使用微博净化模块
 // wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua),script-path=https://raw.githubusercontent.com/chouchoui/zmqcherish.proxy-script/main/weibo_launch.js
 
 # > 微信公众号去广告 by Choler&yjqiang
