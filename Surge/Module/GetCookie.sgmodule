@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,wx-mini.pagoda.com.cn,ccsp-egmas.sf-express.com
+hostname = %INSERT% api.m.jd.com, passport.iqiyi.com, app.bilibili.com, m.bilibili.com, mobile.ximalaya.com, 180.153.255.*, 180.153.250.*, 180.153.140.*, 114.80.99.*, 114.80.139.*, 114.80.161.*, 1.62.62.64, 61.172.194.184, wx-mini.pagoda.com.cn, ccsp-egmas.sf-express.com
 
 [Script]
 # > 京东 GetCookie by NobyDa
@@ -18,8 +18,13 @@ Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/
 
 # > 哔哩哔哩 GetCookie by ClydeTime
 // 以下 cookie 获取方式二选其一即可
-Cookie: 哔哩哔哩 App = type=http-request,pattern=^https:\/\/app\.bilibili\.com\/x\/resource\/domain\?,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js
-Cookie: 哔哩哔哩 网页 = type=http-request,pattern=^https:\/\/m.bilibili.com/$,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js
+Cookie: 哔哩哔哩 App = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/resource\/domain\?,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js,requires-body=0
+
+Cookie: 哔哩哔哩 网页 = type=http-request,pattern=^https?:\/\/m.bilibili.com/$,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js,requires-body=0
+Cookie: 哔哩哔哩 网页 = type=http-request,pattern=^https?:\/\/m.bilibili.com/$,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js,requires-body=0
+
+# > 喜马拉雅 GetCookie by ClydeTime
+Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/mobile\.ximalaya\.com\/app-skin-service\/skin\/,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/xmlySign.js,requires-body=0
 
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
