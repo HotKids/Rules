@@ -44,7 +44,7 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/unread_hot_timeline\?gsid= data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
 
 # > 获取设备型号
-// ^https?:\/\/m?api\.weibo\.c(n|om)\/device\/get data="https://hub.nange.cn/Mock/Weibo/getDevice.json"
+^https?:\/\/m?api\.weibo\.c(n|om)\/device\/get data="https://hub.nange.cn/Mock/Weibo/getDevice.json"
 
 # > 微博发现
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/search\/container_discover\?gsid= data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
@@ -53,9 +53,9 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_getdotinfo data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
 
 # > 微博超话看帖
-// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_channel_list data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
-// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/unread_topic_timeline data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
-// ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topic data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/huati\/discovery_home_bottom_channel_list data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/unread_topic_timeline data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
+^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topic data="https://hub.nange.cn/Mock/Blank/Blank_Dict.json"
 
 # > 微博网络检测
 ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/carrier\/get\/info data="https://hub.nange.cn/Mock/Weibo/carrier.json"
@@ -88,12 +88,12 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 
 [Script]
 # > 微博个人信息
-// 个人信息 = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(statuses\/send|statuses\/destroy|comments\/destroy|profile|users\/(show|relation)|direct_messages\/user_list|messageflow\/notice)\?,requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/Profile.js
+个人信息 = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(profile\/userinfo|statuses\/send|statuses\/destroy|comments\/destroy|profile|users\/(show|relation)|direct_messages\/user_list|messageflow\/notice)\?,requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/Profile.js
 
-// 会员中心 = type=http-response,pattern=^https?:\/\/new\.vip\.weibo\.c(n|om)\/aj\/(vipcenter\/home|avatargj\/mall|activity\/userinfo|cardbackground\/index),requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/VIPCenter.js
+会员中心 = type=http-response,pattern=^https?:\/\/new\.vip\.weibo\.c(n|om)\/aj\/(vipcenter\/home|avatargj\/mall|activity\/userinfo|cardbackground\/index),requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/VIPCenter.js
 
 # > 微博去广告
-微博 = type=http-response,pattern=^https?://m?api\.weibo\.c(n|om)/2/(profile/(me|statuses|container_timeline)|searchall|statuses/(unread_hot_timeline|extend|video_mixtimeline)|video/(community_tab|remind_info|tiny_stream_video_list)|checkin/show|container/get_item|search/container_discover),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
+微博 = type=http-response,pattern=^https?://m?api\.weibo\.c(n|om)/2/(profile/(me|statuses|container_timeline)|searchall|statuses/(unread_hot_timeline|extend|video_mixtimeline)|video/(community_tab|remind_info|tiny_stream_video_list)|checkin/show|container/get_item|search/container_discover),requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/Weibo.js
 
 开屏 = requires-body=1,script-path=https://hub.nange.cn/Script/Weibo/Launch.js,type=http-response,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(/interface/sdk/sdkad.php|/wbapplua/wbpullad.lua)
 
@@ -102,7 +102,7 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 微博钱包订单 = type=http-response,pattern=(^https?:\/\/js\.t\.sinajs\.cn\/c2p\/sam\/frontend\/assets\/walletcache\.json|^https?:\/\/pay\.sc\.weibo\.com\/api\/client\/sdk\/app\/indexnew\/(index|person)|^https?:\/\/shop\.sc\.weibo\.com\/aj\/h5\/order\/center),requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/Wallet.js
 
 # > 微博配置注入
-// 微博去广告配置注入 = type=cron,cronexp="0 0 1 ? * MON",debug=1,script-path=https://hub.nange.cn/Script/Weibo/Config.js
+微博去广告配置注入 = type=cron,cronexp="0 0 1 ? * MON",debug=1,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
 
 [MITM]
 hostname = %APPEND% *.uve.weibo.com, *api.weibo.cn, *api.weibo.com, h5.sinaimg.cn, new.vip.weibo.cn, *.sc.weibo.com, captcha.weibo.com, wx*.sinaimg.cn, js.t.sinajs.cn, *.e.weibo.com
