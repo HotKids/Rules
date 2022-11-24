@@ -21,3 +21,6 @@ payload:
   - DOMAIN,cbsnews.akamaized.net
   # DOMAIN,cbsservice.aws.syncbak.com
   # DOMAIN,cbsplaylistserver.aws.syncbak.com
+  
+  # > PeacockTV
+  - DOMAIN-SUFFIX,cdn.peacocktv.com
