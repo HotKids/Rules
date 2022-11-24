@@ -1,0 +1,16 @@
+# 一些无需验证地区的 HOST
+
+# > Disney+
+DOMAIN-SUFFIX,media.dssott.com,Streaming
+DOMAIN,prod-ripcut-delivery.disney-plus.net,Streaming
+
+# > Paramount+
+DOMAIN-SUFFIX,cbsaavideo.com,Streaming
+DOMAIN-SUFFIX,mtvnservices.com,Streaming
+DOMAIN-SUFFIX,cws.conviva.com,Streaming
+DOMAIN,thumbnails.cbsig.net,Streaming
+DOMAIN,cbsinteractive.hb.omtrdc.net,Streaming
+DOMAIN,cbsnews.akamaized.net,Streaming
+
+# > Peacock TV
+DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming
