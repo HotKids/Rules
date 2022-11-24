@@ -1,5 +1,6 @@
 # > Peacock
 USER-AGENT,peacock*
+DOMAIN-SUFFIX,cdn.peacocktv.com
 DOMAIN-SUFFIX,peacocktv.com
 // 屏蔽广告
 // DOMAIN,video-ads-module.ad-tech.nbcuni.com
