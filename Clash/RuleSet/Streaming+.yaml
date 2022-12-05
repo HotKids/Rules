@@ -1,5 +1,5 @@
 payload:
-  ## 一些无需验证地区的 HOST
+  # 一些无需验证地区的 HOST
   # > Disney+
   - DOMAIN-SUFFIX,media.dssott.com
   - DOMAIN,prod-ripcut-delivery.disney-plus.net
