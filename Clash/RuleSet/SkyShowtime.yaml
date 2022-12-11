@@ -1,0 +1,5 @@
+payload:
+  # > SkyShowtime
+  - DOMAIN-SUFFIX,skyshowtime.com
+  # DOMAIN-SUFFIX,cssott.com
+  # DOMAIN,g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com
