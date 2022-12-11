@@ -10,5 +10,6 @@ payload:
   - DOMAIN-SUFFIX,mail.me.com
   - DOMAIN-SUFFIX,mail.yahoo.com
   - DOMAIN-SUFFIX,mail.infomaniak.com
+  - DOMAIN-SUFFIX,vodafonemail.de
   - DOMAIN,imap.vodafone.de
   - DOMAIN,smtp.vodafone.de
