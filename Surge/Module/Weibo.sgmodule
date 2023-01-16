@@ -4,6 +4,7 @@
 
 [Rule]
 # forked from GitHub.com/xOS/Config
+# 注释个人信息及会员中心，以及修改微博配置注入
 
 # > 微博其它
 URL-REGEX,^https?:\/\/.+\/wbts\.png$,REJECT
