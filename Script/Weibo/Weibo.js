@@ -1,3 +1,6 @@
+// forked from /xOS/Config
+// 移除对个人页面会员功能（removeHomeVip）的修改
+
 const version = 'v1031.1';
 
 const $ = new Env("微博去广告");
@@ -8,7 +11,7 @@ let storeItemMenusConfig = $.getdata('itemMenusConfig');
 const mainConfig = storeMainConfig ? JSON.parse(storeMainConfig) : {
     isDebug: true, //开启调试，会打印运行中部分日志
     //个人中心配置，其中多数是可以直接在更多功能里直接移除
-    removeHomeVip: true, //个人中心头像旁边的vip样式
+    removeHomeVip: false, //个人中心头像旁边的vip样式
     removeHomeCreatorTask: true, //个人中心创作者中心下方的轮播图
 
     //微博详情页配置
