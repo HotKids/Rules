@@ -2,4 +2,5 @@ payload:
   # > Chromecast with Google TV Home
   - PROCESS-NAME,com.google.android.videos
   - DOMAIN,androidtvlauncherxfe-pa.googleapis.com
-  # DOMAIN-KEYWORD,pa.google
+  # 懒得抓了
+  - DOMAIN-KEYWORD,pa.google
