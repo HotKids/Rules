@@ -1,6 +1,5 @@
 #!name= 哔哩哔哩
 #!desc= 哔哩哔哩 App 净化
-#!system=ios
 
 [Rule]
 // forked from /xOS/Config
