@@ -22,12 +22,12 @@ test-timeout = 5
 ipv6 = false
 
 # > 允许 Wi-Fi 访问 (仅 iOS，若允许远程访问将「false」改为「true」)
-allow-wifi-access = false
+allow-wifi-access = true
 wifi-access-http-port = 6152
 wifi-access-socks5-port = 6153
 # > 允许 Wi-Fi 访问 (仅 macOS，若允许远程访问将「127.0.0.1」改为「0.0.0.0」)
-http-listen = 127.0.0.1:6152
-socks5-listen = 127.0.0.1:6153
+http-listen = 0.0.0.0:6152
+socks5-listen = 0.0.0.0:6153
 
 # > 兼容模式 (仅 iOS)
 # compatibility-mode = 0
