@@ -13,7 +13,8 @@ payload:
   - DOMAIN,cbsnews.akamaized.net
 
   # > Peacock TV
-  - DOMAIN-SUFFIX,cdn.peacocktv.com
+  # TV 端需走 US
+  # DOMAIN-SUFFIX,cdn.peacocktv.com
   
   # > SkyShowtime
   - DOMAIN-SUFFIX,cssott.com
