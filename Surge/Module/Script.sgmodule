@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,client.app.coc.10086.cn,mbd.baidu.com,app.biliintl.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,app.bilibili.com, grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,client.app.coc.10086.cn,mbd.baidu.com,app.biliintl.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,app.bilibili.com, grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com
 
 [Rule]
 # > Apple CDN
@@ -87,3 +87,6 @@ baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\
 
 # > 酷安去好物推荐 by Eric
 coolapk.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.coolapk\.com\/v6\/feed\/detail.*,script-path=https://raw.githubusercontent.com/Alex0510/Eric/master/surge/Script/KA.js
+
+# > 喜马拉雅去除首页轮盘滚动广告 by ClydeTime
+xmly_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(mobile|mobilehera|mobwsa)\.ximalaya\.com\/focus-mobile\/focusPic\/info,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/XMLY/noFocusAd.js
