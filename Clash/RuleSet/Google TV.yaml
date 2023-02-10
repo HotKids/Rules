@@ -3,5 +3,6 @@ payload:
   - PROCESS-NAME,com.google.android.videos
   - DOMAIN,androidtvlauncherxfe-pa.googleapis.com
   - DOMAIN,androidtvwatsonfe-pa.googleapis.com
+  - DOMAIN-KEYWORD,pa.google
   # Homatics Box 需此条走特定代理
   - DOMAIN,www.googleapis.com
