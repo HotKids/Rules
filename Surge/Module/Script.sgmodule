@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,client.app.coc.10086.cn,mbd.baidu.com,app.biliintl.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,app.bilibili.com, grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,client.app.coc.10086.cn,mbd.baidu.com,app.biliintl.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,app.bilibili.com, grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
 
 [Rule]
 # > Apple CDN
@@ -90,3 +90,6 @@ coolapk.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/
 
 # > 喜马拉雅去除首页轮盘滚动广告 by ClydeTime
 xmly_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(mobile|mobilehera|mobwsa)\.ximalaya\.com\/focus-mobile\/focusPic\/info,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/XMLY/noFocusAd.js
+
+# > 避免 Google 搜索可能出现的人机验证 by NobyDa
+Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
