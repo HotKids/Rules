@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,iacc.rec.qq.com,*.bilibili.com,*.ximalaya.com,wx-mini.pagoda.com.cn,ccsp-egmas.sf-express.com,auth.aliyundrive.com
+hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,wx-mini.pagoda.com.cn,ccsp-egmas.sf-express.com,auth.aliyundrive.com
 
 [Rule]
 DOMAIN,gslbali.ximalaya.com,REJECT
@@ -19,10 +19,6 @@ Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.
 # > 爱奇艺 GetCookie by NobyDa
 // https://m.iqiyi.com/user.html
 Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/apis\/user\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
-
-# > 腾讯视频 GetCookie by MayoBlueSky&ClydeTime
-// 使用说明参考脚本内容
-Cookie: 腾讯视频 = type=http-request,pattern=^https?:\/\/iacc\.rec\.qq\.com,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/videoqq.js,requires-body=0
 
 # > 喜马拉雅 GetCookie by ClydeTime
 Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/(mobile|mobilehera|mobwsa)\.ximalaya\.com\/app-skin-service\/skin\/,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/xmlySign.js,requires-body=0
