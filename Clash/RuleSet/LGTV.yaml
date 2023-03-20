@@ -1,6 +1,0 @@
-payload:
-  # > LG TV
-  - DOMAIN-SUFFIX,lgtviot.com
-  - DOMAIN-SUFFIX,lgtvsdp.com
-  - DOMAIN-SUFFIX,lgtvlink.com
-  - DOMAIN-SUFFIX,lge.com
