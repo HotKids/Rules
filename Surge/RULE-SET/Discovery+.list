@@ -1,26 +1,14 @@
 # > Discovery+
-// US
+USER-AGENT,discovery+*
+USER-AGENT,DPlus*
+DOMAIN-SUFFIX,discoveryplus.com
+DOMAIN-SUFFIX,disco-api.com
+DOMAIN-SUFFIX,dnitv.com
 DOMAIN,us1-prod.disco-api.com
 DOMAIN,us1-prod-images.disco-api.com
+DOMAIN,kvinit-prod.api.kochava.com
 DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
 DOMAIN,content-ause1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 // DOMAIN,go-prod-vz.akamaized.net
-// PH
-DOMAIN-SUFFIX,discoveryplus.ph
-DOMAIN,ap2-prod.disco-api.com
-DOMAIN,ap2-prod-images.disco-api.com
-DOMAIN,discovery-ap.conax.cloud
-DOMAIN,ap2-prod-direct.discoveryplus.com
-DOMAIN,gdvm0o88gc3qseqotiavvvhim.litix.io
-// DOMAIN,dplus-ph-prod-vod.akamaized.net
-// DOMAIN,dplus-ph-google-v2.prod-vod.h264.io
-
-USER-AGENT,discovery+*
-USER-AGENT,DPlus*
-DOMAIN-KEYWORD,discoveryplus
-DOMAIN-SUFFIX,discoveryplus.com
-DOMAIN-SUFFIX,disco-api.com
-DOMAIN-SUFFIX,dnitv.com
-DOMAIN,kvinit-prod.api.kochava.com
