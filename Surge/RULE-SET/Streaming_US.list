@@ -1,23 +1,26 @@
 # > Crunchyroll
 USER-AGENT,Crunchyroll*
 DOMAIN-SUFFIX,crunchyroll.com
-DOMAIN-SUFFIX,vrv.co
+// DOMAIN-SUFFIX,vrv.co
 
 # > Discovery+
 USER-AGENT,discovery+*
 USER-AGENT,DPlus*
 
-# > Discovery+ US
+# > Discovery+
+USER-AGENT,discovery+*
+USER-AGENT,DPlus*
 DOMAIN-SUFFIX,discoveryplus.com
+DOMAIN-SUFFIX,disco-api.com
+DOMAIN-SUFFIX,dnitv.com
 DOMAIN,us1-prod.disco-api.com
 DOMAIN,us1-prod-images.disco-api.com
+DOMAIN,kvinit-prod.api.kochava.com
 DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
 DOMAIN,content-ause1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 // DOMAIN,go-prod-vz.akamaized.net
-DOMAIN-SUFFIX,dnitv.com
-DOMAIN,kvinit-prod.api.kochava.com
 
 # > HBO Max
 USER-AGENT,HBOMAX*
@@ -52,11 +55,6 @@ DOMAIN-SUFFIX,pplusstatic.com
 // DOMAIN-SUFFIX,mtvnservices.com #MTV
 // DOMAIN-SUFFIX,cws.conviva.com
 DOMAIN,link.theplatform.com
-// US
-AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
-// Intl.
-AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
-// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
 // DOMAIN,thumbnails.cbsig.net #缩略图
 // DOMAIN,cbsinteractive.hb.omtrdc.net
