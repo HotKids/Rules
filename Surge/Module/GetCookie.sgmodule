@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,wx-mini.pagoda.com.cn,ccsp-egmas.sf-express.com,auth.aliyundrive.com
+hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,ccsp-egmas.sf-express.com,auth.aliyundrive.com
 
 [Rule]
 DOMAIN,gslbali.ximalaya.com,REJECT
@@ -25,9 +25,6 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/(mobile|mobilehera|
 
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
-
-# > 百果园 GetCookie by chavyleung
-Cookie: 百果园 = type=http-request,pattern=^https?:\/\/wx-mini\.pagoda\.com\.cn\/api\/v1\/wxmini\/signIn\/customer,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/pagoda/pagoda.cookie.js
 
 # > 顺丰速运 GetCookie by chavyleung
 Cookie: 顺丰速运 = type=http-request,pattern=^https:\/\/ccsp-egmas.sf-express.com\/cx-app-member\/member\/app\/user\/universalSign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js,requires-body=true
