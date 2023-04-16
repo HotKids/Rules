@@ -237,6 +237,10 @@ DOMAIN,star.connections.edge.bamgrid.com
 DOMAIN,star.content.edge.bamgrid.com
 DOMAIN,star.playback.edge.bamgrid.com
 
+# > TVBAnywhere
+DOMAIN-SUFFIX,tvb.com
+DOMAIN-KEYWORD,tvbanywhere
+
 # > TVer
 DOMAIN-SUFFIX,tver.jp
 DOMAIN-SUFFIX,interactive-circle.jp
