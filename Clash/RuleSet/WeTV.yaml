@@ -1,4 +1,3 @@
-payload:
   # > WeTV
   # USER-AGENT,WeTV*
   - PROCESS-NAME,com.tencent.qqlivei18n
@@ -12,6 +11,7 @@ payload:
   # DOMAIN,oth.eve.mdt.qq.com
   # DOMAIN,oth.str.mdt.qq.com
   # DOMAIN-SUFFIX,meovse.com
+  - IP-CIDR,150.109.28.51/32,no-resolve
   # IP-CIDR,203.205.136.0/23,no-resolve
 
   # > iFlix
