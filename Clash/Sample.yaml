@@ -416,6 +416,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
     interval: 86400
 
+  Streaming+:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming+.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming+.yaml
+    interval: 86400
+
   Streaming TW:
     type: http
     behavior: classical
@@ -437,20 +444,20 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_US.yaml
     interval: 86400
 
+  Streaming SEA:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Streaming/Streaming_SEA.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_SEA.yaml
+    interval: 86400
+    
   Streaming:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming/Streaming.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
-
-  CNTV:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming/CNTV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
-    interval: 86400
-    
+  
   Telegram:
     type: http
     behavior: classical
@@ -506,13 +513,12 @@ rules:
   # Global Area Network
 
   # Streaming
-  - RULE-SET,Streaming TW,🇨🇳 Taiwan
+  - RULE-SET,Streaming+,🔰 Proxy
+  - RULE-SET,Streaming TW,🇹🇼 Taiwan
   - RULE-SET,Streaming JP,🇯🇵 Japan
   - RULE-SET,Streaming US,🇺🇸 America
+  - RULE-SET,Streaming SEA,📺 CNTV
   - RULE-SET,Streaming,🎬 Streaming
-
-  # CNTV
-  - RULE-SET,CNTV,📺 CNTV
 
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
