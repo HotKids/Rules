@@ -55,11 +55,12 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 zhihu_json.js = type=http-response,pattern=^https:\/\/(appcloud2\.zhihu\.com\/v3\/config$|www\.zhihu\.com\/api\/v4\/(answers\/\d+\/recommendations|articles\/\d+\/recommendation)|api\.zhihu\.com\/(topstory\/recommend|commercial_api\/(real_time_launch_v2|app_float_layer$)|questions\/\d+\/feeds\?|v4\/questions\/\d+\/answers\?)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/zhihu.js
 
 # > B 站去广告 by app2smile
+// 请使用 B 站净化模块 https://github.com/HotKids/Rules/tree/master/Surge/Module
 // bili-json.js = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js,script-update-interval=0
 // bili-proto.js = type=http-response,pattern=^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.(view\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll|playurl\.v1\.PlayURL\/PlayView)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,script-update-interval=0
 
 # > 微博去广告 by yichahucha&chouchoui
-// 请使用微博净化模块
+// 请使用微博净化模块 https://github.com/HotKids/Rules/tree/master/Surge/Module
 // wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|searchall|page|messageflow|statuses\/(unread_)?friends(\/|_)timeline|groups\/timeline|statuses\/container_timeline|statuses\/(unread_hot_timeline|extend|video_mixtimeline|unread_topic_timeline)|profile\/(me|statuses)|video\/(community_tab|remind_info|tiny_stream_video_list)|checkin\/show|\!\/live\/media_homelist|comments\/build_comments|container\/get_item|search\/(finder|container_timeline|container_discover)),script-path=https://raw.githubusercontent.com/chouchoui/zmqcherish.proxy-script/main/weibo_main.js
 // wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua),script-path=https://raw.githubusercontent.com/chouchoui/zmqcherish.proxy-script/main/weibo_launch.js
 
