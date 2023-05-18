@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
@@ -42,7 +42,47 @@ OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0
 
 # > 优酷
 DOMAIN, iyes.youku.com,REJECT
-URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT-TINYGIF
+URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT
+
+# > 网易云去广告 by @ddgksf2013
+// 位置请求
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/lbs\/gpsStatus\/upload,REJECT
+// 每日推荐 Tips
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/homepage\/daily\/song\/elf\/notice,REJECT
+// 通用广告请求
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/ad\/,REJECT
+// 不知道是个啥
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/sp\/flow,REJECT
+// 屏蔽更新
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/ios\/upgrade,REJECT
+// LIKE音乐上方推广
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/link\/position\/show\/resource,REJECT
+// 歌单上方推广
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?eapi\/resource-exposure\/config,REJECT
+// 搜索框专词
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/specialkeyword,REJECT
+// 首页右上角激励图标
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/link\/scene\/show\/resource,REJECT
+// 搜索框推荐
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default,REJECT
+// 评论区下方广告
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/comment\/feed\/inserted,REJECT
+// 评论回复区广告
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/v1\/content\/exposure\/comment,REJECT
+// 搜索页猜你喜欢[卸载重装]
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/rcmd\/keyword,REJECT
+// 搜索框填词
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default\/keyword,REJECT
+// 评论区右上角
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/comment\/hotcomment\/collect,REJECT
+// 活动推广1
+; URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/middle\/clientcfg\/config,REJECT
+// 活动推广2
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/resource-exposure\/activity\/config,REJECT
+// VIP歌曲提醒框
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/vipcenter/tspopup\/get,REJECT
+// 搜索页下方热搜Card[自行启用]
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/chart,REJECT
 
 # > 美团
 URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
