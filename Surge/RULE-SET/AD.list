@@ -24,3 +24,12 @@ DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 
 # > Youku 视频暂停广告
 DOMAIN,iyes.youku.com
+
+# > 中国联通 去开屏
+DOMAIN-SUFFIX,m1.ad.10010.com,REJECT
+
+# > 中国电信 去开屏
+DOMAIN,ad.21cn.com,REJECT
+DOMAIN,ad.k.21cn.com,REJECT
+DOMAIN,admarket.21cn.com,REJECT
+DOMAIN,adshows.21cn.com,REJECT
