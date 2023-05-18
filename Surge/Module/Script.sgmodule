@@ -44,7 +44,7 @@ OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0
 DOMAIN, iyes.youku.com,REJECT
 URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT
 
-# > 百度地图去广告 by @ddgksf2013
+# > 百度地图去广告（需卸载重装） by @ddgksf2013
 // 搜索推广
 URL-REGEX,^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui.*qt=hw,REJECT
 // 开屏广告|首页左上角广告
@@ -81,7 +81,7 @@ URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default,
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/comment\/feed\/inserted,REJECT
 // 评论回复区广告
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/v1\/content\/exposure\/comment,REJECT
-// 搜索页猜你喜欢[卸载重装]
+// 搜索页猜你喜欢（需卸载重装）
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/rcmd\/keyword,REJECT
 // 搜索框填词
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default\/keyword,REJECT
