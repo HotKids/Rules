@@ -24,23 +24,23 @@ RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ru
 # > Hijacking 运营商劫持或恶意网站
 RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Hijacking.list,REJECT-TINYGIF
 
-# > 微信公众号
+# > 微信公众号去广告
 // URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
-# > 携程
+# > 携程去广告
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 
-# > 云闪付
+# > 云闪付去广告
 URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
 
-# > 中国移动
+# > 中国移动去广告
 URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/init\/startInit,REJECT
 URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/clientUpdate\/getclientUpdate$,REJECT
 
-# > 腾讯视频 去开屏广告
+# > 腾讯视频去开屏广告
 OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0/0,no-resolve)))),REJECT-DROP
 
-# > 优酷
+# > 优酷去广告
 DOMAIN, iyes.youku.com,REJECT
 URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT
 
@@ -96,16 +96,16 @@ URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/vipcenter/tspopu
 // 搜索页下方热搜Card[自行启用]
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/chart,REJECT
 
-# > 美团
+# > 美团去广告
 URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
 URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
 
-# > 顺丰速运 去开屏广告
+# > 顺丰速运去开屏广告
 URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/appVersion\/detectionUpgrade,REJECT
 URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/ad\/,REJECT
 URL-REGEX,^https?:\/\/shopic\.sf-express\.com\/crm\/mobile\/common\/flashscreen,REJECT
 
-# > 拼多多 去开屏广告
+# > 拼多多去开屏广告
 URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
 
 # > 屏蔽知乎网页版强制登陆弹窗
@@ -159,7 +159,7 @@ iqiyi_startup.js = type=http-response,requires-body=1,max-size=0,pattern=^https?
 baidu-no-redirect.js = type=http-response,pattern=^https?:\/\/boxer\.baidu\.com\/scheme\?scheme,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
 
 # > 百度地图去广告 by app2smile
-baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
+// baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
 # > 酷安去好物推荐 by Eric
 coolapk.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.coolapk\.com\/v6\/feed\/detail.*,script-path=https://raw.githubusercontent.com/Alex0510/Eric/master/surge/Script/KA.js
