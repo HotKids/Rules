@@ -1,0 +1,20 @@
+#!name= 酷安去广告
+#!desc= 酷安去广告
+## forked from @ddgksf2013/Rewrite/AdBlock
+
+[MITM]
+hostname =  %APPEND% api.coolapk.com
+
+[Rule]
+# > 酷安_屏蔽热词
+URL-REGEX,^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch,REJECT
+
+[Script]
+# > 酷安_推广广告
+http-response ^https?:\/\/api.coolapk.com\/v6\/dataList requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
+# > 酷安_首页广告
+http-response ^https?:\/\/api.coolapk.com\/v6\/main\/indexV8 requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
+# > 酷安_评论广告
+http-response ^https?:\/\/api.coolapk.com\/v6\/feed\/replyList requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
+# > 酷安_商品推广
+http-response ^https?:\/\/api.coolapk.com\/v6\/feed\/detail requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
