@@ -2,7 +2,8 @@
 #!desc= keep 去广告
 
 [Rule]
-// forked from /ddgksf2013/Rewrite
+// forked from /ddgksf2013/Rewrite/AdBlock
+
 # > 屏蔽部分启动弹窗
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/kprime\/v\d\/popups\/primeGuide,REJECT
 # > 屏蔽开屏广告请求
