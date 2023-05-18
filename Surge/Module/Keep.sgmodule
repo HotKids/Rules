@@ -1,9 +1,11 @@
 #!name= keep 去广告
 #!desc= keep 去广告
+## forked from @ddgksf2013/Rewrite/AdBlock
+
+[MITM]
+hostname =  %APPEND% api.gotokeep.com, kad.gotokeep.com
 
 [Rule]
-// forked from /ddgksf2013/Rewrite/AdBlock
-
 # > 屏蔽部分启动弹窗
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/kprime\/v\d\/popups\/primeGuide,REJECT
 # > 屏蔽开屏广告请求
@@ -36,6 +38,3 @@ http-response ^https?:\/\/api\.gotokeep\.com\/homepage/v\d/tab requires-body=1,m
 http-response ^https?:\/\/api\.gotokeep\.com\/nuocha/course/v2/\w+/preview requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/keepStyle.js
 # > 我的运动页面去除下方推荐
 http-response ^https?:\/\/api\.gotokeep\.com\/sportpage/sport/v3/mysport requires-body=1,max-size=0,script-path=https://github.com/ddgksf2013/Scripts/raw/master/keepStyle.js
-
-[MITM]
-hostname =  %APPEND% api.gotokeep.com, kad.gotokeep.com
