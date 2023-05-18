@@ -7,6 +7,7 @@ hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
+
 [Rule]
 # > Apple CDN
 // DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT
