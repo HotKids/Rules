@@ -3,15 +3,12 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,180.76.76.200,newclient.map.baidu.com,httpdns.baidubce.com,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
 
 [Rule]
-# > Apple CDN
-// DOMAIN-SET,https://ruleset.skk.moe/List/domainset/apple_cdn.conf,DIRECT
-
 # > Advertising 广告
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF
 RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Advertising.list,REJECT-TINYGIF
@@ -39,22 +36,6 @@ URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/clientUpdate\/
 
 # > 腾讯视频去开屏广告
 OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0/0,no-resolve)))),REJECT-DROP
-
-# > 优酷去广告
-DOMAIN, iyes.youku.com,REJECT
-URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT
-
-# > 百度地图去广告（需卸载重装） by @ddgksf2013
-// 搜索推广
-URL-REGEX,^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui.*qt=hw,REJECT
-// 开屏广告|首页左上角广告
-URL-REGEX,^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,REJECT
-// DNS处理
-URL-REGEX,^https?:\/\/httpdns\.baidubce\.com,REJECT
-// 各种商业推广
-URL-REGEX,^https?:\/\/newclient\.map\.baidu\.com\/client\/crossmarketing,REJECT
-// 我的页面地图动态
-URL-REGEX,^https?:\/\/newclient\.map\.baidu\.com\/client\/usersystem\/home\/dynamic,REJECT
 
 # > 网易云去广告 by @ddgksf2013
 // 位置请求
@@ -155,17 +136,8 @@ famijia.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/f
 # > 爱奇艺去开屏广告 by blackmatrix7
 iqiyi_startup.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/(t7z|kjp)\.cupid\.iqiyi\.com\/mixer\?,script-path=https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/script/startup/startup.js
  
-# > 百度搜索防跳转 App Store by app2smile
-baidu-no-redirect.js = type=http-response,pattern=^https?:\/\/boxer\.baidu\.com\/scheme\?scheme,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidu-no-redirect.js
-
 # > 百度地图去广告 by app2smile
-// baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
-
-# > 酷安去好物推荐 by Eric
-coolapk.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.coolapk\.com\/v6\/feed\/detail.*,script-path=https://raw.githubusercontent.com/Alex0510/Eric/master/surge/Script/KA.js
-
-# > 喜马拉雅去除首页轮盘滚动广告 by ClydeTime
-xmly_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(mobile|mobilehera|mobwsa)\.ximalaya\.com\/focus-mobile\/focusPic\/info,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/XMLY/noFocusAd.js
+baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
 # > 避免 Google 搜索可能出现的人机验证 by NobyDa
 Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
