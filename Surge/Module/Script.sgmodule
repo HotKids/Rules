@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,static.zhihu.com,client.app.coc.10086.cn,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,boxer.baidu.com,newclient.map.baidu.com,api.coolapk.com,mobile.ximalaya.com,mobwsa.ximalaya.com,mobilehera.ximalaya.com,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
@@ -32,12 +32,31 @@ URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 # > 云闪付
 URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
 
-# > 屏蔽知乎网页版强制登陆弹窗
-URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
-
-# > 中国移动 App
+# > 中国移动
 URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/init\/startInit,REJECT
 URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/clientUpdate\/getclientUpdate$,REJECT
+
+# > 腾讯视频 去开屏广告
+OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0/0,no-resolve)))),REJECT-DROP
+
+# > 优酷
+DOMAIN, iyes.youku.com,REJECT
+URL-REGEX,^http:\/\/.*\.cp31\.ott\.cibntv\.net\/youku\/,REJECT-TINYGIF
+
+# > 美团
+URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
+URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
+
+# > 顺丰速运 去开屏广告
+URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/appVersion\/detectionUpgrade,REJECT
+URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/ad\/,REJECT
+URL-REGEX,^https?:\/\/shopic\.sf-express\.com\/crm\/mobile\/common\/flashscreen,REJECT
+
+# > 拼多多 去开屏广告
+URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
+
+# > 屏蔽知乎网页版强制登陆弹窗
+URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
 # > Baidu 
 DOMAIN-SUFFIX,ug.baidu.com,REJECT
