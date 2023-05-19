@@ -114,16 +114,16 @@ baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\
 
 # > 高德地图去广告（需卸载重装） by ddgksf2013
 amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amdc.js
-amap.js = type=http-response,pattern=^https?:\/\/.*\.amap\.com\/ws\/(message\/notice\/list|shield\/frogserver\/aocs\/updatable|shield\/search\/nearbyrec_smart|promotion-web\/resource|faas\/amap-navigation\/main-page|valueadded\/alimama\/splash_screen|msgbox\/pull|shield\/dsp\/profile\/index\/nodefaas|shield\/search\/new_hotword)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amap.js
+amap.js = type=http-response,pattern=^https?:\/\/.*\.amap\.com\/ws\/(message\/notice\/list|shield\/frogserver\/aocs\/updatable|shield\/search\/nearbyrec_smart|promotion-web\/resource|faas\/amap-navigation\/main-page|valueadded\/alimama\/splash_screen|msgbox\/pull|shield\/dsp\/profile\/index\/nodefaas|shield\/search\/new_hotword)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amap.js
 
 # > 酷安去广告 by by ddgksf2013
-coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)),requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
+coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
 
 # > Keep 去广告 by by ddgksf2013
 // 修改底栏
-// Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+// Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 // 保留底栏
-Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 避免 Google 搜索可能出现的人机验证 by NobyDa
 Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
