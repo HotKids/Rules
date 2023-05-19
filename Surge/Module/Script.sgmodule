@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,api.coolapk.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
@@ -31,59 +31,21 @@ URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
 
 # > 中国移动去广告
-URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/init\/startInit,REJECT
-URL-REGEX,^https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/clientUpdate\/getclientUpdate$,REJECT
+URL-REGEX,https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(init\/startInit|clientUpdate\/getclientUpdate)$,REJECT
 
 # > 腾讯视频去开屏广告
 OR,((DOMAIN,pgdt.gtimg.cn), (AND,((USER-AGENT,live4iphoneRel*), (IP-CIDR,0.0.0.0/0,no-resolve)))),REJECT-DROP
 
-# > 网易云去广告 by @ddgksf2013
-// 位置请求
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/lbs\/gpsStatus\/upload,REJECT
-// 每日推荐 Tips
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/homepage\/daily\/song\/elf\/notice,REJECT
-// 通用广告请求
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/ad\/,REJECT
-// 不知道是个啥
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/sp\/flow,REJECT
-// 屏蔽更新
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/ios\/upgrade,REJECT
-// LIKE音乐上方推广
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/link\/position\/show\/resource,REJECT
-// 歌单上方推广
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?eapi\/resource-exposure\/config,REJECT
-// 搜索框专词
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/specialkeyword,REJECT
-// 首页右上角激励图标
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/link\/scene\/show\/resource,REJECT
-// 搜索框推荐
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default,REJECT
-// 评论区下方广告
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/comment\/feed\/inserted,REJECT
-// 评论回复区广告
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/v1\/content\/exposure\/comment,REJECT
-// 搜索页猜你喜欢（需卸载重装）
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/rcmd\/keyword,REJECT
-// 搜索框填词
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/default\/keyword,REJECT
-// 评论区右上角
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/comment\/hotcomment\/collect,REJECT
-// 活动推广1
-; URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/middle\/clientcfg\/config,REJECT
-// 活动推广2
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/resource-exposure\/activity\/config,REJECT
-// VIP歌曲提醒框
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/vipcenter/tspopup\/get,REJECT
-// 搜索页下方热搜Card[自行启用]
-URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/search\/chart,REJECT
+# > 网易云去广告 by ddgksf2013
+URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/(lbs\/gpsStatus\/upload|homepage\/daily\/song\/elf\/notice|ad\/|sp\/flow|ios\/upgrade|link\/position\/show\/resource|resource-exposure\/config|search\/specialkeyword|link\/scene\/show\/resource|search\/default|comment\/feed\/inserted|v1\/content\/exposure\/comment|search\/rcmd\/keyword|search\/default\/keyword|comment\/hotcomment\/collect|middle\/clientcfg\/config|resource-exposure\/activity\/config|vipcenter\/tspopup\/get|search\/chart),REJECT
 
 # > 美团去广告
 URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
 URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
+URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg|https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$
 
 # > 顺丰速运去开屏广告
-URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/appVersion\/detectionUpgrade,REJECT
-URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/ad\/,REJECT
+URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/(appVersion\/detectionUpgrade|ad\/)$,REJECT
 URL-REGEX,^https?:\/\/shopic\.sf-express\.com\/crm\/mobile\/common\/flashscreen,REJECT
 
 # > 拼多多去开屏广告
@@ -91,6 +53,9 @@ URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,R
 
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
+
+# > 酷安 屏蔽热词 by ddgksf2013
+URL-REGEX,^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch,REJECT
 
 # > Baidu 
 DOMAIN-SUFFIX,ug.baidu.com,REJECT
@@ -138,6 +103,9 @@ iqiyi_startup.js = type=http-response,requires-body=1,max-size=0,pattern=^https?
  
 # > 百度地图去广告 by app2smile
 baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
+
+# > 酷安去广告 by by ddgksf2013
+coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)),requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
 
 # > 避免 Google 搜索可能出现的人机验证 by NobyDa
 Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
