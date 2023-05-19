@@ -6,12 +6,12 @@
 hostname =  %APPEND% api.gotokeep.com, kad.gotokeep.com
 
 [Rule]
-# > 屏蔽部分启动弹窗
-URL-REGEX,^https?:\/\/api\.gotokeep\.com\/kprime\/v\d\/popups\/primeGuide,REJECT
 # > 屏蔽开屏广告请求
 URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
+# > 屏蔽部分启动弹窗
+URL-REGEX,^https?:\/\/api\.gotokeep\.com\/kprime\/v\d\/popups\/primeGuide,REJECT
 # > 屏蔽青少年弹窗
-URL-REGEX,^https?:\/\/api.gotokeep.com/cauchy/growth/init,REJECT
+URL-REGEX,^https?:\/\/api\.gotokeep\.com\/cauchy\/growth\/init,REJECT
 # > 屏蔽搜索栏自动填充词
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/search\/v\d\/default\/keyword\/list,REJECT
 # > 屏蔽热词
