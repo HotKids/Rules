@@ -42,7 +42,7 @@ URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/(lbs\/gpsStatus\
 # > 美团去广告
 URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
 URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
-URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg|https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$
+URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg|https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
 
 # > 顺丰速运去开屏广告
 URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/(appVersion\/detectionUpgrade|ad\/)$,REJECT
@@ -54,7 +54,7 @@ URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,R
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
-# > 高德地图去广告 by ddgksf2013
+# > 高德地图去广告（需卸载重装） by ddgksf2013
 URL-REGEX,^https?:\/\/.*\.amap\.com\/uploadimg\/\w+\.gif,REJECT
 URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/(faas\/amap-navigation\/card-service-route-plan\?|boss\/order_web\/\w{8}_information|asa\/ads_attribution|shield\/scene\/recommend|valueadded\/weather),REJECT
 
@@ -113,7 +113,7 @@ iqiyi_startup.js = type=http-response,requires-body=1,max-size=0,pattern=^https?
 # > 百度地图去广告 by app2smile
 baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
-# > 高德地图去广告 by ddgksf2013
+# > 高德地图去广告（需卸载重装） by ddgksf2013
 amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amdc.js
 amap.js = type=http-response,pattern=^https?:\/\/.*\.amap\.com\/ws\/(message\/notice\/list|shield\/frogserver\/aocs\/updatable|shield\/search\/nearbyrec_smart|promotion-web\/resource|faas\/amap-navigation\/main-page|valueadded\/alimama\/splash_screen|msgbox\/pull|shield\/dsp\/profile\/index\/nodefaas|shield\/search\/new_hotword)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amap.js
 
