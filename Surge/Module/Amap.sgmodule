@@ -14,10 +14,10 @@ URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/boss\/order_web\/\w{8}_information,REJE
 URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/asa\/ads_attribution,REJECT
 # > 搜索框scene
 URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/shield\/scene\/recommend,REJECT
-# > 首页左上角gif
-URL-REGEX,^https?:\/\/.*\.amap\.com\/uploadimg\/\w+\.gif,REJECT
 # > 左下天气
 URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/valueadded\/weather,REJECT
+# > 首页左上角gif
+URL-REGEX,^https?:\/\/.*\.amap\.com\/uploadimg\/\w+\.gif,REJECT
 
 [Script]
 # > amdc处理
