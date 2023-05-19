@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,api.coolapk.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,wallet.95516.com,client.app.coc.10086.cn,pgdt.gtimg.cn,*.cp31.ott.cibntv.net,interface*.music.163.com,flowplus.meituan.net,s3plus.meituan.net,ccsp-egmas.sf-express.com,shopic.sf-express.com,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,*.amap.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,mbd.baidu.com,api.zhihu.com,www.zhihu.com,appcloud2.zhihu.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
@@ -54,8 +54,17 @@ URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,R
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
+# > 高德地图去广告 by ddgksf2013
+URL-REGEX,^https?:\/\/.*\.amap\.com\/uploadimg\/\w+\.gif,REJECT
+URL-REGEX,^https?:\/\/.*\.amap\.com\/ws\/(faas\/amap-navigation\/card-service-route-plan\?|boss\/order_web\/\w{8}_information|asa\/ads_attribution|shield\/scene\/recommend|valueadded\/weather),REJECT
+
 # > 酷安 屏蔽热词 by ddgksf2013
 URL-REGEX,^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch,REJECT
+
+# > Keep 去广告 by by ddgksf2013
+URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(kprime\/v\d\/popups\/primeGuide|cauchy\/growth\/init|search\/v\d\/default,REJECT
+// 开屏
+URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 
 # > Baidu 
 DOMAIN-SUFFIX,ug.baidu.com,REJECT
@@ -104,8 +113,18 @@ iqiyi_startup.js = type=http-response,requires-body=1,max-size=0,pattern=^https?
 # > 百度地图去广告 by app2smile
 baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
+# > 高德地图去广告 by ddgksf2013
+amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amdc.js
+amap.js = type=http-response,pattern=^https?:\/\/.*\.amap\.com\/ws\/(message\/notice\/list|shield\/frogserver\/aocs\/updatable|shield\/search\/nearbyrec_smart|promotion-web\/resource|faas\/amap-navigation\/main-page|valueadded\/alimama\/splash_screen|msgbox\/pull|shield\/dsp\/profile\/index\/nodefaas|shield\/search\/new_hotword)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/amap.js
+
 # > 酷安去广告 by by ddgksf2013
 coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)),requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
+
+# > Keep 去广告 by by ddgksf2013
+// 修改底栏
+// Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+// 保留底栏
+Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 避免 Google 搜索可能出现的人机验证 by NobyDa
 Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
