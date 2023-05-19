@@ -42,7 +42,6 @@ URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/(lbs\/gpsStatus\
 # > 美团去广告
 URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
 URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
-URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg|https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
 
 # > 顺丰速运去开屏广告
 URL-REGEX,^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-base\/base\/app\/(appVersion\/detectionUpgrade|ad\/)$,REJECT
