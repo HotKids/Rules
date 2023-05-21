@@ -10,6 +10,23 @@ payload:
   # DOMAIN,mtrace.qq.com
   - DOMAIN-KEYWORD,adstats
   - DOMAIN,adstats.tencentmusic.com
+  - DOMAIN,adstats.tencentmusic.com
+  - DOMAIN,ad.tencentmusic.com
+  - DOMAIN,adcdn.tencentmusic.com
+  - DOMAIN,adexpo.tencentmusic.com,
+  - DOMAIN,adclick.tencentmusic.com
+  - DOMAIN,otheve.beacon.qq.com
+  - DOMAIN,monitor.music.qq.com
+  - DOMAIN,stat.y.qq.com
+  - DOMAIN,tmead.y.qq.com
+  - DOMAIN,oth.str.mdt.qq.com
+  - DOMAIN,h.trace.qq.com
+  - DOMAIN,tmead.y.qq.com
+  - DOMAIN,sdk.e.qq.com
+  - DOMAIN,p.l.qq.com
+  - DOMAIN,us.l.qq.com
+  - DOMAIN,tangram.e.qq.com
+  - DOMAIN-SUFFIX,imtmp.net
   
   # > TVer
   - DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
@@ -28,3 +45,6 @@ payload:
 
   # > Youku 视频暂停广告
   - DOMAIN,iyes.youku.com
+  
+  # > 12306
+  - DOMAIN,ad.12306.com
