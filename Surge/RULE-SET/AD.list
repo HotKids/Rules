@@ -43,13 +43,13 @@ DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 DOMAIN,iyes.youku.com
 
 # > 中国联通去开屏
-DOMAIN-SUFFIX,m1.ad.10010.com,REJECT
+DOMAIN-SUFFIX,m1.ad.10010.com
 
 # > 中国电信去开屏
-DOMAIN,ad.21cn.com,REJECT
-DOMAIN,ad.k.21cn.com,REJECT
-DOMAIN,admarket.21cn.com,REJECT
-DOMAIN,adshows.21cn.com,REJECT
+DOMAIN,ad.21cn.com
+DOMAIN,ad.k.21cn.com
+DOMAIN,admarket.21cn.com
+DOMAIN,adshows.21cn.com
 
 # > 12306
-DOMAIN,ad.12306.com,REJECT
+DOMAIN,ad.12306.com
