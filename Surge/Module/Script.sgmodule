@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,pan.baidu.com,app.dewu.com,*acs.m.cainiao.com,p0.pipi.cn,api.douban.com,creditcardapp.bankcomm.cn,api-sams.walmartmobile.cn,wallet.95516.com,client.app.coc.10086.cn,flowplus.meituan.net,s3plus.meituan.net,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,interface*.music.163.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,pan.baidu.com,app.dewu.com,*acs.m.cainiao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,wallet.95516.com,client.app.coc.10086.cn,flowplus.meituan.net,s3plus.meituan.net,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,interface*.music.163.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,api.m.jd.com,wmapi.meituan.com,fmapp.chinafamilymart.com.cn,t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com,newclient.map.baidu.com,,www.google.com*
 
 [General]
 force-http-engine-hosts = %APPEND% t7z.cupid.iqiyi.com,kjp.cupid.iqiyi.com
@@ -54,9 +54,6 @@ URL-REGEX,^https?:\/\/p0\.pipi\.cn\/adAdmin\/\w+.jpg\?,REJECT
 
 # > 豆瓣
 URL-REGEX,^https?:\/\/api\.douban\.com\/(v2\/app_ads\/splash|b.*\/common_ads\?.*)$,REJECT
-
-# > 买单吧
-URL-REGEX,^https?:\/\/creditcardapp\.bankcomm\.cn\/mappweb_interface\/common\/(qryPopAds|qryLaunchAds)\.do,REJECT
 
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
