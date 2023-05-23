@@ -145,6 +145,11 @@ DOMAIN-SUFFIX,hulustream.com,Hulu
 DOMAIN,cws-hulu.conviva.com,Hulu
 // DOMAIN,assetshuluimcom-a.akamaihd.net,Hulu
 
+# > Max
+USER-AGENT,Max*,Max
+PROCESS-NAME,com.wbd.stream,Max
+DOMAIN-SUFFIX,max.com,Max
+DOMAIN-SUFFIX,discomax.com,Max
 
 # > MUBI
 DOMAIN-SUFFIX,mubi.com,MUBI
