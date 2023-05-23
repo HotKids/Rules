@@ -36,6 +36,12 @@ payload:
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
   # DOMAIN,assetshuluimcom-a.akamaihd.net
+   
+  # > Max
+  # USER-AGENT,Max*
+  - PROCESS-NAME,com.wbd.stream
+  - DOMAIN-SUFFIX,max.com
+  - DOMAIN-SUFFIX,discomax.com
   
   # > Paramount+
   # USER-AGENT,PPlus*
