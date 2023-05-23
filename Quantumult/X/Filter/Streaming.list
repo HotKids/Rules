@@ -145,6 +145,7 @@ DOMAIN-SUFFIX,hulustream.com,Hulu
 DOMAIN,cws-hulu.conviva.com,Hulu
 // DOMAIN,assetshuluimcom-a.akamaihd.net,Hulu
 
+
 # > MUBI
 DOMAIN-SUFFIX,mubi.com,MUBI
 DOMAIN-SUFFIX,mubicdn.net,MUBI
