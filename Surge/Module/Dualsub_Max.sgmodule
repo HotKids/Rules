@@ -1,8 +1,0 @@
-#!name= Dualsub_Max
-#!desc= Max 字幕翻译
-
-[MITM]
-hostname = %APPEND% *.h264.io
-
-[Script]
-Dualsub_Max.js = type=http-response,pattern=https:\/\/.+h264.io\/.+\.vtt,requires-body=1,max-size=0,timeout=30,script-path=https://raw.githubusercontent.com/Neurogram-R/Surge/master/Dualsub.js
