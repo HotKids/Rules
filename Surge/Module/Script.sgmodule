@@ -62,11 +62,11 @@ URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(wi
 URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
 
 # > 中国移动
-URL-REGEX,https:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(init\/startInit|clientUpdate\/getclientUpdate)$,REJECT
+URL-REGEX,https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(init\/startInit|clientUpdate\/getclientUpdate)$,REJECT
 
 # > 美团
-URL-REGEX,^https:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
-URL-REGEX,^https:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
+URL-REGEX,^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
+URL-REGEX,^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
 
 # > 拼多多
 URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
