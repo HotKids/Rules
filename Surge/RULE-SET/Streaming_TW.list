@@ -23,19 +23,18 @@ DOMAIN,aka01p.akamaized.net
 DOMAIN,aka02p.akamaized.net
 DOMAIN,aka36p.akamaized.net
 
-# > KKBOX
-USER-AGENT,*KKBOX
-DOMAIN-SUFFIX,kkbox.com
-DOMAIN-SUFFIX,kkbox.com.tw
-DOMAIN-SUFFIX,kfs.io
-
-# > KKTV
-USER-AGENT,KKTV*
-USER-AGENT,com.kktv*
-DOMAIN-SUFFIX,kktv.me
-DOMAIN-SUFFIX,kktv.com.tw
-DOMAIN,kktv-theater.kk.stream
-DOMAIN,theater-kktv.cdn.hinet.net
+# > HBO GO Asia
+// USER-AGENT,HBO%20GO%20PROD*
+// DOMAIN-KEYWORD,hboasia
+DOMAIN-KEYWORD,hbogoasia
+DOMAIN-SUFFIX,hboasia.com
+DOMAIN-SUFFIX,hbogoasia.com
+DOMAIN,hbolb.onwardsmg.com
+DOMAIN,hbounify-prod.evergent.com
+// DOMAIN,hbogoprod-vod.akamaized.net
+// DOMAIN,hboasialive.akamaized.net
+// DOMAIN,bcbolthboa-a.akamaihd.net
+DOMAIN,dai3fd1oh325y.cloudfront.net
 
 # > iQIYI Intl
 // USER-AGENT,iQIYI*
@@ -70,6 +69,20 @@ IP-CIDR,118.26.32.162/32,no-resolve
 IP-CIDR,159.138.102.146/32,no-resolve
 IP-CIDR,203.80.97.208/32,no-resolve
 IP-CIDR,203.198.80.99/32,no-resolve
+
+# > KKBOX
+USER-AGENT,*KKBOX
+DOMAIN-SUFFIX,kkbox.com
+DOMAIN-SUFFIX,kkbox.com.tw
+DOMAIN-SUFFIX,kfs.io
+
+# > KKTV
+USER-AGENT,KKTV*
+USER-AGENT,com.kktv*
+DOMAIN-SUFFIX,kktv.me
+DOMAIN-SUFFIX,kktv.com.tw
+DOMAIN,kktv-theater.kk.stream
+DOMAIN,theater-kktv.cdn.hinet.net
 
 # > LINE TV
 USER-AGENT,LINE%20TV*
