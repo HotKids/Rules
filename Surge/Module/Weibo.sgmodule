@@ -1,11 +1,10 @@
 #!name= 微博净化
 #!desc=微博官方APP净化
 #!system=ios
+### forked from GitHub.com/xOS/Config
+### 注释个人信息及会员中心，以及修改微博配置注入
 
 [Rule]
-# forked from GitHub.com/xOS/Config
-# 注释个人信息及会员中心，以及修改微博配置注入
-
 # > 微博其它
 URL-REGEX,^https?:\/\/.+\/wbts\.png$,REJECT
 URL-REGEX,^https?:\/\/.+\/licai\.png$,REJECT
@@ -97,9 +96,9 @@ URL-REGEX,^https?:\/\/wx[0-9]\.sinaimg\.cn\/large\/.+\.gif$,REJECT
 # > 微博去广告
 微博 = type=http-response,pattern=^https?://m?api\.weibo\.c(n|om)/2/(profile/(me|statuses|container_timeline)|searchall|statuses/(unread_hot_timeline|extend|video_mixtimeline)|video/(community_tab|remind_info|tiny_stream_video_list)|checkin/show|container/get_item|search/container_discover),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/Weibo/Weibo.js
 
-开屏 = type=http-response,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(/interface/sdk/sdkad.php|/wbapplua/wbpullad.lua),requires-body=1,script-path=https://hub.nange.cn/Script/Weibo/Launch.js
+开屏 = requires-body=1,script-path=https://hub.nange.cn/Script/Weibo/Launch.js,type=http-response,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(/interface/sdk/sdkad.php|/wbapplua/wbpullad.lua)
 
-微博信息流 = type=http-response,pattern=^https?:\/\/m?api\.weibo\.c(n|om)/2/(statuses/container_timeline|statuses/container_timeline_unread|statuses/(unread|extend|positives/get|(friends|video)(/|_)(mix)?timeline)|stories/(video_stream|home_list)|(groups|fangle)/timeline|profile/statuses|comments/build_comments|photo/recommend_list|service/picfeed|cardlist|page|!/(photos/pic_recommend_status|live/media_homelist|wbox\/.+\/createrIndex|st_videos\/tiny\/effect\/shoot_display_config)|video/tiny_stream_video_list|photo/info|remind/unread_count|search/finder|search/container_timeline|!\/huati\/discovery_home_bottom_channel_list|statuses\/unread_topic_timeline),requires-body=1,max-size=-1,script-path=https://hub.nange.cn/Script/Weibo/Timeline.js
+微博信息流 = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)/2/(statuses/container_timeline|statuses/container_timeline_unread|statuses/(unread|extend|positives/get|(friends|video)(/|_)(mix)?timeline)|stories/(video_stream|home_list)|(groups|fangle)/timeline|profile/statuses|comments/build_comments|photo/recommend_list|service/picfeed|cardlist|page|!/(photos/pic_recommend_status|live/media_homelist|wbox\/.+\/createrIndex|st_videos\/tiny\/effect\/shoot_display_config)|video/tiny_stream_video_list|photo/info|remind/unread_count|search/finder|search/container_timeline|!\/huati\/discovery_home_bottom_channel_list|statuses\/unread_topic_timeline),script-path=https://hub.nange.cn/Script/Weibo/Timeline.js
 
 微博钱包订单 = type=http-response,pattern=(^https?:\/\/js\.t\.sinajs\.cn\/c2p\/sam\/frontend\/assets\/walletcache\.json|^https?:\/\/pay\.sc\.weibo\.com\/api\/client\/sdk\/app\/indexnew\/(index|person)|^https?:\/\/shop\.sc\.weibo\.com\/aj\/h5\/order\/center),requires-body=1,max-size=0,script-path=https://hub.nange.cn/Script/Weibo/Wallet.js
 
