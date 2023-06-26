@@ -8,6 +8,7 @@ payload:
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
   - DOMAIN-SUFFIX,intl.iqiyi.com
+  - DOMAIN,ip.geo.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
