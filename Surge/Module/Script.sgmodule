@@ -22,7 +22,7 @@ RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ru
 RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Hijacking.list,REJECT-TINYGIF
 
 # > 微信公众号
-// URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
+URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
 # > 携程
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
@@ -33,6 +33,7 @@ URL-REGEX,^https?:\/\/mbd\.baidu\.com\/newspage\/api\/getmobads\?page\=landingsh
 DOMAIN-SUFFIX,ug.baidu.com,REJECT
 URL-REGEX,^https?:\/\/mbd\.baidu\.com\/tcbox,REJECT
 URL-REGEX,^https?:\/\/pan\.baidu\.com\/(act\/v\d\/(bchannel|welfare)\/list|rest\/2\.0\/pcs\/ad|act\/api\/activityentry)$,REJECT
+URL-REGEX,^https?:\/\/pan\.baidu\.com\/(act\/(api\/activityentry|v2\/(bchannel|welfare)\/list)|rest\/2\.0\/pcs\/ad),REJECT
 
 # > 得物
 URL-REGEX,^https?:\/\/app\.dewu\.com\/api\/v1\/app\/advertisement\/,REJECT
@@ -97,7 +98,7 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 // wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|searchall|page|messageflow|statuses\/(unread_)?friends(\/|_)timeline|groups\/timeline|statuses\/(container_timeline|unread_hot_timeline|extend|video_mixtimeline|unread_topic_timeline)|profile\/(me|statuses|container_timeline)|video\/(community_tab|remind_info|tiny_stream_video_list)|checkin\/show|\!\/live\/media_homelist|comments\/build_comments|container\/get_item|search\/(finder|container_timeline|container_discover))$,script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_main.js
 // wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua)$,script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_launch.js
 
-# > 微信公众号去广告 by Choler&NobyDa
+# > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告 by chouchoui
