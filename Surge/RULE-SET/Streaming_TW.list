@@ -53,6 +53,7 @@ DOMAIN,intl-im-hist-api.iqiyi.com
 DOMAIN,intl-subscription.iqiyi.com
 // 播放
 DOMAIN,ip.geo.iqiyi.com
+DOMAIN,meta.video.iqiyi.com
 DOMAIN,akmcdnoversea.inter.iqiyi.com
 DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
 DOMAIN,chuangcachecdnoversea.inter.iqiyi.com
