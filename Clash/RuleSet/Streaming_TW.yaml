@@ -55,6 +55,7 @@ payload:
   - DOMAIN-SUFFIX,iq.com
   - DOMAIN-SUFFIX,intl.iqiyi.com
   - DOMAIN,ip.geo.iqiyi.com
+  - DOMAIN,meta.video.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
@@ -79,7 +80,7 @@ payload:
   - IP-CIDR,159.138.102.146/32,no-resolve
   - IP-CIDR,203.80.97.208/32,no-resolve
   - IP-CIDR,203.198.80.99/32,no-resolve
-
+  
   # > KKBOX
   # USER-AGENT,*KKBOX
   - DOMAIN-SUFFIX,kkbox.com
