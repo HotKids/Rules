@@ -52,6 +52,7 @@ DOMAIN,intl-im-hist-api.iqiyi.com
 // 收藏
 DOMAIN,intl-subscription.iqiyi.com
 // 播放
+DOMAIN,msg-intl.qy.net
 DOMAIN,ip.geo.iqiyi.com
 DOMAIN,akmcdnoversea.inter.iqiyi.com
 DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
@@ -66,7 +67,6 @@ DOMAIN-KEYWORD,chuangcachecdnoversea
 IP-CIDR,2.21.22.17/32,no-resolve 
 IP-CIDR,23.40.241.251/32,no-resolve
 IP-CIDR,23.40.242.10/32,no-resolve
-IP-CIDR,110.238.107.47/32,no-resolve
 IP-CIDR,110.238.107.47/32,no-resolve
 IP-CIDR,110.238.109.184/32,no-resolve
 IP-CIDR,114.119.175.88/32,no-resolve
