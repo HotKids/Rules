@@ -493,7 +493,7 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
     
-  LANCIDR:
+  LAN:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/LANCIDR.yaml
@@ -529,15 +529,14 @@ rules:
   # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
-  # China Area Network
+   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-
-  # Local Area Network
-  - RULE-SET,LANCIDR,🔘 DIRECT
-
-  # （可选）使用来自 ipipdotnet 的 ChinaIP 以解决数据不准确的问题，使用 CNCIDR.yaml 时可禁用下列直至（包括）「GEOIP,CN」规则
   - RULE-SET,CNCIDR,🔘 DIRECT
-  # GeoIP China(若启用，则禁用 CNCIDR.list)
-  # GEOIP,CN,🔘 DIRECT
+  
+  # Local Area Network
+  - RULE-SET,LAN,🔘 DIRECT
+  
+  # GeoIP China
+  - GEOIP,CN,🔘 DIRECT
 
   - MATCH,🔰 Proxy
