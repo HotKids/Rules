@@ -474,16 +474,16 @@ rule-providers:
 
   Global:
     type: http
-    behavior: classical
+    behavior: domain
     path: ./Provider/RuleSet/Global.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Global.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
     interval: 86400
 
   China:
     type: http
-    behavior: classical
+    behavior: domain
     path: ./Provider/RuleSet/China.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/China.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
   CNCIDR:
