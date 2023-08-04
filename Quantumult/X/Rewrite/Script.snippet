@@ -1,0 +1,8 @@
+hostname = ad.12306.cn, api.coolapk.com
+
+# > 12306 去广告 by ddgksf2013
+^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList url script-analyze-echo-response https://github.com/ddgksf2013/Scripts/raw/master/12306.js
+
+# > 酷安去广告 by ddgksf2013
+^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch url reject-dict
+^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)) url script-response-body https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
