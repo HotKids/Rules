@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,pan.baidu.com,app.dewu.com,*acs.m.cainiao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,wallet.95516.com,flowplus.meituan.net,s3plus.meituan.net,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,interface*.music.163.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,newclient.map.baidu.com,,www.google.com*
+hostname = %INSERT% socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,pan.baidu.com,app.dewu.com,*acs.m.cainiao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,wallet.95516.com,flowplus.meituan.net,s3plus.meituan.net,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,interface*.music.163.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,newclient.map.baidu.com
 
 [Rule]
 # > Advertising 广告
@@ -113,6 +113,3 @@ coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(data
 // Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 // 保留底栏
 Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
-
-# > 避免 Google 搜索可能出现的人机验证 by NobyDa
-Google_CAPTCHA.js = type=http-response,pattern=^https:\/\/www\.google\.com(\.[a-z]+|)\/search\?(client=[a-z-]+&|)q=,requires-body=1,debug=0,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Surge/JS/Google_CAPTCHA.js,max-size=0,timeout=10,ability=http-client-policy,argument=^(🇸🇬|🇭🇰)\s.*\d+$
