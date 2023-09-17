@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,cn-acs.m.cainiao.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,pan.baidu.com,flowplus.meituan.net,img.meituan.net,s3plus.meituan.net,home.mi.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,newclient.map.baidu.com
+hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,cn-acs.m.cainiao.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,pan.baidu.com,flowplus.meituan.net,img.meituan.net,s3plus.meituan.net,home.mi.com,www.xiaohongshu.com,edith.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,newclient.map.baidu.com,ad.12306.cn
 
 [Rule]
 # > 微信公众号
@@ -100,6 +100,9 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 # > 酷安
 ^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
+# > 小红书
+^https?:\/\/(edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(get_style|open|submit_action)|www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\?|edith\.xiaohongshu\.com\/api\/sns\/v3\/note\/guide\?|www\.xiaohongshu\.com\/api\/sns\/v1\/ads\/resource\?)  data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
 [Script]
 # > Sub Info
 Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.githubusercontent.com/mieqq/mieqq/master/sub_info.js,timeout=10
@@ -117,8 +120,8 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)ap
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
-# > 小红书去广告 by chouchoui
-xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v2\/system_service\/splash_config|v6\/homefeed\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
+# > 小红书去广告 by chouchoui&RuCu6
+xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v2\/note\/(widgets|feed)|v1\/search\/(banner|hot)_list|v4\/search\/(hint|trending)\?|v10\/search\/notes\?|v1\/system_service\/config\?|v2\/system_service\/splash_config$|v3\/note\/videofeed\?|v4\/followfeed\?|v6\/homefeed\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 // xiaohongshu_splash.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v2\/system_service\/splash_config,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
 // xiaohongshu_timeline.js = type=http-response,pattern=^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v6\/homefeed\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
  
