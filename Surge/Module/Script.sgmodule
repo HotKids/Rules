@@ -3,46 +3,53 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,pan.baidu.com,app.dewu.com,*acs.m.cainiao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,wallet.95516.com,flowplus.meituan.net,s3plus.meituan.net,api.pinduoduo.com,api.yangkeduo.com,static.zhihu.com,interface*.music.163.com,api.coolapk.com,api.gotokeep.com,kad.gotokeep.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,newclient.map.baidu.com
+hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,cn-acs.m.cainiao.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,pan.baidu.com,flowplus.meituan.net,img.meituan.net,s3plus.meituan.net,home.mi.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,edith.xiaohongshu.com,newclient.map.baidu.com
 
 [Rule]
-# > Advertising 广告
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF
-RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Advertising.list,REJECT-TINYGIF
-RULE-SET,https://raw.githubusercontent.com/app2smile/rules/master/rule/zhihu-ad.list,REJECT-NO-DROP
-// DOMAIN-SET,https://anti-ad.net/surge2.txt,REJECT-TINYGIF
-
-# > Privacy 隐私
-RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Privacy.list,REJECT-TINYGIF
-
-# > Hijacking 运营商劫持或恶意网站
-RULE-SET,https://raw.githubusercontent.com/DivineEngine/Profiles/master/Surge/Ruleset/Guard/Hijacking.list,REJECT-TINYGIF
-
 # > 微信公众号
 URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
+
+# > 京东
+URL-REGEX,^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=start,REJECT
+
+# > 云闪付
+URL-REGEX,^https?:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1,REJECT
+
+# > 交管12123
+URL-REGEX,^https?:\/\/gab\.122\.gov\.cn\/eapp\/m\/sysquery\/adver$,REJECT
+
+# > 肯德基
+URL-REGEX,^https?:\/\/res\.kfc\.com\.cn\/advertisement,REJECT
+
+# > 拼多多
+URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
+
+# > 中国移动
+URL-REGEX,^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/DN\/init\/startInit,REJECT
+URL-REGEX,^https?:\/\/wap\.js\.10086\.cn\/jsmccClient\/cd\/market_content\/api\/v\d\/market_content\.page\.query,REJECT
 
 # > 携程
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 URL-REGEX,^https?:\/\/ma-adx\.ctrip\.com\/_ma\.gif,REJECT
 URL-REGEX,^https?:\/\/mbd\.baidu\.com\/newspage\/api\/getmobads\?page\=landingshare,REJECT
 
-# > 百度网盘
-DOMAIN-SUFFIX,ug.baidu.com,REJECT
-URL-REGEX,^https?:\/\/mbd\.baidu\.com\/tcbox,REJECT
-URL-REGEX,^https?:\/\/pan\.baidu\.com\/(act\/v\d\/(bchannel|welfare)\/list|rest\/2\.0\/pcs\/ad|act\/api\/activityentry)$,REJECT
-URL-REGEX,^https?:\/\/pan\.baidu\.com\/(act\/(api\/activityentry|v2\/(bchannel|welfare)\/list)|rest\/2\.0\/pcs\/ad),REJECT
-
 # > 得物
 URL-REGEX,^https?:\/\/app\.dewu\.com\/api\/v1\/app\/advertisement\/,REJECT
+
+# > 饿了么
+URL-REGEX,^https?:\/\/elemecdn.com\/.+\/sitemap,REJECT
+URL-REGEX,^https?:\/\/www1.elecfans.com\/www\/delivery,REJECT
+URL-REGEX,^https?:\/\/fuss10\.elemecdn\.com\/.+\/(w\/(640|750)\/h\/\d{3,4}|.+\.mp4)$,REJECT
 
 # > 菜鸟
 URL-REGEX,^https?:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.(show|mshow)\.cn\/,REJECT
 
+# > 闲鱼
+URL-REGEX,^https?:\/\/gw\.alicdn\.com\/(mt\/|tfs\/.+\d{3,4}-\d{4}|tps\/.+\d{3,4}-\d{4})$,REJECT
+URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome,REJECT
+
 # > 淘票票
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop.film.mtopadvertiseapi.queryadvertise\/5.0.*,REJECT
-
-# > 飞猪
-URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.allresource,REJECT
 
 # > 大麦
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome,REJECT
@@ -56,29 +63,42 @@ URL-REGEX,^https?:\/\/api\.douban\.com\/(v2\/app_ads\/splash|b.*\/common_ads\?.*
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
 
-# > 云闪付
-URL-REGEX,^https?:\/\/wallet\.95516\.com\/s\/wl\/icon\/long,REJECT
-
-# > 美团
-URL-REGEX,^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg$,REJECT
-URL-REGEX,^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$,REJECT
-
-# > 拼多多
-URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
-
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
-# > 网易云 by ddgksf2013
+# > 网易云
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/(lbs\/gpsStatus\/upload|homepage\/daily\/song\/elf\/notice|ad\/|sp\/flow|ios\/upgrade|link\/position\/show\/resource|resource-exposure\/config|search\/specialkeyword|link\/scene\/show\/resource|search\/default|comment\/feed\/inserted|v1\/content\/exposure\/comment|search\/rcmd\/keyword|search\/default\/keyword|comment\/hotcomment\/collect|middle\/clientcfg\/config|resource-exposure\/activity\/config|vipcenter\/tspopup\/get|search\/chart),REJECT
 
-# > 酷安 by ddgksf2013
-URL-REGEX,^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch,REJECT
-
-# > Keep by by ddgksf2013
+# > Keep
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(kprime\/v\d\/popups\/primeGuide|cauchy\/growth\/init|search\/v\d\/(default\/keyword\/list|hotword\/list|hotCourse\/list)|op-engine-webapp\/v\d\/ad|ads\/v\d\/ads\/preload|training\/box\/config|anno\/v\d\/upgrade\/check)$,REJECT
 // 开屏
 URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
+
+[Map Local]
+# > 微信公众号
+^https?:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|masonryfeed|relatedarticle)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 阿里云盘
+^https?:\/\/api\.alipan\.com\/adrive\/v1\/file\/getTopFolders data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 百度网盘
+^https?:\/\/pan\.baidu\.com\/(act\/api\/activityentry|rest\/2\.0\/pcs\/adx)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/update\.pan\.baidu\.com\/statistics\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 美团 
+^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$ data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 米家 
+^https?:\/\/home\.mi\.com\/cgi-op\/api\/v1\/recommendation\/(banner|myTab|openingBanner) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 飞猪
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 酷安
+^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
 # > Sub Info
@@ -103,10 +123,19 @@ xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\
 // xiaohongshu_timeline.js = type=http-response,pattern=^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v6\/homefeed\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
  
 # > 百度地图去广告 by app2smile
-baidumap_proto.js = type=http-response,pattern=^https:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
+baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
-# > 酷安去广告 by by ddgksf2013
-coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|main\/indexV8|feed\/(replyList|detail)),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
+# > 阿里云盘 by RuCu6
+alidrive.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
+
+# 百度网盘 by RuCu6
+baidudrive.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
+
+# > 酷安去广告 by RuCu6
+coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
+
+# > 12306 开屏广告 by RuCu6
+12306.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/12306.js
 
 # > Keep 去广告 by by ddgksf2013
 // 修改底栏
