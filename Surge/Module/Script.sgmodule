@@ -83,7 +83,9 @@ URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(kprime\/v\d\/popups\/primeGuide|cauch
 URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 
 # > 腾讯视频
-URL-REGEX,^https?:\/\/([0-9\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com|apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com|apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|varietyts|vmind\.qqvideo)\.tc\.qq\.com)\/\w+$,REJECT
+URL-REGEX,^https?:\/\/[0-9\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^https?:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^https?:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 
 [Map Local]
 # > 微信公众号
@@ -122,6 +124,8 @@ URL-REGEX,^https?:\/\/([0-9\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com|apd-v
 ^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(pisp\.scripts\.get|xspace\.play\.position\.preload\.query|xspace\.poplayer\.position\.query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 芒果TV
+^https?:\/\/[0-9\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/mobile\.api\.mgtv\.com\/v2\/mobile\/checkUpdate\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
@@ -169,13 +173,10 @@ coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed
 Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 爱奇艺 by RuCu6
-iqiyi1.js = type=http-response,pattern=https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
-iqiyi2.js = type=http-response,pattern=https?:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
-iqiyi3.js = type=http-response,pattern=https?://[0-9.]+/3f1/cards\.iqiyi\.com/(views_(home\/3\.0\/qy_home|category\/3\.0/(category_home|categorylib_content|film_hybrid)|plt\/3\.0\/player_tabs_v2|search\/3\.0/(hot_query_)?search|comment\/3\.0/long_video_comments))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
-iqiyi4.js = type=http-response,pattern=https?://iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+iqiyi.js = type=http-response,pattern=^https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?|^http:\/\/[0-9\.]+\/3f1\/cards\.iqiyi\.com\/(views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?|^http:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?|^https?:\/\/cards\.iqiyi\.com\/views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)\?|^https?:\/\/cards\.iqiyi\.com\/(views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?|^https?:\/\/iface2\.iqiyi\.com\/aggregate\/3\.0\/getMyMenus\?|^https?:\/\/iface2\.iqiyi\.com\/control\/3\.0\/init_proxy\?|^https?:\/\/iface2\.iqiyi\.com\/fusion\/3\.0\/common_switch\?|^https?:\/\/iface2\.iqiyi\.com\/views\/3\.0\/(bottom_theme|home_top_menu)\?|^https?:\/\/cards\.iqiyi\.com\/views_plt\/3\.0\/player_tabs_v2\?|^https?:\/\/cards\.iqiyi\.com\/views_search\/3\.0\/(hot_query_)?search\?|^https?:\/\/search\.video\.iqiyi\.com\/q\?|^https?:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\?,requires-body=1,max-size=0,script-path=http://script.hub/convert/_start_/https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js/_end_/cnftp.js?type=qx-script&target=surge-script
 
 # > 优酷 by RuCu6
-youku.js = type=http-response,pattern=https?:\/\/(acs\.youku\.com|push\.m\.youku\.com|un-acs\.youku\.com)\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|soku\.yksearch|play\.ups\.appinfo\.get|huluwa\.dispatcher\.youthmode\.config2)\??,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+youku.js = type=http-response,pattern=^https?:\/\/(acs\.youku\.com|push\.m\.youku\.com|un-acs\.youku\.com)\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|soku\.yksearch|play\.ups\.appinfo\.get|huluwa\.dispatcher\.youthmode\.config2)\??,requires-body=1,max-size=0,script-path=http://script.hub/convert/_start_/https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js/_end_/cnftp.js?type=qx-script&target=surge-script
 
 # > 芒果TV by RuCu6
-mgtv.js = type=http-response,pattern=^https?:\/\/(?:mob-st|dc2?|mobileso|me|mobile\.api)\.bz\.mgtv\.com\/(?:odin\/c1\/channel\/index|dynamic\/v1\/channel\/(?:index|vrsList)\/\w|mobile\/(?:recommend\/v2|config)|v3\/module\/list|v10\/video\/info)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+mgtv.js = type=http-response,pattern=^https?:\/\/(mob-st\.bz\.mgtv\.com\/odin\/c1\/channel\/index|dc2?\.bz\.mgtv\.com\/dynamic\/v1\/channel\/(index|vrsList)\/\w|mobileso\.bz\.mgtv\.com\/mobile\/recommend\/v2|me\.bz\.mgtv\.com\/v3\/module\/list|mobile\.api\.mgtv\.com\/mobile\/config|mobile\.api\.mgtv\.com\/v10\/video\/info)\?,requires-body=1,max-size=0,script-path=http://script.hub/convert/_start_/https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js/_end_/cnftp.js?type=qx-script&target=surge-script
