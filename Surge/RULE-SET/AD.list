@@ -8,14 +8,14 @@ DOMAIN-SUFFIX,pangolin-sdk-toutiao1.com
 DOMAIN-SUFFIX,pangolin.snssdk.com
 
 # > Tencent
-// DOMAIN,btrace.qq.com
-// DOMAIN,mtrace.qq.com
+DOMAIN,btrace.qq.com
+DOMAIN,mtrace.qq.com
 DOMAIN-KEYWORD,adstats
 DOMAIN,adstats.tencentmusic.com
 DOMAIN,adstats.tencentmusic.com
 DOMAIN,ad.tencentmusic.com
 DOMAIN,adcdn.tencentmusic.com
-DOMAIN,adexpo.tencentmusic.com,
+DOMAIN,adexpo.tencentmusic.com
 DOMAIN,adclick.tencentmusic.com
 DOMAIN,otheve.beacon.qq.com
 DOMAIN,monitor.music.qq.com
@@ -29,6 +29,12 @@ DOMAIN,p.l.qq.com
 DOMAIN,us.l.qq.com
 DOMAIN,tangram.e.qq.com
 DOMAIN-SUFFIX,imtmp.net
+DOMAIN,adsmind.gdtimg.com
+DOMAIN,info4.video.qq.com
+DOMAIN,info6.video.qq.com
+DOMAIN,ios.video.mpush.qq.com
+DOMAIN,vv.video.qq.com
+DOMAIN,pgdt.gtimg.cn
 
 # > Baidu
 DOMAIN-SUFFIX,pos.baidu.com
