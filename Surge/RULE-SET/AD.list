@@ -1,5 +1,11 @@
-# > PeacockTV
-DOMAIN,video-ads-module.ad-tech.nbcuni.com
+# > 广告联盟
+DOMAIN,is.snssdk.com
+DOMAIN,mi.gdt.qq.com
+DOMAIN,open.e.kuaishou.com
+DOMAIN-SUFFIX,pangolin-sdk-toutiao-b.com
+DOMAIN-SUFFIX,pangolin-sdk-toutiao.com
+DOMAIN-SUFFIX,pangolin-sdk-toutiao1.com
+DOMAIN-SUFFIX,pangolin.snssdk.com
 
 # > Tencent
 // DOMAIN,btrace.qq.com
@@ -24,8 +30,34 @@ DOMAIN,us.l.qq.com
 DOMAIN,tangram.e.qq.com
 DOMAIN-SUFFIX,imtmp.net
 
+# > Baidu
+DOMAIN-SUFFIX,pos.baidu.com
+DOMAIN,afd.baidu.com
+DOMAIN,afdconf.baidu.com
+DOMAIN,httpdns.baidubce.com
+DOMAIN,lc.map.baidu.com
+DOMAIN,mobads.baidu.com
+
+# > Meituan
+DOMAIN,al-log.d.meituan.net
+DOMAIN,babel-statistics-android.d.meituan.net
+DOMAIN,maplocatesdksnapshot.d.meituan.net
+DOMAIN,metrics-picture.d.meituan.net
+DOMAIN,route-stats.d.meituan.net
+
+# > Amap
+DOMAIN,amap-aos-info-nogw.amap.com
+DOMAIN,awaken.amap.com
+DOMAIN,free-aos-cdn-image.amap.com
+
+# > ICBC
+DOMAIN,pageviewp.icbc.com.cn
+
 # > TVer
 DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
+
+# > PeacockTV
+DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
 # > Viu
 DOMAIN-SUFFIX,adcolony.com
@@ -34,6 +66,20 @@ DOMAIN,r2---sn-j5o76n7e.gvt1.com
 # > WeTV
 DOMAIN,btrace.wetvinfo.com
 DOMAIN,mtrace.wetvinfo.com
+
+# > MGTV
+DOMAIN,dflow.bz.mgtv.com
+DOMAIN,encounter.bz.mgtv.com
+DOMAIN,floor.bz.mgtv.com
+DOMAIN,img.da.mgtv.com
+DOMAIN,layer.bz.mgtv.com
+DOMAIN,mob.bz.mgtv.com
+DOMAIN,mobile.da.mgtv.com
+DOMAIN,rc-topic-api.bz.mgtv.com
+DOMAIN,v2.da.mgtv.com
+DOMAIN,video.da.mgtv.com
+DOMAIN,vip.bz.mgtv.com
+DOMAIN,ys.da.mgtv.com
 
 # > iQIYI 视频暂停广告
 DOMAIN-SUFFIX,cupid.iqiyi.com
