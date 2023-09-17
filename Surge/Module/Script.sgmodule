@@ -3,9 +3,16 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,*.tc.qq.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn
+hostname = %INSERT% -i.vip.iqiyi.com,*.iqiyi.com,*.tc.qq.com,acs.youku.com,push.m.youku.com,un-acs.youku.com,*.mgtv.com,mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn
 
 [Rule]
+# > CNTV
+DOMAIN-SUFFIX,cupid.iqiyi.com,DIRECT
+DOMAIN,push.m.youku.com,DIRECT
+DOMAIN,un-acs.youku.com,DIRECT
+DOMAIN,dorangesource.alicdn.com,DIRECT
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT
+
 # > 微信公众号
 URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
@@ -32,6 +39,10 @@ URL-REGEX,^https?:\/\/wap\.js\.10086\.cn\/jsmccClient\/cd\/market_content\/api\/
 URL-REGEX,^https?:\/\/socketio\.ctrip\.com\/api,REJECT
 URL-REGEX,^https?:\/\/ma-adx\.ctrip\.com\/_ma\.gif,REJECT
 URL-REGEX,^https?:\/\/mbd\.baidu\.com\/newspage\/api\/getmobads\?page\=landingshare,REJECT
+
+# > 芒果TV
+URL-REGEX,^https?:\/\/[0-9\.]+\/odin\/c1\/(channel\/ads|skin\/config)\?,REJECT
+URL-REGEX,^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\?,REJECT
 
 # > 得物
 URL-REGEX,^https?:\/\/app\.dewu\.com\/api\/v1\/app\/advertisement\/,REJECT
@@ -66,13 +77,13 @@ URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+
 # > 网易云
 URL-REGEX,^https?:\/\/interface(\d)?\.music\.163\.com\/w?e?api\/(lbs\/gpsStatus\/upload|homepage\/daily\/song\/elf\/notice|ad\/|sp\/flow|ios\/upgrade|link\/position\/show\/resource|resource-exposure\/config|search\/specialkeyword|link\/scene\/show\/resource|search\/default|comment\/feed\/inserted|v1\/content\/exposure\/comment|search\/rcmd\/keyword|search\/default\/keyword|comment\/hotcomment\/collect|middle\/clientcfg\/config|resource-exposure\/activity\/config|vipcenter\/tspopup\/get|search\/chart),REJECT
 
-# > 腾讯视频
-URL-REGEX,^https?:\/\/([0-9\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com|apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com|apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|varietyts|vmind\.qqvideo)\.tc\.qq\.com)\/\w+$,REJECT
-
 # > Keep
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(kprime\/v\d\/popups\/primeGuide|cauchy\/growth\/init|search\/v\d\/(default\/keyword\/list|hotword\/list|hotCourse\/list)|op-engine-webapp\/v\d\/ad|ads\/v\d\/ads\/preload|training\/box\/config|anno\/v\d\/upgrade\/check)$,REJECT
 // 开屏
 URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
+
+# > 腾讯视频
+URL-REGEX,^https?:\/\/([0-9\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com|apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com|apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|varietyts|vmind\.qqvideo)\.tc\.qq\.com)\/\w+$,REJECT
 
 [Map Local]
 # > 微信公众号
@@ -103,6 +114,17 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 # > 小红书
 ^https?:\/\/(edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(get_style|open|submit_action)|www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\?|edith\.xiaohongshu\.com\/api\/sns\/v3\/note\/guide\?|www\.xiaohongshu\.com\/api\/sns\/v1\/ads\/resource\?)  data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
+# > 爱奇艺
+^https?:\/\/iface2\.iqiyi\.com\/views_pop\/3\.0\/pop_control\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/act\.vip\.iqiyi\.com\/interact\/api\/v2\/show\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 优酷
+^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(pisp\.scripts\.get|xspace\.play\.position\.preload\.query|xspace\.poplayer\.position\.query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 芒果TV
+^https?:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobile\.api\.mgtv\.com\/v2\/mobile\/checkUpdate\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
 [Script]
 # > Sub Info
 Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.githubusercontent.com/mieqq/mieqq/master/sub_info.js,timeout=10
@@ -131,7 +153,7 @@ baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu
 # > 阿里云盘 by RuCu6
 alidrive.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
 
-# 百度网盘 by RuCu6
+# > 百度网盘 by RuCu6
 baidudrive.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
 
 # > 酷安去广告 by RuCu6
@@ -145,3 +167,15 @@ coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed
 // Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 // 保留底栏
 Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+
+# > 爱奇艺 by RuCu6
+iqiyi1.js = type=http-response,pattern=https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+iqiyi2.js = type=http-response,pattern=https?:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+iqiyi3.js = type=http-response,pattern=https?://[0-9.]+/3f1/cards\.iqiyi\.com/(views_(home\/3\.0\/qy_home|category\/3\.0/(category_home|categorylib_content|film_hybrid)|plt\/3\.0\/player_tabs_v2|search\/3\.0/(hot_query_)?search|comment\/3\.0/long_video_comments))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+iqiyi4.js = type=http-response,pattern=https?://iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+# > 优酷 by RuCu6
+youku.js = type=http-response,pattern=https?:\/\/(acs\.youku\.com|push\.m\.youku\.com|un-acs\.youku\.com)\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|soku\.yksearch|play\.ups\.appinfo\.get|huluwa\.dispatcher\.youthmode\.config2)\??,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+# > 芒果TV by RuCu6
+mgtv.js = type=http-response,pattern=^https?:\/\/(?:mob-st|dc2?|mobileso|me|mobile\.api)\.bz\.mgtv\.com\/(?:odin\/c1\/channel\/index|dynamic\/v1\/channel\/(?:index|vrsList)\/\w|mobile\/(?:recommend\/v2|config)|v3\/module\/list|v10\/video\/info)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
