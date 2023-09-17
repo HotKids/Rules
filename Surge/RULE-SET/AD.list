@@ -73,6 +73,26 @@ DOMAIN,r2---sn-j5o76n7e.gvt1.com
 DOMAIN,btrace.wetvinfo.com
 DOMAIN,mtrace.wetvinfo.com
 
+# > iQIYI
+DOMAIN,api.iqiyi.com
+DOMAIN-SUFFIX,cupid.iqiyi.com
+DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
+
+# > Youku
+DOMAIN,adsmind.ugdtimg.com
+DOMAIN,amdc.m.youku.com
+DOMAIN,apiv4-iyes.youku.com
+DOMAIN,httpdns.alicdn.com
+DOMAIN,huichuan-mc.sm.cn
+DOMAIN,huichuan.sm.cn
+DOMAIN,iyes.youku.com
+DOMAIN,m-vali.cp31.ott.cibntv.net
+DOMAIN,mc.atm.youku.com
+DOMAIN,vali-g1.cp31.ott.cibntv.net
+DOMAIN,vali-ugc.cp31.ott.cibntv.net
+DOMAIN,yk-ssp.ad.youku.com
+DOMAIN,ykad-data.youku.com
+
 # > MGTV
 DOMAIN,dflow.bz.mgtv.com
 DOMAIN,encounter.bz.mgtv.com
@@ -86,13 +106,6 @@ DOMAIN,v2.da.mgtv.com
 DOMAIN,video.da.mgtv.com
 DOMAIN,vip.bz.mgtv.com
 DOMAIN,ys.da.mgtv.com
-
-# > iQIYI 视频暂停广告
-DOMAIN-SUFFIX,cupid.iqiyi.com
-DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
-
-# > Youku 视频暂停广告
-DOMAIN,iyes.youku.com
 
 # > 中国联通去开屏
 DOMAIN-SUFFIX,m1.ad.10010.com
