@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,cn-acs.m.cainiao.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,pan.baidu.com,flowplus.meituan.net,img.meituan.net,s3plus.meituan.net,home.mi.com,www.xiaohongshu.com,edith.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,newclient.map.baidu.com,ad.12306.cn
+hostname = %INSERT% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,socketio.ctrip.com,ma-adx.ctrip.com,mbd.baidu.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,api.alipan.com,member.alipan.com,pan.baidu.com,flowplus.meituan.net,img.meituan.net,s3plus.meituan.net,home.mi.com,cn-acs.m.cainiao.com,www.xiaohongshu.com,edith.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,mp.weixin.qq.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,guide-acs.m.taobao.com
 
 [Rule]
 # > 微信公众号
@@ -40,9 +40,6 @@ URL-REGEX,^https?:\/\/app\.dewu\.com\/api\/v1\/app\/advertisement\/,REJECT
 URL-REGEX,^https?:\/\/elemecdn.com\/.+\/sitemap,REJECT
 URL-REGEX,^https?:\/\/www1.elecfans.com\/www\/delivery,REJECT
 URL-REGEX,^https?:\/\/fuss10\.elemecdn\.com\/.+\/(w\/(640|750)\/h\/\d{3,4}|.+\.mp4)$,REJECT
-
-# > 菜鸟
-URL-REGEX,^https?:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads\.(show|mshow)\.cn\/,REJECT
 
 # > 闲鱼
 URL-REGEX,^https?:\/\/gw\.alicdn\.com\/(mt\/|tfs\/.+\d{3,4}-\d{4}|tps\/.+\d{3,4}-\d{4})$,REJECT
@@ -94,6 +91,9 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 # > 米家 
 ^https?:\/\/home\.mi\.com\/cgi-op\/api\/v1\/recommendation\/(banner|myTab|openingBanner) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
+# > 菜鸟
+^https?:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.(cainiao\.((adkeyword\.get|cncommunity\.my\.station\.query|guoguo\.nbnetflow\.ads\.(batch\.show\.v2|index)|nbopen\.miniapp\.recommend\.cpc|nbmensa\.research\.researchservice\.(acquire|event|close)|nbpresentation\.homepage\.merge\.get)|com\.cainiao\.(cnactivitycenter|cncreditmarket\.hit\.getactivityhit|longquan\.place\.getpageresourcecontent)))\.cn$ data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
 # > 飞猪
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
@@ -127,6 +127,10 @@ xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\
  
 # > 百度地图去广告 by app2smile
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
+
+# > 菜鸟去广告 by RuCu6
+mobileDispatch.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
+cainiao.js = type=http-response,pattern=^https?:\/\/(cn-acs|guide-acs)\.m\.(cainiao|taobao)\.com\/gw\/mtop\.(cainiao\.(guoguo\.nbnetflow\.ads\.m?show|nbpresentation\.(pickup\.empty\.page|protocol\.homepage)|nbfriend\.message\.conversation\.list)|cainiao\.guoguo\.nbnetflow\.ads\.mshow)\.cn$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cainiao.js
 
 # > 阿里云盘 by RuCu6
 alidrive.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
