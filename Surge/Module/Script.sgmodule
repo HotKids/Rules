@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,*.tc.qq.com,*.smtcdns.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,image.spdbccc.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn
+hostname = %APPEND% mp.weixin.qq.com,*.tc.qq.com,*.smtcdns.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,image.spdbccc.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com
 
 [General]
 force-http-engine-hosts = %APPEND% <ip-address>,<ip-address>:49155,*.tc.qq.com,*.smtcdns.com
@@ -102,7 +102,12 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 ^https?:\/\/newclient\.map\.baidu\.com\/(client\/crossmarketing\/\?container=du_(aide_module|card_ugc|trip_route_tab)|client\/noticebar\/get|client\/phpui2\/\?qt=ads|grow-engine\/api\/common\/userHome\?)|https:\/\/newclient\.map\.baidu\.com\/client\/crossmarketing\/\?oem= data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/notice|gomarketing\/api\/activity\/talos\/activitycard\?|gomarketing\/api\/popup\/getentrancecordovaurl|goorder\/passenger\/baseinfo) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 美团 
+# > 高德地图
+^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists|msgbox\/pull_mp)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/m5-zb\.amap\.com\/ws\/boss\/(car\/order\/content_info|order\/car\/king_toolbox_car_bubble|order_web\/friendly_information|tips\/onscene_visual_optimization)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/m5\.amap\.com\/ws\/(faas\/amap-navigation\/card-service-(car-end|route-plan)|shield\/search\/(new_hotword|new_hotword)|shield\/search_poi\/(tips_adv)|faas\/amap-navigation\/main-page-(assets|location)|mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/scene\/recommend|valueadded\/weather\/v2)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 美团
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -157,6 +162,11 @@ baidudrive.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/get
 
 # > 百度地图 by RuCu6
 baidumap.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/baidu/map.js
+
+# > 高德地图 by RuCu6
+amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
+amap1.js = type=http-response,pattern=^https?:\/\/m5-zb\.amap\.com\/ws\/(promotion-web\/resource(\/home)?|sharedtrip\/taxi\/order_detail_car_tips)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
+amap2.js = type=http-response,pattern=^https?:\/\/m5\.amap\.com\/ws\/(perception\/drive\/routePlan|shield\/search\/(common\/coupon\/info|poi\/detail)|shield\/search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|faas\/amap-navigation\/(card-service-plan-home|main-page)|shield\/frogserver\/aocs\/updatable\/1|shield\/dsp\/profile\/index\/nodefaasv3|shield\/search\/nearbyrec_smart|valueadded\/alimama\/splash_screen)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
 
 # > 酷安去广告 by RuCu6
 coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
