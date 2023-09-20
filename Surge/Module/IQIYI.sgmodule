@@ -2,6 +2,9 @@
 #!desc = 过滤爱奇艺客户端广告
 ## forked from @RuCu6/QuanX/main/Rewrites/Cube/cnftp.snippet
 
+[General]
+force-http-engine-hosts = %APPEND% kjp.cupid.iqiyi.com,t7z.cupid.iqiyi.com
+
 [MITM]
 hostname = %APPEND% -i.vip.iqiyi.com, *.iqiyi.com
 
