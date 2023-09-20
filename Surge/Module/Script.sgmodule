@@ -38,6 +38,9 @@ URL-REGEX,^https?:\/\/intellicc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.intelli\.
 # > 浦大喜奔
 URL-REGEX,^https?:\/\/image\.spdbccc\.com\.cn\/group\d\/M00\/[7-9]{1}[A-Z0-9]{1}\/[A-Z0-9]{2}\/rBsZ.+(4038|0571)\.PNG,REJECT
 
+# > 微博
+URL-REGEX,^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(get-lbs-cell-info\.php|sdkconfig\.php),REJECT
+
 # > 得物
 URL-REGEX,^https?:\/\/app\.dewu\.com\/api\/v1\/app\/advertisement\/,REJECT
 
@@ -106,7 +109,11 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 ^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 小红书
-^https?:\/\/(edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(get_style|open|submit_action)|www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\?|edith\.xiaohongshu\.com\/api\/sns\/v3\/note\/guide\?|www\.xiaohongshu\.com\/api\/sns\/v1\/ads\/resource\?)  data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/(edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(get_style|open|submit_action)|www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\?|edith\.xiaohongshu\.com\/api\/sns\/v3\/note\/guide\?|www\.xiaohongshu\.com\/api\/sns\/v1\/ads\/resource\?) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 微博
+^https?:\/\/bootrealtime\.uve\.weibo\.com\/v3\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/api\.weibo\.cn\/2\/(ug\/checkin\/list|push\/daily|!\/live\/media_homelist|comments\/bullet_screens|statuses\/(container_positive|push_info)|vote\/get_vote_detail|!\/huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|search\/container_discover|hot\/hours_spotlight|video\/redpacket|!\/sug\/list\/finderchange|photo\/info)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
 # > Sub Info
@@ -117,10 +124,10 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 // bili-json.js = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js,script-update-interval=0
 // bili-proto.js = type=http-response,pattern=^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.((view|viewunite)\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll|playurl\.v1\.PlayURL\/PlayView)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,script-update-interval=0
 
-# > 微博去广告 by yichahucha&zmqcherish
+# > 微博去广告 by yichahucha&zmqcherish&RuCu6
 // 或使用微博净化模块 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Weibo.sgmodule
-wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|searchall|page|messageflow|statuses\/(unread_)?friends(\/|_)timeline|groups\/timeline|statuses\/(container_timeline|unread_hot_timeline|extend|video_mixtimeline)|profile\/(me|container_timeline)|video\/(community_tab|remind_info|tiny_stream_video_list)|checkin\/show|\!/live\/media_homelist|comments\/build_comments|container\/get_item|search\/(finder|container_timeline|container_discover)),script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_main.js
-wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(\/interface\/sdk\/sdkad.php|\/wbapplua\/wbpullad.lua),script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_launch.js
+wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(checkin\/show|client\/publisher_list|push\/active|cardlist|page|comments\/build_comments|container\/asyn|flowlist|profile\/(container_timeline|me)|statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline|extend|show)|video\/tiny_stream_video_list|!\/huati\/discovery_home_bottom_channels|direct_messages\/user_list|messageflow\/notice|search\/(container_timeline|finder)|searchall)\?,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
+wb_launch.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/(bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(\/v1\/ad\/preload|interface\/sdk\/sdkad\.php|\/preload\/get_ad|wbapplua\/wbpullad\.lua)\?,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
 
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
