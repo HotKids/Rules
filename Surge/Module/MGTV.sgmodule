@@ -6,6 +6,7 @@
 hostname = %APPEND% *.mgtv.com
 
 [Rule]
+DOMAIN,credits.bz.mgtv.com,REJECT
 DOMAIN,dflow.bz.mgtv.com,REJECT
 DOMAIN,encounter.bz.mgtv.com,REJECT
 DOMAIN,floor.bz.mgtv.com,REJECT
