@@ -21,11 +21,11 @@ DOMAIN,vip.bz.mgtv.com,REJECT
 DOMAIN,ys.da.mgtv.com,REJECT
 
 [Map Local]
-^https?:\/\/hb-boom\.api\.mgtv\.com\/release\/pullReleaseInfo data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/[0-9\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/[\d\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/hb-boom\.api\.mgtv\.com\/release\/pullReleaseInfo data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/mobile\.api\.mgtv\.com\/v2\/mobile\/checkUpdate\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
 mgtv1.js = type=http-response,pattern=^https?:\/\/me\.bz\.mgtv\.com\/v3\/module\/list\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
@@ -39,4 +39,3 @@ mgtv4.js = type=http-response,pattern=^https?:\/\/mob-st\.bz\.mgtv\.com\/odin\/c
 mgtv5.js = type=http-response,pattern=^https?:\/\/mobile\.api\.mgtv\.com\/(mobile\/config|v10\/video\/info)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
 
 mgtv6.js = type=http-response,pattern=^https?:\/\/dc2?\.bz\.mgtv\.com\/dynamic\/v1\/channel\/(index|vrsList)\/\w,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
-
