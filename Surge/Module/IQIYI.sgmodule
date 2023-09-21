@@ -17,16 +17,16 @@ DOMAIN,api.iqiyi.com,REJECT
 ^https?:\/\/iface2\.iqiyi\.com\/(ivos\/interact\/video\/data|video\/3\.0\/v_interface_proxy|views_pop\/3\.0\/pop_control)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
-iqiyi1.js = type=http-response,pattern=^https?:\/\/search\.video\.iqiyi\.com\/q\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi1.js = type=http-response,pattern=^https?:\/\/search\.video\.iqiyi\.com\/q\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi2.js = type=http-response,pattern=^https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi2.js = type=http-response,pattern=^https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi3.js = type=http-response,pattern=^https?:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi3.js = type=http-response,pattern=^https?:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi4.js = type=http-response,pattern=^https?:\/\/[\d\.]+\/3f1\/cards\.iqiyi\.com\/(views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi4.js = type=http-response,pattern=^https?:\/\/[\d\.]+\/3f1\/cards\.iqiyi\.com\/(views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi5.js = type=http-response,pattern=^https?:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi5.js = type=http-response,pattern=^https?:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi6.js = type=http-response,pattern=^https?:\/\/iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi6.js = type=http-response,pattern=^https?:\/\/iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
-iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)|views_(home\/3\.0\/qy_home|search\/3\.0\/(hot_query_)?search|plt\/3\.0\/player_tabs_v2|waterfall\/3\.0\/feed))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/CNTV.js
+iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)|views_(home\/3\.0\/qy_home|search\/3\.0\/(hot_query_)?search|plt\/3\.0\/player_tabs_v2|waterfall\/3\.0\/feed))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
