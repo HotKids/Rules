@@ -9,34 +9,43 @@ payload:
   - DOMAIN-SUFFIX,pangolin-sdk-toutiao1.com
   - DOMAIN-SUFFIX,pangolin.snssdk.com
 
-  # > Tencent
-  - DOMAIN,btrace.qq.com
-  - DOMAIN,mtrace.qq.com
-  - DOMAIN-KEYWORD,adstats
-  - DOMAIN,adstats.tencentmusic.com
-  - DOMAIN,adstats.tencentmusic.com
-  - DOMAIN,ad.tencentmusic.com
-  - DOMAIN,adcdn.tencentmusic.com
-  - DOMAIN,adexpo.tencentmusic.com
-  - DOMAIN,adclick.tencentmusic.com
-  - DOMAIN,otheve.beacon.qq.com
-  - DOMAIN,monitor.music.qq.com
-  - DOMAIN,stat.y.qq.com
-  - DOMAIN,tmead.y.qq.com
-  - DOMAIN,oth.str.mdt.qq.com
-  - DOMAIN,h.trace.qq.com
-  - DOMAIN,tmead.y.qq.com
-  - DOMAIN,sdk.e.qq.com
-  - DOMAIN,p.l.qq.com
-  - DOMAIN,us.l.qq.com
-  - DOMAIN,tangram.e.qq.com
-  - DOMAIN-SUFFIX,imtmp.net
-  - DOMAIN,adsmind.gdtimg.com
-  - DOMAIN,info4.video.qq.com
-  - DOMAIN,info6.video.qq.com
-  - DOMAIN,ios.video.mpush.qq.com
-  - DOMAIN,vv.video.qq.com
-  - DOMAIN,pgdt.gtimg.cn
+  # > 安全浏览限制解除
+  - DOMAIN,lookup.api.bsb.baidu.com
+  - DOMAIN,proxy.safebrowsing.apple
+  - DOMAIN,safebrowsing.g.applimg.com
+  - DOMAIN,safebrowsing.googleapis.com
+  - DOMAIN,safebrowsing.urlsec.qq.com
+  - DOMAIN,token.safebrowsing.apple
+  - DOMAIN,vs6.bj2ct.u3.ucweb.com
+  - DOMAIN-SUFFIX,safebrowsing.apple
+  - DOMAIN-SUFFIX,u3.ucweb.com
+
+  # > Aliyun
+  - IP-CIDR,203.107.1.1/24
+
+  # > Amap
+  - DOMAIN,amap-aos-info-nogw.amap.com
+  - DOMAIN,awaken.amap.com
+  - DOMAIN,free-aos-cdn-image.amap.com
+
+  # > Apple
+  - DOMAIN,advertising.apple.com
+  - DOMAIN,api-adservices.apple.com
+  - DOMAIN,apple.comscoreresearch.com
+  - DOMAIN,banners.itunes.apple.com
+  - DOMAIN,iad.apple.com
+  - DOMAIN,iadcontent.apple.com
+  - DOMAIN,iadctest.qwapi.com
+  - DOMAIN,iadmoo.apple.com
+  - DOMAIN,iadworkbench.apple.com
+  - DOMAIN,launch.apple.com
+  - DOMAIN,metrics.apple.com
+  - DOMAIN,qwapi.apple.com
+  - DOMAIN,securemetrics.apple.com
+  - DOMAIN,webproxy-advp.iad-apple.com
+  - DOMAIN,webproxy-advp.iad-apple.com.akadns.net
+  - DOMAIN-SUFFIX,advp.apple.com
+  - DOMAIN-SUFFIX,iadsdk.apple.com
 
   # > Baidu
   - DOMAIN-SUFFIX,pos.baidu.com
@@ -45,6 +54,39 @@ payload:
   - DOMAIN,httpdns.baidubce.com
   - DOMAIN,lc.map.baidu.com
   - DOMAIN,mobads.baidu.com
+  - DOMAIN,sf3-fe-tos.pglstatp-toutiao.com
+  - IP-CIDR,180.76.76.200/32
+
+  # > Bilibili
+  - DOMAIN,mall.bilibili.com
+  - DOMAIN,passport.bilibili.com
+
+  # > ByteDance
+  - DOMAIN,ad.zijieapi.com
+  - DOMAIN-KEYWORD,-ad-sign.byteimg.com
+
+  # > Caiyun Weather
+  - DOMAIN,ad.cyapi.cn
+
+  # > ChatGPT
+  - DOMAIN,o33249.ingest.sentry.io
+
+  # > Google
+  - DOMAIN,adservice.google.com
+  - DOMAIN,googleads.g.doubleclick-cn.net
+  - DOMAIN,googleads.g.doubleclick.net
+  - DOMAIN,pagead2.googlesyndication.com
+  - DOMAIN,pubads.g.doubleclick.net
+  - DOMAIN,www.googleadservices.com
+  - DOMAIN-KEYWORD,adservice.google.com.
+
+  # > ICBC
+  - DOMAIN,pageviewp.icbc.com.cn
+
+  # > iQIYI
+  - DOMAIN,api.iqiyi.com
+  - DOMAIN-SUFFIX,cupid.iqiyi.com
+  - DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 
   # > Meituan
   - DOMAIN,al-log.d.meituan.net
@@ -53,32 +95,98 @@ payload:
   - DOMAIN,metrics-picture.d.meituan.net
   - DOMAIN,route-stats.d.meituan.net
 
-  # > Amap
-  - DOMAIN,amap-aos-info-nogw.amap.com
-  - DOMAIN,awaken.amap.com
-  - DOMAIN,free-aos-cdn-image.amap.com
+  # > MGTV
+  - DOMAIN,credits.bz.mgtv.com
+  - DOMAIN,credits2.bz.mgtv.com
+  - DOMAIN,credits3.bz.mgtv.com
+  - DOMAIN,dflow.bz.mgtv.com
+  - DOMAIN,encounter.bz.mgtv.com
+  - DOMAIN,floor.bz.mgtv.com
+  - DOMAIN,img.da.mgtv.com
+  - DOMAIN,layer.bz.mgtv.com
+  - DOMAIN,mob.bz.mgtv.com
+  - DOMAIN,mobile.da.mgtv.com
+  - DOMAIN,rc-topic-api.bz.mgtv.com
+  - DOMAIN,v2.da.mgtv.com
+  - DOMAIN,video.da.mgtv.com
+  - DOMAIN,vip.bz.mgtv.com
+  - DOMAIN,ys.da.mgtv.com
 
-  # > ICBC
-  - DOMAIN,pageviewp.icbc.com.cn
+  # > NetEase Music
+  - DOMAIN,httpdns.n.netease.com
+  - DOMAIN,iadmat.nosdn.127.net
+  - DOMAIN,iadmusicmat.music.126.net
+  - DOMAIN,iadmusicmatvideo.music.126.net
+  - DOMAIN-SUFFIX,163jiasu.com
+
+  # > Outlook
+  - DOMAIN,acdn.adnxs.com
+  - DOMAIN,mediation.adnxs.com
+  - DOMAIN,sin3-ib.adnxs.com
+
+  # > PeacockTV
+  - DOMAIN,video-ads-module.ad-tech.nbcuni.com
+
+  # > SMZDM
+  - DOMAIN,api.zuihuimai.com
+
+  # > Tencent
+  - DOMAIN,btrace.qq.com
+  - DOMAIN,mtrace.qq.com
+  - DOMAIN-KEYWORD,adstats
+  - DOMAIN-SUFFIX,imtmp.net
+  - DOMAIN,adsmind.gdtimg.com
+  - DOMAIN,gdt.qq.com
+  - DOMAIN,oth.str.mdt.qq.com
+  - DOMAIN,p.l.qq.com
+  - DOMAIN,pgdt.gtimg.cn
+  - DOMAIN,rpt.gdt.qq.com
+  - DOMAIN,sdk.e.qq.com
+  - DOMAIN,stat.y.qq.com
+  - DOMAIN,tmead.y.qq.com
+  - DOMAIN,tpns.qq.com
+  - DOMAIN,us.l.qq.com
+  - DOMAIN,info4.video.qq.com
+  - DOMAIN,info6.video.qq.com
+  - DOMAIN,btrace.video.qq.com
+  - DOMAIN,vv.video.qq.com
+  - DOMAIN,ios.video.mpush.qq.com
+  - DOMAIN,adstats.tencentmusic.com
+  - DOMAIN,ad.tencentmusic.com
+  - DOMAIN,adcdn.tencentmusic.com
+  - DOMAIN,adexpo.tencentmusic.com
+  - DOMAIN,adclick.tencentmusic.com
+  - DOMAIN,otheve.beacon.qq.com
+  - DOMAIN,monitor.music.qq.com
 
   # > TVer
   - DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
 
-  # > PeacockTV
-  - DOMAIN,video-ads-module.ad-tech.nbcuni.com
+  # > UnionPay
+  - DOMAIN,ads.95516.com
+  - DOMAIN,cm-10-138.getui.com
+  - DOMAIN,sdk-conf.getui.com
+  - DOMAIN,sdk.open.talk.getui.net
+  - DOMAIN,switch.cup.com.cn
+  - DOMAIN,tysdk.95516.com
 
   # > Viu
   - DOMAIN-SUFFIX,adcolony.com
   - DOMAIN,r2---sn-j5o76n7e.gvt1.com
 
+  # > Weibo
+  - DOMAIN,adstrategy.biz.weibo.com
+  - DOMAIN,kadmimage.biz.weibo.com
+  - DOMAIN,sdkaction.biz.weibo.com
+  - DOMAIN,sdkclick.biz.weibo.com
+  - DOMAIN,sdkmonitor.biz.weibo.com
+
   # > WeTV
   - DOMAIN,btrace.wetvinfo.com
   - DOMAIN,mtrace.wetvinfo.com
 
-  # > iQIYI
-  - DOMAIN,api.iqiyi.com
-  - DOMAIN-SUFFIX,cupid.iqiyi.com
-  - DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
+  # > Xiaomi
+  - DOMAIN,sdkconfig.ad.xiaomi.com
 
   # > Youku
   - DOMAIN,adsmind.ugdtimg.com
@@ -95,29 +203,25 @@ payload:
   - DOMAIN,yk-ssp.ad.youku.com
   - DOMAIN,ykad-data.youku.com
 
-  # > MGTV
-  - DOMAIN,credits.bz.mgtv.com
-  - DOMAIN,dflow.bz.mgtv.com
-  - DOMAIN,encounter.bz.mgtv.com
-  - DOMAIN,floor.bz.mgtv.com
-  - DOMAIN,img.da.mgtv.com
-  - DOMAIN,layer.bz.mgtv.com
-  - DOMAIN,mob.bz.mgtv.com
-  - DOMAIN,mobile.da.mgtv.com
-  - DOMAIN,rc-topic-api.bz.mgtv.com
-  - DOMAIN,v2.da.mgtv.com
-  - DOMAIN,video.da.mgtv.com
-  - DOMAIN,vip.bz.mgtv.com
-  - DOMAIN,ys.da.mgtv.com
+  # > Zhihu
+  - DOMAIN,appcloud.zhihu.com
+  - DOMAIN,appcloud2.in.zhihu.com
+  - DOMAIN,crash2.zhihu.com
+  - DOMAIN,mqtt.zhihu.com
+  - DOMAIN,sugar.zhihu.com
+  - DOMAIN,zxid-m.mobileservice.cn
+  - IP-CIDR,103.41.167.237/32
+  - IP-CIDR,118.89.204.198/32
+  - IP6-CIDR,2402:4e00:1200:ed00:0:9089:6dac:96b6/128
 
-  # > 中国联通去开屏
-  - DOMAIN-SUFFIX,m1.ad.10010.com
-
-  # > 中国电信去开屏
+  # > 10000
   - DOMAIN,ad.21cn.com
   - DOMAIN,ad.k.21cn.com
   - DOMAIN,admarket.21cn.com
   - DOMAIN,adshows.21cn.com
 
+  # > 10010
+  - DOMAIN-SUFFIX,m1.ad.10010.com
+  
   # > 12306
   - DOMAIN,ad.12306.com
