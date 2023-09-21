@@ -72,7 +72,7 @@ URL-REGEX,^https?:\/\/ucmp\.sf-express\.com\/cx-wechat-query\/query\/info-flow\/
 URL-REGEX,^https?:\/\/elife\.icbc\.com\.cn\/OFSTNEWBASE\/floorinfo\/getMantlePages\.do,REJECT
 
 # > 万桩微信小程序
-URL-REGEX,^https?:\/\/webapi\.wanzhuangkj\.com\/gatewaymsg\/ad\/banner?,REJECT
+URL-REGEX,^https?:\/\/webapi\.wanzhuangkj\.com\/gatewaymsg\/ad\/,REJECT
 
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
