@@ -21,6 +21,7 @@ DOMAIN,v2.da.mgtv.com,REJECT
 DOMAIN,video.da.mgtv.com,REJECT
 DOMAIN,vip.bz.mgtv.com,REJECT
 DOMAIN,ys.da.mgtv.com,REJECT
+URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
 
 [Map Local]
 ^https?:\/\/[\d\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
