@@ -71,9 +71,6 @@ URL-REGEX,^https?:\/\/ucmp\.sf-express\.com\/cx-wechat-query\/query\/info-flow\/
 # > 工银e生活微信小程序
 URL-REGEX,^https?:\/\/elife\.icbc\.com\.cn\/OFSTNEWBASE\/floorinfo\/getMantlePages\.do,REJECT
 
-# > 万桩微信小程序
-URL-REGEX,^https?:\/\/webapi\.wanzhuangkj\.com\/gatewaymsg\/ad\/banner\?,REJECT
-
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
@@ -130,6 +127,9 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 ^https?:\/\/api\.weibo\.cn\/!\/sug\/list\/finderchange\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/bootrealtime\.uve\.weibo\.com\/v3\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/api\.weibo\.cn\/2\/(ug\/checkin\/list|push\/daily|!\/live\/media_homelist|comments\/bullet_screens|photo\/info|statuses\/(container_positive|push_info)|vote\/get_vote_detail|!\/huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|search\/container_discover|hot\/hours_spotlight|video\/redpacket)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 万桩微信小程序
+^https?:\/\/webapi\.wanzhuangkj\.com\/gatewaymsg\/ad\/banner\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
 # > Sub Info
