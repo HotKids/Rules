@@ -17,6 +17,7 @@ DOMAIN,layer.bz.mgtv.com,REJECT
 DOMAIN,mob.bz.mgtv.com,REJECT
 DOMAIN,mobile.da.mgtv.com,REJECT
 DOMAIN,rc-topic-api.bz.mgtv.com,REJECT
+DOMAIN,rprain.bz.mgtv.com,REJECT
 DOMAIN,v2.da.mgtv.com,REJECT
 DOMAIN,video.da.mgtv.com,REJECT
 DOMAIN,vip.bz.mgtv.com,REJECT
