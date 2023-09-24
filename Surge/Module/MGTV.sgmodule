@@ -12,16 +12,13 @@ DOMAIN,credits3.bz.mgtv.com,REJECT
 DOMAIN,dflow.bz.mgtv.com,REJECT
 DOMAIN,encounter.bz.mgtv.com,REJECT
 DOMAIN,floor.bz.mgtv.com,REJECT
-DOMAIN,img.da.mgtv.com,REJECT
 DOMAIN,layer.bz.mgtv.com,REJECT
 DOMAIN,mob.bz.mgtv.com,REJECT
-DOMAIN,mobile.da.mgtv.com,REJECT
 DOMAIN,rc-topic-api.bz.mgtv.com,REJECT
 DOMAIN,rprain.bz.mgtv.com,REJECT
-DOMAIN,v2.da.mgtv.com,REJECT
-DOMAIN,video.da.mgtv.com,REJECT
+DOMAIN,rprain.log.mgtv.com,REJECT
 DOMAIN,vip.bz.mgtv.com,REJECT
-DOMAIN,ys.da.mgtv.com,REJECT
+DOMAIN-SUFFIX,da.mgtv.com,REJECT
 URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
 
 [Map Local]
