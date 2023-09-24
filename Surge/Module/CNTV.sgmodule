@@ -1,0 +1,78 @@
+#!name = 爱奇艺去广告
+#!desc = 过滤爱奇艺客户端广告
+## forked from @RuCu6/QuanX/main/Rewrites/Cube/cnftp.snippet
+
+[General]
+force-http-engine-hosts = %APPEND% <ip-address>,<ip-address>:49155,*.tc.qq.com,kjp.cupid.iqiyi.com,t7z.cupid.iqiyi.com,*.smtcdns.com
+
+[MITM]
+hostname = %APPEND% -i.vip.iqiyi.com, *.iqiyi.com,acs.youku.com,push.m.youku.com,un-acs.youku.com
+
+[Rule]
+// 爱奇艺
+DOMAIN-SUFFIX,cupid.iqiyi.com,DIRECT
+DOMAIN,api.iqiyi.com,REJECT
+// 腾讯
+DOMAIN,adsmind.gdtimg.com,REJECT
+DOMAIN,btrace.qq.com,REJECT
+DOMAIN,btrace.video.qq.com,REJECT
+DOMAIN,info4.video.qq.com,REJECT
+DOMAIN,info6.video.qq.com,REJECT
+DOMAIN,ios.video.mpush.qq.com,REJECT
+DOMAIN,mtrace.qq.com,REJECT
+DOMAIN,p.l.qq.com,REJECT
+DOMAIN,pgdt.gtimg.cn,REJECT
+DOMAIN,rpt.gdt.qq.com,REJECT
+DOMAIN-SUFFIX,trace.qq.com,REJECT
+URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
+// 优酷
+DOMAIN,push.m.youku.com,DIRECT
+DOMAIN,un-acs.youku.com,DIRECT
+DOMAIN,dorangesource.alicdn.com,DIRECT
+DOMAIN,adsmind.ugdtimg.com,REJECT
+DOMAIN,amdc.m.youku.com,REJECT
+DOMAIN,apiv4-iyes.youku.com,REJECT
+DOMAIN,httpdns.alicdn.com,REJECT
+DOMAIN,huichuan-mc.sm.cn,REJECT
+DOMAIN,huichuan.sm.cn,REJECT
+DOMAIN,iyes.youku.com,REJECT
+DOMAIN,m-vali.cp31.ott.cibntv.net,REJECT
+DOMAIN,mc.atm.youku.com,REJECT
+DOMAIN,vali-g1.cp31.ott.cibntv.net,REJECT
+DOMAIN,vali-ugc.cp31.ott.cibntv.net,REJECT
+DOMAIN,yk-ssp.ad.youku.com,REJECT
+DOMAIN,ykad-data.youku.com,REJECT
+URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
+
+[Map Local]
+// 爱奇艺
+^https?:\/\/act\.vip\.iqiyi\.com\/interact\/api\/v2\/show\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/iface2\.iqiyi\.com\/(ivos\/interact\/video\/data|video\/3\.0\/v_interface_proxy|views_pop\/3\.0\/pop_control)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+// 优酷
+^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(pisp\.scripts\.get|xspace\.play\.position\.preload\.query|xspace\.poplayer\.position\.query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+[Script]
+// 爱奇艺
+iqiyi1.js = type=http-response,pattern=^https?:\/\/search\.video\.iqiyi\.com\/q\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi2.js = type=http-response,pattern=^https?:\/\/(kjp|t7z)\.cupid\.iqiyi\.com\/mixer\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi3.js = type=http-response,pattern=^https?:\/\/comment-card\.iqiyi\.com\/views_comment\/3\.0\/long_video_comments\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi4.js = type=http-response,pattern=^https?:\/\/[\d\.]+\/3f1\/cards\.iqiyi\.com\/(views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi5.js = type=http-response,pattern=^https?:\/\/access\.if\.iqiyi\.com\/3f1\/cards\.iqiyi\.com\/(views_category\/3\.0\/category_home|views_home\/3\.0\/qy_home|waterfall\/3\.0\/feed)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi6.js = type=http-response,pattern=^https?:\/\/iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)|views_(home\/3\.0\/qy_home|search\/3\.0\/(hot_query_)?search|plt\/3\.0\/player_tabs_v2|waterfall\/3\.0\/feed))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+// 优酷
+youku1.js = type=http-response,pattern=^https?:\/\/un-acs\.youku\.com\/gw\/mtop\.youku\.play\.ups\.appinfo\.get,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+youku2.js = type=http-response,pattern=^https?:\/\/push\.m\.youku\.com\/collect-api\/get_push_interval_config_wx\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+youku3.js = type=http-response,pattern=^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|huluwa\.dispatcher\.youthmode\.config2|soku\.yksearch),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
