@@ -6,12 +6,13 @@
 force-http-engine-hosts = %APPEND% <ip-address>,<ip-address>:49155,*.tc.qq.com,kjp.cupid.iqiyi.com,t7z.cupid.iqiyi.com,*.smtcdns.com
 
 [MITM]
-hostname = %APPEND% -i.vip.iqiyi.com, *.iqiyi.com,acs.youku.com,push.m.youku.com,un-acs.youku.com
+hostname = %APPEND% -i.vip.iqiyi.com, *.iqiyi.com,acs.youku.com,push.m.youku.com,un-acs.youku.com,*.mgtv.com
 
 [Rule]
 // 爱奇艺
 DOMAIN-SUFFIX,cupid.iqiyi.com,DIRECT
 DOMAIN,api.iqiyi.com,REJECT
+
 // 腾讯
 DOMAIN,adsmind.gdtimg.com,REJECT
 DOMAIN,btrace.qq.com,REJECT
@@ -27,6 +28,7 @@ DOMAIN-SUFFIX,trace.qq.com,REJECT
 URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
 URL-REGEX,^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
+
 // 优酷
 DOMAIN,push.m.youku.com,DIRECT
 DOMAIN,un-acs.youku.com,DIRECT
@@ -46,6 +48,22 @@ DOMAIN,yk-ssp.ad.youku.com,REJECT
 DOMAIN,ykad-data.youku.com,REJECT
 URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
 
+// 芒果TV
+DOMAIN,credits.bz.mgtv.com,REJECT
+DOMAIN,credits2.bz.mgtv.com,REJECT
+DOMAIN,credits3.bz.mgtv.com,REJECT
+DOMAIN,dflow.bz.mgtv.com,REJECT
+DOMAIN,encounter.bz.mgtv.com,REJECT
+DOMAIN,floor.bz.mgtv.com,REJECT
+DOMAIN,layer.bz.mgtv.com,REJECT
+DOMAIN,mob.bz.mgtv.com,REJECT
+DOMAIN,rc-topic-api.bz.mgtv.com,REJECT
+DOMAIN,rprain.bz.mgtv.com,REJECT
+DOMAIN,rprain.log.mgtv.com,REJECT
+DOMAIN,vip.bz.mgtv.com,REJECT
+DOMAIN-SUFFIX,da.mgtv.com,REJECT
+URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
+
 [Map Local]
 // 爱奇艺
 ^https?:\/\/act\.vip\.iqiyi\.com\/interact\/api\/v2\/show\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -53,6 +71,13 @@ URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
 
 // 优酷
 ^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(pisp\.scripts\.get|xspace\.play\.position\.preload\.query|xspace\.poplayer\.position\.query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+// 芒果TV
+^https?:\/\/[\d\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/hb-boom\.api\.mgtv\.com\/release\/pullReleaseInfo data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobile\.api\.mgtv\.com\/v2\/mobile\/checkUpdate\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
 // 爱奇艺
@@ -76,3 +101,16 @@ youku1.js = type=http-response,pattern=^https?:\/\/un-acs\.youku\.com\/gw\/mtop\
 youku2.js = type=http-response,pattern=^https?:\/\/push\.m\.youku\.com\/collect-api\/get_push_interval_config_wx\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
 youku3.js = type=http-response,pattern=^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|huluwa\.dispatcher\.youthmode\.config2|soku\.yksearch),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+// 芒果TV
+mgtv1.js = type=http-response,pattern=^https?:\/\/me\.bz\.mgtv\.com\/v3\/module\/list\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+mgtv2.js = type=http-response,pattern=^https?:\/\/mobile-thor\.api\.mgtv\.com\/v1\/vod\/info\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+mgtv3.js = type=http-response,pattern=^https?:\/\/mobileso\.bz\.mgtv\.com\/mobile\/recommend\/v2\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+mgtv4.js = type=http-response,pattern=^https?:\/\/mob-st\.bz\.mgtv\.com\/odin\/c1\/channel\/index\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+mgtv5.js = type=http-response,pattern=^https?:\/\/mobile\.api\.mgtv\.com\/(mobile\/config|v10\/video\/info)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+mgtv6.js = type=http-response,pattern=^https?:\/\/dc2?\.bz\.mgtv\.com\/dynamic\/v1\/channel\/(index|vrsList)\/\w,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
