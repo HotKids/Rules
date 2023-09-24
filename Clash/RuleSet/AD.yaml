@@ -102,16 +102,13 @@ payload:
   - DOMAIN,dflow.bz.mgtv.com
   - DOMAIN,encounter.bz.mgtv.com
   - DOMAIN,floor.bz.mgtv.com
-  - DOMAIN,img.da.mgtv.com
   - DOMAIN,layer.bz.mgtv.com
   - DOMAIN,mob.bz.mgtv.com
-  - DOMAIN,mobile.da.mgtv.com
   - DOMAIN,rc-topic-api.bz.mgtv.com
   - DOMAIN,rprain.bz.mgtv.com
-  - DOMAIN,v2.da.mgtv.com
-  - DOMAIN,video.da.mgtv.com
+  - DOMAIN,rprain.log.mgtv.com
   - DOMAIN,vip.bz.mgtv.com
-  - DOMAIN,ys.da.mgtv.com
+  - DOMAIN-SUFFIX,da.mgtv.com
 
   # > NetEase Music
   - DOMAIN,httpdns.n.netease.com
