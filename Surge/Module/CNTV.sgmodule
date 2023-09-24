@@ -14,9 +14,6 @@ DOMAIN-SUFFIX,cupid.iqiyi.com,DIRECT
 DOMAIN,api.iqiyi.com,REJECT
 
 // 腾讯
-URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
-URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
-URL-REGEX,^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 DOMAIN,adsmind.gdtimg.com,REJECT
 DOMAIN,btrace.qq.com,REJECT
 DOMAIN,btrace.video.qq.com,REJECT
@@ -28,9 +25,11 @@ DOMAIN,p.l.qq.com,REJECT
 DOMAIN,pgdt.gtimg.cn,REJECT
 DOMAIN,rpt.gdt.qq.com,REJECT
 DOMAIN-SUFFIX,trace.qq.com,REJECT
+URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
+URL-REGEX,^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 
 // 优酷
-URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
 DOMAIN,push.m.youku.com,DIRECT
 DOMAIN,un-acs.youku.com,DIRECT
 DOMAIN,dorangesource.alicdn.com,DIRECT
@@ -47,9 +46,9 @@ DOMAIN,vali-g1.cp31.ott.cibntv.net,REJECT
 DOMAIN,vali-ugc.cp31.ott.cibntv.net,REJECT
 DOMAIN,yk-ssp.ad.youku.com,REJECT
 DOMAIN,ykad-data.youku.com,REJECT
+URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
 
 // 芒果TV
-URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
 DOMAIN,credits.bz.mgtv.com,REJECT
 DOMAIN,credits2.bz.mgtv.com,REJECT
 DOMAIN,credits3.bz.mgtv.com,REJECT
@@ -63,6 +62,7 @@ DOMAIN,rprain.bz.mgtv.com,REJECT
 DOMAIN,rprain.log.mgtv.com,REJECT
 DOMAIN,vip.bz.mgtv.com,REJECT
 DOMAIN-SUFFIX,da.mgtv.com,REJECT
+URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
 
 [Map Local]
 // 爱奇艺
