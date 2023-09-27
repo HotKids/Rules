@@ -6,7 +6,7 @@
 force-http-engine-hosts = %APPEND% <ip-address>,<ip-address>:49155,*.tc.qq.com,kjp.cupid.iqiyi.com,t7z.cupid.iqiyi.com,*.smtcdns.com
 
 [MITM]
-hostname = %APPEND% -i.vip.iqiyi.com, *.iqiyi.com,*.tc.qq.com,*.smtcdns.com,acs.youku.com,push.m.youku.com,un-acs.youku.com,*.mgtv.com
+hostname = %APPEND% %APPEND% -i.vip.iqiyi.com,*.iqiyi.com,*.mgtv.com,vv.video.qq.com,acs.youku.com,push.m.youku.com,un-acs.youku.com
 
 [Rule]
 // 爱奇艺
@@ -24,6 +24,12 @@ DOMAIN,mtrace.qq.com,REJECT
 DOMAIN,p.l.qq.com,REJECT
 DOMAIN,pgdt.gtimg.cn,REJECT
 DOMAIN,rpt.gdt.qq.com,REJECT
+DOMAIN,tytx.m.cn.miaozhen.com,REJECT
+//DOMAIN,vv.video.qq.com,REJECT
+DOMAIN,vv6.video.qq.com,REJECT
+DOMAIN-SUFFIX,beacon.qq.com,REJECT
+DOMAIN-SUFFIX,gdt.qq.com,REJECT
+DOMAIN-SUFFIX,tpns.qq.com,REJECT
 DOMAIN-SUFFIX,trace.qq.com,REJECT
 URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
@@ -94,6 +100,9 @@ iqiyi5.js = type=http-response,pattern=^https?:\/\/access\.if\.iqiyi\.com\/3f1\/
 iqiyi6.js = type=http-response,pattern=^https?:\/\/iface2\.iqiyi\.com\/(aggregate\/3\.0\/getMyMenus|control\/3\.0\/init_proxy|fusion\/3\.0\/common_switch|views\/3\.0\/(bottom_theme|home_top_menu))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
 iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)|views_(home\/3\.0\/qy_home|search\/3\.0\/(hot_query_)?search|plt\/3\.0\/player_tabs_v2|waterfall\/3\.0\/feed))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+
+// 腾讯视频
+qqvideo.js = type=http-request, pattern=^https?:\/\/vv\.video\.qq\.com\/,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/scripts/replace-body.js,timeout=60,argument="%26sppreviewtype%3D1(.*)%26spsrt%3D1->%26sppreviewtype%3D0%241spsrt%3D0
 
 // 优酷
 youku1.js = type=http-response,pattern=^https?:\/\/un-acs\.youku\.com\/gw\/mtop\.youku\.play\.ups\.appinfo\.get,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
