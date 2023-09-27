@@ -31,9 +31,6 @@ DOMAIN-SUFFIX,beacon.qq.com,REJECT
 DOMAIN-SUFFIX,gdt.qq.com,REJECT
 DOMAIN-SUFFIX,tpns.qq.com,REJECT
 DOMAIN-SUFFIX,trace.qq.com,REJECT
-URL-REGEX,^http:\/\/[\d\.:]*\/?(defaultts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
-URL-REGEX,^http:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+,REJECT
-URL-REGEX,^http:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+,REJECT
 
 // 优酷
 DOMAIN,push.m.youku.com,DIRECT
@@ -52,7 +49,6 @@ DOMAIN,vali-g1.cp31.ott.cibntv.net,REJECT
 DOMAIN,vali-ugc.cp31.ott.cibntv.net,REJECT
 DOMAIN,yk-ssp.ad.youku.com,REJECT
 DOMAIN,ykad-data.youku.com,REJECT
-URL-REGEX,^http:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$,REJECT
 
 // 芒果TV
 DOMAIN,credits.bz.mgtv.com,REJECT
@@ -68,7 +64,13 @@ DOMAIN,rprain.bz.mgtv.com,REJECT
 DOMAIN,rprain.log.mgtv.com,REJECT
 DOMAIN,vip.bz.mgtv.com,REJECT
 DOMAIN-SUFFIX,da.mgtv.com,REJECT
-URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
+
+[URL Rewrite]
+^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes - reject
+^https?:\/\/[0-9.]+(\:80)?\/amdc\/mobileDispatch$ - reject
+^https?:\/\/apd-vlive\.apdcdn\.tc\.qq\.com\/vmind\.qqvideo\.tc\.qq\.com\/\w+ - reject
+^https?:\/\/apd-\w+\.v\.smtcdns\.com\/(defaultts|omts|vmind\.qqvideo)\.tc\.qq\.com\/\w+ - reject
+^https?:\/\/[\d\.:]*\/?(defaultts\.tc|vmind\.qqvideo\.tc|finderpdd\.video)\.qq\.com\/\w+ - reject
 
 [Map Local]
 // 爱奇艺
@@ -108,11 +110,9 @@ iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_cat
 qqvideo.js = type=http-request, pattern=^https?:\/\/vv\.video\.qq\.com\/getvinfo,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/scripts/replace-body.js, timeout=60, argument="%26spgzip%3D%5Cd(.*)%26sppreviewtype%3D%5Cd(.*)%26spsrt%3D%5Cd(.*)%26adpass%3D%5Cw%2B->%26spgzip%3D0%241%26sppreviewtype%3D0%242%26spsrt%3D0%243%26adpass%3D0"
 
 // 优酷
-youku1.js = type=http-response,pattern=^https?:\/\/un-acs\.youku\.com\/gw\/mtop\.youku\.play\.ups\.appinfo\.get,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
+youku1.js = type=http-response,pattern=^https?:\/\/(un)?acs\.youku\.com\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query|ycp\.query)|haidai\.lantern\.appconfig\.get|huluwa\.dispatcher\.youthmode\.config2|soku\.yksearch|play\.ups\.appinfo\.get),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
 youku2.js = type=http-response,pattern=^https?:\/\/push\.m\.youku\.com\/collect-api\/get_push_interval_config_wx\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
-
-youku3.js = type=http-response,pattern=^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(columbus\.(gateway\.new\.execute|home\.feed|home\.query|uc\.query)|ycp\.query|haidai\.lantern\.appconfig\.get|huluwa\.dispatcher\.youthmode\.config2|soku\.yksearch),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
 // 芒果TV
 mgtv1.js = type=http-response,pattern=^https?:\/\/me\.bz\.mgtv\.com\/v3\/module\/list\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
