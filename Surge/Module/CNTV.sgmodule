@@ -73,7 +73,10 @@ URL-REGEX,^https?:\/\/[\d\.]+:\d{5}\/\?cmd=indexes,REJECT
 [Map Local]
 // 爱奇艺
 ^https?:\/\/act\.vip\.iqiyi\.com\/interact\/api\/v2\/show\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/iface2\.iqiyi\.com\/(ivos\/interact\/video\/data|video\/3\.0\/v_interface_proxy|views_pop\/3\.0\/pop_control)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+\/\/iface2\.iqiyi\.com\/(ivos\/interact\/video\/data|video\/3\.0\/v_interface_proxy|views_pop\/3\.0\/pop_control)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+// 腾讯
+^https?:\/\/vv\.video\.qq\.com\/(diffvmind|getvmind) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 // 优酷
 ^https?:\/\/acs\.youku\.com\/gw\/mtop\.youku\.(pisp\.scripts\.get|xspace\.play\.position\.preload\.query|xspace\.poplayer\.position\.query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -102,7 +105,7 @@ iqiyi6.js = type=http-response,pattern=^https?:\/\/iface2\.iqiyi\.com\/(aggregat
 iqiyi7.js = type=http-response,pattern=^https?:\/\/cards\.iqiyi\.com\/(views_category\/3\.0\/(category_home|categorylib_content|film_hybrid)|views_(home\/3\.0\/qy_home|search\/3\.0\/(hot_query_)?search|plt\/3\.0\/player_tabs_v2|waterfall\/3\.0\/feed))\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
 
 // 腾讯视频
-qqvideo.js = type=http-request, pattern=^https?:\/\/vv\.video\.qq\.com\/,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/scripts/replace-body.js,timeout=60,argument="%26sppreviewtype%3D1(.*)%26spsrt%3D1->%26sppreviewtype%3D0%241spsrt%3D0
+qqvideo.js = type=http-request, pattern=^https?:\/\/vv\.video\.qq\.com\/getvinfo,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/scripts/replace-body.js, timeout=60, argument="%26spgzip%3D%5Cd(.*)%26sppreviewtype%3D%5Cd(.*)%26spsrt%3D%5Cd(.*)%26adpass%3D%5Cw%2B->%26spgzip%3D0%241%26sppreviewtype%3D0%242%26spsrt%3D0%243%26adpass%3D0"
 
 // 优酷
 youku1.js = type=http-response,pattern=^https?:\/\/un-acs\.youku\.com\/gw\/mtop\.youku\.play\.ups\.appinfo\.get,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/cnftp.js
