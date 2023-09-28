@@ -21,7 +21,7 @@ payload:
   - DOMAIN-SUFFIX,u3.ucweb.com
 
   # > Aliyun
-  - IP-CIDR,203.107.1.1/24
+  - IP-CIDR,203.107.1.1/24,no-resolve
 
   # > Amap
   - DOMAIN,amap-aos-info-nogw.amap.com
@@ -55,7 +55,7 @@ payload:
   - DOMAIN,lc.map.baidu.com
   - DOMAIN,mobads.baidu.com
   - DOMAIN,sf3-fe-tos.pglstatp-toutiao.com
-  - IP-CIDR,180.76.76.200/32
+  - IP-CIDR,180.76.76.200/32,no-resolve
 
   # > Bilibili
   - DOMAIN,mall.bilibili.com
@@ -209,9 +209,9 @@ payload:
   - DOMAIN,mqtt.zhihu.com
   - DOMAIN,sugar.zhihu.com
   - DOMAIN,zxid-m.mobileservice.cn
-  - IP-CIDR,103.41.167.237/32
-  - IP-CIDR,118.89.204.198/32
-  - IP6-CIDR,2402:4e00:1200:ed00:0:9089:6dac:96b6/128
+  - IP-CIDR,103.41.167.237/32,no-resolve
+  - IP-CIDR,118.89.204.198/32,no-resolve
+  - IP6-CIDR,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,no-resolve
 
   # > 10000
   - DOMAIN,ad.21cn.com
