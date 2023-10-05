@@ -81,6 +81,7 @@ payload:
   - DOMAIN-KEYWORD,adservice.google.com.
 
   # > ICBC
+  - DOMAIN,oisc.icbc.com.cn
   - DOMAIN,pageviewp.icbc.com.cn
 
   # > iQIYI
