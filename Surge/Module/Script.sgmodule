@@ -33,7 +33,7 @@ URL-REGEX,^https?:\/\/az1mbasecc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.clientfa
 URL-REGEX,^https?:\/\/intellicc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.intelli\.render\.api\.render\/getDynamicDataSec,REJECT
 
 # > 浦大喜奔
-URL-REGEX,^https?:\/\/image\.spdbccc\.com\.cn\/group\d\/M00\/[7-9]{1}[A-Z0-9]{1}\/[A-Z0-9]{2}\/rBsZ.+(4038|0571)\.PNG,REJECT
+URL-REGEX,^https?:\/\/image\.spdbccc\.com\.cn\/group\d\/M00\/[A-Z0-9]{2}\/[A-Z0-9]{2}\/rBsZ.+(4038|0571|M511),REJECT
 
 # > 微博
 URL-REGEX,^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(get-lbs-cell-info\.php|sdkconfig\.php),REJECT
