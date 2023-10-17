@@ -30,7 +30,7 @@ Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili
 Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsy.js
 
 # > 霸王茶姬小程序 GetCookie by Sliverkiss
-Cookie: 霸王茶姬小程序 = type=http-request,pattern=^https?:\/\/webapi\.qmai\.cn\/web\/catering\/integral\/sign\/signIn,script-path=https://raw.githubusercontent.com/Guding88/Script/main/bawangchaji/bwcj_token.js
+Cookie: 霸王茶姬小程序 = type=http-request,pattern=^https?:\/\/webapi\.qmai\.cn\/web\/catering\/integral\/sign\/signIn,script-path=https://raw.githubusercontent.com/Guding88/Script/main/bawangchaji/bwcj_token.js,requires-body=1
 
 # > 阿里云盘 GetCookie by ClydeTime
 // https://auth.aliyundrive.com/v2/account/token
