@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,ccsp-egmas.sf-express.com,auth.aliyundrive.com
+hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,mcs-mimp-web.sf-express.com,auth.aliyundrive.com
 
 [Rule]
 DOMAIN,gslbali.ximalaya.com,REJECT
@@ -27,7 +27,7 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/(mobile|mobilehera|
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 顺丰速运 GetCookie by chavyleung
-Cookie: 顺丰速运 = type=http-request,pattern=^https:\/\/ccsp-egmas.sf-express.com\/cx-app-member\/member\/app\/user\/universalSign,script-path=https://raw.githubusercontent.com/chavyleung/scripts/master/sfexpress/sfexpress.cookie.js,requires-body=true
+Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsy.js
 
 # > 阿里云盘 GetCookie by ClydeTime
 // https://auth.aliyundrive.com/v2/account/token
