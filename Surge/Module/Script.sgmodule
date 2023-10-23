@@ -83,7 +83,7 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 # > 百度首页纯净搜索 
 ^https?:\/\/(www|m)\.baidu\.com\/?($|\?(from=\w{8,9}|tn=&from=)) data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/baidu.html" header="Content-Type: text/html; charset=utf-8"
 
-# 彩云天气移除赏花地图&赏叶地图
+# 彩云天气移除赏花地图&赏叶地图 by RuCu6
 ^https?:\/\/api\.caiyunapp\.com\/v1\/activity\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/wrapper\.cyapi\.cn\/v1\/activity\? data="https://raw.githubusercontent.com/RuCu6/QuanX/main/Mocks/caiyun.json"
 
@@ -97,19 +97,19 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 ^https?:\/\/pan\.baidu\.com\/(act\/api\/activityentry|rest\/2\.0\/pcs\/adx)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/update\.pan\.baidu\.com\/statistics\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 百度地图
+# > 百度地图 by RuCu6
 ^https?:\/\/newclient\.map\.baidu\.com\/(client\/crossmarketing\/\?container=du_(aide_module|card_ugc|trip_route_tab)|client\/noticebar\/get|client\/phpui2\/\?qt=ads|grow-engine\/api\/common\/userHome\?)|https:\/\/newclient\.map\.baidu\.com\/client\/crossmarketing\/\?oem= data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/notice|gomarketing\/api\/activity\/talos\/activitycard\?|gomarketing\/api\/popup\/getentrancecordovaurl|goorder\/passenger\/baseinfo) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 高德地图
+# > 高德地图 by RuCu6
 ^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists|msgbox\/pull_mp)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/m5-zb\.amap\.com\/ws\/boss\/(car\/order\/content_info|order\/car\/king_toolbox_car_bubble|order_web\/friendly_information|tips\/onscene_visual_optimization)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/m5\.amap\.com\/ws\/(faas\/amap-navigation\/card-service-(car-end|route-plan)|shield\/search\/(new_hotword|new_hotword)|shield\/search_poi\/(tips_adv)|faas\/amap-navigation\/main-page-(assets|location)|mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/scene\/recommend|valueadded\/weather\/v2)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 网易云
+# > 网易云 by RuCu6
 ^https?:\/\/(ipv4|interface(\d)?)\.music\.163\.com\/w?eapi\/(ocpc\/)?ad\/.*|search\/(chart\/(detail|list)|default\/keyword\/list|rcmd\/keyword\/get\/v2|specialkeyword\/get)|link\/position\/show\/(resource|strategy)|music\/songshare\/text\/recommend\/get|mlivestream\/entrance\/playpage\/v7|community\/friends\/fans-group\/artist\/group)\/get|mlog\/vinyl\/story\/list|user\/sub\/artist\/exist|vipcenter\/tspopup\/get|zone\/songplay\/entry\/get|resniche\/position\/play\/new\/get|comment\/(hotcomment\/collect\/fetchmodelinfov2|feed\/inserted\/resources|tips\/v2\/get)|content\/exposure\/vinyl\/comment\/entrance|v1\/content\/exposure\/comment\/banner|event\/floating\/layer|homepage\/banner\/ad\/get|link\/scene\/show\/resource|music-vip-membership\/client\/vip\/info|vipauth\/app\/auth\/recycle|side-bar\/mini-program\/music-service\/account|delivery\/batch-deliver|mine\/applet\/redpoint|voice\/play\/page\/ad\/info|activity\/bonus\/playpage\/time\/query|middle\/clientcfg\/config\/list|resource-exposure\/(activity\/config\/get|config) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 美团
+# > 美团 by RuCu6
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
