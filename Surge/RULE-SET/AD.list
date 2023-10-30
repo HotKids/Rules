@@ -88,6 +88,11 @@ DOMAIN,api.iqiyi.com
 DOMAIN-SUFFIX,cupid.iqiyi.com
 DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 
+# > JD
+DOMAIN,dns.jd.com
+IP-CIDR,101.124.19.122/32
+IP-CIDR6,2402:db40:5100:1011::5/128
+
 # > Meituan
 DOMAIN,al-log.d.meituan.net
 DOMAIN,babel-statistics-android.d.meituan.net
