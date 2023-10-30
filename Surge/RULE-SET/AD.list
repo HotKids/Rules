@@ -162,6 +162,9 @@ DOMAIN,adexpo.tencentmusic.com
 DOMAIN,adclick.tencentmusic.com
 DOMAIN,otheve.beacon.qq.com
 DOMAIN,monitor.music.qq.com
+DOMAIN,wxsnsdy.wxs.qq.com
+DOMAIN,wxsmsdy.video.qq.com
+DOMAIN,wxsnsdythumb.wxs.qq.com
 
 # > TVer
 DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
