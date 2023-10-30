@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,clientaccess.10086.cn,wap.js.10086.cn,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,image.spdbccc.com,static.95508.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,ucmp.sf-express.com,elife.icbc.com.cn,static.zhihu.com,interface*.music.163.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.caiyunapp.com,wrapper.cyapi.cn,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
+hostname = %APPEND% mp.weixin.qq.com,api.m.jd.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,elife.icbc.com.cn,static.zhihu.com,interface*.music.163.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.caiyunapp.com,wrapper.cyapi.cn,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
 
 [Rule]
 # > 微信公众号
@@ -23,10 +23,6 @@ URL-REGEX,^https?:\/\/res\.kfc\.com\.cn\/advertisement,REJECT
 
 # > 拼多多
 URL-REGEX,^https?:\/\/api\.(pinduoduo|yangkeduo)\.com\/api\/cappuccino\/splash,REJECT
-
-# > 中国移动
-URL-REGEX,^https?:\/\/clientaccess\.10086\.cn\/biz-orange\/DN\/init\/startInit,REJECT
-URL-REGEX,^https?:\/\/wap\.js\.10086\.cn\/jsmccClient\/cd\/market_content\/api\/v\d\/market_content\.page\.query,REJECT
 
 # > 掌上生活
 URL-REGEX,^https?:\/\/az1mbasecc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.clientface\.clientservice\.api\.advertiseService\/preCacheAdvertiseSec,REJECT
@@ -62,9 +58,6 @@ URL-REGEX,^https?:\/\/api\.douban\.com\/(v2\/app_ads\/splash|b.*\/common_ads\?.*
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
 
-# > 顺丰微信小程序
-URL-REGEX,^https?:\/\/ucmp\.sf-express\.com\/cx-wechat-query\/query\/info-flow\/reconsitution-list,REJECT
-
 # > 工银e生活微信小程序
 URL-REGEX,^https?:\/\/elife\.icbc\.com\.cn\/OFSTNEWBASE\/floorinfo\/getMantlePages\.do,REJECT
 
@@ -90,7 +83,7 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 # > 微信公众号
 ^https?:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|masonryfeed|relatedarticle)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 阿里云盘
+# > 阿里云盘 by RuCu6
 ^https?:\/\/api\.alipan\.com\/adrive\/v1\/file\/getTopFolders data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 百度网盘
@@ -115,6 +108,9 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 ^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$ data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
+# > 京东 by RuCu6
+^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=uniformRecommend data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
 # > 米家
 ^https?:\/\/home\.mi\.com\/cgi-op\/api\/v1\/recommendation\/(banner|myTab|openingBanner) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
@@ -124,11 +120,15 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 # > 酷安
 ^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 浦大喜奔
-URL-REGEX,^https?:\/\/image\.spdbccc\.com\.cn\/group\d\/M00\/[A-Z0-9]{2}\/[A-Z0-9]{2}\/.+(4038|0571|M511|V-008|g549|b0628) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-
 # > 发现精彩
 ^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 中国移动
+^https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(explorePage\/getAdverList|init\/startInit) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+
+# > 顺丰微信小程序
+^https?:\/\/mcs-mimp-web\.sf-express\.com\/mcs-mimp\/integralPlanet\/getCxAdvertiseList data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo|operation-platform\/info-flow-adver\/query|esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 小红书
 ^https?:\/\/www\.xiaohongshu\.com\/api\/(sns\/v1\/ads\/resource|marketing\/box\/trigger)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -163,6 +163,9 @@ xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\
  
 # > 百度地图去广告 by app2smile
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
+
+# > 京东 by RuCu6
+jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(personinfoBusiness|start),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
 
 # > 阿里云盘 by RuCu6
 alidrive.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
