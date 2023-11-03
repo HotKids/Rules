@@ -13,4 +13,4 @@ Cookie: 哔哩哔哩 App = type=http-request,pattern=^https?:\/\/app\.bilibili\.
 Cookie: 哔哩哔哩 网页 = type=http-request,pattern=^https?:\/\/m.bilibili.com/$,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js,requires-body=0
 
 # > 哔哩哔哩 DailyBonus by ClydeTime
-Tasks: 哔哩哔哩 = type=cron,cronexp="0 12 * * *",script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js
+Tasks: 哔哩哔哩 = type=cron,cronexp="0 12 * * *",timeout=300,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/BiliBili.js
