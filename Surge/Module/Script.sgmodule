@@ -135,7 +135,7 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v3\/note\/guide|v1\/surprisebox\/(get_style|open|submit_action))\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 微博
-^https?:\/\/bootrealtime\.uve\.weibo\.com\/v3\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/(card)?\.weibo\.com\/(tt)?article\/(x)?\/m\/aj\/(reward|uvead)\?  data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https:\/\/api\.weibo\.cn\/(2\/(ug\/checkin\/list|push\/daily|comments\/bullet_screens|photo\/info|statuses\/(container_positive|push_info)|vote\/get_vote_detail|search\/container_discover|hot\/hours_spotlight|video\/redpacket|!\/(live\/media_homelist|chaohua\/discovery\/home_bottom\/switch|huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|wbox\/\w+\/(home_bottom_modal|interest_category)))|!\/sug\/list\/finderchange)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
