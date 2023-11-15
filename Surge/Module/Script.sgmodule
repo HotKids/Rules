@@ -176,11 +176,10 @@ baidumap.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\
 # > 高德地图 by RuCu6
 ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch$
 amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch$,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
-amap1.js = type=http-response,pattern=^https?:\/\/m5-zb\.amap\.com\/ws\/(promotion-web\/resource(\/home)?|sharedtrip\/taxi\/order_detail_car_tips)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
-amap2.js = type=http-response,pattern=^https?:\/\/m5\.amap\.com\/ws\/(perception\/drive\/routePlan|shield\/search\/(common\/coupon\/info|poi\/detail)|shield\/search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|faas\/amap-navigation\/(card-service-plan-home|main-page)|shield\/frogserver\/aocs\/updatable\/1|shield\/dsp\/profile\/index\/nodefaasv3|shield\/search\/nearbyrec_smart|valueadded\/alimama\/splash_screen)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
+amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(shield\/(search\/(common\/coupon\/info|poi\/detail|nearbyrec_smart)|search_business\/process\/marketingOperationStructured|search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|frogserver\/aocs\/updatable\/1|dsp\/profile\/index\/nodefaasv3)|perception\/drive\/routePlan|faas\/amap-navigation\/(card-service-plan-home|main-page)|valueadded\/alimama\/splash_screen|promotion-web\/resource(\/home)?|sharedtrip\/taxi\/order_detail_car_tips)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
 
 # > 酷安去广告 by RuCu6
-coolapk.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
+coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
 
 # > 12306 开屏广告 by RuCu6
 12306.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/12306.js
