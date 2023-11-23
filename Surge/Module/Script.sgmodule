@@ -157,11 +157,8 @@ WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp
 xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(search\/(banner|hot)_list|system_service\/config)|v2\/note\/(widgets|feed)|v3\/note\/videofeed|v4\/(followfeed|search\/(hint|trending))|v6\/homefeed|v10\/search\/notes)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 // xiaohongshu_splash.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v2\/system_service\/splash_config,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
 // xiaohongshu_timeline.js = type=http-response,pattern=^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v6\/homefeed\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
- 
-# > 百度地图去广告 by app2smile
-baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/phpui2\/\?qt=ads,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/baidumap.js
 
-# > 京东 by RuCu6
+# > 京东去广告 by RuCu6
 jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
 
 # > 阿里云盘 by RuCu6
