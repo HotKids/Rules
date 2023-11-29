@@ -162,13 +162,13 @@ xiaohongshu.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\
 jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/jd.js
 
 # > 阿里云盘 by RuCu6
-alidrive.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
+alidrive_proto.js = type=http-response,pattern=^https?:\/\/(api\.alipan\.com\/apps\/v2\/users\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/adrive.js
 
 # > 百度网盘 by RuCu6
-baidudrive.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
+baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
 
 # > 百度地图 by RuCu6
-baidumap.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/baidu/map.js
+baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/baidu/map.js
 
 # > 高德地图 by RuCu6
 ^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch$
@@ -179,13 +179,13 @@ amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/
 coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
 
 # > 12306 开屏广告 by RuCu6
-12306.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/12306.js
+12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/12306.js
 
 # > Keep 去广告 by by ddgksf2013
 // 修改底栏
-// Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+// Keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 // 保留底栏
-Keep.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+Keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|homepage\/v\d\/tab|nuocha\/course\/v2\/\w+\/preview|sportpage\/sport\/v3\/mysport)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 航旅纵横
-Umetrip.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/Umetrip/Umetrip_remove_ads.js
+Umetrip_proto.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/Umetrip/Umetrip_remove_ads.js
