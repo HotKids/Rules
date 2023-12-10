@@ -24,3 +24,6 @@ payload:
   - DOMAIN,push.m.youku.com
   - DOMAIN,un-acs.youku.com
   - DOMAIN,dorangesource.alicdn.com
+  
+  # > Samsung Galaxy App Store CN
+  - DOMAIN,cn-ms.galaxyappstore.com
