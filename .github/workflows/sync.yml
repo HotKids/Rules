@@ -2,7 +2,7 @@ name: Config Update
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
   workflow_dispatch:
   schedule:
     - cron: '0 12 * * *'
@@ -23,11 +23,11 @@ jobs:
         pip install pandas requests pyyaml
     - name: Run script
       run: python ../main.py
-      working-directory: ./rule/
+      working-directory: ./sing-box/
     - name: Commit and push config.json
       run: |
         git config --global user.email "action@github.com"
         git config --global user.name "GitHub Action"
-        git add ./rule/*.json
+        git add ./sing-box/*.json
         git commit -m "Add JSON files"
         git push
