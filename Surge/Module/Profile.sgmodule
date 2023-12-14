@@ -35,7 +35,7 @@ socks5-listen = 0.0.0.0:6153
 # > 跳过代理
 # 跳过某个域名或者 IP 段，这些目标主机将不会由 Surge Proxy 处理。
 # (macOS 版本中，如果启用了 Set as System Proxy, 这些值会被写入到系统网络代理设置.)
-skip-proxy = %APPEND% localhost, *.local, captive.apple.com, cable.auth.com, www.baidu.com, yunbusiness.ccb.com, 127.0.0.1/32, 192.168.0.0/16, ::1/128, fc00::/7, fd00::/8, fe80::/10, ff00::/8, 2001::/32, 2001:db8::/32, 2002::/16, ::ffff:0:0:0:0/1, ::ffff:128:0:0:0/1, iosapps.itunes.apple.com
+skip-proxy = %APPEND% 192.168.0.0/24, 10.0.0.0/8, 172.16.0.0/12, 127.0.0.1, localhost, *.local
 
 # > 排除简单主机名
  exclude-simple-hostnames = true
@@ -61,7 +61,7 @@ dns-server = system, 119.29.29.29, 119.28.28.28, 1.2.4.8, 1.1.1.1, 1.0.0.1, 223.
 # > Always Real IP Hosts
 # 当 Surge VIF 处理 DNS 问题时，此选项要求 Surge 返回一个真正的 IP 地址，而不是一个假 IP 地址。
 # DNS 数据包将被转发到上游 DNS 服务器。
-always-real-ip = %APPEND% *.lan, cable.auth.com, *.msftconnecttest.com, *.msftncsi.com, network-test.debian.org, detectportal.firefox.com, resolver1.opendns.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, localhost.*.qq.com
+always-real-ip = %APPEND% *.lan, *.msftconnecttest.com, *.msftncsi.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, localhost.*.qq.com
 
 # > Hijack DNS
 # 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址 (198.18.0.2)。
@@ -70,7 +70,7 @@ always-real-ip = %APPEND% *.lan, cable.auth.com, *.msftconnecttest.com, *.msftnc
 
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理。Surge HTTP 引擎将处理这些请求，所有的高级功能，如捕获、重写和脚本等都可以使用。
-force-http-engine-hosts = %APPEND% *.intsig.net, *.ott.cibntv.net, *.alicdn.com, *.myalicdn.com, *.iqiyipic.com, ts.qq.com, *.douyinvod.com, *.xhscdn.com, *.xiaohongshu.com, *.tc.qq.com, api*.amemv.com, wmapi.meituan.com, weibointl.api.weibo.cn, weibointl.mapi.weibo.com, api.cloud.189.cn
+// force-http-engine-hosts = %APPEND% *.intsig.net, *.ott.cibntv.net, *.alicdn.com, *.myalicdn.com, *.iqiyipic.com, ts.qq.com, *.douyinvod.com, *.xhscdn.com, *.xiaohongshu.com, *.tc.qq.com, api*.amemv.com, wmapi.meituan.com, weibointl.api.weibo.cn, weibointl.mapi.weibo.com, api.cloud.189.cn
 
 # > VIF Excluded Routes
 # Surge VIF 只能处理 TCP 和 UDP 协议。使用此选项可以绕过特定的 IP 范围，允许所有流量通过。
