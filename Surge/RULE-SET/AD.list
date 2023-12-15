@@ -18,15 +18,6 @@ DOMAIN,lookup.api.bsb.baidu.com
 DOMAIN-SUFFIX,u3.ucweb.com
 DOMAIN-KEYWORD,safebrowsing.
 
-# > Alibaba
-DOMAIN,ossgw.alicdn.com
-DOMAIN,ems.youku.com
-DOMAIN,hudong.alicdn.com
-DOMAIN-SUFFIX,ut.taobao.com
-
-# > Aliyun
-IP-CIDR,203.107.1.1/24
-
 # > Amap
 DOMAIN,amap-aos-info-nogw.amap.com
 DOMAIN,awaken.amap.com
@@ -154,8 +145,6 @@ DOMAIN,p.l.qq.com
 DOMAIN,pgdt.gtimg.cn
 DOMAIN,rpt.gdt.qq.com
 DOMAIN,tytx.m.cn.miaozhen.com
-//DOMAIN,vv.video.qq.com
-DOMAIN,vv6.video.qq.com
 DOMAIN-SUFFIX,beacon.qq.com
 DOMAIN-SUFFIX,gdt.qq.com
 DOMAIN-SUFFIX,tpns.qq.com
