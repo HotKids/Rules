@@ -88,6 +88,7 @@ DOMAIN-SUFFIX,da.mgtv.com,REJECT
 ^https?:\/\/[\d\.]+\/odin\/c1\/(channel\/ads|skin\/config)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/damang\.api\.mgtv\.com\/station\/album\/red\/dot\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/mobile\.api\.mgtv\.com\/v2\/mobile\/checkUpdate\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mobile-thor\.api\.mgtv\.com\/v1\/vod\/cms\/list\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/mobileso\.bz\.mgtv\.com\/spotlight\/search\/v1\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 [Script]
