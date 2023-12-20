@@ -1,8 +1,4 @@
-hostname = i.weread.qq.com,api.caiyunapp.com,wrapper.cyapi.cn
+hostname = i.weread.qq.com
 
 # > 微信阅读精简 by Maasea
 ^https?:\/\/i\.weread\.qq\.com\/(book\/(reading[sS]tat|chapterReview)|user\/profile|groups\/readerEntrance|review\/list|mobileSync) url script-response-body https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/WeRead/weread.js
-
-# > 彩云天气移除赏花地图&赏叶地图 by RuCu6
-^https?:\/\/api\.caiyunapp\.com\/v1\/activity\? url reject-dict
-^https?:\/\/wrapper\.cyapi\.cn\/v1\/activity\? url echo-response application/json echo-response https://raw.githubusercontent.com/RuCu6/QuanX/main/Mocks/caiyun.json
