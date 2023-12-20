@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,elife.icbc.com.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,wmapi.meituan.com,img.meituan.net,s3plus.meituan.net,,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
+hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,elife.icbc.com.cn,static.zhihu.com,interface*.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,app.bilibili.com,grpc.biliapi.net,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
 
 [Rule]
 # > 微信公众号
@@ -48,6 +48,9 @@ URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welc
 
 # > 猫眼
 URL-REGEX,^https?:\/\/p0\.pipi\.cn\/adAdmin\/\w+.jpg\?,REJECT
+
+# > 京东
+URL-REGEX,^https?:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
 
 # > 豆瓣
 URL-REGEX,^https?:\/\/api\.douban\.com\/(v2\/app_ads\/splash|b.*\/common_ads\?.*)$,REJECT
@@ -94,13 +97,14 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 
 # > 网易云 by RuCu6&Keywos
 ^https?:\/\/interface3?\.music\.163\.com\/e?api\/(ocpc\/)?ad\/.* data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/interface3?\.music\.163\.com\/w?eapi\/(search\/(chart\/(detail|list)|default\/keyword\/list|rcmd\/keyword\/get\/v2|specialkeyword\/get)|(link\/position\/show\/strategy|music\/songshare\/text\/recommend\/get)|(mlivestream\/entrance\/playpage\/v7|community\/friends\/fans-group\/artist\/group)\/get|mlog\/vinyl\/story\/list|(user\/sub\/artist\/exist|vipcenter\/tspopup\/get)|zone\/songplay\/entry\/get|resniche\/position\/play\/new\/get|comment\/(hotcomment\/collect\/fetchmodelinfov2|feed\/inserted\/resources|tips\/v2\/get)|(content\/exposure\/vinyl\/comment\/entrance|v1\/content\/exposure\/comment\/banner)\/get|event\/floating\/layer|(homepage\/banner\/ad\/get|link\/scene\/show\/resource)|(music-vip-membership\/client\/vip\/info|vipauth\/app\/auth\/recycle)|(side-bar\/mini-program\/music-service\/account|delivery\/batch-deliver)|mine\/applet\/redpoint|voice\/play\/page\/ad\/info|(activity\/bonus\/playpage\/time\/query|middle\/clientcfg\/config\/list)|resource-exposure\/(activity\/config\/get|config)|sp\/flow\/popup\/query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/interface3?\.music\.163\.com\/w?eapi\/(search\/(chart\/(detail|list)|default\/keyword\/list|rcmd\/keyword\/get\/v2|specialkeyword\/get)|(link\/position\/show\/(resource|strategy)|music\/songshare\/text\/recommend\/get)|(mlivestream\/entrance\/playpage\/v7|community\/friends\/fans-group\/artist\/group)\/get|mlog\/vinyl\/story\/list|(user\/sub\/artist\/exist|vipcenter\/tspopup\/get)|zone\/songplay\/entry\/get|resniche\/position\/play\/new\/get|comment\/(hotcomment\/collect\/fetchmodelinfov2|feed\/inserted\/resources|tips\/v2\/get)|(content\/exposure\/vinyl\/comment\/entrance|v1\/content\/exposure\/comment\/banner)\/get|event\/floating\/layer|(homepage\/banner\/ad\/get|link\/scene\/show\/resource)|(music-vip-membership\/client\/vip\/info|vipauth\/app\/auth\/recycle)|(side-bar\/mini-program\/music-service\/account|delivery\/batch-deliver)|mine\/applet\/redpoint|voice\/play\/page\/ad\/info|(activity\/bonus\/playpage\/time\/query|middle\/clientcfg\/config\/list)|resource-exposure\/(activity\/config\/get|config)|sp\/flow\/popup\/query) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 美团 by RuCu6
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$ data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/mall\.meituan\.com\/api\/c\/homepage\/splash data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 京东 by RuCu6
 ^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -150,7 +154,8 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(bootprelo
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&图片视频水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(search\/(banner|hot)_list|system_service\/config|note\/(imagefeed|live_photo\/save))|v2\/(note\/(widgets|feed)|system_service\/splash_config)|v3\/note\/videofeed|v4\/(search\/(hint|trending)|followfeed)|v6\/homefeed|v10\/search\/notes)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
+xiaohongshu_proto.js = type=http-response,pattern=
+^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(search\/(banner|hot)_list|system_service\/config|note\/(imagefeed|live_photo\/save))|v2\/(note\/(widgets|feed)|user\/followings\/followfeed|system_service\/splash_config)|v3\/note\/videofeed|v4\/(search\/(hint|trending)|followfeed)|v5\/recommend\/user\/follow_recommend|v6\/homefeed|v10\/search\/notes)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 // xiaohongshu_splash.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v2\/system_service\/splash_config,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
 // xiaohongshu_timeline.js = type=http-response,pattern=^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v6\/homefeed\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/chouchoui/QuanX/master/Scripts/xiaohongshu/xiaohongshu.ad.js,script-update-interval=0
 
