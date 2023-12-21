@@ -19,7 +19,7 @@ payload:
   - DOMAIN,alt8-mtalk.google.com
   
   # > CNTV
-  - DOMAIN,msg-intl.qy.net
+  # DOMAIN,msg-intl.qy.net
   - DOMAIN-SUFFIX,cupid.iqiyi.com
   - DOMAIN,push.m.youku.com
   - DOMAIN,un-acs.youku.com
