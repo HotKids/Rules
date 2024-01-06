@@ -27,3 +27,5 @@ payload:
   
   # > Samsung Galaxy App Store
   - DOMAIN-SUFFIX,galaxyappstore.com
+  - DOMAIN-SUFFIX,samsungapps.com
+  # DOMAIN-SUFFIX,samsungcloud.com
