@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,elife.icbc.com.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
+hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,gw.alicdn.com,acs.m.taobao.com,p0.pipi.cn,api.douban.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,amdc.m.taobao.com,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129
 
 [Rule]
 # > 微信公众号
@@ -62,9 +62,6 @@ URL-REGEX,^https?:\/\/api\.douban\.com\/(v2\/app_ads\/splash|b.*\/common_ads\?.*
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
 
-# > 工银e生活微信小程序
-URL-REGEX,^https?:\/\/elife\.icbc\.com\.cn\/OFSTNEWBASE\/floorinfo\/getMantlePages\.do,REJECT
-
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
 
@@ -100,7 +97,8 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 
 # > 网易云 by Keywos
 ^https?:\/\/(ipv4|interface3?)\.music\.163.com\/e?api\/ad\/.* data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/eapiad.json"
-^https?:\/\/interface3?\.music\.163\.com\/w?e?api\/(side-bar\/mini-program\/music-service\/account|content\/activity\/music|delivery\/(batch-deliver|deliver)|moment\/tab\/info\/get|yunbei\/account\/entrance\/get|resource\/comments?\/musiciansaid|community\/friends\/fans-group\/artist\/group\/get|user\/sub\/artist|music\/songshare\/text\/recommend\/get|mine\/applet\/redpoint|resniche\/position\/play\/new\/get|search\/(default|chart|rcmd\/keyword|specialkeyword)|resource-exposure\/|activity\/bonus\/playpage\/time\/query|mlivestream\/entrance\/playpage|link\/(position\/show\/strategy|scene\/show)|ios\/version|v\d\/content\/exposure\/comment\/banner) data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/blank_dict.json"
+^https?:\/\/interface3?\.music\.163.com\/w?e?api\/search\/default data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/keyword.json"
+^https?:\/\/interface3?\.music\.163\.com\/(w?e?api\/(side-bar\/mini-program\/music-service\/account|content\/activity\/music|delivery\/(batch-deliver|deliver)|moment\/tab\/info\/get|yunbei\/account\/entrance\/get|search\/(chart|rcmd\/keyword|specialkeyword)|resource-exposure\/|activity\/bonus\/playpage\/time\/query)|eapi\/(resource\/comments?\/musiciansaid|community\/friends\/fans-group\/artist\/group\/get|user\/sub\/artist|music\/songshare\/text\/recommend\/get|mine\/applet\/redpoint|resniche\/position\/play\/new\/get|mlivestream\/entrance\/playpage|link\/(position\/show\/strategy|scene\/show)|ios\/version|v\d\/content\/exposure\/comment\/banner)) data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/blank_dict.json"
 
 # > 美团 by RuCu6
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -160,7 +158,7 @@ WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp
 xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(search\/(banner|hot)_list|system_service\/config|note\/(imagefeed|live_photo\/save))|v2\/(note\/(widgets|feed)|user\/followings\/followfeed|system_service\/splash_config)|v3\/note\/videofeed|v4\/(search\/(hint|trending)|followfeed)|v5\/recommend\/user\/follow_recommend|v6\/homefeed|v10\/search\/notes)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 
 # > 网易云 by Keywos
-cloudmusic_proto.js = type=http-response,pattern=^https?:\/\/(ipv4|interface3?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get|link\/(home\/framework\/tab|page\/(discovery\/resource\/show|position\/show\/resource|rcmd\/(resource\/show|block\/resource\/multi\/refresh)))|homepage\/block\/page|song\/play\/more\/list\/v\d|user\/follow\/users\/mixed\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/JS/wyresParam_nolog.js
+cloudmusic_proto.js = type=http-response,pattern=^https?:\/\/(ipv4|interface3?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get|link\/(home\/framework\/tab|page\/(discovery\/resource\/show|rcmd\/(resource\/show|block\/resource\/multi\/refresh)|position\/show\/resource)|homepage\/block\/page|song\/play\/more\/list\/v\d|user\/follow\/users\/mixed\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/JS/wyresParam_nolog.js
 
 # > 京东去广告 by RuCu6
 jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/jingdong.js
