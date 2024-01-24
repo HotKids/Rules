@@ -1,5 +1,6 @@
 #!name = 爱腾优芒去广告
 #!desc = 过滤爱奇艺、腾讯视频、优酷、芒果TV客户端广告
+#!category = 去广告
 ## forked from @RuCu6/QuanX/main/Rewrites/Cube/cnftp.snippet
 
 [General]
