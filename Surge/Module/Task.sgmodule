@@ -27,4 +27,4 @@ Tasks: 阿里云盘 = type=cron,cronexp="13 0 * * *",wake-system=1,script-path=h
 Tasks: 霸王茶姬小程序 = type=cron,cronexp="14 0 * * *",script-path=https://raw.githubusercontent.com/Guding88/Script/main/bawangchaji/bwcj.js
 
 # > 达乐美披萨小游戏 DailyBonus by Sliverkiss
-Tasks: 达乐美小游戏 = type=cron,cronexp="15 0 * * *",timeout=300,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/100269fc92d8ed607fd5f105c2c5b32876101ff1/dlm.js
+Tasks: 达乐美小游戏 = type=cron,cronexp="15 0 * * *",timeout=300,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js
