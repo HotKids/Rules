@@ -130,7 +130,7 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 ^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo|operation-platform\/info-flow-adver\/query|esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 小红书
-^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/v1\/surprisebox\/(get_style|open|submit_action)|sns\/(v1\/ads\/resource|v2\/hey\/\w+\/hey_gallery)|sns\/v3\/note\/guide\?|marketing\/box\/trigger\?) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/v1\/(surprisebox\/(get_style|open|submit_action)|ads\/resource)|sns\/v2\/hey\/\w+\/hey_gallery|sns\/v3\/note\/guide\?|marketing\/box\/trigger\?) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
 # > 微博
 ^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
@@ -155,7 +155,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(bootprelo
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(search\/(banner|hot)_list|system_service\/config|note\/(imagefeed|live_photo\/save))|v2\/(note\/(widgets|feed)|user\/followings\/followfeed|system_service\/splash_config)|v3\/note\/videofeed|v4\/(search\/(hint|trending)|followfeed)|v5\/recommend\/user\/follow_recommend|v6\/homefeed|v10\/search\/notes)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
+xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(note\/(imagefeed|live_photo\/save)|search\/(banner|hot)_list|system_service\/config\?)|v2\/(note\/(feed\?|widgets)|system_service\/splash_config|user\/followings\/followfeed)|v3\/note\/videofeed\?|v4\/(followfeed\?|search\/(hint|trending)\?)|v5\/recommend\/user\/follow_recommend\?|v6\/homefeed\?|v10\/search\/notes\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 
 # > 网易云 by Keywos
 cloudmusic_proto.js = type=http-response,pattern=^https?:\/\/(ipv4|interface3?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get|link\/(home\/framework\/tab|page\/(discovery\/resource\/show|rcmd\/(resource\/show|block\/resource\/multi\/refresh)|position\/show\/resource)|homepage\/block\/page|song\/play\/more\/list\/v\d|user\/follow\/users\/mixed\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/JS/wyresParam_nolog.js
