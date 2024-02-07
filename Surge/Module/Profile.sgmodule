@@ -44,7 +44,7 @@ skip-proxy = %APPEND% 192.168.0.0/24, 10.0.0.0/8, 172.16.0.0/12, 127.0.0.1, loca
 network-framework = false
 
 # > DNS 服务器 (如无必要不建议使用 DNS over HTTPS)
-dns-server = system, 119.29.29.29, 119.28.28.28, 1.2.4.8, 1.1.1.1, 1.0.0.1, 223.5.5.5, 223.6.6.6, 8.8.8.8, 8.8.4.4
+dns-server = %APPEND% system, 119.29.29.29, 119.28.28.28, 1.0.0.1, 223.5.5.5, 223.6.6.6, 1.2.4.8, 1.1.1.1, 8.8.8.8, 8.8.4.4
 // encrypted-dns-server = h3://1.1.1.1/dns-query, h3://dns.alidns.com/dns-query, h3://dns-unfiltered.adguard.com/dns-query
 
 # > 从 /etc/hosts 读取 DNS 记录
