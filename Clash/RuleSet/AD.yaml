@@ -50,7 +50,6 @@ payload:
 
   # > Bilibili
   - DOMAIN,mall.bilibili.com
-  - DOMAIN,passport.bilibili.com
 
   # > ByteDance
   - DOMAIN,ad.zijieapi.com
