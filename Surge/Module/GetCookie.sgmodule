@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,mcs-mimp-web.sf-express.com,auth.alipan.com,aliyundrive.alipan.com,game.dominos.com.cn,qmwebapi.qmai.cn,webapi.qmai.cn
+hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,mcs-mimp-web.sf-express.com,auth.alipan.com,auth.aliyundrive.com,game.dominos.com.cn,qmwebapi.qmai.cn,webapi.qmai.cn
 
 [Rule]
 DOMAIN,gslbali.ximalaya.com,REJECT
