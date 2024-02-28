@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,*.ximalaya.com,mcs-mimp-web.sf-express.com,auth.aliyundrive.com,game.dominos.com.cn,qmwebapi.qmai.cn,webapi.qmai.cn
+hostname = %INSERT% api.m.jd.com,passport.iqiyi.com,*.bilibili.com,xmc.ximalaya.com,mcs-mimp-web.sf-express.com,auth.aliyundrive.com,game.dominos.com.cn,qmwebapi.qmai.cn,webapi.qmai.cn
 
 [Rule]
 DOMAIN,gslbali.ximalaya.com,REJECT
@@ -21,7 +21,7 @@ Cookie: 京东 = type=http-request,pattern=^https?:\/\/api\.m\.jd\.com\/client\.
 Cookie: 爱奇艺 = type=http-request,pattern=^https?:\/\/passport\.iqiyi\.com\/apis\/user\/,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 喜马拉雅 GetCookie by ClydeTime
-Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/(mobile|mobilehera|mobwsa)\.ximalaya\.com\/app-skin-service\/skin\/,script-path=https://raw.githubusercontent.com/ClydeTime/Quantumult/main/Script/Task/xmlySign.js,requires-body=0
+Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/xmc\.ximalaya\.com\/xmlymain-login-web\/login\/,script-path=https://raw.githubusercontent.com/ClydeTime/Surge/main/Script/Task/xmly.js,requires-body=0
 
 # > 哔哩哔哩漫画 GetCookie by NobyDa
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
