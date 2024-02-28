@@ -33,7 +33,7 @@ Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-exp
 Cookie: 达乐美小游戏 = type=http-request,pattern=^https?:\/\/game\.dominos\.com\.cn\/gold\/game\/gameDone,requires-body=1,max-size=0,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js
 
 # > 阿里云盘 GetCookie by Sliverkiss
-Cookie: 阿里云盘 = type=http-request,pattern=^https?:\/\/(auth|aliyundrive)\.alipan\.com\/v2\/account\/token,script-path=https://gist.githubusercontent.com/Sliverkiss/33800a98dcd029ba09f8b6fc6f0f5162/raw/aliyun.js,requires-body=1,max-size=-1,timeout=60
+Cookie: 阿里云盘 = type=http-request,pattern=^https?:\/\/auth\.(alipan|aliyundrive)\.com\/v2\/account\/token,script-path=https://gist.githubusercontent.com/Sliverkiss/33800a98dcd029ba09f8b6fc6f0f5162/raw/aliyun.js,requires-body=1,max-size=-1,timeout=60
 
 # > 霸王茶姬小程序 GetCookie by Guding88
 Cookie: 霸王茶姬小程序 = type=http-request,pattern=^https?:\/\/(webapi|qmwebapi)\.qmai\.cn\/web\/(catering2-apiserver\/customer-suggest\/query-feedback-config|catering\/crm\/points-info),requires-body=0,max-size=0,script-path=https://raw.githubusercontent.com/Guding88/Script/main/bawangchaji/bwcj_token.js
