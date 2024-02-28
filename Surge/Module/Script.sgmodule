@@ -51,6 +51,7 @@ URL-REGEX,^https?:\/\/p0\.pipi\.cn\/adAdmin\/\w+.jpg\?,REJECT
 
 # > 京东
 URL-REGEX,^https?:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
+URL-REGEX,^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=start$,REJECT-TINYGIF
 
 # > 网易云音乐
 URL-REGEX,^https?:\/\/httpdns.n\.netease\.com,REJECT
