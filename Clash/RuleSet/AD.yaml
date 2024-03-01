@@ -20,7 +20,6 @@ payload:
 
   # > Amap
   - DOMAIN,amap-aos-info-nogw.amap.com
-  - DOMAIN,awaken.amap.com
   - DOMAIN,free-aos-cdn-image.amap.com
 
   # > Apple
