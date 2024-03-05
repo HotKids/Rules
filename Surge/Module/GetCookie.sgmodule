@@ -30,7 +30,8 @@ Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili
 Cookie: 顺丰速运 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsy.js
 
 # > 达乐美披萨小游戏 GetCookie by Sliverkiss
-Cookie: 达乐美小游戏 = type=http-request,pattern=^https?:\/\/game\.dominos\.com\.cn\/loong\/game\/gameDone,requires-body=1,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js,timeout=10
+Cookie: 达乐美小游戏 = type=http-request,pattern=
+^https?\/\/game\.dominos\.com\.cn\/.+\/game\/gameDone,requires-body=1,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js,timeout=10
 
 # > 阿里云盘 GetCookie by lowking
 // https://auth.aliyundrive.com/v2/account/token
