@@ -7,7 +7,7 @@ hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com
 
 [Rule]
 # > 微信公众号
-URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
+// URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
 # > 云闪付
 URL-REGEX,^https?:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1,REJECT
@@ -164,7 +164,7 @@ wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/ap
 wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v1\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)\?),script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
 
 # > 微信公众号去广告 by NobyDa
-WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
+// WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
 xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(note\/(imagefeed|live_photo\/save)|search\/(banner|hot)_list|system_service\/config\?)|v2\/(note\/(feed\?|widgets)|system_service\/splash_config|user\/followings\/followfeed)|v3\/note\/videofeed\?|v4\/(followfeed\?|search\/(hint|trending)\?)|v5\/recommend\/user\/follow_recommend\?|v6\/homefeed\?|v10\/search\/notes\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
