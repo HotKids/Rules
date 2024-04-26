@@ -7,7 +7,7 @@ hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com
 
 [Rule]
 # > 微信公众号
-// URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
+URL-REGEX,^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,REJECT
 
 # > 云闪付
 URL-REGEX,^https?:\/\/wallet\.95516\.com(:10533)?\/s\/wl\/icon\/large\/1,REJECT
