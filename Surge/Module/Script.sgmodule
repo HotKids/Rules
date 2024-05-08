@@ -37,7 +37,6 @@ URL-REGEX,^https?:\/\/www1.elecfans.com\/www\/delivery,REJECT
 URL-REGEX,^https?:\/\/fuss10\.elemecdn\.com\/.+\/(w\/(640|750)\/h\/\d{3,4}|.+\.mp4)$,REJECT
 
 # > 闲鱼
-URL-REGEX,^https?:\/\/gw\.alicdn\.com\/(mt\/|tfs\/.+\d{3,4}-\d{4}|tps\/.+\d{3,4}-\d{4})$,REJECT
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome,REJECT
 
 # > 淘票票
