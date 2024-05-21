@@ -191,7 +191,7 @@ payload:
   - DOMAIN,adsmind.ugdtimg.com
   - DOMAIN,amdc.m.youku.com
   - DOMAIN,apiv4-iyes.youku.com
-  - DOMAIN,httpdns.alicdn.com
+  # DOMAIN,httpdns.alicdn.com
   - DOMAIN,huichuan-mc.sm.cn
   - DOMAIN,huichuan.sm.cn
   - DOMAIN,iyes.youku.com
