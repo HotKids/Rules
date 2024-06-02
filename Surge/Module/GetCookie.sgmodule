@@ -27,8 +27,8 @@ Cookie: 喜马拉雅 = type=http-request,pattern=^https?:\/\/xmc\.ximalaya\.com\
 Cookie: 哔哩哔哩漫画 = type=http-request,pattern=^https?:\/\/app\.bilibili\.com\/x\/v2\/account\/myinfo,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/Manga.js
 
 # > 顺丰速运 GetCookie by leafTheFish
-Cookie: 顺丰速运_app = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share/app/shareRedirect,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsyV2.js
-Cookie: 顺丰速运_小程序 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share/weChat/shareGiftReceiveRedirect,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsyV2.js
+Cookie: 顺丰速运_app = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share/app/shareRedirect,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsy.js
+Cookie: 顺丰速运_小程序 = type=http-request,pattern=^https?:\/\/mcs-mimp-web.sf-express.com\/mcs-mimp\/share/weChat/shareGiftReceiveRedirect,script-path=https://raw.githubusercontent.com/leafTheFish/DeathNote/main/sfsy.js
 
 # > 达乐美披萨小游戏 GetCookie by Sliverkiss
 Cookie: 达乐美小游戏 = type=http-request,pattern=^https?\/\/game\.dominos\.com\.cn\/.+\/game\/gameDone,requires-body=1,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js,timeout=10
