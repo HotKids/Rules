@@ -168,6 +168,13 @@ payload:
   - DOMAIN-SUFFIX,max.com
   - DOMAIN-SUFFIX,discomax.com
 
+  # > MGM+
+  - DOMAIN-SUFFIX,mgmplus.com
+  - DOMAIN-SUFFIX,epix.com
+  - DOMAIN-SUFFIX,epixnow.com
+  - DOMAIN,epixhls.akamaized.net
+  - DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com
+  
   # > MUBI
   - PROCESS-NAME,com.mubi
   - DOMAIN-SUFFIX,mubi.com
