@@ -1,2 +1,3 @@
-# > Youku
-DOMAIN-SUFFIX,youku.com,Youku
+# > Youku Intl.
+DOMAIN,vod-interyk.youku.tv,Youku
+// DOMAIN-SUFFIX,youku.tv,Youku
