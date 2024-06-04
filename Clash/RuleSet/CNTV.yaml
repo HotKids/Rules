@@ -71,6 +71,9 @@ payload:
   # DOMAIN-SUFFIX,meovse.com
   - IP-CIDR,150.109.28.51/32,no-resolve
   # IP-CIDR,203.205.136.0/23,no-resolve
-
   # > iFlix
   - DOMAIN-SUFFIX,iflix.com
+
+  # > Youku Intl.
+  - DOMAIN,vod-interyk.youku.tv
+  # DOMAIN-SUFFIX,youku.tv
