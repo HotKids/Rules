@@ -67,3 +67,7 @@ DOMAIN,wetv.tv.qq.com
 DOMAIN,wetv.acc.qq.com
 DOMAIN,hwvip.video.qq.com
 IP-CIDR,150.109.28.51/32,no-resolve
+
+# > Youku Intl.
+DOMAIN,vod-interyk.youku.tv
+// DOMAIN-SUFFIX,youku.tv
