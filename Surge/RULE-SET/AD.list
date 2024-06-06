@@ -6,9 +6,8 @@ DOMAIN,is.snssdk.com
 DOMAIN,mi.gdt.qq.com
 DOMAIN,open.e.kuaishou.com
 DOMAIN-SUFFIX,miaozhen.com
-DOMAIN-KEYWORD,pangolin-sdk-toutiao
 DOMAIN-KEYWORD,pangolin.snssdk.com
-DOMAIN-KEYWORD,pangolin-sdk-toutiao
+// DOMAIN-KEYWORD,pangolin-sdk-toutiao
 DOMAIN-KEYWORD,pangolin.snssdk.com
 DOMAIN-KEYWORD,pglstatp-toutiao
 DOMAIN-KEYWORD,video-cn.snssdk.com
