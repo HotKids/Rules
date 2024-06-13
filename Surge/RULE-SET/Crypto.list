@@ -1,0 +1,28 @@
+DOMAIN-SUFFIX,bitcointalk.org
+DOMAIN-SUFFIX,bitfinex.com
+DOMAIN-SUFFIX,bitflyer.com
+DOMAIN-SUFFIX,bitget.com
+DOMAIN-SUFFIX,bithumb.com
+DOMAIN-SUFFIX,bitstamp.net
+DOMAIN-SUFFIX,bybit.com
+DOMAIN-SUFFIX,coinbase.com
+DOMAIN-SUFFIX,coingecko.com
+DOMAIN-SUFFIX,coinmarketcap.com
+DOMAIN-SUFFIX,crypto.com
+DOMAIN-SUFFIX,dydx.exchange
+DOMAIN-SUFFIX,etherscan.io
+DOMAIN-SUFFIX,gate.io
+DOMAIN-SUFFIX,gemini.com
+DOMAIN-SUFFIX,kraken.com
+DOMAIN-SUFFIX,kucoin.com
+DOMAIN-SUFFIX,mexc.com
+DOMAIN-SUFFIX,probit.com
+DOMAIN-SUFFIX,uniswap.org
+DOMAIN-SUFFIX,upbit.com
+# > Binane
+DOMAIN-SUFFIX,binance.com
+DOMAIN-SUFFIX,binance.info
+DOMAIN-SUFFIX,bnbstatic.com
+# > OKX
+DOMAIN-SUFFIX,okx.com
+DOMAIN-SUFFIX,okx.com.cdn.cloudflare.net
