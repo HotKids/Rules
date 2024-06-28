@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5*.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5*.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -61,6 +61,9 @@ URL-REGEX,^https?:\/\/httpdns\.music\.163\.com,REJECT
 
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
+
+# > 麦当劳
+URL-REGEX,^https?:\/\/api\.mcd\.cn\/bff\/portal\/(home\/splash|richpop),REJECT
 
 # > 屏蔽知乎网页版强制登陆弹窗
 URL-REGEX,^https?:\/\/static\.zhihu\.com\/[^\/]+\/(main|column)\.signflow\.[^.]+.js,REJECT
