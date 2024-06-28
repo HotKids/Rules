@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5*.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5*.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -141,11 +141,6 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 # > 小红书
 ^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/v1\/(surprisebox\/(get_style|open|submit_action)|ads\/resource)|sns\/v2\/hey\/\w+\/hey_gallery|sns\/v3\/note\/guide\?|marketing\/box\/trigger\?) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 微博
-^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/(card)?\.weibo\.com\/(tt)?article\/(x)?\/m\/aj\/(reward|uvead)\?  data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/api\.weibo\.cn\/(2\/(!\/live\/media_homelist|!\/chaohua\/discovery\/home_bottom\/switch|!\/huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|!\/wbox\/\w+\/(home_bottom_modal|interest_category)|ug\/checkin\/list|push\/daily|comments\/bullet_screens|photo\/info|statuses\/(container_positive|push_info)|vote\/get_vote_detail|search\/container_discover|hot\/hours_spotlight|video\/redpacket)|!\/sug\/list\/finderchange)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-
 [Script]
 # > Sub Info
 Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.githubusercontent.com/mieqq/mieqq/master/sub_info.js,timeout=10
@@ -155,10 +150,10 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 // bili-json.js = type=http-response,pattern=^https:\/\/app\.bilibili\.com\/x\/(v2\/(splash\/(list|show)|feed\/index\?)|resource\/show\/tab\/v2),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-json.js,script-update-interval=0
 // bili-proto.js = type=http-response,pattern=^https:\/\/(grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.app\.((view|viewunite)\.v1\.View\/View|dynamic\.v2\.Dynamic\/DynAll|playurl\.v1\.PlayURL\/PlayView)$,requires-body=1,binary-body-mode=1,max-size=0,script-path=https://raw.githubusercontent.com/app2smile/rules/master/js/bilibili-proto.js,script-update-interval=0
 
-# > 微博去广告 by yichahucha&zmqcherish&RuCu6
-// 或使用微博净化模块 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Weibo.sgmodule
-wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.weibo\.cn\/2\/(checkin\/show|client\/publisher_list|client\/tabbar|push\/active|groups\/allgroups\/v2|cardlist|page|comments\/build_comments|container\/(asyn|flowlist)|friendships\/(create|destroy)|profile\/(container_timeline|dealatt|me|statuses\/tab|userinfo)|statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline|extend|show)|video\/tiny_stream_video_list|!\/huati\/discovery_home_bottom_channels|direct_messages\/user_list|messageflow\/notice|search\/(container_timeline|finder)|searchall)\?,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
-wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v1\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)\?),script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
+# > 微博去广告 by yichahucha&zmqcherish
+// 或使用微博净化模块 https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo.sgmodule
+wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|searchall|page|messageflow|statuses\/(unread_)?friends(\/|_)timeline|groups\/timeline|statuses\/(container_timeline|unread_hot_timeline|extend|video_mixtimeline|repost_timeline)|profile\/(me|container_timeline)|video\/(community_tab|remind_info|tiny_stream_video_list)|checkin\/show|\!\/live\/media_homelist|comments\/build_comments|container\/get_item|search\/(finder|container_timeline|container_discover)),script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_main.js
+wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/(bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v1\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)\?),script-path=https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo_launch.js
 
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
@@ -194,11 +189,11 @@ coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\
 # > 12306 开屏广告 by RuCu6
 12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/12306.js
 
-# > Keep 去广告 by by ddgksf2013
+# > Keep 去广告 by ddgksf2013
 // 修改底栏
-// Keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|twins\/v4\/feed\/course)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+// keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|config\/v\d\/basic|twins\/v4\/feed\/course)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 // 保留底栏
-Keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|twins\/v4\/feed\/course)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
+keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athena\/v\d\/people\/my|twins\/v4\/feed\/course)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 航旅纵横
-Umetrip_proto.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/Umetrip/Umetrip_remove_ads.js
+umetrip_proto.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/Umetrip/Umetrip_remove_ads.js
