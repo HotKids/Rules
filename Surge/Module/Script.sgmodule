@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5.amap.com,m5-zb.amap.com,oss.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,static.zhihu.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,api.gotokeep.com,kad.gotokeep.com,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,*.uve.weibo.com,*.weibo.com,newclient.map.baidu.com,ad.12306.cn,m5*.amap.com,sns.amap.com,home.umetrip.com,startup.umetrip.com, discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -43,6 +43,9 @@ URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop.film.mtopadvertiseapi.querya
 
 # > 大麦
 URL-REGEX,^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome,REJECT
+
+# > 高德地图
+URL-REGEX,^https?:\/\/m5\.amap\.com\/ws\/asa\/ads_attribution,REJECT
 
 # > 京东
 URL-REGEX,^https?:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
@@ -92,9 +95,9 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 ^https?:\/\/newclient\.map\.baidu\.com\/(client\/crossmarketing\/\?container=du_(aide_module|card_ugc|trip_route_tab)|client\/noticebar\/get|client\/phpui2\/\?qt=ads|grow-engine\/api\/common\/userHome\?)|https:\/\/newclient\.map\.baidu\.com\/client\/crossmarketing\/\?oem= data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 ^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/notice|gomarketing\/api\/activity\/talos\/activitycard\?|gomarketing\/api\/popup\/getentrancecordovaurl|goorder\/passenger\/baseinfo) data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
 
-# > 高德地图 by RuCu6
-^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists|msgbox\/pull_mp)\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
-^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(faas\/amap-navigation\/(card-service-(car-end|route-plan)|main-page-(assets|location))|shield\/(search\/(new_hotword|poi\/tips_adv)|scene\/recommend)|mapapi\/hint_text\/offline_data|message\/notice\/list|valueadded\/weather\/v2|boss\/(order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization))\? data="https://raw.githubusercontent.com/mieqq/mieqq/master/reject-dict.json"
+# > 高德地图 by RuCu6&kokoryh
+^https?:\/\/m5\.amap\.com\/ws\/(shield\/scene\/recommend|valueadded\/weather) data="https://raw.githubusercontent.com/kokoryh/Script/master/data/blank_dict.json"
+^https?:\/\/m5-zb\.amap\.com\/ws\/boss\/order_web\/\w{8}_information data="https://raw.githubusercontent.com/kokoryh/Script/master/data/blank.txt"
 
 # > 网易云 by Keywos
 ^https?:\/\/(ipv4|interface3?)\.music\.163.com\/e?api\/ad data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/eapiad.json"
@@ -180,8 +183,10 @@ baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/ap
 # > 百度地图 by RuCu6
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/baidu/map.js
 
-# > 高德地图 by RuCu6
-amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(perception\/drive\/(routeInfo|routePlan)|faas\/amap-navigation\/(card-service-plan-home|main-page)|shield\/(search\/(common\/coupon\/info|poi\/detail|nearbyrec_smart)|search_business\/process\/marketingOperationStructured|search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|frogserver\/aocs\/updatable\/1|dsp\/profile\/index\/nodefaasv3)|valueadded\/(weather\/v2|alimama\/splash_screen)|boss\/(order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization|car\/order\/content_info|order_web\/friendly_information)|promotion-web\/resource(\/home)?|sharedtrip\/taxi\/order_detail_car_tips)\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/amap.js
+# > 高德地图 by RuCu6&kokoryh
+amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
+amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(shield\/(search\/(new_hotword|nearbyrec_smart)|dsp\/profile\/index\/nodefaas|frogserver\/aocs\/updatable)|valueadded\/alimama\/splash_screen|faas\/amap-navigation\/main-page|message\/notice\/list|promotion-web\/resource),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/kokoryh/Script/master/js/amap.js
+amap_banner.js = type=http-response,pattern=^https?:\/\/sns\.amap\.com\/ws\/msgbox\/pull,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/kokoryh/Script/master/js/amap.js
 
 # > 酷安去广告 by RuCu6
 coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/(detail|replyList)\?|main\/(dataList|indexV8|init)|page\/dataList\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/coolapk.js
