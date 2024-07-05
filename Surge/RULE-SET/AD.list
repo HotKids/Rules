@@ -1,14 +1,14 @@
 # > 广告联盟
-DOMAIN-KEYWORD,adservice
 DOMAIN,i.snssdk.com
 DOMAIN,is.snssdk.com
 DOMAIN,mi.gdt.qq.com
 DOMAIN,open.e.kuaishou.com
 DOMAIN-SUFFIX,miaozhen.com
-DOMAIN-KEYWORD,pangolin.snssdk.com
+DOMAIN-KEYWORD,adservice
+DOMAIN-KEYWORD,pglstatp-toutiao
 DOMAIN-KEYWORD,pangolin-sdk-toutiao
 DOMAIN-KEYWORD,pangolin.snssdk.com
-DOMAIN-KEYWORD,pglstatp-toutiao
+DOMAIN-KEYWORD,pangolin.snssdk.com
 DOMAIN-KEYWORD,video-cn.snssdk.com
 
 # > 安全浏览限制解除
@@ -37,12 +37,19 @@ DOMAIN-SUFFIX,iadsdk.apple.com
 DOMAIN-KEYWORD,.iad-apple.com
 
 # > Baidu
-DOMAIN,mobads.baidu.com
-DOMAIN-SUFFIX,pos.baidu.com
 DOMAIN,afd.baidu.com
 DOMAIN,afdconf.baidu.com
+DOMAIN,als.baidu.com
+DOMAIN,bgg.baidu.com
+DOMAIN,feed-image.baidu.com
 DOMAIN,httpdns.baidubce.com
 DOMAIN,lc.map.baidu.com
+DOMAIN,mobads-logs.baidu.com
+DOMAIN,mobads.baidu.com
+DOMAIN,wn.pos.baidu.com
+DOMAIN-SUFFIX,pos.baidu.com
+DOMAIN-SUFFIX,union.baidu.cn
+DOMAIN-SUFFIX,union.baidu.com
 IP-CIDR,180.76.76.200/32
 
 # > Bilibili
@@ -50,8 +57,15 @@ DOMAIN,mall.bilibili.com
 
 # > ByteDance
 DOMAIN,ad.zijieapi.com
-DOMAIN-KEYWORD,asiad.byteactivity
+DOMAIN,lf-cdn-tos.bytescm.com
 DOMAIN-KEYWORD,-ad-sign.byteimg.com
+DOMAIN-KEYWORD,-be-pack-sign.pglstatp-toutiao.com
+DOMAIN-KEYWORD,-be-pack.pglstatp-toutiao.com
+DOMAIN-KEYWORD,-fe-tos.pglstatp-toutiao.com
+DOMAIN-KEYWORD,-sign.douyinpic.com
+DOMAIN-KEYWORD,api-access.pangolin-sdk-toutiao
+DOMAIN-KEYWORD,asiad.byteactivity
+DOMAIN-KEYWORD,log-api.pangolin-sdk-toutiao
 
 # > Caiyun Weather
 DOMAIN,ad.cyapi.cn
@@ -79,6 +93,9 @@ DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
 
 # > JD
 DOMAIN,dns.jd.com
+DOMAIN,dsp-x.jd.com
+DOMAIN,janapi.jd.com
+DOMAIN,xlog.jd.com
 IP-CIDR,101.124.19.122/32
 IP-CIDR6,2402:db40:5100:1011::5/128
 
@@ -104,14 +121,19 @@ DOMAIN,rprain.log.mgtv.com
 DOMAIN,vip.bz.mgtv.com
 DOMAIN-SUFFIX,da.mgtv.com
 
-# > NetEase Music
-DOMAIN,gdt.qq.com
+# > NetEase
+DOMAIN,adx-bj.anythinktech.com
+DOMAIN,api.anythinktech.com
+DOMAIN,da.anythinktech.com
 DOMAIN,httpdns.music.163.com
 DOMAIN,httpdns.n.netease.com
+DOMAIN,iad.g.163.com
 DOMAIN,iadmat.nosdn.127.net
 DOMAIN,iadmatapk.nosdn.127.net
 DOMAIN,iadmusicmat.music.126.net
 DOMAIN,iadmusicmatvideo.music.126.net
+DOMAIN,nex.163.com
+DOMAIN,tk.anythinktech.com
 DOMAIN-SUFFIX,163jiasu.com
 
 # > Outlook
@@ -126,46 +148,45 @@ DOMAIN,video-ads-module.ad-tech.nbcuni.com
 DOMAIN,api.zuihuimai.com
 
 # > Tencent
-DOMAIN,btrace.qq.com
-DOMAIN,mtrace.qq.com
 DOMAIN-KEYWORD,adstats
-DOMAIN-SUFFIX,imtmp.net
+DOMAIN,adcdn.tencentmusic.com
+DOMAIN,adclick.tencentmusic.com
+DOMAIN,adexpo.tencentmusic.com
 DOMAIN,adsmind.gdtimg.com
+DOMAIN,adstats.tencentmusic.com
+DOMAIN,ad.tencentmusic.com
 DOMAIN,btrace.qq.com
 DOMAIN,btrace.video.qq.com
 DOMAIN,info4.video.qq.com
 DOMAIN,info6.video.qq.com
 DOMAIN,ios.video.mpush.qq.com
+DOMAIN,gdt.qq.com
 DOMAIN,mtrace.qq.com
+DOMAIN,monitor.music.qq.com
+DOMAIN,otheve.beacon.qq.com
 DOMAIN,p.l.qq.com
 DOMAIN,pgdt.gtimg.cn
 DOMAIN,rpt.gdt.qq.com
 DOMAIN,tytx.m.cn.miaozhen.com
+DOMAIN,wxsmsdy.video.qq.com
+DOMAIN,wxsnsdy.wxs.qq.com
+DOMAIN,wxsnsdythumb.wxs.qq.com
 DOMAIN-SUFFIX,beacon.qq.com
 DOMAIN-SUFFIX,gdt.qq.com
+DOMAIN-SUFFIX,imtmp.net
 DOMAIN-SUFFIX,tpns.qq.com
 DOMAIN-SUFFIX,trace.qq.com
-DOMAIN,adstats.tencentmusic.com
-DOMAIN,ad.tencentmusic.com
-DOMAIN,adcdn.tencentmusic.com
-DOMAIN,adexpo.tencentmusic.com
-DOMAIN,adclick.tencentmusic.com
-DOMAIN,otheve.beacon.qq.com
-DOMAIN,monitor.music.qq.com
-DOMAIN,wxsnsdy.wxs.qq.com
-DOMAIN,wxsmsdy.video.qq.com
-DOMAIN,wxsnsdythumb.wxs.qq.com
 
 # > TVer
 DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
 
 # > UnionPay
 DOMAIN,ads.95516.com
+DOMAIN,tysdk.95516.com
 DOMAIN,cm-10-138.getui.com
 DOMAIN,sdk-conf.getui.com
 DOMAIN,sdk.open.talk.getui.net
 DOMAIN,switch.cup.com.cn
-DOMAIN,tysdk.95516.com
 
 # > Viu
 DOMAIN-SUFFIX,adcolony.com
@@ -191,21 +212,21 @@ DOMAIN,sdkconfig.ad.xiaomi.com
 
 # > Youku
 DOMAIN,adsmind.ugdtimg.com
+DOMAIN,huichuan-mc.sm.cn
 DOMAIN,amdc.m.youku.com
 DOMAIN,apiv4-iyes.youku.com
-DOMAIN,huichuan-mc.sm.cn
 DOMAIN,huichuan.sm.cn
 DOMAIN,iyes.youku.com
-DOMAIN,m-vali.cp31.ott.cibntv.net
 DOMAIN,mc.atm.youku.com
-DOMAIN,vali-g1.cp31.ott.cibntv.net
-DOMAIN,vali-ugc.cp31.ott.cibntv.net
 DOMAIN,yk-ssp.ad.youku.com
 DOMAIN,ykad-data.youku.com
+DOMAIN,m-vali.cp31.ott.cibntv.net
+DOMAIN,vali-g1.cp31.ott.cibntv.net
+DOMAIN,vali-ugc.cp31.ott.cibntv.net
 
 # > Zhihu
-DOMAIN,appcloud.zhihu.com
 DOMAIN,appcloud2.in.zhihu.com
+DOMAIN,appcloud.zhihu.com
 DOMAIN,crash2.zhihu.com
 DOMAIN,mqtt.zhihu.com
 DOMAIN,sugar.zhihu.com
