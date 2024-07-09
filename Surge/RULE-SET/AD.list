@@ -195,8 +195,11 @@ DOMAIN,r2---sn-j5o76n7e.gvt1.com
 # > WeChat
 DOMAIN,wxsnsdy.wxs.qq.com
 DOMAIN,wxsnsdythumb.wxs.qq.com
+DOMAIN,badjs.weixinbridge.com
 
 # > Weibo
+DOMAIN,huodong.weibo.cn
+DOMAIN-SUFFIX,biz.weibo.com
 DOMAIN,adstrategy.biz.weibo.com
 DOMAIN,kadmimage.biz.weibo.com
 DOMAIN,sdkaction.biz.weibo.com
