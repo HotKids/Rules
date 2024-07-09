@@ -196,13 +196,16 @@ payload:
   # > WeChat
   - DOMAIN,wxsnsdy.wxs.qq.com
   - DOMAIN,wxsnsdythumb.wxs.qq.com
+  - DOMAIN,badjs.weixinbridge.com
 
   # > Weibo
+  - DOMAIN,huodong.weibo.cn
   - DOMAIN,adstrategy.biz.weibo.com
   - DOMAIN,kadmimage.biz.weibo.com
   - DOMAIN,sdkaction.biz.weibo.com
   - DOMAIN,sdkclick.biz.weibo.com
   - DOMAIN,sdkmonitor.biz.weibo.com
+  - DOMAIN-SUFFIX,biz.weibo.com
 
   # > WeTV
   - DOMAIN,btrace.wetvinfo.com
