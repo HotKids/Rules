@@ -40,3 +40,6 @@ payload:
 
   # Meta
   - DOMAIN,imagine.meta.com
+
+  # Poe
+  - DOMAIN-SUFFIX,poe.com
