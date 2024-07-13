@@ -1,0 +1,13 @@
+{
+  "rules": [
+    {
+      "domain_suffix": [
+        "paypal-mktg.com",
+        "paypal.com",
+        "paypal.me",
+        "paypalobjects.com"
+      ]
+    }
+  ],
+  "version": 1
+}

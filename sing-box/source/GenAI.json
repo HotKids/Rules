@@ -1,0 +1,42 @@
+{
+  "rules": [
+    {
+      "domain": [
+        "ai.google.dev",
+        "aistudio.google.com",
+        "alkalimakersuite-pa.clients6.google.com",
+        "api-iam.intercom.io",
+        "api.statsig.com",
+        "bard.google.com",
+        "chatgpt.livekit.cloud",
+        "copilot.microsoft.com",
+        "gemini.google.com",
+        "generativelanguage.googleapis.com",
+        "imagine.meta.com",
+        "o33249.ingest.sentry.io",
+        "openaiapi-site.azureedge.net",
+        "sfo3.turn.livekit.cloud",
+        "sydney.bing.com",
+        "www.bing.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "openaicom"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "anthropic.com",
+        "chatgpt.com",
+        "claude.ai",
+        "grazie.ai",
+        "oaistatic.com",
+        "oaiusercontent.com",
+        "openai.com",
+        "poe.com"
+      ]
+    }
+  ],
+  "version": 1
+}
