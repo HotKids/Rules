@@ -181,7 +181,7 @@ RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Rulese
 RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,REJECT-TINYGIF
 
 # Hijacking 运营商劫持或恶意网站
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Hijacking.list,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,REJECT-TINYGIF
 
 [Header Rewrite]
 # > 百度（全站替换为百度简单搜索的 User-Agent）
