@@ -65,7 +65,7 @@ URL-REGEX,^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad,REJECT
 URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(ads\/v\d\/ads\/preload|anno\/v\d\/upgrade\/check|cauchy\/growth\/init|guide-webapp\/v\d\/popup\/getPopUp|kprime\/v\d\/popups\/primeGuide|op-engine-webapp\/v\d\/ad|running\/v\d\/home\/dialog|search\/v\d\/(default\/keyword|hotword|hotCourse)\/list|training\/box\/config)$,REJECT
 
 # > 航旅纵横
-URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/native,REJECT
+URL-REGEX,^https?:\/\/(home|umerp|discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/native,REJECT
 
 [URL Rewrite]
 # > 将 xhslink.com 短链重定向至 xhslink.icu 防止追踪参数 by chouchoui
@@ -89,7 +89,8 @@ URL-REGEX,^https?:\/\/(discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimusic\.common\.mobileservice\.startinit data-type=text data="{}"
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome data-type=text data="{}"
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash data-type=text data="{}"
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash data-type=text data="{}"
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.popup\.get\/ data-type=text data="{}"
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner\/ data-type=text data="{}"
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryadvertise\/5.0.* data-type=text data="{}"
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data-type=text data="{}"
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.o2o\.ad\.gateway\.get data-type=text data="{}"
