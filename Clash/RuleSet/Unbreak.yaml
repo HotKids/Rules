@@ -29,3 +29,6 @@ payload:
   - DOMAIN-SUFFIX,galaxyappstore.com
   - DOMAIN-SUFFIX,samsungapps.com
   # DOMAIN-SUFFIX,samsungcloud.com
+  
+  # > ziniao
+  - PROCESS-NAME,ziniao*,DIRECT
