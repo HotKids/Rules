@@ -207,7 +207,6 @@ baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu
 
 # > 高德地图 by RuCu6&kokoryh
 amdc.js = type=http-response,pattern=^https?:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
-,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/header.js
 amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(shield\/(search\/(new_hotword|nearbyrec_smart)|dsp\/profile\/index\/nodefaas|frogserver\/aocs\/updatable)|valueadded\/alimama\/splash_screen|faas\/amap-navigation\/main-page|message\/notice\/list|promotion-web\/resource),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/kokoryh/Script/master/js/amap.js
 amap_banner.js = type=http-response,pattern=^https?:\/\/sns\.amap\.com\/ws\/msgbox\/pull,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/kokoryh/Script/master/js/amap.js
 
