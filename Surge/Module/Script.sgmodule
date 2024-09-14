@@ -185,8 +185,8 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
-# > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v1\/(note\/(imagefeed|live_photo\/save)|search\/(banner|hot)_list|system_service\/config\?)|v2\/(note\/(feed\?|widgets)|system_service\/splash_config|user\/followings\/followfeed)|v3\/note\/videofeed\?|v4\/(followfeed\?|search\/(hint|trending)\?)|v5\/recommend\/user\/follow_recommend\?|v6\/homefeed\?|v10\/search\/notes\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
+# > 小红书去广告&水印 by chouchoui&RuCu6
+xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(imagefeed|live_photo\/save|feed\?|widgets|videofeed\?)|search\/(banner|hot)_list|search\/(hint|trending|notes)\?|system_service\/(config\?|splash_config)|(user\/followings\/followfeed|recommend\/user\/follow_recommend\?|followfeed\?)|homefeed\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/xiaohongshu.js,script-update-interval=0
 
 # > 网易云 by Keywos
 cloudmusic_tab.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"MY":"{{{漫游}}}","DT":"{{{动态}}}","TJ":"{{{推荐}}}","FX":"{{{发现}}}"}"
