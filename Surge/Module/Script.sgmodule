@@ -67,10 +67,6 @@ URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(ads\/v\d\/ads\/preload|anno\/v\d\/upg
 # > 航旅纵横
 URL-REGEX,^https?:\/\/(home|umerp|discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/native,REJECT
 
-[URL Rewrite]
-# > 将 xhslink.com 短链重定向至 xhslink.icu 防止追踪参数 by chouchoui
-^https?:\/\/xhslink\.com https://xhslink.icu 302
-
 [Map Local]
 # > 百度首页纯净搜索 
 ^https?:\/\/(?:www|m)\.baidu\.com(?:\/|\/\?(tn=&)?from=\w+)?$ data="https://raw.githubusercontent.com/Keywos/rule/master/script/baidu_index/html/index.html" header="Content-Type: text/html; charset=utf-8"
