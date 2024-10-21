@@ -185,7 +185,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(widgets|feed|videofeed|imagefeed|live_photo\/save)|search\/((banner|hot)_list|hint|trending|notes)|system_service\/(config|splash_config)|(user\/followings\/followfeed|followfeed|recommend\/user\/follow_recommend)|homefeed)(\?.*)?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/xiaohongshu.js
+xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(widgets|feed|videofeed|imagefeed|live_photo\/save)|search\/((banner|hot)_list|hint|trending|notes)|system_service\/(config|splash_config)|(user\/followings\/followfeed|followfeed|recommend\/user\/follow_recommend)|homefeed)(\?.*)?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiaohongshu.js
 
 # > 网易云 by Keywos&RuCu6
 cloudmusic_tab.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"MY":"{{{漫游}}}","DT":"{{{动态}}}","TJ":"{{{推荐}}}","FX":"{{{发现}}}"}"
@@ -193,26 +193,26 @@ cloudmusic_home.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\
 cloudmusic_proto.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get|link\/page\/discovery\/resource\/show|link\/position\/show\/resource|song\/play\/more\/list\/v\d|user\/follow\/users\/mixed\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
 
 # > 京东去广告 by RuCu6
-jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(?:deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/jingdong.js
+jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(?:deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/jingdong.js
 
 # > 阿里云盘 by RuCu6
-alidrive_proto.js = type=http-response,pattern=^https?:\/\/((member|(biz)?api)\.alipan\.com)\/(apps\/v\d\/users?\/home\/(news|widgets)|v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/adrive.js
+alidrive_proto.js = type=http-response,pattern=^https?:\/\/((member|(biz)?api)\.alipan\.com)\/(apps\/v\d\/users?\/home\/(news|widgets)|v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/adrive.js
 
 # > 百度网盘 by RuCu6
 baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
 
 # > 百度地图 by RuCu6
-baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/bdmap.js
+baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bdmap.js
 
 # > 高德地图 by RuCu6&kokoryh
-amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/perception\/publicTravel\/beforeNavi\?|bus\/plan\/integrate\?|c3frontend\/af-(hotel|launch)\/page\/main\?|perception\/drive\/(routeInfo|routePlan)|shield\/(search\/(common\/coupon\/info|poi\/detail|nearbyrec_smart\?)|search_bff\/hotword\?|search_business\/process\/marketingOperationStructured\?|search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|frogserver\/aocs\/updatable\/1\?|dsp\/profile\/index\/nodefaasv3\?)|faas\/amap-navigation\/(card-service-plan-home|main-page)|valueadded\/alimama\/splash_screen\?|boss\/(car\/order\/content_info|order_web\/friendly_information)|promotion-web\/resource(\/home)?\?|sharedtrip\/taxi\/order_detail_car_tips\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/amap.js
+amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/perception\/publicTravel\/beforeNavi\?|bus\/plan\/integrate\?|c3frontend\/af-(hotel|launch)\/page\/main\?|perception\/drive\/(routeInfo|routePlan)|shield\/(search\/(common\/coupon\/info|poi\/detail|nearbyrec_smart\?)|search_bff\/hotword\?|search_business\/process\/marketingOperationStructured\?|search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|frogserver\/aocs\/updatable\/1\?|dsp\/profile\/index\/nodefaasv3\?)|faas\/amap-navigation\/(card-service-plan-home|main-page)|valueadded\/alimama\/splash_screen\?|boss\/(car\/order\/content_info|order_web\/friendly_information)|promotion-web\/resource(\/home)?\?|sharedtrip\/taxi\/order_detail_car_tips\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/amap.js
 
 # > 酷安去广告 by RuCu6
-coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/detail|feed\/replyList|page\/dataList|main\/dataList|main\/indexV8|main\/init)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/coolapk.js
+coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/detail|feed\/replyList|page\/dataList|main\/dataList|main\/indexV8|main\/init)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/coolapk.js
 
 # > 12306 开屏广告 by RuCu6
-12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/12306.js
-12306_proto.js = type=http-response,pattern=^https?:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/Loon/main/Scripts/header.js
+12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/12306.js
+12306_proto.js = type=http-response,pattern=^https?:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/header.js
 
 # > Keep 去广告 by ddgksf2013
 // 修改底栏
@@ -224,4 +224,4 @@ keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(athe
 tuhu_proto.js = type=http-response,pattern=^https?:\/\/cl-gateway\.tuhu\.cn\/cl-(shop-api\/shopTab\/getModuleForC|homepage-service\/homePage\/getHomePageInfo|common-api\/api\/personalCenter\/getCmsModuleList),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/TH.js
 
 # > 航旅纵横 by lodepuly
-umetrip_proto.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://gitlab.com/lodepuly/vpn_tool/-/raw/master/Resource/Script/Umetrip/Umetrip_remove_ads.js
+umetrip_proto.js = type=http-response,pattern=^https?:\/\/(114\.115\.217\.129)|(home\.umetrip\.com)\/gateway\/api\/umetrip\/native$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/umetrip.js
