@@ -178,8 +178,8 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 
 # > 微博去广告 by yichahucha&zmqcherish&RuCu6
 // 或使用微博净化模块 https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo.sgmodule
-wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|page|checkin\/show|client\/publisher_list|comments\/build_comments|container\/asyn|direct_messages\/user_list|flowlist|flowpage|friendships\/(create|destroy)|groups\/allgroups\/v2|!\/huati\/discovery_home_bottom_channels|messageflow\/notice|profile\/(container_timeline|dealatt|me|statuses\/tab|userinfo)|push\/active|search\/(container_timeline|finder)|searchall|statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline|extend|show)|video\/tiny_stream_video_list)\?,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
-wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v[12]\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)))\?,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/weibo.js
+wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|page|checkin\/show|client\/publisher_list|comments\/build_comments|container\/asyn|direct_messages\/user_list|flowlist|flowpage|friendships\/(create|destroy)|groups\/allgroups\/v2|!\/huati\/discovery_home_bottom_channels|messageflow\/notice|profile\/(container_timeline|dealatt|me|statuses\/tab|userinfo)|push\/active|search\/(container_timeline|finder)|searchall|statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline|extend|show)|video\/tiny_stream_video_list)\?,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
+wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v[12]\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)))\?,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
 
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
@@ -199,7 +199,7 @@ jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.ac
 alidrive_proto.js = type=http-response,pattern=^https?:\/\/((member|(biz)?api)\.alipan\.com)\/(apps\/v\d\/users?\/home\/(news|widgets)|v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/adrive.js
 
 # > 百度网盘 by RuCu6
-baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/RuCu6/QuanX/main/Scripts/myBlockAds.js
+baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/myBlockAds.js
 
 # > 百度地图 by RuCu6
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bdmap.js
