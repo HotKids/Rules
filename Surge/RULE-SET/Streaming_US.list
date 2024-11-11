@@ -4,31 +4,31 @@ DOMAIN-SUFFIX,crunchyroll.com
 // DOMAIN-SUFFIX,vrv.co
 
 # > Discovery+
-USER-AGENT,discovery+*
-USER-AGENT,DPlus*
+// USER-AGENT,discovery+*
+// USER-AGENT,DPlus*
 
 # > Discovery+
-USER-AGENT,discovery+*
-USER-AGENT,DPlus*
-DOMAIN-SUFFIX,discoveryplus.com
-DOMAIN-SUFFIX,disco-api.com
-DOMAIN-SUFFIX,dnitv.com
-DOMAIN,us1-prod.disco-api.com
-DOMAIN,us1-prod-images.disco-api.com
-DOMAIN,kvinit-prod.api.kochava.com
-DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
-DOMAIN,content-ause1-ur-discovery1.uplynk.com
-DOMAIN,content-ausw1-ur-discovery1.uplynk.com
-DOMAIN,content-ausw2-ur-discovery1.uplynk.com
+// USER-AGENT,discovery+*
+// USER-AGENT,DPlus*
+// DOMAIN-SUFFIX,discoveryplus.com
+// DOMAIN-SUFFIX,disco-api.com
+// DOMAIN-SUFFIX,dnitv.com
+// DOMAIN,us1-prod.disco-api.com
+// DOMAIN,us1-prod-images.disco-api.com
+// DOMAIN,kvinit-prod.api.kochava.com
+// DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
+// DOMAIN,content-ause1-ur-discovery1.uplynk.com
+// DOMAIN,content-ausw1-ur-discovery1.uplynk.com
+// DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 // DOMAIN,go-prod-vz.akamaized.net
 
 # > HBO Max
-USER-AGENT,HBOMAX*
-DOMAIN-SUFFIX,hbo.com
+// USER-AGENT,HBOMAX*
+// DOMAIN-SUFFIX,hbo.com
 // DOMAIN-SUFFIX,hbogo.com
-DOMAIN-SUFFIX,hbonow.com
-DOMAIN-SUFFIX,hbomax.com
-DOMAIN-SUFFIX,hbomaxcdn.com
+// DOMAIN-SUFFIX,hbonow.com
+// DOMAIN-SUFFIX,hbomax.com
+// DOMAIN-SUFFIX,hbomaxcdn.com
 
 # > Hulu
 DOMAIN-SUFFIX,hulu.com
@@ -39,10 +39,10 @@ DOMAIN,cws-hulu.conviva.com
 // DOMAIN,assetshuluimcom-a.akamaihd.net
 
 # > Max
-USER-AGENT,Max*
-PROCESS-NAME,com.wbd.stream
-DOMAIN-SUFFIX,max.com
-DOMAIN-SUFFIX,discomax.com
+// USER-AGENT,Max*
+// PROCESS-NAME,com.wbd.stream
+// DOMAIN-SUFFIX,max.com
+// DOMAIN-SUFFIX,discomax.com
 
 # > MGM+
 DOMAIN-SUFFIX,mgmplus.com
