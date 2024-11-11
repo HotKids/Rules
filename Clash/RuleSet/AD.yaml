@@ -20,6 +20,7 @@ payload:
   # > Amap
   - DOMAIN,amap-aos-info-nogw.amap.com
   - DOMAIN,free-aos-cdn-image.amap.com
+  - DOMAIN-SUFFIX,v.smtcdns.com
 
   # > Apple
   - DOMAIN,advertising.apple.com
@@ -209,6 +210,8 @@ payload:
   - DOMAIN,sdkclick.biz.weibo.com
   - DOMAIN,sdkmonitor.biz.weibo.com
   - DOMAIN-SUFFIX,biz.weibo.com
+  - IP-CIDR,39.97.130.51/32
+  - IP-CIDR,39.97.128.148/32
 
   # > WeTV
   - DOMAIN,btrace.wetvinfo.com
