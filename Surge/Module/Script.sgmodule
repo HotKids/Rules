@@ -66,7 +66,7 @@ URL-REGEX,^https?:\/\/api\.gotokeep\.com\/(ads\/v\d\/ads\/preload|anno\/v\d\/upg
 URL-REGEX,^https?:\/\/(home|umerp|discardrp|startup)\.umetrip\.com\/gateway\/api\/umetrip\/native,REJECT
 
 # > 高德地图
-AND,((URL-REGEX,^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch),(USER-AGENT,AMapiPhone*)),REJECT
+AND,((URL-REGEX,^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch),(USER-AGENT, AMapiPhone*)),REJECT
 
 # > 小红书
 AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
@@ -111,7 +111,7 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/(notice|baseinfo)|gomarketing\/api\/(activity\/talos\/activitycard\?|popup\/getentrancecordovareject-dict)) data-type=text data="{}" status-code=200
 
 # > 高德地图 by RuCu6&kokoryh
-^https?:\/\/m5-zb\.amap\.com\/ws\/(shield\/(search\/new_hotword\??|search_poi\/tips_adv\?|scene\/recommend\?)|faas\/amap-navigation\/(card-service-(car-end|route-plan)|main-page-assets|main-page-location|ridewalk-end-fc)|aos\/main\/page\/product\/list\?|mapapi\/hint_text\/offline_data|message\/notice\/list|valueadded\/weather\/v2\?|boss\/(order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization)) data-type=text data="{}" status-code=200
+^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(shield\/(search\/new_hotword\??|search_business\/process\/marketingOperationStructured\?|search_poi\/(homepage\?|tips_adv\?)|scene\/recommend\?)|faas\/amap-navigation\/(card-service-(?:car-end|route-plan)|main-page-assets|main-page-location|ridewalk-end-fc)|aos\/main\/page\/product\/list\?|(?:mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/search\/new_hotword)|valueadded\/weather\/v2\?|boss\/(?:order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization)|sharedtrip\/taxi\/order_detail_car_tips\?) data-type=text data="{}" status-code=200
 ^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists\/?|msgbox\/pull_mp)\? data-type=text data="{}" status-code=200
 
 # > 网易邮箱大师
@@ -207,7 +207,7 @@ baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/ap
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bdmap.js
 
 # > 高德地图 by RuCu6&kokoryh
-amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/perception\/publicTravel\/beforeNavi\?|bus\/plan\/integrate\?|c3frontend\/af-(hotel|launch)\/page\/main\?|perception\/drive\/(routeInfo|routePlan)|shield\/(search\/(common\/coupon\/info|poi\/detail|nearbyrec_smart\?)|search_bff\/hotword\?|search_business\/process\/marketingOperationStructured\?|search_poi\/(homepage|mps|search\/sp|sug|tips_operation_location)|frogserver\/aocs\/updatable\/1\?|dsp\/profile\/index\/nodefaasv3\?)|faas\/amap-navigation\/(card-service-plan-home|main-page)|valueadded\/alimama\/splash_screen\?|boss\/(car\/order\/content_info|order_web\/friendly_information)|promotion-web\/resource(\/home)?\?|sharedtrip\/taxi\/order_detail_car_tips\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/amap.js
+amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/perception\/publicTravel\/beforeNavi\?|boss\/(car\/order\/content_info|order_web\/friendly_information)|bus\/plan\/integrate\?|c3frontend\/af-(?:hotel|launch)\/page\/main\?|faas\/amap-navigation\/(?:card-service-plan-home|main-page)|perception\/drive\/(?:routeInfo|routePlan)|promotion-web\/resource(\/home)?\?|shield\/(dsp\/profile\/index\/nodefaasv3\?|frogserver\/aocs\/updatable\/1\?|search\/(?:common\/coupon\/info|nearbyrec_smart\?|poi\/detail)|search_bff\/hotword\?|search_poi\/(?:mps|search\/sp|sug|tips_operation_location))|valueadded\/alimama\/splash_screen\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/amap.js
 
 # > 酷安去广告 by RuCu6
 coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/detail|feed\/replyList|page\/dataList|main\/dataList|main\/indexV8|main\/init)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/coolapk.js
