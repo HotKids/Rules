@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,rec.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -68,7 +68,7 @@ URL-REGEX,^https?:\/\/(home|umerp|discardrp|startup)\.umetrip\.com\/gateway\/api
 AND,((URL-REGEX,^http:\/\/amdc\.m\.taobao\.com\/amdc\/mobileDispatch),(USER-AGENT,AMapiPhone*)),REJECT
 
 # > 小红书
-AND,((PROTOCOL,UDP),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
+AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 
 [Map Local]
 # > 百度首页纯净搜索 
@@ -153,7 +153,7 @@ AND,((PROTOCOL,UDP),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo|operation-platform\/info-flow-adver\/query|esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)) data-type=text data="{}" status-code=200
 
 # > 小红书
-^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/(v1\/(surprisebox\/(get_style|open|submit_action)|ads\/resource)|v2\/(guide\/user_banner|hey\/\w+\/hey_gallery)|v3\/note\/guide)|marketing\/box\/trigger\?) data-type=text data="{}" status-code=200
+^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/v\d+\/(surprisebox\/(get_style|open|submit_action)|ads\/resource|search\/(banner_list$|hot_list$|hint|trending\?)|guide\/user_banner|hey\/\w+\/hey_gallery|note\/guide)|marketing\/box\/trigger\?) data-type=text data="{}" status-code=200
 
 # > 途虎养车
 ^https?:\/\/(cl|mkt)-gateway\.tuhu\.cn\/(cl-common-api\/api\/personalCenter\/getAutoSuperConfig|mlp-product-search-api\/search\/helper\/defaultAndHotWord|mkt-(scene-marketing-service\/api\/scene\/queryScheme|push-message-box\/banner\/cms\/getIndexBanner|cms\/circle\/recommend\/v3)) data-type=text data="{}" status-code=200
@@ -185,7 +185,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(widgets|feed|videofeed|imagefeed|live_photo\/save)|search\/((banner|hot)_list|hint|trending|notes)|system_service\/(config|splash_config)|(user\/followings\/followfeed|followfeed|recommend\/user\/follow_recommend)|homefeed)(\?.*)?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiaohongshu.js
+xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(imagefeed|live_photo\/save|widgets|feed|videofeed|video\/save)|system_service\/(config\?|splash_config)|(user\/followings\/followfeed|followfeed\?|recommend\/user\/follow_recommend\?)|homefeed\?|search\/notes\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiaohongshu.js
 
 # > 网易云 by Keywos&RuCu6
 cloudmusic_tab.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"MY":"{{{漫游}}}","DT":"{{{动态}}}","TJ":"{{{推荐}}}","FX":"{{{发现}}}"}"
