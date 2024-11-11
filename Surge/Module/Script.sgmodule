@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,rec.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,rec.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -39,14 +39,6 @@ URL-REGEX,^https?:\/\/www1.elecfans.com\/www\/delivery,REJECT
 # > 京东
 URL-REGEX,^https?:\/\/\w{32}\.jddebug\.com\/diagnose\?,REJECT
 URL-REGEX,^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=start$,REJECT-TINYGIF
-
-# > 网易云音乐
-DOMAIN,iadmusicmat.music.126.net,REJECT-NO-DROP
-DOMAIN,iadmat.nosdn.127.net,REJECT-NO-DROP
-DOMAIN,iadmatapk.nosdn.127.net,REJECT-NO-DROP
-DOMAIN,httpdns.n.netease.com,REJECT-NO-DROP
-URL-REGEX,^https?:\/\/httpdns.n\.netease\.com,REJECT
-URL-REGEX,^https?:\/\/httpdns\.music\.163\.com,REJECT
 
 # > 山姆
 URL-REGEX,^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/sams-user\/(window\/getGoUpPlus|screen_promotion\/get),REJECT
@@ -117,12 +109,6 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 # > 网易邮箱大师
 ^https?:\/\/appconf\.mail\.163\.com\/mailmaster\/api\/http\/urlConfig\.do$ data-type=text data="{}" status-code=200
 
-# > 网易云音乐 by Keywos
-// 请使用独立模块 https://raw.githubusercontent.com/Keywos/rule/refs/heads/main/script/wy/wy.sgmodule
-// ^https?:\/\/(ipv4|interface\d?)\.music\.163.com\/e?api\/ad data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/eapiad.json"
-// ^https?:\/\/interface\d?\.music\.163.com\/w?e?api\/search\/default data="https://raw.githubusercontent.com/Keywos/rule/main/mocks/keyword.json"
-// ^https?:\/\/interface\d?\.music\.163\.com\/w?e?api\/(?:side-bar\/mini-program\/music-service\/account|delivery\/(batch-deliver|deliver)|moment\/tab\/info\/get|yunbei\/account\/entrance\/get|search\/(chart|rcmd\/keyword|specialkeyword)|resource-exposure\/|activity\/bonus\/playpage\/time\/query|resource\/comments?\/musiciansaid|community\/friends\/fans-group\/artist\/group\/get|user\/sub\/artist|music\/songshare\/text\/recommend\/get|mine\/applet\/redpoint|resniche\/position\/play\/new\/get|mlivestream\/entrance\/playpage|link\/(position\/show\/strategy|scene\/show)|ios\/version|v\d\/content\/exposure\/comment\/banner) data-type=text data="{}" status-code=200
-
 # > 美团 by RuCu6
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data-type=text data="{}" status-code=200
 ^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data-type=text data="{}" status-code=200
@@ -190,10 +176,8 @@ WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp
 # > 小红书去广告&水印 by chouchoui&RuCu6
 xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(note\/(imagefeed|live_photo\/save|widgets|feed|videofeed|video\/save)|system_service\/(config\?|splash_config)|(user\/followings\/followfeed|followfeed\?|recommend\/user\/follow_recommend\?)|homefeed\?|search\/notes\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/xiaohongshu.js
 
-# > 网易云 by Keywos&RuCu6
-cloudmusic_tab.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"MY":"{{{漫游}}}","DT":"{{{动态}}}","TJ":"{{{推荐}}}","FX":"{{{发现}}}"}"
-cloudmusic_home.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(homepage\/block\/page|link\/page\/rcmd\/(resource\/show|block\/resource\/multi\/refresh)),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"PRGG":"{{{问候语}}}","PRDRD":"{{{每日推荐}}}","PRSCVPT":"{{{推荐歌单}}}","PRST":"{{{最近常听}}}","HMPR":"{{{音乐合伙人}}}","PRRR":"{{{雷达歌单}}}","PRRK":"{{{排行榜}}}","PRMST":"{{{推荐专属歌单}}}","PRCN":"{{{你的专属歌单}}}"}"
-cloudmusic_proto.js = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get|link\/page\/discovery\/resource\/show|link\/position\/show\/resource|song\/play\/more\/list\/v\d|user\/follow\/users\/mixed\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+# > 网易云 by Keywos
+// 请使用独立模块 https://raw.githubusercontent.com/Keywos/rule/refs/heads/main/script/wy/wy.sgmodule
 
 # > 京东去广告 by RuCu6
 jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(?:deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/jingdong.js
