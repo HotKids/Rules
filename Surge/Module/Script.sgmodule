@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,rec.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn, mapi.weibo.com, *.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,interface*.music.163.com,httpdns.n.netease.com,ipv4.music.163.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,*.pan.baidu.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,edith.xiaohongshu.com,rec.xiaohongshu.com,www.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -26,6 +26,7 @@ URL-REGEX,^https?:\/\/az1mbasecc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.clientfa
 URL-REGEX,^https?:\/\/intellicc\.bas\.cmbchina\.com\/Edge\/api\/mlife\.intelli\.render\.api\.render\/getDynamicDataSec,REJECT
 
 # > 微博
+URL-REGEX,^https?:\/\/api\.weibo\.cn\/(2\/)?httpdns\/config,REJECT
 URL-REGEX,^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(get-lbs-cell-info\.php|sdkconfig\.php),REJECT
 
 # > 得物
@@ -80,7 +81,8 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 
 # > 微博
 ^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data-type=text data="{}" status-code=200
-^https?:\/\/api\.weibo\.cn\/2\/(!\/(chaohua\/discovery\/home_bottom\/switch|huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|live\/media_homelist|wbox\/\w+\/(home_bottom_modal|interest_category)|sug\/list\/finderchange)|comments\/bullet_screens|hot\/hours_spotlight|photo\/info|push\/daily|search\/container_discover|statuses\/(container_positive|push_info)|ug\/checkin\/list|video\/redpacket|vote\/get_vote_detail)\? data-type=text data="{}" status-code=200
+^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(?:get-lbs-cell-info\.php|sdkconfig\.php) status-code=200
+^https?:\/\/api\.weibo\.cn\/(2\/(ug\/checkin\/list|push\/daily|comments\/bullet_screens\?|photo\/info\?|statuses\/(container_positive|push_info)|vote\/get_vote_detail\?|search\/container_discover\?|hot\/hours_spotlight\?|video\/redpacket\?|!\/(live\/media_homelist\?|chaohua\/discovery\/home_bottom\/switch\?|huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|wbox\/\w+\/(home_bottom_modal|interest_category)))|!\/sug\/list\/finderchange\?) data-type=text data="{}" status-code=200
 
 # > 阿里巴巴
 ^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alibaba\.advertisementservice\.getadv data-type=text data="{}" status-code=200
@@ -178,8 +180,8 @@ Sub_info = type=http-request,pattern=http://sub\.info,script-path=https://raw.gi
 
 # > 微博去广告 by yichahucha&zmqcherish&RuCu6
 // 或使用微博净化模块 https://raw.githubusercontent.com/zmqcherish/proxy-script/main/weibo.sgmodule
-wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(cardlist|page|checkin\/show|client\/publisher_list|comments\/build_comments|container\/asyn|direct_messages\/user_list|flowlist|flowpage|friendships\/(create|destroy)|groups\/allgroups\/v2|!\/huati\/discovery_home_bottom_channels|messageflow\/notice|profile\/(container_timeline|dealatt|me|statuses\/tab|userinfo)|push\/active|search\/(container_timeline|finder)|searchall|statuses\/(container_timeline(_hot|_topic|_topicpage|_unread)?|unread_hot_timeline|extend|show)|video\/tiny_stream_video_list)\?,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
-wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootpreload|(sdk|wb)app)\.uve\.weibo\.com\/(v[12]\/ad\/preload|interface\/sdk\/sdkad\.php|(preload\/get_ad|wbapplua\/wbpullad\.lua)))\?,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
+wb_ad.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/api\.weibo\.cn\/2\/(?:(?:!\/huati\/discovery_home_bottom_channels\?|cardlist|checkin\/show|client\/publisher_list|comments\/build_comments\?|container\/asyn|direct_messages\/user_list\?|(?:flowlist|flowpage)|friendships\/(?:create|destroy)|groups\/allgroups\/v2\?|messageflow\/notice\?|page|profile\/(?:container_timeline|dealatt|me|statuses\/tab|userinfo)|push\/active|search\/(?:container_timeline|finder)|searchall\?|shproxy\/chaohua\/discovery\/searchactive\?|statuses\/(?:container_timeline(?:_hot|_topic|_topicpage|_unread)?|extend|repost_timeline|show|unread_hot_timeline)|video\/tiny_stream_video_list\?)),script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
+wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootpreload|(sdk|wb)app)\.uve\.weibo\.com)\/(?:v[12]\/ad\/preload|interface\/sdk\/sdkad\.php|preload\/get_ad|wbapplua\/wbpullad\.lua),script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/weibo.js
 
 # > 微信公众号去广告 by NobyDa
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
