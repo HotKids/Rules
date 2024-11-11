@@ -19,6 +19,7 @@ DOMAIN-KEYWORD,safebrowsing.
 # > Amap
 DOMAIN,amap-aos-info-nogw.amap.com
 DOMAIN,free-aos-cdn-image.amap.com
+DOMAIN-SUFFIX,v.smtcdns.com
 
 # > Apple
 DOMAIN,advertising.apple.com
