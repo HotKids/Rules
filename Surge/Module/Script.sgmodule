@@ -93,7 +93,7 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/member\.alipan\.com\/v2\/activity\/(sign_in_info|sign_in_luckyBottle) data-type=text data="{}" status-code=200
 
 # > 百度网盘
-^https?:\/\/pan\.baidu\.com\/(act\/(api\/activityentry|v2\/(bchannel|welfare)\/list)|rest\/2\.0\/pcs\/ad) data-type=text data="{}" status-code=200
+^https?:\/\/pan\.baidu\.com\/(act\/api\/activityentry|act\/v2\/welfare\/list|api\/getconfig|api\/getsyscfg|api\/taskscore\/tasklist|rest\/2\.0\/membership\/user\?method=gamecenter|rest\/\d\.\d\/pcs\/adv) data-type=text data="{}" status-code=200
 ^https?:\/\/update\.pan\.baidu\.com\/statistics\? data-type=text data="{}" status-code=200
 
 # > 百度地图 by RuCu6
@@ -185,9 +185,6 @@ jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.ac
 
 # > 阿里云盘 by RuCu6
 alidrive_proto.js = type=http-response,pattern=^https?:\/\/((member|(biz)?api)\.alipan\.com)\/(apps\/v\d\/users?\/home\/(news|widgets)|v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/adrive.js
-
-# > 百度网盘 by RuCu6
-baidudrive_proto.js = type=http-response,pattern=^https?:\/\/pan\.baidu\.com\/api\/getsyscfg\?,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/myBlockAds.js
 
 # > 百度地图 by RuCu6
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bdmap.js
