@@ -153,6 +153,17 @@ networking.apple = server:https://doh.dns.apple.com/dns-query // Apple
 *.mmstat.com = server:223.5.5.5 // mmstat 数据统计 广告追踪
 tb.cn = server:223.5.5.5 // 淘宝短网址
 
+# > Tencent
+*.qq.com = server:119.29.29.29
+*.qpic.com = server:119.29.29.29
+*.qlogo.cn = server:119.29.29.29
+*.weixin.com = server:119.29.29.29
+*.wechat.com = server:119.29.29.29
+*.tenpay.com = server:119.29.29.29
+*.wechatpay.com = server:119.29.29.29
+*.weixinbridge.com = server:119.29.29.29
+*.servicewechat.com = server:119.29.29.29
+
 # > Taiwan
 # 中华电信
 *.cht.com.tw  = server:https://dns.hinet.net/dns-query // 中华电信
