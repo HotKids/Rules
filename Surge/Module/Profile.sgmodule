@@ -19,8 +19,8 @@ test-timeout = 5
  geoip-maxmind-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 
 # > IPv6 支持（默认关闭）
-ipv6 = true
-ipv6-vif=auto
+ipv6 = false
+ipv6-vif = off
 
 # > 允许 Wi-Fi 访问 (仅 iOS，若允许远程访问将「false」改为「true」)
 allow-wifi-access = true
@@ -44,8 +44,8 @@ skip-proxy = %APPEND% 192.168.0.0/24, 10.0.0.0/8, 172.16.0.0/12, 127.0.0.1, loca
 network-framework = false
 
 # > DNS 服务器 (如无必要不建议使用 DNS over HTTPS)
-dns-server = %APPEND% system, 119.29.29.29, 119.28.28.28, 1.0.0.1, 223.5.5.5, 223.6.6.6, 1.1.1.1, 8.8.8.8, 8.8.4.4
-encrypted-dns-server = h3://1.1.1.1/dns-query, h3://dns.alidns.com/dns-query, h3://dns-unfiltered.adguard.com/dns-query
+// dns-server = %APPEND% system, 119.29.29.29, 119.28.28.28, 1.0.0.1, 223.5.5.5, 223.6.6.6, 1.1.1.1, 8.8.8.8, 8.8.4.4
+encrypted-dns-server = quic://223.5.5.5, quic://223.6.6.6, https://1.12.12.12/dns-query, https://120.53.53.53/dns-query
 
 # > 从 /etc/hosts 读取 DNS 记录
  read-etc-hosts = true
@@ -61,12 +61,12 @@ encrypted-dns-server = h3://1.1.1.1/dns-query, h3://dns.alidns.com/dns-query, h3
 # > Always Real IP Hosts
 # 当 Surge VIF 处理 DNS 问题时，此选项要求 Surge 返回一个真正的 IP 地址，而不是一个假 IP 地址。
 # DNS 数据包将被转发到上游 DNS 服务器。
-always-real-ip = %APPEND% *.lan, *.msftconnecttest.com, *.msftncsi.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, localhost.*.qq.com
+always-real-ip = %APPEND% *.lan, dns.msftncsi.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, *.turn.twilio.com, *.stun.twilio.com, stun.syncthing.net, stun.*
 
 # > Hijack DNS
 # 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址 (198.18.0.2)。
 # 有些设备或软件总是使用硬编码的 DNS 服务器。 (例如 Google Speakers 总是使用 8.8.8.8)。 您可以使用此选项劫持查询，以获得一个假地址。
-# hijack-dns = 8.8.8.8:53, 8.8.4.4:53
+hijack-dns = 8.8.8.8:53, 8.8.4.4:53
 
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理。Surge HTTP 引擎将处理这些请求，所有的高级功能，如捕获、重写和脚本等都可以使用。
