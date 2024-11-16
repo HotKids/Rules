@@ -15,15 +15,15 @@ IP-CIDR,162.14.157.24/32,REJECT
 IP-CIDR,139.199.240.15/32,REJECT
 
 [Map Local]
+^https?:\/\/daijia\.kuaidadi\.com:443\/gateway data-type=text data="{}" status-code=200
+
 ^https?:\/\/ct\.xiaojukeji\.com\/agent\/v3\/feeds data-type=text data="{}" status-code=200
 
 ^https?:\/\/freight\.xiaojukeji\.com\/gateway data-type=text data="{}" status-code=200
 
-^https?:\/\/daijia\.kuaidadi\.com:443\/gateway data-type=text data="{}" status-code=200
+^https?:\/\/res\.xiaojukeji\.com\/resapi\/activity\/(getMulti\?|mget|xpget) data-type=text data="{}" status-code=200
 
 ^https?:\/\/conf\.diditaxi\.com\.cn\/(dynamic\/conf|homepage\/v\d\/other\/(fast|slow)) data-type=text data="{}" status-code=200
-
-^https?:\/\/res\.xiaojukeji\.com\/resapi\/activity\/(getMulti\?|mget|xpget) data-type=text data="{}" status-code=200
 
 [Script]
 didi_1.js = type=http-response,pattern=^https?:\/\/(common|conf)\.diditaxi\.com\.cn\/(common\/v\d\/usercenter\/me|homepage\/v\d\/core|ota\/na\/yuantu\/infoList),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/Didichuxing.js
