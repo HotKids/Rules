@@ -192,8 +192,8 @@ baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu
 # > 高德地图 by RuCu6&kokoryh
 amap_proto.js = type=http-response,pattern=^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/perception\/publicTravel\/beforeNavi\?|boss\/(car\/order\/content_info|order_web\/friendly_information)|bus\/plan\/integrate\?|c3frontend\/af-(?:hotel|launch)\/page\/main\?|faas\/amap-navigation\/(?:card-service-plan-home|main-page)|perception\/drive\/(?:routeInfo|routePlan)|promotion-web\/resource(\/home)?\?|shield\/(dsp\/profile\/index\/nodefaasv3\?|frogserver\/aocs\/updatable\/1\?|search\/(?:common\/coupon\/info|nearbyrec_smart\?|poi\/detail)|search_bff\/hotword\?|search_poi\/(?:mps|search\/sp|sug|tips_operation_location))|valueadded\/alimama\/splash_screen\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/amap.js
 
-# > 酷安去广告 by RuCu6
-coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(feed\/detail|feed\/replyList|page\/dataList|main\/dataList|main\/indexV8|main\/init)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/coolapk.js
+# > 酷安去广告 by ddgksf2013
+coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\/(dataList|feed\/(detail|replyList)|main\/(indexV8|init)|page\/dataList\?.*title=%E9%85),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/coolapk.js
 
 # > 12306 开屏广告 by RuCu6
 12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/12306.js
