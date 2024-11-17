@@ -105,7 +105,8 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists\/?|msgbox\/pull_mp)\? data-type=text data="{}" status-code=200
 
 # > 网易邮箱大师
-^https?:\/\/appconf\.mail\.163\.com\/mailmaster\/api\/http\/urlConfig\.do$ data-type=text data="{}" status-code=200
+^https?:\/\/dashi\.163\.com\/task-center-api\/fapi\/task\/list$ data-type=text data="{}" status-code=200
+^https?:\/\/appconf\.mail\.163\.com\/(mailmaster\/api\/http\/urlConfig\.do|mailoperating\/mailmaster\/api\/operator\/get)$ data-type=text data="{}" status-code=200
 
 # > 美团 by RuCu6
 ^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data-type=text data="{}" status-code=200
@@ -136,8 +137,8 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 
 # > 顺丰速运&小程序
 ^https?:\/\/mcs-mimp-web\.sf-express\.com\/mcs-mimp\/integralPlanet\/getCxAdvertiseList data-type=text data="{}" status-code=200
-^https?:\/\/ccsp-egmas\.sf-express\.com\/cx-app-(video\/video\/app\/video\/labelClusterList|base\/base\/app\/(ad\/queryInfoFlow|bms\/queryRecommend)) data-type=text data="{}" status-code=200
-^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo|operation-platform\/info-flow-adver\/query|esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)) data-type=text data="{}" status-code=200
+^https?:\/\/ccsp-egmas\.sf-express\.com\/(cx-app-video\/video\/app\/video\/labelClusterList|cx-app-base\/base\/app\/(ad\/queryInfoFlow|bms\/queryRecommend))$ data-type=text data="{}" status-code=200
+^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)|operation-platform\/info-flow-adver\/query|wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo)$ data-type=text data="{}" status-code=200
 
 # > 小红书
 ^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(sns\/(v1\/(surprisebox\/(get_style|open|submit_action)|ads\/resource)|v2\/(guide\/user_banner|hey\/\w+\/hey_gallery)|v3\/note\/guide)|marketing\/box\/trigger\?) data-type=text data="{}" status-code=200
@@ -182,7 +183,7 @@ xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/(edith|rec|www)\.x
 jd_proto.js = type=http-response,pattern=^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(?:deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/jingdong.js
 
 # > 阿里云盘 by RuCu6
-alidrive_proto.js = type=http-response,pattern=^https?:\/\/((member|(biz)?api)\.alipan\.com)\/(apps\/v\d\/users?\/home\/(news|widgets)|v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/adrive.js
+alidrive_proto.js = type=http-response,pattern=^https?:\/\/((biz)?api\.alipan\.com\/apps\/v\d\/users?\/home\/(news|widgets)|member\.alipan\.com\/v1\/users\/onboard_list),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/adrive.js
 
 # > 百度地图 by RuCu6
 baidumap_proto.js = type=http-response,pattern=^https?:\/\/newclient\.map\.baidu\.com\/client\/(imap\/dl\/s\/UpdateInfo\.php\?|usersystem\/mine\/page\?),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/bdmap.js
