@@ -1,4 +1,7 @@
-hostname = i.weread.qq.com
+hostname = i.weread.qq.com,api.coolapk.com
 
 # > 微信阅读精简 by Maasea
 ^https?:\/\/i\.weread\.qq\.com\/(book\/(reading[sS]tat|chapterReview)|user\/profile|groups\/readerEntrance|review\/list|mobileSync) url script-response-body https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/WeRead/weread.js
+
+# > 酷安去广告 by ddgksf2013
+^https?:\/\/api\.coolapk\.com\/v6\/(dataList|feed\/(detail|replyList)|main\/(indexV8|init)|page\/dataList\?.*title=%E9%85) url script-response-body https://github.com/ddgksf2013/Scripts/raw/master/coolapk.js
