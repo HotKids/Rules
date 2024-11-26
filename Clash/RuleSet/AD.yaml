@@ -74,6 +74,10 @@ payload:
 
   # > ChatGPT
   - DOMAIN,o33249.ingest.sentry.io
+  
+  # > Disney+ with Hulu
+  - DOMAIN-SUFFIX,disneyadvertising.com
+  # DOMAIN-SUFFIX,ads.digital.disneyadvertising.com
 
   # > Google
   - DOMAIN,adservice.google.com
