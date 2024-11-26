@@ -1,0 +1,18 @@
+#!name = Hulu 去广告
+#!desc = Hulu 去广告
+#!author = liunice
+
+[MITM]
+hostname = %APPEND% vodmanifest.hulustream.com,discover.hulu.com
+
+[Rule]
+# > Disney+ with Hulu
+DOMAIN-SUFFIX,disneyadvertising.com,REJECT
+
+[Script]
+# > 去广告
+hulu_ad.js = type=http-response,pattern=^https?:\/\/vodmanifest\.hulustream\.com\/hulu\/v\d+\/hls\/(video|audio|vtt)\/\d+\/(playlist\.m3u8)?$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
+
+# > 去台标水印
+hulu_logo.js = type=http-response,pattern=^https?:\/\/discover\.hulu\.com\/content\/v\d+\/(hubs\/series\/|browse\/upnext\?)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
+
