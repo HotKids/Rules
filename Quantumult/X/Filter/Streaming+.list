@@ -2,6 +2,7 @@
 
 # > Disney+
 DOMAIN-SUFFIX,media.dssott.com,Streaming
+DOMAIN-SUFFIX,prod.dssedge.com,Streaming
 DOMAIN,prod-ripcut-delivery.disney-plus.net,Streaming
 
 # > Paramount+
