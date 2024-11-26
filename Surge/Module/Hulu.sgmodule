@@ -16,6 +16,9 @@ DOMAIN-SUFFIX,disneyadvertising.com,REJECT
 hulu_ad.js = type=http-response,pattern=^https?:\/\/vodmanifest\.hulustream\.com\/hulu\/v\d+\/hls\/(video|audio)\/\d+\/,requires-body=1,max-size=-1,timeout=60,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
 hulu_ad.js = type=http-response,pattern=^https?:\/\/vodmanifest\.hulustream\.com\/hulu\/v\d+\/hls\/vtt\/\d+\/playlist\.m3u8,requires-body=1,max-size=-1,timeout=60,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
 
+# > 强制 1080P
+hulu_fhd.js = type=http-response,pattern=^https?:\/\/vodmanifest\.hulustream\.com\/hulu\/v\d+\/hls\/multivariant\/\d+\/playlist\.m3u8,requires-body=1,max-size=-1,timeout=60,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
+
 # > 去台标水印
 hulu_logo.js = type=http-response,pattern=^https?:\/\/discover\.hulu\.com\/content\/v\d+\/hubs\/series\/,requires-body=1,max-size=-1,timeout=60,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
 hulu_logo.js = type=http-response,pattern=^https?:\/\/discover\.hulu\.com\/content\/v\d+\/browse\/upnext\?,requires-body=1,max-size=-1,timeout=60,script-path=https://raw.githubusercontent.com/liunice/HuluHelper/master/hulu_helper.js
