@@ -1,5 +1,5 @@
-#!name = Hulu 去广告
-#!desc = Hulu 去广告
+#!name = Hulu 增强
+#!desc = Hulu 去广告、去台标水印、强制1080p
 #!category=去广告
 #!author = liunice
 ### fork from liunice/HuluHelper
