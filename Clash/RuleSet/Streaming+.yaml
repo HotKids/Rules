@@ -2,6 +2,7 @@ payload:
   # 一些无需验证地区的 HOST
   # > Disney+
   - DOMAIN-SUFFIX,media.dssott.com
+  - DOMAIN-SUFFIX,prod.dssedge.com
   - DOMAIN,prod-ripcut-delivery.disney-plus.net
 
   # > Paramount+
