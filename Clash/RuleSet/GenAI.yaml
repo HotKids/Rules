@@ -41,5 +41,9 @@ payload:
   # Meta
   - DOMAIN,imagine.meta.com
 
+  # Perplexity
+  - DOMAIN-SUFFIX,perplexity.ai
+  - DOMAIN-SUFFIX,pplx.ai
+  
   # Poe
   - DOMAIN-SUFFIX,poe.com
