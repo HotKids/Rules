@@ -224,7 +224,7 @@ proxy-providers:
   HK:
     type: http
     path: ./Provider/Proxy/Sub/HK.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     filter: '香港|HK|Hong Kong|🇭🇰'
     health-check: 
@@ -234,7 +234,7 @@ proxy-providers:
   TW:
     type: http
     path: ./Provider/Proxy/Sub/TW.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
     health-check: 
@@ -244,7 +244,7 @@ proxy-providers:
   SG:
     type: http
     path: ./Provider/Proxy/Sub/SG.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     filter: '新加坡|狮城|SG|Singapore|🇸🇬'
     health-check: 
@@ -254,7 +254,7 @@ proxy-providers:
   JP:
     type: http
     path: ./Provider/Proxy/Sub/JP.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     filter: '日本|JP|Japan|🇯🇵'
     health-check: 
@@ -264,7 +264,7 @@ proxy-providers:
   US:
     type: http
     path: ./Provider/Proxy/Sub/US.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     filter: '美国|US|USA|America|United States|🇺🇸'
     health-check: 
@@ -274,7 +274,7 @@ proxy-providers:
   UN:
     type: http
     path: ./Provider/Proxy/Sub/UN.yaml
-    url: https://dove.589669.xyz/all2clash?sub=https://sub.hotkids.me
+    url: https://sub.hotkids.me
     interval: 3600
     health-check: 
       enable: true
@@ -315,6 +315,14 @@ proxy-groups:
       - 🇸🇬 Singapore
 
   # 特殊代理服务
+  - name: "🤖 GenAI"
+    type: select
+    proxies:
+      - 🇸🇬 Singapore
+      - 🇯🇵 Japan
+      - 🇺🇸 America
+      - 🔰 Proxy
+      
   - name: "📬 Telegram"
     type: select
     proxies:
@@ -392,28 +400,35 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Unbreak.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Unbreak.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
+    interval: 86400
+    
+  Advertising_Domain:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Guard/Advertising_Domain.yaml
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising_Domain.yaml
     interval: 86400
 
+  Advertising_Custom:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Guard/Advertising_Custom.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Clash/RuleSet/AD.yaml
+    interval: 86400
+    
   Advertising:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Guard/Advertising.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
-    interval: 86400
-
-  Hijacking:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Guard/Hijacking.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Hijacking.yaml
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising_Domain.yaml
     interval: 86400
     
-  Privacy:
+  HTTPDNS:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Guard/Privacy.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Guard/Privacy.yaml
+    path: ./Provider/RuleSet/Guard/HTTPDNS.yaml
+    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
   Streaming+:
@@ -457,19 +472,33 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Streaming.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
-  
+
+  GenAI:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Extra/GenAI.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
+    interval: 86400
+
   Telegram:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/Telegram.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/Telegram/Telegram.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
+    interval: 86400
+    
+  TelegramCIDR:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/Extra/TelegramCIDR.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt
     interval: 86400
 
   PayPal:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/PayPal.yaml
-    url: https://raw.githubusercontent.com/DivineEngine/Profiles/master/Clash/RuleSet/Extra/PayPal.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/PayPal.yaml
     interval: 86400
 
   Global:
@@ -490,7 +519,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/CNCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
     
   LAN:
@@ -506,9 +535,10 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
+  - RULE-SET,Advertising_Domain,🚧 AdGuard
+  - RULE-SET,Advertising_Custom,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
-  - RULE-SET,Hijacking,🚧 AdGuard
-  - RULE-SET,Privacy,🚧 AdGuard
+  - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Global Area Network
 
@@ -519,9 +549,13 @@ rules:
   - RULE-SET,Streaming US,🇺🇸 America
   - RULE-SET,Streaming SEA,📺 CNTV
   - RULE-SET,Streaming,🎬 Streaming
-
+  
+  # GenAI
+  - RULE-SET,GenAI,🤖 GenAI
+  
   # Telegram
   - RULE-SET,Telegram,📬 Telegram
+  - RULE-SET,TelegramCIDR,📬 Telegram
 
   # PayPal
   - RULE-SET,PayPal,💳 PayPal
