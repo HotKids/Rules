@@ -403,25 +403,11 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
     
-  Advertising_Domain:
-    type: http
-    behavior: domain
-    path: ./Provider/RuleSet/Guard/Advertising_Domain.yaml
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising_Domain.yaml
-    interval: 86400
-
-  Advertising_Custom:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Guard/Advertising_Custom.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Clash/RuleSet/AD.yaml
-    interval: 86400
-    
   Advertising:
     type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Guard/Advertising.yaml
-    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/refs/heads/master/rule/Clash/Advertising/Advertising_Domain.yaml
+    behavior: domain
+    path: ./Provider/RuleSet/Guard/Reject.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
     
   HTTPDNS:
@@ -535,8 +521,6 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
-  - RULE-SET,Advertising_Domain,🚧 AdGuard
-  - RULE-SET,Advertising_Custom,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
   - RULE-SET,HTTPDNS,🚧 AdGuard
 
