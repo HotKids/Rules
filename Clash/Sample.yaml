@@ -403,7 +403,7 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
     
-  Advertising:
+  AdBlock:
     type: http
     behavior: domain
     path: ./Provider/RuleSet/Guard/Reject.yaml
@@ -521,7 +521,7 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
 
   # AdBlock
-  - RULE-SET,Advertising,🚧 AdGuard
+  - RULE-SET,AdBlock,🚧 AdGuard
   - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Global Area Network
