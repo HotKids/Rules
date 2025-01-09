@@ -31,4 +31,8 @@ payload:
   # DOMAIN-SUFFIX,samsungcloud.com
   
   # > ziniao
-  - PROCESS-NAME,ziniao*,DIRECT
+  - PROCESS-NAME,ziniao*
+
+  # > Sub
+  - DOMAIN-SUFFIX,dler.cloud
+  - DOMAIN-SUFFIX,nexconvert.com
