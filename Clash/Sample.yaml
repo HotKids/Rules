@@ -203,7 +203,15 @@ dns:
     '*.alibabausercontent.com': '223.5.5.5'
     '*.mmstat.com': '223.5.5.5'
     'tb.cn': '223.5.5.5'
-
+    '*.qq.com': '119.29.29.29'
+    '*.qpic.com': '119.29.29.29'
+    '*.qlogo.cn': '119.29.29.29'
+    '*.weixin.com': '119.29.29.29'
+    '*.wechat.com': '119.29.29.29'
+    '*.tenpay.com': '119.29.29.29'
+    '*.wechatpay.com': '119.29.29.29'
+    '*.weixinbridge.com': '119.29.29.29'
+    '*.servicewechat.com': '119.29.29.29'
 #
 # https://github.com/Dreamacro/clash/wiki/premium-core-features
 #
