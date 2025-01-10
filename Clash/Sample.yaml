@@ -221,59 +221,9 @@ proxies:
 
 # 服务器节点订阅
 proxy-providers:
-  HK:
+  Nodes:
     type: http
-    path: ./Provider/Proxy/Sub/HK.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    filter: '香港|HK|Hong Kong|🇭🇰'
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
-  TW:
-    type: http
-    path: ./Provider/Proxy/Sub/TW.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
-  SG:
-    type: http
-    path: ./Provider/Proxy/Sub/SG.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    filter: '新加坡|狮城|SG|Singapore|🇸🇬'
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
-  JP:
-    type: http
-    path: ./Provider/Proxy/Sub/JP.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    filter: '日本|JP|Japan|🇯🇵'
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
-  US:
-    type: http
-    path: ./Provider/Proxy/Sub/US.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    filter: '美国|US|USA|America|United States|🇺🇸'
-    health-check: 
-      enable: true
-      url: http://www.gstatic.com/generate_204
-      interval: 600
-  UN:
-    type: http
-    path: ./Provider/Proxy/Sub/UN.yaml
+    path: ./Provider/Proxy/Nodes.yaml
     url: https://sub.hotkids.me
     interval: 3600
     health-check: 
@@ -354,37 +304,42 @@ proxy-groups:
   - name: "🇺🇳 Server"
     type: select
     use:
-      - UN
+      - Nodes
 
   # HK
   - name: "🇭🇰 Hong Kong"
     type: select
+    filter: '香港|HK|Hong Kong|🇭🇰'
     use:
-      - HK
+      - Nodes
       
   # TW
   - name: "🇨🇳 Taiwan"
     type: select
+    filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
     use:
-      - TW
+      - Nodes
 
   # SG
   - name: "🇸🇬 Singapore"
     type: select
+    filter: '新加坡|狮城|SG|Singapore|🇸🇬'
     use:
-      - SG
+      - Nodes
       
   # JP
   - name: "🇯🇵 Japan"
     type: select
+    filter: '日本|JP|Japan|🇯🇵'
     use:
-      - JP
+      - Nodes
     
   # US
   - name: "🇺🇸 America"
     type: select
+    filter: '美国|US|USA|America|United States|🇺🇸'
     use:
-      - US
+      - Nodes
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
