@@ -84,10 +84,10 @@ dns:
   # These nameservers are used to resolve the DNS nameserver hostnames below.
   # Specify IP addresses only
   default-nameserver:
-    - 223.5.5.5
     - 119.29.29.29
-    - 8.8.4.4
-    - 1.0.0.1
+    - 223.5.5.5
+    - 182.254.116.116
+    
   enhanced-mode: fake-ip # or redir-host
   fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
   # use-hosts: true # lookup hosts and return IP record
@@ -104,6 +104,7 @@ dns:
     - '*.test'
     - '*.local'
     - '*.home.arpa'
+    - 'localhost.ptlogin2.qq.com'
     # Stun Services
     - '+.stun.*.*'
     - '+.stun.*.*.*'
@@ -130,23 +131,21 @@ dns:
   # All DNS questions are sent directly to the nameserver, without proxies
   # involved. Clash answers the DNS question with the first result gathered.
   nameserver:
-    - 192.168.31.1
-    - 119.29.29.29
     - https://doh.pub/dns-query
     - https://dns.alidns.com/dns-query
     # - tls://dns.rubyfish.cn:853 # DNS over TLS
     # - https://1.1.1.1/dns-query # DNS over HTTPS
+    - dhcp://en0 # dns from dhcp
+    # - '8.8.8.8#en0'
 
   # When `fallback` is present, the DNS server will send concurrent requests
   # to the servers in this section along with servers in `nameservers`.
   # The answers from fallback servers are used when the GEOIP country
   # is not `CN`.
   fallback:
-    - https://dns.cloudflare.com/dns-query
-    - https://public.dns.iij.jp/dns-query
-    - https://jp.tiar.app/dns-query
-    - https://jp.tiarap.org/dns-query
-    - tls://dot.tiar.app
+    - tls://8.8.4.4
+    - tls://1.1.1.1
+    - https://doh.pub/dns-query
 
   # If IP addresses resolved with servers in `nameservers` are in the specified
   # subnets below, they are considered invalid and results from `fallback`
@@ -203,6 +202,7 @@ dns:
     '*.alibabausercontent.com': '223.5.5.5'
     '*.mmstat.com': '223.5.5.5'
     'tb.cn': '223.5.5.5'
+    # Tencent
     '*.qq.com': '119.29.29.29'
     '*.qpic.com': '119.29.29.29'
     '*.qlogo.cn': '119.29.29.29'
@@ -229,20 +229,26 @@ proxies:
 
 # 服务器节点订阅
 proxy-providers:
-  Nodes:
+  Server:
     type: http
-    path: ./Provider/Proxy/Nodes.yaml
+    path: ./Provider/Proxy/Server.yaml
     url: https://sub.hotkids.me
     interval: 3600
+    proxy: DIRECT
+    header:
+      User-Agent:
+      - "Clash/v1.18.0"
+      - "mihomo/1.18.3"
     health-check: 
       enable: true
-      url: http://www.gstatic.com/generate_204
+      url: https://cp.cloudflare.com/generate_204
       interval: 600
 
 proxy-groups:
   # 代理节点选项
   - name: "🔰 Proxy"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
@@ -255,6 +261,7 @@ proxy-groups:
   # 海外流媒体服务
   - name: "🎬 Streaming"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
@@ -266,38 +273,35 @@ proxy-groups:
   # 大陆流媒体服务（面向港台版本）
   - name: "📺 CNTV"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
     proxies:
       - 🔘 DIRECT
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
       - 🇸🇬 Singapore
-
+    
   # 特殊代理服务
+  - name: "🍎 Apple"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+    proxies:
+      - 🔘 DIRECT
+      - 🔰 Proxy
+      - 🇺🇸 America
+      
   - name: "🤖 GenAI"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
     proxies:
       - 🇸🇬 Singapore
       - 🇯🇵 Japan
       - 🇺🇸 America
       - 🔰 Proxy
       
-  - name: "📬 Telegram"
-    type: select
-    proxies:
-      - 🔰 Proxy
-      - 🇸🇬 Singapore
-      - 🔘 DIRECT
-
-  - name: "💳 PayPal"
-    type: select
-    proxies:
-      - 🔘 DIRECT
-      - 🔰 Proxy
-      - 🇺🇸 America
-
   # 去广告以及隐私追踪保护、反运营商劫持开关
   - name: "🚧 AdGuard"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
     proxies:
       - REJECT
       - DIRECT
@@ -305,49 +309,56 @@ proxy-groups:
   # 直连
   - name: "🔘 DIRECT"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - DIRECT
 
   # UN
   - name: "🇺🇳 Server"
     type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
     use:
-      - Nodes
+      - Server
 
   # HK
   - name: "🇭🇰 Hong Kong"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/HK.png
     filter: '香港|HK|Hong Kong|🇭🇰'
     use:
-      - Nodes
+      - Server
       
   # TW
   - name: "🇨🇳 Taiwan"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/TW.png
     filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
     use:
-      - Nodes
+      - Server
 
   # SG
   - name: "🇸🇬 Singapore"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/SG.png
     filter: '新加坡|狮城|SG|Singapore|🇸🇬'
     use:
-      - Nodes
+      - Server
       
   # JP
   - name: "🇯🇵 Japan"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/JP.png
     filter: '日本|JP|Japan|🇯🇵'
     use:
-      - Nodes
+      - Server
     
   # US
   - name: "🇺🇸 America"
     type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/US.png
     filter: '美国|US|USA|America|United States|🇺🇸'
     use:
-      - Nodes
+      - Server
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
@@ -379,7 +390,7 @@ rule-providers:
     path: ./Provider/RuleSet/Guard/HTTPDNS.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
-
+    
   Streaming+:
     type: http
     behavior: classical
@@ -421,35 +432,28 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/Streaming.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
+    
+  Apple CDN:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Extra/AppleCDN.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt
+    interval: 86400
 
+  Apple:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Extra/Apple.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
+    interval: 86400
+    
   GenAI:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/GenAI.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
-
-  Telegram:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Extra/Telegram.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
-    interval: 86400
     
-  TelegramCIDR:
-    type: http
-    behavior: ipcidr
-    path: ./Provider/RuleSet/Extra/TelegramCIDR.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/telegramcidr.txt
-    interval: 86400
-
-  PayPal:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Extra/PayPal.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/PayPal.yaml
-    interval: 86400
-
   Global:
     type: http
     behavior: domain
@@ -468,7 +472,7 @@ rule-providers:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/CNCIDR.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
+    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
     
   LAN:
@@ -482,7 +486,7 @@ rule-providers:
 rules:
   # Unbreak
   - RULE-SET,Unbreak,🔘 DIRECT
-
+  
   # AdBlock
   - RULE-SET,AdBlock,🚧 AdGuard
   - RULE-SET,HTTPDNS,🚧 AdGuard
@@ -491,22 +495,19 @@ rules:
 
   # Streaming
   - RULE-SET,Streaming+,🔰 Proxy
-  - RULE-SET,Streaming TW,🇹🇼 Taiwan
+  - RULE-SET,Streaming TW,🇨🇳 Taiwan
   - RULE-SET,Streaming JP,🇯🇵 Japan
   - RULE-SET,Streaming US,🇺🇸 America
   - RULE-SET,Streaming SEA,📺 CNTV
   - RULE-SET,Streaming,🎬 Streaming
-  
+
+  # Apple
+  - RULE-SET,Apple CDN,🔘 DIRECT
+  - RULE-SET,Apple,🍎 Apple
+
   # GenAI
   - RULE-SET,GenAI,🤖 GenAI
   
-  # Telegram
-  - RULE-SET,Telegram,📬 Telegram
-  - RULE-SET,TelegramCIDR,📬 Telegram
-
-  # PayPal
-  - RULE-SET,PayPal,💳 PayPal
-
   # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
@@ -517,7 +518,7 @@ rules:
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
   
-  # GeoIP China
+  # GeoIP China	
   - GEOIP,CN,🔘 DIRECT
-
+ 
   - MATCH,🔰 Proxy
