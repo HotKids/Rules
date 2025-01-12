@@ -87,6 +87,14 @@ DOMAIN,pubads.g.doubleclick.net
 DOMAIN,www.googleadservices.com
 DOMAIN-KEYWORD,adservice.google.com.
 
+# > HeyTap(OPPO)
+DOMAIN,event.dc.oppomobile.com
+DOMAIN,adx.ads.heytapmobi.com
+DOMAIN,ibrowser.feeds.heytapmobi.com
+DOMAIN,adsfs.heytapimage.com
+DOMAIN,cc-algo-cn.heytapimage.com
+DOMAIN,cc-img-cn.heytapimage.com
+
 # > ICBC
 DOMAIN,oisc.icbc.com.cn
 DOMAIN,pageviewp.icbc.com.cn
