@@ -13,6 +13,7 @@ payload:
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
   - DOMAIN,intl-subscription.iqiyi.com
+  - DOMAIN,akcdnoversea.inter.71edge.com
   - DOMAIN,akmcdnoversea.inter.iqiyi.com
   - DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
   - DOMAIN,chuangcachecdnoversea.inter.iqiyi.com
