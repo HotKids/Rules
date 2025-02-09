@@ -3,3 +3,7 @@ payload:
   # 解决国行设备 Google Play 无法正常下载的问题
   - DOMAIN-SUFFIX,xn--ngstr-lra8j.com
   - DOMAIN-SUFFIX,services.googleapis.cn
+
+  # > Goole VPN
+  - DOMAIN-SUFFIX,cloud.cupronickel.goog
+  - DOMAIN-SUFFIX,googleapis.com
