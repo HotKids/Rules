@@ -36,3 +36,6 @@ payload:
   # > Sub
   - DOMAIN-SUFFIX,dler.cloud
   - DOMAIN-SUFFIX,nexconvert.com
+
+    # > Windows NTP
+  - DOMAIN,time.windows.com
