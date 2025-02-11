@@ -7,7 +7,6 @@ payload:
   - DOMAIN-SUFFIX,bitget.com
   - DOMAIN-SUFFIX,bithumb.com
   - DOMAIN-SUFFIX,bitstamp.net
-  - DOMAIN-SUFFIX,bybit.com
   - DOMAIN-SUFFIX,coinbase.com
   - DOMAIN-SUFFIX,coingecko.com
   - DOMAIN-SUFFIX,coinmarketcap.com
@@ -26,6 +25,14 @@ payload:
   - DOMAIN-SUFFIX,binance.com
   - DOMAIN-SUFFIX,binance.info
   - DOMAIN-SUFFIX,bnbstatic.com
+  # > Bybit
+  - DOMAIN-SUFFIX,bybit.com
+  - DOMAIN-SUFFIX,bybit.biz
+  - DOMAIN-SUFFIX,bybit.cloud
+  - DOMAIN-SUFFIX,byapps.net
+  - DOMAIN-SUFFIX,byabcde.com
+  - DOMAIN-SUFFIX,byd3c3.com
+  - DOMAIN-SUFFIX,bybdc6.com
   # > OKX
   - DOMAIN-SUFFIX,okx.com
   - DOMAIN-SUFFIX,okx.com.cdn.cloudflare.net
