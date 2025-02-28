@@ -24,6 +24,7 @@ DOMAIN,guzzoni.apple.com
 # Anthropic
 # > Claude
 DOMAIN-SUFFIX,claude.ai
+DOMAIN-SUFFIX,claudeusercontent.com
 DOMAIN-SUFFIX,anthropic.com
 
 # Google
