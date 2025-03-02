@@ -309,6 +309,7 @@ proxy-groups:
   # 直连
   - name: "🔘 DIRECT"
     type: select
+    hidden: true
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - DIRECT
