@@ -1,4 +1,8 @@
 ## GenAI
+# Cloudflare
+# > AI Gateway
+DOMAIN,gateway.ai.cloudflare.com
+
 # OpenAI
 # > ChatGPT
 DOMAIN-SUFFIX,chatgpt.com
