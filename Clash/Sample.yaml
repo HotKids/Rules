@@ -301,7 +301,7 @@ proxy-groups:
   # 去广告以及隐私追踪保护、反运营商劫持开关
   - name: "🚧 AdGuard"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hijacking.png
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Qure/AdBlock.png
     proxies:
       - ⛔️ REJECT
       - 🔘 DIRECT
