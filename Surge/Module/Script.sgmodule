@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,*.acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,*.pan.baidu.com,*issuecdn.baidupcs.com,*.cdn.bcebos.com,rp.hpplay.cn,gw.aihuishou.com,apps.api.ke.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,www.xiaohongshu.com,edith.xiaohongshu.com,ci.xiaohongshu.com,rec.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,manga.bilibili.com,i*.hdslb.com,lens.leoao.com,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,*.acs.m.taobao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,*.pan.baidu.com,*issuecdn.baidupcs.com,*.cdn.bcebos.com,rp.hpplay.cn,gw.aihuishou.com,apps.api.ke.com,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,mall.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,www.xiaohongshu.com,edith.xiaohongshu.com,ci.xiaohongshu.com,rec.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,manga.bilibili.com,i*.hdslb.com,se-api.djiits.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -170,9 +170,6 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/manga\.bilibili\.com\/twirp\/(comic\.v\d\.(Comic\/(Recommend|Flash|ListFlash|GetBubbles|GetActivityTab|GetCommonBanner|GetComicConfigPicList)|Shop\/GetShopItems)|user\.v\d\.(SeasonV\d\/GetSeasonInfo|Read\/ActInfo)) data-type=text data="{}" status-code=500
 ^https?:\/\/i\d\.hdslb\.com\/bfs\/(fawkes|manga-static\/\w+\.(jpg|png))$ data-type=text data="{}" status-code=500
 
-# > 乐刻运动
-^https?:\/\/lens\.leoao\.com\/lens\/conduct\/app\/rpc\/v2\/com\.lefit\.dubbo\.cms\.api\.(front\.(AppAdvertisingNew|AdvertiseConfigFrontService\/getAdvertiseConfigNew)|bff\.ClientFrontFacade\/queryHomeMiddleInfo) data-type=text data="{}" status-code=500
-
 # > Keep
 ^https?:\/\/(api\.gotokeep\.com\/(guide-webapp\/v1\/popup\/getPopUp|search\/v6\/default\/keyword\/list)|kad\.gotokeep\.com\/op-engine-webapp\/v1\/ad) data-type=text data="{}" status-code=500
 
@@ -195,7 +192,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d\/(followfeed\?|homefeed\?|interaction\/comment\/video\/download\?|note\/(comment\/(list|sub_comments)|feed|imagefeed|live_photo\/save|video\/save|videofeed|widgets)|search\/(banner|hot)_list|search\/(hint|trending)\?|search\/notes\?|system_service\/(config\?|splash_config))$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js
+xiaohongshu_proto.js = type=http-response,pattern=https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed|interaction\/comment\/video\/download|note\/comment\/list|note\/comment\/sub_comments|note\/feed|note\/videofeed|note\/video\/save|note\/widgets|search\/banner_list|search\/hot_list|search\/hint|search\/notes|search\/trending|system_service\/config|system_service\/splash_config)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js
 
 # > 网易云 by Keywos
 // 请使用独立模块 https://raw.githubusercontent.com/Keywos/rule/refs/heads/main/script/wy/wy.sgmodule
