@@ -154,7 +154,7 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)|operation-platform\/info-flow-adver\/query|wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo)$ data-type=text data="{}" status-code=500
 
 # > 小红书
-^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/(v\d\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|note\/guide\?|surprisebox\/(get_style|open|submit_action)))$) data-type=text data="{}" status-code=500
+^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/v\d+\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|surprisebox\/(?:get_style|open|submit_action)|note\/guide\?)) data-type=text data="{}" status-code=500
 ^https?:\/\/ci\.xiaohongshu\.com\/system_config\/watermark data-type=tiny-gif status-code=200
 
 # > 途虎养车
