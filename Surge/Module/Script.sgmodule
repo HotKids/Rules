@@ -171,7 +171,8 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/i\d\.hdslb\.com\/bfs\/(fawkes|manga-static\/\w+\.(jpg|png))$ data-type=text data="{}" status-code=500
 
 # > Keep
-^https?:\/\/(api\.gotokeep\.com\/(guide-webapp\/v1\/popup\/getPopUp|search\/v6\/default\/keyword\/list)|kad\.gotokeep\.com\/op-engine-webapp\/v1\/ad) data-type=text data="{}" status-code=500
+^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad data-type=text data="{}" status-code=500
+^https?:\/\/api\.gotokeep\.com\/(?:ads\/v\d\/ads\/preload|anno\/v\d\/upgrade\/check|cauchy\/growth\/init|guide-webapp\/v\d\/popup\/getPopUp|kprime\/v\d\/popups\/primeGuide|op-engine-webapp\/v\d\/ad|running\/v\d\/home\/dialog|search\/v\d\/default\/keyword\/list|search\/v\d\/hotCourse\/list|search\/v\d\/hotHashtag\/list|search\/v\d\/hotword\/list|training\/box\/config)$ data-type=text data="{}" status-code=500
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=500
@@ -229,8 +230,8 @@ coolapk_proto.js = type=http-response,pattern=^https?:\/\/api\.coolapk\.com\/v6\
 12306_splash.js = type=http-response,pattern=^https?:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/12306.js
 12306_proto.js = type=http-response,pattern=^https?:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Script/header.js
 
-# > Keep 去广告 by luestr
-keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/config\/v3\/basic,requires-body=1,max-size=0,script-path=https://kelee.one/Resource/Script/Keep/Keep_remove_ads.js
+# > Keep 去广告 by ddgksf2013
+keep_proto.js = type=http-response,pattern=^https?:\/\/api\.gotokeep\.com\/(?:athena\/v\d\/people\/my|config\/v\d\/basic|twins\/v\d\/feed\/course)$,requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ddgksf2013/Scripts/master/keepStyle.js
 
 # > 途虎养车 by ZenmoFeiShi
 tuhu_proto.js = type=http-response,pattern=^https?:\/\/cl-gateway\.tuhu\.cn\/cl-(shop-api\/shopTab\/getModuleForC|homepage-service\/homePage\/getHomePageInfo|common-api\/api\/personalCenter\/getCmsModuleList),requires-body=1,max-size=0,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/TH.js
