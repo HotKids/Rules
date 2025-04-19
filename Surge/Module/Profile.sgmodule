@@ -40,7 +40,7 @@ skip-proxy = %INSERT% localhost, *.local, captive.apple.com, e.crashlytics.com, 
 # > 排除简单主机名
  exclude-simple-hostnames = true
 
-# > Network framwork
+# > Network framework
 network-framework = false
 
 # > DNS 服务器 (如无必要不建议使用 DNS over HTTPS)
