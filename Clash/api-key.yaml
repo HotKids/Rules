@@ -44,7 +44,7 @@ apis:
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/openai
 
   grok: # Grok by xAI
-    model: grok-3-mini-latest 建议，价格参考：https://docs.x.ai/docs/models#models-and-pricing
+    model: 价格参考：https://docs.x.ai/docs/models#models-and-pricing
     app_key: ************
     base_url: https://api.x.ai/v1
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/grok
