@@ -1,4 +1,5 @@
 apis:
+## 具体参考：https://bobtranslate.com/service/
   tencent: # 腾讯云 NLP / 翻译 / 语音识别等（免费额度：翻译每月500万字符，OCR每月1000次）
     app_id: ************
     app_key: ************
