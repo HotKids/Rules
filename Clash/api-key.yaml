@@ -17,17 +17,17 @@ apis:
     free_api_url: https://api-free.deepl.com/v2/translate
 
   zhipu: # 智谱 GLM
-    model: GLM-4-Flash 免费，付费价格参考：https://bigmodel.cn/pricing
+    model: GLM-4-Flash 免费，价格参考：https://bigmodel.cn/pricing
     app_key: ************.************
     base_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
 
   doubao: # 豆包
-    model: doubao-1-5-pro-32k-250115 建议，付费价格参考：https://www.volcengine.com/docs/82379/1099320
+    model: doubao-1-5-pro-32k-250115 建议，价格参考：https://www.volcengine.com/docs/82379/1099320
     app_key: ************
     base_url: https://ark.cn-beijing.volces.com/api/v3
 
   siliconflow: # 硅基流动
-    model: Qwen/Qwen2.5-7B-Instruct 免费，模型广场：https://cloud.siliconflow.cn/models?types=chat
+    model: Qwen/Qwen2.5-7B-Instruct 免费，所有模型：https://cloud.siliconflow.cn/models?types=chat
     app_key: ************
     base_url: https://api.siliconflow.cn/v1
 
