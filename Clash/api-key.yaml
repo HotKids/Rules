@@ -1,61 +1,61 @@
 apis:
 ## 具体参考：https://bobtranslate.com/service/
   tencent: # 腾讯云 NLP / 翻译 / 语音识别等（免费额度：翻译每月500万字符，OCR每月1000次）
-    app_id: ************
-    app_key: ************
+    api_id: ************
+    api_key: ************
 
   volcengine: # 火山引擎（字节跳动旗下）通用 AI 服务
-    app_id: ************
-    app_key: ************
+    api_id: ************
+    api_key: ************
 
   caiyun: # 彩云小译
-    app_key: ************
+    api_key: ************
 
   deepl: # DeepL 翻译
-    app_key: ************:fx
+    api_key: ************:fx
     api_url: https://api.deepl.com/v2/translate
     free_api_url: https://api-free.deepl.com/v2/translate
 
   zhipu: # 智谱 GLM
     model: GLM-4-Flash 免费，价格参考：https://bigmodel.cn/pricing
-    app_key: ************.************
+    api_key: ************.************
     base_url: https://open.bigmodel.cn/api/paas/v4/chat/completions
 
   doubao: # 豆包
     model: doubao-1-5-pro-32k-250115 建议，价格参考：https://www.volcengine.com/docs/82379/1099320
-    app_key: ************
+    api_key: ************
     base_url: https://ark.cn-beijing.volces.com/api/v3
 
   siliconflow: # 硅基流动
     model: Qwen/Qwen2.5-7B-Instruct 免费，所有模型：https://cloud.siliconflow.cn/models?types=chat
-    app_key: ************
+    api_key: ************
     base_url: https://api.siliconflow.cn/v1
 
   gemini: # Google AI
     model: gemini-2.0-flash 建议，所有模型：https://ai.google.dev/gemini-api/docs/models?hl=zh-cn
-    app_key: ************
+    api_key: ************
     base_url: https://generativelanguage.googleapis.com/v1beta/models
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/google-ai-studio
 
   openai: # ChatGPT by OpenAI
     model: gpt-4.1-nano 建议，价格参考：https://openai.com/api/pricing/
-    app_key: ************
+    api_key: ************
     base_url: https://api.openai.com/v1/chat/completions
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/openai
 
   grok: # Grok by xAI
     model: 可领 150USD 额度，价格参考：https://docs.x.ai/docs/models#models-and-pricing
-    app_key: ************
+    api_key: ************
     base_url: https://api.x.ai/v1
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/grok
 
   claude: # Claude by Anthropic
     model: claude-3-5-haiku-latest 建议，价格参考：https://docs.anthropic.com/en/docs/about-claude/models/all-models
-    app_key: ************
+    api_key: ************
     base_url: https://api.anthropic.com/v1/messages
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/anthropic
 
   deepseek: # DeepSeek（国产 AI 大模型）
-    app_key: ************
+    api_key: ************
     base_url: https://api.deepseek.com/v1/chat/completions
     cf_gateway_url: https://gateway.ai.cloudflare.com/v1/<account_id>/<gateway_id>/deepseek
