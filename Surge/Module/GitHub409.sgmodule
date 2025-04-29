@@ -1,4 +1,4 @@
-#!name=GitHub Status code 409
+#!name=GitHub Error 409
 #!desc=解决github速率限制返回 429 问题
 #!system=ios
 
