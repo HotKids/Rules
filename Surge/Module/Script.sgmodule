@@ -208,7 +208,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed|interaction\/comment\/video\/download|note\/(comment\/(list|sub_comments)|feed|imagefeed|live_photo\/save|videofeed|video\/save|widgets)|search\/(banner_list|hot_list|hint|notes|trending)|system_service\/(config|splash_config)),script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js
+xiaohongshu_proto.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed|interaction\/comment\/video\/download|note\/(comment\/(list|sub_comments)|feed|imagefeed|live_photo\/save|videofeed|video\/save|widgets)|search\/(banner_list|hot_list|hint|notes|trending)|system_service\/(config|splash_config)),script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js,timeout=60
 
 # > 网易云 by Keywos
 // 请使用独立模块 https://raw.githubusercontent.com/Keywos/rule/refs/heads/main/script/wy/wy.sgmodule
