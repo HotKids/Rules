@@ -153,7 +153,7 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)|operation-platform\/info-flow-adver\/query|wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo)$ data-type=text data="{}" status-code=500
 
 # > 小红书
-^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/v\d+\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|surprisebox\/(?:get_style|open|submit_action)|note\/guide\?)) data-type=text data="{}" status-code=500
+^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/v\d+\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|note\/guide\?|surprisebox\/(get_style|open|submit_action))) data-type=text data="{}" status-code=500
 ^https?:\/\/ci\.xiaohongshu\.com\/system_config\/watermark data-type=tiny-gif status-code=200
 
 # > 途虎养车
@@ -171,7 +171,7 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 
 # > Keep
 ^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad data-type=text data="{}" status-code=500
-^https?:\/\/api\.gotokeep\.com\/(?:ads\/v\d\/ads\/preload|anno\/v\d\/upgrade\/check|cauchy\/growth\/init|guide-webapp\/v\d\/popup\/getPopUp|kprime\/v\d\/popups\/primeGuide|op-engine-webapp\/v\d\/ad|running\/v\d\/home\/dialog|search\/v\d\/default\/keyword\/list|search\/v\d\/hotCourse\/list|search\/v\d\/hotHashtag\/list|search\/v\d\/hotword\/list|training\/box\/config)$ data-type=text data="{}" status-code=500
+^https?:\/\/api\.gotokeep\.com\/(ads\/v\d+\/ads\/preload|anno\/v\d+\/upgrade\/check|athena\/v\d+\/people\/my|cauchy\/growth\/init|config\/v\d+\/basic|guide-webapp\/v\d+\/popup\/getPopUp|kprime\/v\d+\/popups\/primeGuide|op-engine-webapp\/v\d+\/ad|running\/v\d+\/home\/dialog|search\/v\d+\/(default\/keyword\/list|hotCourse\/list|hotHashtag\/list|hotword\/list)|training\/box\/config) data-type=text data="{}" status-code=500
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=500
@@ -205,7 +205,7 @@ wb_launch.js = type=http-response,requires-body=1,pattern=^https?:\/\/((bootprel
 WeChat.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/mp\.weixin\.qq\.com\/mp\/getappmsgad\?,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/QuantumultX/File/Wechat.js
 
 # > 小红书去广告&水印 by chouchoui&RuCu6&fmz200
-xiaohongshu_proto.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed\?|homefeed\?|interaction\/comment\/video\/download\?|note\/(comment\/sub_comments|comment\/list|feed|imagefeed|videofeed|video\/save|widgets|live_photo\/save)|search\/(banner|hot)_list|search\/(hint|trending)\?|search\/notes\?|system_service\/(config\?|splash_config)),script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js
+xiaohongshu_proto.js = type=http-response,requires-body=1,max-size=-1,pattern=^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed|interaction\/comment\/video\/download|note\/(comment\/(list|sub_comments)|feed|imagefeed|live_photo\/save|videofeed|video\/save|widgets)|search\/(banner_list|hot_list|hint|notes|trending)|system_service\/(config|splash_config)),script-path=https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/xiaohongshu/xiaohongshu.js
 
 # > 网易云 by Keywos
 // 请使用独立模块 https://raw.githubusercontent.com/Keywos/rule/refs/heads/main/script/wy/wy.sgmodule
