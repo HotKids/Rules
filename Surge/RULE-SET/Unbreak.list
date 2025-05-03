@@ -1,0 +1,39 @@
+# > Google
+DOMAIN-SUFFIX,blog.google
+DOMAIN-SUFFIX,googletraveladservices.com
+DOMAIN,clientservices.googleapis.com
+DOMAIN,dl.google.com
+DOMAIN,dl.l.google.com
+DOMAIN,update.googleapis.com
+# >> Firebase Cloud Messaging
+DOMAIN,mtalk.google.com
+DOMAIN-WILDCARD,*mtalk*.google.com
+DOMAIN,alt1-mtalk.google.com
+DOMAIN,alt2-mtalk.google.com
+DOMAIN,alt3-mtalk.google.com
+DOMAIN,alt4-mtalk.google.com
+DOMAIN,alt5-mtalk.google.com
+DOMAIN,alt6-mtalk.google.com
+DOMAIN,alt7-mtalk.google.com
+DOMAIN,alt8-mtalk.google.com
+
+# > CNTV
+DOMAIN-SUFFIX,cupid.iqiyi.com
+DOMAIN,push.m.youku.com
+DOMAIN,un-acs.youku.com
+DOMAIN,dorangesource.alicdn.com
+
+# > Samsung Galaxy App Store
+DOMAIN-SUFFIX,galaxyappstore.com
+DOMAIN-SUFFIX,samsungapps.com
+
+# > ziniao
+PROCESS-NAME,ziniao
+
+# > Sub
+DOMAIN-SUFFIX,dler.cloud
+DOMAIN-SUFFIX,nexconvert.com
+DOMAIN-SUFFIX,qtt-163cdn.com
+
+# > Windows NTP
+DOMAIN,time.windows.com
