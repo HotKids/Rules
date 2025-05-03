@@ -1,5 +1,34 @@
 payload:
   # Unbreak
+  # > Direct
+  - DOMAIN,app.adjust.com
+  - DOMAIN,app.appsflyer.com
+  - DOMAIN,bdtj.tagtic.cn
+
+  # > CNTV
+  # DOMAIN,msg-intl.qy.net
+  - DOMAIN-SUFFIX,cupid.iqiyi.com
+  - DOMAIN,push.m.youku.com
+  - DOMAIN,un-acs.youku.com
+  - DOMAIN,dorangesource.alicdn.com
+
+  # > Alibaba
+  - DOMAIN,log.mmstat.com
+  - DOMAIN,sycm.mmstat.com
+
+  # > Tencent
+  - DOMAIN,fairplay.l.qq.com
+  - DOMAIN,livew.l.qq.com
+  - DOMAIN,vd.l.qq.com
+  - DOMAIN,vi.l.qq.com
+
+  # > Strava
+  - DOMAIN,analytics.strava.com
+
+  # > Umeng
+  - DOMAIN,msg.umeng.com
+  - DOMAIN,msg.umengcloud.com
+
   # > Google
   - DOMAIN-SUFFIX,blog.google
   - DOMAIN-SUFFIX,googletraveladservices.com
@@ -10,6 +39,7 @@ payload:
   # >> Firebase Cloud Messaging
   - DOMAIN,mtalk.google.com
   - DOMAIN-REGEX,*mtalk*.google.com
+  - DOMAIN-WILDCARD,*mtalk*.google.com
   - DOMAIN,alt1-mtalk.google.com
   - DOMAIN,alt2-mtalk.google.com
   - DOMAIN,alt3-mtalk.google.com
@@ -19,25 +49,18 @@ payload:
   - DOMAIN,alt7-mtalk.google.com
   - DOMAIN,alt8-mtalk.google.com
   
-  # > CNTV
-  # DOMAIN,msg-intl.qy.net
-  - DOMAIN-SUFFIX,cupid.iqiyi.com
-  - DOMAIN,push.m.youku.com
-  - DOMAIN,un-acs.youku.com
-  - DOMAIN,dorangesource.alicdn.com
-  
   # > Samsung Galaxy App Store
   - DOMAIN-SUFFIX,galaxyappstore.com
   - DOMAIN-SUFFIX,samsungapps.com
   # DOMAIN-SUFFIX,samsungcloud.com
   
-  # > ziniao
-  - PROCESS-NAME,ziniao*
-
   # > Sub
   - DOMAIN-SUFFIX,dler.cloud
   - DOMAIN-SUFFIX,nexconvert.com
   - DOMAIN-SUFFIX,qtt-163cdn.com
 
-    # > Windows NTP
+  # > Windows NTP
   - DOMAIN,time.windows.com
+
+ # > ziniao
+ - PROCESS-NAME,ziniao*
