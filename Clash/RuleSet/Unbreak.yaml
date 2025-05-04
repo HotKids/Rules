@@ -38,7 +38,6 @@ payload:
   - DOMAIN,update.googleapis.com
   # >> Firebase Cloud Messaging
   - DOMAIN,mtalk.google.com
-  - DOMAIN-REGEX,*mtalk*.google.com
   - DOMAIN-WILDCARD,*mtalk*.google.com
   - DOMAIN,alt1-mtalk.google.com
   - DOMAIN,alt2-mtalk.google.com
