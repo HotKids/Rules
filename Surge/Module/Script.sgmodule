@@ -3,7 +3,7 @@
 #!system=ios
 
 [MITM]
-hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,*.acs.m.taobao.com,cn-acs.m.cainiao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,*.pan.baidu.com,*issuecdn.baidupcs.com,*.cdn.bcebos.com,rp.hpplay.cn,gw.aihuishou.com,apps.api.ke.com,api.petkit.cn,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,www.xiaohongshu.com,edith.xiaohongshu.com,ci.xiaohongshu.com,rec.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,manga.bilibili.com,i*.hdslb.com,se-api.djiits.com,qapi.huolala.cn,appuser-static.huolala.cn,ccmsupport-sz.tenpay.com,r2.gzyct.com,apis.alenable.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
+hostname = %APPEND% *.wxs.qq.com,mp.weixin.qq.com,wallet.95516.com,gab.122.gov.cn,res.kfc.com.cn,api.pinduoduo.com,api.yangkeduo.com,az1mbasecc.bas.cmbchina.com,intellicc.bas.cmbchina.com,static.95508.com,client.app.coc.10086.cn,mcs-mimp-web.sf-express.com,ccsp-egmas.sf-express.com,ucmp-static.sf-express.com,ucmp.sf-express.com,app.dewu.com,*.elemecdn.com,www1.elecfans.com,*.acs.m.taobao.com,cn-acs.m.cainiao.com,api-sams.walmartmobile.cn,api.mcd.cn,static.zhihu.com,appconf.mail.163.com,*.pan.baidu.com,*issuecdn.baidupcs.com,*.cdn.bcebos.com,rp.hpplay.cn,gw.aihuishou.com,apps.api.ke.com,api.petkit.cn,api-sams.walmartmobile.cn,hc-ssp.sm.cn,api.gotokeep.com,kad.gotokeep.com,42.187.199.248,m.baidu.com,www.baidu.com,newclient.map.baidu.com,yongche.baidu.com,*api.alipan.com,member.alipan.com,img.meituan.net,s3plus.meituan.net,wmapi.meituan.com,p0.pipi.cn,api.m.jd.com,home.mi.com,api.coolapk.com,www.xiaohongshu.com,edith.xiaohongshu.com,ci.xiaohongshu.com,rec.xiaohongshu.com,api.weibo.cn,mapi.weibo.com,*.uve.weibo.com,newclient.map.baidu.com,ad.12306.cn,mobile.12306.cn,m5*.amap.com,oss.amap.com,sns.amap.com,mkt-gateway.tuhu.cn,cl-gateway.tuhu.cn,hfapp-service.qweather.net,magical.api.ddxq.mobi,manga.bilibili.com,i*.hdslb.com,se-api.djiits.com,qapi.huolala.cn,appuser-static.huolala.cn,ccmsupport-sz.tenpay.com,r2.gzyct.com,apis.alenable.com,home.umetrip.com,startup.umetrip.com,discardrp.umetrip.com,114.115.217.129,xhslink.com
 
 [Rule]
 # > 微信公众号
@@ -81,116 +81,119 @@ AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,xiaohongshu.com)),REJECT
 ^https?:\/\/(?:www|m)\.baidu\.com(?:\/|\/\?(tn=&)?from=\w+)?$ data-type=file data="https://raw.githubusercontent.com/Keywos/rule/master/script/baidu_index/html/index.html" header="Content-Type: text/html; charset=utf-8"
 
 # > 微信公众号
-^https?:\/\/\w+\.wxs\.qq\.com\/\d+\/\d+\/(snscosdownload|snssvpdownload)\/(SH|SZ)\/reserved\/\w+ data-type=text data="{}" status-code=500
-^https?:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? data-type=text data="{}" status-code=500
+^https?:\/\/\w+\.wxs\.qq\.com\/\d+\/\d+\/(snscosdownload|snssvpdownload)\/(SH|SZ)\/reserved\/\w+ data-type=text data="{}" status-code=200
+^https?:\/\/mp\.weixin\.qq\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? data-type=text data="{}" status-code=200
 
 # > 微博
-^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data-type=text data="{}" status-code=500
+^https?:\/\/bootrealtime\.uve\.weibo\.com\/v[23]\/ad\/realtime data-type=text data="{}" status-code=200
 ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(?:get-lbs-cell-info\.php|sdkconfig\.php) status-code=200
-^https?:\/\/api\.weibo\.cn\/(2\/(ug\/checkin\/list|push\/daily|comments\/bullet_screens\?|photo\/info\?|statuses\/(container_positive|push_info)|vote\/get_vote_detail\?|search\/container_discover\?|hot\/hours_spotlight\?|video\/redpacket\?|!\/(live\/media_homelist\?|chaohua\/discovery\/home_bottom\/switch\?|huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|wbox\/\w+\/(home_bottom_modal|interest_category)))|!\/sug\/list\/finderchange\?) data-type=text data="{}" status-code=500
+^https?:\/\/api\.weibo\.cn\/(2\/(ug\/checkin\/list|push\/daily|comments\/bullet_screens\?|photo\/info\?|statuses\/(container_positive|push_info)|vote\/get_vote_detail\?|search\/container_discover\?|hot\/hours_spotlight\?|video\/redpacket\?|!\/(live\/media_homelist\?|chaohua\/discovery\/home_bottom\/switch\?|huati\/(discovery_home_bottom_getdotinfo|mobile_discovery_searchchange)|wbox\/\w+\/(home_bottom_modal|interest_category)))|!\/sug\/list\/finderchange\?) data-type=text data="{}" status-code=200
 
 # > 阿里巴巴
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alibaba\.advertisementservice\.getadv data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimama\.etao\.config\.query\/.+?etao_advertise data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimusic\.common\.mobileservice\.startinit data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.popup\.get\/ data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner\/ data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryadvertise\/5.0.* data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.o2o\.ad\.gateway\.get data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome data-type=text data="{}" status-code=500
-^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.activity\.querytmsresources data-type=text data="{}" status-code=500
-^https?:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.(cnactivitycenter|adkeyword\.get\.cn|cncommunity\.my\.station\.query\.cn|guoguo\.nbnetflow\.ads\.(batch\.show\.v2|index)\.cn|nbopen\.miniapp\.recommend\.cpc\.cn|nbmensa\.research\.researchservice\.(acquire|event|close)\.cn|nbpresentation\.(homepage\.merge|tabbar\.marketing)\.get\.cn|cncreditmarket\.hit\.getactivityhit\.cn|longquan\.place\.getpageresourcecontent\.cn)$ data-type=text data="{}" status-code=500
-^https?:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads data-type=text data="{}" status-code=500
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alibaba\.advertisementservice\.getadv data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimama\.etao\.config\.query\/.+?etao_advertise data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.alimusic\.common\.mobileservice\.startinit data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.damai\.wireless\.home\.welcome data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.etao\.noah\.query\/.+tao_splash data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.life\.popup\.get\/ data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryloadingbanner\/ data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.film\.mtopadvertiseapi\.queryadvertise\/5.0.* data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.fliggy\.crm\.screen\.(allresource|predict) data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.o2o\.ad\.gateway\.get data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.taobao\.idle\.home\.welcome data-type=text data="{}" status-code=200
+^https?:\/\/acs\.m\.taobao\.com\/gw\/mtop\.trip\.activity\.querytmsresources data-type=text data="{}" status-code=200
+^https?:\/\/cn-acs\.m\.cainiao\.com\/gw\/mtop\.cainiao\.(cnactivitycenter|adkeyword\.get\.cn|cncommunity\.my\.station\.query\.cn|guoguo\.nbnetflow\.ads\.(batch\.show\.v2|index)\.cn|nbopen\.miniapp\.recommend\.cpc\.cn|nbmensa\.research\.researchservice\.(acquire|event|close)\.cn|nbpresentation\.(homepage\.merge|tabbar\.marketing)\.get\.cn|cncreditmarket\.hit\.getactivityhit\.cn|longquan\.place\.getpageresourcecontent\.cn)$ data-type=text data="{}" status-code=200
+^https?:\/\/guide-acs\.m\.taobao\.com\/gw\/mtop\.cainiao\.guoguo\.nbnetflow\.ads data-type=text data="{}" status-code=200
 
 # > 阿里云盘
-^https?:\/\/api\.alipan\.com\/adrive\/v1\/file\/getTopFolders data-type=text data="{}" status-code=500
-^https?:\/\/member\.alipan\.com\/v2\/activity\/(sign_in_info|sign_in_luckyBottle) data-type=text data="{}" status-code=500
+^https?:\/\/api\.alipan\.com\/adrive\/v1\/file\/getTopFolders data-type=text data="{}" status-code=200
+^https?:\/\/member\.alipan\.com\/v2\/activity\/(sign_in_info|sign_in_luckyBottle) data-type=text data="{}" status-code=200
 
 # > 百度地图 by RuCu6
-^https?:\/\/newclient\.map\.baidu\.com\/(client\/(crossmarketing\/\?(container=du_(aide_module|card_ugc|trip_route_tab)|oem=)|noticebar\/get\?|phpui2\/\?qt=ads)|grow-engine\/api\/common\/userHome\?) data-type=text data="{}" status-code=500
-^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/(notice|baseinfo)|gomarketing\/api\/(activity\/talos\/activitycard\?|popup\/getentrancecordovareject-dict)) data-type=text data="{}" status-code=500
+^https?:\/\/newclient\.map\.baidu\.com\/(client\/(crossmarketing\/\?(container=du_(aide_module|card_ugc|trip_route_tab)|oem=)|noticebar\/get\?|phpui2\/\?qt=ads)|grow-engine\/api\/common\/userHome\?) data-type=text data="{}" status-code=200
+^https?:\/\/yongche\.baidu\.com\/(goorder\/passenger\/(notice|baseinfo)|gomarketing\/api\/(activity\/talos\/activitycard\?|popup\/getentrancecordovareject-dict)) data-type=text data="{}" status-code=200
 
 # > 高德地图 by RuCu6&kokoryh
-^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/main\/page\/product\/list\?|boss\/(?:order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization)|faas\/amap-navigation\/(?:card-service-(?:car-end|route-plan)|(?:main-page-assets|main-page-location|ridewalk-end-fc))|mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/(search\/new_hotword|search_poi\/tips_adv|scene\/recommend)|valueadded\/weather\/v2\?)\? data-type=text data="{}" status-code=500
-^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists\/?|msgbox\/pull_mp)\? data-type=text data="{}" status-code=500
+^https?:\/\/m5(-zb)?\.amap\.com\/ws\/(aos\/main\/page\/product\/list\?|boss\/(?:order\/car\/king_toolbox_car_bubble|tips\/onscene_visual_optimization)|faas\/amap-navigation\/(?:card-service-(?:car-end|route-plan)|(?:main-page-assets|main-page-location|ridewalk-end-fc))|mapapi\/hint_text\/offline_data|message\/notice\/list|shield\/(search\/new_hotword|search_poi\/tips_adv|scene\/recommend)|valueadded\/weather\/v2\?)\? data-type=text data="{}" status-code=200
+^https?:\/\/(os|sn)s\.amap\.com\/ws\/(banner\/lists\/?|msgbox\/pull_mp)\? data-type=text data="{}" status-code=200
 
 # > 网易邮箱大师
-^https?:\/\/dashi\.163\.com\/task-center-api\/fapi\/task\/list$ data-type=text data="{}" status-code=500
-^https?:\/\/appconf\.mail\.163\.com\/(mailmaster\/api\/http\/urlConfig\.do|mailoperating\/mailmaster\/api\/operator\/get)$ data-type=text data="{}" status-code=500
+^https?:\/\/dashi\.163\.com\/task-center-api\/fapi\/task\/list$ data-type=text data="{}" status-code=200
+^https?:\/\/appconf\.mail\.163\.com\/(mailmaster\/api\/http\/urlConfig\.do|mailoperating\/mailmaster\/api\/operator\/get)$ data-type=text data="{}" status-code=200
 
 # > 美团 by RuCu6
-^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data-type=text data="{}" status-code=500
-^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data-type=text data="{}" status-code=500
-^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data-type=text data="{}" status-code=500
-^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$ data-type=text data="{}" status-code=500
-^https?:\/\/s3plus\.meituan\.net\/ocean-blk-index\/index\/blk_conf_73\.json data-type=text data="{}" status-code=500
+^https?:\/\/wmapi\.meituan\.com\/api\/v7\/(loadInfo|openscreen|startpicture)\? data-type=text data="{}" status-code=200
+^https?:\/\/flowplus\.meituan\.net\/v1\/mss_\w+\/linglong\/\d+\.jpg data-type=text data="{}" status-code=200
+^https?:\/\/img\.meituan\.net\/bizad\/bizad_brandCpt_\d+\.jpg data-type=text data="{}" status-code=200
+^https?:\/\/s3plus\.meituan\.net\/v1\/mss_\w+\/(brandcpt-vedio|waimai-alita)\/\w+\.zip$ data-type=text data="{}" status-code=200
+^https?:\/\/s3plus\.meituan\.net\/ocean-blk-index\/index\/blk_conf_73\.json data-type=text data="{}" status-code=200
 
 # > 猫眼 by RuCu6
-^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.jpg\?imageMogr2\/quality\/ data-type=text data="{}" status-code=500
-^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/thumbnail\/(860x0|!165x165|!1049x1169) data-type=text data="{}" status-code=500
+^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.jpg\?imageMogr2\/quality\/ data-type=text data="{}" status-code=200
+^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/thumbnail\/(860x0|!165x165|!1049x1169) data-type=text data="{}" status-code=200
 
 # > 京东 by RuCu6
-^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data-type=text data="{}" status-code=500
+^https?:\/\/api\.m\.jd\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data-type=text data="{}" status-code=200
 
 # > 米家
-^https?:\/\/home\.mi\.com\/cgi-op\/api\/v1\/recommendation\/(banner|myTab|openingBanner) data-type=text data="{}" status-code=500
+^https?:\/\/home\.mi\.com\/cgi-op\/api\/v1\/recommendation\/(banner|myTab|openingBanner) data-type=text data="{}" status-code=200
 
 # > 酷安
-^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data-type=text data="{}" status-code=500
+^https?:\/\/api\.coolapk\.com\/v6\/search\?.*type=hotSearch data-type=text data="{}" status-code=200
 
 # > 发现精彩
-^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data-type=text data="{}" status-code=500
+^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data-type=text data="{}" status-code=200
 
 # > 中国移动
-^https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(explorePage\/getAdverList|init\/startInit) data-type=text data="{}" status-code=500
+^https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(explorePage\/getAdverList|init\/startInit) data-type=text data="{}" status-code=200
 
 # > 顺丰速运&小程序
-^https?:\/\/mcs-mimp-web\.sf-express\.com\/mcs-mimp\/integralPlanet\/getCxAdvertiseList data-type=text data="{}" status-code=500
-^https?:\/\/ccsp-egmas\.sf-express\.com\/(cx-app-video\/video\/app\/video\/labelClusterList|cx-app-base\/base\/app\/(ad\/queryInfoFlow|bms\/queryRecommend))$ data-type=text data="{}" status-code=500
-^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)|operation-platform\/info-flow-adver\/query|wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo)$ data-type=text data="{}" status-code=500
+^https?:\/\/mcs-mimp-web\.sf-express\.com\/mcs-mimp\/integralPlanet\/getCxAdvertiseList data-type=text data="{}" status-code=200
+^https?:\/\/ccsp-egmas\.sf-express\.com\/(cx-app-video\/video\/app\/video\/labelClusterList|cx-app-base\/base\/app\/(ad\/queryInfoFlow|bms\/queryRecommend))$ data-type=text data="{}" status-code=200
+^https?:\/\/ucmp(-static)?\.sf-express\.com\/proxy\/(esgcempcore\/member(Goods\/pointMallService\/goodsList|Manage\/memberEquity\/queryRecommendEquity|ActLengthy\/fullGiveActivityService\/fullGiveInfo)|operation-platform\/info-flow-adver\/query|wxbase\/wxTicket\/wxLiveStreamInfo\?pageNo)$ data-type=text data="{}" status-code=200
 
 # > 小红书
-^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/v\d+\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|note\/guide\?|surprisebox\/(get_style|open|submit_action))) data-type=text data="{}" status-code=500
+^https?:\/\/(www|edith)\.xiaohongshu\.com\/api\/(marketing\/box\/trigger\?|sns\/v\d+\/(ads\/resource|guide\/user_banner|hey\/\w+\/hey_gallery|note\/guide\?|surprisebox\/(get_style|open|submit_action))) data-type=text data="{}" status-code=200
 ^https?:\/\/ci\.xiaohongshu\.com\/system_config\/watermark data-type=tiny-gif status-code=200
 
 # > 途虎养车
-^https?:\/\/(cl|mkt)-gateway\.tuhu\.cn\/(cl-common-api\/api\/personalCenter\/getAutoSuperConfig|mlp-product-search-api\/search\/helper\/defaultAndHotWord|mkt-(scene-marketing-service\/api\/scene\/queryScheme|push-message-box\/banner\/cms\/getIndexBanner|cms\/circle\/recommend\/v3)) data-type=text data="{}" status-code=500
+^https?:\/\/(cl|mkt)-gateway\.tuhu\.cn\/(cl-common-api\/api\/personalCenter\/getAutoSuperConfig|mlp-product-search-api\/search\/helper\/defaultAndHotWord|mkt-(scene-marketing-service\/api\/scene\/queryScheme|push-message-box\/banner\/cms\/getIndexBanner|cms\/circle\/recommend\/v3)) data-type=text data="{}" status-code=200
 
 # > 彩云天气
-^https?:\/\/hfapp-service\.qweather\.net\/v2\.0\/app\/ad\/list\? data-type=text data="{}" status-code=500
+^https?:\/\/hfapp-service\.qweather\.net\/v2\.0\/app\/ad\/list\? data-type=text data="{}" status-code=200
 
 # > 叮咚买菜
-^https?:\/\/maicai\.api\.ddxq\.mobi\/(advert\/(getPreloadAd\?ad_id|startUpScreen)|homeApi\/(getHomeAdPop|newDetails)|vip\/getVipAd)$ data-type=text data="{}" status-code=500
+^https?:\/\/maicai\.api\.ddxq\.mobi\/(advert\/(getPreloadAd\?ad_id|startUpScreen)|homeApi\/(getHomeAdPop|newDetails)|vip\/getVipAd)$ data-type=text data="{}" status-code=200
 
 # > 哔哩哔哩漫画
-^https?:\/\/manga\.bilibili\.com\/twirp\/(comic\.v\d\.(Comic\/(Recommend|Flash|ListFlash|GetBubbles|GetActivityTab|GetCommonBanner|GetComicConfigPicList)|Shop\/GetShopItems)|user\.v\d\.(SeasonV\d\/GetSeasonInfo|Read\/ActInfo)) data-type=text data="{}" status-code=500
-^https?:\/\/i\d\.hdslb\.com\/bfs\/(fawkes|manga-static\/\w+\.(jpg|png))$ data-type=text data="{}" status-code=500
+^https?:\/\/manga\.bilibili\.com\/twirp\/(comic\.v\d\.(Comic\/(Recommend|Flash|ListFlash|GetBubbles|GetActivityTab|GetCommonBanner|GetComicConfigPicList)|Shop\/GetShopItems)|user\.v\d\.(SeasonV\d\/GetSeasonInfo|Read\/ActInfo)) data-type=text data="{}" status-code=200
+^https?:\/\/i\d\.hdslb\.com\/bfs\/(fawkes|manga-static\/\w+\.(jpg|png))$ data-type=text data="{}" status-code=200
 
 # > 小佩宠物
-^https?:\/\/api\.petkit\.cn\/6\/\/device\/relatedProductsInfo data-type=text data="{}" status-code=500
+^https?:\/\/api\.petkit\.cn\/6\/\/device\/relatedProductsInfo data-type=text data="{}" status-code=200
+
+# > 山姆会员超市
+^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/channel\/portal\/AdgroupData\/queryAdgroup data-type=text data="{}" status-code=200
 
 # > Keep
-^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad data-type=text data="{}" status-code=500
-^https?:\/\/api\.gotokeep\.com\/(ads\/v\d+\/ads\/preload|anno\/v\d+\/upgrade\/check|athena\/v\d+\/people\/my|cauchy\/growth\/init|config\/v\d+\/basic|guide-webapp\/v\d+\/popup\/getPopUp|kprime\/v\d+\/popups\/primeGuide|op-engine-webapp\/v\d+\/ad|running\/v\d+\/home\/dialog|search\/v\d+\/(default\/keyword\/list|hotCourse\/list|hotHashtag\/list|hotword\/list)|training\/box\/config) data-type=text data="{}" status-code=500
+^https?:\/\/kad\.gotokeep\.com\/op-engine-webapp\/v\d\/ad data-type=text data="{}" status-code=200
+^https?:\/\/api\.gotokeep\.com\/(ads\/v\d+\/ads\/preload|anno\/v\d+\/upgrade\/check|athena\/v\d+\/people\/my|cauchy\/growth\/init|config\/v\d+\/basic|guide-webapp\/v\d+\/popup\/getPopUp|kprime\/v\d+\/popups\/primeGuide|op-engine-webapp\/v\d+\/ad|running\/v\d+\/home\/dialog|search\/v\d+\/(default\/keyword\/list|hotCourse\/list|hotHashtag\/list|hotword\/list)|training\/box\/config) data-type=text data="{}" status-code=200
 
 # > DJI Store
-^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=500
+^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
 
 # > 货拉拉小程序
-^https?:\/\/qapi\.huolala\.cn\/(ads|get_service_list|home_new_user) data-type=text data="{}" status-code=500
-^https?:\/\/appuser-static\.huolala\.cn\/imgs data-type=text data="{}" status-code=500
+^https?:\/\/qapi\.huolala\.cn\/(ads|get_service_list|home_new_user) data-type=text data="{}" status-code=200
+^https?:\/\/appuser-static\.huolala\.cn\/imgs data-type=text data="{}" status-code=200
 
 # > 乘车码
-^https?:\/\/ccmsupport-sz\.tenpay\.com\/cgi-bin\/common\/ccm_page_element.cgi data-type=text data="{}" status-code=500
+^https?:\/\/ccmsupport-sz\.tenpay\.com\/cgi-bin\/common\/ccm_page_element.cgi data-type=text data="{}" status-code=200
 
 # > 羊城通小程序
-^https?:\/\/r2\.gzyct\.com\/qrcode\/advert data-type=text data="{}" status-code=500
+^https?:\/\/r2\.gzyct\.com\/qrcode\/advert data-type=text data="{}" status-code=200
 
 # > 广州地铁小程序
-^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=500
+^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200
 
 [Script]
 # > Sub Info
