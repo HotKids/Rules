@@ -2,7 +2,7 @@
 #!desc=AdBlock Packs
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,se-api.djiits.com,qapi.huolala.cn,appuser-static.huolala.cn,ccmsupport-sz.tenpay.com,r2.gzyct.com,apis.alenable.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,se-api.djiits.com
 
 [Rule]
 # > 交管12123
@@ -45,16 +45,3 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
-
-# > 货拉拉小程序
-^https?:\/\/qapi\.huolala\.cn\/(ads|get_service_list|home_new_user) data-type=text data="{}" status-code=200
-^https?:\/\/appuser-static\.huolala\.cn\/imgs data-type=text data="{}" status-code=200
-
-# > 乘车码
-^https?:\/\/ccmsupport-sz\.tenpay\.com\/cgi-bin\/common\/ccm_page_element.cgi data-type=text data="{}" status-code=200
-
-# > 羊城通小程序
-^https?:\/\/r2\.gzyct\.com\/qrcode\/advert data-type=text data="{}" status-code=200
-
-# > 广州地铁小程序
-^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200
