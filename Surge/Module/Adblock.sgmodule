@@ -1,5 +1,5 @@
 #!name=AdBlock Module
-#!desc=AdBlock Packs
+#!desc=AdBlock Module Enhancement
 
 [MITM]
 hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,se-api.djiits.com
