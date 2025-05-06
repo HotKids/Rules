@@ -2,7 +2,7 @@
 #!desc=AdBlock Module Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,se-api.djiits.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com
 
 [Rule]
 # > 交管12123
@@ -42,6 +42,9 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 # > 山姆会员超市
 ^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/channel\/portal\/AdgroupData\/queryAdgroup data-type=text data="{}" status-code=200
+
+# > 小宇宙
+^https?:\/\/api\.xiaoyuzhoufm\.com\/v1\/flash-screen\/list data-type=text data="{}" status-code=200
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
