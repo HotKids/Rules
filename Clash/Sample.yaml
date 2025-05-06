@@ -392,6 +392,13 @@ rule-providers:
     path: ./Provider/RuleSet/Guard/Reject.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
+
+  Advertising:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Guard/Reject.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
+    interval: 86400
     
   HTTPDNS:
     type: http
@@ -477,18 +484,25 @@ rule-providers:
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
+  CNASN:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+    path: ./Rules/ASNChina.yaml
+    interval: 86400
+    
   CNCIDR:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/CNCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
     
   LAN:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/Extra/LANCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/lancidr.txt
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
     interval: 86400
 
 # 规则
@@ -498,6 +512,7 @@ rules:
   
   # AdBlock
   - RULE-SET,AdBlock,🚧 AdGuard
+  - RULE-SET,Advertising,🚧 AdGuard
   - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Global Area Network
@@ -524,6 +539,7 @@ rules:
 
    # China Area Network
   - RULE-SET,China,🔘 DIRECT
+  - RULE-SET,CNASN,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
   
   # Local Area Network
