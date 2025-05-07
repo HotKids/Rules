@@ -248,7 +248,7 @@ proxy-groups:
   # 代理节点选项
   - name: "🔰 Proxy"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Proxy.png
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
@@ -301,7 +301,7 @@ proxy-groups:
   # 去广告以及隐私追踪保护、反运营商劫持开关
   - name: "🚧 AdGuard"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hijacking.png
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
     proxies:
       - ⛔️ REJECT
       - 🔘 DIRECT
@@ -325,7 +325,7 @@ proxy-groups:
   # UN
   - name: "🇺🇳 Server"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
     use:
       - Server
 
