@@ -2,7 +2,7 @@
 #!desc=AdBlock Module Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com
 
 [Rule]
 # > 交管12123
@@ -22,8 +22,12 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 [Map Local]
 # > 猫眼 by RuCu6
-^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.jpg\?imageMogr2\/quality\/ data-type=text data="{}" status-code=200
-^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/thumbnail\/(860x0|!165x165|!1049x1169) data-type=text data="{}" status-code=200
+^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/(quality\/|thumbnail\/(860x0|!165x165|!1049x1169)) data-type=text data="{}" status-code=200
+
+# > 美团小程序
+^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/defaultword data-type=text data="{}" status-code=200
+^https?:\/\/npay\.meituan\.com\/conch\/(flow\/mypage-wallet-info|walletv3\/wechat-pop-window) data-type=text data="{}" status-code=200
+^https?:\/\/web\.meituan\.com\/(api\/miniprogram\/my\/(novelZone|resources)|newUser\/returnMoney\/popWindow) data-type=text data="{}" status-code=200
 
 # > 发现精彩
 ^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data-type=text data="{}" status-code=200
@@ -48,3 +52,10 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
+
+
+^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200
+
+[Script]
+# > 美团小程序去广告 by ZenmoFeiShi
+Meituan.js = type=http-response,requires-body=1,max-size=0,pattern=^https?::\/\/web\.meituan\.com\/api\/miniprogram\/(tabbar\/all\/query|index\/aggregate),script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MeiTuanNoAd.js
