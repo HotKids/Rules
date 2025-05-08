@@ -48,7 +48,7 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 ^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/channel\/portal\/AdgroupData\/queryAdgroup data-type=text data="{}" status-code=200
 
 # > 小宇宙
-^https?:\/\/api\.xiaoyuzhoufm\.com\/v1\/flash-screen\/list data-type=text data="{}" status-code=200
+^https?:\/\/api\.xiaoyuzhoufm\.com\/v\d\/flash- data-type=text data="{}" status-code=200
 
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
