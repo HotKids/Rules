@@ -4,7 +4,7 @@
 
 [Script]
 # > 爱奇艺 DailyBonus by NobyDa
-Tasks: 爱奇艺 = type=cron,cronexp="1,10 0 * * *",timeout=120,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
+// Tasks: 爱奇艺 = type=cron,cronexp="1,10 0 * * *",timeout=120,script-path=https://raw.githubusercontent.com/NobyDa/Script/master/iQIYI-DailyBonus/iQIYI.js
 
 # > 喜马拉雅 DailyBonus by ClydeTime
 Tasks: 喜马拉雅 = type=cron,cronexp="11 0 * * *",script-path=https://raw.githubusercontent.com/ClydeTime/Surge/main/Script/Task/xmly.js,timeout=15,wake-system=1
@@ -14,7 +14,7 @@ Tasks: 哔哩哔哩漫画 = type=cron,cronexp="12 0 * * *",script-path=https://r
 Tasks: 哔哩哔哩漫画积分兑换 = type=cron,cronexp="10,20,30 0 12 * * *",script-path=https://raw.githubusercontent.com/NobyDa/Script/master/Bilibili-DailyBonus/ExchangePoints.js
 
 # > 达乐美披萨小游戏 DailyBonus by Sliverkiss
-Tasks: 达乐美小游戏 = type=cron,cronexp="13 0 * * *",timeout=300,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js
+// Tasks: 达乐美小游戏 = type=cron,cronexp="13 0 * * *",timeout=300,script-path=https://gist.githubusercontent.com/Sliverkiss/6b4da0d367d13790a9fd1d928c82bdf8/raw/dlm.js
 
 # > 阿里云盘 DailyBonus by lowking
 Tasks: 阿里云盘 = type=cron,cronexp="14 0 * * *",script-path=https://raw.githubusercontent.com/lowking/Scripts/master/ali/aliYunPanCheckIn.js,timeout=60, wake-system=1
