@@ -9,8 +9,6 @@
 # SSID 匹配
 // Home
 SUBNET,JOEY,DIRECT
-// Office
-SUBNET,1512,DIRECT
 
 [SSID Setting]
 //SONY A7R5
