@@ -1,5 +1,7 @@
 #!name=电信余量
-#!desc=请前往 BoxJS 订阅：https://github.com/ChinaTelecomOperators/ChinaTelecom/releases/download/Prerelease-Alpha/Tele.json 
+#!desc=请前往 BoxJS 订阅：https://github.com/ChinaTelecomOperators/ChinaTelecom/releases/download/Prerelease-Alpha/Tele.json
+#!category=面板模块
+#!author = ChinaTelecomOperators/ChinaTelecom
 ## BoxJS 建议格式：中国电信余量查询\n我的套餐 [套]\n通用流量 [通用]|[通剩]\n定向流量 [定用]|[定剩]\n剩余语音 [语剩]\n话费余额 [话剩]\n更新时间 [时]
 
 [Panel]
@@ -7,4 +9,3 @@
 
 [Script]
 10000-panel = type=generic,timeout=60,script-path=https://github.com/ChinaTelecomOperators/ChinaTelecom/releases/download/Prerelease-Alpha/Tele_Cellular_Panel.js,argument=icon=arrow.up.arrow.down.circle&icon-color=#5d84f8
-
