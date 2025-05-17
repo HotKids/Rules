@@ -33,7 +33,7 @@ socks5-listen = 0.0.0.0:6153
 # > 远程控制器
 # > 允许外部控制器访问 Surge，Surge Dashboard 或 Surge CLI 进行管理控制
 external-controller-access = 127.0.0.1:6170
-http-api = BlueGrave@127.0.0.1:6171
+http-api = HotKids@127.0.0.1:6171
 http-api-tls = false
 # > Safari 输入 127.0.0.1:6171,填入 HTTP-API 密码即可。
 http-api-web-dashboard = true
