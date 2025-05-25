@@ -2,4 +2,4 @@
 #!desc=私人使用，访问家中内网
 
 [Rule]
-IP-CIDR,192.168.31.0/24,DEVICE:macmini
+IP-CIDR,192.168.31.0/24,DEVICE:macmini,no-resolve
