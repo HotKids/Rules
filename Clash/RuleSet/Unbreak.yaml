@@ -63,6 +63,7 @@ payload:
   
   # > Marriott
   - DOMAIN-SUFFIX,marriottwifi.com
+  - DOMAIN,portal.linkbroad.com
 
  # > ziniao
  - PROCESS-NAME,*ziniao*
