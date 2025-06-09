@@ -60,6 +60,9 @@ payload:
 
   # > Windows NTP
   - DOMAIN,time.windows.com
+  
+  # > Marriott
+  - DOMAIN-SUFFIX,marriottwifi.com
 
  # > ziniao
- - PROCESS-NAME,ziniao*
+ - PROCESS-NAME,*ziniao*
