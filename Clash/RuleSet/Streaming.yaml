@@ -89,29 +89,20 @@ payload:
   # USER-AGENT,DPlus*
   # PROCESS-NAME,com.discovery.discoveryplus.mobile
   # PROCESS-NAME,com.discovery.discoveryplus.androidtv
-  ## US
+  - DOMAIN-SUFFIX,discoveryplus.com
+  - DOMAIN-SUFFIX,disco-api.com
+  - DOMAIN-SUFFIX,dnitv.com
+  - DOMAIN-SUFFIX,dplus.us.prd.media.max.com
+  - DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com
+  # DOMAIN,default.any-any.prd.api.discomax.com // 会影响 HBO Max
   - DOMAIN,us1-prod.disco-api.com
   - DOMAIN,us1-prod-images.disco-api.com
+  - DOMAIN,kvinit-prod.api.kochava.com
   - DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io
   - DOMAIN,content-ause1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
   # DOMAIN,go-prod-vz.akamaized.net
-  ## PH
-  - DOMAIN-SUFFIX,discoveryplus.ph
-  - DOMAIN,ap2-prod.disco-api.com
-  - DOMAIN,ap2-prod-images.disco-api.com
-  - DOMAIN,discovery-ap.conax.cloud
-  - DOMAIN,ap2-prod-direct.discoveryplus.com
-  - DOMAIN,gdvm0o88gc3qseqotiavvvhim.litix.io
-  # DOMAIN,dplus-ph-prod-vod.akamaized.net
-  # DOMAIN,dplus-ph-google-v2.prod-vod.h264.io
-  ## Discovery+
-  - DOMAIN-KEYWORD,discoveryplus
-  - DOMAIN-SUFFIX,discoveryplus.com
-  - DOMAIN-SUFFIX,disco-api.com
-  - DOMAIN-SUFFIX,dnitv.com
-  - DOMAIN,kvinit-prod.api.kochava.com
 
   # > Disney+
   # USER-AGENT,Disney*
@@ -129,29 +120,13 @@ payload:
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
-  # > HBO GO Asia
-  # USER-AGENT,HBO%20GO%20PROD*
-  # PROCESS-NAME,sg.hbo.hbogo
-  # PROCESS-NAME,com.hbo.asia.androidtv
-  # DOMAIN-KEYWORD,hboasia
-  - DOMAIN-KEYWORD,hbogoasia
-  - DOMAIN-SUFFIX,hboasia.com
-  - DOMAIN-SUFFIX,hbogoasia.com
-  - DOMAIN,hbolb.onwardsmg.com
-  - DOMAIN,hbounify-prod.evergent.com
-  # DOMAIN,hbogoprod-vod.akamaized.net
-  # DOMAIN,hboasialive.akamaized.net
-  # DOMAIN,bcbolthboa-a.akamaihd.net
-  - DOMAIN,dai3fd1oh325y.cloudfront.net
-
   # > HBO Max
   # USER-AGENT,HBOMAX*
-  - PROCESS-NAME,com.hbo.hbonow
-  - DOMAIN-SUFFIX,hbo.com
-  # DOMAIN-SUFFIX,hbogo.com
-  - DOMAIN-SUFFIX,hbonow.com
-  - DOMAIN-SUFFIX,hbomax.com
-  - DOMAIN-SUFFIX,hbomaxcdn.com
+  # USER-AGENT,Max*
+  - PROCESS-NAME,com.wbd.stream
+  - DOMAIN-SUFFIX,max.com
+  - DOMAIN-SUFFIX,hbomax.com  
+  - DOMAIN-SUFFIX,discomax.com
 
   # > Hulu
   # PROCESS-NAME,com.hulu.plus
@@ -161,12 +136,6 @@ payload:
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
   # DOMAIN,assetshuluimcom-a.akamaihd.net
-
-  # > Max
-  # USER-AGENT,Max*
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,discomax.com
 
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
@@ -261,17 +230,6 @@ payload:
   - DOMAIN-SUFFIX,stan.com.au
   - DOMAIN,aws.stan.video
   # DOMAIN,streamcoimg-a.akamaihd.net
-
-  # > Star+
-  # USER-AGENT,Star+
-  # PROCESS-NAME,com.disney.starplus
-  - DOMAIN-SUFFIX,starplus.com
-  - DOMAIN-SUFFIX,starott.com
-  - DOMAIN,star.api.edge.bamgrid.com
-  - DOMAIN,star.connections.edge.bamgrid.com
-  - DOMAIN,star.content.edge.bamgrid.com
-  - DOMAIN,star.playback.edge.bamgrid.com
-  
 
   # > TVBAnywhere
   - DOMAIN-SUFFIX,tvb.com
