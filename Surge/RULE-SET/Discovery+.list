@@ -1,11 +1,12 @@
 # > Discovery+
 USER-AGENT,discovery+*
-USER-AGENT,DPlus*
+USER-AGENT,*DPlus*
 DOMAIN-SUFFIX,discoveryplus.com
 DOMAIN-SUFFIX,disco-api.com
 DOMAIN-SUFFIX,dnitv.com
 DOMAIN-SUFFIX,dplus.us.prd.media.max.com
 DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com
+// DOMAIN-SUFFIX,any-any.prd.api.discomax.com // 会影响 HBO Max
 DOMAIN,us1-prod.disco-api.com
 DOMAIN,us1-prod-images.disco-api.com
 DOMAIN,kvinit-prod.api.kochava.com
