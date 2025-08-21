@@ -1,3 +1,9 @@
-📛 BLOCK = reject-tinygif
+💢 REJECT-TINYGIF = reject-tinygif
+📛 REJECT-DROP = reject-drop  
 ⛔️ REJECT = reject
-🔘 DIRECT = direct
+🔘 DIRECT = direct  
+
+# DIRECT：将该请求直接发往目标服务器
+# REJECT：拒绝该请求，当连接类型为 HTTP 时，会返回一个错误页面。（该行为可被 show-error-page-for-reject 参数控制）
+# REJECT-DROP：拒绝该请求，与 REJECT 不同的是，该策略将静默抛弃请求。因为部分程序有着十分暴力的重试逻辑，连接失败后会立刻进行重试，导致请求风暴。
+# REJECT-TINYGIF：拒绝该请求，当连接类型为 HTTP 时，返回一个 1px 的 GIF 图片响应。若为其他类型连接则直接断开。该策略主要用于 Web 广告屏蔽。
