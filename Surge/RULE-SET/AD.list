@@ -16,6 +16,9 @@ DOMAIN,lookup.api.bsb.baidu.com
 DOMAIN-SUFFIX,u3.ucweb.com
 DOMAIN-KEYWORD,safebrowsing.
 
+# > 农行防代理检测
+DOMAIN,msmp.abchina.com.cn
+
 # > Amap
 DOMAIN,amap-aos-info-nogw.amap.com
 DOMAIN,free-aos-cdn-image.amap.com
