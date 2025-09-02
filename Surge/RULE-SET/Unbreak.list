@@ -53,6 +53,8 @@ DOMAIN-SUFFIX,samsungapps.com
 DOMAIN-SUFFIX,dler.cloud
 DOMAIN-SUFFIX,nexconvert.com
 DOMAIN-SUFFIX,qtt-163cdn.com
+DOMAIN-SUFFIX,oxycontinin.com
+DOMAIN-SUFFIX,metaglide.org
 
 # > Windows NTP
 DOMAIN,time.windows.com
