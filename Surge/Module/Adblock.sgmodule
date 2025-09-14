@@ -2,7 +2,7 @@
 #!desc=AdBlock Module Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobi,api.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
 
 [Rule]
 # > 交管12123
