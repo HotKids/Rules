@@ -2,7 +2,7 @@
 #!desc=AdBlock Module Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api-sams.walmartmobile.cn,api.mcd.cngw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobiapi.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
 
 [Rule]
 # > 交管12123
@@ -53,8 +53,11 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 # > DJI Store
 ^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
 
-
+# > 广州地铁乘车码
 ^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200
+
+# > 深圳通
+^https?:\/\/ecard\.shenzhentong\.com\/wxweb\/bwxppub2\/QryAdvertList\.do data-type=text data="{}" status-code=200
 
 [Script]
 # > 美团小程序去广告 by ZenmoFeiShi
