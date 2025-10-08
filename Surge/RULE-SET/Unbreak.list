@@ -63,5 +63,9 @@ DOMAIN,time.windows.com
 DOMAIN-SUFFIX,marriottwifi.com
 DOMAIN,portal.linkbroad.com
 
+# > BOC HK
+DOMAIN-SUFFIX,bochk.com
+
 # > ziniao
 PROCESS-NAME,*ziniao*
+
