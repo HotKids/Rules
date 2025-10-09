@@ -289,7 +289,7 @@ proxy-groups:
       - 🔰 Proxy
       - 🇺🇸 America
       
-  - name: "🤖 GenAI"
+  - name: "🤖 AIGC"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
     proxies:
@@ -463,7 +463,7 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
     interval: 86400
     
-  GenAI:
+  AIGC:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/GenAI.yaml
@@ -528,7 +528,7 @@ rules:
   - RULE-SET,CNTV,📺 CNTV
 
   # AIGC
-  - RULE-SET,GenAI,🤖 GenAI
+  - RULE-SET,AIGC,🤖 AIGC
   
   # Apple
   - RULE-SET,Apple CDN,🔘 DIRECT
