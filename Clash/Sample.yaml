@@ -526,14 +526,14 @@ rules:
   
   # CNTV
   - RULE-SET,CNTV,📺 CNTV
+
+  # AIGC
+  - RULE-SET,GenAI,🤖 GenAI
   
   # Apple
   - RULE-SET,Apple CDN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
-  # GenAI
-  - RULE-SET,GenAI,🤖 GenAI
-  
   # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
