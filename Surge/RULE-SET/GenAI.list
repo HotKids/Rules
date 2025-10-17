@@ -90,5 +90,6 @@ DOMAIN-SUFFIX,x.ai  
 
 # ByteDance
 # > Doubao Cici
-DOMAIN-SUFFIX,ciciai.com
+DOMAIN-SUFFIX,cici.com,extended-matching
+DOMAIN-SUFFIX,ciciai.com,extended-matching
 IP-CIDR,23.202.34.0/24,no-resolve
