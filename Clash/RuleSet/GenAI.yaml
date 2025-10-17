@@ -93,4 +93,3 @@ payload:
   # > Doubao Cici
   - DOMAIN-SUFFIX,cici.com
   - DOMAIN-SUFFIX,ciciai.com
-  - IP-CIDR,23.202.34.0/24,no-resolve
