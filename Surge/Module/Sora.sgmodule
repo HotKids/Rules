@@ -1,0 +1,8 @@
+#!name=Sora去水印
+#!desc=Sora AI生成发布[非草稿]的视频，下载时去除水印
+
+[Script]
+SoraRemoveWatermark = type=http-request, pattern=^https?:\/\/videos\.openai\.com\/.*vg-assets\/assets.*mp4, script-path=https://gist.githubusercontent.com/ddgksf2013/71fca841d34a7b440408276d03da3261/raw/SoraRemoveWatermark.js, requires-body=false, timeout=10
+
+[MITM]
+hostname = videos.openai.com
