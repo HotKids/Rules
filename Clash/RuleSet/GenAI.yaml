@@ -93,3 +93,5 @@ payload:
   # > Doubao Cici
   - DOMAIN-SUFFIX,cici.com
   - DOMAIN-SUFFIX,ciciai.com
+  - DOMAIN-SUFFIX,dola.com
+  - DOMAIN-WILDCARD,abtest*.byteoversea.com
