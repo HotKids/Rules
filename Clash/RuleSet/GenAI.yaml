@@ -95,3 +95,4 @@ payload:
   - DOMAIN-SUFFIX,ciciai.com
   - DOMAIN-SUFFIX,dola.com
   - DOMAIN-WILDCARD,abtest*.byteoversea.com
+  - DOMAIN,abtestvm-sg.bytedance.com
