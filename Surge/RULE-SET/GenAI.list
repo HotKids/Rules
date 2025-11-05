@@ -1,5 +1,6 @@
 ## GenAI
 # Apple Intelligence
+// https://support.apple.com/zh-cn/101555
 // 搜索服务，包括 Siri、聚焦、查询、Safari 浏览器、新闻、信息和音乐
 DOMAIN-SUFFIX,smoot.apple.com
 // Apple 智能扩展
@@ -12,6 +13,8 @@ DOMAIN,cp4.cloudflare.com
 DOMAIN,guzzoni.apple.com
 // Apple 定位与系统服务域名
 DOMAIN,gspe1-ssl.ls.apple.com
+// CloudKit 内容，包括 XProtect 更新和语音控制资源
+DOMAIN-SUFFIX,gateway.icloud.com
 
 # Anthropic
 # > Claude
