@@ -98,3 +98,4 @@ payload:
   - DOMAIN-SUFFIX,ciciai.com
   - DOMAIN-WILDCARD,abtest*.byteoversea.com
   - DOMAIN,abtestvm-sg.bytedance.com
+  - IP-CIDR,23.202.34.0/24,no-resolve
