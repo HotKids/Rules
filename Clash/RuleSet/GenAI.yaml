@@ -92,6 +92,7 @@ payload:
 
   # ByteDance
   # > Doubao Dola
+  - PROCESS-NAME,com.larus.wolf
   - DOMAIN-SUFFIX,dola.com
   - DOMAIN-SUFFIX,cici.com
   - DOMAIN-SUFFIX,ciciai.com
