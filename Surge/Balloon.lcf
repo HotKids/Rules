@@ -67,10 +67,10 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 🔰 Proxy = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
 🎬 Streaming = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
 📺 CNTV = select,🔘 DIRECT,🇨🇳 Taiwan,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
+🤖 AIGC = select,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
 🍏 Apple TV = select,🔘 DIRECT,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
 🍎 Apple = select,🔘 DIRECT,🔰 Proxy,🇺🇸 America,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
-🤖 GenAI = select,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
-💳 PayPal = select,🔘 DIRECT,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+💳 Credit = select,🔘 DIRECT,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
 📬 Telegram = select,🔰 Proxy,🇸🇬 Singapore,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
 📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
 🚧 AdGuard = select,🚫 REJECT,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
@@ -124,32 +124,61 @@ FINAL,🔰 Proxy
 
 [Remote Rule]
 # Remote Rule
+# Unbreak 后续规则修正
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list, policy=🔘 DIRECT, tag=Unbreak, enabled=true
+# Advertising 广告
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Advertising, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
+# Privacy 隐私
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Privacy, enabled=true
+# Hijacking 运营商劫持或恶意网站
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list, policy=🚧 AdGuard, tag=Hijacking, enabled=true
+# HTTPDNS 请求/流量阻止 
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
+# 自定义多区域媒体应用
+# > 一些无需验证地区的分流 HOST
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming+.list, policy=🔰 Proxy, tag=Streaming+, enabled=true
+# > Streaming by Region  
+# >> Streaming TW
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming_TW.list, policy=🇨🇳 Taiwan, tag=Streaming_TW, enabled=true
+# >> Streaming JP
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming_JP.list, policy=🇯🇵 Japan, tag=Streaming_JP, enabled=true
+# >> Streaming US
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming_US.list, policy=🇺🇸 America, tag=Streaming_US, enabled=true
+# >> Streaming
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming.list, policy=🎬 Streaming, tag=Streaming, enabled=true
+# 国内流媒体服务代理规则（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
+# > Biliili｜CN TW
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bilibili.list, policy=📺 CNTV, tag=Bilibili, enabled=true
+# > iQIYI Intl｜TW HK SEA
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/IQ.list, policy=🇨🇳 Taiwan, tag=iQIYI Intl., enabled=true
+# > WeTV｜TW SEA
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/WeTV.list, policy=📺CNTV, tag=WeTV, enabled=true
+# Global 全球代理规则
+# > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GenAI.list, policy=🤖 AIGC, tag=AIGC, enabled=true
+# > Apple 部分服务代理（App Store、TV、Movies、Music、News）
+# >> iCloud Private Relay
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/iCloud.PrivateRelay.list, policy=🔰 Proxy, tag=iCloud Relay, enabled=true
+# >> Apple News
 https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list, policy=🇺🇸 America, tag=Apple News, enabled=true
+# >> Apple TV
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Apple%20TV.list, policy=🍏 Apple TV, tag=Apple TV, enabled=true
+# >> Apple
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/apple.txt, policy=🔘 DIRECT, tag=Apple CDN, enabled=true
 https://raw.githubusercontent.com/Blankwonder/surge-list/master/apple.list, policy=🍎 Apple, tag=Apple, enabled=true
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GenAI.list, policy=🤖 GenAI, tag=GenAI, enabled=true
-https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/PayPal.list, policy=💳 PayPal, tag=PayPal, enabled=true
+# > PayPal
+https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/PayPal.list, policy=💳 Credit, tag=PayPal, enabled=true
+# > Telegram
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list, policy=📬 Telegram, tag=Telegram, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/telegramcidr.txt, policy=📬 Telegram, tag=Telegram CIDR, enabled=true
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.list, policy=📬 Telegram, tag=Telegram ASN, enabled=true
+# > Mail
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Mail, enabled=true
+# Global
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=Global, enabled=true
+# China
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=China, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=China CIDR, enabled=true
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=CHina ASN, enabled=true
@@ -166,7 +195,7 @@ https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/modules/script-
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/DNS.plugin, tag=DNS Enhanced, enabled=true
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/HTTPDNS.Block.plugin, tag=HTTPDNS Block, enabled=true
 https://raw.githubusercontent.com/mw418/Loon/main/plugin/jd_price.plugin, tag=京东比价, enabled=true
-https://raw.githubusercontent.com/fmz200/wool_scripts/main/Loon/plugin/blockAds.plugin, tag=去广告合集, enabled=true
+https://raw.githubusercontent.com/fmz200/wool_scripts/main/Loon/plugin/blockAds.plugin, tag=去广告合集, enabled=false
 
 [Mitm]
 skip-server-cert-verify = true
