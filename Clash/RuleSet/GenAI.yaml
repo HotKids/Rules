@@ -99,3 +99,4 @@ payload:
   - DOMAIN-WILDCARD,abtest*.byteoversea.com
   - DOMAIN,abtestvm-sg.bytedance.com
   - IP-CIDR,23.202.34.0/24,no-resolve
+  - IP-CIDR,71.18.222.0/24,no-resolve
