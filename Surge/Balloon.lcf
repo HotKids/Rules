@@ -152,7 +152,7 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming.
 # > Biliili｜CN TW
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bilibili.list, policy=📺 CNTV, tag=Bilibili, enabled=true
 # > iQIYI Intl｜TW HK SEA
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/IQ.list, policy=🇨🇳 Taiwan, tag=iQIYI Intl., enabled=true
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/IQ.list, policy=🇨🇳 Taiwan, tag=iQIYI Intl., enabled=true
 # > WeTV｜TW SEA
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/WeTV.list, policy=📺CNTV, tag=WeTV, enabled=true
 # Global 全球代理规则
