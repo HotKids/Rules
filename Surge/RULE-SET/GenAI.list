@@ -24,6 +24,11 @@ DOMAIN-SUFFIX,anthropic.com
 
 # OpenAI
 # > ChatGPT
+AND,((DOMAIN-KEYWORD,openaicom-api-), (DOMAIN-SUFFIX,azurefd.net))
+AND,((DOMAIN-KEYWORD,chatgpt-async-webps-prod-), (DOMAIN-SUFFIX,webpubsub.azure.com))
+DOMAIN,chatgpt.livekit.cloud
+DOMAIN,host.livekit.cloud
+DOMAIN,turn.livekit.cloud
 DOMAIN-SUFFIX,chat.com
 DOMAIN-SUFFIX,chatgpt.com
 DOMAIN-SUFFIX,livekit.cloud
@@ -34,7 +39,10 @@ DOMAIN-SUFFIX,sora.com
 DOMAIN,api.statsig.com
 DOMAIN,api-iam.intercom.io
 DOMAIN,o33249.ingest.sentry.io
+DOMAIN,openai.com.cdn.cloudflare.net
 DOMAIN,openaiapi-site.azureedge.net
+DOMAIN,production-openaicom-storage.azureedge.net
+DOMAIN,openaicomproductionae4b.blob.core.windows.net
 DOMAIN-KEYWORD,openaiapi
 DOMAIN-KEYWORD,openaicom
 
