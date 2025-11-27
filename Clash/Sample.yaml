@@ -79,7 +79,7 @@ hosts:
 dns:
   enable: true
   listen: 0.0.0.0:53
-  # ipv6: false # when the false, response to AAAA questions will be empty
+  ipv6: false # when the false, response to AAAA questions will be empty
 
   # These nameservers are used to resolve the DNS nameserver hostnames below.
   # Specify IP addresses only
@@ -89,7 +89,7 @@ dns:
     - 182.254.116.116
     
   enhanced-mode: fake-ip # or redir-host
-  fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
+  fake-ip-range: 198.18.0.0/15 # Fake IP addresses pool CIDR
   # use-hosts: true # lookup hosts and return IP record
 
   # Hostnames in this list will not be resolved with fake IPs
@@ -103,6 +103,7 @@ dns:
     - '*.localhost'
     - '*.test'
     - '*.local'
+    - '*.router'
     - '*.home.arpa'
     - 'localhost.ptlogin2.qq.com'
     # Stun Services
@@ -112,8 +113,13 @@ dns:
     - '+.stun.*.*.*.*.*'
     # Google Voices
     - 'lens.l.google.com'
+    # Google Android
+    - '*.google.cn'
+    - '*.googleapis.cn'
+    - 'connectivitycheck.gstatic.com'
+    - 'connectivitycheck.android.com'
     # Nintendo Switch STUN
-    - '*.n.n.srv.nintendo.net'
+    - '*.srv.nintendo.net'
     # PlayStation STUN
     - '+.stun.playstation.net'
     # XBox
@@ -126,6 +132,12 @@ dns:
     - '*.mcdn.bilivideo.cn'
     # Windows Default LAN WorkGroup
     - 'WORKGROUP'
+    # NTP
+    - 'time.*.com'
+    - 'time.*.gov'
+    - 'time.*.edu.cn'
+    - 'time.*.apple.com'
+    - 'ntp.*.com'
   
   # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
   # All DNS questions are sent directly to the nameserver, without proxies
@@ -135,7 +147,7 @@ dns:
     - https://dns.alidns.com/dns-query
     # - tls://dns.rubyfish.cn:853 # DNS over TLS
     # - https://1.1.1.1/dns-query # DNS over HTTPS
-    - dhcp://en0 # dns from dhcp
+    # - dhcp://en0 # dns from dhcp
     # - '8.8.8.8#en0'
 
   # When `fallback` is present, the DNS server will send concurrent requests
@@ -145,7 +157,7 @@ dns:
   fallback:
     - tls://8.8.4.4
     - tls://1.1.1.1
-    - https://doh.pub/dns-query
+    - https://cloudflare-dns.com/dns-query
 
   # If IP addresses resolved with servers in `nameservers` are in the specified
   # subnets below, they are considered invalid and results from `fallback`
@@ -172,6 +184,7 @@ dns:
       - '+.recaptcha.net'
       - '+.twimg.com'
       - '+.twitter.com'
+      - '+.x.com'
       - '+.youtube.com'
       - '+.ytimg.com'
       - 'twitter.com'
@@ -217,13 +230,15 @@ dns:
 #
 tun:
   enable: true
-  stack: system # or gvisor
+  stack: gvisor # or system
   dns-hijack:
-    - 198.18.0.2:53
+    - any:53
     - tcp://any:53
-
+    - 198.18.0.2:53
+    
   auto-route: true # auto set global route
   auto-detect-interface: true # conflict with interface-name
+  strict-route: true # strict routing to prevent leaks
   
 proxies:
 
@@ -385,21 +400,7 @@ rule-providers:
     path: ./Provider/RuleSet/Unbreak.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
-    
-  AdBlock:
-    type: http
-    behavior: domain
-    path: ./Provider/RuleSet/Guard/Reject.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
-    interval: 86400
 
-  Advertising:
-    type: http
-    behavior: domain
-    path: ./Provider/RuleSet/Guard/Reject.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
-    interval: 86400
-    
   HTTPDNS:
     type: http
     behavior: classical
@@ -407,6 +408,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
     
+  Advertising:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Guard/Reject.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
+    interval: 86400
+      
   Streaming+:
     type: http
     behavior: classical
@@ -448,6 +456,13 @@ rule-providers:
     path: ./Provider/RuleSet/Streaming/CNTV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
     interval: 86400
+
+  AIGC:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Extra/GenAI.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
+    interval: 86400
     
   Apple CDN:
     type: http
@@ -461,13 +476,6 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Extra/Apple.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
-    interval: 86400
-    
-  AIGC:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Extra/GenAI.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
     
   Global:
@@ -487,8 +495,8 @@ rule-providers:
   CNASN:
     type: http
     behavior: classical
+    path: ./Provider/RuleSet/Extra/CNASN.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
-    path: ./Rules/ASNChina.yaml
     interval: 86400
     
   CNCIDR:
@@ -511,9 +519,8 @@ rules:
   - RULE-SET,Unbreak,🔘 DIRECT
   
   # AdBlock
-  - RULE-SET,AdBlock,🚧 AdGuard
-  - RULE-SET,Advertising,🚧 AdGuard
   - RULE-SET,HTTPDNS,🚧 AdGuard
+  - RULE-SET,Advertising,🚧 AdGuard
 
   # Global Area Network
 
@@ -537,7 +544,7 @@ rules:
   # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
-   # China Area Network
+  # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
@@ -545,7 +552,7 @@ rules:
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
   
-  # GeoIP China	
+  # GeoIP China
   - GEOIP,CN,🔘 DIRECT
  
   - MATCH,🔰 Proxy
