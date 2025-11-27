@@ -5,7 +5,6 @@
 # 通用设置
 
 # > 增强版 Wi-Fi 助理
-# (在 Wi-Fi 网络不佳时尝试使用数据网络建立连接，请仅当使用不限量的数据流量时开启)
 wifi-assist = false
 
 # > Internet 测试 URL
@@ -22,28 +21,22 @@ geoip-maxmind-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release
 ipv6 = false
 ipv6-vif = auto
 
-# > 允许 Wi-Fi 访问 (仅 iOS，若允许远程访问将「false」改为「true」)
+# > 允许 Wi-Fi 访问 (仅 iOS)
 allow-wifi-access = true
 wifi-access-http-port = 6152
 wifi-access-socks5-port = 6153
-# > 允许 Wi-Fi 访问 (仅 macOS，若允许远程访问将「127.0.0.1」改为「0.0.0.0」)
+# > 允许 Wi-Fi 访问 (仅 macOS)
 http-listen = 0.0.0.0:6152
 socks5-listen = 0.0.0.0:6153
 
 # > 远程控制器
-# > 允许外部控制器访问 Surge，Surge Dashboard 或 Surge CLI 进行管理控制
 external-controller-access = 127.0.0.1:6170
 http-api = HotKids@127.0.0.1:6171
 http-api-tls = false
-# > Safari 输入 127.0.0.1:6171,填入 HTTP-API 密码即可。
 http-api-web-dashboard = true
 
-# > 兼容模式 (仅 iOS)
-# compatibility-mode = 0
-# > 跳过代理
-# 跳过某个域名或者 IP 段，这些目标主机将不会由 Surge Proxy 处理。
-# (macOS 版本中，如果启用了 Set as System Proxy, 这些值会被写入到系统网络代理设置.)
-skip-proxy = localhost, *.local, captive.apple.com, e.crashlytics.com, sequoia.apple.com, seed-sequoia.siri.apple.com, www.baidu.com, passenger.t3go.cn, yunbusiness.ccb.com, wxh.wo.cn, gate.lagou.com, www.abchina.com.cn, login-service.mobile-bank.psbc.com, mobile-bank.psbc.com, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.1/32, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, 192.168.122.1/32, 193.168.0.1/32, 224.0.0.0/4, 240.0.0.0/4, 255.255.255.255/32, ::1/128, fc00::/7, fd00::/8, fe80::/10, ff00::/8, 2001::/32, 2001:db8::/32, 2002::/16, ::ffff:0:0:0:0/1, ::ffff:128:0:0:0/1
+# > 跳过代理（追加）
+skip-proxy = %APPEND% *.portal.*, captive.*, hotspot.*, *.wifi.com, *login*wifi*, captive.apple.com.cn, gateway.*, router.*, *.router, modem.*, *.modem, amplifi.lan, orbi.*, *.orbi, tplogin.cn, tplinkwifi.net, miwifi.com, asuswrt.*, *.asus.com
 
 # > 排除简单主机名
 exclude-simple-hostnames = true
@@ -51,9 +44,13 @@ exclude-simple-hostnames = true
 # > Network framework
 network-framework = false
 
-# > DNS 服务器 (如无必要不建议使用 DNS over HTTPS)
-dns-server = %APPEND% system, 119.29.29.29, 223.5.5.5, 223.6.6.6
-# encrypted-dns-server = %APPEND% quic://223.5.5.5, quic://223.6.6.6, https://1.12.12.12/dns-query, https://120.53.53.53/dns-query
+# > DNS 服务器（追加）
+dns-server = %APPEND% 119.29.29.29, 223.5.5.5
+
+# > 加密 DNS（追加）
+encrypted-dns-server = %APPEND% quic://dns.alidns.com, quic://dns.pub, https://dns.alidns.com/dns-query, https://doh.pub/dns-query
+doh-skip-cert-verification = false
+encrypted-dns-fallback-mode = prefer-encrypted
 
 # > 从 /etc/hosts 读取 DNS 记录
 read-etc-hosts = true
@@ -66,50 +63,35 @@ loglevel = notify
 # > 当遇到 REJECT 策略时返回错误页
 show-error-page-for-reject = true
 
-# > Always Real IP Hosts
-# 当 Surge VIF 处理 DNS 问题时，此选项要求 Surge 返回一个真正的 IP 地址，而不是一个假 IP 地址。
-# DNS 数据包将被转发到上游 DNS 服务器。
-always-real-ip = %INSERT% *.lan, *.direct, cable.auth.com, *.msftconnecttest.com, *.msftncsi.com, network-test.debian.org, detectportal.firefox.com, resolver1.opendns.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, stun.*, global.turn.twilio.com, global.stun.twilio.com, app.yinxiang.com, injections.adguard.org, local.adguard.org, localhost.*.qq.com, localhost.*.weixin.qq.com, *.logon.battlenet.com.cn, *.logon.battle.net, *.blzstatic.cn, music.163.com, *.music.163.com, *.126.net, songsearch.kugou.com, trackercdn.kugou.com, *.kuwo.cn, y.qq.com, *.y.qq.com, streamoc.music.tc.qq.com, mobileoc.music.tc.qq.com, isure.stream.qqmusic.qq.com, dl.stream.qqmusic.qq.com, aqqmusic.tc.qq.com, amobile.music.tc.qq.com, *.music.migu.cn, music.migu.cn, proxy.golang.org, *.mcdn.bilivideo.cn, *.cmpassport.com, id6.me, open.e.189.cn, opencloud.wostore.cn, id.mail.wo.cn, mdn.open.wo.cn, hmrz.wo.cn, nishub1.10010.com, enrichgw.10010.com, *.wosms.cn, *.jegotrip.com.cn, *.icitymobile.mobi, *.pingan.com.cn, *.cmbchina.com, *.10099.com.cn, *.microdone.cn, pool.ntp.org, *.pool.ntp.org, ntp.*.com, time.*.com, ntp?.*.com, time?.*.com, time.*.gov, time.*.edu.cn, *.ntp.org.cn, PDC._msDCS.*.*, DC._msDCS.*.*, GC._msDCS.*.*
+# > Always Real IP Hosts（插入到开头）
+always-real-ip = %INSERT% *.lan, *.local, *.localdomain, *.localhost, *.example, *.invalid, *.test, *.direct, *.home.arpa, *.internal, WORKGROUP, localhost.*.qq.com, localhost.*.weixin.qq.com, *.msftconnecttest.com, *.msftncsi.com, network-test.debian.org, detectportal.firefox.com, captive.apple.com, captive.apple.com.cn, connectivitycheck.gstatic.com, connectivitycheck.android.com, connectivitycheck.platform.hicloud.com, connectivitycheck.coloros.com, connectivitycheck.samsung.com, conn.oplus.com, detectportal.meizu.com, wifi.vivo.com.cn, wifi.coloros.com, connect.rom.miui.com, *.miui.com, resolver1.opendns.com, *.portal.*, captive.*, hotspot.*, *.google.cn, *.googleapis.cn, stun.*, turn.*, *.stun.*, *.turn.*, lens.l.google.com, *.srv.nintendo.net, *.nintendo.net, *.stun.playstation.net, *.playstation.net, *.sonyentertainmentnetwork.com, xbox.*.microsoft.com, *.xboxlive.com, *.logon.battle.net, *.battle.net, *.steam-chat.com, *.epicgames.com, *.ea.com, *.ubisoft.com, *.discord.gg, *.discordapp.com, *.zoom.us, *.teams.microsoft.com, injections.adguard.org, local.adguard.org, *.mcdn.bilivideo.cn, *.cmpassport.com, id6.me, open.e.189.cn, opencloud.wostore.cn, *.wosms.cn, *.pingan.com.cn, *.cmbchina.com, *.icbc.com.cn, *.ccb.com, *.boc.cn, *.abchina.com, *.alipay.com, *.tenpay.com, pool.ntp.org, *.pool.ntp.org, time.*.com, time.*.apple.com, time.cloudflare.com, *.ntp.org.cn, PDC._msDCS.*.*, DC._msDCS.*.*, GC._msDCS.*.*
 
-# > Hijack DNS
-# 默认情况下，Surge 只返回发送到 Surge DNS 地址的 DNS 查询的假 IP 地址 (198.18.0.2)。
-# 有些设备或软件总是使用硬编码的 DNS 服务器。 (例如 Google Speakers 总是使用 8.8.8.8)。 您可以使用此选项劫持查询，以获得一个假地址。
-hijack-dns = 8.8.8.8:53, 8.8.4.4:53, 1.1.1.1:53, 1.0.0.1:53
+# > Hijack DNS（追加）
+hijack-dns = %APPEND% 9.9.9.9:53, 149.112.112.112:53, 208.67.222.222:53, 208.67.220.220:53
 
-# > TCP Force HTTP Hosts
-# 让 Surge 把 TCP 连接当作 HTTP 请求来处理。Surge HTTP 引擎将处理这些请求，所有的高级功能，如捕获、重写和脚本等都可以使用。
-force-http-engine-hosts = %APPEND% *.intsig.net, *.ott.cibntv.net, *.alicdn.com, *.myalicdn.com, *.iqiyipic.com, ts.qq.com, *.douyinvod.com, *.xhscdn.com, *.xiaohongshu.com, *.tc.qq.com, api*.amemv.com, wmapi.meituan.com, weibointl.api.weibo.cn, weibointl.mapi.weibo.com, api.cloud.189.cn
+# > TCP Force HTTP Hosts（追加）
+force-http-engine-hosts = %APPEND% *.alicdn.com, *.ott.cibntv.net, *.tc.qq.com, *.douyinvod.com, *.douyin.com, api*.amemv.com, *.xhscdn.com, *.xiaohongshu.com, *.bilibili.com, *.kuaishou.com, *.jd.com, *.pinduoduo.com, *.music.163.com, wmapi.meituan.com
 
-# > VIF Excluded Routes
-# Surge VIF 只能处理 TCP 和 UDP 协议。使用此选项可以绕过特定的 IP 范围，允许所有流量通过。
-# tun-excluded-routes = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12
+# > VIF Excluded Routes（旁路由绕过内网）
+tun-excluded-routes = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12
 
-# > VIF Included Routes
-# 默认情况下，Surge VIF 接口会声明自己是默认路由。但是，由于 Wi-Fi 接口的路由较小，有些流量可能不会通过 Surge VIF 接口。使用此选项可以添加一条较小的路由。
-# tun-included-routes = 192.168.1.12/32
+# > UDP 优先级
+udp-priority = true
 
-# > 如果没有代理服务器支持 UDP 转发，可修改为「 direct 」或注释下条，但需注意同一目标主机名 TCP 请求与 UDP 请求的源地址不同所造成的隐私及安全风险。
+# > UDP 策略不支持时的行为
 udp-policy-not-supported-behaviour = reject
 
 [Replica]
-# 0 为关闭，1 为开启
 # > 隐藏 Apple 请求
 hide-apple-request = 0
 # > 隐藏崩溃追踪器请求
 hide-crash-reporter-request = 1
 # > 隐藏 UDP 会话
 hide-udp = 0
-# > 关键词过滤器
-# none（关闭关键词过滤器） /whitelist（blacklist（仅记录包含关键字的请求）） /blacklist（仅记录不包含关键字的请求） /pattern（匹配通配符的请求）
-# keyword-filter-type = none
-# > 关键词
-# keyword-filter = (null)
 
 [Host]
-# > Firebase Cloud Messaging
+# > Google 服务（国内 CDN 加速）
 mtalk.google.com = server:119.29.29.29
-
-# > Google Dl
 dl.google.com = server:119.29.29.29
 dl.l.google.com = server:119.29.29.29
 update.googleapis.com = server:119.29.29.29
@@ -118,50 +100,37 @@ update.googleapis.com = server:119.29.29.29
 *.dl.playstation.net = server:119.29.29.29
 
 # > Router Admin Panel
-amplifi.lan = server:syslib # Ubiquiti Amplifi Router
-router.synology.com = server:syslib # Synology Router
-sila.razer.com = server:syslib # Razer Sila Router
-router.asus.com = server:syslib # Asus Router
-routerlogin.net = server:syslib # Netgear Router
-orbilogin.com = server:syslib # Netgear Obri Router
-www.LinksysSmartWiFi.com = server:syslib # Linksys Router
-LinksysSmartWiFi.com = server:syslib # Linksys Router
-myrouter.local = server:syslib # Linksys Router
-www.miwifi.com = server:syslib # Xiaomi Mi WiFi Router
-miwifi.com = server:syslib # Xiaomi Mi WiFi Router
-mediarouter.home = server:syslib # Huawei Router
-tplogin.cn = server:syslib # TP-Link Router
-tplinklogin.net = server:syslib # TP-Link Router
-melogin.cn = server:syslib # MERCURY Router
-falogin.cn = server:syslib # FAST Router
+amplifi.lan = server:syslib
+router.synology.com = server:syslib
+sila.razer.com = server:syslib
+router.asus.com = server:syslib
+routerlogin.net = server:syslib
+orbilogin.com = server:syslib
+www.LinksysSmartWiFi.com = server:syslib
+LinksysSmartWiFi.com = server:syslib
+myrouter.local = server:syslib
+www.miwifi.com = server:syslib
+miwifi.com = server:syslib
+mediarouter.home = server:syslib
+tplogin.cn = server:syslib
+tplinklogin.net = server:syslib
+melogin.cn = server:syslib
+falogin.cn = server:syslib
 
 # > Apple
-networking.apple = server:https://doh.dns.apple.com/dns-query # Apple
-# *.apple.com = server:https://doh.dns.apple.com/dns-query # Apple.com
-*.icloud.com = server:https://doh.dns.apple.com/dns-query # iCloud.com
+networking.apple = server:https://doh.dns.apple.com/dns-query
+*.icloud.com = server:https://doh.dns.apple.com/dns-query
 
-# > Alibaba
-*.alibaba.cn = server:223.5.5.5 # 阿里巴巴
-*.alibaba.com.cn = server:223.5.5.5 # 阿里巴巴
-*.china.alibaba.com = server:223.5.5.5 # Alibaba 中国
-*.1688.com = server:223.5.5.5 # 1688
-*.taobao.com = server:223.5.5.5 # 淘宝
-*.tbcache.com = server:223.5.5.5 # 淘宝 缓存
-*.tmall.com = server:223.5.5.5 # 天猫
-*.alicdn.com = server:223.5.5.5 # 阿里 CDN
-*.aliyundrive.com = server:223.5.5.5 # 阿里云盘
-*.aliyun.* = server:223.5.5.5 # 阿里云
-*.aliyuncdn.* = server:223.5.5.5 # 阿里云 CDN
-*.aliyunddos????.com = server:223.5.5.5 # 阿里云 DDoS防护
-*.aliyuncs.com = server:223.5.5.5 # 阿里云API服务
-*.aliyundunwaf.com = server:223.5.5.5 # 阿里云Web应用防火墙
-*.aliapp.com = server:223.5.5.5 # 云引擎应用平台
-*.aliapp.org = server:223.5.5.5 # 上云平台
-*.alibabausercontent.com = server:223.5.5.5 # 阿里用户上传资料
-*.mmstat.com = server:223.5.5.5 # mmstat 数据统计 广告追踪
-tb.cn = server:223.5.5.5 # 淘宝短网址
+# > Alibaba 阿里系
+*.taobao.com = server:223.5.5.5
+*.tmall.com = server:223.5.5.5
+*.alicdn.com = server:223.5.5.5
+*.aliyundrive.com = server:223.5.5.5
+*.aliyun.com = server:223.5.5.5
+*.aliyuncs.com = server:223.5.5.5
+*.1688.com = server:223.5.5.5
 
-# > Tencent
+# > Tencent 腾讯系
 *.qq.com = server:119.29.29.29
 *.qpic.com = server:119.29.29.29
 *.qlogo.cn = server:119.29.29.29
@@ -172,25 +141,58 @@ tb.cn = server:223.5.5.5 # 淘宝短网址
 *.weixinbridge.com = server:119.29.29.29
 *.servicewechat.com = server:119.29.29.29
 
-# > Taiwan
-# 中华电信
-*.cht.com.tw = server:https://dns.hinet.net/dns-query # 中华电信
-*.hinet.net = server:https://dns.hinet.net/dns-query # 中华电信HiNet
-*.emome.net = server:https://dns.hinet.net/dns-query # 中华电信emome
-# Taiwan Network Information Center
-*.tw = server:https://dns.twnic.tw/dns-query # TWNIC DNS
-*.taipei = server:https://dns.twnic.tw/dns-query # TWNIC DNS
+# > ByteDance 字节系
+*.douyin.com = server:119.29.29.29
+*.bytedance.com = server:119.29.29.29
+*.toutiao.com = server:119.29.29.29
+
+# > Bilibili B站
+*.bilibili.com = server:119.29.29.29
+*.hdslb.com = server:119.29.29.29
+*.bilivideo.com = server:119.29.29.29
+
+# > JD 京东
+*.jd.com = server:119.29.29.29
+*.360buyimg.com = server:119.29.29.29
+
+# > Pinduoduo 拼多多
+*.pinduoduo.com = server:119.29.29.29
+
+# > Xiaohongshu 小红书
+*.xiaohongshu.com = server:119.29.29.29
+*.xhscdn.com = server:119.29.29.29
+
+# > Meituan 美团
+*.meituan.com = server:119.29.29.29
+*.dianping.com = server:119.29.29.29
+
+# > NetEase 网易
+*.163.com = server:119.29.29.29
+*.126.net = server:119.29.29.29
+*.netease.com = server:119.29.29.29
+
+# > Baidu 百度
+*.baidu.com = server:119.29.29.29
+*.bdstatic.com = server:119.29.29.29
+
+# > Taiwan 台湾
+*.cht.com.tw = server:https://dns.hinet.net/dns-query
+*.hinet.net = server:https://dns.hinet.net/dns-query
+*.emome.net = server:https://dns.hinet.net/dns-query
+*.tw = server:https://dns.twnic.tw/dns-query
+*.taipei = server:https://dns.twnic.tw/dns-query
 
 [Rule]
 # HTTP3/QUIC 协议开始流行，但是国内 ISP 和国际出口的 UDP 优先级都很低，表现很差，屏蔽掉以强制回退 HTTP2/HTTP1.1。
 # REJECT-NO-DROP 表示不使用默认的自动丢包逻辑，这样 Surge 每次都会返回 ICMP Port Unreachable，应用会立刻回退而不是等超时。
 # PROTOCOL,QUIC,REJECT-NO-DROP
-# AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
+AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
 
 # Unbreak 后续规则修正
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/RULE-SET/Unbreak.list,DIRECT,extended-matching
 
 # Advertising 广告
+RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,REJECT,extended-matching
 DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,REJECT-TINYGIF,extended-matching
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF,extended-matching
 RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,REJECT-TINYGIF,extended-matching
