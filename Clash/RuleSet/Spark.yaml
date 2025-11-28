@@ -5,10 +5,13 @@ payload:
   - PROCESS-NAME,*spark
   - PROCESS-NAME,com.readdle.spark
   - DOMAIN-SUFFIX,gmail.com
+  - DOMAIN-SUFFIX,googlemail.com
   - DOMAIN-SUFFIX,live.com
   - DOMAIN-SUFFIX,outlook.com
+  - DOMAIN-SUFFIX,hotmail.com
   - DOMAIN-SUFFIX,mail.me.com
   - DOMAIN-SUFFIX,mail.yahoo.com
+  - DOMAIN-SUFFIX,fastmail.com
   - DOMAIN-SUFFIX,mail.infomaniak.com
   - DOMAIN-SUFFIX,vodafonemail.de
   - DOMAIN,imap.vodafone.de
