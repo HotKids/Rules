@@ -3,7 +3,7 @@
 # 明文 SMTP
 // DEST-PORT,25
 # SMTP over SSL (SMTPS)
-/ DEST-PORT,465
+// DEST-PORT,465
 # SMTP Submission (STARTTLS)
 // DEST-PORT,587
 USER-AGENT, *spark
