@@ -3,11 +3,11 @@
 [Rule]
 # 通用 SMTP 端口
 # 明文 SMTP
-DST-PORT,25
+// DST-PORT,25
 # SMTP over SSL (SMTPS)
-DST-PORT,465
+/ DST-PORT,465
 # SMTP Submission (STARTTLS)
-DST-PORT,587
+// DST-PORT,587
 USER-AGENT, *spark
 USER-AGENT, *Spark
 PROCESS-NAME,*spark
