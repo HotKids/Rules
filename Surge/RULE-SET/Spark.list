@@ -1,6 +1,4 @@
 # > Spark Mail
-
-[Rule]
 # 通用 SMTP 端口
 # 明文 SMTP
 // DEST-PORT,25
