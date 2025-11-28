@@ -188,6 +188,9 @@ networking.apple = server:https://doh.dns.apple.com/dns-query
 # PROTOCOL,QUIC,REJECT-NO-DROP
 AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
 
+# 标准 SSH 端口
+DST-PORT,22,DIRECT
+
 # Unbreak 后续规则修正
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/RULE-SET/Unbreak.list,DIRECT,extended-matching
 
