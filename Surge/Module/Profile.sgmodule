@@ -48,7 +48,7 @@ network-framework = false
 dns-server = %APPEND% 119.29.29.29, 223.5.5.5
 
 # > 加密 DNS（追加）
-encrypted-dns-server = %APPEND% quic://dns.alidns.com, quic://dns.pub, https://dns.alidns.com/dns-query, https://doh.pub/dns-query
+encrypted-dns-server = %APPEND% https://dns.alidns.com/dns-query, https://doh.pub/dns-query, https://dns.cloudflare.com/dns-query, https://dns.google/dns-query
 doh-skip-cert-verification = false
 encrypted-dns-fallback-mode = prefer-encrypted
 
