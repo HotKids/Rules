@@ -89,9 +89,9 @@ force-http-engine-hosts = %APPEND% *.alicdn.com, *.ott.cibntv.net, *.tc.qq.com, 
 # tun-excluded-routes = 192.168.0.0/16, 10.0.0.0/8, 172.16.0.0/12
 # 路由防火墙
 # 包含所有的网络请求
-include-all-networks = true
+# include-all-networks = true
 # 包含本地网络请求
-include-local-networks = true
+# include-local-networks = true
 
 # > UDP 优先级
 udp-priority = true
