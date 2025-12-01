@@ -1,218 +1,157 @@
-# Port of HTTP(S) proxy server on the local end
-# port: 7890
-
-# Port of SOCKS5 proxy server on the local end
-# socks-port: 7891
-
-# Transparent proxy server port for Linux and macOS (Redirect TCP and TProxy UDP)
-# redir-port: 7892
-
-# Transparent proxy server port for Linux (TProxy TCP and TProxy UDP)
-# tproxy-port: 7893
-
-# HTTP(S) and SOCKS5 server on the same port
+# 基础端口设置（混合端口）
 mixed-port: 7893
 
-# authentication of local SOCKS5/HTTP(S) server
-# authentication:
-#  - "user1:pass1"
-#  - "user2:pass2"
-
-# Set to true to allow connections to the local-end server from
-# other LAN IP addresses
+# 允许局域网连接
 allow-lan: true
-
-# This is only applicable when `allow-lan` is `true`
-# '*': bind all IP addresses
-# 192.168.122.11: bind a single IPv4 address
-# "[aaaa::a8aa:ff:fe09:57d8]": bind a single IPv6 address
 bind-address: '*'
 
-# Clash router working mode
-# rule: rule-based packet routing
-# global: all packets will be forwarded to a single endpoint
-# direct: directly forward the packets to the Internet
+# 运行模式
 mode: rule
 
-# Clash by default prints logs to STDOUT
-# info / warning / error / debug / silent
+# 日志级别
 log-level: info
 
-# When set to false, resolver won't translate hostnames to IPv6 addresses
+# 关闭 IPv6 (目前国内环境开启 IPv6 容易导致分流失效或连接缓慢，建议关闭)
 ipv6: false
 
-# RESTful web API listening address
+# API 控制端口
 external-controller: 127.0.0.1:9090
 
-# A relative path to the configuration directory or an absolute path to a
-# directory in which you put some static web resource. Clash core will then
-# serve it at `${API}/ui`.
-# external-ui: folder
+# 性能与指纹设置
+# 统一延迟计算 (去除握手等干扰)
+unified-delay: true
 
-# Secret for the RESTful API (optional)
-# Authenticate by spedifying HTTP header `Authorization: Bearer ${secret}`
-# ALWAYS set a secret if RESTful API is listening on 0.0.0.0
-# secret: ""
+# TCP 并发 (使用最快握手的 IP)
+tcp-concurrent: true
 
-# Outbound interface name
-# interface-name: eth0
+# 伪装指纹 (防探测)
+global-client-fingerprint: chrome
 
-# Static hosts for DNS server and connection establishment (like /etc/hosts)
-#
-# Wildcard hostnames are supported (e.g. *.clash.dev, *.foo.*.example.com)
-# Non-wildcard domain names have a higher priority than wildcard domain names
-# e.g. foo.example.com > *.example.com > .example.com
-# P.S. +.foo.com equals to .foo.com and foo.com
+# 进程匹配模式 (Android/路由器建议 off 节省性能，Windows 可根据需要开启)
+find-process-mode: off
+
+# GeoData 规则库更新设置
+geodata-mode: true
+geodata-loader: standard
+geo-auto-update: true
+geo-update-interval: 24
+
+geox-url:
+  geoip: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
+  geosite: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
+  mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
+
+# Hosts 设置
 hosts:
-  # '*.clash.dev': 127.0.0.1
-  # '.dev': 127.0.0.1
-  # 'alpha.clash.dev': '::1'
+  '*.clash.dev': 127.0.0.1
+  '.dev': 127.0.0.1
+  'alpha.clash.dev': '::1'
+  "ip6-localhost": "::1"
+  "ip6-loopback": "::1"
+  
+# 配置持久化（保存节点选择与 Fake-IP 映射）
+profile:
+  store-selected: true
+  store-fake-ip: true
 
-  # Firebase Cloud Messaging
-  'mtalk.google.com': 108.177.125.188
-  # Google Dl
-  'dl.google.com': 180.163.151.161
-  'dl.l.google.com': 180.163.151.161
-
-# DNS server settings
-# This section is optional. When not present, the DNS server will be disabled.
+# 流量嗅探（提升域名识别能力）
+sniffer:
+  enable: true
+  sniff:
+    TLS:
+      ports: [443, 8443]     # SNI 嗅探
+    HTTP:
+      ports: [80, 8080-8880] # Host 嗅探
+      override-destination: true  # 强制使用嗅探域名进行分流（解决 CDN/反代域名不一致问题）
+      
+# DNS 设置
 dns:
   enable: true
   listen: 0.0.0.0:53
-  # ipv6: false # when the false, response to AAAA questions will be empty
+  ipv6: false
+  
+  # Fake-IP 模式
+  enhanced-mode: fake-ip 
+  fake-ip-range: 198.18.0.1/16
+  
+  # DNS 缓存方式
+  cache-algorithm: lru
+  
+  # 优先使用 H3 加速 DoH
+  prefer-h3: true 
+  
+  # 遵循 Clash 分流规则 (非常重要，防止 DNS 泄露)
+  respect-rules: true 
+  
+  # Fake-IP 过滤列表 (返回真实 IP，解决特定应用兼容性问题)
+  fake-ip-filter:
+    # 局域网与本地服务
+    - '*.lan'
+    - '*.local'
+    - '*.localdomain'
+    - '*.home.arpa'
+    - '*.localhost'
+    - 'localhost.ptlogin2.qq.com'
+    - 'WORKGROUP'
+    # STUN 服务（语音/游戏 NAT）
+    - '+.stun.*'
+    - '+.stun.playstation.net'
+    - '*.srv.nintendo.net'
+    - 'xbox.*.*.microsoft.com'
+    - '*.*.xboxlive.com'
+    # Windows 网络检测
+    - '*.msftconnecttest.com'
+    - '*.msftncsi.com'
+    # Android 网络检测
+    - 'connectivitycheck.gstatic.com'
+    - 'connectivitycheck.android.com'
+    # Google Voice 特殊解析
+    - 'lens.l.google.com'
+    # Bilibili CDN
+    - '*.mcdn.bilivideo.cn'
 
-  # These nameservers are used to resolve the DNS nameserver hostnames below.
-  # Specify IP addresses only
+  # 1. 默认 DNS (Bootstrap DNS)
+  # 用于解析下面 nameserver 域名的 IP，必须使用国内纯净 DNS
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
-    - 8.8.4.4
-    - 1.0.0.1
-  enhanced-mode: fake-ip # or redir-host
-  fake-ip-range: 198.18.0.1/16 # Fake IP addresses pool CIDR
-  # use-hosts: true # lookup hosts and return IP record
 
-  # Hostnames in this list will not be resolved with fake IPs
-  # i.e. questions to these domain names will always be answered with their
-  # real IP addresses
-  fake-ip-filter:
-    - '*.lan'
-    - '*.localdomain'
-    - '*.example'
-    - '*.invalid'
-    - '*.localhost'
-    - '*.test'
-    - '*.local'
-    - '*.home.arpa'
-    # Stun Services
-    - '+.stun.*.*'
-    - '+.stun.*.*.*'
-    - '+.stun.*.*.*.*'
-    - '+.stun.*.*.*.*.*'
-    # Google Voices
-    - 'lens.l.google.com'
-    # Nintendo Switch STUN
-    - '*.n.n.srv.nintendo.net'
-    # PlayStation STUN
-    - '+.stun.playstation.net'
-    # XBox
-    - 'xbox.*.*.microsoft.com'
-    - '*.*.xboxlive.com'
-    # Microsoft Captive Portal
-    - '*.msftncsi.com'
-    - '*.msftconnecttest.com'
-    # Bilibili CDN
-    - '*.mcdn.bilivideo.cn'
-    # Windows Default LAN WorkGroup
-    - 'WORKGROUP'
-  
-  # Supports UDP, TCP, DoT, DoH. You can specify the port to connect to.
-  # All DNS questions are sent directly to the nameserver, without proxies
-  # involved. Clash answers the DNS question with the first result gathered.
+  # 2. 主要 DNS (Foreign DNS)
+  # 默认情况下的 DNS 服务器（通常被规则判定为代理或未匹配时使用）
+  # 配置为国外 DNS，Clash 会拦截并返回 Fake-IP，实际由代理节点进行远程解析
   nameserver:
-    - 192.168.31.1
-    - 119.29.29.29
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-    # - tls://dns.rubyfish.cn:853 # DNS over TLS
-    # - https://1.1.1.1/dns-query # DNS over HTTPS
+    - https://1.1.1.1/dns-query#h3
+    - https://8.8.8.8/dns-query#h3
 
-  # When `fallback` is present, the DNS server will send concurrent requests
-  # to the servers in this section along with servers in `nameservers`.
-  # The answers from fallback servers are used when the GEOIP country
-  # is not `CN`.
-  fallback:
-    - https://dns.cloudflare.com/dns-query
-    - https://public.dns.iij.jp/dns-query
-    - https://jp.tiar.app/dns-query
-    - https://jp.tiarap.org/dns-query
-    - tls://dot.tiar.app
-
-  # If IP addresses resolved with servers in `nameservers` are in the specified
-  # subnets below, they are considered invalid and results from `fallback`
-  # servers are used instead.
-  #
-  # IP address resolved with servers in `nameserver` is used when
-  # `fallback-filter.geoip` is true and when GEOIP of the IP address is `CN`.
-  #
-  # If `fallback-filter.geoip` is false, results from `nameserver` nameservers
-  # are always used if not match `fallback-filter.ipcidr`.
-  #
-  # This is a countermeasure against DNS pollution attacks.
-  fallback-filter:
-    geoip: true
-    geoip-code: CN
-    domain:
-      - '+.google.+'
-      - '+.googleapis.com'
-      - '+.googlevideo.com'
-      - '+.gstatic.cn'
-      - '+.gstatic.com'
-      - '+.gvt1.com'
-      - '+.gvt2.com'
-      - '+.recaptcha.net'
-      - '+.twimg.com'
-      - '+.twitter.com'
-      - '+.youtube.com'
-      - '+.ytimg.com'
-      - 'twitter.com'
-      - 't.co'
-      - 't.me'
-      - 'telegra.ph'
-      - 'youtu.be'
-
-  # Lookup domains via specific nameservers
+  # 3. 域名分流策略 (Nameserver Policy)
+  # 指定 "国内域名(geosite:cn)" 和 "私有网络(geosite:private)" 必须走国内 DNS
+  # 这样既能获得国内 CDN 加速，又不会把 DNS 请求泄露给国外服务器
   nameserver-policy:
-    # Alibaba
-    '*.alibaba.cn': '223.5.5.5'
-    '*.alibaba.com.cn': '223.5.5.5'
-    '*.china.alibaba.com': '223.5.5.5'
-    '*.1688.com': '223.5.5.5'
-    '*.taobao.com': '223.5.5.5'
-    '*.tbcache.com': '223.5.5.5'
-    '*.tmall.com': '223.5.5.5'
-    '*.alicdn.com': '223.5.5.5'
-    '*.aliyundrive.com': '223.5.5.5'
-    '*.aliyun.*': '223.5.5.5'
-    '*.aliyuncdn.*': '223.5.5.5'
-    '*.aliyunddos????.com': '223.5.5.5'
-    '*.aliyuncs.com': '223.5.5.5'
-    '*.aliyundunwaf.com': '223.5.5.5'
-    '*.aliapp.com': '223.5.5.5'
-    '*.aliapp.org': '223.5.5.5'
-    '*.alibabausercontent.com': '223.5.5.5'
-    '*.mmstat.com': '223.5.5.5'
-    'tb.cn': '223.5.5.5'
+    "geosite:cn":
+      - https://223.5.5.5/dns-query
+      - https://1.12.12.12/dns-query
+    # 私有域名必须走 system，否则会被 DoH 阻断
+    "geosite:private":
+      - system
 
-#
-# https://github.com/Dreamacro/clash/wiki/premium-core-features
-#
+# TUN 模式设置 (虚拟网卡)
 tun:
   enable: true
-  stack: system # or gvisor
+  # 混合模式：TCP 走系统栈，UDP 走 gvisor (兼容性最好)
+  stack: mixed 
+  
+  # DNS 劫持
   dns-hijack:
-    - 198.18.0.2:53
-    - tcp://any:53
-
-  auto-route: true # auto set global route
-  auto-detect-interface: true # conflict with interface-name
+    - any:53
+  
+  # 自动设置路由
+  auto-route: true
+  
+  # 自动检测出口网卡
+  auto-detect-interface: true
+  
+  # 严格路由 (Android 建议开启，防止流量通过物理网卡泄露)
+  strict-route: false
+  
+  # MTU 设置
+  mtu: 1500
