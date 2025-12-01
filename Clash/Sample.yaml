@@ -78,10 +78,10 @@ dns:
   cache-algorithm: lru
   
   # 优先使用 H3 加速 DoH
-  prefer-h3: true 
+  prefer-h3: true
   
-  # 遵循 Clash 分流规则 (非常重要，防止 DNS 泄露)
-  respect-rules: true 
+  # 遵循 Clash 分流规则
+  respect-rules: false
   
   # Fake-IP 过滤列表 (返回真实 IP，解决特定应用兼容性问题)
   fake-ip-filter:
