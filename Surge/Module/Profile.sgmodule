@@ -19,8 +19,8 @@ test-timeout = 5
 geoip-maxmind-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb
 
 # > IPv6 支持
-ipv6 = false
-ipv6-vif = off
+ipv6 = true
+ipv6-vif = auto
 
 # > 允许 Wi-Fi 访问 (仅 iOS，若允许远程访问将「false」改为「true」)
 allow-wifi-access = true
