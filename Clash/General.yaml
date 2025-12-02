@@ -11,8 +11,11 @@ mode: rule
 # 日志级别
 log-level: info
 
-# 关闭 IPv6 (目前国内环境开启 IPv6 容易导致分流失效或连接缓慢，建议关闭)
-ipv6: false
+# IPv6
+ipv6: true
+
+# UDP
+udp: true
 
 # API 控制端口
 external-controller: 127.0.0.1:9090
@@ -58,11 +61,13 @@ profile:
 sniffer:
   enable: true
   sniff:
-    TLS:
-      ports: [443, 8443]     # SNI 嗅探
     HTTP:
-      ports: [80, 8080-8880] # Host 嗅探
-      override-destination: true  # 强制使用嗅探域名进行分流（解决 CDN/反代域名不一致问题）
+      ports: [80, 8080-8880]
+      override-destination: true
+    TLS:
+      ports: [443, 8443]
+    QUIC:
+      ports: [443, 8443]
       
 # DNS 设置
 dns:
@@ -120,8 +125,10 @@ dns:
   # 默认情况下的 DNS 服务器（通常被规则判定为代理或未匹配时使用）
   # 配置为国外 DNS，Clash 会拦截并返回 Fake-IP，实际由代理节点进行远程解析
   nameserver:
-    - https://1.1.1.1/dns-query#h3
-    - https://8.8.8.8/dns-query#h3
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+    - https://1.1.1.1/dns-query
+    - https://8.8.8.8/dns-query
 
   # 3. 域名分流策略 (Nameserver Policy)
   # 指定 "国内域名(geosite:cn)" 和 "私有网络(geosite:private)" 必须走国内 DNS
@@ -151,7 +158,4 @@ tun:
   auto-detect-interface: true
   
   # 严格路由 (Android 建议开启，防止流量通过物理网卡泄露)
-  strict-route: false
-  
-  # MTU 设置
-  mtu: 1500
+  # strict-route: false
