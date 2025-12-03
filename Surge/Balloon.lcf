@@ -126,6 +126,8 @@ FINAL,🔰 Proxy
 # Remote Rule
 # Unbreak 后续规则修正
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list, policy=🔘 DIRECT, tag=Unbreak, enabled=true
+# HTTPDNS 请求/流量阻止 
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 # Advertising 广告
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Advertising, enabled=true
@@ -134,8 +136,6 @@ https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/R
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Privacy, enabled=true
 # Hijacking 运营商劫持或恶意网站
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list, policy=🚧 AdGuard, tag=Hijacking, enabled=true
-# HTTPDNS 请求/流量阻止 
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 # 自定义多区域媒体应用
 # > 一些无需验证地区的分流 HOST
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming+.list, policy=🔰 Proxy, tag=Streaming+, enabled=true
@@ -167,7 +167,9 @@ https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list, policy=�
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Apple%20TV.list, policy=🍏 Apple TV, tag=Apple TV, enabled=true
 # >> Apple
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/apple.txt, policy=🔘 DIRECT, tag=Apple CDN, enabled=true
-https://raw.githubusercontent.com/Blankwonder/surge-list/master/apple.list, policy=🍎 Apple, tag=Apple, enabled=true
+https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Apple/Apple.list,, policy=🍎 Apple, tag=Apple, enabled=true
+# > Finance
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Credit.list, policy=💳 Credit, tag=Finance, enabled=true
 # > PayPal
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/PayPal.list, policy=💳 Credit, tag=PayPal, enabled=true
 # > Telegram
