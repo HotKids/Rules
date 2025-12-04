@@ -11,3 +11,8 @@ DOMAIN-SUFFIX,chasecdn.com
 DOMAIN-SUFFIX,chasepay.com
 DOMAIN-SUFFIX,jpmorganchase.com
 DOMAIN-SUFFIX,jpmorgan.com
+
+# > IBKR
+DOMAIN-SUFFIX,interactivebrokers.com
+DOMAIN-SUFFIX,ibkr.com
+DOMAIN-SUFFIX,ibllc.com
