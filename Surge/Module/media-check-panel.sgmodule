@@ -1,0 +1,8 @@
+#!name=Streaming & AIGC Service Monitor
+#!desc=主流 Streaming / AIGC 服务可用性检测面板
+
+[Panel]
+media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill
+
+[Script]
+media-check = type=generic,timeout=30,script-path=media-check.js
