@@ -42,25 +42,6 @@ function httpJSON(url, timeout = 5000, policy) {
   });
 }
 
-function httpText(url, timeout = 5000) {
-  return new Promise((resolve) => {
-    let done = false;
-    const timer = setTimeout(() => {
-      if (!done) {
-        done = true;
-        resolve(null);
-      }
-    }, timeout);
-
-    $httpClient.get({ url }, (err, resp, data) => {
-      if (done) return;
-      done = true;
-      clearTimeout(timer);
-      resolve(data || null);
-    });
-  });
-}
-
 function getProxyInfo() {
   return new Promise((resolve) => {
     if (typeof $httpAPI === "undefined") {
@@ -71,7 +52,7 @@ function getProxyInfo() {
       if (!res || !res.requests) return resolve({ policyName: "" });
 
       const hit = res.requests.find(r =>
-        /(ippure|ip-api|scamalytics)/i.test(r.URL)
+        /(ippure|ip-api)/i.test(r.URL)
       );
 
       resolve({
@@ -122,12 +103,8 @@ function riskText(score) {
     httpJSON(`http://ip-api.com/json/${exitIP}?fields=countryCode,country,city,isp`)
   ]);
 
-  const scamBody = await httpText(`https://scamalytics.com/ip/${exitIP}`);
-  const fraudScore = (() => {
-    const m = scamBody?.match(/"score":"(\d+)"/);
-    return m ? Number(m[1]) : 0;
-  })();
-
+  // ✅ 风控值：改为 IPPure
+  const fraudScore = Number(ippureData.fraudScore || 0);
   const riskInfo = riskText(fraudScore);
 
   const ipProperty = ippureData.isResidential ? "住宅 IP" : "机房 IP";
