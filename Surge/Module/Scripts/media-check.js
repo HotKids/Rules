@@ -121,18 +121,39 @@ function getLocationInfo() {
         reject("Not Available");
         return;
       }
-      data = JSON.parse(data);
-      if (data?.errors) {
+      
+      // ✅ 修复 1: 添加 JSON.parse 错误处理
+      let parsedData;
+      try {
+        parsedData = JSON.parse(data);
+      } catch (e) {
+        reject("Error");
+        return;
+      }
+      
+      // ✅ 修复 2: 检查数据结构后再解构
+      if (parsedData?.errors) {
         reject("Not Available");
         return;
       }
+      
+      // 检查必需的数据结构是否存在
+      if (!parsedData?.extensions?.sdk?.token?.accessToken ||
+          !parsedData?.extensions?.sdk?.session?.inSupportedLocation ||
+          !parsedData?.extensions?.sdk?.session?.location?.countryCode) {
+        reject("Error");
+        return;
+      }
+      
+      // 安全解构
       let {
         token: { accessToken },
         session: {
           inSupportedLocation,
           location: { countryCode }
         }
-      } = data?.extensions?.sdk;
+      } = parsedData.extensions.sdk;
+      
       resolve({ inSupportedLocation, countryCode, accessToken });
     });
   });
