@@ -12,7 +12,7 @@ setTimeout(() => {
     icon: "xmark.shield.fill",
     "icon-color": "#CD5C5C"
   });
-}, 8000);
+}, 10000);
 
 function httpJSON(url, timeout = 5000, policy) {
   return new Promise((resolve) => {
@@ -24,14 +24,20 @@ function httpJSON(url, timeout = 5000, policy) {
       }
     }, timeout);
 
-    const opts = policy ? { url, policy } : { url };
+    const opts = policy
+      ? { url, policy }
+      : { url };
 
     $httpClient.get(opts, (err, resp, data) => {
       if (done) return;
       done = true;
       clearTimeout(timer);
       if (err || !data) return resolve(null);
-      try { resolve(JSON.parse(data)); } catch { resolve(null); }
+      try {
+        resolve(JSON.parse(data));
+      } catch {
+        resolve(null);
+      }
     });
   });
 }
@@ -46,17 +52,15 @@ function httpText(url, timeout = 5000) {
       }
     }, timeout);
 
-    $httpClient.get(url, (err, resp, data) => {
+    $httpClient.get({ url }, (err, resp, data) => {
       if (done) return;
       done = true;
       clearTimeout(timer);
-      if (err || !data) return resolve(null);
-      resolve(data);
+      resolve(data || null);
     });
   });
 }
 
-// Surge 真实策略
 function getProxyInfo() {
   return new Promise((resolve) => {
     if (typeof $httpAPI === "undefined") {
@@ -93,61 +97,65 @@ function riskText(score) {
   return { text: "极度风险 IP", color: "#CD5C5C" };
 }
 
-function parseScamalytics(html) {
-  if (!html) return null;
-  const scoreMatch = html.match(/Risk Score[^0-9]*([0-9]{1,3})/i);
-  return {
-    score: scoreMatch ? Number(scoreMatch[1]) : 0
-  };
-}
-
 (async () => {
-  const [enterIPPure, exitIPPure, proxy] = await Promise.all([
-    httpJSON("https://my.ippure.com/v1/info", 5000, "DIRECT"),
-    httpJSON("https://my.ippure.com/v1/info"),
+  const [enterIPData, exitIPData, ippureData, proxy] = await Promise.all([
+    httpJSON("http://ip-api.com/json/?fields=query", 6000, "DIRECT"),
+    httpJSON("http://ip-api.com/json/?fields=query", 6000),
+    httpJSON("https://my.ippure.com/v1/info", 6000),
     getProxyInfo()
   ]);
 
-  if (!enterIPPure || !exitIPPure || !exitIPPure.ip) {
+  const enterIP = enterIPData?.query || null;
+  const exitIP  = exitIPData?.query  || null;
+
+  if (!enterIP || !exitIP || !ippureData) {
     return safeDone({
       title: "出口 IP 获取失败",
-      content: "无法从 IPPure 获取数据",
+      content: "无法获取入口或出口 IPv4",
       icon: "xmark.shield.fill",
       "icon-color": "#CD5C5C"
     });
   }
 
   const [enterGeo, exitGeo] = await Promise.all([
-    httpJSON(`http://ip-api.com/json/${enterIPPure.ip}?fields=status,city,countryCode,isp`),
-    httpJSON(`http://ip-api.com/json/${exitIPPure.ip}?fields=status,city,countryCode,isp`)
+    httpJSON(`http://ip-api.com/json/${enterIP}?fields=countryCode,country,city,isp`),
+    httpJSON(`http://ip-api.com/json/${exitIP}?fields=countryCode,country,city,isp`)
   ]);
 
-  const scamHTML = await httpText(`https://scamalytics.com/ip/${exitIPPure.ip}`);
-  const riskData = parseScamalytics(scamHTML);
-  const riskInfo = riskText(riskData?.score || 0);
+  const scamBody = await httpText(`https://scamalytics.com/ip/${exitIP}`);
+  const fraudScore = (() => {
+    const m = scamBody?.match(/"score":"(\d+)"/);
+    return m ? Number(m[1]) : 0;
+  })();
 
-  const ipProperty = exitIPPure.isResidential === true ? "住宅 IP" : "机房 IP";
-  const ipSource   = exitIPPure.isBroadcast === true ? "广播 IP" : "原生 IP";
+  const riskInfo = riskText(fraudScore);
 
-  const enterLocation = `${flag(enterGeo?.countryCode)} ${enterGeo?.city || ""} ${enterGeo?.countryCode || ""}`.trim();
-  const exitLocation  = `${flag(exitGeo?.countryCode)} ${exitGeo?.city || ""} ${exitGeo?.countryCode || ""}`.trim();
+  const ipProperty = ippureData.isResidential ? "住宅 IP" : "机房 IP";
+  const ipSource   = ippureData.isBroadcast  ? "广播 IP" : "原生 IP";
+
+  const enterLocation = `${flag(enterGeo.countryCode)} ${enterGeo.city} ${enterGeo.countryCode}`;
+  const exitLocation  = `${flag(exitGeo.countryCode)} ${exitGeo.city} ${exitGeo.countryCode}`;
 
   const content = [
-    `IP 风控值：${riskData?.score || 0}%  ${riskInfo.text}`,
+    `IP 风控值：${fraudScore}%  ${riskInfo.text}`,
     ``,
     `IP 类型：${ipProperty} | ${ipSource}`,
     ``,
-    `入口 IP：${enterIPPure.ip}`,
+    `入口 IP：${enterIP}`,
     `地区：${enterLocation}`,
-    `运营商：${enterGeo?.isp || ""}`,
+    `运营商：${enterGeo.isp}`,
     ``,
-    `出口 IP：${exitIPPure.ip}`,
+    `出口 IP：${exitIP}`,
     `地区：${exitLocation}`,
-    `运营商：${exitGeo?.isp || ""}`
+    `运营商：${exitGeo.isp}`
   ].join("\n");
 
+  const title = proxy.policyName
+    ? `代理策略：${proxy.policyName}`
+    : "代理策略：DIRECT";
+
   safeDone({
-    title: `代理策略：${proxy.policyName || "DIRECT"}`,
+    title: title,
     content: content,
     icon: "shield.lefthalf.filled",
     "icon-color": riskInfo.color
