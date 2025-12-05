@@ -19,6 +19,31 @@ function buildYesLine(status, name) {
   return `${name.padEnd(9, " ")} ➟ ${status === "good" ? "YES" : "N/A"}`;
 }
 
+// 添加 httpGet 函数
+function httpGet(url, timeout = 3000) {
+  return new Promise((resolve) => {
+    let done = false;
+    const timer = setTimeout(() => {
+      if (!done) {
+        done = true;
+        resolve(null);
+      }
+    }, timeout);
+    
+    $httpClient.get({ url: url, headers: REQUEST_HEADERS }, (error, response, data) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      
+      if (error || !response) {
+        resolve(null);
+      } else {
+        resolve({ status: response.status, body: data || "" });
+      }
+    });
+  });
+}
+
 ;(async () => {
   let panel_result = { title: "可用性检测", content: "", icon: "play.circle.fill" };
 
@@ -49,7 +74,9 @@ function buildYesLine(status, name) {
   let spStatus = spotify_res?.status || "bad";
   let spRegion2 = spotify_res?.region || "N/A";
 
-  let cgStatus = chatgpt_res === "good" ? "good" : "bad";
+  let cgStatus = chatgpt_res?.status || "bad";
+  let cgRegion2 = chatgpt_res?.region || "N/A";
+  
   let clStatus = claude_res === "good" ? "good" : "bad";
 
   const lines = [
@@ -57,7 +84,7 @@ function buildYesLine(status, name) {
     buildLine(dyRegion2, "Disney+"),
     buildLine(ytRegion2, "YouTube"),
     buildLine(spRegion2, "Spotify"),
-    buildLine("SG", "ChatGPT"),
+    buildLine(cgRegion2, "ChatGPT"),
     buildYesLine(clStatus, "Claude")
   ];
 
@@ -250,10 +277,10 @@ async function checkSpotify() {
 
 async function checkChatGPT() {
   const r = await httpGet("https://chat.openai.com/cdn-cgi/trace");
-  if (!r) return { status: "bad" };
+  if (!r) return { status: "bad", region: "N/A" };
   let m = r.body.match(/loc=([A-Z]{2})/);
   if (m) return { status: "good", region: m[1] };
-  return { status: "bad" };
+  return { status: "bad", region: "N/A" };
 }
 
 async function checkClaude() {
