@@ -249,9 +249,11 @@ async function checkSpotify() {
 }
 
 async function checkChatGPT() {
-  const r = await timeoutRaw("https://chat.openai.com/cdn-cgi/trace");
-  if (r && r.includes("loc=")) return "good";
-  return "bad";
+  const r = await httpGet("https://chat.openai.com/cdn-cgi/trace");
+  if (!r) return { status: "bad" };
+  let m = r.body.match(/loc=([A-Z]{2})/);
+  if (m) return { status: "good", region: m[1] };
+  return { status: "bad" };
 }
 
 async function checkClaude() {
