@@ -19,7 +19,16 @@ function buildYesLine(status, name) {
   return `${name.padEnd(9, " ")} ➟ ${status === "good" ? "YES" : "N/A"}`;
 }
 
-// 添加 httpGet 函数
+// ===== 工具函数必须先定义 =====
+
+function timeout(delay = 5000) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      reject("Timeout");
+    }, delay);
+  });
+}
+
 function httpGet(url, timeout = 3000) {
   return new Promise((resolve) => {
     let done = false;
@@ -44,126 +53,31 @@ function httpGet(url, timeout = 3000) {
   });
 }
 
-;(async () => {
-  let panel_result = { title: "可用性检测", content: "", icon: "play.circle.fill" };
+function timeoutFetch(url, t = 3000) {
+  return new Promise((resolve, reject) => {
+    let done = false;
+    setTimeout(() => !done && reject(), t);
+    $httpClient.get({ url, headers: REQUEST_HEADERS }, (e, r, d) => {
+      if (done) return;
+      done = true;
+      e || !d ? reject() : resolve(d);
+    });
+  });
+}
 
-  const netflix_raw = await check_netflix();
-  const disney_res = await testDisneyPlus();
-  const youtube_raw = await check_youtube_premium();
-  const spotify_res = await checkSpotify();
-  const chatgpt_res = await checkChatGPT();
-  const claude_res = await checkClaude();
-
-  let nfStatus = "bad", nfRegion2 = "US";
-  if (typeof netflix_raw === "string") {
-    const m = netflix_raw.match(/➟\s*([A-Z]{2})/);
-    if (m) nfRegion2 = m[1];
-    if (netflix_raw.includes("已解锁")) nfStatus = "good";
-  }
-
-  let dyStatus = "bad", dyRegion2 = disney_res?.region || "US";
-  if (disney_res?.status === STATUS_AVAILABLE) dyStatus = "good";
-
-  let ytStatus = "bad", ytRegion2 = "US";
-  if (typeof youtube_raw === "string") {
-    const m = youtube_raw.match(/➟\s*([A-Z]{2})/);
-    if (m) ytRegion2 = m[1];
-    if (youtube_raw.includes("已解锁")) ytStatus = "good";
-  }
-
-  let spStatus = spotify_res?.status || "bad";
-  let spRegion2 = spotify_res?.region || "N/A";
-
-  let cgStatus = chatgpt_res?.status || "bad";
-  let cgRegion2 = chatgpt_res?.region || "N/A";
-  
-  let clStatus = claude_res === "good" ? "good" : "bad";
-
-  const lines = [
-    buildLine(nfRegion2, "Netflix"),
-    buildLine(dyRegion2, "Disney+"),
-    buildLine(ytRegion2, "YouTube"),
-    buildLine(spRegion2, "Spotify"),
-    buildLine(cgRegion2, "ChatGPT"),
-    buildYesLine(clStatus, "Claude")
-  ];
-
-  const statuses = [nfStatus, dyStatus, ytStatus, spStatus, cgStatus, clStatus];
-  const goodCount = statuses.filter(s => s === "good").length;
-  const hasBad = statuses.includes("bad");
-
-  let titleIcon = hasBad ? "🟡" : "🟢";
-  let iconColor = hasBad ? "#DAA520" : "#3CB371";
-  panel_result.title = `${titleIcon} 可用性检测 ${goodCount}/6`;
-  panel_result["icon-color"] = iconColor;
-
-  panel_result.content = lines.join("\n");
-  $done(panel_result);
-})();
-
-async function check_youtube_premium() {
+function timeoutRaw(url, t = 3000) {
   return new Promise((resolve) => {
-    $httpClient.get({ url: "https://www.youtube.com/premium", headers: REQUEST_HEADERS }, function (error, response, data) {
-      if (error || response.status !== 200) return resolve("YouTube未解锁");
-      if (data.includes("Premium is not available in your country")) return resolve("YouTube未解锁");
-      const m = data.match(/"countryCode":"(.*?)"/);
-      resolve("YouTube已解锁 ➟ " + (m ? m[1] : "US"));
+    let done = false;
+    setTimeout(() => !done && resolve(null), t);
+    $httpClient.get({ url, headers: REQUEST_HEADERS }, (e, r, d) => {
+      if (done) return;
+      done = true;
+      resolve(d || null);
     });
   });
 }
 
-async function check_netflix() {
-  const inner = (id) => new Promise((res, rej) => {
-    $httpClient.get({ url: "https://www.netflix.com/title/" + id, headers: REQUEST_HEADERS }, (e, r) => {
-      if (e || r.status === 403) return rej();
-      if (r.status === 404) return res("NF");
-      if (r.status === 200) {
-        let u = r.headers["x-originating-url"];
-        let c = u ? u.split("/")[3].split("-")[0] : "us";
-        res(c.toUpperCase());
-      }
-    });
-  });
-
-  try {
-    const c = await inner(80062035);
-    if (c !== "NF") return "Netflix已解锁 ➟ " + c;
-    const c2 = await inner(80018499);
-    return "Netflix已解锁 ➟ " + c2;
-  } catch {
-    return "Netflix未解锁";
-  }
-}
-
-async function testDisneyPlus() {
-  try {
-    let { region, cnbl } = await Promise.race([
-      testHomePage(),
-      timeout(7000)
-    ]);
-
-    let { countryCode, inSupportedLocation } = await Promise.race([
-      getLocationInfo(),
-      timeout(7000)
-    ]);
-
-    region = countryCode ?? region;
-
-    if (inSupportedLocation === false || inSupportedLocation === "false") {
-      return { region, status: STATUS_COMING };
-    } else {
-      return { region, status: STATUS_AVAILABLE };
-    }
-  } catch (error) {
-    if (error === "Not Available") {
-      return { status: STATUS_NOT_AVAILABLE };
-    }
-    if (error === "Timeout") {
-      return { status: STATUS_TIMEOUT };
-    }
-    return { status: STATUS_ERROR };
-  }
-}
+// ===== Disney+ 相关函数 =====
 
 function getLocationInfo() {
   return new Promise((resolve, reject) => {
@@ -257,12 +171,70 @@ function testHomePage() {
   });
 }
 
-function timeout(delay = 5000) {
-  return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      reject("Timeout");
-    }, delay);
+async function testDisneyPlus() {
+  try {
+    let { region, cnbl } = await Promise.race([
+      testHomePage(),
+      timeout(7000)
+    ]);
+
+    let { countryCode, inSupportedLocation } = await Promise.race([
+      getLocationInfo(),
+      timeout(7000)
+    ]);
+
+    region = countryCode ?? region;
+
+    if (inSupportedLocation === false || inSupportedLocation === "false") {
+      return { region, status: STATUS_COMING };
+    } else {
+      return { region, status: STATUS_AVAILABLE };
+    }
+  } catch (error) {
+    if (error === "Not Available") {
+      return { status: STATUS_NOT_AVAILABLE };
+    }
+    if (error === "Timeout") {
+      return { status: STATUS_TIMEOUT };
+    }
+    return { status: STATUS_ERROR };
+  }
+}
+
+// ===== 检测函数 =====
+
+async function check_youtube_premium() {
+  return new Promise((resolve) => {
+    $httpClient.get({ url: "https://www.youtube.com/premium", headers: REQUEST_HEADERS }, function (error, response, data) {
+      if (error || response.status !== 200) return resolve("YouTube未解锁");
+      if (data.includes("Premium is not available in your country")) return resolve("YouTube未解锁");
+      const m = data.match(/"countryCode":"(.*?)"/);
+      resolve("YouTube已解锁 ➟ " + (m ? m[1] : "US"));
+    });
   });
+}
+
+async function check_netflix() {
+  const inner = (id) => new Promise((res, rej) => {
+    $httpClient.get({ url: "https://www.netflix.com/title/" + id, headers: REQUEST_HEADERS }, (e, r) => {
+      if (e || r.status === 403) return rej();
+      if (r.status === 404) return res("NF");
+      if (r.status === 200) {
+        let u = r.headers["x-originating-url"];
+        let c = u ? u.split("/")[3].split("-")[0] : "us";
+        res(c.toUpperCase());
+      }
+    });
+  });
+
+  try {
+    const c = await inner(80062035);
+    if (c !== "NF") return "Netflix已解锁 ➟ " + c;
+    const c2 = await inner(80018499);
+    return "Netflix已解锁 ➟ " + c2;
+  } catch {
+    return "Netflix未解锁";
+  }
 }
 
 async function checkSpotify() {
@@ -289,26 +261,61 @@ async function checkClaude() {
   return r ? "good" : "bad";
 }
 
-function timeoutFetch(url, t = 3000) {
-  return new Promise((resolve, reject) => {
-    let done = false;
-    setTimeout(() => !done && reject(), t);
-    $httpClient.get({ url, headers: REQUEST_HEADERS }, (e, r, d) => {
-      if (done) return;
-      done = true;
-      e || !d ? reject() : resolve(d);
-    });
-  });
-}
+// ===== 主流程 =====
 
-function timeoutRaw(url, t = 3000) {
-  return new Promise((resolve) => {
-    let done = false;
-    setTimeout(() => !done && resolve(null), t);
-    $httpClient.get({ url, headers: REQUEST_HEADERS }, (e, r, d) => {
-      if (done) return;
-      done = true;
-      resolve(d || null);
-    });
-  });
-}
+;(async () => {
+  let panel_result = { title: "可用性检测", content: "", icon: "play.circle.fill" };
+
+  const netflix_raw = await check_netflix();
+  const disney_res = await testDisneyPlus();
+  const youtube_raw = await check_youtube_premium();
+  const spotify_res = await checkSpotify();
+  const chatgpt_res = await checkChatGPT();
+  const claude_res = await checkClaude();
+
+  let nfStatus = "bad", nfRegion2 = "US";
+  if (typeof netflix_raw === "string") {
+    const m = netflix_raw.match(/➟\s*([A-Z]{2})/);
+    if (m) nfRegion2 = m[1];
+    if (netflix_raw.includes("已解锁")) nfStatus = "good";
+  }
+
+  let dyStatus = "bad", dyRegion2 = disney_res?.region || "US";
+  if (disney_res?.status === STATUS_AVAILABLE) dyStatus = "good";
+
+  let ytStatus = "bad", ytRegion2 = "US";
+  if (typeof youtube_raw === "string") {
+    const m = youtube_raw.match(/➟\s*([A-Z]{2})/);
+    if (m) ytRegion2 = m[1];
+    if (youtube_raw.includes("已解锁")) ytStatus = "good";
+  }
+
+  let spStatus = spotify_res?.status || "bad";
+  let spRegion2 = spotify_res?.region || "N/A";
+
+  let cgStatus = chatgpt_res?.status || "bad";
+  let cgRegion2 = chatgpt_res?.region || "N/A";
+  
+  let clStatus = claude_res === "good" ? "good" : "bad";
+
+  const lines = [
+    buildLine(nfRegion2, "Netflix"),
+    buildLine(dyRegion2, "Disney+"),
+    buildLine(ytRegion2, "YouTube"),
+    buildLine(spRegion2, "Spotify"),
+    buildLine(cgRegion2, "ChatGPT"),
+    buildYesLine(clStatus, "Claude")
+  ];
+
+  const statuses = [nfStatus, dyStatus, ytStatus, spStatus, cgStatus, clStatus];
+  const goodCount = statuses.filter(s => s === "good").length;
+  const hasBad = statuses.includes("bad");
+
+  let titleIcon = hasBad ? "🟡" : "🟢";
+  let iconColor = hasBad ? "#DAA520" : "#3CB371";
+  panel_result.title = `${titleIcon} 可用性检测 ${goodCount}/6`;
+  panel_result["icon-color"] = iconColor;
+
+  panel_result.content = lines.join("\n");
+  $done(panel_result);
+})();
