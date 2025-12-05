@@ -1,9 +1,10 @@
-#!name=IP 安全检测面板
+#!name=IP Security Monitor
 #!desc=显示 IP 风险评分、类型、原生/广播判定、代理策略和入口/出口 IP 信息
+#!author=HotKids&ChatGPT
 #!system=ios
 
 [Panel]
 ip-security-panel = script-name=ip-security,update-interval=600
 
 [Script]
-ip-security = type=generic,timeout=10,script-path=ip-security.js
+ip-security = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js
