@@ -1,5 +1,7 @@
 #!name=Streaming & AIGC Service Monitor
 #!desc=主流 Streaming / AIGC 服务可用性检测面板
+#!author=HotKids&ChatGPT
+#!system=ios
 
 [Panel]
 media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill
