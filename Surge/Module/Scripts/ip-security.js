@@ -45,14 +45,19 @@ function httpJSON(url, timeout = 5000, policy) {
 function getProxyInfo() {
   return new Promise((resolve) => {
     if (typeof $httpAPI === "undefined") {
-      return resolve({ policyName: "" });
+      return resolve({ policyName: "DIRECT" });
     }
 
     $httpAPI("GET", "/v1/requests/recent", null, (res) => {
-      if (!res || !res.requests) return resolve({ policyName: "" });
+      if (!res || !res.requests) {
+        return resolve({ policyName: "DIRECT" });
+      }
 
+      // ✅ 只匹配：出口 IP 的 ip-api 请求（必须是 (Proxy)）
       const hit = res.requests.find(r =>
-        /(ippure|ip-api)/i.test(r.URL)
+        /ip-api\.com\/json\/\?fields=query/i.test(r.URL) &&
+        typeof r.remoteAddress === "string" &&
+        r.remoteAddress.includes("(Proxy)")
       );
 
       resolve({
