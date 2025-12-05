@@ -1,5 +1,5 @@
 /*
- * 流媒体解锁检测脚本 (修复版)
+ * 流媒体解锁检测脚本
  * 包含：Netflix, Disney+, YouTube Premium, Spotify, ChatGPT, Claude
  * 更新：修复 Claude 检测逻辑，移除严格状态码限制
  */
@@ -261,7 +261,7 @@ async function checkDisney() {
   // 计算状态颜色
   const allResults = [nf, dy, yt, sp, cg, cl];
   const goodCount = allResults.filter(r => r.status === STATUS.OK || r.status === STATUS.COMING).length;
-  // 只要有一个是 Fail/Error，图标就变黄/红，全绿才变绿
+  // 只要有一个是 Fail/Error，图标就变黄，全绿才变绿
   const hasBad = allResults.some(r => r.status === STATUS.FAIL || r.status === STATUS.ERROR || r.status === STATUS.TIMEOUT);
   
   const titleIcon = hasBad ? "🟡" : "🟢";
