@@ -42,6 +42,31 @@ function httpJSON(url, timeout = 5000, policy) {
   });
 }
 
+// ✅ 新增：获取原始 HTML，用于抓取 Scamalytics 网页
+function httpRaw(url, timeout = 5000, policy) {
+  return new Promise((resolve) => {
+    let done = false;
+    const timer = setTimeout(() => {
+      if (!done) {
+        done = true;
+        resolve(null);
+      }
+    }, timeout);
+
+    const opts = policy
+      ? { url, policy }
+      : { url };
+
+    $httpClient.get(opts, (err, resp, data) => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      if (err || !data) return resolve(null);
+      resolve(data);
+    });
+  });
+}
+
 function getProxyInfo() {
   return new Promise((resolve) => {
     if (typeof $httpAPI === "undefined") {
@@ -83,6 +108,14 @@ function riskText(score) {
   return { text: "极度风险 IP", color: "#CD5C5C" };
 }
 
+// ✅ 只用于从 Scamalytics 网页里抠出 Fraud Score
+function parseScamalyticsScore(html) {
+  if (!html) return null;
+  const m = html.match(/Fraud Score[^0-9]*([0-9]{1,3})/i);
+  if (!m) return null;
+  return Number(m[1]);
+}
+
 (async () => {
   const [enterIPData, exitIPData, ippureData, proxy] = await Promise.all([
     httpJSON("http://ip-api.com/json/?fields=query", 6000, "DIRECT"),
@@ -108,10 +141,18 @@ function riskText(score) {
     httpJSON(`http://ip-api.com/json/${exitIP}?fields=countryCode,country,city,isp`)
   ]);
 
-  // ✅ 风控值：改为 IPPure
-  const fraudScore = Number(ippureData.fraudScore || 0);
+  // ✅ 1. 先从 Scamalytics 抓风险值（只改这一块）
+  const scamHTML = await httpRaw(`https://scamalytics.com/ip/${exitIP}`, 6000);
+  let fraudScore = parseScamalyticsScore(scamHTML);
+
+  // ✅ 2. 如果 Scamalytics 失败，就回退到 IPPure 的 fraudScore（保持兼容）
+  if (fraudScore == null || Number.isNaN(fraudScore)) {
+    fraudScore = Number(ippureData.fraudScore || 0);
+  }
+
   const riskInfo = riskText(fraudScore);
 
+  // ✅ 仍然用 IPPure 判断 IP 类型（保持原逻辑不变）
   const ipProperty = ippureData.isResidential ? "住宅 IP" : "机房 IP";
   const ipSource   = ippureData.isBroadcast  ? "广播 IP" : "原生 IP";
 
