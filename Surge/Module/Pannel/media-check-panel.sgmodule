@@ -3,7 +3,7 @@
 #!author=HotKids & ChatGPT
 #!system=ios
 #!arguments=geminiapikey:null
-#!arguments-desc=geminiapikey: Google Gemini API Key（可选，填写后启用 Gemini API 检测）
+#!arguments-desc=geminiapikey: Google Gemini API Key（可选，填写后启用 Gemini API 检测。💡 本脚本仅调用免费的 models.list 接口，不会产生任何费用）
 
 [Panel]
 media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill
