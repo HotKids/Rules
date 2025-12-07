@@ -1,10 +1,12 @@
 let finished = false;
+
 function safeDone(obj) {
   if (finished) return;
   finished = true;
   $done(obj);
 }
 
+// 超时保护
 setTimeout(() => {
   safeDone({
     title: "检测超时",
@@ -14,23 +16,13 @@ setTimeout(() => {
   });
 }, 10000);
 
+// 通用 JSON 请求
 function httpJSON(url, timeout = 5000, policy) {
   return new Promise((resolve) => {
-    let done = false;
-    const timer = setTimeout(() => {
-      if (!done) {
-        done = true;
-        resolve(null);
-      }
-    }, timeout);
-
-    const opts = policy
-      ? { url, policy }
-      : { url };
+    const timer = setTimeout(() => resolve(null), timeout);
+    const opts = policy ? { url, policy } : { url };
 
     $httpClient.get(opts, (err, resp, data) => {
-      if (done) return;
-      done = true;
       clearTimeout(timer);
       if (err || !data) return resolve(null);
       try {
@@ -42,24 +34,13 @@ function httpJSON(url, timeout = 5000, policy) {
   });
 }
 
-// ✅ 新增：获取原始 HTML，用于抓取 Scamalytics 网页
+// 原始 HTML 请求（Scamalytics）
 function httpRaw(url, timeout = 5000, policy) {
   return new Promise((resolve) => {
-    let done = false;
-    const timer = setTimeout(() => {
-      if (!done) {
-        done = true;
-        resolve(null);
-      }
-    }, timeout);
-
-    const opts = policy
-      ? { url, policy }
-      : { url };
+    const timer = setTimeout(() => resolve(null), timeout);
+    const opts = policy ? { url, policy } : { url };
 
     $httpClient.get(opts, (err, resp, data) => {
-      if (done) return;
-      done = true;
       clearTimeout(timer);
       if (err || !data) return resolve(null);
       resolve(data);
@@ -67,6 +48,7 @@ function httpRaw(url, timeout = 5000, policy) {
   });
 }
 
+// ✅ 从 recent 反查 ipify 实际走的节点
 function getProxyInfo() {
   return new Promise((resolve) => {
     if (typeof $httpAPI === "undefined") {
@@ -74,15 +56,14 @@ function getProxyInfo() {
     }
 
     $httpAPI("GET", "/v1/requests/recent", null, (res) => {
-      if (!res || !res.requests) {
+      if (!res || !Array.isArray(res.requests)) {
         return resolve({ policyName: "DIRECT" });
       }
 
-      // ✅ 只匹配：出口 IP 的 ip-api 请求（必须是 (Proxy)）
       const hit = res.requests.find(r =>
-        /ip-api\.com\/json\/\?fields=query/i.test(r.URL) &&
-        typeof r.remoteAddress === "string" &&
-        r.remoteAddress.includes("(Proxy)")
+        typeof r.URL === "string" &&
+        r.URL.includes("api.ipify.org") &&
+        typeof r.policyName === "string"
       );
 
       resolve({
@@ -92,13 +73,17 @@ function getProxyInfo() {
   });
 }
 
+// 国旗
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
   const base = 0x1f1e6;
-  return String.fromCodePoint(base + cc.charCodeAt(0) - 65)
-       + String.fromCodePoint(base + cc.charCodeAt(1) - 65);
+  return (
+    String.fromCodePoint(base + cc.charCodeAt(0) - 65) +
+    String.fromCodePoint(base + cc.charCodeAt(1) - 65)
+  );
 }
 
+// 风险描述
 function riskText(score) {
   if (score <= 15) return { text: "极度纯净 IP", color: "#006400" };
   if (score <= 25) return { text: "纯净 IP", color: "#3CB371" };
@@ -108,7 +93,7 @@ function riskText(score) {
   return { text: "极度风险 IP", color: "#CD5C5C" };
 }
 
-// ✅ 只用于从 Scamalytics 网页里抠出 Fraud Score
+// 从 Scamalytics 页面抠 Fraud Score
 function parseScamalyticsScore(html) {
   if (!html) return null;
   const m = html.match(/Fraud Score[^0-9]*([0-9]{1,3})/i);
@@ -117,17 +102,46 @@ function parseScamalyticsScore(html) {
 }
 
 (async () => {
-  const [enterIPData, exitIPData, ippureData, proxy] = await Promise.all([
-    httpJSON("http://ip-api.com/json/?fields=query", 6000, "DIRECT"),
-    httpJSON("http://ip-api.com/json/?fields=query", 6000),
-    httpJSON("https://my.ippure.com/v1/info", 6000),
-    getProxyInfo()
-  ]);
+  // 1️⃣ 入口 IP（DIRECT）
+  const enterIPData = await httpJSON(
+    "https://api.bilibili.com/x/web-interface/zone",
+    6000,
+    "DIRECT"
+  );
 
-  const enterIP = enterIPData?.query || null;
-  const exitIP  = exitIPData?.query  || null;
+  // 2️⃣ 出口 IP（ipify，不绑策略）
+  const exitIPData = await httpJSON(
+    "https://api.ipify.org?format=json",
+    6000
+  );
 
-  if (!enterIP || !exitIP || !ippureData) {
+  // 3️⃣ 反查 ipify 实际走的节点
+  const proxy = await getProxyInfo();
+
+  // 4️⃣ IPPure（可失败）
+  const ippureData = await httpJSON(
+    "https://my.ippure.com/v1/info",
+    6000
+  );
+
+  // 解析入口 IP
+  let enterIP = enterIPData?.data?.addr || null;
+
+  // bilibili 失败 → DIRECT fallback
+  if (!enterIP) {
+    const fallback = await httpJSON(
+      "https://api64.ipify.org?format=json",
+      6000,
+      "DIRECT"
+    );
+    enterIP = fallback?.ip || null;
+  }
+
+  // 解析出口 IP
+  const exitIP = exitIPData?.ip || null;
+
+  // 仅在入口或出口失败时报错
+  if (!enterIP || !exitIP) {
     return safeDone({
       title: "出口 IP 获取失败",
       content: "无法获取入口或出口 IPv4",
@@ -136,25 +150,26 @@ function parseScamalyticsScore(html) {
     });
   }
 
+  // 地理信息
   const [enterGeo, exitGeo] = await Promise.all([
     httpJSON(`http://ip-api.com/json/${enterIP}?fields=countryCode,country,city,isp`),
     httpJSON(`http://ip-api.com/json/${exitIP}?fields=countryCode,country,city,isp`)
   ]);
 
-  // ✅ 1. 先从 Scamalytics 抓风险值（只改这一块）
+  // Scamalytics 风控
   const scamHTML = await httpRaw(`https://scamalytics.com/ip/${exitIP}`, 6000);
   let fraudScore = parseScamalyticsScore(scamHTML);
 
-  // ✅ 2. 如果 Scamalytics 失败，就回退到 IPPure 的 fraudScore（保持兼容）
+  // 回退到 IPPure
   if (fraudScore == null || Number.isNaN(fraudScore)) {
-    fraudScore = Number(ippureData.fraudScore || 0);
+    fraudScore = Number(ippureData?.fraudScore || 0);
   }
 
   const riskInfo = riskText(fraudScore);
 
-  // ✅ 仍然用 IPPure 判断 IP 类型（保持原逻辑不变）
-  const ipProperty = ippureData.isResidential ? "住宅 IP" : "机房 IP";
-  const ipSource   = ippureData.isBroadcast  ? "广播 IP" : "原生 IP";
+  // IP 类型
+  const ipProperty = ippureData?.isResidential ? "住宅 IP" : "机房 IP";
+  const ipSource   = ippureData?.isBroadcast  ? "广播 IP" : "原生 IP";
 
   const enterLocation = `${flag(enterGeo.countryCode)} ${enterGeo.city} ${enterGeo.countryCode}`;
   const exitLocation  = `${flag(exitGeo.countryCode)} ${exitGeo.city} ${exitGeo.countryCode}`;
@@ -178,8 +193,8 @@ function parseScamalyticsScore(html) {
     : "代理策略：DIRECT";
 
   safeDone({
-    title: title,
-    content: content,
+    title,
+    content,
     icon: "shield.lefthalf.filled",
     "icon-color": riskInfo.color
   });
