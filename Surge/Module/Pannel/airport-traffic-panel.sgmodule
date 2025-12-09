@@ -1,0 +1,12 @@
+#!name=Airport Traffic Monitor
+#!desc=支持单机场/多机场流量监控，自动获取流量和到期信息
+#!author=HotKids & Claude
+#!system=ios
+#!arguments=name:null,sub:null,expire:null,reset:null,title:机场流量信息,icon:airplane.departure,color:#007AFF
+#!arguments-desc=【必填参数】\nsub: 机场订阅链接（必须先 URL encode）\n  - 单机场：直接填入 encode 后的链接\n  - 多机场：1️⃣链接1 2️⃣链接2 3️⃣链接3\n  - 在线 encode: https://www.urlencoder.org/\n\n【可选参数】\nname: 机场名称\n  - 单机场：我的机场\n  - 多机场：1️⃣机场A 2️⃣机场B 3️⃣机场C\n\nexpire: 到期日期（优先使用此值，否则从订阅读取）\n  - 格式：YYYYMMDD / YYYY-MM-DD / Unix时间戳\n\nreset: 每月流量重置日（1-31）\n\ntitle: 面板标题（默认：机场流量信息）\n\nicon: 面板图标（默认：airplane.departure）\n\ncolor: 图标颜色（默认：#007AFF）
+
+[Panel]
+airport-traffic-panel = type=generic,script-name=airport-traffic,update-interval=600,icon={{{icon}}}
+
+[Script]
+airport-traffic = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/airport-traffic.js,argument=name={{{name}}}&sub={{{sub}}}&expire={{{expire}}}&reset={{{reset}}}&title={{{title}}}&icon={{{icon}}}&color={{{color}}}
