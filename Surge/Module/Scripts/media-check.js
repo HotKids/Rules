@@ -10,7 +10,7 @@
  * 支持的服务：
  * - 流媒体: Netflix (含价格), Disney+, YouTube Premium, Spotify
  * - AI 服务: ChatGPT, Claude AI, Gemini API (需配置 API Key)
- * - 社交平台: Reddit
+ * - 社交平台: Reddit (测试中不保证准确)
  * 
  * 功能特性：
  * - 并发检测，响应速度快
