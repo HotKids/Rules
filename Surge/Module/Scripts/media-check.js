@@ -1,7 +1,9 @@
 /**
  * =============================================================================
- * @description  流媒体与AI服务解锁检测 (Stream Services & AI Unlock Check)
- * @version      1.4.3 (HBO Max Optimized)
+ * 流媒体解锁检测脚本 - Surge Panel Script
+ * =============================================================================
+ * * @description  检测代理节点对各大流媒体和 AI 服务的解锁状态
+ * @version      1.4.4 (HBO Max Optimization & Gemini HK Region Fix)
  * @author       HotKids&ChatGPT
  * * 支持的服务：
  * - 流媒体: Netflix (含价格), Disney+, HBO Max, YouTube Premium, Spotify
@@ -35,7 +37,7 @@
 // 请求配置
 const CONFIG = {
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-  TIMEOUT: 8000, // 适当增加超时以适应 HBO 复杂流程
+  TIMEOUT: 8000, 
   CHROME_VERSION: "131.0.6778"
 };
 
@@ -136,7 +138,7 @@ class Utils {
     };
     
     let displayStatus = statusMap[result.status];
-    // 如果是 Fail 且有具体原因（如 VPN），优先显示具体原因
+    // 如果是 Fail 且有具体原因（如 VPN 或 Region Blocked），优先显示具体原因
     if (result.status === STATUS.FAIL && result.region && result.region !== "No") {
       displayStatus = result.region; 
     }
@@ -412,8 +414,8 @@ class ServiceChecker {
    * 需要用户提供有效的 API Key（通过参数 geminiapikey 传入）
    * * 检测逻辑：
    * - 无效 Key 或模板占位符：返回 null（不显示）
+   * - 地区限制（HK等返回400/403）：显示 "Region Blocked"
    * - API Key 错误：显示 "Invalid API Key"
-   * - 地区限制：显示 "No"
    * - 正常可用：显示 "OK"
    * * @returns {Promise<Object|null>} 检测结果或 null
    */
@@ -432,16 +434,21 @@ class ServiceChecker {
       const res = await Utils.request({ url });
       const body = res.body.toLowerCase();
 
+      // 1. 成功
       if (res.status === 200 && body.includes('"models"')) {
         return Utils.createResult(STATUS.OK, "OK");
       }
 
-      if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
-        return Utils.createResult(STATUS.ERROR, "Invalid API Key");
+      // 2. 地区限制 (优先判断)
+      // HK 等地区通常返回 400 或 403，且 body 包含 "user location is not supported"
+      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
+        return Utils.createResult(STATUS.FAIL, "Region Blocked");
       }
 
-      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
-        return Utils.createResult(STATUS.FAIL, "No");
+      // 3. Key 错误 (后置判断)
+      // 如果不是地区问题，但状态码是 400 或包含 key 错误信息
+      if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
+        return Utils.createResult(STATUS.ERROR, "Invalid API Key");
       }
 
       return Utils.createResult(STATUS.ERROR, "Invalid API Key");
