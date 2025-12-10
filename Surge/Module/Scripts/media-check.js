@@ -3,7 +3,7 @@
  * 流媒体解锁检测脚本 - Surge Panel Script
  * =============================================================================
  * @description  检测代理节点对各大流媒体和 AI 服务的解锁状态
- * @version      1.4.5 (Disney+ Hotstar & HBO Max hbomax.com)
+ * @version      1.4.5 (HBO Max Optimization & Gemini Region Blocked Fix &Disney+ Hotstar SEA Region Fix)
  * @author       HotKids&ChatGPT
  * 
  * 支持的服务：
