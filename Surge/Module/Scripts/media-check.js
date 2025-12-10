@@ -3,28 +3,24 @@
  * 流媒体解锁检测脚本 - Surge Panel Script
  * =============================================================================
  * @description  检测代理节点对各大流媒体和 AI 服务的解锁状态
- * @version      1.4.5 (HBO Max Optimization & Gemini Region Blocked Fix &Disney+ Hotstar SEA Region Fix)
+ * @version      1.4.7 (Optimized & Cleaned)
  * @author       HotKids&ChatGPT
- * 
- * 支持的服务：
+ * * 支持的服务：
  * - 流媒体: Netflix (含价格), Disney+, HBO Max, YouTube Premium, Spotify
  * - AI 服务: ChatGPT, Claude AI, Gemini API (需配置 API Key)
  * - 社交平台: Reddit
- * 
- * 功能特性：
+ * * 功能特性：
  * - 并发检测，响应速度快
  * - 自动识别地区代码
  * - Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
  * - Disney+ Hotstar 地区识别（东南亚国家显示 Hotstar 标记）
  * - Gemini API 检测（可选，需提供有效 API Key）
  * - HBO Max 严格风控检测（模拟官方完整握手流程）
- * 
- * 使用方法：
+ * * 使用方法：
  * 1. 添加到 Surge Module 或 Panel
  * 2. 可选参数：geminiapikey=YOUR_API_KEY, nfprice=false
  * 3. 切换代理节点后点击面板即可查看解锁状态
- * 
- * 返回状态：
+ * * 返回状态：
  * - 🟢 绿色: 所有检测服务均可用
  * - 🟡 黄色: 部分服务不可用、检测失败或检测到 VPN
  * =============================================================================
@@ -58,14 +54,14 @@ class Utils {
       const finalHeaders = { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers };
       const timer = setTimeout(() => reject("Timeout"), timeout);
 
-      const callback = (error, response, data) => {
+      const cb = (err, resp, data) => {
         clearTimeout(timer);
-        if (error) return reject(error);
-        resolve({ status: response.status, headers: response.headers || {}, body: data || "" });
+        if (err) return reject(err);
+        resolve({ status: resp.status, headers: resp.headers || {}, body: data || "" });
       };
 
       const reqOpts = { url, headers: finalHeaders, body };
-      method === "POST" ? $httpClient.post(reqOpts, callback) : $httpClient.get(reqOpts, callback);
+      method === "POST" ? $httpClient.post(reqOpts, cb) : $httpClient.get(reqOpts, cb);
     });
   }
 
@@ -76,12 +72,10 @@ class Utils {
    */
   static parseArgs(argString) {
     if (!argString) return {};
-    return Object.fromEntries(
-      argString.split("&").map(p => {
-        const [key, ...valueParts] = p.split("=");
-        return [key, valueParts.join("=")];
-      })
-    );
+    return Object.fromEntries(argString.split("&").map(p => {
+      const [k, ...v] = p.split("=");
+      return [k, v.join("=")];
+    }));
   }
 
   /**
@@ -94,20 +88,18 @@ class Utils {
   static buildLine(name, result, suffix = "") {
     const statusMap = {
       [STATUS.OK]: result.region || "OK",
-      [STATUS.COMING]: result.region && result.region.includes("(") ? result.region : `${result.region || "N/A"} (Coming)`,
+      [STATUS.COMING]: result.region?.includes("(") ? result.region : `${result.region || "N/A"} (Coming)`,
       [STATUS.FAIL]: result.region || "No",
       [STATUS.TIMEOUT]: "Timeout",
       [STATUS.ERROR]: result.region || "Error"
     };
     
-    let displayStatus = statusMap[result.status];
     // 优先显示具体失败原因（如 VPN、Region Blocked）
-    if (result.status === STATUS.FAIL && result.region && result.region !== "No") {
-      displayStatus = result.region;
-    }
+    let displayStatus = (result.status === STATUS.FAIL && result.region && result.region !== "No") 
+      ? result.region 
+      : statusMap[result.status];
     
-    const suffixStr = suffix ? ` | ${suffix}` : "";
-    return `${name.padEnd(11)} ➟ ${displayStatus}${suffixStr}`;
+    return `${name.padEnd(11)} ➟ ${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
   }
 
   /**
@@ -153,14 +145,15 @@ class ServiceChecker {
         const res = await Utils.request({ url: `https://www.netflix.com/title/${id}` });
         if (res.status === 403) return Utils.createResult(STATUS.FAIL);
         if (res.status === 404) return { ...Utils.createResult(STATUS.ERROR), code: 404 };
+        
         if (res.status === 200) {
           const urlHeader = res.headers["x-originating-url"] || res.headers["X-Originating-URL"] || "";
-          const region = urlHeader.split("/")[3]?.split("-")[0]?.toUpperCase() || "US";
+          let region = urlHeader.split("/")[3]?.split("-")[0]?.toUpperCase();
+          // 修复：如果提取到 "TITLE" 或为空，则默认为 US
+          if (region === "TITLE" || !region) region = "US";
           return Utils.createResult(STATUS.OK, region);
         }
-      } catch {
-        return Utils.createResult(STATUS.ERROR);
-      }
+      } catch { return Utils.createResult(STATUS.ERROR); }
       return Utils.createResult(STATUS.FAIL);
     };
 
@@ -173,7 +166,7 @@ class ServiceChecker {
   /**
    * Netflix 价格查询（辅助方法）
    * @param {string} region - 地区代码
-   * @returns {Promise<string>} 价格字符串（如 "15.99 USD"）
+   * @returns {Promise<string>} 价格字符串
    */
   static async getNetflixPrice(region) {
     try {
@@ -187,15 +180,12 @@ class ServiceChecker {
 
   /**
    * Disney+ 解锁检测
-   * 通过主页和 API 双重验证，判断是否解锁及即将推出状态
    * 东南亚 Hotstar 地区（除新加坡外）显示为 Hotstar
    * @returns {Promise<Object>} 检测结果
    */
   static async checkDisney() {
-    // Disney+ Hotstar 地区列表（东南亚，不含新加坡）
     const HOTSTAR_REGIONS = ['IN', 'ID', 'MY', 'PH', 'TH', 'VN'];
-
-    // 检测主页是否可访问及地区信息
+    
     const checkHomePage = async () => {
       try {
         const res = await Utils.request({ url: "https://www.disneyplus.com/" });
@@ -205,7 +195,6 @@ class ServiceChecker {
       } catch { return { valid: false }; }
     };
 
-    // 通过 GraphQL API 获取地区和支持状态
     const checkAPI = async () => {
       try {
         const res = await Utils.request({
@@ -224,7 +213,6 @@ class ServiceChecker {
         if (res.status !== 200) return { valid: false };
         const data = JSON.parse(res.body);
         if (data?.errors) return { valid: false };
-
         const session = data?.extensions?.sdk?.session;
         return {
           valid: true,
@@ -240,7 +228,6 @@ class ServiceChecker {
 
       if (apiRes.valid) {
         const isSupported = apiRes.inSupportedLocation !== false && apiRes.inSupportedLocation !== 'false';
-        // 特殊处理 Hotstar 地区
         if (HOTSTAR_REGIONS.includes(region)) return { status: STATUS.COMING, region: `${region} (Hotstar)` };
         return Utils.createResult(isSupported ? STATUS.OK : STATUS.COMING, region);
       }
@@ -250,12 +237,11 @@ class ServiceChecker {
 
   /**
    * HBO Max 解锁检测（严格模式）
-   * 模拟官方完整流程：Token -> Bootstrap -> User Region -> Website List -> VPN Check
    * @returns {Promise<Object>} 检测结果
    */
   static async checkHBOMax() {
     try {
-      // Step 1: 获取匿名 Token（使用完整 Headers 避免风控）
+      // Step 1: Token
       const tokenRes = await Utils.request({
         url: "https://default.any-any.prd.api.hbomax.com/token?realm=bolt&deviceId=afbb5daa-c327-461d-9460-d8e4b3ee4a1f",
         headers: {
@@ -264,33 +250,31 @@ class ServiceChecker {
           "Accept": "application/json, text/plain, */*"
         }
       });
-
       if (tokenRes.status !== 200) return Utils.createResult(STATUS.ERROR, "Network Error");
+      
       const token = JSON.parse(tokenRes.body)?.data?.attributes?.token;
       if (!token) return Utils.createResult(tokenRes.status >= 400 ? STATUS.FAIL : STATUS.ERROR, "Token Error");
+      
+      const commonHeaders = { "Cookie": `st=${token}`, "Accept": "application/json, text/plain, */*" };
 
-      const cookieSt = `st=${token}`;
-
-      // Step 2: 获取 Bootstrap 路由信息
+      // Step 2: Bootstrap
       const bootstrapRes = await Utils.request({
         url: "https://default.any-any.prd.api.hbomax.com/session-context/headwaiter/v1/bootstrap",
-        method: "POST",
-        headers: { "Cookie": cookieSt, "Accept": "application/json, text/plain, */*" }
+        method: "POST", headers: commonHeaders
       });
       const route = JSON.parse(bootstrapRes.body)?.routing;
-      if (!route || !route.domain) return Utils.createResult(STATUS.ERROR, "Route Error");
+      if (!route?.domain) return Utils.createResult(STATUS.ERROR, "Route Error");
 
-      // Step 3: 获取用户地区信息
+      // Step 3: User Region
       const userRes = await Utils.request({
         url: `https://default.${route.tenant}-${route.homeMarket}.${route.env}.${route.domain}/users/me`,
-        headers: { "Cookie": cookieSt, "Accept": "application/json, text/plain, */*" }
+        headers: commonHeaders
       });
-
       if (userRes.status >= 400) return Utils.createResult(STATUS.FAIL, `HTTP ${userRes.status}`);
       const region = JSON.parse(userRes.body)?.data?.attributes?.currentLocationTerritory;
       if (!region) return Utils.createResult(STATUS.FAIL, "No Region");
 
-      // Step 4: 官网支持列表校验（从 hbomax.com 获取支持地区列表）
+      // Step 4: Website Check
       let allowed = [];
       try {
         const homeRes = await Utils.request({ url: "https://www.hbomax.com/" });
@@ -300,45 +284,49 @@ class ServiceChecker {
         }
       } catch {}
 
-      // Step 5: 播放接口 VPN 检测
+      // Step 5: VPN Check
       let isVPN = false;
       try {
         const vpnRes = await Utils.request({
           url: "https://default.any-any.prd.api.hbomax.com/any/playback/v1/playbackInfo",
-          headers: { "Cookie": cookieSt, "Accept": "application/json, text/plain, */*" }
+          headers: commonHeaders
         });
         if (vpnRes.body && /VPN/i.test(vpnRes.body)) isVPN = true;
       } catch {}
 
-      // 综合判断：地区支持 + VPN 检测
       const inList = !allowed.length || allowed.includes(region);
       if (!inList) return Utils.createResult(STATUS.FAIL, region);
       if (isVPN) return Utils.createResult(STATUS.FAIL, `${region} (VPN)`);
 
       return Utils.createResult(STATUS.OK, region);
-    } catch {
-      return Utils.createResult(STATUS.ERROR, "Error");
-    }
+    } catch { return Utils.createResult(STATUS.ERROR, "Error"); }
   }
 
   /**
-   * YouTube Premium 解锁检测
-   * 检测是否被重定向到 google.cn（中国大陆）
+   * YouTube Premium 解锁检测 (已优化)
+   * 增加 Cookie 和双重正则匹配，防止误判
    * @returns {Promise<Object>} 检测结果
    */
   static async checkYoutube() {
     try {
-      const res = await Utils.request({ url: "https://www.youtube.com/premium" });
+      const res = await Utils.request({
+        url: "https://www.youtube.com/premium",
+        headers: { "Cookie": "YSC=Bi68b13iL_c; VISITOR_INFO1_LIVE=k0p5p-lR5N4; GPS=1", "User-Agent": CONFIG.UA }
+      });
+      
       if (res.body.includes("www.google.cn")) return Utils.createResult(STATUS.FAIL, "CN");
       if (res.body.includes("Premium is not available")) return Utils.createResult(STATUS.FAIL);
-      const region = res.body.match(/"countryCode":"(.*?)"/)?.[1];
-      return region ? Utils.createResult(STATUS.OK, region) : Utils.createResult(STATUS.FAIL);
+      
+      const region = res.body.match(/"countryCode":"([A-Z]{2})"/)?.[1] || res.body.match(/"GL":"([A-Z]{2})"/)?.[1];
+      if (region) return Utils.createResult(STATUS.OK, region);
+      
+      // 防误判：状态码200且无明确拒绝则视为 OK
+      return res.status === 200 ? Utils.createResult(STATUS.OK, "OK") : Utils.createResult(STATUS.FAIL);
     } catch { return Utils.createResult(STATUS.ERROR); }
   }
 
   /**
    * Spotify 解锁检测
-   * 通过正则匹配 URL 中的地区代码
    * @returns {Promise<Object>} 检测结果
    */
   static checkSpotify() {
@@ -347,7 +335,6 @@ class ServiceChecker {
 
   /**
    * ChatGPT 解锁检测
-   * 通过 Cloudflare trace 获取 IP 地区
    * @returns {Promise<Object>} 检测结果
    */
   static checkChatGPT() {
@@ -356,7 +343,6 @@ class ServiceChecker {
 
   /**
    * Claude AI 解锁检测
-   * 通过访问登录页判断是否有地区限制
    * @returns {Promise<Object>} 检测结果
    */
   static async checkClaude() {
@@ -370,44 +356,30 @@ class ServiceChecker {
 
   /**
    * Gemini API 解锁检测
-   * 需要用户提供有效的 API Key（通过参数 geminiapikey 传入）
-   * 检测逻辑：
-   * - 无效 Key 或模板占位符：返回 null（不显示）
-   * - 地区限制（HK 等返回 400/403）：显示 "Region Blocked"
-   * - API Key 错误：显示 "Invalid API Key"
-   * - 正常可用：显示 "OK"
    * @returns {Promise<Object|null>} 检测结果或 null
    */
   static async checkGemini() {
     const args = Utils.parseArgs($argument);
     const apiKey = (args.geminiapikey || "").trim();
-
-    // 过滤无效 API Key：空值、模板占位符、特殊字符
-    const invalidKeys = ["{", "}", "0", "null"];
-    if (!apiKey || invalidKeys.some(k => apiKey.toLowerCase().includes(k))) return null;
+    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
       const body = res.body.toLowerCase();
-
+      
       if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
-      // 优先判断地区限制
       if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
         return Utils.createResult(STATUS.FAIL, "Region Blocked");
       }
-      // 后置判断 Key 错误
       if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
         return Utils.createResult(STATUS.ERROR, "Invalid API Key");
       }
       return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-    } catch {
-      return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-    }
+    } catch { return Utils.createResult(STATUS.ERROR, "Invalid API Key"); }
   }
 
   /**
    * Reddit 解锁检测
-   * 检测 Reddit OAuth 接口可访问性
    * @returns {Promise<Object>} 检测结果
    */
   static async checkReddit() {
@@ -424,7 +396,6 @@ class ServiceChecker {
  */
 (async () => {
   try {
-    // 并发执行所有服务检测，提高响应速度
     const results = await Promise.all([
       ServiceChecker.checkNetflix(),
       ServiceChecker.checkDisney(),
@@ -438,14 +409,11 @@ class ServiceChecker {
     ]);
 
     const [netflix, disney, hbomax, youtube, spotify, chatgpt, claude, gemini, reddit] = results;
-
-    // 获取 Netflix 价格（默认开启，可通过 nfprice=false 关闭）
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
       : "";
 
-    // 构建服务列表（过滤掉 Gemini 的 null 结果）
     const services = [
       { name: "Netflix", result: netflix, suffix: netflixPrice },
       { name: "Disney+", result: disney },
@@ -458,29 +426,18 @@ class ServiceChecker {
       { name: "Reddit", result: reddit }
     ].filter(Boolean);
 
-    // 生成显示内容
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
-    
-    // 统计可用服务数量
     const totalCount = services.length;
     const goodCount = services.filter(s => s.result.status === STATUS.OK || s.result.status === STATUS.COMING).length;
-    
-    // 判断整体状态（有任何失败/错误/超时则显示警告）
     const hasFailed = services.some(s => [STATUS.FAIL, STATUS.ERROR, STATUS.TIMEOUT].includes(s.result.status));
-
-    // 设置图标和颜色
-    const icon = hasFailed ? ICONS.WARNING : ICONS.SUCCESS;
-    const color = hasFailed ? ICONS.COLORS.WARNING : ICONS.COLORS.SUCCESS;
-
-    // 输出到 Surge Panel
+    
     $done({
-      title: `${icon} 可用性检测 ${goodCount}/${totalCount}`,
+      title: `${hasFailed ? ICONS.WARNING : ICONS.SUCCESS} 可用性检测 ${goodCount}/${totalCount}`,
       content: lines.join("\n"),
       icon: "play.circle.fill",
-      "icon-color": color
+      "icon-color": hasFailed ? ICONS.COLORS.WARNING : ICONS.COLORS.SUCCESS
     });
   } catch (error) {
-    // 全局错误处理
     $done({
       title: "❌ 检测失败",
       content: `错误: ${error.message || error}`,
