@@ -1,4 +1,4 @@
-// vps-traffic.js - VPS 流量监控（多 VPS 顺序输出 + 上下行 + 配额）
+// vps-traffic.js - VPS 流量监控（多 VPS 顺序输出 + 上下行 + 用量）
 
 function getArgument() {
   try {
@@ -34,7 +34,7 @@ if (!rawList.length) {
 
   // ===== quota 解析 =====
   let defaultQuota = 1000;       // 全局默认 1000GB
-  const quotaMap = {};           // 按名称单独配额
+  const quotaMap = {};           // 按名称单独用量
 
   if (args.quota) {
     args.quota.split(";").forEach(item => {
@@ -124,7 +124,7 @@ if (!rawList.length) {
           `${name}\n` +
           `今日 ↓ ${formatGB(dayRx)}  ↑ ${formatGB(dayTx)}\n` +
           `本月 ↓ ${formatGB(monthRx)}  ↑ ${formatGB(monthTx)}\n` +
-          `配额 ${usedGB.toFixed(2)} / ${quota}GB (${percent}%)`;
+          `用量 ${usedGB.toFixed(2)} / ${quota}GB (${percent}%)`;
 
       } catch (e) {
         results[index] = `${name}\n数据解析失败`;
