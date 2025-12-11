@@ -34,7 +34,7 @@ if (!rawList.length) {
 
   // ===== quota 解析 =====
   let defaultQuota = 1000;       // 全局默认 1000GB
-  const quotaMap = {};           // 按名称单独用量
+  const quotaMap = {};           // 按名称单独配额
 
   if (args.quota) {
     args.quota.split(";").forEach(item => {
