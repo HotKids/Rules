@@ -89,7 +89,7 @@ function getPolicy() {
     $httpAPI("GET", "/v1/requests/recent", null, res => {
       const hit = res?.requests
         ?.slice(0, 10)
-        .find(i => /api\.ip\.sb/i.test(i.URL));
+        .find(i => /(api\.ip\.sb|ip-api\.com)/i.test(i.URL));
       r(hit?.policyName || "DIRECT");
     });
   });
@@ -136,19 +136,6 @@ function riskText(s) {
 function parseScore(html) {
   const m = html?.match(/Fraud Score[^0-9]*([0-9]{1,3})/i);
   return m ? Number(m[1]) : null;
-}
-
-/**
- * 格式化地理位置信息
- * @param {Object} geo - ipapi.co 返回的地理信息对象
- * @returns {string} 格式化的地址字符串（城市, 区域, 国家代码）
- */
-function formatLocation(geo) {
-  const parts = [];
-  if (geo?.city) parts.push(geo.city);
-  if (geo?.region && geo.region !== geo.city) parts.push(geo.region);
-  if (geo?.country_code) parts.push(geo.country_code);
-  return parts.join(", ");
 }
 
 // ============= 风险评分获取（三级回落） =============
@@ -248,11 +235,13 @@ async function getRiskScore(ip) {
   const ipSrc = ippure?.isBroadcast ? "广播 IP" : "原生 IP";
 
   // ========== 6. 获取地理位置和运营商信息 ==========
-  const [inGeo, outGeo] = await Promise.all([
+  const [inGeo, outGeo, inISP, outISP] = await Promise.all([
   httpJSON(`http://ip-api.com/json/${inIP}?fields=countryCode,regionName,city`),
-  httpJSON(`http://ip-api.com/json/${outIP}?fields=countryCode,regionName,city`)
+  httpJSON(`http://ip-api.com/json/${outIP}?fields=countryCode,regionName,city`),
+  httpJSON(`https://api.ip.sb/geoip/${inIP}`),
+  httpJSON(`https://api.ip.sb/geoip/${outIP}`)
 ]);
-
+  
   // ========== 7. 构建显示内容 ==========
   const content = [
     `IP 风控值：${riskInfo.score}% ${riskLabel} (${riskInfo.source})`,
@@ -260,12 +249,12 @@ async function getRiskScore(ip) {
     `IP 类型：${ipType} | ${ipSrc}`,
     ``,
     `入口 IP：${inIP}`,
-    `地区：${flag(inGeo?.countryCode)} ${inGeo?.city}, ${inGeo?.regionName}, ${inGeo?.countryCode}`,
-    `运营商：${inGeo?.organization || "Unknown"}`,
+    `地区：${flag(inGeo?.countryCode)} ${[inGeo?.city, inGeo?.regionName, inGeo?.countryCode].filter(Boolean).join(", ")}`,
+    `运营商：${inISP?.organization || "Unknown"}`,
     ``,
     `出口 IP：${outIP}`,
-    `地区：${flag(outGeo?.countryCode)} ${outGeo?.city}, ${outGeo?.regionName}, ${outGeo?.countryCode}`,
-    `运营商：${outGeo?.organization || "Unknown"}`
+    `地区：${flag(outGeo?.countryCode)} ${[outGeo?.city, outGeo?.regionName, outGeo?.countryCode].filter(Boolean).join(", ")}`,
+    `运营商：${outISP?.organization || "Unknown"}`
   ].join("\n");
 
   // ========== 8. 返回结果 ==========
