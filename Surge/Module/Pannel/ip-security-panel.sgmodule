@@ -9,4 +9,4 @@
 ip-security-panel = script-name=ip-security,update-interval=600
 
 [Script]
-ip-security = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={ipqs_key}
+ip-security = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={{{ipqs_key}}}
