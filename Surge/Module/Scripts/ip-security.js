@@ -19,14 +19,12 @@
  * 
  * 配置示例：
  * [Script]
- * # 不使用 API Key（仅免费服务）
- * IP-Security = type=generic,timeout=10,script-path=ip-security.js
  * 
  * # 使用 IPQualityScore API Key（更准确）
  * IP-Security = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
  * 
  * @author HotKids&Claude
- * @version 2.2.0
+ * @version 2.2.7
  * @date 2025-12-12
  */
 
