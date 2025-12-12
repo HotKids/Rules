@@ -3,22 +3,39 @@
  * 
  * 功能概述：
  * - 检测并显示入口/出口 IP 信息
- * - 评估 IP 风险等级和类型
+ * - 评估 IP 风险等级和类型  
  * - 显示地理位置和运营商信息
  * 
  * 数据来源：
  * ① 入口 IP: bilibili API (DIRECT)
  * ② 出口 IP: ipapi.co API
  * ③ 代理策略: Surge /v1/requests/recent
- * ④ 风险评分: Scamalytics (主) / IPPure (备)
+ * ④ 风险评分: IPQualityScore (主) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
  * ⑥ 地理信息: ipapi.co API
  * 
- * @author JOEY&Claude
- * @version 2.0.1
- * @update 2025-12-12
+ * 参数说明：
+ * - ipqs_key: IPQualityScore API Key (可选)
+ * 
+ * 配置示例：
+ * [Script]
+ * # 不使用 API Key（仅免费服务）
+ * IP-Security = type=generic,timeout=10,script-path=ip-security.js
+ * 
+ * # 使用 IPQualityScore API Key（更准确）
+ * IP-Security = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
+ * 
+ * @author HotKids&Claude
+ * @version 2.2.0
+ * @date 2025-12-12
  */
 
+// ============= 配置解析 =============
+// 从 Surge argument 获取 IPQualityScore API Key
+const args = $argument ? Object.fromEntries($argument.split("&").map(i => i.split("="))) : {};
+const IPQS_API_KEY = args.ipqs_key || "";
+
+// ============= 全局状态 =============
 // 防止重复调用 $done
 let finished = false;
 function done(o) {
@@ -37,6 +54,7 @@ setTimeout(() => {
   });
 }, 9000);
 
+// ============= HTTP 请求工具 =============
 /**
  * 通用 HTTP JSON 请求
  * @param {string} url - 请求地址
@@ -62,8 +80,10 @@ function httpRaw(url) {
   });
 }
 
+// ============= Surge API 交互 =============
 /**
  * 从 Surge 最近请求中获取实际使用的代理策略
+ * 通过查找最近的 ipapi.co 请求来确定使用的策略
  * @returns {Promise<string>} 代理策略名称
  */
 function getPolicy() {
@@ -77,6 +97,7 @@ function getPolicy() {
   });
 }
 
+// ============= 数据处理工具 =============
 /**
  * 将国家代码转换为国旗 emoji
  * @param {string} cc - ISO 3166-1 alpha-2 国家代码
@@ -85,18 +106,8 @@ function getPolicy() {
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
   
-  // 台湾地区特殊处理：TW 回落到 CN
-  if (cc.toUpperCase() === "TW") {
-    // 先尝试显示台湾旗帜
-    const twFlag = String.fromCodePoint(0x1f1f9, 0x1f1fc);
-    // 测试是否能正常显示（通过检查长度）
-    // 如果无法显示会变成单个字符或乱码
-    if (twFlag.length === 2) {
-      return twFlag;
-    }
-    // 回落到中国国旗
-    cc = "CN";
-  }
+  // 台湾地区回落到中国国旗（国行设备兼容）
+  if (cc.toUpperCase() === "TW") cc = "CN";
   
   const b = 0x1f1e6;
   return String.fromCodePoint(
@@ -132,7 +143,7 @@ function parseScore(html) {
 /**
  * 格式化地理位置信息
  * @param {Object} geo - ipapi.co 返回的地理信息对象
- * @returns {string} 格式化的地址字符串
+ * @returns {string} 格式化的地址字符串（城市, 区域, 国家代码）
  */
 function formatLocation(geo) {
   const parts = [];
@@ -142,16 +153,77 @@ function formatLocation(geo) {
   return parts.join(", ");
 }
 
-// 主执行函数
+// ============= 风险评分获取（三级回落） =============
+/**
+ * 获取 IP 风险分数（三级回落策略）
+ * 优先级：IPQualityScore → ProxyCheck → Scamalytics
+ * @param {string} ip - 要检测的 IP
+ * @returns {Promise<Object>} 包含分数和来源的对象
+ */
+async function getRiskScore(ip) {
+  let score = null;
+  let source = "";
+  
+  // 1. 尝试 IPQualityScore（需要 API Key）
+  if (IPQS_API_KEY) {
+    try {
+      const ipqs = await httpJSON(
+        `https://ipqualityscore.com/api/json/ip/${IPQS_API_KEY}/${ip}?strictness=1`
+      );
+      if (ipqs?.success && ipqs?.fraud_score !== undefined) {
+        score = ipqs.fraud_score;
+        source = "IPQS";
+      }
+    } catch (e) {
+      console.log("IPQS failed:", e);
+    }
+  }
+  
+  // 2. 回落到 ProxyCheck.io（免费）
+  if (score === null) {
+    try {
+      const proxycheck = await httpJSON(
+        `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`
+      );
+      if (proxycheck?.[ip]?.risk !== undefined) {
+        score = proxycheck[ip].risk;
+        source = "ProxyCheck";
+      }
+    } catch (e) {
+      console.log("ProxyCheck failed:", e);
+    }
+  }
+  
+  // 3. 兜底使用 Scamalytics（免费）
+  if (score === null) {
+    try {
+      const html = await httpRaw(`https://scamalytics.com/ip/${ip}`);
+      score = parseScore(html);
+      if (score !== null) {
+        source = "Scamalytics";
+      }
+    } catch (e) {
+      console.log("Scamalytics failed:", e);
+    }
+  }
+  
+  // 如果全部失败，返回默认值
+  return { 
+    score: score ?? 50, 
+    source: source || "Default" 
+  };
+}
+
+// ============= 主执行函数 =============
 (async () => {
-  // ① 获取入口 IP（直连）
+  // ========== 1. 获取入口 IP（直连）==========
   const enter = await httpJSON(
     "https://api.bilibili.com/x/web-interface/zone",
     "DIRECT"
   );
   const inIP = enter?.data?.addr;
 
-  // ② 获取出口 IP（代理）
+  // ========== 2. 获取出口 IP（代理）==========
   const exit = await httpJSON("https://ipapi.co/json/");
   const outIP = exit?.ip;
 
@@ -165,28 +237,27 @@ function formatLocation(geo) {
     });
   }
 
-  // ③ 获取真实代理策略
+  // ========== 3. 获取真实代理策略 ==========
   const policy = await getPolicy();
 
-  // ④ 获取 IP 风险评分（优先 Scamalytics，备用 IPPure）
+  // ========== 4. 获取 IP 风险评分（三级回落）==========
+  const riskInfo = await getRiskScore(outIP);
+  const [riskLabel, color] = riskText(riskInfo.score);
+  
+  // ========== 5. 获取 IP 类型（IPPure）==========
   const ippure = await httpJSON("https://my.ippure.com/v1/info");
-  let score = parseScore(await httpRaw(`https://scamalytics.com/ip/${outIP}`));
-  if (score == null) score = Number(ippure?.fraudScore || 0);
-  const [riskLabel, color] = riskText(score);
-
-  // ⑤ 获取 IP 类型
   const ipType = ippure?.isResidential ? "住宅 IP" : "机房 IP";
-  const ipSrc  = ippure?.isBroadcast  ? "广播 IP" : "原生 IP";
+  const ipSrc = ippure?.isBroadcast ? "广播 IP" : "原生 IP";
 
-  // ⑥ 获取地理位置和运营商信息
+  // ========== 6. 获取地理位置和运营商信息 ==========
   const [inGeo, outGeo] = await Promise.all([
     httpJSON(`https://ipapi.co/${inIP}/json/`),
     httpJSON(`https://ipapi.co/${outIP}/json/`)
   ]);
 
-  // 构建显示内容
+  // ========== 7. 构建显示内容 ==========
   const content = [
-    `IP 风控值：${score}%  ${riskLabel}`,
+    `IP 风控值：${riskInfo.score}% ${riskLabel} (${riskInfo.source})`,
     ``,
     `IP 类型：${ipType} | ${ipSrc}`,
     ``,
@@ -199,7 +270,7 @@ function formatLocation(geo) {
     `运营商：${outGeo?.org || "Unknown"}`
   ].join("\n");
 
-  // 返回结果
+  // ========== 8. 返回结果 ==========
   done({
     title: `代理策略：${policy}`,
     content,
