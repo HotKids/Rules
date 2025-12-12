@@ -1,10 +1,12 @@
 #!name=IP Security Monitor
-#!desc=显示 IP 风险评分、类型、原生/广播判定、代理策略和入口/出口 IP 信息
-#!author=HotKids&ChatGPT
+#!desc=显示 IP 风险评分、类型、代理策略和入口/出口 IP 地理信息
+#!author=HotKids&ChatGPT&Claude
 #!system=ios
+#!arguments=ipqs_key:
+#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务
 
 [Panel]
 ip-security-panel = script-name=ip-security,update-interval=600
 
 [Script]
-ip-security = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js
+ip-security = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={ipqs_key}
