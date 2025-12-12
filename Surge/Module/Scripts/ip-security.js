@@ -33,7 +33,7 @@
 // ============= 配置解析 =============
 // 从 Surge argument 获取 IPQualityScore API Key
 const args = $argument ? Object.fromEntries($argument.split("&").map(i => i.split("="))) : {};
-const IPQS_API_KEY = args.ipqs_key || "";
+const IPQS_API_KEY = (args.ipqs_key && args.ipqs_key !== "null") ? args.ipqs_key : "";
 
 // ============= 全局状态 =============
 // 防止重复调用 $done
