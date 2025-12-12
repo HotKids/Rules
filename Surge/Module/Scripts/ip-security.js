@@ -8,11 +8,11 @@
  * 
  * 数据来源：
  * ① 入口 IP: bilibili API (DIRECT)
- * ② 出口 IP: ipapi.co API
+ * ② 出口 IP: ip.sb API
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理信息: ipapi.co API
+ * ⑥ 地理信息: ip.sb API
  * 
  * 参数说明：
  * - ipqs_key: IPQualityScore API Key (可选)
@@ -224,7 +224,7 @@ async function getRiskScore(ip) {
   const inIP = enter?.data?.addr;
 
   // ========== 2. 获取出口 IP（代理）==========
-  const exit = await httpJSON("https://ipapi.co/json/");
+  const exit = await httpJSON("https://api.ip.sb/geoip");
   const outIP = exit?.ip;
 
   // 验证 IP 获取成功
@@ -251,8 +251,8 @@ async function getRiskScore(ip) {
 
   // ========== 6. 获取地理位置和运营商信息 ==========
   const [inGeo, outGeo] = await Promise.all([
-    httpJSON(`https://ipapi.co/${inIP}/json/`),
-    httpJSON(`https://ipapi.co/${outIP}/json/`)
+    httpJSON(`https://api.ip.sb/geoip/${inIP}`),
+    httpJSON(`https://api.ip.sb/geoip/${outIP}`)
   ]);
 
   // ========== 7. 构建显示内容 ==========
@@ -263,11 +263,11 @@ async function getRiskScore(ip) {
     ``,
     `入口 IP：${inIP}`,
     `地区：${flag(inGeo?.country_code)} ${formatLocation(inGeo)}`,
-    `运营商：${inGeo?.org || "Unknown"}`,
+    `运营商：${inGeo?.organization || "Unknown"}`,
     ``,
     `出口 IP：${outIP}`,
     `地区：${flag(outGeo?.country_code)} ${formatLocation(outGeo)}`,
-    `运营商：${outGeo?.org || "Unknown"}`
+    `运营商：${outGeo?.organization || "Unknown"}`
   ].join("\n");
 
   // ========== 8. 返回结果 ==========
