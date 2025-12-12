@@ -2,7 +2,7 @@
 #!desc=显示 IP 风险评分、类型、代理策略和入口/出口 IP 地理信息
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
-#!arguments=ipqs_key:
+#!arguments=ipqs_key:null
 #!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务
 
 [Panel]
