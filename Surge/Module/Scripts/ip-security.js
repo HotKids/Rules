@@ -209,8 +209,12 @@ async function getRiskScore(ip) {
   const inIP = enter?.data?.addr;
 
   // ========== 2. 获取出口 IP（代理）==========
+  // 出口 IPv4
   const exit = await httpJSON("https://api.ip.sb/geoip");
   const outIP = exit?.ip;
+  // 出口 IPv6
+  const exit6 = await Promise.race([httpJSON("https://api64.ip.sb/geoip"), new Promise(r => setTimeout(() => r(null), 1500))]);
+  const outIP6 = exit6?.ip;
 
   // 验证 IP 获取成功
   if (!inIP || !outIP) {
@@ -252,16 +256,41 @@ async function getRiskScore(ip) {
     `地区：${flag(inGeo?.countryCode)} ${[inGeo?.city, inGeo?.regionName, inGeo?.countryCode].filter(Boolean).join(", ")}`,
     `运营商：${inISP?.organization || "Unknown"}`,
     ``,
-    `出口 IP：${outIP}`,
-    `地区：${flag(outGeo?.countryCode)} ${[outGeo?.city, outGeo?.regionName, outGeo?.countryCode].filter(Boolean).join(", ")}`,
-    `运营商：${outISP?.organization || "Unknown"}`
+
+    ...(outIP6 ? (() => {
+      const same =
+        outGeo?.countryCode === exit6?.country_code &&
+        outISP?.organization === exit6?.organization;
+
+      if (same) {
+        return [
+          `出口 IP⁴：${outIP}`,
+          `出口 IP⁶：${outIP6}`,
+          `地区：${flag(outGeo?.countryCode)} ${[outGeo?.city, outGeo?.regionName, outGeo?.countryCode].filter(Boolean).join(", ")}`,
+          `运营商：${outISP?.organization || "Unknown"}`
+        ];
+      }
+
+      return [
+        `出口 IP⁴：${outIP}`,
+        `地区⁴：${flag(outGeo?.countryCode)} ${[outGeo?.city, outGeo?.regionName, outGeo?.countryCode].filter(Boolean).join(", ")}`,
+        `运营商⁴：${outISP?.organization || "Unknown"}`,
+        ``,
+        `出口 IP⁶：${outIP6}`,
+        `地区⁶：${flag(exit6?.country_code)} ${[exit6?.city, exit6?.region, exit6?.country_code].filter(Boolean).join(", ")}`,
+        `运营商⁶：${exit6?.organization || "Unknown"}`
+      ];
+    })() : [
+      `出口 IP：${outIP}`,
+      `地区：${flag(outGeo?.countryCode)} ${[outGeo?.city, outGeo?.regionName, outGeo?.countryCode].filter(Boolean).join(", ")}`,
+      `运营商：${outISP?.organization || "Unknown"}`
+    ])
   ].join("\n");
 
-  // ========== 8. 返回结果 ==========
   done({
     title: `代理策略：${policy}`,
     content,
     icon: "shield.lefthalf.filled",
     "icon-color": color
   });
-})(); 
+})();
