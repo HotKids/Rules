@@ -10,7 +10,7 @@
  * ① 入口 IP: bilibili API (DIRECT)
  * ② 出口 IP: ip.sb API
  * ③ 代理策略: Surge /v1/requests/recent
- * ④ 风险评分: IPQualityScore (主) → ProxyCheck (备) → Scamalytics (兜底)
+ * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
  * ⑥ 地理信息: ip.sb ip-api.com API
  * 
@@ -24,7 +24,7 @@
  * IP-Security = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
  * 
  * @author HotKids&Claude
- * @version 2.2.7
+ * @version 2.2.9
  * @date 2025-12-12
  */
 
