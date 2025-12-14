@@ -3,7 +3,7 @@
 #!author=HotKids & ChatGPT
 #!system=ios
 #!arguments=title:📊 VPS 流量统计,ip:null,quota:null,resetday:1,mode:both
-#!arguments-desc=【参数说明】\n\n· [title]: 面板标题\n不填写时默认显示：📊 VPS 流量统计\n\n· [ip]: VPS 列表（必填）\n格式：名称#IP:端口@网卡;名称#IP;名称#IP@网卡\n规则：名称与IP用#分隔，端口用:指定(默认8686)，网卡用@指定(默认eth0)，多台用;分隔\n示例：Cloudflare#1.1.1.1;Google#8.8.8.8:8848@eth0\n\n· [quota]: 流量配额(单位GB)\n不填写：所有VPS默认1000GB\n写法1：quota=1500(全部1500GB)\n写法2：quota=1500;Google:500(默认1500GB,Google为500GB)\n写法3：quota=Google:500;Cloudflare:300(只限制指定VPS，其它仍为1000GB)\n说明：冒号前为VPS名称，必须与ip中的名称完全一致\n\n· [resetday]: 流量重置日\n不填写：默认每月1号重置\n示例：resetday=15 表示每月15号重置流量\n\n· [mode]: 流量计算模式\n不填写：默认双向(both)\n可选值：both(双向↕) / tx(仅出站↑) / rx(仅入站↓)\n写法1：mode=tx(全部按出站计算)\n写法2：mode=tx;Google:both(默认出站,Google为双向)\n写法3：mode=Google:tx;Cloudflare:rx(只限制指定VPS，其它仍为双向)\n说明：单向流量一般指VPS出站(tx)，冒号前为VPS名称\n\n【显示规则】\n显示：今日 / 周期 / 配额\n显示顺序：严格按照ip填写顺序输出\n用量标签：↕双向 / ↑出站 / ↓入站
+#!arguments-desc=【参数说明】\n\n· [title]: 面板标题\n不填写时默认显示：📊 VPS 流量统计\n\n· [ip]: VPS 列表（必填）\n格式：名称#IP:端口@网卡;名称#IP;名称#IP@网卡\n规则：名称与IP用#分隔，端口用:指定(默认8686)，网卡用@指定(默认eth0)，多台用;分隔\n示例：Cloudflare#1.1.1.1;Google#8.8.8.8:8848@eth0\n\n· [quota]: 流量配额(单位GB)\n不填写：所有VPS默认1000GB\n写法1：quota=1500(全部1500GB)\n写法2：quota=1500;Google:500(默认1500GB,Google为500GB)\n写法3：quota=Google:500;Cloudflare:300(只限制指定VPS，其它仍为1000GB)\n说明：冒号前为VPS名称，必须与ip中的名称完全一致\n\n· [resetday]: 流量重置日\n不填写：默认每月1号重置\n示例：resetday=15 表示每月15号重置流量\n\n· [mode]: 流量计算模式\n不填写：默认双向(both)\n可选值：both(双向↕) / tx(仅出站↑) / rx(仅入站↓)\n写法1：mode=tx(全部按出站计算)\n写法2：mode=tx;Google:both(默认出站,Google为双向)\n写法3：mode=Google:tx;Cloudflare:rx(只限制指定VPS，其它仍为双向)\n说明：单向流量一般指VPS出站(tx)，冒号前为VPS名称\n\n【显示规则】\n显示：今日 / 周期 / 配额\n显示顺序：严格按照ip填写顺序输出\n用量标签：⇅双向 / ↑出站 / ↓入站
 
 [Panel]
 vps-traffic-panel = type=generic,script-name=vps-traffic,update-interval=300,icon=server.rack
