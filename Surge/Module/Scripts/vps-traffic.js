@@ -15,6 +15,21 @@ const title = args.title || "📊 VPS 流量统计";
 const rawList = (args.ip || "").split(";").map(s => s.trim()).filter(Boolean);
 const resetDay = parseInt(args.resetday) || 1;
 
+// 流量计算模式: both(双向), rx(仅下行), tx(仅上行)
+// 支持全局默认值和按 VPS 单独配置，格式同 quota: mode=rx;VPS1:both;VPS2:tx
+let defaultMode = "both";
+const modeMap = {};
+(args.mode || "").split(";").forEach(item => {
+  item = item.trim();
+  if (!item) return;
+  if (/^(both|rx|tx)$/i.test(item)) {
+    defaultMode = item.toLowerCase();
+  } else if (item.includes(":")) {
+    const [k, v] = item.split(":");
+    if (k && /^(both|rx|tx)$/i.test(v)) modeMap[k.trim()] = v.trim().toLowerCase();
+  }
+});
+
 if (!rawList.length) {
   $done({ title, content: "未填写 ip 参数", icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
 } else {
@@ -33,6 +48,20 @@ if (!rawList.length) {
   });
 
   const formatGB = bytes => (bytes / 1073741824).toFixed(2) + " GB";
+
+  // 根据模式计算用量
+  const calcUsage = (rx, tx, mode) => {
+    if (mode === "rx") return rx;
+    if (mode === "tx") return tx;
+    return rx + tx; // both
+  };
+
+  // 获取模式标签
+  const getModeLabel = mode => {
+    if (mode === "rx") return "↓";
+    if (mode === "tx") return "↑";
+    return "↕";
+  };
 
   // 获取计费周期起始日期
   const getBillingStart = () => {
@@ -85,15 +114,17 @@ if (!rawList.length) {
           } else {
             const day = ifaceData.traffic.day?.[0] || {};
             const billing = calcBillingTraffic(ifaceData.traffic);
-            const total = billing.rx + billing.tx;
+            const mode = modeMap[name] || defaultMode;
+            const usage = calcUsage(billing.rx, billing.tx, mode);
             const quota = quotaMap[name] || defaultQuota;
-            const usedGB = total / 1073741824;
+            const usedGB = usage / 1073741824;
+            const modeLabel = getModeLabel(mode);
 
             results[index] =
               `${name}\n` +
               `今日 ↓ ${formatGB(day.rx || 0)}  ↑ ${formatGB(day.tx || 0)}\n` +
               `周期 ↓ ${formatGB(billing.rx)}  ↑ ${formatGB(billing.tx)}\n` +
-              `用量 ${usedGB.toFixed(2)} / ${quota}GB (${((usedGB / quota) * 100).toFixed(1)}%)`;
+              `用量 ${modeLabel} ${usedGB.toFixed(2)} / ${quota}GB (${((usedGB / quota) * 100).toFixed(1)}%)`;
           }
         } catch (e) {
           results[index] = `${name}\n数据解析失败`;
