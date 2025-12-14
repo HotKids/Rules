@@ -60,7 +60,7 @@ if (!rawList.length) {
   const getModeLabel = mode => {
     if (mode === "rx") return "↓";
     if (mode === "tx") return "↑";
-    return "↕";
+    return "⇅";
   };
 
   // 获取计费周期起始日期
