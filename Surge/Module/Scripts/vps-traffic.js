@@ -1,4 +1,4 @@
-// vps-traffic.js - VPS 流量监控（多 VPS 顺序输出 + 上下行 + 用量）
+// vps-traffic.js - VPS 流量监控（多 VPS 顺序输出 + 上下行 + 用量 + 到期）
 
 const args = (() => {
   const obj = {};
@@ -16,7 +16,6 @@ const rawList = (args.ip || "").split(";").map(s => s.trim()).filter(Boolean);
 const resetDay = parseInt(args.resetday) || 1;
 
 // 流量计算模式: both(双向), rx(仅下行), tx(仅上行)
-// 支持全局默认值和按 VPS 单独配置，格式同 quota: mode=rx;VPS1:both;VPS2:tx
 let defaultMode = "both";
 const modeMap = {};
 (args.mode || "").split(";").forEach(item => {
@@ -29,6 +28,38 @@ const modeMap = {};
     if (k && /^(both|rx|tx)$/i.test(v)) modeMap[k.trim()] = v.trim().toLowerCase();
   }
 });
+
+// 到期时间配置，格式: expire=2025-12-31;VPS1:2025-06-30;VPS2:2026-01-15
+let defaultExpire = "";
+const expireMap = {};
+(args.expire || "").split(";").forEach(item => {
+  item = item.trim();
+  if (!item) return;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(item)) {
+    defaultExpire = item;
+  } else if (item.includes(":")) {
+    const [k, v] = item.split(":");
+    if (k && /^\d{4}-\d{2}-\d{2}$/.test(v)) expireMap[k.trim()] = v.trim();
+  }
+});
+
+// 计算剩余天数
+const getDaysRemaining = (expireDate) => {
+  if (!expireDate) return null;
+  const now = new Date();
+  const expire = new Date(expireDate + "T00:00:00");
+  const diff = expire - now;
+  return Math.ceil(diff / 86400000);
+};
+
+// 格式化到期显示
+const formatExpire = (expireDate) => {
+  const days = getDaysRemaining(expireDate);
+  if (days === null) return "";
+  if (days < 0) return `${expireDate}（已过期 ${-days} 天）`;
+  if (days === 0) return `${expireDate}（今日到期）`;
+  return `${expireDate}（剩余 ${days} 天）`;
+};
 
 if (!rawList.length) {
   $done({ title, content: "未填写 ip 参数", icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
@@ -53,7 +84,7 @@ if (!rawList.length) {
   const calcUsage = (rx, tx, mode) => {
     if (mode === "rx") return rx;
     if (mode === "tx") return tx;
-    return rx + tx; // both
+    return rx + tx;
   };
 
   // 获取模式标签
@@ -119,12 +150,18 @@ if (!rawList.length) {
             const quota = quotaMap[name] || defaultQuota;
             const usedGB = usage / 1073741824;
             const modeLabel = getModeLabel(mode);
+            const expire = expireMap[name] || defaultExpire;
+            const expireStr = formatExpire(expire);
 
-            results[index] =
+            let output =
               `${name}\n` +
               `今日 ↓ ${formatGB(day.rx || 0)}  ↑ ${formatGB(day.tx || 0)}\n` +
               `周期 ↓ ${formatGB(billing.rx)}  ↑ ${formatGB(billing.tx)}\n` +
               `用量 ${modeLabel} ${usedGB.toFixed(2)} / ${quota}GB (${((usedGB / quota) * 100).toFixed(1)}%)`;
+            
+            if (expireStr) output += `\n到期 ${expireStr}`;
+
+            results[index] = output;
           }
         } catch (e) {
           results[index] = `${name}\n数据解析失败`;
