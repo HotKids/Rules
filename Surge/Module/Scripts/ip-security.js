@@ -32,7 +32,7 @@
  * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2
  * 
  * @author HotKids&Claude
- * @version 3.0.0
+ * @version 3.0.1
  * @date 2025-12-15
  */
 
@@ -436,11 +436,11 @@ function notify(title, subtitle, content) {
   if (arg.TYPE === "EVENT") {
     // 网络变化时发送通知
     const notifyTitle = "🔄 网络已切换 | " + policy;
-    const notifySubtitle = "🄳 " + inIP + " 🅿 " + outIP;
+    const notifySubtitle = "Ⓓ " + inIP + " 🅟 " + outIP;
     const notifyContentParts = [
-      "🄳 " + flag(inGeo?.countryCode) + " " + [inGeo?.city, inGeo?.country].filter(Boolean).join(", ") + " · " + (inISP?.organization || "Unknown"),
-      "🅿 " + flag(outGeo?.countryCode) + " " + [outGeo?.city, outGeo?.country].filter(Boolean).join(", ") + " · " + (outISP?.organization || "Unknown"),
-      "🅿 风控：" + riskInfo.score + "% " + riskLabel + " | 类型：" + ipType + " · " + ipSrc
+      "Ⓓ " + flag(inGeo?.countryCode) + " " + [inGeo?.city, inGeo?.country].filter(Boolean).join(", ") + " · " + (inISP?.organization || "Unknown"),
+      "🅟 " + flag(outGeo?.countryCode) + " " + [outGeo?.city, outGeo?.country].filter(Boolean).join(", ") + " · " + (outISP?.organization || "Unknown"),
+      "🅟 风控：" + riskInfo.score + "% " + riskLabel + " | 类型：" + ipType + " · " + ipSrc
     ];
     
     notify(notifyTitle, notifySubtitle, notifyContentParts.join("\n"));
