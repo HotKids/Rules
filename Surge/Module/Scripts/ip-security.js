@@ -24,8 +24,8 @@
  * IP-Security = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
  * 
  * @author HotKids&Claude
- * @version 2.2.9
- * @date 2025-12-12
+ * @version 2.3.0
+ * @date 2025-12-15
  */
 
 // ============= 配置解析 =============
@@ -47,8 +47,8 @@ setTimeout(() => {
   done({
     title: "检测超时",
     content: "API 请求超时",
-    icon: "xmark.shield.fill",
-    "icon-color": "#CD5C5C"
+    icon: "leaf",
+    "icon-color": "#9E9E9E"
   });
 }, 9000);
 
@@ -81,7 +81,7 @@ function httpRaw(url) {
 // ============= Surge API 交互 =============
 /**
  * 从 Surge 最近请求中获取实际使用的代理策略
- * 通过查找最近的 ipapi.co 请求来确定使用的策略
+ * 通过查找最近的 api.ip.sb/ipapi.co 请求来确定使用的策略
  * @returns {Promise<string>} 代理策略名称
  */
 function getPolicy() {
@@ -120,12 +120,12 @@ function flag(cc) {
  * @returns {Array} [描述文本, 颜色代码]
  */
 function riskText(s) {
-  if (s <= 15) return ["极度纯净 IP", "#006400"];
-  if (s <= 25) return ["纯净 IP", "#3CB371"];
-  if (s <= 40) return ["一般 IP", "#9ACD32"];
-  if (s <= 50) return ["微风险 IP", "#FFD700"];
-  if (s <= 70) return ["一般风险 IP", "#FF8C00"];
-  return ["极度风险 IP", "#CD5C5C"];
+  if (s <= 15) return ["极度纯净 IP", "#0D6E3D"];
+  if (s <= 25) return ["纯净 IP", "#2E9F5E"];
+  if (s <= 40) return ["一般 IP", "#8BC34A"];
+  if (s <= 50) return ["微风险 IP", "#FFC107"];
+  if (s <= 70) return ["一般风险 IP", "#FF9800"];
+  return ["极度风险 IP", "#F44336"];
 }
 
 /**
@@ -221,8 +221,8 @@ async function getRiskScore(ip) {
     return done({
       title: "出口 IP 获取失败",
       content: "无法获取入口或出口 IPv4",
-      icon: "xmark.shield.fill",
-      "icon-color": "#CD5C5C"
+      icon: "leaf",
+      "icon-color": "#9E9E9E"
     });
   }
 
@@ -290,7 +290,7 @@ async function getRiskScore(ip) {
   done({
     title: `代理策略：${policy}`,
     content,
-    icon: "shield.lefthalf.filled",
+    icon: "leaf.fill",
     "icon-color": color
   });
 })();
