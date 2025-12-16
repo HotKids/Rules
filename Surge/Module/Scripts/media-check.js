@@ -12,15 +12,15 @@
  * 
  * 🎬 流媒体服务
  *    ├─ Netflix       含价格显示（可选关闭）
- *    ├─ Disney+       支持 Hotstar 地区识别
- *    ├─ HBO Max       日本地区通过 U-NEXT 验证
+ *    ├─ Disney+       支持 Hotstar 地区识别（东南亚地区除 SG 外）
+ *    ├─ HBO Max       支持第三方平台识别（JP/CA/KR）
  *    ├─ YouTube       双重请求机制，准确检测
  *    └─ Spotify       标准地区检测
  * 
  * 🤖 AI 服务
  *    ├─ ChatGPT       OpenAI 服务检测
  *    ├─ Claude AI     Anthropic 服务检测
- *    └─ Gemini API    Google Gemini AI 检测（需提供 API Key）
+ *    └─ Gemini API    Google AI 检测（需提供 API Key）
  * 
  * 🌐 社交平台
  *    └─ Reddit        地区访问检测
@@ -32,12 +32,18 @@
  * • 🚀 并发检测技术，响应速度快
  * • 🌍 自动识别并显示地区代码
  * • 💰 Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
- * • 🎭 Disney+ Hotstar 地区特殊标识（TH, ID, MY, PH 等）
+ * • 🎭 Disney+ Hotstar 地区特殊标识（ID, MY, PH, TH, VN 等东南亚地区 Disney+ Hotstar 现已更名为 Disney+ 此脚本仅作特殊标识以作区分）
  * • 📡 HBO Max 智能检测
  *     - JP 地区：验证 U-NEXT 可用性
- *     - U-NEXT 可用 → 显示 "JP (U-NEXT)"（绿灯✅）
- *     - U-NEXT 不可用 → 显示 "No"（黄灯⚠️）
- *     - 其他地区：优先使用 API 地区码判断，辅以 VPN 检测
+ *       • U-NEXT 可用 → "JP (U-NEXT)"（黄灯⚠️）
+ *       • U-NEXT 不可用 → "JP (No)"（黄灯⚠️）
+ *     - CA 地区：显示 "CA (Crave)"（通过 Bell Media 的 Crave 提供，黄灯⚠️）
+ *     - KR 地区：显示 "KR (Coupang Play)"（通过 Coupang Play 提供，黄灯⚠️）
+ *     - 其他地区：从主页提取可用地区列表，判断是否可用
+ *       • 可用 → 显示地区码（绿灯✅）
+ *       • 不可用 → 显示 "地区码 (No)"（黄灯⚠️）
+ *     - VPN 检测：显示 "地区码 (VPN)"（黄灯⚠️）
+ *     - 参考 RegionRestrictionCheck 项目优化
  * • 📺 YouTube Premium 增强检测
  *     - 双重请求机制（带/不带 Cookie）
  *     - 检查 purchaseButtonOverride 和 Start trial 标识
@@ -72,39 +78,18 @@
  * │   • 参考 RegionRestrictionCheck 开源项目的检测方法
  * │   • 从主页提取可用地区列表（提取 "url":"/xx/xx" 格式链接）
  * │   • 判断 API 返回的地区码是否在可用列表中
- * │   • JP 地区继续通过 U-NEXT 验证
+ * │   • 第三方平台特殊标识：
+ * │     - JP (U-NEXT) - 日本通过 U-NEXT 提供
+ * │     - CA (Crave) - 加拿大通过 Bell Media 的 Crave 提供
+ * │     - KR (Coupang Play) - 韩国通过 Coupang Play 提供
  * │   • 移除不可靠的 geo-availability 页面检测
  * │   • 修复误判问题，提高检测准确性
- * └─────────────────────────────────────────────────────────────────────────
- * 
- * v1.6.1 (2025-12-16) - HBO Max 检测修复（已废弃）
- * ┌─────────────────────────────────────────────────────────────────────────
- * │ 🐛 HBO Max Bug 修复（基于 Debug 验证）
- * │   • 修复非 JP 地区全部返回 "No" 的问题
- * │   • 仅在明确认证错误（401/403）时判定为不可用
- * │   • 添加 JSON 解析容错，防止解析失败影响检测
- * │   • VPN 检测失败（如 404）不影响主判断逻辑
- * │   • 优先使用 API 返回的地区码判断可用性
- * │   • 改进兜底逻辑，避免误判
- * │   • 通过 SG 地区 Debug 日志验证修复有效
- * └─────────────────────────────────────────────────────────────────────────
- * 
- * v1.6.0 (2025-12-15) - YouTube & HBO Max 重大更新
- * ┌─────────────────────────────────────────────────────────────────────────
- * │ ✨ YouTube Premium 检测重写
- * │   • 采用双重请求机制（带Cookie + 不带Cookie）
- * │   • 检查 purchaseButtonOverride 和 Start trial 标识判断可用性
- * │   • 始终显示地区码（如能提取到）
- * │   • 参考 RegionRestrictionCheck 项目优化逻辑
  * │
- * │ ✨ HBO Max 检测优化
- * │   • JP 地区特殊处理：优先验证 U-NEXT 可用性
- * │   • U-NEXT 可用 → 显示 "JP (U-NEXT)" 并计入通过（绿灯）
- * │   • U-NEXT 不可用 → 显示 "No"
- * │   • 其他地区：geo-availability 验证 + VPN 检测
- * │   • 移除冗余逻辑，优化检测流程
+ * │ ✨ Disney+ Hotstar 地区调整
+ * │   • 移除 IN（印度）的 Hotstar 标识，正常显示为 IN
+ * │   • 保留东南亚 Hotstar 地区：ID, MY, PH, TH, VN
+ * │   • SG（新加坡）正常显示，不标识为 Hotstar
  * └─────────────────────────────────────────────────────────────────────────
- * 
  * 
  * =============================================================================
  */
@@ -263,11 +248,11 @@ class ServiceChecker {
 
   /**
    * Disney+ 解锁检测
-   * 东南亚 Hotstar 地区（除新加坡外）显示为 Hotstar
+   * 东南亚 Hotstar 地区（ID, MY, PH, TH, VN，不含 SG 和 IN）显示为 Hotstar
    * @returns {Promise<Object>} 检测结果
    */
   static async checkDisney() {
-    const HOTSTAR_REGIONS = ['IN', 'ID', 'MY', 'PH', 'TH', 'VN'];
+    const HOTSTAR_REGIONS = ['ID', 'MY', 'PH', 'TH', 'VN'];
     
     const checkHomePage = async () => {
       try {
@@ -444,6 +429,7 @@ class ServiceChecker {
    */
   /**
    * HBO Max 解锁检测
+   * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
    * 参考 RegionRestrictionCheck 项目逻辑
    * @returns {Promise<Object>} 检测结果
    */
@@ -474,17 +460,17 @@ class ServiceChecker {
           "Accept": "application/json, text/plain, */*"
         }
       });
-      if (tokenRes.status !== 200) return Utils.createResult(STATUS.ERROR, "Network Error");
+      if (tokenRes.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
       
       let tokenData;
       try {
         tokenData = JSON.parse(tokenRes.body);
       } catch {
-        return Utils.createResult(STATUS.ERROR, "Token Error");
+        return Utils.createResult(STATUS.FAIL, "No");
       }
       
       const token = tokenData?.data?.attributes?.token;
-      if (!token) return Utils.createResult(STATUS.FAIL, "No Token");
+      if (!token) return Utils.createResult(STATUS.FAIL, "No");
       
       const commonHeaders = { "Cookie": `st=${token}`, "Accept": "application/json, text/plain, */*" };
 
@@ -499,11 +485,11 @@ class ServiceChecker {
       try {
         bootstrapData = JSON.parse(bootstrapRes.body);
       } catch {
-        return Utils.createResult(STATUS.ERROR, "Bootstrap Error");
+        return Utils.createResult(STATUS.FAIL, "No");
       }
       
       const route = bootstrapData?.routing;
-      if (!route?.domain) return Utils.createResult(STATUS.ERROR, "Route Error");
+      if (!route?.domain) return Utils.createResult(STATUS.FAIL, "No");
 
       // Step 4: User Region
       const userRes = await Utils.request({
@@ -522,23 +508,31 @@ class ServiceChecker {
       } catch {}
       
       if (!region || region.length !== 2) {
-        return Utils.createResult(STATUS.FAIL, "No Region");
+        return Utils.createResult(STATUS.FAIL, "No");
       }
 
       // Step 5: JP 特殊处理 - 优先验证 U-NEXT
       if (region === "JP") {
         const unextResult = await ServiceChecker.checkUNext();
         if (unextResult.status === STATUS.OK) {
-          return Utils.createResult(STATUS.OK, "JP (U-NEXT)");
+          return Utils.createResult(STATUS.COMING, "JP (U-NEXT)");
         } else {
-          return Utils.createResult(STATUS.FAIL, "No");
+          return Utils.createResult(STATUS.FAIL, "JP (No)");
         }
+      }
+      
+      // Step 5.5: CA 和 KR 特殊处理 - 通过第三方平台提供
+      if (region === "CA") {
+        return Utils.createResult(STATUS.COMING, "CA (Crave)");
+      }
+      if (region === "KR") {
+        return Utils.createResult(STATUS.COMING, "KR (Coupang Play)");
       }
       
       // Step 6: 判断 region 是否在可用地区列表中
       const isAvailable = availableRegions.includes(region);
       if (!isAvailable) {
-        return Utils.createResult(STATUS.FAIL, region);
+        return Utils.createResult(STATUS.FAIL, `${region} (No)`);
       }
       
       // Step 7: VPN 检测
@@ -561,7 +555,7 @@ class ServiceChecker {
       return Utils.createResult(STATUS.OK, region);
       
     } catch {
-      return Utils.createResult(STATUS.ERROR, "Error");
+      return Utils.createResult(STATUS.FAIL, "No");
     }
   }
 
