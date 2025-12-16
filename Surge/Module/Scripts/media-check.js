@@ -12,8 +12,8 @@
  * 
  * 🎬 流媒体服务
  *    ├─ Netflix       含价格显示（可选关闭）
- *    ├─ Disney+       支持 Hotstar 地区识别（东南亚地区除 SG 外）
- *    ├─ HBO Max       支持第三方平台识别（JP/CA/KR）
+ *    ├─ Disney+       支持 Hotstar 地区识别（ID/MY/TH/PH 等东南亚地区）
+ *    ├─ HBO Max       支持第三方平台识别（JP/KR/CA）
  *    ├─ YouTube       双重请求机制，准确检测
  *    └─ Spotify       标准地区检测
  * 
@@ -31,14 +31,14 @@
  * 
  * • 🚀 并发检测技术，响应速度快
  * • 🌍 自动识别并显示地区代码
- * • 💰 Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
- * • 🎭 Disney+ Hotstar 地区特殊标识（ID, MY, PH, TH, VN 等东南亚地区 Disney+ Hotstar 现已更名为 Disney+ 此脚本仅作特殊标识以作区分）
- * • 📡 HBO Max 智能检测
- *     - JP 地区：验证 U-NEXT 可用性
+ * • 🍿 Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
+ * • 🐭 Disney+ Hotstar 地区特殊标识（ID, MY, TH, PH 等东南亚地区 Disney+ Hotstar 现已更名为 Disney+ 此脚本仅作特殊标识以作区分）
+ * • 🧙‍♂️ HBO Max 智能检测
+ *     - 🇯🇵 JP 地区：验证 U-NEXT 可用性
  *       • U-NEXT 可用 → "JP (U-NEXT)"（黄灯⚠️）
  *       • U-NEXT 不可用 → "JP (No)"（黄灯⚠️）
- *     - CA 地区：显示 "CA (Crave)"（通过 Bell Media 的 Crave 提供，黄灯⚠️）
- *     - KR 地区：显示 "KR (Coupang Play)"（通过 Coupang Play 提供，黄灯⚠️）
+ *     - 🇰🇷 KR 地区：显示 "KR (Coupang Play)"（通过 Coupang Play 提供，黄灯⚠️）
+ *     - 🇨🇦 CA 地区：显示 "CA (Crave)"（通过 Bell Media 的 Crave 提供，黄灯⚠️）
  *     - 其他地区：从主页提取可用地区列表，判断是否可用
  *       • 可用 → 显示地区码（绿灯✅）
  *       • 不可用 → 显示 "地区码 (No)"（黄灯⚠️）
@@ -49,7 +49,7 @@
  *     - 检查 purchaseButtonOverride 和 Start trial 标识
  *     - 始终显示地区码（如能提取）
  *     - 参考 RegionRestrictionCheck 项目优化
- * • 🔧 Gemini API 可选检测（需提供有效 API Key）
+ * • ✨ Gemini API 可选检测（需提供有效 API Key）
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  * 📖 使用方法
