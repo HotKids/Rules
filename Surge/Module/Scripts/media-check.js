@@ -3,8 +3,8 @@
  * 流媒体解锁检测脚本 - Surge Panel Script
  * =============================================================================
  * @description  检测代理节点对各大流媒体和 AI 服务的解锁状态
- * @version      1.6.0 (YouTube & HBO Max Enhanced - 2025-12-15)
- * @author       HotKids & ChatGPT
+ * @version      1.7.0 (HBO Max Detection Fix - 2025-12-16)
+ * @author       HotKids & ChatGPT & Claude
  * 
  * ═══════════════════════════════════════════════════════════════════════════
  * 📋 支持的服务
@@ -20,7 +20,7 @@
  * 🤖 AI 服务
  *    ├─ ChatGPT       OpenAI 服务检测
  *    ├─ Claude AI     Anthropic 服务检测
- *    └─ Gemini API    Google AI 检测（需提供 API Key）
+ *    └─ Gemini API    Google Gemini AI 检测（需提供 API Key）
  * 
  * 🌐 社交平台
  *    └─ Reddit        地区访问检测
@@ -32,12 +32,12 @@
  * • 🚀 并发检测技术，响应速度快
  * • 🌍 自动识别并显示地区代码
  * • 💰 Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
- * • 🎭 Disney+ Hotstar 地区特殊标识（IN, TH, ID, MY, PH 等）
+ * • 🎭 Disney+ Hotstar 地区特殊标识（TH, ID, MY, PH 等）
  * • 📡 HBO Max 智能检测
  *     - JP 地区：验证 U-NEXT 可用性
  *     - U-NEXT 可用 → 显示 "JP (U-NEXT)"（绿灯✅）
  *     - U-NEXT 不可用 → 显示 "No"（黄灯⚠️）
- *     - 其他地区：geo-availability + VPN 检测
+ *     - 其他地区：优先使用 API 地区码判断，辅以 VPN 检测
  * • 📺 YouTube Premium 增强检测
  *     - 双重请求机制（带/不带 Cookie）
  *     - 检查 purchaseButtonOverride 和 Start trial 标识
@@ -66,6 +66,29 @@
  * 📝 更新日志
  * ═══════════════════════════════════════════════════════════════════════════
  * 
+ * v1.7.0 (2025-12-16) - HBO Max 检测完全重写
+ * ┌─────────────────────────────────────────────────────────────────────────
+ * │ ✨ HBO Max 检测逻辑重写
+ * │   • 参考 RegionRestrictionCheck 开源项目的检测方法
+ * │   • 从主页提取可用地区列表（提取 "url":"/xx/xx" 格式链接）
+ * │   • 判断 API 返回的地区码是否在可用列表中
+ * │   • JP 地区继续通过 U-NEXT 验证
+ * │   • 移除不可靠的 geo-availability 页面检测
+ * │   • 修复误判问题，提高检测准确性
+ * └─────────────────────────────────────────────────────────────────────────
+ * 
+ * v1.6.1 (2025-12-16) - HBO Max 检测修复（已废弃）
+ * ┌─────────────────────────────────────────────────────────────────────────
+ * │ 🐛 HBO Max Bug 修复（基于 Debug 验证）
+ * │   • 修复非 JP 地区全部返回 "No" 的问题
+ * │   • 仅在明确认证错误（401/403）时判定为不可用
+ * │   • 添加 JSON 解析容错，防止解析失败影响检测
+ * │   • VPN 检测失败（如 404）不影响主判断逻辑
+ * │   • 优先使用 API 返回的地区码判断可用性
+ * │   • 改进兜底逻辑，避免误判
+ * │   • 通过 SG 地区 Debug 日志验证修复有效
+ * └─────────────────────────────────────────────────────────────────────────
+ * 
  * v1.6.0 (2025-12-15) - YouTube & HBO Max 重大更新
  * ┌─────────────────────────────────────────────────────────────────────────
  * │ ✨ YouTube Premium 检测重写
@@ -80,14 +103,6 @@
  * │   • U-NEXT 不可用 → 显示 "No"
  * │   • 其他地区：geo-availability 验证 + VPN 检测
  * │   • 移除冗余逻辑，优化检测流程
- * │
- * │ 🐛 Bug 修复
- * │   • 修复多个检测逻辑问题
- * │   • 清理冗余代码
- * │
- * │ 🎯 性能优化
- * │   • 优化并发检测性能
- * │   • 减少不必要的网络请求
  * └─────────────────────────────────────────────────────────────────────────
  * 
  * 
@@ -423,13 +438,34 @@ class ServiceChecker {
   }
 
   /**
-   * HBO Max 解锁检测
+   * HBO Max 解锁检测（修复版 - 基于 Debug 验证）
    * JP 地区优先验证 U-NEXT 可用性，其他地区正常检测
+   * @returns {Promise<Object>} 检测结果
+   */
+  /**
+   * HBO Max 解锁检测
+   * 参考 RegionRestrictionCheck 项目逻辑
    * @returns {Promise<Object>} 检测结果
    */
   static async checkHBOMax() {
     try {
-      // Step 1: Token 获取
+      // Step 1: 从主页提取可用地区列表
+      let availableRegions = [];
+      try {
+        const homeRes = await Utils.request({ url: `https://www.hbomax.com/?t=${Date.now()}`, timeout: 8000 });
+        if (homeRes.body) {
+          // 提取所有 "url":"/xx/xx" 格式的地区链接
+          const regex = /"url":"\/([a-z]{2})\/[a-z]{2}"/gi;
+          let match;
+          const regions = new Set();
+          while ((match = regex.exec(homeRes.body)) !== null) {
+            regions.add(match[1].toUpperCase());
+          }
+          availableRegions = Array.from(regions);
+        }
+      } catch {}
+
+      // Step 2: Token 获取
       const tokenRes = await Utils.request({
         url: "https://default.any-any.prd.api.hbomax.com/token?realm=bolt&deviceId=afbb5daa-c327-461d-9460-d8e4b3ee4a1f",
         headers: {
@@ -440,71 +476,93 @@ class ServiceChecker {
       });
       if (tokenRes.status !== 200) return Utils.createResult(STATUS.ERROR, "Network Error");
       
-      const token = JSON.parse(tokenRes.body)?.data?.attributes?.token;
-      if (!token) return Utils.createResult(tokenRes.status >= 400 ? STATUS.FAIL : STATUS.ERROR, "Token Error");
+      let tokenData;
+      try {
+        tokenData = JSON.parse(tokenRes.body);
+      } catch {
+        return Utils.createResult(STATUS.ERROR, "Token Error");
+      }
+      
+      const token = tokenData?.data?.attributes?.token;
+      if (!token) return Utils.createResult(STATUS.FAIL, "No Token");
       
       const commonHeaders = { "Cookie": `st=${token}`, "Accept": "application/json, text/plain, */*" };
 
-      // Step 2: Bootstrap
+      // Step 3: Bootstrap
       const bootstrapRes = await Utils.request({
         url: "https://default.any-any.prd.api.hbomax.com/session-context/headwaiter/v1/bootstrap",
-        method: "POST", headers: commonHeaders
+        method: "POST",
+        headers: commonHeaders
       });
-      const route = JSON.parse(bootstrapRes.body)?.routing;
+      
+      let bootstrapData;
+      try {
+        bootstrapData = JSON.parse(bootstrapRes.body);
+      } catch {
+        return Utils.createResult(STATUS.ERROR, "Bootstrap Error");
+      }
+      
+      const route = bootstrapData?.routing;
       if (!route?.domain) return Utils.createResult(STATUS.ERROR, "Route Error");
 
-      // Step 3: User Region
+      // Step 4: User Region
       const userRes = await Utils.request({
         url: `https://default.${route.tenant}-${route.homeMarket}.${route.env}.${route.domain}/users/me`,
         headers: commonHeaders
       });
-      if (userRes.status >= 400) return Utils.createResult(STATUS.FAIL, "No");
       
-      const region = JSON.parse(userRes.body)?.data?.attributes?.currentLocationTerritory;
-      if (!region) return Utils.createResult(STATUS.FAIL, "No");
+      if (userRes.status === 401 || userRes.status === 403) {
+        return Utils.createResult(STATUS.FAIL, "No");
+      }
+      
+      let region = "";
+      try {
+        const userData = JSON.parse(userRes.body);
+        region = userData?.data?.attributes?.currentLocationTerritory || "";
+      } catch {}
+      
+      if (!region || region.length !== 2) {
+        return Utils.createResult(STATUS.FAIL, "No Region");
+      }
 
-      // Step 4: JP 地区特殊处理 - 验证 U-NEXT 可用性
+      // Step 5: JP 特殊处理 - 优先验证 U-NEXT
       if (region === "JP") {
         const unextResult = await ServiceChecker.checkUNext();
         if (unextResult.status === STATUS.OK) {
-          // U-NEXT 可用 - 显示 JP (U-NEXT) 并计入通过（绿灯）
           return Utils.createResult(STATUS.OK, "JP (U-NEXT)");
         } else {
-          // U-NEXT 不可用
           return Utils.createResult(STATUS.FAIL, "No");
         }
       }
       
-      // Step 5: 非 JP 地区 - geo-availability 验证
-      try {
-        const geoRes = await Utils.request({ 
-          url: "https://www.hbomax.com/geo-availability",
-          timeout: 5000
-        });
-        
-        if (geoRes.status === 200 && geoRes.body) {
-          if (geoRes.body.includes('Not Available in Your Region') ||
-              geoRes.body.includes('Not available in your region') ||
-              geoRes.body.includes('HBO Max Is Not Available')) {
-            return Utils.createResult(STATUS.FAIL, "No");
-          }
-        }
-      } catch {}
-
-      // Step 6: VPN Check
+      // Step 6: 判断 region 是否在可用地区列表中
+      const isAvailable = availableRegions.includes(region);
+      if (!isAvailable) {
+        return Utils.createResult(STATUS.FAIL, region);
+      }
+      
+      // Step 7: VPN 检测
       let isVPN = false;
       try {
         const vpnRes = await Utils.request({
           url: "https://default.any-any.prd.api.hbomax.com/any/playback/v1/playbackInfo",
-          headers: commonHeaders
+          headers: commonHeaders,
+          timeout: 5000
         });
-        if (vpnRes.body && /VPN/i.test(vpnRes.body)) isVPN = true;
+        if (vpnRes.body && /VPN/i.test(vpnRes.body)) {
+          isVPN = true;
+        }
       } catch {}
 
-      if (isVPN) return Utils.createResult(STATUS.FAIL, `${region} (VPN)`);
-
+      if (isVPN) {
+        return Utils.createResult(STATUS.FAIL, `${region} (VPN)`);
+      }
+      
       return Utils.createResult(STATUS.OK, region);
-    } catch { return Utils.createResult(STATUS.ERROR, "Error"); }
+      
+    } catch {
+      return Utils.createResult(STATUS.ERROR, "Error");
+    }
   }
 
   /**
