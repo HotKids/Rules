@@ -12,7 +12,7 @@ mode: rule
 log-level: info
 
 # IPv6
-ipv6: true
+ipv6: false
 
 # UDP
 udp: true
@@ -115,31 +115,32 @@ dns:
     # Bilibili CDN
     - '*.mcdn.bilivideo.cn'
 
-  # 1. 默认 DNS (Bootstrap DNS)
-  # 用于解析下面 nameserver 域名的 IP，必须使用国内纯净 DNS
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-
-  # 2. 主要 DNS (Foreign DNS)
-  # 默认情况下的 DNS 服务器（通常被规则判定为代理或未匹配时使用）
-  # 配置为国外 DNS，Clash 会拦截并返回 Fake-IP，实际由代理节点进行远程解析
+  # 1. 主要 DNS (国内优先)
+  # 优先使用国内 DNS 并发查询。如果返回国内 IP (GEOIP:CN) 则直接采用；
+  # 如果返回国外 IP (可能被污染)，则认为结果不可信，触发下面的 Fallback 重新查询。
   nameserver:
-    - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
-    - https://1.1.1.1/dns-query
-    - https://8.8.8.8/dns-query
+    - https://dns.alidns.com/dns-query
 
-  # 3. 域名分流策略 (Nameserver Policy)
-  # 指定 "国内域名(geosite:cn)" 和 "私有网络(geosite:private)" 必须走国内 DNS
-  # 这样既能获得国内 CDN 加速，又不会把 DNS 请求泄露给国外服务器
-  nameserver-policy:
-    "geosite:cn":
-      - https://223.5.5.5/dns-query
-      - https://1.12.12.12/dns-query
-    # 私有域名必须走 system，否则会被 DoH 阻断
-    "geosite:private":
-      - system
+  # 2. 后备 DNS (国外兜底)
+  # 当主要 DNS 解析结果被判断为“非国内 IP”时，Clash 会并发查询这里的国外 DNS，
+  # 并选取这里的结果作为最终解析 IP，从而绕过 DNS 污染。
+  fallback:
+    - https://8.8.8.8/dns-query
+    - https://1.1.1.1/dns-query
+
+  # 3. 回退过滤器 (触发逻辑)
+  # 定义什么情况下启用 Fallback。
+  # 这里设置为：当解析结果不是 CN (中国) IP 时，启用 Fallback。
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.facebook.com'
+      - '+.youtube.com'
 
 # TUN 模式设置 (虚拟网卡)
 tun:
@@ -159,8 +160,15 @@ tun:
   
   # 严格路由 (Android 建议开启，防止流量通过物理网卡泄露)
   # strict-route: false
+
+# 时间同步 (防止设备时间不准导致节点无法连接)
+ntp:
+  enable: true
+  server: time.apple.com
+  write-to-system: false
+  interval: 30
   
-# 本地节点配置
+# 本地节点配置（订阅为空）
 proxies: []
   
 # 服务器订阅配置
