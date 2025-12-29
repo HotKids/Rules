@@ -67,4 +67,5 @@ payload:
 
  # > ziniao
  - PROCESS-NAME,ziniao.exe
+ - PROCESS-NAME,ziniaobrowser.exe
  - PROCESS-NAME,ziniao-gateway.exe
