@@ -66,4 +66,5 @@ payload:
   - DOMAIN,portal.linkbroad.com
 
  # > ziniao
- - PROCESS-NAME,ziniao*
+ - PROCESS-NAME,ziniao.exe
+ - PROCESS-NAME,ziniao-gateway.exe
