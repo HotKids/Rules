@@ -1,4 +1,6 @@
-# 基础端口设置（混合端口）
+# 通用设置
+
+# 混合端口
 mixed-port: 7893
 
 # 允许局域网连接
@@ -11,53 +13,75 @@ mode: rule
 # 日志级别
 log-level: info
 
-# IPv6
+# IPv6 支持
 ipv6: false
 
-# UDP
+# UDP 支持
 udp: true
 
 # API 控制端口
 external-controller: 127.0.0.1:9090
 
-# 性能与指纹设置
-# 统一延迟计算 (去除握手等干扰)
+# 出站接口
+# 多网卡环境可指定出站网卡
+# interface-name: eth0
+
+# 性能设置
+
+# 统一延迟计算
+# 去除握手等干扰，更准确反映节点延迟
 unified-delay: true
 
-# TCP 并发 (使用最快握手的 IP)
+# TCP 并发
+# 使用最快握手的 IP
 tcp-concurrent: true
 
-# 伪装指纹 (防探测)
+# 伪装指纹
+# 防探测
 global-client-fingerprint: chrome
 
-# 进程匹配模式 (Android/路由器建议 off 节省性能，Windows 可根据需要开启)
+# 进程匹配模式
+# Android/路由器建议 off 节省性能，Windows 可根据需要开启
 find-process-mode: off
 
-# GeoData 规则库更新设置
+# 连接设置
+
+# TCP Keep-Alive
+keep-alive-interval: 30
+
+# GeoData 设置
+
+# 规则库更新
 geodata-mode: true
 geodata-loader: standard
 geo-auto-update: true
 geo-update-interval: 24
 
+# GeoData 下载地址
 geox-url:
   geoip: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
   geosite: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
   mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
 
 # Hosts 设置
+
 hosts:
   '*.clash.dev': 127.0.0.1
   '.dev': 127.0.0.1
   'alpha.clash.dev': '::1'
-  "ip6-localhost": "::1"
-  "ip6-loopback": "::1"
-  
-# 配置持久化（保存节点选择与 Fake-IP 映射）
+  'ip6-localhost': '::1'
+  'ip6-loopback': '::1'
+
+# 配置持久化
+
+# 保存节点选择与 Fake-IP 映射
 profile:
   store-selected: true
   store-fake-ip: true
 
-# 流量嗅探（提升域名识别能力）
+# 流量嗅探
+
+# 提升域名识别能力
 sniffer:
   enable: true
   sniff:
@@ -68,27 +92,34 @@ sniffer:
       ports: [443, 8443]
     QUIC:
       ports: [443, 8443]
-      
+
 # DNS 设置
+
 dns:
   enable: true
-  listen: 0.0.0.0:53
+  listen: 0.0.0.0:1053
   ipv6: false
-  
+
   # Fake-IP 模式
-  enhanced-mode: fake-ip 
+  enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
-  
-  # DNS 缓存方式
+
+  # DNS 缓存算法
   cache-algorithm: lru
-  
-  # 优先使用 H3 加速 DoH
-  prefer-h3: true
-  
-  # 遵循 Clash 分流规则
+
+  # DNS 缓存大小
+  # 默认 1024，高负载环境可增加
+  cache-size: 4096
+
+  # H3 加速 DoH
+  # 国内 DoH 服务器对 H3 支持不稳定，建议关闭
+  prefer-h3: false
+
+  # 遵循分流规则
   respect-rules: false
-  
-  # Fake-IP 过滤列表 (返回真实 IP，解决特定应用兼容性问题)
+
+  # Fake-IP 过滤列表
+  # 返回真实 IP，解决特定应用兼容性问题
   fake-ip-filter:
     # 局域网与本地服务
     - '*.lan'
@@ -110,57 +141,111 @@ dns:
     # Android 网络检测
     - 'connectivitycheck.gstatic.com'
     - 'connectivitycheck.android.com'
-    # Google Voice 特殊解析
+    # 华为网络检测
+    - 'connectivitycheck.platform.hicloud.com'
+    # 小米网络检测
+    - 'connect.rom.miui.com'
+    # Apple Captive Portal
+    - 'captive.apple.com'
+    # Google Voice
     - 'lens.l.google.com'
     # Bilibili CDN
     - '*.mcdn.bilivideo.cn'
+    # NTP 时间服务
+    - 'time.*.com'
+    - 'time.*.gov'
+    - 'time.*.apple.com'
+    - 'ntp.*.com'
+    # Spotify
+    - '*.spotify.com'
+    # 暴雪游戏
+    - '*.battlenet.com.cn'
+    - '*.blizzard.com'
+    # Steam
+    - '*.cm.steampowered.com'
+    - '*.steamcontent.com'
+    # Tailscale / ZeroTier
+    - '*.tailscale.com'
+    - '*.zerotier.com'
 
-  # 1. 主要 DNS (国内优先)
-  # 优先使用国内 DNS 并发查询。如果返回国内 IP (GEOIP:CN) 则直接采用；
-  # 如果返回国外 IP (可能被污染)，则认为结果不可信，触发下面的 Fallback 重新查询。
+  # 默认 DNS (Bootstrap DNS)
+  # 用于解析下方 nameserver 域名的 IP，必须使用国内纯净 IP
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
+  # 主要 DNS (Foreign DNS)
+  # 默认情况下的 DNS 服务器
+  # 配置为国外 DNS，Clash 会拦截并返回 Fake-IP，实际由代理节点进行远程解析
   nameserver:
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
+    - https://dns.cloudflare.com/dns-query
+    - https://dns.google/dns-query
 
-  # 2. 后备 DNS (国外兜底)
-  # 当主要 DNS 解析结果被判断为“非国内 IP”时，Clash 会并发查询这里的国外 DNS，
-  # 并选取这里的结果作为最终解析 IP，从而绕过 DNS 污染。
-  fallback:
-    - https://8.8.8.8/dns-query
-    - https://1.1.1.1/dns-query
+  # 域名分流策略 (Nameserver Policy)
+  # 指定 "国内域名(geosite:cn)" 和 "私有网络(geosite:private)" 必须走国内 DNS
+  # 既能获得国内 CDN 加速，又不会把 DNS 请求泄露给国外服务器
+  nameserver-policy:
+    # 国内域名走国内加密 DNS
+    "geosite:cn":
+      - https://dns.alidns.com/dns-query
+      - https://doh.pub/dns-query
+    # 私有域名走系统 DNS，否则会被 DoH 阻断
+    "geosite:private":
+      - system
+    # 阿里系
+    "+.taobao.com,+.tmall.com,+.alicdn.com,+.aliyun.com,+.alipay.com":
+      - https://dns.alidns.com/dns-query
+    # 腾讯系
+    "+.qq.com,+.tencent.com,+.weixin.com,+.gtimg.cn":
+      - https://doh.pub/dns-query
+    # 京东 / B站 / 网易
+    "+.jd.com,+.bilibili.com,+.hdslb.com,+.163.com,+.netease.com":
+      - https://dns.alidns.com/dns-query
+    # 百度
+    "+.baidu.com,+.bdstatic.com,+.baidupcs.com":
+      - https://dns.alidns.com/dns-query
+    # 字节跳动
+    "+.douyin.com,+.toutiao.com,+.bytedance.com,+.douyincdn.com":
+      - https://dns.alidns.com/dns-query
+    # 小红书 / 快手
+    "+.xiaohongshu.com,+.xhscdn.com,+.kuaishou.com":
+      - https://dns.alidns.com/dns-query
+    # 美团 / 拼多多
+    "+.meituan.com,+.pinduoduo.com":
+      - https://dns.alidns.com/dns-query
+    # Apple 中国
+    "+.apple.cn,+.icloud.com.cn":
+      - https://dns.alidns.com/dns-query
 
-  # 3. 回退过滤器 (触发逻辑)
-  # 定义什么情况下启用 Fallback。
-  # 这里设置为：当解析结果不是 CN (中国) IP 时，启用 Fallback。
-  fallback-filter:
-    geoip: true
-    geoip-code: CN
-    ipcidr:
-      - 240.0.0.0/4
-    domain:
-      - '+.google.com'
-      - '+.facebook.com'
-      - '+.youtube.com'
+# TUN 设置
 
-# TUN 模式设置 (虚拟网卡)
 tun:
   enable: true
-  # 混合模式：TCP 走系统栈，UDP 走 gvisor (兼容性最好)
-  stack: mixed 
-  
+
+  # 网络栈模式
+  # mixed: TCP 走系统栈，UDP 走 gvisor，兼容性最好
+  stack: mixed
+
   # DNS 劫持
+  # 劫持所有发往 53 端口的 DNS 查询
   dns-hijack:
     - any:53
-  
+
   # 自动设置路由
   auto-route: true
-  
+
   # 自动检测出口网卡
   auto-detect-interface: true
-  
-  # 严格路由 (Android 建议开启，防止流量通过物理网卡泄露)
+
+  # 严格路由
+  # Android 建议开启，防止流量通过物理网卡泄露
   # strict-route: false
 
+  # 排除路由
+  # 这些网段不经过 TUN，直接走物理网卡
+  # route-exclude-address:
+  #   - 192.168.31.0/24
+  
 # 时间同步 (防止设备时间不准导致节点无法连接)
 ntp:
   enable: true
