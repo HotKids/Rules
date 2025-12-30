@@ -112,3 +112,6 @@ DOMAIN-SUFFIX,cici.com,extended-matching
 DOMAIN-SUFFIX,ciciai.com,extended-matching
 DOMAIN,abtestvm-sg.bytedance.com,extended-matching
 DOMAIN-WILDCARD,abtest*.byteoversea.com,extended-matching
+
+# Affinity
+DOMAIN,d3ssuo6fbvr.cloudfront.net
