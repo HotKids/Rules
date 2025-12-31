@@ -1,23 +1,23 @@
 # 通用设置
 
 # 混合端口
+# HTTP(S) 和 SOCKS 代理混合端口
 mixed-port: 7893
 
 # 允许局域网连接
 allow-lan: true
-bind-address: '*'
+bind-address: '*' # 绑定所有地址
 
 # 运行模式
 mode: rule
 
 # 日志级别
+# 可选：silent/error/warning/info/debug
 log-level: info
 
 # IPv6 支持
+# 关闭后将阻断所有 IPv6 链接和屏蔽 DNS 请求 AAAA 记录
 ipv6: false
-
-# UDP 支持
-udp: true
 
 # API 控制端口
 external-controller: 127.0.0.1:9090
@@ -33,29 +33,30 @@ external-controller: 127.0.0.1:9090
 unified-delay: true
 
 # TCP 并发
-# 使用最快握手的 IP
+# 使用最快握手的 IP，将并发连接所有 IP
 tcp-concurrent: true
 
-# 伪装指纹
-# 防探测
+# 全局 TLS 指纹
+# 防探测，优先低于 proxy 内的 client-fingerprint
+# 可选："chrome","firefox","safari","ios","random","none"
 global-client-fingerprint: chrome
 
 # 进程匹配模式
-# Android/路由器建议 off 节省性能，Windows 可根据需要开启
-find-process-mode: off
+# always - 开启，强制匹配所有进程
+# strict - 默认，由 mihomo 判断是否开启
+# off - 不匹配进程，推荐在路由器上使用此模式
+find-process-mode: strict
 
 # 连接设置
 
-# TCP Keep-Alive
+# TCP Keep-Alive 间隔
 keep-alive-interval: 30
 
 # GeoData 设置
 
-# 规则库更新
-geodata-mode: true
-geodata-loader: standard
+# 规则库自动更新
 geo-auto-update: true
-geo-update-interval: 24
+geo-update-interval: 24 # 更新间隔（小时）
 
 # GeoData 下载地址
 geox-url:
@@ -64,13 +65,11 @@ geox-url:
   mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
 
 # Hosts 设置
-
+# 类似于 /etc/hosts，仅支持配置单个 IP
 hosts:
   '*.clash.dev': 127.0.0.1
   '.dev': 127.0.0.1
-  'alpha.clash.dev': '::1'
-  'ip6-localhost': '::1'
-  'ip6-loopback': '::1'
+  'localhost': 127.0.0.1
 
 # 配置持久化
 
@@ -84,10 +83,12 @@ profile:
 # 提升域名识别能力
 sniffer:
   enable: true
+  # 全局配置，优先级低于 sniff 内的实际配置
+  override-destination: false
   sniff:
     HTTP:
       ports: [80, 8080-8880]
-      override-destination: true
+      override-destination: true # 覆盖全局配置
     TLS:
       ports: [443, 8443]
     QUIC:
@@ -98,28 +99,32 @@ sniffer:
 dns:
   enable: true
   listen: 0.0.0.0:1053
-  ipv6: false
+  ipv6: false # 不返回 AAAA 记录
 
   # Fake-IP 模式
   enhanced-mode: fake-ip
   fake-ip-range: 198.18.0.1/16
 
   # DNS 缓存算法
-  cache-algorithm: lru
+  # lru - 最近最少使用
+  # arc - 自适应缓存替换（推荐）
+  cache-algorithm: arc
 
   # DNS 缓存大小
-  # 默认 1024，高负载环境可增加
+  # 默认 1024，可根据需要调整
   cache-size: 4096
 
-  # H3 加速 DoH
+  # HTTP/3 支持
   # 国内 DoH 服务器对 H3 支持不稳定，建议关闭
   prefer-h3: false
 
   # 遵循分流规则
+  # false（推荐）- DNS 服务器直连，性能最优
+  # true - DNS 服务器遵守 rules 规则
   respect-rules: false
 
   # Fake-IP 过滤列表
-  # 返回真实 IP，解决特定应用兼容性问题
+  # 匹配的域名返回真实 IP，解决特定应用兼容性问题
   fake-ip-filter:
     # 局域网与本地服务
     - '*.lan'
@@ -129,93 +134,88 @@ dns:
     - '*.localhost'
     - 'localhost.ptlogin2.qq.com'
     - 'WORKGROUP'
-    # STUN 服务（语音/游戏 NAT）
+    # STUN 服务
     - '+.stun.*'
-    - '+.stun.playstation.net'
     - '*.srv.nintendo.net'
+    - 'xbox.*.microsoft.com'
     - 'xbox.*.*.microsoft.com'
-    - '*.*.xboxlive.com'
-    # Windows 网络检测
+    - '*.xboxlive.com'
+    # 网络检测
     - '*.msftconnecttest.com'
     - '*.msftncsi.com'
-    # Android 网络检测
     - 'connectivitycheck.gstatic.com'
     - 'connectivitycheck.android.com'
-    # 华为网络检测
     - 'connectivitycheck.platform.hicloud.com'
-    # 小米网络检测
     - 'connect.rom.miui.com'
-    # Apple Captive Portal
     - 'captive.apple.com'
-    # Google Voice
+    - 'network-test.debian.org'
+    - 'detectportal.firefox.com'
+    # 特殊服务
     - 'lens.l.google.com'
-    # Bilibili CDN
     - '*.mcdn.bilivideo.cn'
-    # NTP 时间服务
-    - 'time.*.com'
-    - 'time.*.gov'
-    - 'time.*.apple.com'
-    - 'ntp.*.com'
-    # Spotify
-    - '*.spotify.com'
-    # 暴雪游戏
     - '*.battlenet.com.cn'
-    - '*.blizzard.com'
+    - '*.battlenet.com'
+    - '*.blzstatic.cn'
+    - '*.battle.net'
     # Steam
     - '*.cm.steampowered.com'
     - '*.steamcontent.com'
     # Tailscale / ZeroTier
     - '*.tailscale.com'
     - '*.zerotier.com'
+    # Spotify
+    - '*.spotify.com'
 
-  # 默认 DNS (Bootstrap DNS)
-  # 用于解析下方 nameserver 域名的 IP，必须使用国内纯净 IP
+  # Fake-IP 过滤模式
+  # blacklist - 黑名单，匹配则不返回 fake-ip
+  # whitelist - 白名单，仅匹配才返回 fake-ip
+  fake-ip-filter-mode: blacklist
+
+  # Bootstrap DNS
+  # 用于解析 DNS 服务器域名，必须使用纯 IP
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
 
-  # 主要 DNS (Foreign DNS)
-  # 默认情况下的 DNS 服务器
-  # 配置为国外 DNS，Clash 会拦截并返回 Fake-IP，实际由代理节点进行远程解析
+  # 主 DNS 服务器
+  # 配置为国内 DNS，确保国内域名获得最优 CDN
   nameserver:
-    - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
 
-  # 域名分流策略 (Nameserver Policy)
-  # 指定 "国内域名(geosite:cn)" 和 "私有网络(geosite:private)" 必须走国内 DNS
-  # 既能获得国内 CDN 加速，又不会把 DNS 请求泄露给国外服务器
+  # 域名分流策略
+  # 根据域名类型使用不同的 DNS 服务器
   nameserver-policy:
-    # 国内域名走国内加密 DNS
+    # 私有域名
+    "geosite:private":
+      - system
+    # 广告拦截
+    "geosite:category-ads-all": rcode://success
+    # CDN 优化域名
+    "+.apple.cn,+.icloud.com.cn":
+      - https://dns.alidns.com/dns-query
+    "+.taobao.com,+.tmall.com,+.alicdn.com,+.aliyun.com,+.alipay.com":
+      - https://dns.alidns.com/dns-query
+    "+.qq.com,+.tencent.com,+.weixin.com,+.gtimg.cn":
+      - https://doh.pub/dns-query
+    "+.jd.com,+.bilibili.com,+.hdslb.com,+.163.com,+.netease.com":
+      - https://dns.alidns.com/dns-query
+    "+.baidu.com,+.bdstatic.com,+.baidupcs.com":
+      - https://dns.alidns.com/dns-query
+    "+.douyin.com,+.toutiao.com,+.bytedance.com,+.douyincdn.com":
+      - https://dns.alidns.com/dns-query
+    "+.xiaohongshu.com,+.xhscdn.com,+.kuaishou.com":
+      - https://dns.alidns.com/dns-query
+    "+.meituan.com,+.pinduoduo.com":
+      - https://dns.alidns.com/dns-query
+    # 国内域名
     "geosite:cn":
       - https://dns.alidns.com/dns-query
       - https://doh.pub/dns-query
-    # 私有域名走系统 DNS，否则会被 DoH 阻断
-    "geosite:private":
-      - system
-    # 阿里系
-    "+.taobao.com,+.tmall.com,+.alicdn.com,+.aliyun.com,+.alipay.com":
-      - https://dns.alidns.com/dns-query
-    # 腾讯系
-    "+.qq.com,+.tencent.com,+.weixin.com,+.gtimg.cn":
-      - https://doh.pub/dns-query
-    # 京东 / B站 / 网易
-    "+.jd.com,+.bilibili.com,+.hdslb.com,+.163.com,+.netease.com":
-      - https://dns.alidns.com/dns-query
-    # 百度
-    "+.baidu.com,+.bdstatic.com,+.baidupcs.com":
-      - https://dns.alidns.com/dns-query
-    # 字节跳动
-    "+.douyin.com,+.toutiao.com,+.bytedance.com,+.douyincdn.com":
-      - https://dns.alidns.com/dns-query
-    # 小红书 / 快手
-    "+.xiaohongshu.com,+.xhscdn.com,+.kuaishou.com":
-      - https://dns.alidns.com/dns-query
-    # 美团 / 拼多多
-    "+.meituan.com,+.pinduoduo.com":
-      - https://dns.alidns.com/dns-query
-    # Apple 中国
-    "+.apple.cn,+.icloud.com.cn":
-      - https://dns.alidns.com/dns-query
+    # 国外域名（启用 HTTP/3）
+    "geosite:geolocation-!cn":
+      - https://dns.cloudflare.com/dns-query#h3=true
+      - https://dns.google/dns-query#h3=true
 
 # TUN 设置
 
@@ -223,11 +223,12 @@ tun:
   enable: true
 
   # 网络栈模式
-  # mixed: TCP 走系统栈，UDP 走 gvisor，兼容性最好
+  # system - 性能最高，兼容性一般
+  # gvisor - 兼容性好，性能较低
+  # mixed - TCP 走系统栈，UDP 走 gvisor（推荐）
   stack: mixed
 
   # DNS 劫持
-  # 劫持所有发往 53 端口的 DNS 查询
   dns-hijack:
     - any:53
 
@@ -238,7 +239,8 @@ tun:
   auto-detect-interface: true
 
   # 严格路由
-  # Android 建议开启，防止流量通过物理网卡泄露
+  # 开启后设备将无法被其他设备访问
+  # Android 建议开启，防止流量泄露
   # strict-route: false
 
   # 排除路由
