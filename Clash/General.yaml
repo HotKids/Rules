@@ -181,23 +181,6 @@ dns:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
 
-  # 配置查询域名使用的 DNS 服务器
-  nameserver-policy:
-    # 私有域名
-    "geosite:private":
-      - system
-    # 广告拦截
-    "geosite:category-ads-all": rcode://success
-    # 国内域名
-    "geosite:cn":
-      - https://dns.alidns.com/dns-query
-      - https://doh.pub/dns-query
-    # 国外域名
-    # #h3=true 强制开启 DoH 的 HTTP/3 支持，与 prefer-h3 无关
-    "geosite:geolocation-!cn":
-      - https://dns.cloudflare.com/dns-query#h3=true
-      - https://dns.google/dns-query#h3=true
-
 # TUN 设置
 
 tun:
