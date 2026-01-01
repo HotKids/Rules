@@ -1,44 +1,39 @@
 # 通用设置
 
-# 混合端口
-# HTTP(S) 和 SOCKS 代理混合端口
-mixed-port: 7893
+# port: 7890 # HTTP(S) 代理服务器端口
+# socks-port: 7891 # SOCKS5 代理端口
+mixed-port: 7893 # HTTP(S) 和 SOCKS 代理混合端口
+# redir-port: 7892 # 透明代理端口，用于 Linux 和 MacOS
+# tproxy-port: 7893 # 透明代理端口，用于 Linux (TProxy TCP and TProxy UDP)
 
-# 允许局域网连接
-allow-lan: true
-bind-address: '*' # 绑定所有地址
+allow-lan: true # 允许局域网连接
+bind-address: '*' # 绑定 IP 地址，仅作用于 allow-lan 为 true，'*' 表示所有地址
 
-# 运行模式
 mode: rule
 
-# 日志级别
-# 可选：silent/error/warning/info/debug
+# 日志等级 silent/error/warning/info/debug
 log-level: info
 
-# IPv6 支持
-# 关闭后将阻断所有 IPv6 链接和屏蔽 DNS 请求 AAAA 记录
+# 开启 IPv6 总开关，关闭阻断所有 IPv6 链接和屏蔽 DNS 请求 AAAA 记录
 ipv6: false
 
-# API 控制端口
+# RESTful API 监听地址
 external-controller: 127.0.0.1:9090
 
-# 出站接口
-# 多网卡环境可指定出站网卡
+# 设置出口网卡
 # interface-name: eth0
 
 # 性能设置
 
-# 统一延迟计算
-# 去除握手等干扰，更准确反映节点延迟
+# 统一延迟
+# 去除握手等额外延迟，更准确反映节点延迟
 unified-delay: true
 
-# TCP 并发
-# 使用最快握手的 IP，将并发连接所有 IP
+# TCP 并发连接所有 IP，将使用最快握手的 TCP
 tcp-concurrent: true
 
-# 全局 TLS 指纹
-# 防探测，优先低于 proxy 内的 client-fingerprint
-# 可选："chrome","firefox","safari","ios","random","none"
+# 全局 TLS 指纹，优先级低于 proxy 内的 client-fingerprint
+# 可选：chrome/firefox/safari/ios/random/none
 global-client-fingerprint: chrome
 
 # 进程匹配模式
@@ -54,17 +49,20 @@ keep-alive-interval: 30
 
 # GeoData 设置
 
-# 规则库自动更新
+# 是否自动更新 geodata
 geo-auto-update: true
-geo-update-interval: 24 # 更新间隔（小时）
 
-# GeoData 下载地址
+# 更新间隔，单位：小时
+geo-update-interval: 24
+
+# 自定义 geodata url
 geox-url:
   geoip: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
   geosite: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
   mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
 
 # Hosts 设置
+
 # 类似于 /etc/hosts，仅支持配置单个 IP
 hosts:
   '*.clash.dev': 127.0.0.1
@@ -73,22 +71,25 @@ hosts:
 
 # 配置持久化
 
-# 保存节点选择与 Fake-IP 映射
 profile:
+  # 存储 select 选择记录
   store-selected: true
+  # 持久化 fake-ip
   store-fake-ip: true
 
-# 流量嗅探
+# 嗅探域名
 
-# 提升域名识别能力
 sniffer:
   enable: true
-  # 全局配置，优先级低于 sniff 内的实际配置
+  # 是否使用嗅探结果作为实际访问，默认 true
+  # 全局配置，优先级低于 sniffer.sniff 实际配置
   override-destination: false
   sniff:
     HTTP:
+      # 需要嗅探的端口
       ports: [80, 8080-8880]
-      override-destination: true # 覆盖全局配置
+      # 可覆盖 sniffer.override-destination
+      override-destination: true
     TLS:
       ports: [443, 8443]
     QUIC:
@@ -98,33 +99,40 @@ sniffer:
 
 dns:
   enable: true
+  # 开启 DNS 服务器监听
   listen: 0.0.0.0:1053
-  ipv6: false # 不返回 AAAA 记录
+  # false 将返回 AAAA 的空结果
+  ipv6: false
 
-  # Fake-IP 模式
+  # 用于解析 nameserver，fallback 以及其他 DNS 服务器配置的 DNS 服务域名
+  # 只能使用纯 IP 地址，可使用加密 DNS
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+
   enhanced-mode: fake-ip
+  # fake-ip 池设置
   fake-ip-range: 198.18.0.1/16
 
   # DNS 缓存算法
-  # lru - 最近最少使用
-  # arc - 自适应缓存替换（推荐）
   cache-algorithm: arc
 
   # DNS 缓存大小
-  # 默认 1024，可根据需要调整
   cache-size: 4096
 
-  # HTTP/3 支持
-  # 国内 DoH 服务器对 H3 支持不稳定，建议关闭
+  # 是否开启 DoH 支持 HTTP/3，将并发尝试
   prefer-h3: false
 
-  # 遵循分流规则
-  # false（推荐）- DNS 服务器直连，性能最优
-  # true - DNS 服务器遵守 rules 规则
+  # 配置后面的 nameserver、fallback 和 nameserver-policy 向 DNS 服务器的连接过程是否遵守 rules 规则
+  # 如果为 false（默认值）则这三部分的 DNS 服务器在未特别指定的情况下会直连
+  # 如果为 true，将会按照 rules 的规则匹配链接方式（走代理或直连）
   respect-rules: false
 
-  # Fake-IP 过滤列表
-  # 匹配的域名返回真实 IP，解决特定应用兼容性问题
+  # 配置 fake-ip-filter 的匹配模式，默认为 blacklist，即如果匹配成功不返回 fake-ip
+  # 可设置为 whitelist，即只有匹配成功才返回 fake-ip
+  fake-ip-filter-mode: blacklist
+
+  # 配置不使用 fake-ip 的域名
   fake-ip-filter:
     # 局域网与本地服务
     - '*.lan'
@@ -166,53 +174,26 @@ dns:
     # Spotify
     - '*.spotify.com'
 
-  # Fake-IP 过滤模式
-  # blacklist - 黑名单，匹配则不返回 fake-ip
-  # whitelist - 白名单，仅匹配才返回 fake-ip
-  fake-ip-filter-mode: blacklist
-
-  # Bootstrap DNS
-  # 用于解析 DNS 服务器域名，必须使用纯 IP
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-
-  # 主 DNS 服务器
-  # 配置为国内 DNS，确保国内域名获得最优 CDN
+  # DNS 主要域名配置
+  # 支持 UDP、TCP、DoT、DoH、DoQ
+  # 这部分为主要 DNS 配置，影响所有直连，确保使用对大陆解析精准的 DNS
   nameserver:
     - https://dns.alidns.com/dns-query
     - https://doh.pub/dns-query
 
-  # 域名分流策略
-  # 根据域名类型使用不同的 DNS 服务器
+  # 配置查询域名使用的 DNS 服务器
   nameserver-policy:
     # 私有域名
     "geosite:private":
       - system
     # 广告拦截
     "geosite:category-ads-all": rcode://success
-    # CDN 优化域名
-    "+.apple.cn,+.icloud.com.cn":
-      - https://dns.alidns.com/dns-query
-    "+.taobao.com,+.tmall.com,+.alicdn.com,+.aliyun.com,+.alipay.com":
-      - https://dns.alidns.com/dns-query
-    "+.qq.com,+.tencent.com,+.weixin.com,+.gtimg.cn":
-      - https://doh.pub/dns-query
-    "+.jd.com,+.bilibili.com,+.hdslb.com,+.163.com,+.netease.com":
-      - https://dns.alidns.com/dns-query
-    "+.baidu.com,+.bdstatic.com,+.baidupcs.com":
-      - https://dns.alidns.com/dns-query
-    "+.douyin.com,+.toutiao.com,+.bytedance.com,+.douyincdn.com":
-      - https://dns.alidns.com/dns-query
-    "+.xiaohongshu.com,+.xhscdn.com,+.kuaishou.com":
-      - https://dns.alidns.com/dns-query
-    "+.meituan.com,+.pinduoduo.com":
-      - https://dns.alidns.com/dns-query
     # 国内域名
     "geosite:cn":
       - https://dns.alidns.com/dns-query
       - https://doh.pub/dns-query
-    # 国外域名（启用 HTTP/3）
+    # 国外域名
+    # #h3=true 强制开启 DoH 的 HTTP/3 支持，与 prefer-h3 无关
     "geosite:geolocation-!cn":
       - https://dns.cloudflare.com/dns-query#h3=true
       - https://dns.google/dns-query#h3=true
@@ -228,23 +209,25 @@ tun:
   # mixed - TCP 走系统栈，UDP 走 gvisor（推荐）
   stack: mixed
 
-  # DNS 劫持
+  # 需要劫持的 DNS
   dns-hijack:
     - any:53
 
-  # 自动设置路由
+  # 配置路由表
   auto-route: true
 
-  # 自动检测出口网卡
+  # 自动识别出口网卡
   auto-detect-interface: true
 
-  # 严格路由
-  # 开启后设备将无法被其他设备访问
-  # Android 建议开启，防止流量泄露
+  # 将所有连接路由到 tun 来防止泄漏，但你的设备将无法被其他设备访问
   # strict-route: false
 
-  # 排除路由
-  # 这些网段不经过 TUN，直接走物理网卡
+  # 启用 auto-route 时使用自定义路由而不是默认路由
+  # route-address:
+  #   - 0.0.0.0/1
+  #   - 128.0.0.0/1
+
+  # 排除路由，这些网段不经过 TUN
   # route-exclude-address:
   #   - 192.168.31.0/24
   
