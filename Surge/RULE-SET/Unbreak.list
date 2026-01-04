@@ -49,13 +49,6 @@ DOMAIN,alt8-mtalk.google.com
 DOMAIN-SUFFIX,galaxyappstore.com
 DOMAIN-SUFFIX,samsungapps.com
 
-# > Sub
-DOMAIN-SUFFIX,dler.cloud
-DOMAIN-SUFFIX,nexconvert.com
-DOMAIN-SUFFIX,qtt-163cdn.com
-DOMAIN-SUFFIX,oxycontinin.com
-DOMAIN-SUFFIX,metaglide.org
-
 # > Windows NTP
 DOMAIN,time.windows.com
 
@@ -68,4 +61,3 @@ DOMAIN-SUFFIX,bochk.com
 
 # > ziniao
 PROCESS-NAME,*ziniao*
-
