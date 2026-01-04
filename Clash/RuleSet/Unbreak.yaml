@@ -52,11 +52,6 @@ payload:
   - DOMAIN-SUFFIX,galaxyappstore.com
   - DOMAIN-SUFFIX,samsungapps.com
   # DOMAIN-SUFFIX,samsungcloud.com
-  
-  # > Sub
-  - DOMAIN-SUFFIX,dler.cloud
-  - DOMAIN-SUFFIX,nexconvert.com
-  - DOMAIN-SUFFIX,qtt-163cdn.com
 
   # > Windows NTP
   - DOMAIN,time.windows.com
