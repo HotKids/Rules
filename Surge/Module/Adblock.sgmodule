@@ -2,7 +2,7 @@
 #!desc=AdBlock Module Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobi,api.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobi,api.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,lens.leoao.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
 
 [Rule]
 # > 交管12123
@@ -22,42 +22,45 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 [Map Local]
 # > 猫眼 by RuCu6
-^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/(quality\/|thumbnail\/(860x0|!165x165|!1049x1169)) data-type=text data="{}" status-code=200
+^https?:\/\/p0\.pipi\.cn\/(adAdmin|mediaplus\/maoyantong_ads_fe)\/\w+\.(jpg|png)\?imageMogr2\/(quality\/|thumbnail\/(860x0|!165x165|!1049x1169)) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 美团小程序
-^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/defaultword data-type=text data="{}" status-code=200
-^https?:\/\/npay\.meituan\.com\/conch\/(flow\/mypage-wallet-info|walletv3\/wechat-pop-window) data-type=text data="{}" status-code=200
-^https?:\/\/web\.meituan\.com\/(api\/miniprogram\/my\/(novelZone|resources)|newUser\/returnMoney\/popWindow) data-type=text data="{}" status-code=200
+^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/defaultword data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/npay\.meituan\.com\/conch\/(flow\/mypage-wallet-info|walletv3\/wechat-pop-window) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+^https?:\/\/web\.meituan\.com\/(api\/miniprogram\/my\/(novelZone|resources)|newUser\/returnMoney\/popWindow) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 发现精彩
-^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data-type=text data="{}" status-code=200
+^https?:\/\/static\.95508\.com\/mmg\/images\/ads\/.+\/(.+1125?.+2436|.+%.+%|.+_.+_) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 中国移动
-^https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(explorePage\/getAdverList|init\/startInit) data-type=text data="{}" status-code=200
+^https?:\/\/client\.app\.coc\.10086\.cn\/biz-orange\/DN\/(explorePage\/getAdverList|init\/startInit) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 途虎养车
-^https?:\/\/(cl|mkt)-gateway\.tuhu\.cn\/(cl-common-api\/api\/personalCenter\/getAutoSuperConfig|mlp-product-search-api\/search\/helper\/defaultAndHotWord|mkt-(scene-marketing-service\/api\/scene\/queryScheme|push-message-box\/banner\/cms\/getIndexBanner|cms\/circle\/recommend\/v3)) data-type=text data="{}" status-code=200
+^https?:\/\/(cl|mkt)-gateway\.tuhu\.cn\/(cl-common-api\/api\/personalCenter\/getAutoSuperConfig|mlp-product-search-api\/search\/helper\/defaultAndHotWord|mkt-(scene-marketing-service\/api\/scene\/queryScheme|push-message-box\/banner\/cms\/getIndexBanner|cms\/circle\/recommend\/v3)) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 叮咚买菜
-^https?:\/\/maicai\.api\.ddxq\.mobi\/(advert\/(getPreloadAd\?ad_id|startUpScreen)|homeApi\/(getHomeAdPop|newDetails)|vip\/getVipAd)$ data-type=text data="{}" status-code=200
+^https?:\/\/maicai\.api\.ddxq\.mobi\/(advert\/(getPreloadAd\?ad_id|startUpScreen)|homeApi\/(getHomeAdPop|newDetails)|vip\/getVipAd)$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 小佩宠物
-^https?:\/\/api\.petkit\.cn\/6\/\/device\/relatedProductsInfo data-type=text data="{}" status-code=200
+^https?:\/\/api\.petkit\.cn\/6\/\/device\/relatedProductsInfo data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 山姆会员超市
-^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/channel\/portal\/AdgroupData\/queryAdgroup data-type=text data="{}" status-code=200
+^https?:\/\/api-sams\.walmartmobile\.cn\/api\/v1\/sams\/channel\/portal\/AdgroupData\/queryAdgroup data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 小宇宙
-^https?:\/\/api\.xiaoyuzhoufm\.com\/v\d\/flash- data-type=text data="{}" status-code=200
+^https?:\/\/api\.xiaoyuzhoufm\.com\/v\d\/flash- data-type=text data="{}" status-code=200 header="Content-Type:application/json"
+
+# > 乐刻
+^https?:\/\/lens\.leoao\.com\/lens\/conduct\/app\/rpc\/v2\/com\.lefit\.dubbo\.cms\.api\.(front|bff)\.(AdvertiseConfigFrontService\/getAdvertiseConfigNew|AppAdvertisingFrontService\/getAppAdvertisingNew|ClientFrontFacade\/queryHomeMiddleInfo) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > DJI Store
-^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200
+^https?:\/\/se-api\.djiits\.com\/api\/components\/launch_ad\.json\?abbrv_url=1&country=cn&language=zh-CN data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 广州地铁乘车码
-^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200
+^https?:\/\/apis\.alenable\.com\/(mall\/v1\/api\/mall\/skin\/user\/get|ycx\/v1\/api\/adPut) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 深圳通
-^https?:\/\/ecard\.shenzhentong\.com\/wxweb\/bwxppub2\/QryAdvertList\.do data-type=text data="{}" status-code=200
+^https?:\/\/ecard\.shenzhentong\.com\/wxweb\/bwxppub2\/QryAdvertList\.do data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 [Script]
 # > 美团小程序去广告 by ZenmoFeiShi
