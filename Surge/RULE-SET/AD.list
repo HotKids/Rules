@@ -14,7 +14,7 @@ DOMAIN-KEYWORD,video-cn.snssdk.com
 # > 安全浏览限制解除
 DOMAIN,lookup.api.bsb.baidu.com
 DOMAIN-SUFFIX,u3.ucweb.com
-DOMAIN-KEYWORD,safebrowsing.
+# DOMAIN-KEYWORD,safebrowsing. 会影响 Pixel VPN
 
 # > 农行防代理检测
 DOMAIN,msmp.abchina.com.cn
