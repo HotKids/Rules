@@ -33,4 +33,5 @@ DOMAIN-SUFFIX,byd3c3.com
 DOMAIN-SUFFIX,bybdc6.com
 # > OKX
 DOMAIN-SUFFIX,okx.com
+DOMAIN-KEYWORD,okx-dns
 DOMAIN-SUFFIX,okx.com.cdn.cloudflare.net
