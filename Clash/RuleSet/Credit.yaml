@@ -12,3 +12,10 @@ payload:
   - DOMAIN-SUFFIX,chasepay.com
   - DOMAIN-SUFFIX,jpmorganchase.com
   - DOMAIN-SUFFIX,jpmorgan.com
+  
+  # > N26
+  - DOMAIN-SUFFIX,n26.com
+  - DOMAIN-SUFFIX,tech26.de
+
+# > bonify
+  - DOMAIN-SUFFIX,bonify.de
