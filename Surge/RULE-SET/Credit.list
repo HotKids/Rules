@@ -16,3 +16,10 @@ DOMAIN-SUFFIX,jpmorgan.com
 DOMAIN-SUFFIX,interactivebrokers.com
 DOMAIN-SUFFIX,ibkr.com
 DOMAIN-SUFFIX,ibllc.com
+
+# > N26
+DOMAIN-SUFFIX,n26.com
+DOMAIN-SUFFIX,tech26.de
+
+# > bonify
+DOMAIN-SUFFIX,bonify.de
