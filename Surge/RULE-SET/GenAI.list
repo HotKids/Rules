@@ -78,9 +78,6 @@ DOMAIN-KEYWORD,notebooklm.google
 # > Search Labs
 DOMAIN-KEYWORD,labs.google
 
-# Groq
-DOMAIN-SUFFIX,groq.com
-
 # JetBrains AI
 DOMAIN-SUFFIX,grazie.ai
 
@@ -95,6 +92,10 @@ DOMAIN,sydney.bing.com
 DOMAIN,www.bing.com
 # > GitHub Copilot
 DOMAIN-SUFFIX,githubcopilot.com
+
+# NVIDIA
+# > Groq
+DOMAIN-SUFFIX,groq.com
 
 # Perplexity
 DOMAIN-SUFFIX,perplexity.ai
