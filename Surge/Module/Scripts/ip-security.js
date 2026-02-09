@@ -50,6 +50,7 @@ const CONFIG = {
     outboundIP: "https://api-ipv4.ip.sb/geoip",
     outboundIPv6: "https://api64.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
+    ipTypeCard: "https://my.ippure.com/v1/card",
     geoAPI: (ip) => `http://ip-api.com/json/${ip}?fields=country,countryCode,regionName,city`,
     ispAPI: (ip) => `https://api.ip.sb/geoip/${ip}`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
@@ -270,6 +271,36 @@ async function getRiskScore(ip) {
   return saveAndReturn(50, "Default");
 }
 
+// ==================== IP 类型检测（二级回落） ====================
+/**
+ * 获取 IP 类型（住宅/机房、广播/原生）
+ * 优先级：/v1/info JSON → /v1/card HTML 抓取
+ */
+async function getIPType() {
+  // 1. 尝试 /v1/info JSON 接口
+  const info = await httpJSON(CONFIG.urls.ipType);
+  if (info && info.isResidential !== undefined) {
+    console.log("IPPure /v1/info 返回 IP 类型数据");
+    return {
+      ipType: info.isResidential ? "住宅 IP" : "机房 IP",
+      ipSrc: info.isBroadcast ? "广播 IP" : "原生 IP"
+    };
+  }
+  console.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
+
+  // 2. 回落到 /v1/card HTML 抓取
+  const html = await httpRaw(CONFIG.urls.ipTypeCard);
+  if (html) {
+    const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
+    const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
+    console.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
+    return { ipType, ipSrc };
+  }
+
+  console.log("IPPure 所有接口均失败");
+  return { ipType: "未知", ipSrc: "未知" };
+}
+
 // ==================== IP 获取 ====================
 /**
  * 获取入口/出口 IP 地址
@@ -413,10 +444,10 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inGeo, outGeo, inI
   }
 
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
-  const [policy, riskInfo, ippure, inGeo, outGeo, inISP, outISP] = await Promise.all([
+  const [policy, riskInfo, ipTypeResult, inGeo, outGeo, inISP, outISP] = await Promise.all([
     getPolicy(),
     getRiskScore(outIP),
-    httpJSON(CONFIG.urls.ipType),
+    getIPType(),
     httpJSON(CONFIG.urls.geoAPI(inIP)),
     httpJSON(CONFIG.urls.geoAPI(outIP)),
     httpJSON(CONFIG.urls.ispAPI(inIP)),
@@ -424,8 +455,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inGeo, outGeo, inI
   ]);
 
   const riskResult = riskText(riskInfo.score);
-  const ipType = ippure?.isResidential ? "住宅 IP" : "机房 IP";
-  const ipSrc = ippure?.isBroadcast ? "广播 IP" : "原生 IP";
+  const { ipType, ipSrc } = ipTypeResult;
 
   // 5. 根据触发类型输出结果
   const context = { policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, outIPv6Data, inGeo, outGeo, inISP, outISP, ipv6Data: outIPv6Data };
