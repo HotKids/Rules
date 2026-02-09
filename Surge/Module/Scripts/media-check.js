@@ -423,11 +423,6 @@ class ServiceChecker {
   }
 
   /**
-   * HBO Max 解锁检测（修复版 - 基于 Debug 验证）
-   * JP 地区优先验证 U-NEXT 可用性，其他地区正常检测
-   * @returns {Promise<Object>} 检测结果
-   */
-  /**
    * HBO Max 解锁检测
    * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
    * 参考 RegionRestrictionCheck 项目逻辑
@@ -656,7 +651,7 @@ class ServiceChecker {
   static async checkGemini() {
     const args = Utils.parseArgs($argument);
     const apiKey = (args.geminiapikey || "").trim();
-    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
+    if (!apiKey || apiKey === "0" || ["{", "}", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
