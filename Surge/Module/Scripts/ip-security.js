@@ -42,7 +42,8 @@ const CONFIG = {
   timeout: 10000,
   storeKeys: {
     lastEvent: "lastNetworkInfoEvent",
-    lastPolicy: "lastProxyPolicy"
+    lastPolicy: "lastProxyPolicy",
+    riskCache: "riskScoreCache"
   },
   urls: {
     inboundIP: "https://api.bilibili.com/x/web-interface/zone",
@@ -224,11 +225,29 @@ async function getPolicy() {
  * 优先级：IPQualityScore → ProxyCheck → Scamalytics
  */
 async function getRiskScore(ip) {
+  // 0. 检查缓存：IP 未变则直接返回
+  const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      if (c.ip === ip) {
+        console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
+        return { score: c.score, source: c.source };
+      }
+    } catch (e) {}
+  }
+
+  function saveAndReturn(score, source) {
+    $persistentStore.write(JSON.stringify({ ip, score, source }), CONFIG.storeKeys.riskCache);
+    console.log("风险评分已缓存: " + score + "% (" + source + ")");
+    return { score, source };
+  }
+
   // 1. IPQualityScore（需要 API Key）
   if (args.ipqsKey) {
     const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
     if (data?.success && data?.fraud_score !== undefined) {
-      return { score: data.fraud_score, source: "IPQS" };
+      return saveAndReturn(data.fraud_score, "IPQS");
     }
     console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
   }
@@ -236,7 +255,7 @@ async function getRiskScore(ip) {
   // 2. ProxyCheck.io（免费）
   const proxyData = await httpJSON(CONFIG.urls.proxyCheck(ip));
   if (proxyData?.[ip]?.risk !== undefined) {
-    return { score: proxyData[ip].risk, source: "ProxyCheck" };
+    return saveAndReturn(proxyData[ip].risk, "ProxyCheck");
   }
   console.log("ProxyCheck 回落: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
 
@@ -244,11 +263,11 @@ async function getRiskScore(ip) {
   const html = await httpRaw(CONFIG.urls.scamalytics(ip));
   const score = parseScamalyticsScore(html);
   if (score !== null) {
-    return { score, source: "Scamalytics" };
+    return saveAndReturn(score, "Scamalytics");
   }
   console.log("Scamalytics 回落: " + (html ? "解析失败" : "请求失败"));
 
-  return { score: 50, source: "Default" };
+  return saveAndReturn(50, "Default");
 }
 
 // ==================== IP 获取 ====================
