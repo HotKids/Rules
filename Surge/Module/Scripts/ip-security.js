@@ -55,7 +55,7 @@ const CONFIG = {
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
   },
-  ipv6Timeout: 1500,
+  ipv6Timeout: 3000,
   policyRetryDelay: 500,
   riskLevels: [
     { max: 15, label: "极度纯净 IP", color: "#0D6E3D" },
@@ -72,7 +72,10 @@ function parseArguments() {
   let arg = {};
 
   if (typeof $argument !== "undefined") {
-    arg = Object.fromEntries($argument.split("&").map(i => i.split("=")));
+    arg = Object.fromEntries($argument.split("&").map(i => {
+      const idx = i.indexOf("=");
+      return idx === -1 ? [i, ""] : [i.slice(0, idx), i.slice(idx + 1)];
+    }));
   }
 
   const storedArg = $persistentStore.read(CONFIG.name);
@@ -253,14 +256,13 @@ async function getRiskScore(ip) {
  * 获取入口/出口 IP 地址
  */
 async function fetchIPs() {
-  const [enter, exit] = await Promise.all([
+  const [enter, exit, exit6] = await Promise.all([
     httpJSON(CONFIG.urls.inboundIP, "DIRECT"),
-    httpJSON(CONFIG.urls.outboundIP)
-  ]);
-
-  const exit6 = await Promise.race([
-    httpJSON(CONFIG.urls.outboundIPv6),
-    wait(CONFIG.ipv6Timeout).then(() => null)
+    httpJSON(CONFIG.urls.outboundIP),
+    Promise.race([
+      httpJSON(CONFIG.urls.outboundIPv6),
+      wait(CONFIG.ipv6Timeout).then(() => null)
+    ])
   ]);
 
   return {
