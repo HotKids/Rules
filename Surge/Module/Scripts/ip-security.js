@@ -9,7 +9,7 @@
  *
  * 数据来源：
  * ① 入口 IP: bilibili API (DIRECT)
- * ② 出口 IP: ip.sb API
+ * ② 出口 IP: IPLark API (IPv4), ip.sb API (IPv6)
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
@@ -47,7 +47,7 @@ const CONFIG = {
   },
   urls: {
     inboundIP: "https://api.bilibili.com/x/web-interface/zone",
-    outboundIP: "https://api-ipv4.ip.sb/geoip",
+    outboundIP: "https://iplark.com/ipstack",
     outboundIPv6: "https://api64.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
@@ -190,7 +190,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ip-api\.com)/i, 10);
+  let policy = await findPolicyInRecent(/(iplark\.com|ip-api\.com)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -202,7 +202,7 @@ async function getPolicy() {
   await httpJSON(CONFIG.urls.outboundIP);
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/api(-ipv4)?\.ip\.sb/i, 5);
+  policy = await findPolicyInRecent(/iplark\.com/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
