@@ -256,14 +256,13 @@ async function getRiskScore(ip) {
  * 获取入口/出口 IP 地址
  */
 async function fetchIPs() {
-  const [enter, exit] = await Promise.all([
+  const [enter, exit, exit6] = await Promise.all([
     httpJSON(CONFIG.urls.inboundIP, "DIRECT"),
-    httpJSON(CONFIG.urls.outboundIP)
-  ]);
-
-  const exit6 = await Promise.race([
-    httpJSON(CONFIG.urls.outboundIPv6),
-    wait(CONFIG.ipv6Timeout).then(() => null)
+    httpJSON(CONFIG.urls.outboundIP),
+    Promise.race([
+      httpJSON(CONFIG.urls.outboundIPv6),
+      wait(CONFIG.ipv6Timeout).then(() => null)
+    ])
   ]);
 
   return {
