@@ -223,36 +223,27 @@ async function getPolicy() {
 async function getRiskScore(ip) {
   // 1. IPQualityScore（需要 API Key）
   if (args.ipqsKey) {
-    try {
-      const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
-      if (data?.success && data?.fraud_score !== undefined) {
-        return { score: data.fraud_score, source: "IPQS" };
-      }
-    } catch (e) {
-      console.log("IPQS 查询失败");
+    const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
+    if (data?.success && data?.fraud_score !== undefined) {
+      return { score: data.fraud_score, source: "IPQS" };
     }
+    console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
   }
 
   // 2. ProxyCheck.io（免费）
-  try {
-    const data = await httpJSON(CONFIG.urls.proxyCheck(ip));
-    if (data?.[ip]?.risk !== undefined) {
-      return { score: data[ip].risk, source: "ProxyCheck" };
-    }
-  } catch (e) {
-    console.log("ProxyCheck 查询失败");
+  const proxyData = await httpJSON(CONFIG.urls.proxyCheck(ip));
+  if (proxyData?.[ip]?.risk !== undefined) {
+    return { score: proxyData[ip].risk, source: "ProxyCheck" };
   }
+  console.log("ProxyCheck 回落: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
 
   // 3. Scamalytics（兜底）
-  try {
-    const html = await httpRaw(CONFIG.urls.scamalytics(ip));
-    const score = parseScamalyticsScore(html);
-    if (score !== null) {
-      return { score, source: "Scamalytics" };
-    }
-  } catch (e) {
-    console.log("Scamalytics 查询失败");
+  const html = await httpRaw(CONFIG.urls.scamalytics(ip));
+  const score = parseScamalyticsScore(html);
+  if (score !== null) {
+    return { score, source: "Scamalytics" };
   }
+  console.log("Scamalytics 回落: " + (html ? "解析失败" : "请求失败"));
 
   return { score: 50, source: "Default" };
 }
