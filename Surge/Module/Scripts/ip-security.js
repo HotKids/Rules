@@ -72,7 +72,10 @@ function parseArguments() {
   let arg = {};
 
   if (typeof $argument !== "undefined") {
-    arg = Object.fromEntries($argument.split("&").map(i => i.split("=")));
+    arg = Object.fromEntries($argument.split("&").map(i => {
+      const idx = i.indexOf("=");
+      return idx === -1 ? [i, ""] : [i.slice(0, idx), i.slice(idx + 1)];
+    }));
   }
 
   const storedArg = $persistentStore.read(CONFIG.name);
