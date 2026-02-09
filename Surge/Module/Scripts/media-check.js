@@ -211,24 +211,62 @@ class ServiceChecker {
     const checkFilm = async (id) => {
       try {
         const res = await Utils.request({ url: `https://www.netflix.com/title/${id}` });
-        if (res.status === 403) return Utils.createResult(STATUS.FAIL);
-        if (res.status === 404) return { ...Utils.createResult(STATUS.ERROR), code: 404 };
-        
-        if (res.status === 200) {
-          const urlHeader = res.headers["x-originating-url"] || res.headers["X-Originating-URL"] || "";
-          let region = urlHeader.split("/")[3]?.split("-")[0]?.toUpperCase();
-          // 修复：如果提取到 "TITLE" 或为空，则默认为 US
-          if (region === "TITLE" || !region) region = "US";
-          return Utils.createResult(STATUS.OK, region);
-        }
-      } catch { return Utils.createResult(STATUS.ERROR); }
-      return Utils.createResult(STATUS.FAIL);
+        return { httpStatus: res.status, body: res.body || "", headers: res.headers || {} };
+      } catch {
+        return { httpStatus: -1, body: "", headers: {} };
+      }
     };
 
-    // 使用两个不同的影片 ID 进行检测，提高准确性
-    let result = await checkFilm(80062035);
-    if (result.status !== STATUS.OK && result.code === 404) result = await checkFilm(80018499);
-    return result.status === STATUS.OK ? result : Utils.createResult(STATUS.FAIL);
+    /**
+     * 多级地区码提取（从 HTML body + 响应头）
+     * 参考 RegionRestrictionCheck 项目
+     */
+    const extractRegion = (body, headers) => {
+      // 1. 嵌入 JSON: "id":"xx" ... "countryName" (RegionRestrictionCheck 方案)
+      let m = body.match(/"id"\s*:\s*"([a-z]{2})"[^}]*?"countryName"/);
+      if (m) return m[1].toUpperCase();
+
+      // 2. Body 内 URL 模式: netflix.com/xx(-yy)?/title/
+      m = body.match(/netflix\.com\/([a-z]{2})(?:-[a-z]+)?\/title\//i);
+      if (m) return m[1].toUpperCase();
+
+      // 3. x-originating-url 响应头 (旧方案，部分节点仍有效)
+      const urlHeader = headers["x-originating-url"] || headers["X-Originating-URL"] || "";
+      const h = urlHeader.split("/")[3]?.split("-")[0]?.toUpperCase();
+      if (h && h !== "TITLE") return h;
+
+      return "";
+    };
+
+    // Film 1: LEGO Ninjago (非原创，用于区分完整解锁 vs Originals Only)
+    const r1 = await checkFilm(81280792);
+
+    if (r1.httpStatus === 403) return Utils.createResult(STATUS.FAIL);
+    if (r1.httpStatus === -1) return Utils.createResult(STATUS.ERROR);
+
+    // Film 1 可用且非 "Oh no!" → 完整解锁
+    if (r1.httpStatus === 200 && !r1.body.includes("Oh no!")) {
+      const region = extractRegion(r1.body, r1.headers) || "US";
+      return Utils.createResult(STATUS.OK, region);
+    }
+
+    // Film 1 不可用 → 尝试 Film 2: Breaking Bad
+    const r2 = await checkFilm(70143836);
+
+    if (r2.httpStatus === 200 && !r2.body.includes("Oh no!")) {
+      const region = extractRegion(r2.body, r2.headers) || "US";
+      return Utils.createResult(STATUS.OK, region);
+    }
+
+    // 两部影片均不可用，但至少一个返回了 200 → Originals Only
+    if (r1.httpStatus === 200 || r2.httpStatus === 200) {
+      const body = r1.httpStatus === 200 ? r1.body : r2.body;
+      const headers = r1.httpStatus === 200 ? r1.headers : r2.headers;
+      const region = extractRegion(body, headers);
+      return Utils.createResult(STATUS.FAIL, region ? `${region} (Originals)` : "Originals Only");
+    }
+
+    return Utils.createResult(STATUS.FAIL);
   }
 
   /**
