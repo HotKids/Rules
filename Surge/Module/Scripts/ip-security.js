@@ -46,7 +46,7 @@ const CONFIG = {
   },
   urls: {
     inboundIP: "https://api.bilibili.com/x/web-interface/zone",
-    outboundIP: "https://api.ip.sb/geoip",
+    outboundIP: "https://api-ipv4.ip.sb/geoip",
     outboundIPv6: "https://api64.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
     geoAPI: (ip) => `http://ip-api.com/json/${ip}?fields=country,countryCode,regionName,city`,
@@ -154,11 +154,12 @@ function riskText(score) {
 }
 
 /**
- * 格式化地理位置文本：🇺🇸 City, Region, CC
+ * 格式化地理位置文本：🇺🇸 + 自定义部分
+ * 面板用法：formatGeo(cc, city, regionName, cc) → 🇺🇸 City, Region, US
+ * 通知用法：formatGeo(cc, city, country) → 🇺🇸 City, United States
  */
-function formatGeo(countryCode, city, region) {
-  const parts = [city, region, countryCode].filter(Boolean).join(", ");
-  return flag(countryCode) + " " + parts;
+function formatGeo(countryCode, ...parts) {
+  return flag(countryCode) + " " + parts.filter(Boolean).join(", ");
 }
 
 /**
@@ -184,7 +185,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api\.ip\.sb|ip-api\.com)/i, 10);
+  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ip-api\.com)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -196,7 +197,7 @@ async function getPolicy() {
   await httpJSON(CONFIG.urls.outboundIP);
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/api\.ip\.sb/i, 5);
+  policy = await findPolicyInRecent(/api(-ipv4)?\.ip\.sb/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -313,7 +314,7 @@ function buildOutboundSection(outIP, outIPv6, outGeo, outISP, ipv6Data) {
   if (!outIPv6) {
     // 仅 IPv4
     lines.push("出口 IP：" + outIP);
-    lines.push("地区：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName));
+    lines.push("地区：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName, outGeo?.countryCode));
     lines.push("运营商：" + (outISP?.organization || "Unknown"));
     return lines;
   }
@@ -324,15 +325,15 @@ function buildOutboundSection(outIP, outIPv6, outGeo, outISP, ipv6Data) {
   if (sameLocation) {
     lines.push("出口 IP⁴：" + outIP);
     lines.push("出口 IP⁶：" + outIPv6);
-    lines.push("地区：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName));
+    lines.push("地区：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName, outGeo?.countryCode));
     lines.push("运营商：" + (outISP?.organization || "Unknown"));
   } else {
     lines.push("出口 IP⁴：" + outIP);
-    lines.push("地区⁴：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName));
+    lines.push("地区⁴：" + formatGeo(outGeo?.countryCode, outGeo?.city, outGeo?.regionName, outGeo?.countryCode));
     lines.push("运营商⁴：" + (outISP?.organization || "Unknown"));
     lines.push("");
     lines.push("出口 IP⁶：" + outIPv6);
-    lines.push("地区⁶：" + formatGeo(ipv6Data?.country_code, ipv6Data?.city, ipv6Data?.region));
+    lines.push("地区⁶：" + formatGeo(ipv6Data?.country_code, ipv6Data?.city, ipv6Data?.region, ipv6Data?.country_code));
     lines.push("运营商⁶：" + (ipv6Data?.organization || "Unknown"));
   }
 
@@ -349,7 +350,7 @@ function buildPanelContent({ riskInfo, riskResult, ipType, ipSrc, inIP, inGeo, i
     "IP 类型：" + ipType + " | " + ipSrc,
     "",
     "入口 IP：" + inIP,
-    "地区：" + formatGeo(inGeo?.countryCode, inGeo?.city, inGeo?.regionName),
+    "地区：" + formatGeo(inGeo?.countryCode, inGeo?.city, inGeo?.regionName, inGeo?.countryCode),
     "运营商：" + (inISP?.organization || "Unknown"),
     "",
     ...buildOutboundSection(outIP, outIPv6, outGeo, outISP, ipv6Data)
