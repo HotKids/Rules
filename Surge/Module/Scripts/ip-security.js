@@ -190,7 +190,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api\.ip\.sb|ip-api\.com)/i, 10);
+  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ip-api\.com)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -202,7 +202,7 @@ async function getPolicy() {
   await httpJSON(CONFIG.urls.outboundIP);
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/api\.ip\.sb/i, 5);
+  policy = await findPolicyInRecent(/api(-ipv4)?\.ip\.sb/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
