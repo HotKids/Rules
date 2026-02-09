@@ -9,7 +9,7 @@
  *
  * 数据来源：
  * ① 入口 IP: bilibili API (DIRECT)
- * ② 出口 IP: ip.sb API
+ * ② 出口 IP: ip.sb API (IPv4/IPv6)
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
@@ -48,7 +48,7 @@ const CONFIG = {
   urls: {
     inboundIP: "https://api.bilibili.com/x/web-interface/zone",
     outboundIP: "https://api-ipv4.ip.sb/geoip",
-    outboundIPv6: "https://api64.ip.sb/geoip",
+    outboundIPv6: "https://api-ipv6.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
     geoAPI: (ip) => `http://ip-api.com/json/${ip}?fields=country,countryCode,regionName,city`,
@@ -317,7 +317,7 @@ async function fetchIPs() {
 
   const v6ip = exit6?.ip;
   // 仅当返回的 IP 确实是 IPv6 格式（含 :）时才视为有效 IPv6
-  // api64.ip.sb 无 IPv6 连接时会通过 IPv4 访回相同的 IPv4 地址
+  // api-ipv6.ip.sb 无 IPv6 连接时可能通过 IPv4 返回相同的 IPv4 地址
   const hasIPv6 = v6ip && v6ip.includes(":");
 
   return {
