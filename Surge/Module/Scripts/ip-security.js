@@ -55,7 +55,7 @@ const CONFIG = {
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
   },
-  ipv6Timeout: 1500,
+  ipv6Timeout: 3000,
   policyRetryDelay: 500,
   riskLevels: [
     { max: 15, label: "极度纯净 IP", color: "#0D6E3D" },
