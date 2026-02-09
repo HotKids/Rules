@@ -315,11 +315,16 @@ async function fetchIPs() {
     ])
   ]);
 
+  const v6ip = exit6?.ip;
+  // 仅当返回的 IP 确实是 IPv6 格式（含 :）时才视为有效 IPv6
+  // api64.ip.sb 无 IPv6 连接时会通过 IPv4 访回相同的 IPv4 地址
+  const hasIPv6 = v6ip && v6ip.includes(":");
+
   return {
     inIP: enter?.data?.addr || null,
     outIP: exit?.ip || null,
-    outIPv6: exit6?.ip || null,
-    outIPv6Data: exit6
+    outIPv6: hasIPv6 ? v6ip : null,
+    outIPv6Data: hasIPv6 ? exit6 : null
   };
 }
 
