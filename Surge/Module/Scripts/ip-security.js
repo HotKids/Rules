@@ -13,7 +13,7 @@
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: ipapi.co API
+ * ⑥ 地理/运营商: ip.sb (入口), ipapi.co (出口, ip.sb 兜底)
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
@@ -51,6 +51,7 @@ const CONFIG = {
     outboundIPv6: "https://api-ipv6.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
+    inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
     ipInfo: (ip) => `https://ipapi.co/${ip}/json/`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
@@ -167,6 +168,20 @@ function formatGeo(countryCode, ...parts) {
 }
 
 /**
+ * 将 ip.sb 返回字段归一化为 ipapi.co 格式
+ */
+function normalizeIpSb(data) {
+  if (!data) return null;
+  return {
+    country_code: data.country_code,
+    country_name: data.country,
+    city: data.city,
+    region: data.region,
+    org: data.organization
+  };
+}
+
+/**
  * 从 Scamalytics HTML 中解析风险分数
  */
 function parseScamalyticsScore(html) {
@@ -196,12 +211,11 @@ async function getPolicy() {
     return policy;
   }
 
-  // 发送测试请求后重试
-  console.log("未找到策略记录，发送测试请求");
-  await httpJSON(CONFIG.urls.outboundIP);
+  // fetchIPs 阶段已发送过 outboundIP 请求，等待后直接重试
+  console.log("未找到策略记录，等待后重试");
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/api(-ipv4)?\.ip\.sb/i, 5);
+  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipapi\.co)/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -252,20 +266,22 @@ async function getRiskScore(ip) {
     console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
   }
 
-  // 2. ProxyCheck.io（免费）
-  const proxyData = await httpJSON(CONFIG.urls.proxyCheck(ip));
+  // 2&3. ProxyCheck + Scamalytics 并行请求
+  const [proxyData, scamHtml] = await Promise.all([
+    httpJSON(CONFIG.urls.proxyCheck(ip)),
+    httpRaw(CONFIG.urls.scamalytics(ip))
+  ]);
+
   if (proxyData?.[ip]?.risk !== undefined) {
     return saveAndReturn(proxyData[ip].risk, "ProxyCheck");
   }
-  console.log("ProxyCheck 回落: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
+  console.log("ProxyCheck 失败: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
 
-  // 3. Scamalytics（兜底）
-  const html = await httpRaw(CONFIG.urls.scamalytics(ip));
-  const score = parseScamalyticsScore(html);
+  const score = parseScamalyticsScore(scamHtml);
   if (score !== null) {
     return saveAndReturn(score, "Scamalytics");
   }
-  console.log("Scamalytics 回落: " + (html ? "解析失败" : "请求失败"));
+  console.log("Scamalytics 失败: " + (scamHtml ? "解析失败" : "请求失败"));
 
   return saveAndReturn(50, "Default");
 }
@@ -322,7 +338,9 @@ async function fetchIPs() {
   return {
     inIP: enter?.data?.addr || null,
     outIP: exit?.ip || null,
-    outIPv6: hasIPv6 ? v6ip : null
+    outIPv6: hasIPv6 ? v6ip : null,
+    outRaw: exit,
+    v6Raw: hasIPv6 ? exit6 : null
   };
 }
 
@@ -433,7 +451,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   }
 
   // 2. 获取入口/出口 IP
-  const { inIP, outIP, outIPv6 } = await fetchIPs();
+  const { inIP, outIP, outIPv6, outRaw, v6Raw } = await fetchIPs();
 
   if (!inIP || !outIP) {
     console.log("IP 获取失败");
@@ -451,14 +469,19 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     getPolicy(),
     getRiskScore(outIP),
     getIPType(),
-    httpJSON(CONFIG.urls.ipInfo(inIP)),
+    httpJSON(CONFIG.urls.inboundInfo(inIP)),
     httpJSON(CONFIG.urls.ipInfo(outIP))
   ];
   if (outIPv6) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
 
   const results = await Promise.all(queries);
-  const [policy, riskInfo, ipTypeResult, inInfo, outInfo] = results;
-  const ipv6Info = outIPv6 ? results[5] : null;
+  const [policy, riskInfo, ipTypeResult, inInfoRaw, outInfoRaw] = results;
+  const ipv6InfoRaw = outIPv6 ? results[5] : null;
+
+  // 入口用 ip.sb（归一化），出口用 ipapi.co（失败时回落到 ip.sb 已有数据）
+  const inInfo = normalizeIpSb(inInfoRaw);
+  const outInfo = outInfoRaw || normalizeIpSb(outRaw);
+  const ipv6Info = outIPv6 ? (ipv6InfoRaw || normalizeIpSb(v6Raw)) : null;
 
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
