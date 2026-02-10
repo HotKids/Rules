@@ -155,7 +155,8 @@ function surgeAPI(method, path) {
 // ==================== 数据处理工具 ====================
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
-  if (cc.toUpperCase() === "TW" && args.twFlag !== "tw") cc = "CN";
+  cc = cc.toUpperCase();
+  if (cc === "TW" && args.twFlag !== "tw") cc = "CN";
   const b = 0x1f1e6;
   return String.fromCodePoint(b + cc.charCodeAt(0) - 65, b + cc.charCodeAt(1) - 65);
 }
@@ -466,6 +467,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
 
 // ==================== 主执行函数 ====================
 (async () => {
+  try {
   console.log("=== IP 安全检测开始 ===");
 
   // 1. EVENT 触发时延迟等待网络稳定
@@ -563,7 +565,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     const tolerance = 15;
     const remainder = elapsed % interval;
     const isAutoRefresh = lastRun > 0 && elapsed > tolerance
-      && (remainder < tolerance || remainder > interval - tolerance);
+      && (remainder <= tolerance || remainder >= interval - tolerance);
     if (!isAutoRefresh) {
       isMask = !isMask;
       $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
@@ -582,5 +584,9 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
       icon: "leaf.fill",
       "icon-color": riskResult.color
     });
+  }
+  } catch (e) {
+    console.log("未捕获异常: " + (e.message || e));
+    done({ title: "检测异常", content: e.message || String(e), icon: "leaf", "icon-color": "#9E9E9E" });
   }
 })();
