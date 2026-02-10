@@ -1,5 +1,5 @@
 #!name=Streaming & AI Service Monitor
-#!desc=检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit、IG Music
+#!desc=检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
 #!arguments=geminiapikey:null,nfprice:true
