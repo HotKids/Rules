@@ -247,7 +247,7 @@ async function getPolicyAndEntrance() {
 
   let entranceIP = null;
   if (/\(Proxy\)/.test(hit.remoteAddress)) {
-    entranceIP = hit.remoteAddress.replace(/\s*\(Proxy\)\s*/, "");
+    entranceIP = hit.remoteAddress.replace(/\s*\(Proxy\)\s*/, "").replace(/:\d+$/, "");
     console.log("找到入口 IP: " + entranceIP);
   }
 
