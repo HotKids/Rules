@@ -21,6 +21,7 @@
  * - ipqs_key: IPQualityScore API Key (可选)
  * - lang: 本地 IP 地理信息语言，en(默认)=英文(ip.sb)，zh=中文(bilibili)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
+ * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
  * 配置示例：
@@ -46,7 +47,9 @@ const CONFIG = {
   storeKeys: {
     lastEvent: "lastNetworkInfoEvent",
     lastPolicy: "lastProxyPolicy",
-    riskCache: "riskScoreCache"
+    riskCache: "riskScoreCache",
+    maskToggle: "ipMaskToggle",
+    lastRun: "ipLastRunTime"
   },
   urls: {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
@@ -99,6 +102,7 @@ function parseArguments() {
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
     lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
+    twFlag: (arg.tw_flag && arg.tw_flag !== "null") ? arg.tw_flag : "cn",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
 }
@@ -147,7 +151,7 @@ function surgeAPI(method, path) {
 // ==================== 数据处理工具 ====================
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
-  if (cc.toUpperCase() === "TW") cc = "CN";
+  if (cc.toUpperCase() === "TW" && args.twFlag !== "tw") cc = "CN";
   const b = 0x1f1e6;
   return String.fromCodePoint(b + cc.charCodeAt(0) - 65, b + cc.charCodeAt(1) - 65);
 }
@@ -520,8 +524,24 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
 
-  // 5. 根据触发类型输出结果
-  const isMask = args.maskIP;
+  // 5. IP 打码切换：手动点击切换，自动刷新和 EVENT 保持当前状态
+  const maskStored = $persistentStore.read(CONFIG.storeKeys.maskToggle);
+  let isMask = maskStored !== null ? maskStored === "1" : args.maskIP;
+  if (!args.isEvent) {
+    const now = Math.floor(Date.now() / 1000);
+    const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun)) || 0;
+    $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
+    const elapsed = now - lastRun;
+    const interval = 600; // 需与 sgmodule update-interval 一致
+    const tolerance = 15;
+    const remainder = elapsed % interval;
+    const isAutoRefresh = lastRun > 0 && elapsed > tolerance
+      && (remainder < tolerance || remainder > interval - tolerance);
+    if (!isAutoRefresh) {
+      isMask = !isMask;
+      $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
+    }
+  }
   const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info };
 
   if (args.isEvent) {
