@@ -1,96 +1,45 @@
 /**
  * =============================================================================
- * 流媒体解锁检测脚本 - Surge Panel Script
+ * 流媒体 & AI 服务解锁检测脚本 - Surge Panel Script
  * =============================================================================
- * @description  检测代理节点对各大流媒体和 AI 服务的解锁状态
- * @version      1.7.0 (HBO Max Detection Fix - 2025-12-16)
+ * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
+ * @version      2.0.0 (2026-02-10)
  * @author       HotKids & ChatGPT & Claude
- * 
+ *
  * ═══════════════════════════════════════════════════════════════════════════
- * 📋 支持的服务
+ * 📋 支持的服务（10 项）
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * 🎬 流媒体服务
- *    ├─ Netflix       含价格显示（可选关闭）
- *    ├─ Disney+       支持 Hotstar 地区识别（ID/MY/TH/PH 等东南亚地区）
- *    ├─ HBO Max       支持第三方平台识别（JP/KR/CA）
- *    ├─ YouTube       双重请求机制，准确检测
+ *
+ * 🎬 流媒体
+ *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
+ *    ├─ Disney+       支持 Hotstar 地区识别（ID/MY/TH/PH/VN）
+ *    ├─ HBO Max       支持第三方平台识别（JP/KR/CA）、VPN 检测
+ *    ├─ YouTube       双重请求机制（带/不带 Cookie）
  *    └─ Spotify       标准地区检测
- * 
+ *
  * 🤖 AI 服务
- *    ├─ ChatGPT       OpenAI 服务检测
- *    ├─ Claude AI     Anthropic 服务检测
- *    └─ Gemini API    Google AI 检测（需提供 API Key）
- * 
- * 🌐 社交平台
- *    └─ Reddit        地区访问检测
- * 
+ *    ├─ ChatGPT       区分 OK / Web Only / Mobile Only
+ *    ├─ Gemini        网页检测 + API Key fallback
+ *    └─ Claude        地区可用性检测
+ *
+ * 🌐 社交 & 其他
+ *    ├─ Reddit        地区访问检测
+ *    └─ IG Music      Instagram 授权音乐检测
+ *
  * ═══════════════════════════════════════════════════════════════════════════
- * ⚙️ 功能特性
+ * ⚙️ 参数配置
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * • 🚀 并发检测技术，响应速度快
- * • 🌍 自动识别并显示地区代码
- * • 🍿 Netflix 价格显示（默认开启，可通过 nfprice=false 关闭）
- * • 🐭 Disney+ Hotstar 地区特殊标识（ID, MY, TH, PH 等东南亚地区 Disney+ Hotstar 现已更名为 Disney+ 此脚本仅作特殊标识以作区分）
- * • 🧙‍♂️ HBO Max 智能检测
- *     - 🇯🇵 JP 地区：验证 U-NEXT 可用性
- *       • U-NEXT 可用 → "JP (U-NEXT)"（黄灯⚠️）
- *       • U-NEXT 不可用 → "JP (No)"（黄灯⚠️）
- *     - 🇰🇷 KR 地区：显示 "KR (Coupang Play)"（通过 Coupang Play 提供，黄灯⚠️）
- *     - 🇨🇦 CA 地区：显示 "CA (Crave)"（通过 Bell Media 的 Crave 提供，黄灯⚠️）
- *     - 其他地区：从主页提取可用地区列表，判断是否可用
- *       • 可用 → 显示地区码（绿灯✅）
- *       • 不可用 → 显示 "地区码 (No)"（黄灯⚠️）
- *     - VPN 检测：显示 "地区码 (VPN)"（黄灯⚠️）
- *     - 参考 RegionRestrictionCheck 项目优化
- * • 📺 YouTube Premium 增强检测
- *     - 双重请求机制（带/不带 Cookie）
- *     - 检查 purchaseButtonOverride 和 Start trial 标识
- *     - 始终显示地区码（如能提取）
- *     - 参考 RegionRestrictionCheck 项目优化
- * • ✨ Gemini API 可选检测（需提供有效 API Key）
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * 📖 使用方法
- * ═══════════════════════════════════════════════════════════════════════════
- * 
- * 1. 添加到 Surge Module 或 Panel
- * 2. 可选参数：
- *    • geminiapikey=YOUR_KEY    启用 Gemini API 检测
- *    • nfprice=false            关闭 Netflix 价格显示
- * 3. 切换代理节点后点击面板刷新查看解锁状态
- * 
+ *
+ * • geminiapikey=YOUR_KEY    Gemini API Key（可选，增强检测准确性）
+ * • nfprice=false            关闭 Netflix 价格显示（默认开启）
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎨 状态指示
  * ═══════════════════════════════════════════════════════════════════════════
- * 
- * 🟢 绿色：所有检测服务均可用
- * 🟡 黄色：部分服务不可用、检测失败或检测到 VPN
- * 
- * ═══════════════════════════════════════════════════════════════════════════
- * 📝 更新日志
- * ═══════════════════════════════════════════════════════════════════════════
- * 
- * v1.7.0 (2025-12-16) - HBO Max 检测完全重写
- * ┌─────────────────────────────────────────────────────────────────────────
- * │ ✨ HBO Max 检测逻辑重写
- * │   • 参考 RegionRestrictionCheck 开源项目的检测方法
- * │   • 从主页提取可用地区列表（提取 "url":"/xx/xx" 格式链接）
- * │   • 判断 API 返回的地区码是否在可用列表中
- * │   • 第三方平台特殊标识：
- * │     - JP (U-NEXT) - 日本通过 U-NEXT 提供
- * │     - CA (Crave) - 加拿大通过 Bell Media 的 Crave 提供
- * │     - KR (Coupang Play) - 韩国通过 Coupang Play 提供
- * │   • 移除不可靠的 geo-availability 页面检测
- * │   • 修复误判问题，提高检测准确性
- * │
- * │ ✨ Disney+ Hotstar 地区调整
- * │   • 移除 IN（印度）的 Hotstar 标识，正常显示为 IN
- * │   • 保留东南亚 Hotstar 地区：ID, MY, PH, TH, VN
- * │   • SG（新加坡）正常显示，不标识为 Hotstar
- * └─────────────────────────────────────────────────────────────────────────
- * 
+ *
+ * 🟢 所有服务均可用
+ * 🟡 部分服务不可用 / 受限 / 超时
+ *
  * =============================================================================
  */
 
@@ -156,7 +105,7 @@ class Utils {
   static buildLine(name, result, suffix = "") {
     const statusMap = {
       [STATUS.OK]: result.region || "OK",
-      [STATUS.COMING]: result.region?.includes("(") ? result.region : `${result.region || "N/A"} (Coming)`,
+      [STATUS.COMING]: (result.region?.includes("(") || result.region?.includes(" ")) ? result.region : `${result.region || "N/A"} (Coming)`,
       [STATUS.FAIL]: result.region || "No",
       [STATUS.TIMEOUT]: "Timeout",
       [STATUS.ERROR]: result.region || "Error"
@@ -760,6 +709,28 @@ class ServiceChecker {
       return Utils.createResult(STATUS.FAIL, res.status === 403 ? "IP Blocked" : "No");
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
+
+  /**
+   * Instagram Music 授权检测
+   * 参考 1-stream/RegionRestrictionCheck：查询含音乐帖子的 should_mute_audio
+   * @returns {Promise<Object>} 检测结果
+   */
+  static async checkInstagramMusic() {
+    try {
+      const res = await Utils.request({
+        url: "https://www.instagram.com/graphql/query",
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "av=0&__d=www&__user=0&__a=1&__req=3&dpr=1&__ccg=UNKNOWN&__rev=1013915830&__s=e0krj4:y7ob1k:rsdf9x&__hsi=7375722728458088454&__comet_req=7&lsd=AVpOeIV9Tzw&jazoest=2984&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=PolarisPostActionLoadPostQueryQuery&variables=%7B%22shortcode%22%3A%22C2YEAdOh9AB%22%2C%22fetch_comment_count%22%3A0%2C%22parent_comment_count%22%3A0%2C%22child_comment_count%22%3A0%2C%22fetch_like_count%22%3A0%2C%22fetch_tagged_user_count%22%3Anull%2C%22fetch_preview_comment_count%22%3A0%2C%22has_threaded_comments%22%3Atrue%2C%22hoisted_comment_id%22%3Anull%2C%22hoisted_reply_id%22%3Anull%7D&server_timestamps=true&doc_id=25531498899829322"
+      });
+      const body = res.body || "";
+      const m = body.match(/"should_mute_audio"\s*:\s*(true|false)/);
+      if (!m) return Utils.createResult(STATUS.ERROR, "Error");
+      return m[1] === "false"
+        ? Utils.createResult(STATUS.OK, "OK")
+        : Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
+  }
 }
 
 /**
@@ -776,10 +747,11 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit()
+      ServiceChecker.checkReddit(),
+      ServiceChecker.checkInstagramMusic()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, igMusic] = results;
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
@@ -794,7 +766,8 @@ class ServiceChecker {
       { name: "ChatGPT", result: chatgpt },
       { name: "Gemini", result: gemini },
       { name: "Claude", result: claude },
-      { name: "Reddit", result: reddit }
+      { name: "Reddit", result: reddit },
+      { name: "IG Music", result: igMusic }
     ].filter(Boolean);
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
