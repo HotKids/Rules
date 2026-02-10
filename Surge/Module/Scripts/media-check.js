@@ -781,12 +781,12 @@ class ServiceChecker {
       ServiceChecker.checkYoutube(),
       ServiceChecker.checkSpotify(),
       ServiceChecker.checkChatGPT(),
-      ServiceChecker.checkClaude(),
       ServiceChecker.checkGemini(),
+      ServiceChecker.checkClaude(),
       ServiceChecker.checkReddit()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, claude, gemini, reddit] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
@@ -799,8 +799,8 @@ class ServiceChecker {
       { name: "YouTube", result: youtube },
       { name: "Spotify", result: spotify },
       { name: "ChatGPT", result: chatgpt },
-      { name: "Claude", result: claude },
       { name: "Gemini", result: gemini },
+      { name: "Claude", result: claude },
       { name: "Reddit", result: reddit }
     ].filter(Boolean);
 
