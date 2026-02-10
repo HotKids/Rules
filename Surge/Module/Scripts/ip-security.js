@@ -13,12 +13,12 @@
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → ip-api.com (中文)
+ * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → bilibili (中文, ip.sb 兜底)
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key (可选)
- * - lang: 地理信息语言，en(默认)=英文(ipinfo.io)，zh=中文(ip-api.com)
+ * - lang: 地理信息语言，en(默认)=英文(ipinfo.io)，zh=中文(bilibili)
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
  * 配置示例：
@@ -54,7 +54,6 @@ const CONFIG = {
     ipTypeCard: "https://my.ippure.com/v1/card",
     inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
     ipInfo: (ip) => `https://ipinfo.io/${ip}/json`,
-    ipApiZh: (ip) => `http://ip-api.com/json/${ip}?lang=zh-CN`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
@@ -200,17 +199,19 @@ function normalizeIpInfo(data) {
 }
 
 /**
- * 将 ip-api.com 返回字段归一化为内部格式
- * ip-api.com: { status:"success", country:"中国", countryCode:"CN", regionName:"广东", city:"广州市", isp, org }
+ * 将 bilibili zone API 返回字段归一化为内部格式（中文）
+ * bilibili: { code:0, data:{ addr, country:"中国", province:"香港", city:"", isp:"数据中心" } }
+ * 注意：bilibili 不返回 ISO country_code，需从 ip.sb 补充
  */
-function normalizeIpApi(data) {
-  if (!data || data.status !== "success") return null;
+function normalizeBilibili(data) {
+  const d = data?.data;
+  if (!d || !d.country) return null;
   return {
-    country_code: data.countryCode,
-    country_name: data.country,
-    city: data.city,
-    region: data.regionName,
-    org: data.isp || data.org || ""
+    country_code: null,
+    country_name: d.country,
+    city: d.city || d.province,
+    region: d.province,
+    org: d.isp || ""
   };
 }
 
@@ -237,7 +238,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com)/i, 10);
+  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -248,7 +249,7 @@ async function getPolicy() {
   console.log("未找到策略记录，等待后重试");
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com)/i, 5);
+  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -372,6 +373,7 @@ async function fetchIPs() {
     inIP: enter?.data?.addr || null,
     outIP: exit?.ip || null,
     outIPv6: hasIPv6 ? v6ip : null,
+    inRaw: enter,
     outRaw: exit,
     v6Raw: hasIPv6 ? exit6 : null
   };
@@ -484,7 +486,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   }
 
   // 2. 获取入口/出口 IP
-  const { inIP, outIP, outIPv6, outRaw, v6Raw } = await fetchIPs();
+  const { inIP, outIP, outIPv6, inRaw, outRaw, v6Raw } = await fetchIPs();
 
   if (!inIP || !outIP) {
     console.log("IP 获取失败");
@@ -499,27 +501,41 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
 
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
   const isZh = args.lang === "zh";
-  const geoUrl = isZh ? CONFIG.urls.ipApiZh : CONFIG.urls.ipInfo;
-  const inGeoUrl = isZh ? CONFIG.urls.ipApiZh(inIP) : CONFIG.urls.inboundInfo(inIP);
 
   const queries = [
     getPolicy(),
     getRiskScore(outIP),
     getIPType(),
-    httpJSON(inGeoUrl),
-    httpJSON(geoUrl(outIP))
+    httpJSON(CONFIG.urls.inboundInfo(inIP)),
+    isZh ? httpJSON(CONFIG.urls.inboundIP) : httpJSON(CONFIG.urls.ipInfo(outIP))
   ];
-  if (outIPv6) queries.push(httpJSON(geoUrl(outIPv6)));
+  if (outIPv6) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
 
   const results = await Promise.all(queries);
-  const [policy, riskInfo, ipTypeResult, inInfoRaw, outInfoRaw] = results;
+  const [policy, riskInfo, ipTypeResult, inSbRaw, outGeoRaw] = results;
   const ipv6InfoRaw = outIPv6 ? results[5] : null;
 
-  // 归一化地理信息：zh 用 ip-api.com，en 用 ipinfo.io / ip.sb
-  const normalizeGeo = isZh ? normalizeIpApi : normalizeIpInfo;
-  const inInfo = isZh ? normalizeIpApi(inInfoRaw) : normalizeIpSb(inInfoRaw);
-  const outInfo = normalizeGeo(outInfoRaw) || normalizeIpSb(outRaw);
-  const ipv6Info = outIPv6 ? (normalizeGeo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+  let inInfo, outInfo, ipv6Info;
+  if (isZh) {
+    // 中文模式：入口用 bilibili DIRECT（fetchIPs 已获取），country_code 补充自 ip.sb
+    const inBili = normalizeBilibili(inRaw);
+    const inSb = normalizeIpSb(inSbRaw);
+    inInfo = inBili ? { ...inBili, country_code: inSb?.country_code || "" } : inSb;
+
+    // 出口：bilibili 无 DIRECT 调用，若返回的 IP 匹配出口则走了代理，否则回落 ip.sb
+    const outBili = normalizeBilibili(outGeoRaw);
+    const biliIsProxy = outGeoRaw?.data?.addr === outIP;
+    const outSb = normalizeIpSb(outRaw);
+    outInfo = (biliIsProxy && outBili) ? { ...outBili, country_code: outSb?.country_code || "" } : outSb;
+
+    // IPv6：bilibili 无 IPv6 端点，用 ipinfo.io / ip.sb 兜底
+    ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+  } else {
+    // 英文模式：入口用 ip.sb，出口用 ipinfo.io（回落 ip.sb）
+    inInfo = normalizeIpSb(inSbRaw);
+    outInfo = normalizeIpInfo(outGeoRaw) || normalizeIpSb(outRaw);
+    ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+  }
 
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;

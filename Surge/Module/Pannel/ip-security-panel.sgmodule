@@ -3,7 +3,7 @@
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
 #!arguments=ipqs_key:null,lang:en,event_delay:2
-#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务\nlang:(可选) 地理信息语言，en=英文(ipinfo.io)，zh=中文(ip-api.com)，默认 en\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
+#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务\nlang:(可选) 地理信息语言，en=英文(ipinfo.io)，zh=中文(bilibili)，默认 en\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
 
 [Panel]
 ip-security-panel = script-name=ip-security-panel,update-interval=600
