@@ -1,5 +1,5 @@
 #!name=IP Security Monitor
-#!desc=显示 IP 风险评分、类型、代理策略和入口/出口 IP 地理信息，支持网络变化自动通知
+#!desc=显示 IP 风险评分、类型、代理策略和本地/入口/出口 IP 地理信息，支持网络变化自动通知
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
 #!arguments=ipqs_key:null,lang:en,mask_ip:0,event_delay:2
