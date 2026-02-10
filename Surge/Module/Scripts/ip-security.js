@@ -14,13 +14,13 @@
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑥ IP 类型: IPPure API
- * ⑦ 地理: 本地 IP → lang=zh bilibili / lang=en ip.sb | 入口/出口 IP 地区 → geo_api=ipinfo ipinfo.io / geo_api=ipapi ip-api.com(en) / geo_api=ipapi-zh ip-api.com(zh)
+ * ⑦ 地理: 本地 IP → local_api=bilibili bilibili / local_api=ipsb ip.sb | 入口/出口 IP 地区 → geo_api=ipinfo ipinfo.io / geo_api=ipapi ip-api.com(en) / geo_api=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key (可选)
- * - lang: 本地 IP 地理信息语言，en(默认)=英文(ip.sb)，zh=中文(bilibili)
+ * - local_api: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
  * - geo_api: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
@@ -103,7 +103,7 @@ function parseArguments() {
   return {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
-    lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
+    localApi: (arg.local_api && arg.local_api !== "null") ? arg.local_api : "bilibili",
     geoApi: (arg.geo_api && arg.geo_api !== "null") ? arg.geo_api : "ipinfo",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
     twFlag: (arg.tw_flag && arg.tw_flag !== "null") ? arg.tw_flag : "cn",
@@ -112,7 +112,7 @@ function parseArguments() {
 }
 
 const args = parseArguments();
-console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", 语言: " + args.lang);
+console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", 本地: " + args.localApi);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
@@ -414,7 +414,7 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask) {
   return lines;
 }
 
-function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo }) {
+function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
@@ -422,7 +422,7 @@ function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, 
     "IP 类型：" + ipType + " | " + ipSrc,
     "",
     "本地 IP：" + m(localIP),
-    "地区：" + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.region, isZh ? localInfo?.country_name : localInfo?.country_code),
+    "地区：" + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.region, useBilibili ? localInfo?.country_name : localInfo?.country_code),
     "运营商：" + (localInfo?.org || "Unknown"),
   ];
 
@@ -485,7 +485,7 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   }
 
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
-  const isZh = args.lang === "zh";
+  const useBilibili = args.localApi === "bilibili";
 
   // 入口/出口地理数据源：geo_api=ipinfo → ipinfo.io, ipapi → ip-api.com(en), ipapi-zh → ip-api.com(zh-CN)
   const useIpApi = args.geoApi.startsWith("ipapi");
@@ -512,7 +512,7 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
 
   // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
   let localInfo;
-  if (isZh) {
+  if (useBilibili) {
     const bili = normalizeBilibili(localRaw);
     const sb = normalizeIpSb(localSbRaw);
     localInfo = bili
@@ -565,7 +565,7 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
       $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
     }
   }
-  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo };
+  const context = { useBilibili, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
