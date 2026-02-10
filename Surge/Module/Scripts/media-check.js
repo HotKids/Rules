@@ -689,7 +689,7 @@ class ServiceChecker {
   static async checkGemini() {
     const args = Utils.parseArgs($argument);
     const apiKey = (args.geminiapikey || "").trim();
-    if (!apiKey || apiKey === "0" || ["{", "}", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
+    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
