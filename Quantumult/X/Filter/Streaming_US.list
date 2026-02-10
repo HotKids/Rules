@@ -15,16 +15,12 @@ DOMAIN,content-ause1-ur-discovery1.uplynk.com,Streaming_US
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming_US
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
 
-# > HBO Max
-
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming_US
 DOMAIN-SUFFIX,hulu.tv,Streaming_US
 DOMAIN-SUFFIX,huluim.com,Streaming_US
 DOMAIN-SUFFIX,hulustream.com,Streaming_US
 DOMAIN,cws-hulu.conviva.com,Streaming_US
-
-# > Max
 
 # > MGM+
 DOMAIN-SUFFIX,mgmplus.com,Streaming_US
