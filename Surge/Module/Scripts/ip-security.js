@@ -393,8 +393,9 @@ function checkIPChange(localIP, outIP, outIPv6) {
 
 // ==================== 面板内容构建 ====================
 function geoLabel(info) {
-  // ip-api.com 返回完整国名，ipinfo.io 只有 country_code
-  return info?.country_name?.length > 2 ? info.country_name : info?.country_code;
+  // ip-api.com: country_name="Hong Kong"/"香港" ≠ country_code="HK" → 用国名
+  // ipinfo.io: country_name="HK" = country_code="HK" → 用 country_code
+  return (info?.country_name && info.country_name !== info.country_code) ? info.country_name : info?.country_code;
 }
 
 function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isMask) {
