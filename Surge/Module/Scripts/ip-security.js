@@ -2,23 +2,25 @@
  * Surge IP Security Check Script
  *
  * 功能概述：
- * - 检测并显示入口/出口 IP 信息
+ * - 检测并显示本地/入口/出口 IP 信息
  * - 评估 IP 风险等级和类型
  * - 显示地理位置和运营商信息
  * - 支持网络变化自动检测和通知
  *
  * 数据来源：
- * ① 入口 IP: bilibili API (DIRECT)
+ * ① 本地 IP: bilibili API (DIRECT)
  * ② 出口 IP: ip.sb API (IPv4/IPv6)
- * ③ 代理策略: Surge /v1/requests/recent
- * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
- * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → 大陆 bilibili, 非大陆地区 ipwho.is + 运营商 ipinfo.io
+ * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
+ * ④ 代理策略: Surge /v1/requests/recent
+ * ⑤ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
+ * ⑥ IP 类型: IPPure API
+ * ⑦ 地理/运营商: 本地 IP → lang=zh bilibili / lang=en ip.sb | 入口/出口 IP → ipinfo.io
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key (可选)
- * - lang: 地理信息语言，en(默认)=英文(ipinfo.io)，zh=中文(大陆bilibili/非大陆ipwho.is)
+ * - lang: 本地 IP 地理信息语言，en(默认)=英文(ip.sb)，zh=中文(bilibili)
+ * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
  * 配置示例：
@@ -33,8 +35,8 @@
  * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2
  *
  * @author HotKids&Claude
- * @version 4.0.0
- * @date 2026-02-09
+ * @version 5.0.0
+ * @date 2026-02-10
  */
 
 // ==================== 全局配置 ====================
@@ -47,15 +49,13 @@ const CONFIG = {
     riskCache: "riskScoreCache"
   },
   urls: {
-    inboundIP: "https://api.bilibili.com/x/web-interface/zone",
+    localIP: "https://api.bilibili.com/x/web-interface/zone",
     outboundIP: "https://api-ipv4.ip.sb/geoip",
     outboundIPv6: "https://api-ipv6.ip.sb/geoip",
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
-    inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
-    biliGeo: (ip) => `https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr?ip=${ip}`,
+    ipSbGeo: (ip) => `https://api.ip.sb/geoip/${ip}`,
     ipInfo: (ip) => `https://ipinfo.io/${ip}/json`,
-    ipWhoIs: (ip) => `https://ipwho.is/${ip}?lang=zh-CN`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
@@ -145,9 +145,6 @@ function surgeAPI(method, path) {
 }
 
 // ==================== 数据处理工具 ====================
-/**
- * 将国家代码转换为国旗 emoji
- */
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
   if (cc.toUpperCase() === "TW") cc = "CN";
@@ -155,45 +152,28 @@ function flag(cc) {
   return String.fromCodePoint(b + cc.charCodeAt(0) - 65, b + cc.charCodeAt(1) - 65);
 }
 
-/**
- * 根据风险分数返回对应的描述和颜色
- */
 function riskText(score) {
   const level = CONFIG.riskLevels.find(l => score <= l.max) || CONFIG.riskLevels.at(-1);
   return { label: level.label, color: level.color };
 }
 
-/**
- * IP 打码：保留首尾段，中间用 * 替代
- * IPv4: 123.45.67.89 → 123.***.***.89
- * IPv6: 2001:db8:85a3::7334 → 2001:**:**:7334
- */
 function maskIP(ip) {
   if (!ip) return ip;
   if (ip.includes(":")) {
-    // IPv6
     const parts = ip.split(":");
     if (parts.length <= 2) return ip;
     return parts[0] + ":" + parts.slice(1, -1).map(() => "**").join(":") + ":" + parts.at(-1);
   }
-  // IPv4
   const parts = ip.split(".");
   if (parts.length !== 4) return ip;
   return parts[0] + ".***.***." + parts[3];
 }
 
-/**
- * 格式化地理位置文本：🇺🇸 + 自定义部分
- * 面板用法：formatGeo(country_code, city, region, country_code) → 🇺🇸 City, Region, US
- * 通知用法：formatGeo(country_code, city, country_name) → 🇺🇸 City, United States
- */
 function formatGeo(countryCode, ...parts) {
-  return flag(countryCode) + " " + parts.filter(Boolean).join(", ");
+  const unique = parts.filter(Boolean).filter((v, i, a) => a.indexOf(v) === i);
+  return flag(countryCode) + " " + unique.join(", ");
 }
 
-/**
- * 将 ip.sb 返回字段归一化为内部格式
- */
 function normalizeIpSb(data) {
   if (!data) return null;
   return {
@@ -205,10 +185,6 @@ function normalizeIpSb(data) {
   };
 }
 
-/**
- * 将 ipinfo.io 返回字段归一化为内部格式
- * ipinfo.io: { country:"US", city, region, org:"AS15169 Google LLC" }
- */
 function normalizeIpInfo(data) {
   if (!data || !data.country) return null;
   return {
@@ -220,26 +196,6 @@ function normalizeIpInfo(data) {
   };
 }
 
-/**
- * 将 ipwho.is 返回字段归一化为内部格式（中文）
- * ipwho.is: { success:true, country:"美国", country_code:"US", region:"加利福尼亚", city:"山景城", connection:{ isp:"Google LLC", org, asn, domain } }
- */
-function normalizeIpWhoIs(data) {
-  if (!data || !data.success) return null;
-  return {
-    country_code: data.country_code,
-    country_name: data.country,
-    city: data.city,
-    region: data.region,
-    org: data.connection?.isp || data.connection?.org || ""
-  };
-}
-
-/**
- * 将 bilibili zone API 返回字段归一化为内部格式（中文）
- * bilibili: { code:0, data:{ addr, country:"中国", province:"香港", city:"", isp:"数据中心" } }
- * 注意：bilibili 不返回 ISO country_code，需从 ip.sb 补充
- */
 function normalizeBilibili(data) {
   const d = data?.data;
   if (!d || !d.country) return null;
@@ -254,65 +210,52 @@ function normalizeBilibili(data) {
   };
 }
 
-/**
- * 从 Scamalytics HTML 中解析风险分数
- */
 function parseScamalyticsScore(html) {
   const m = html?.match(/Fraud Score[^0-9]*([0-9]{1,3})/i);
   return m ? Number(m[1]) : null;
 }
 
-// ==================== 代理策略获取 ====================
+// ==================== 代理策略与入口 IP 获取 ====================
 /**
- * 从 Surge 最近请求中查找匹配的代理策略
+ * 从 Surge 最近请求中同时获取代理策略和入口 IP
+ * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
-async function findPolicyInRecent(pattern, limit) {
-  const res = await surgeAPI("GET", "/v1/requests/recent");
-  const hit = res?.requests?.slice(0, limit).find(i => pattern.test(i.URL));
-  return hit?.policyName || null;
-}
+async function getPolicyAndEntrance() {
+  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i;
 
-/**
- * 获取实际使用的代理策略（带重试和回落）
- */
-async function getPolicy() {
-  // 第一次查找
-  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ipwho\.is)/i, 10);
-  if (policy) {
-    console.log("找到代理策略: " + policy);
-    $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
-    return policy;
+  async function findInRecent(limit) {
+    const res = await surgeAPI("GET", "/v1/requests/recent");
+    return (res?.requests || []).slice(0, limit).find(i => pattern.test(i.URL));
   }
 
-  // fetchIPs 阶段已发送过 outboundIP 请求，等待后直接重试
-  console.log("未找到策略记录，等待后重试");
-  await wait(CONFIG.policyRetryDelay);
-
-  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ipwho\.is)/i, 5);
-  if (policy) {
-    console.log("重试后找到策略: " + policy);
-    $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
-    return policy;
+  let hit = await findInRecent(10);
+  if (!hit) {
+    console.log("未找到策略记录，等待后重试");
+    await wait(CONFIG.policyRetryDelay);
+    hit = await findInRecent(5);
   }
 
-  // 回落到上次保存的策略
-  const lastPolicy = $persistentStore.read(CONFIG.storeKeys.lastPolicy);
-  if (lastPolicy) {
-    console.log("使用上次保存的策略: " + lastPolicy);
-    return lastPolicy;
+  if (!hit) {
+    const lastPolicy = $persistentStore.read(CONFIG.storeKeys.lastPolicy);
+    console.log(lastPolicy ? "使用上次保存的策略: " + lastPolicy : "无法找到任何策略信息");
+    return { policy: lastPolicy || "Unknown", entranceIP: null };
   }
 
-  console.log("无法找到任何策略信息");
-  return "Unknown";
+  const policy = hit.policyName || "Unknown";
+  $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
+  console.log("找到代理策略: " + policy);
+
+  let entranceIP = null;
+  if (/\(Proxy\)/.test(hit.remoteAddress)) {
+    entranceIP = hit.remoteAddress.replace(/\s*\(Proxy\)\s*/, "");
+    console.log("找到入口 IP: " + entranceIP);
+  }
+
+  return { policy, entranceIP };
 }
 
 // ==================== 风险评分获取（三级回落） ====================
-/**
- * 获取 IP 风险分数
- * 优先级：IPQualityScore → ProxyCheck → Scamalytics
- */
 async function getRiskScore(ip) {
-  // 0. 检查缓存：IP 未变则直接返回
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
   if (cached) {
     try {
@@ -330,7 +273,6 @@ async function getRiskScore(ip) {
     return { score, source };
   }
 
-  // 1. IPQualityScore（需要 API Key）
   if (args.ipqsKey) {
     const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
     if (data?.success && data?.fraud_score !== undefined) {
@@ -339,7 +281,6 @@ async function getRiskScore(ip) {
     console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
   }
 
-  // 2&3. ProxyCheck + Scamalytics 并行请求
   const [proxyData, scamHtml] = await Promise.all([
     httpJSON(CONFIG.urls.proxyCheck(ip)),
     httpRaw(CONFIG.urls.scamalytics(ip))
@@ -360,12 +301,7 @@ async function getRiskScore(ip) {
 }
 
 // ==================== IP 类型检测（二级回落） ====================
-/**
- * 获取 IP 类型（住宅/机房、广播/原生）
- * 优先级：/v1/info JSON → /v1/card HTML 抓取
- */
 async function getIPType() {
-  // 1. 尝试 /v1/info JSON 接口
   const info = await httpJSON(CONFIG.urls.ipType);
   if (info && info.isResidential !== undefined) {
     console.log("IPPure /v1/info 返回 IP 类型数据");
@@ -376,7 +312,6 @@ async function getIPType() {
   }
   console.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
-  // 2. 回落到 /v1/card HTML 抓取
   const html = await httpRaw(CONFIG.urls.ipTypeCard);
   if (html) {
     const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
@@ -390,12 +325,9 @@ async function getIPType() {
 }
 
 // ==================== IP 获取 ====================
-/**
- * 获取入口/出口 IP 地址
- */
 async function fetchIPs() {
-  const [enter, exit, exit6] = await Promise.all([
-    httpJSON(CONFIG.urls.inboundIP, "DIRECT"),
+  const [local, exit, exit6] = await Promise.all([
+    httpJSON(CONFIG.urls.localIP, "DIRECT"),
     httpJSON(CONFIG.urls.outboundIP),
     Promise.race([
       httpJSON(CONFIG.urls.outboundIPv6),
@@ -404,26 +336,20 @@ async function fetchIPs() {
   ]);
 
   const v6ip = exit6?.ip;
-  // 仅当返回的 IP 确实是 IPv6 格式（含 :）时才视为有效 IPv6
-  // api-ipv6.ip.sb 无 IPv6 连接时可能通过 IPv4 返回相同的 IPv4 地址
   const hasIPv6 = v6ip && v6ip.includes(":");
 
   return {
-    inIP: enter?.data?.addr || null,
+    localIP: local?.data?.addr || null,
     outIP: exit?.ip || null,
     outIPv6: hasIPv6 ? v6ip : null,
-    inRaw: enter,
+    localRaw: local,
     outRaw: exit,
     v6Raw: hasIPv6 ? exit6 : null
   };
 }
 
 // ==================== 网络变化检测 ====================
-/**
- * 检查 IP 是否发生变化（EVENT 模式）
- * @returns {boolean} true 表示有变化或非 EVENT 模式，false 表示无变化应跳过
- */
-function checkIPChange(inIP, outIP, outIPv6) {
+function checkIPChange(localIP, outIP, outIPv6) {
   if (!args.isEvent) return true;
 
   const lastEvent = $persistentStore.read(CONFIG.storeKeys.lastEvent);
@@ -432,28 +358,24 @@ function checkIPChange(inIP, outIP, outIPv6) {
     try { lastData = JSON.parse(lastEvent); } catch (e) {}
   }
 
-  if (inIP === lastData.inIP && outIP === lastData.outIP && outIPv6 === lastData.outIP6) {
+  if (localIP === lastData.localIP && outIP === lastData.outIP && outIPv6 === lastData.outIPv6) {
     console.log("网络信息未变化，跳过");
     return false;
   }
 
   console.log("网络信息已变化");
-  $persistentStore.write(JSON.stringify({ inIP, outIP, outIP6: outIPv6 }), CONFIG.storeKeys.lastEvent);
+  $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6 }), CONFIG.storeKeys.lastEvent);
   return true;
 }
 
 // ==================== 面板内容构建 ====================
-/**
- * 构建出口 IP 显示内容
- */
-function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh, isMask) {
+function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isMask) {
   const lines = [];
-  const ct = (info) => isZh ? info?.country_name : info?.country_code;
   const m = (ip) => isMask ? maskIP(ip) : ip;
 
   if (!outIPv6) {
     lines.push("出口 IP：" + m(outIP));
-    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
+    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, outInfo?.country_code));
     lines.push("运营商：" + (outInfo?.org || "Unknown"));
     return lines;
   }
@@ -464,57 +386,64 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh, isMask) {
   if (sameLocation) {
     lines.push("出口 IP⁴：" + m(outIP));
     lines.push("出口 IP⁶：" + m(outIPv6));
-    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
+    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, outInfo?.country_code));
     lines.push("运营商：" + (outInfo?.org || "Unknown"));
   } else {
     lines.push("出口 IP⁴：" + m(outIP));
-    lines.push("地区⁴：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
+    lines.push("地区⁴：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, outInfo?.country_code));
     lines.push("运营商⁴：" + (outInfo?.org || "Unknown"));
     lines.push("");
     lines.push("出口 IP⁶：" + m(outIPv6));
-    lines.push("地区⁶：" + formatGeo(ipv6Info?.country_code, ipv6Info?.city, ipv6Info?.region, ct(ipv6Info)));
+    lines.push("地区⁶：" + formatGeo(ipv6Info?.country_code, ipv6Info?.city, ipv6Info?.region, ipv6Info?.country_code));
     lines.push("运营商⁶：" + (ipv6Info?.org || "Unknown"));
   }
 
   return lines;
 }
 
-/**
- * 构建完整面板内容
- */
-function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, outIP, outIPv6, outInfo, ipv6Info }) {
-  const ct = (info) => isZh ? info?.country_name : info?.country_code;
+function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
     "",
     "IP 类型：" + ipType + " | " + ipSrc,
     "",
-    "入口 IP：" + m(inIP),
-    "地区：" + formatGeo(inInfo?.country_code, inInfo?.city, inInfo?.region, ct(inInfo)),
-    "运营商：" + (inInfo?.org || "Unknown"),
-    "",
-    ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh, isMask)
+    "本地 IP：" + m(localIP),
+    "地区：" + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.region, isZh ? localInfo?.country_name : localInfo?.country_code),
+    "运营商：" + (localInfo?.org || "Unknown"),
   ];
+
+  if (entranceInfo) {
+    lines.push(
+      "",
+      "入口 IP：" + m(entranceIP),
+      "地区：" + formatGeo(entranceInfo?.country_code, entranceInfo?.city, entranceInfo?.region, entranceInfo?.country_code),
+      "运营商：" + (entranceInfo?.org || "Unknown")
+    );
+  }
+
+  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isMask));
 
   return lines.join("\n");
 }
 
 // ==================== 通知内容构建 ====================
-/**
- * 构建网络变化通知并发送
- */
-function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
+function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const title = "🔄 网络已切换 | " + policy;
-  const subtitle = "Ⓓ " + m(inIP) + " 🅟 " + m(outIP);
-  const body = [
-    "Ⓓ " + formatGeo(inInfo?.country_code, inInfo?.city, inInfo?.country_name) + " · " + (inInfo?.org || "Unknown"),
+  const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
+  const bodyLines = [
+    "Ⓓ " + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.country_name) + " · " + (localInfo?.org || "Unknown"),
+  ];
+  if (entranceInfo) {
+    bodyLines.push("Ⓔ " + m(entranceIP) + " " + formatGeo(entranceInfo?.country_code, entranceInfo?.city, entranceInfo?.region) + " · " + (entranceInfo?.org || "Unknown"));
+  }
+  bodyLines.push(
     "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.country_name) + " · " + (outInfo?.org || "Unknown"),
     "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
-  ].join("\n");
+  );
 
-  $notification.post(title, subtitle, body);
+  $notification.post(title, subtitle, bodyLines.join("\n"));
   console.log("=== 已发送通知 ===");
 }
 
@@ -528,106 +457,64 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     await wait(args.eventDelay * 1000);
   }
 
-  // 2. 获取入口/出口 IP
-  const { inIP, outIP, outIPv6, inRaw, outRaw, v6Raw } = await fetchIPs();
+  // 2. 获取本地/出口 IP
+  const { localIP, outIP, outIPv6, localRaw, outRaw, v6Raw } = await fetchIPs();
 
-  if (!inIP || !outIP) {
+  if (!localIP || !outIP) {
     console.log("IP 获取失败");
-    return done({ title: "IP 获取失败", content: "无法获取入口或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
+    return done({ title: "IP 获取失败", content: "无法获取本地或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
   }
-  console.log("入口 IP: " + inIP + ", 出口 IP: " + outIP);
+  console.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
 
   // 3. EVENT 模式下检查 IP 是否变化
-  if (!checkIPChange(inIP, outIP, outIPv6)) {
+  if (!checkIPChange(localIP, outIP, outIPv6)) {
     return done({});
   }
 
-  // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
+  // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
   const isZh = args.lang === "zh";
 
-  // en: ipinfo.io + ip.sb | zh: 大陆 bilibili，非大陆地区 ipwho.is + 运营商 ipinfo.io
   const queries = [
-    getPolicy(),                             // 0
+    getPolicyAndEntrance(),                  // 0: {policy, entranceIP}
     getRiskScore(outIP),                     // 1
     getIPType(),                             // 2
-    httpJSON(CONFIG.urls.inboundInfo(inIP)),  // 3: ip.sb 入口
-    httpJSON(CONFIG.urls.ipInfo(outIP))       // 4: ipinfo.io 出口（两种模式都用于运营商）
+    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 3: ip.sb 本地（en 地理 / zh country_code）
+    httpJSON(CONFIG.urls.ipInfo(outIP)),      // 4: ipinfo.io 出口
   ];
-  if (isZh) {
-    queries.push(httpJSON(CONFIG.urls.biliGeo(outIP)));   // 5: bilibili 出口
-    queries.push(httpJSON(CONFIG.urls.ipWhoIs(outIP)));   // 6: ipwho.is 出口（中文地区）
-    queries.push(httpJSON(CONFIG.urls.ipWhoIs(inIP)));    // 7: ipwho.is 入口（中文地区）
-  }
   const v6Idx = queries.length;
   if (outIPv6) {
-    queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));   // v6Idx: ipinfo.io IPv6（运营商）
-    if (isZh) {
-      queries.push(httpJSON(CONFIG.urls.biliGeo(outIPv6)));  // v6Idx+1: bilibili IPv6
-      queries.push(httpJSON(CONFIG.urls.ipWhoIs(outIPv6)));  // v6Idx+2: ipwho.is IPv6（中文地区）
-    }
+    queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));  // v6Idx: ipinfo.io IPv6
   }
 
   const results = await Promise.all(queries);
-  const [policy, riskInfo, ipTypeResult, inSbRaw, outIpInfoRaw] = results;
+  const [policyResult, riskInfo, ipTypeResult, localSbRaw, outIpInfoRaw] = results;
+  const { policy, entranceIP } = policyResult;
 
-  let inInfo, outInfo, ipv6Info;
+  // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
+  let localInfo;
   if (isZh) {
-    const outBiliRaw = results[5];
-    const outIpWhoRaw = results[6];
-    const inIpWhoRaw = results[7];
-    const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
-    const v6BiliRaw = outIPv6 ? results[v6Idx + 1] : null;
-    const v6IpWhoRaw = outIPv6 ? results[v6Idx + 2] : null;
-
-    const isMainland = (bili) => bili.country_name === "中国" && !/^(香港|澳门|台湾)$/.test(bili.region);
-
-    // 入口：大陆用 bilibili（地区+运营商），非大陆地区用 ipwho.is 运营商用 ip.sb
-    const inBili = normalizeBilibili(inRaw);
-    const inIpWho = normalizeIpWhoIs(inIpWhoRaw);
-    const inSb = normalizeIpSb(inSbRaw);
-    if (inBili && isMainland(inBili)) {
-      inInfo = { ...inBili, country_code: inIpWho?.country_code || inSb?.country_code || "" };
-    } else if (inIpWho) {
-      inInfo = { ...inIpWho, org: inSb?.org || inIpWho.org };
-    } else {
-      inInfo = inSb;
-    }
-
-    // 出口：大陆用 bilibili（地区+运营商），非大陆地区用 ipwho.is 运营商用 ipinfo.io
-    const outBili = normalizeBilibili(outBiliRaw);
-    const outIpWho = normalizeIpWhoIs(outIpWhoRaw);
-    const outIpInfo = normalizeIpInfo(outIpInfoRaw);
-    const outSb = normalizeIpSb(outRaw);
-    if (outBili && isMainland(outBili)) {
-      outInfo = { ...outBili, country_code: outIpWho?.country_code || outIpInfo?.country_code || outSb?.country_code || "" };
-    } else if (outIpWho) {
-      outInfo = { ...outIpWho, org: outIpInfo?.org || outSb?.org || outIpWho.org };
-    } else {
-      outInfo = outIpInfo || outSb;
-    }
-
-    // IPv6：同上逻辑
-    const v6Bili = normalizeBilibili(v6BiliRaw);
-    const v6IpWho = normalizeIpWhoIs(v6IpWhoRaw);
-    const v6IpInfo = normalizeIpInfo(v6IpInfoRaw);
-    const v6Sb = outIPv6 ? normalizeIpSb(v6Raw) : null;
-    if (outIPv6) {
-      if (v6Bili && isMainland(v6Bili)) {
-        ipv6Info = { ...v6Bili, country_code: v6IpWho?.country_code || v6IpInfo?.country_code || v6Sb?.country_code || "" };
-      } else if (v6IpWho) {
-        ipv6Info = { ...v6IpWho, org: v6IpInfo?.org || v6Sb?.org || v6IpWho.org };
-      } else {
-        ipv6Info = v6IpInfo || v6Sb;
-      }
-    } else {
-      ipv6Info = null;
-    }
+    const bili = normalizeBilibili(localRaw);
+    const sb = normalizeIpSb(localSbRaw);
+    localInfo = bili
+      ? { ...bili, country_code: sb?.country_code || "CN" }
+      : sb;
   } else {
-    // 英文模式：入口用 ip.sb，出口用 ipinfo.io（回落 ip.sb）
-    const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
-    inInfo = normalizeIpSb(inSbRaw);
-    outInfo = normalizeIpInfo(outIpInfoRaw) || normalizeIpSb(outRaw);
-    ipv6Info = outIPv6 ? (normalizeIpInfo(v6IpInfoRaw) || normalizeIpSb(v6Raw)) : null;
+    localInfo = normalizeIpSb(localSbRaw);
+  }
+
+  // 出口 IP 地理信息：始终用 ipinfo.io（回落 ip.sb）
+  const outInfo = normalizeIpInfo(outIpInfoRaw) || normalizeIpSb(outRaw);
+
+  // IPv6 地理信息
+  const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
+  const ipv6Info = outIPv6 ? (normalizeIpInfo(v6IpInfoRaw) || normalizeIpSb(v6Raw)) : null;
+
+  // 入口 IP 地理信息：与出口不同时才查询，始终用 ipinfo.io
+  let entranceInfo = null;
+  if (entranceIP && entranceIP !== outIP) {
+    console.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
+    const entranceRaw = await httpJSON(CONFIG.urls.ipInfo(entranceIP));
+    entranceInfo = normalizeIpInfo(entranceRaw);
   }
 
   const riskResult = riskText(riskInfo.score);
@@ -635,7 +522,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
 
   // 5. 根据触发类型输出结果
   const isMask = args.maskIP;
-  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, inInfo, outInfo, ipv6Info };
+  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
