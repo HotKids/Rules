@@ -701,13 +701,13 @@ class ServiceChecker {
       const body = res.body.toLowerCase();
 
       if (res.status === 200) return Utils.createResult(STATUS.OK, "OK");
-      if (body.includes("region") || body.includes("location is not supported")) {
+      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
         return Utils.createResult(STATUS.FAIL, "Region Blocked");
       }
-      if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
+      if (body.includes("key not valid") || body.includes("api_key_invalid")) {
         return Utils.createResult(STATUS.ERROR, "Invalid API Key");
       }
-      if (res.status === 403) return Utils.createResult(STATUS.FAIL, "Region Blocked");
+      if (res.status === 404) return Utils.createResult(STATUS.ERROR, "Model N/A");
       return Utils.createResult(STATUS.ERROR, `HTTP ${res.status}`);
     } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
