@@ -691,15 +691,19 @@ class ServiceChecker {
     const apiKey = (args.geminiapikey || "").trim();
     if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
-    // DEBUG: 临时输出原始响应，排查 Region Blocked 问题
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
-      const { status } = res;
-      const body = (res.body || "").substring(0, 150);
-      return Utils.createResult(STATUS.ERROR, `[DBG] ${status} | ${body}`);
-    } catch (e) {
-      return Utils.createResult(STATUS.ERROR, `[DBG] ERR: ${e}`);
-    }
+      const body = res.body.toLowerCase();
+
+      if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
+      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
+        return Utils.createResult(STATUS.FAIL, "Region Blocked");
+      }
+      if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
+        return Utils.createResult(STATUS.ERROR, "Invalid API Key");
+      }
+      return Utils.createResult(STATUS.ERROR, "Invalid API Key");
+    } catch { return Utils.createResult(STATUS.ERROR, "Invalid API Key"); }
   }
 
   /**
