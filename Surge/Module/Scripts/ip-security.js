@@ -13,7 +13,7 @@
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: ip.sb (入口), ipapi.co (出口, ip.sb 兜底)
+ * ⑥ 地理/运营商: ip.sb (入口), ipinfo.io (出口, ip.sb 兜底)
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
@@ -52,7 +52,7 @@ const CONFIG = {
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
     inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
-    ipInfo: (ip) => `https://ipapi.co/${ip}/json/`,
+    ipInfo: (ip) => `https://ipinfo.io/${ip}/json`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
@@ -168,7 +168,7 @@ function formatGeo(countryCode, ...parts) {
 }
 
 /**
- * 将 ip.sb 返回字段归一化为 ipapi.co 格式
+ * 将 ip.sb 返回字段归一化为内部格式
  */
 function normalizeIpSb(data) {
   if (!data) return null;
@@ -178,6 +178,21 @@ function normalizeIpSb(data) {
     city: data.city,
     region: data.region,
     org: data.organization
+  };
+}
+
+/**
+ * 将 ipinfo.io 返回字段归一化为内部格式
+ * ipinfo.io: { country:"US", city, region, org:"AS15169 Google LLC" }
+ */
+function normalizeIpInfo(data) {
+  if (!data || !data.country) return null;
+  return {
+    country_code: data.country,
+    country_name: data.country,
+    city: data.city,
+    region: data.region,
+    org: data.org ? data.org.replace(/^AS\d+\s*/, "") : ""
   };
 }
 
@@ -204,7 +219,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipapi\.co)/i, 10);
+  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -215,7 +230,7 @@ async function getPolicy() {
   console.log("未找到策略记录，等待后重试");
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipapi\.co)/i, 5);
+  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -478,10 +493,10 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   const [policy, riskInfo, ipTypeResult, inInfoRaw, outInfoRaw] = results;
   const ipv6InfoRaw = outIPv6 ? results[5] : null;
 
-  // 入口用 ip.sb（归一化），出口用 ipapi.co（失败时回落到 ip.sb 已有数据）
+  // 入口用 ip.sb（归一化），出口用 ipinfo.io（归一化，失败时回落到 ip.sb）
   const inInfo = normalizeIpSb(inInfoRaw);
-  const outInfo = outInfoRaw || normalizeIpSb(outRaw);
-  const ipv6Info = outIPv6 ? (ipv6InfoRaw || normalizeIpSb(v6Raw)) : null;
+  const outInfo = normalizeIpInfo(outInfoRaw) || normalizeIpSb(outRaw);
+  const ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
 
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
