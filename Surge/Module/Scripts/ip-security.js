@@ -97,6 +97,7 @@ function parseArguments() {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
     lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
+    maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
 }
@@ -159,6 +160,25 @@ function flag(cc) {
 function riskText(score) {
   const level = CONFIG.riskLevels.find(l => score <= l.max) || CONFIG.riskLevels.at(-1);
   return { label: level.label, color: level.color };
+}
+
+/**
+ * IP 打码：保留首尾段，中间用 * 替代
+ * IPv4: 123.45.67.89 → 123.*.*. 89
+ * IPv6: 2001:db8:85a3::7334 → 2001:*:*:7334
+ */
+function maskIP(ip) {
+  if (!ip) return ip;
+  if (ip.includes(":")) {
+    // IPv6
+    const parts = ip.split(":");
+    if (parts.length <= 2) return ip;
+    return parts[0] + ":" + parts.slice(1, -1).map(() => "*").join(":") + ":" + parts.at(-1);
+  }
+  // IPv4
+  const parts = ip.split(".");
+  if (parts.length !== 4) return ip;
+  return parts[0] + ".*.*." + parts[3];
 }
 
 /**
@@ -410,12 +430,13 @@ function checkIPChange(inIP, outIP, outIPv6) {
 /**
  * 构建出口 IP 显示内容
  */
-function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh) {
+function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh, isMask) {
   const lines = [];
   const ct = (info) => isZh ? info?.country_name : info?.country_code;
+  const m = (ip) => isMask ? maskIP(ip) : ip;
 
   if (!outIPv6) {
-    lines.push("出口 IP：" + outIP);
+    lines.push("出口 IP：" + m(outIP));
     lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
     lines.push("运营商：" + (outInfo?.org || "Unknown"));
     return lines;
@@ -425,16 +446,16 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh) {
     && outInfo?.org === ipv6Info?.org;
 
   if (sameLocation) {
-    lines.push("出口 IP⁴：" + outIP);
-    lines.push("出口 IP⁶：" + outIPv6);
+    lines.push("出口 IP⁴：" + m(outIP));
+    lines.push("出口 IP⁶：" + m(outIPv6));
     lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
     lines.push("运营商：" + (outInfo?.org || "Unknown"));
   } else {
-    lines.push("出口 IP⁴：" + outIP);
+    lines.push("出口 IP⁴：" + m(outIP));
     lines.push("地区⁴：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, ct(outInfo)));
     lines.push("运营商⁴：" + (outInfo?.org || "Unknown"));
     lines.push("");
-    lines.push("出口 IP⁶：" + outIPv6);
+    lines.push("出口 IP⁶：" + m(outIPv6));
     lines.push("地区⁶：" + formatGeo(ipv6Info?.country_code, ipv6Info?.city, ipv6Info?.region, ct(ipv6Info)));
     lines.push("运营商⁶：" + (ipv6Info?.org || "Unknown"));
   }
@@ -445,18 +466,19 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh) {
 /**
  * 构建完整面板内容
  */
-function buildPanelContent({ isZh, riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, outIP, outIPv6, outInfo, ipv6Info }) {
+function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, outIP, outIPv6, outInfo, ipv6Info }) {
   const ct = (info) => isZh ? info?.country_name : info?.country_code;
+  const m = (ip) => isMask ? maskIP(ip) : ip;
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
     "",
     "IP 类型：" + ipType + " | " + ipSrc,
     "",
-    "入口 IP：" + inIP,
+    "入口 IP：" + m(inIP),
     "地区：" + formatGeo(inInfo?.country_code, inInfo?.city, inInfo?.region, ct(inInfo)),
     "运营商：" + (inInfo?.org || "Unknown"),
     "",
-    ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh)
+    ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isZh, isMask)
   ];
 
   return lines.join("\n");
@@ -466,9 +488,10 @@ function buildPanelContent({ isZh, riskInfo, riskResult, ipType, ipSrc, inIP, in
 /**
  * 构建网络变化通知并发送
  */
-function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, riskInfo, riskResult, ipType, ipSrc }) {
+function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
+  const m = (ip) => isMask ? maskIP(ip) : ip;
   const title = "🔄 网络已切换 | " + policy;
-  const subtitle = "Ⓓ " + inIP + " 🅟 " + outIP;
+  const subtitle = "Ⓓ " + m(inIP) + " 🅟 " + m(outIP);
   const body = [
     "Ⓓ " + formatGeo(inInfo?.country_code, inInfo?.city, inInfo?.country_name) + " · " + (inInfo?.org || "Unknown"),
     "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.country_name) + " · " + (outInfo?.org || "Unknown"),
@@ -577,7 +600,8 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   const { ipType, ipSrc } = ipTypeResult;
 
   // 5. 根据触发类型输出结果
-  const context = { isZh, policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, inInfo, outInfo, ipv6Info };
+  const isMask = args.maskIP;
+  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, inInfo, outInfo, ipv6Info };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
