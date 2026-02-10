@@ -48,7 +48,8 @@ const CONFIG = {
     lastEvent: "lastNetworkInfoEvent",
     lastPolicy: "lastProxyPolicy",
     riskCache: "riskScoreCache",
-    maskToggle: "ipMaskToggle"
+    maskToggle: "ipMaskToggle",
+    lastRun: "ipLastRunTime"
   },
   urls: {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
@@ -523,12 +524,23 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
 
-  // 5. IP 打码切换：面板点击时切换状态，EVENT 保持当前状态
+  // 5. IP 打码切换：手动点击切换，自动刷新和 EVENT 保持当前状态
   const maskStored = $persistentStore.read(CONFIG.storeKeys.maskToggle);
   let isMask = maskStored !== null ? maskStored === "1" : args.maskIP;
   if (!args.isEvent) {
-    isMask = !isMask;
-    $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
+    const now = Math.floor(Date.now() / 1000);
+    const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun)) || 0;
+    $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
+    const elapsed = now - lastRun;
+    const interval = 600; // 需与 sgmodule update-interval 一致
+    const tolerance = 15;
+    const remainder = elapsed % interval;
+    const isAutoRefresh = lastRun > 0 && elapsed > tolerance
+      && (remainder < tolerance || remainder > interval - tolerance);
+    if (!isAutoRefresh) {
+      isMask = !isMask;
+      $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
+    }
   }
   const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info };
 
