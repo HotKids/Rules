@@ -663,10 +663,36 @@ class ServiceChecker {
 
   /**
    * ChatGPT 解锁检测
+   * 参考 lmc999/RegionRestrictionCheck：区分 Web Only / Mobile Only
    * @returns {Promise<Object>} 检测结果
    */
-  static checkChatGPT() {
-    return Utils.checkByRegex("https://chat.openai.com/cdn-cgi/trace", /loc=([A-Z]{2})/);
+  static async checkChatGPT() {
+    try {
+      const [webRes, iosRes] = await Promise.all([
+        Utils.request({
+          url: "https://api.openai.com/compliance/cookie_requirements",
+          headers: {
+            "Authorization": "Bearer null",
+            "Content-Type": "application/json",
+            "Origin": "https://platform.openai.com",
+            "Referer": "https://platform.openai.com/"
+          }
+        }),
+        Utils.request({ url: "https://ios.chat.openai.com/" })
+      ]);
+
+      const webBlocked = /unsupported_country/i.test(webRes.body);
+      const iosBlocked = /VPN/i.test(iosRes.body);
+
+      if (!webBlocked && !iosBlocked) {
+        const traceRes = await Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace" });
+        const region = traceRes.body.match(/loc=([A-Z]{2})/)?.[1] || "";
+        return Utils.createResult(STATUS.OK, region || "OK");
+      }
+      if (webBlocked && iosBlocked) return Utils.createResult(STATUS.FAIL, "No");
+      if (!webBlocked && iosBlocked) return Utils.createResult(STATUS.COMING, "Web Only");
+      return Utils.createResult(STATUS.COMING, "Mobile Only");
+    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
 
   /**
@@ -684,7 +710,7 @@ class ServiceChecker {
 
   /**
    * Gemini 解锁检测
-   * 优先使用网页检测（无需 API Key），有 Key 时追加 API 检测
+   * 网页检测（参考 lmc999/RegionRestrictionCheck）+ API Key fallback
    * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
@@ -693,33 +719,38 @@ class ServiceChecker {
       const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
       const body = res.body || "";
 
+      // 方式1: RegionRestrictionCheck 标记
       if (body.includes("45631641,null,true")) {
         const m = body.match(/,2,1,200,"([A-Z]{2,3})"/);
         return Utils.createResult(STATUS.OK, m ? m[1] : "OK");
       }
+      // 方式2: 页面含 Gemini app 内容（未被重定向到不可用页）
+      if (res.status === 200 && !body.includes("not available") && !body.includes("not supported")
+          && (body.includes("chat-session") || body.includes("gemini.google.com/app"))) {
+        return Utils.createResult(STATUS.OK, "OK");
+      }
+      // 明确不可用
+      if (body.includes("not available") || body.includes("not supported")) {
+        return Utils.createResult(STATUS.FAIL, "No");
+      }
     } catch {}
 
-    // API 检测（需要 Key）
+    // API 检测 fallback（需要 Key）
     const args = Utils.parseArgs($argument);
     const apiKey = (args.geminiapikey || "").trim();
-    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) {
-      return Utils.createResult(STATUS.FAIL, "No");
+    if (apiKey && !["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) {
+      try {
+        const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
+        const body = (res.body || "").toLowerCase();
+        if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
+        if (res.status === 429) return Utils.createResult(STATUS.OK, "OK");
+        if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
+          return Utils.createResult(STATUS.ERROR, "Invalid Key");
+        }
+      } catch {}
     }
 
-    try {
-      const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
-      const body = res.body.toLowerCase();
-
-      if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "API OK");
-      if (res.status === 403 || res.status === 404 || body.includes("region not supported") || body.includes("location is not supported")) {
-        return Utils.createResult(STATUS.FAIL, "Region Blocked");
-      }
-      if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
-        return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-      }
-      if (res.status === 429) return Utils.createResult(STATUS.OK, "API OK (Rate Limited)");
-      return Utils.createResult(STATUS.ERROR, `HTTP ${res.status}`);
-    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
+    return Utils.createResult(STATUS.FAIL, "No");
   }
 
   /**
