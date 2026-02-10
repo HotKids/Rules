@@ -1,9 +1,16 @@
 payload:
   # > Goole Play
-  # 解决国行设备 Google Play 无法正常下载的问题
   - DOMAIN-SUFFIX,xn--ngstr-lra8j.com
+  - DOMAIN-SUFFIX,xn--ngstr-cn-8za9o.com
   - DOMAIN-SUFFIX,services.googleapis.cn
-
-  # > Goole VPN
-  - DOMAIN-SUFFIX,cloud.cupronickel.goog
-  - DOMAIN-SUFFIX,googleapis.com
+  - DOMAIN,play.google.com
+  - DOMAIN,play.googleapis.com
+  - DOMAIN,play-fe.googleapis.com
+  - DOMAIN,playatoms-pa.googleapis.com
+  - DOMAIN,playgateway-pa.googleapis.com
+  - DOMAIN,play-lh.googleusercontent.com
+  - DOMAIN-KEYWORD,play.google
+  - DOMAIN-WILDCARD,*play*.google.com
+  - DOMAIN-WILDCARD,*play*.google.com
+  - DOMAIN-WILDCARD,*play*.googleapis.com
+  - DOMAIN-WILDCARD,*play*.googleusercontent.com

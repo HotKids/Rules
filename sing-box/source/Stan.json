@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "aws.stan.video"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "stan.com.au"
+      ]
+    }
+  ]
+}

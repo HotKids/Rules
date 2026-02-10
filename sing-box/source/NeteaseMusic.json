@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "music.126.net",
+        "music.163.com"
+      ]
+    }
+  ]
+}

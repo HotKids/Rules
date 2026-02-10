@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "tvb.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "tvbanywhere"
+      ]
+    }
+  ]
+}

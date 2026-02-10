@@ -1,7 +1,5 @@
 payload:
   # > Bilibili
-  # USER-AGENT,*bili*
-  - PROCESS-NAME,tv.danmaku.bili
   - DOMAIN-SUFFIX,bilibili.com
   - DOMAIN-SUFFIX,bilibili.tv
   - DOMAIN-SUFFIX,biliapi.net
@@ -15,7 +13,4 @@ payload:
   - DOMAIN-KEYWORD,bilibili
   - DOMAIN-KEYWORD,cn-hk-eq-bcache-
   - IP-CIDR,121.11.192.0/24,no-resolve
-  # > 港台版 Bilibili App
-  # USER-AGENT,bili-inter*
-  - PROCESS-NAME,com.bilibili.app.in
   - DOMAIN,apiintl.biliapi.net

@@ -1,0 +1,34 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "play-fe.googleapis.com",
+        "play-lh.googleusercontent.com",
+        "play.google.com",
+        "play.googleapis.com",
+        "playatoms-pa.googleapis.com",
+        "playgateway-pa.googleapis.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "services.googleapis.cn",
+        "xn--ngstr-cn-8za9o.com",
+        "xn--ngstr-lra8j.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "play.google"
+      ]
+    },
+    {
+      "domain_regex": [
+        "^.*play.*\\.google\\.com$",
+        "^.*play.*\\.googleapis\\.com$",
+        "^.*play.*\\.googleusercontent\\.com$"
+      ]
+    }
+  ]
+}

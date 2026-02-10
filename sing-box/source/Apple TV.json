@@ -1,0 +1,19 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "hls-amt.itunes.apple.com // Trailers",
+        "hls.itunes.apple.com // Trailers",
+        "play-edge.itunes.apple.com // Unblock Region",
+        "tv.applemusic.com",
+        "uts-api.itunes.apple.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "tv.apple.com"
+      ]
+    }
+  ]
+}

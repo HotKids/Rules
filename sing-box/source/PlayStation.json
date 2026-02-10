@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "psn.akadns.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "playstation.com",
+        "playstation.net",
+        "playstationnetwork.com",
+        "sonyentertainmentnetwork.com"
+      ]
+    }
+  ]
+}

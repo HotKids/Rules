@@ -1,42 +1,122 @@
 {
+  "version": 2,
   "rules": [
     {
       "domain": [
+        "abtestvm-sg.bytedance.com",
         "ai.google.dev",
         "aistudio.google.com",
+        "alkalicore-pa.clients6.google.com",
         "alkalimakersuite-pa.clients6.google.com",
         "api-iam.intercom.io",
         "api.statsig.com",
+        "apple-relay.apple.com",
+        "apple-relay.cloudflare.com",
+        "apple-relay.fastly-edge.com",
         "bard.google.com",
         "chatgpt.livekit.cloud",
         "copilot.microsoft.com",
+        "cp4.cloudflare.com",
+        "d3ssuo6fbvr.cloudfront.net",
+        "gateway.ai.cloudflare.com",
         "gemini.google.com",
-        "generativelanguage.googleapis.com",
+        "gspe1-ssl.ls.apple.com",
+        "guzzoni.apple.com",
+        "host.livekit.cloud",
         "imagine.meta.com",
         "o33249.ingest.sentry.io",
+        "openai.com.cdn.cloudflare.net",
         "openaiapi-site.azureedge.net",
-        "sfo3.turn.livekit.cloud",
+        "openaicomproductionae4b.blob.core.windows.net",
+        "pplx-res.cloudinary.com",
+        "production-openaicom-storage.azureedge.net",
         "sydney.bing.com",
+        "turn.livekit.cloud",
         "www.bing.com"
-      ]
-    },
-    {
-      "domain_keyword": [
-        "openaicom"
       ]
     },
     {
       "domain_suffix": [
         "anthropic.com",
+        "chat.com",
         "chatgpt.com",
+        "cici.com",
+        "ciciai.com",
         "claude.ai",
+        "claude.com",
+        "cursor-cdn.com",
+        "cursor.com",
+        "cursor.sh",
+        "cursorapi.com",
+        "deepmind.com",
+        "deepmind.google",
+        "dola.com",
+        "gateway.icloud.com",
+        "geller-pa.googleapis.com",
+        "generativeai.google",
+        "generativelanguage.googleapis.com",
+        "githubcopilot.com",
         "grazie.ai",
+        "grok.com",
+        "groq.com",
+        "livekit.cloud",
+        "makersuite.google.com",
+        "meta.ai",
         "oaistatic.com",
         "oaiusercontent.com",
         "openai.com",
-        "poe.com"
+        "perplexity.ai",
+        "pplx.ai",
+        "proactivebackend-pa.googleapis.com",
+        "smoot.apple.com",
+        "sora.com",
+        "x.ai"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "labs.google",
+        "notebooklm.google",
+        "openaiapi",
+        "openaicom"
+      ]
+    },
+    {
+      "domain_regex": [
+        "^abtest.*\\.byteoversea\\.com$"
+      ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "openaicom-api-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "azurefd.net"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "chatgpt-async-webps-prod-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "webpubsub.azure.com"
+          ]
+        }
       ]
     }
-  ],
-  "version": 1
+  ]
 }

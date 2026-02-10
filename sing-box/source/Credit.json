@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "aexp-static.com",
+        "aexp.com",
+        "americanexpress.com",
+        "amextravel.com",
+        "bonify.de",
+        "chase.com",
+        "chasecdn.com",
+        "chasepay.com",
+        "ibkr.com",
+        "ibllc.com",
+        "interactivebrokers.com",
+        "jpmorgan.com",
+        "jpmorganchase.com",
+        "membershiprewards.com",
+        "n26.com",
+        "tech26.de"
+      ]
+    }
+  ]
+}

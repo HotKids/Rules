@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "cache.video.iqiyi.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "71.am",
+        "gitv.tv",
+        "iq.com",
+        "iqiyi.com",
+        "iqiyipic.com",
+        "qy.net"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "qiyi"
+      ]
+    }
+  ]
+}

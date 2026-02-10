@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "cbsinteractive.hb.omtrdc.net",
+        "cbsnews.akamaized.net",
+        "g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com",
+        "prod-ripcut-delivery.disney-plus.net",
+        "thumbnails.cbsig.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "cbsaavideo.com",
+        "cssott.com",
+        "cws.conviva.com",
+        "media.dssott.com",
+        "mtvnservices.com",
+        "prod.dssedge.com"
+      ]
+    }
+  ]
+}

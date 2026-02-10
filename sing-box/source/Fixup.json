@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "dns.weixin.qq.com.cn"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "long.weixin.qq.com",
+        "short.weixin.qq.com"
+      ]
+    }
+  ]
+}

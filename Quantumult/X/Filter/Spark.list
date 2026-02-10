@@ -1,0 +1,17 @@
+# > Spark Mail
+# 通用 SMTP 端口
+# 明文 SMTP
+# SMTP over SSL (SMTPS)
+# SMTP Submission (STARTTLS)
+DOMAIN-SUFFIX,gmail.com,Spark
+DOMAIN-SUFFIX,googlemail.com,Spark
+DOMAIN-SUFFIX,live.com,Spark
+DOMAIN-SUFFIX,outlook.com,Spark
+DOMAIN-SUFFIX,hotmail.com,Spark
+DOMAIN-SUFFIX,mail.me.com,Spark
+DOMAIN-SUFFIX,mail.yahoo.com,Spark
+DOMAIN-SUFFIX,fastmail.com,Spark
+DOMAIN-SUFFIX,mail.infomaniak.com,Spark
+DOMAIN-SUFFIX,vodafonemail.de,Spark
+DOMAIN,imap.vodafone.de,Spark
+DOMAIN,smtp.vodafone.de,Spark

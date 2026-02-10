@@ -1,0 +1,108 @@
+## GenAI
+# Apple Intelligence
+DOMAIN-SUFFIX,smoot.apple.com,GenAI
+DOMAIN,apple-relay.apple.com,GenAI
+DOMAIN,apple-relay.cloudflare.com,GenAI
+DOMAIN,apple-relay.fastly-edge.com,GenAI
+DOMAIN,cp4.cloudflare.com,GenAI
+DOMAIN,guzzoni.apple.com,GenAI
+DOMAIN,gspe1-ssl.ls.apple.com,GenAI
+DOMAIN-SUFFIX,gateway.icloud.com,GenAI
+
+# Anthropic
+# > Claude
+DOMAIN-SUFFIX,claude.ai,GenAI
+DOMAIN-SUFFIX,claude.com,GenAI
+DOMAIN-SUFFIX,anthropic.com,GenAI
+
+# OpenAI
+# > ChatGPT
+DOMAIN,chatgpt.livekit.cloud,GenAI
+DOMAIN,host.livekit.cloud,GenAI
+DOMAIN,turn.livekit.cloud,GenAI
+DOMAIN-SUFFIX,chat.com,GenAI
+DOMAIN-SUFFIX,chatgpt.com,GenAI
+DOMAIN-SUFFIX,livekit.cloud,GenAI
+DOMAIN-SUFFIX,oaistatic.com,GenAI
+DOMAIN-SUFFIX,oaiusercontent.com,GenAI
+DOMAIN-SUFFIX,openai.com,GenAI
+DOMAIN-SUFFIX,sora.com,GenAI
+DOMAIN,api.statsig.com,GenAI
+DOMAIN,api-iam.intercom.io,GenAI
+DOMAIN,o33249.ingest.sentry.io,GenAI
+DOMAIN,openai.com.cdn.cloudflare.net,GenAI
+DOMAIN,openaiapi-site.azureedge.net,GenAI
+DOMAIN,production-openaicom-storage.azureedge.net,GenAI
+DOMAIN,openaicomproductionae4b.blob.core.windows.net,GenAI
+DOMAIN-KEYWORD,openaiapi,GenAI
+DOMAIN-KEYWORD,openaicom,GenAI
+
+# Cloudflare
+# > AI Gateway
+DOMAIN,gateway.ai.cloudflare.com,GenAI
+
+# Cursor
+DOMAIN-SUFFIX,cursor-cdn.com,GenAI
+DOMAIN-SUFFIX,cursor.com,GenAI
+DOMAIN-SUFFIX,cursor.sh,GenAI
+DOMAIN-SUFFIX,cursorapi.com,GenAI
+
+# Google
+# > AI Studio
+DOMAIN-SUFFIX,generativeai.google,GenAI
+DOMAIN-SUFFIX,makersuite.google.com,GenAI
+DOMAIN,aistudio.google.com,GenAI
+DOMAIN,alkalicore-pa.clients6.google.com,GenAI
+DOMAIN,alkalimakersuite-pa.clients6.google.com,GenAI
+# > DeepMind
+DOMAIN-SUFFIX,deepmind.com,GenAI
+DOMAIN-SUFFIX,deepmind.google,GenAI
+# > Gemini
+DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,GenAI
+DOMAIN-SUFFIX,geller-pa.googleapis.com,GenAI
+DOMAIN-SUFFIX,generativelanguage.googleapis.com,GenAI
+DOMAIN,ai.google.dev,GenAI
+DOMAIN,bard.google.com,GenAI
+DOMAIN,gemini.google.com,GenAI
+# > NotebookLM
+DOMAIN-KEYWORD,notebooklm.google,GenAI
+# > Search Labs
+DOMAIN-KEYWORD,labs.google,GenAI
+
+# JetBrains AI
+DOMAIN-SUFFIX,grazie.ai,GenAI
+
+# Meta
+DOMAIN-SUFFIX,meta.ai,GenAI
+DOMAIN,imagine.meta.com,GenAI
+
+# Microsoft
+# > Copilot
+DOMAIN,copilot.microsoft.com,GenAI
+DOMAIN,sydney.bing.com,GenAI
+DOMAIN,www.bing.com,GenAI
+# > GitHub Copilot
+DOMAIN-SUFFIX,githubcopilot.com,GenAI
+
+# NVIDIA
+# > Groq
+DOMAIN-SUFFIX,groq.com,GenAI
+
+# Perplexity
+DOMAIN-SUFFIX,perplexity.ai,GenAI
+DOMAIN-SUFFIX,pplx.ai,GenAI
+DOMAIN,pplx-res.cloudinary.com,GenAI
+
+# xAI
+DOMAIN-SUFFIX,grok.com,GenAI
+DOMAIN-SUFFIX,x.ai,GenAI
+
+# ByteDance
+# > Doubao Dola
+DOMAIN-SUFFIX,dola.com,GenAI
+DOMAIN-SUFFIX,cici.com,GenAI
+DOMAIN-SUFFIX,ciciai.com,GenAI
+DOMAIN,abtestvm-sg.bytedance.com,GenAI
+
+# Affinity
+DOMAIN,d3ssuo6fbvr.cloudfront.net,GenAI

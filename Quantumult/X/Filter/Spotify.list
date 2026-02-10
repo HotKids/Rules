@@ -1,6 +1,13 @@
 # > Spotify
-USER-AGENT,*Spotify*,Spotify
 DOMAIN-SUFFIX,pscdn.co,Spotify
 DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify
 DOMAIN-SUFFIX,spotify.com,Spotify
+DOMAIN-SUFFIX,spotifycdn.com,Spotify
+DOMAIN-SUFFIX,spotifycdn.net,Spotify
+DOMAIN-SUFFIX,spotifycharts.com,Spotify
+DOMAIN-SUFFIX,spotifycodes.com,Spotify
+DOMAIN-SUFFIX,spotifyjobs.com,Spotify
+DOMAIN-SUFFIX,spotifynewsroom.jp,Spotify
+DOMAIN-SUFFIX,spotilocal.com,Spotify
+DOMAIN-SUFFIX,tospotify.com,Spotify

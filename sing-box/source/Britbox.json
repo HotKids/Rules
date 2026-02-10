@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "d2z3p34itxwaj7.cloudfront.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "bbc.co.uk",
+        "britbox.com"
+      ]
+    }
+  ]
+}

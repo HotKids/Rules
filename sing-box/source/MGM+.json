@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "epixhls.akamaized.net",
+        "us-ore-00001.s3.dualstack.us-west-2.amazonaws.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "epix.com",
+        "epixnow.com",
+        "mgmplus.com"
+      ]
+    }
+  ]
+}

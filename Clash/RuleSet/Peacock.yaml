@@ -1,7 +1,4 @@
 payload:
   # > Peacock
-  # USER-AGENT,Peacock*
-  - PROCESS-NAME,com.peacocktv.peacockandroid
+  - DOMAIN-SUFFIX,cdn.peacocktv.com
   - DOMAIN-SUFFIX,peacocktv.com
-  ## 屏蔽广告
-  # DOMAIN,video-ads-module.ad-tech.nbcuni.com

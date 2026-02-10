@@ -1,5 +1,4 @@
 # > myVideo
-USER-AGENT,myVideo*,myVideo
 DOMAIN-SUFFIX,myvideo.net.tw,myVideo
 DOMAIN-SUFFIX,catch.net.tw,myVideo
 DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net,myVideo

@@ -1,12 +1,7 @@
 # > WeTV
-USER-AGENT,WeTV*,WeTV
 DOMAIN-SUFFIX,wetv.vip,WeTV
 DOMAIN-SUFFIX,wetvinfo.com,WeTV
 DOMAIN,wetv.tv.qq.com,WeTV
 DOMAIN,wetv.acc.qq.com,WeTV
 DOMAIN,hwvip.video.qq.com,WeTV
-// DOMAIN,oth.eve.mdt.qq.com,WeTV
-// DOMAIN,oth.str.mdt.qq.com,WeTV
-// DOMAIN-SUFFIX,meovse.com,WeTV
 IP-CIDR,150.109.28.51/32,WeTV
-// IP-CIDR,203.205.136.0/23,WeTV

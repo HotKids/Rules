@@ -1,15 +1,14 @@
 # > BBC iPlayer
-USER-AGENT,BBCiPlayer*,BBC iPlayer
-DOMAIN-KEYWORD,bbcfmt,BBC iPlayer
-DOMAIN-KEYWORD,co.uk,BBC iPlayer
-DOMAIN-KEYWORD,uk-live,BBC iPlayer
-DOMAIN-SUFFIX,bbc.com,BBC iPlayer
-DOMAIN-SUFFIX,bbc.co,BBC iPlayer
-DOMAIN-SUFFIX,bbc.co.uk,BBC iPlayer
-DOMAIN-SUFFIX,bbci.co,BBC iPlayer
-DOMAIN-SUFFIX,bbci.co.uk,BBC iPlayer
-DOMAIN,ssl-bbcsmarttv.2cnt.net,BBC iPlayer
-DOMAIN,vod-dash-uk-live.akamaized.net,BBC iPlayer
-DOMAIN,vod-thumb-uk-live.akamaized.net,BBC iPlayer
-DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC iPlayer
-DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC iPlayer
+DOMAIN-KEYWORD,bbcfmt,BBC
+DOMAIN-KEYWORD,co.uk,BBC
+DOMAIN-KEYWORD,uk-live,BBC
+DOMAIN-SUFFIX,bbc.com,BBC
+DOMAIN-SUFFIX,bbc.co,BBC
+DOMAIN-SUFFIX,bbc.co.uk,BBC
+DOMAIN-SUFFIX,bbci.co,BBC
+DOMAIN-SUFFIX,bbci.co.uk,BBC
+DOMAIN,ssl-bbcsmarttv.2cnt.net,BBC
+DOMAIN,vod-dash-uk-live.akamaized.net,BBC
+DOMAIN,vod-thumb-uk-live.akamaized.net,BBC
+DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,BBC
+DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,BBC
