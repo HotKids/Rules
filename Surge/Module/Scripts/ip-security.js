@@ -206,12 +206,14 @@ function normalizeIpInfo(data) {
 function normalizeBilibili(data) {
   const d = data?.data;
   if (!d || !d.country) return null;
+  let isp = d.isp || "";
+  if (/^(移动|联通|电信)$/.test(isp)) isp = "中国" + isp;
   return {
     country_code: null,
     country_name: d.country,
     city: d.city || d.province,
     region: d.province,
-    org: d.isp || ""
+    org: isp
   };
 }
 
@@ -509,29 +511,33 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     httpJSON(CONFIG.urls.inboundInfo(inIP)),
     isZh ? httpJSON(CONFIG.urls.inboundIP) : httpJSON(CONFIG.urls.ipInfo(outIP))
   ];
-  if (outIPv6) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
+  if (outIPv6 && !isZh) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
 
   const results = await Promise.all(queries);
   const [policy, riskInfo, ipTypeResult, inSbRaw, outGeoRaw] = results;
-  const ipv6InfoRaw = outIPv6 ? results[5] : null;
 
   let inInfo, outInfo, ipv6Info;
   if (isZh) {
-    // 中文模式：入口用 bilibili DIRECT（fetchIPs 已获取），country_code 补充自 ip.sb
+    // 中文模式：入口地区/运营商用 bilibili，country_code 补充自 ip.sb
     const inBili = normalizeBilibili(inRaw);
     const inSb = normalizeIpSb(inSbRaw);
     inInfo = inBili ? { ...inBili, country_code: inSb?.country_code || "" } : inSb;
 
-    // 出口：bilibili 无 DIRECT 调用，若返回的 IP 匹配出口则走了代理，否则回落 ip.sb
+    // 出口：地区用 bilibili（若走了代理），运营商始终用 ip.sb
     const outBili = normalizeBilibili(outGeoRaw);
     const biliIsProxy = outGeoRaw?.data?.addr === outIP;
     const outSb = normalizeIpSb(outRaw);
-    outInfo = (biliIsProxy && outBili) ? { ...outBili, country_code: outSb?.country_code || "" } : outSb;
+    if (biliIsProxy && outBili) {
+      outInfo = { ...outBili, country_code: outSb?.country_code || "", org: outSb?.org || "" };
+    } else {
+      outInfo = outSb;
+    }
 
-    // IPv6：bilibili 无 IPv6 端点，用 ipinfo.io / ip.sb 兜底
-    ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+    // IPv6：复用 IPv4 出口信息
+    ipv6Info = outIPv6 ? outInfo : null;
   } else {
     // 英文模式：入口用 ip.sb，出口用 ipinfo.io（回落 ip.sb）
+    const ipv6InfoRaw = outIPv6 ? results[5] : null;
     inInfo = normalizeIpSb(inSbRaw);
     outInfo = normalizeIpInfo(outGeoRaw) || normalizeIpSb(outRaw);
     ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
