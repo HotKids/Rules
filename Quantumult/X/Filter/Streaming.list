@@ -169,14 +169,6 @@ DOMAIN-SUFFIX,tospotify.com,Streaming
 DOMAIN-SUFFIX,stan.com.au,Streaming
 DOMAIN,aws.stan.video,Streaming
 
-# > Star+
-DOMAIN-SUFFIX,starplus.com,Streaming
-DOMAIN-SUFFIX,starott.com,Streaming
-DOMAIN,star.api.edge.bamgrid.com,Streaming
-DOMAIN,star.connections.edge.bamgrid.com,Streaming
-DOMAIN,star.content.edge.bamgrid.com,Streaming
-DOMAIN,star.playback.edge.bamgrid.com,Streaming
-
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com,Streaming
 DOMAIN-KEYWORD,tvbanywhere,Streaming
