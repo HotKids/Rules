@@ -714,28 +714,21 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
-    // 网页检测：访问 gemini.google.com，从 HTML 判断可用性和地区
+    // 网页检测：访问 gemini.google.com（参考 lmc999/RegionRestrictionCheck）
+    let webResult = null;
     try {
       const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
       const body = res.body || "";
 
-      // 方式1: RegionRestrictionCheck 标记
       if (body.includes("45631641,null,true")) {
-        // 优先提取两字母码，fallback 三字母码
         const m2 = body.match(/,2,1,200,"([A-Z]{2})"/);
         if (m2) return Utils.createResult(STATUS.OK, m2[1]);
         const m3 = body.match(/,2,1,200,"([A-Z]{3})"/);
-        return Utils.createResult(STATUS.OK, m3 ? m3[1].substring(0, 2) : "OK");
-      }
-      // 方式2: 页面含 Gemini app 内容（未被重定向到不可用页）
-      if (res.status === 200 && !body.includes("not available") && !body.includes("not supported")
-          && (body.includes("chat-session") || body.includes("gemini.google.com/app"))) {
-        return Utils.createResult(STATUS.OK, "OK");
-      }
-      // 明确不可用
-      if (body.includes("not available") || body.includes("not supported")) {
+        if (m3) return Utils.createResult(STATUS.OK, m3[1].substring(0, 2));
+        // 有标记但无地区码 → 不可用
         return Utils.createResult(STATUS.FAIL, "No");
       }
+      webResult = "fail";
     } catch {}
 
     // API 检测 fallback（需要 Key）
@@ -753,7 +746,7 @@ class ServiceChecker {
       } catch {}
     }
 
-    return Utils.createResult(STATUS.FAIL, "No");
+    return Utils.createResult(STATUS.FAIL, webResult ? "No" : "Timeout");
   }
 
   /**
