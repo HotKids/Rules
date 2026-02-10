@@ -251,11 +251,16 @@ async function getPolicyAndEntrance() {
     return (res?.requests || []).slice(0, limit).find(i => pattern.test(i.URL));
   }
 
-  let hit = await findInRecent(10);
+  let hit = await findInRecent(50);
   if (!hit) {
-    console.log("未找到策略记录，等待后重试");
+    console.log("未找到策略记录，等待后重试 (1/2)");
     await wait(CONFIG.policyRetryDelay);
-    hit = await findInRecent(5);
+    hit = await findInRecent(50);
+  }
+  if (!hit) {
+    console.log("未找到策略记录，等待后重试 (2/2)");
+    await wait(CONFIG.policyRetryDelay * 2);
+    hit = await findInRecent(100);
   }
 
   if (!hit) {
@@ -496,18 +501,18 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
-  const queries = [
-    getPolicyAndEntrance(),                  // 0: {policy, entranceIP}
-    getRiskScore(outIP),                     // 1
-    getIPType(),                             // 2
-    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 3: ip.sb 本地（en 地理 / zh country_code）
-    httpJSON(geoUrl(outIP)),                 // 4: 出口地理
-    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 5: 出口运营商（仅 ip-api 模式）
-  ];
+  // 先并行发起所有 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
+  // 这样 getPolicyAndEntrance 能在 recent 里找到刚完成的请求，避免 Unknown
+  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw] = await Promise.all([
+    getRiskScore(outIP),                     // 0
+    getIPType(),                             // 1
+    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
+    httpJSON(geoUrl(outIP)),                 // 3: 出口地理
+    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）
+  ]);
 
-  const results = await Promise.all(queries);
-  const [policyResult, riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw] = results;
-  const { policy, entranceIP } = policyResult;
+  // API 请求已完成，此时 recent 里一定有匹配记录
+  const { policy, entranceIP } = await getPolicyAndEntrance();
 
   // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
   let localInfo;
