@@ -13,11 +13,12 @@
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: ip.sb (入口), ipinfo.io (出口, ip.sb 兜底)
+ * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → ip-api.com (中文)
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key (可选)
+ * - lang: 地理信息语言，en(默认)=英文(ipinfo.io)，zh=中文(ip-api.com)
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
  * 配置示例：
@@ -53,6 +54,7 @@ const CONFIG = {
     ipTypeCard: "https://my.ippure.com/v1/card",
     inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
     ipInfo: (ip) => `https://ipinfo.io/${ip}/json`,
+    ipApiZh: (ip) => `http://ip-api.com/json/${ip}?lang=zh-CN`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
@@ -94,12 +96,13 @@ function parseArguments() {
   return {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
+    lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
 }
 
 const args = parseArguments();
-console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL"));
+console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", 语言: " + args.lang);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
@@ -197,6 +200,21 @@ function normalizeIpInfo(data) {
 }
 
 /**
+ * 将 ip-api.com 返回字段归一化为内部格式
+ * ip-api.com: { status:"success", country:"中国", countryCode:"CN", regionName:"广东", city:"广州市", isp, org }
+ */
+function normalizeIpApi(data) {
+  if (!data || data.status !== "success") return null;
+  return {
+    country_code: data.countryCode,
+    country_name: data.country,
+    city: data.city,
+    region: data.regionName,
+    org: data.isp || data.org || ""
+  };
+}
+
+/**
  * 从 Scamalytics HTML 中解析风险分数
  */
 function parseScamalyticsScore(html) {
@@ -219,7 +237,7 @@ async function findPolicyInRecent(pattern, limit) {
  */
 async function getPolicy() {
   // 第一次查找
-  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 10);
+  let policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com)/i, 10);
   if (policy) {
     console.log("找到代理策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -230,7 +248,7 @@ async function getPolicy() {
   console.log("未找到策略记录，等待后重试");
   await wait(CONFIG.policyRetryDelay);
 
-  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io)/i, 5);
+  policy = await findPolicyInRecent(/(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com)/i, 5);
   if (policy) {
     console.log("重试后找到策略: " + policy);
     $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
@@ -480,23 +498,28 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   }
 
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
+  const isZh = args.lang === "zh";
+  const geoUrl = isZh ? CONFIG.urls.ipApiZh : CONFIG.urls.ipInfo;
+  const inGeoUrl = isZh ? CONFIG.urls.ipApiZh(inIP) : CONFIG.urls.inboundInfo(inIP);
+
   const queries = [
     getPolicy(),
     getRiskScore(outIP),
     getIPType(),
-    httpJSON(CONFIG.urls.inboundInfo(inIP)),
-    httpJSON(CONFIG.urls.ipInfo(outIP))
+    httpJSON(inGeoUrl),
+    httpJSON(geoUrl(outIP))
   ];
-  if (outIPv6) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
+  if (outIPv6) queries.push(httpJSON(geoUrl(outIPv6)));
 
   const results = await Promise.all(queries);
   const [policy, riskInfo, ipTypeResult, inInfoRaw, outInfoRaw] = results;
   const ipv6InfoRaw = outIPv6 ? results[5] : null;
 
-  // 入口用 ip.sb（归一化），出口用 ipinfo.io（归一化，失败时回落到 ip.sb）
-  const inInfo = normalizeIpSb(inInfoRaw);
-  const outInfo = normalizeIpInfo(outInfoRaw) || normalizeIpSb(outRaw);
-  const ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+  // 归一化地理信息：zh 用 ip-api.com，en 用 ipinfo.io / ip.sb
+  const normalizeGeo = isZh ? normalizeIpApi : normalizeIpInfo;
+  const inInfo = isZh ? normalizeIpApi(inInfoRaw) : normalizeIpSb(inInfoRaw);
+  const outInfo = normalizeGeo(outInfoRaw) || normalizeIpSb(outRaw);
+  const ipv6Info = outIPv6 ? (normalizeGeo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
 
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
