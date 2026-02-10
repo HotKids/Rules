@@ -393,44 +393,28 @@ function checkIPChange(localIP, outIP, outIPv6) {
 
 // ==================== 面板内容构建 ====================
 function geoLabel(info) {
-  // ip-api.com: country_name="Hong Kong"/"香港" ≠ country_code="HK" → 用国名
-  // ipinfo.io: country_name="HK" = country_code="HK" → 用 country_code
-  return (info?.country_name && info.country_name !== info.country_code) ? info.country_name : info?.country_code;
+  // ip-api.com: country_name="Hong Kong"/"香港" ≠ country_code="HK" → 显示国名
+  // ipinfo.io: country_name="HK" = country_code="HK" → 不显示（旗帜已代表）
+  return (info?.country_name && info.country_name !== info.country_code) ? info.country_name : null;
 }
 
-function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isMask) {
+function buildOutboundSection(outIP, outIPv6, outInfo, isMask) {
   const lines = [];
   const m = (ip) => isMask ? maskIP(ip) : ip;
 
-  if (!outIPv6) {
-    lines.push("出口 IP：" + m(outIP));
-    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-    lines.push("运营商：" + (outInfo?.org || "Unknown"));
-    return lines;
-  }
-
-  const sameLocation = outInfo?.country_code === ipv6Info?.country_code
-    && outInfo?.org === ipv6Info?.org;
-
-  if (sameLocation) {
+  if (outIPv6) {
     lines.push("出口 IP⁴：" + m(outIP));
     lines.push("出口 IP⁶：" + m(outIPv6));
-    lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-    lines.push("运营商：" + (outInfo?.org || "Unknown"));
   } else {
-    lines.push("出口 IP⁴：" + m(outIP));
-    lines.push("地区⁴：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-    lines.push("运营商⁴：" + (outInfo?.org || "Unknown"));
-    lines.push("");
-    lines.push("出口 IP⁶：" + m(outIPv6));
-    lines.push("地区⁶：" + formatGeo(ipv6Info?.country_code, ipv6Info?.city, ipv6Info?.region, geoLabel(ipv6Info)));
-    lines.push("运营商⁶：" + (ipv6Info?.org || "Unknown"));
+    lines.push("出口 IP：" + m(outIP));
   }
+  lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
+  lines.push("运营商：" + (outInfo?.org || "Unknown"));
 
   return lines;
 }
 
-function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info }) {
+function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
@@ -451,7 +435,7 @@ function buildPanelContent({ isZh, isMask, riskInfo, riskResult, ipType, ipSrc, 
     );
   }
 
-  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info, isMask));
+  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, isMask));
 
   return lines.join("\n");
 }
@@ -521,15 +505,6 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
     httpJSON(geoUrl(outIP)),                 // 4: 出口地理
     useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 5: 出口运营商（仅 ip-api 模式）
   ];
-  const v6Idx = queries.length;
-  let v6OrgIdx = -1;
-  if (outIPv6) {
-    queries.push(httpJSON(geoUrl(outIPv6)));  // v6Idx: IPv6 地理
-    if (useIpApi) {
-      v6OrgIdx = queries.length;
-      queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));  // v6OrgIdx: IPv6 运营商
-    }
-  }
 
   const results = await Promise.all(queries);
   const [policyResult, riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw] = results;
@@ -548,18 +523,11 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   }
 
   // 出口 IP 地理信息：geo_api 决定地区来源，运营商始终用 ipinfo.io（回落 ip.sb）
+  // IPv6 只显示 IP 地址，不单独查询地区和运营商
   let outInfo = normalizeGeo(outGeoRaw) || normalizeIpSb(outRaw);
   if (useIpApi && outInfo) {
     const orgData = normalizeIpInfo(outOrgRaw);
     if (orgData?.org) outInfo.org = orgData.org;
-  }
-
-  // IPv6 地理信息
-  const v6GeoRaw = outIPv6 ? results[v6Idx] : null;
-  let ipv6Info = outIPv6 ? (normalizeGeo(v6GeoRaw) || normalizeIpSb(v6Raw)) : null;
-  if (useIpApi && ipv6Info && v6OrgIdx >= 0) {
-    const orgData = normalizeIpInfo(results[v6OrgIdx]);
-    if (orgData?.org) ipv6Info.org = orgData.org;
   }
 
   // 入口 IP 地理信息：与出口不同时才查询
@@ -597,7 +565,7 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
       $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
     }
   }
-  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, ipv6Info };
+  const context = { isZh, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
