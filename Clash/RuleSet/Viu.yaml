@@ -1,7 +1,5 @@
 payload:
   # > Viu
-  # USER-AGENT,Viu*
-  # PROCESS-NAME,com.viu.phone
   - DOMAIN-SUFFIX,viu.com
   - DOMAIN,pccw-cf-video.akamaized.net
   - DOMAIN,dfp6rglgjqszk.cloudfront.net

@@ -1,0 +1,272 @@
+# > 广告联盟
+DOMAIN,i.snssdk.com,AD
+DOMAIN,is.snssdk.com,AD
+DOMAIN,mi.gdt.qq.com,AD
+DOMAIN,open.e.kuaishou.com,AD
+DOMAIN-SUFFIX,miaozhen.com,AD
+DOMAIN-KEYWORD,adservice,AD
+DOMAIN-KEYWORD,pglstatp-toutiao,AD
+DOMAIN-KEYWORD,pangolin-sdk-toutiao,AD
+DOMAIN-KEYWORD,pangolin.snssdk.com,AD
+DOMAIN-KEYWORD,pangolin.snssdk.com,AD
+DOMAIN-KEYWORD,video-cn.snssdk.com,AD
+
+# > 安全浏览限制解除
+DOMAIN,lookup.api.bsb.baidu.com,AD
+DOMAIN-SUFFIX,u3.ucweb.com,AD
+# DOMAIN-KEYWORD,safebrowsing. 会影响 Pixel VPN
+
+# > 农行防代理检测
+DOMAIN,msmp.abchina.com.cn,AD
+
+# > Amap
+DOMAIN,amap-aos-info-nogw.amap.com,AD
+DOMAIN,free-aos-cdn-image.amap.com,AD
+DOMAIN-SUFFIX,v.smtcdns.com,AD
+
+# > Apple
+DOMAIN,advertising.apple.com,AD
+DOMAIN,api-adservices.apple.com,AD
+DOMAIN,apple.comscoreresearch.com,AD
+DOMAIN,banners.itunes.apple.com,AD
+DOMAIN,iad.apple.com,AD
+DOMAIN,iadcontent.apple.com,AD
+DOMAIN,iadctest.qwapi.com,AD
+DOMAIN,iadmoo.apple.com,AD
+DOMAIN,iadworkbench.apple.com,AD
+DOMAIN,launch.apple.com,AD
+DOMAIN,qwapi.apple.com,AD
+DOMAIN-SUFFIX,advp.apple.com,AD
+DOMAIN-SUFFIX,iadsdk.apple.com,AD
+DOMAIN-KEYWORD,.iad-apple.com,AD
+
+# > Baidu
+DOMAIN,afd.baidu.com,AD
+DOMAIN,afdconf.baidu.com,AD
+DOMAIN,als.baidu.com,AD
+DOMAIN,bgg.baidu.com,AD
+DOMAIN,feed-image.baidu.com,AD
+DOMAIN,httpdns.baidubce.com,AD
+DOMAIN,lc.map.baidu.com,AD
+DOMAIN,mobads-logs.baidu.com,AD
+DOMAIN,mobads.baidu.com,AD
+DOMAIN,wn.pos.baidu.com,AD
+DOMAIN-SUFFIX,pos.baidu.com,AD
+DOMAIN-SUFFIX,union.baidu.cn,AD
+DOMAIN-SUFFIX,union.baidu.com,AD
+IP-CIDR,180.76.76.200/32,AD
+
+# > Bilibili
+DOMAIN,mall.bilibili.com,AD
+
+# > ByteDance
+DOMAIN,ad.zijieapi.com,AD
+DOMAIN,lf-cdn-tos.bytescm.com,AD
+DOMAIN-KEYWORD,-ad-sign.byteimg.com,AD
+DOMAIN-KEYWORD,-be-pack-sign.pglstatp-toutiao.com,AD
+DOMAIN-KEYWORD,-be-pack.pglstatp-toutiao.com,AD
+DOMAIN-KEYWORD,-fe-tos.pglstatp-toutiao.com,AD
+DOMAIN-KEYWORD,api-access.pangolin-sdk-toutiao,AD
+DOMAIN-KEYWORD,asiad.byteactivity,AD
+DOMAIN-KEYWORD,log-api.pangolin-sdk-toutiao,AD
+
+# > Caiyun Weather
+DOMAIN,ad.cyapi.cn,AD
+
+# > Disney+ with Hulu
+DOMAIN-SUFFIX,disneyadvertising.com,AD
+
+# > ChatGPT
+DOMAIN,o33249.ingest.sentry.io,AD
+
+# > Google
+DOMAIN,adservice.google.com,AD
+DOMAIN,googleads.g.doubleclick-cn.net,AD
+DOMAIN,googleads.g.doubleclick.net,AD
+DOMAIN,pagead2.googlesyndication.com,AD
+DOMAIN,pubads.g.doubleclick.net,AD
+DOMAIN,www.googleadservices.com,AD
+DOMAIN-KEYWORD,adservice.google.com.,AD
+
+# > HeyTap(OPPO)
+DOMAIN,event.dc.oppomobile.com,AD
+DOMAIN,adx.ads.heytapmobi.com,AD
+DOMAIN,ibrowser.feeds.heytapmobi.com,AD
+DOMAIN,adsfs.heytapimage.com,AD
+DOMAIN,cc-algo-cn.heytapimage.com,AD
+DOMAIN,cc-img-cn.heytapimage.com,AD
+
+# > ICBC
+DOMAIN,oisc.icbc.com.cn,AD
+DOMAIN,pageviewp.icbc.com.cn,AD
+
+# > iQIYI
+DOMAIN,api.iqiyi.com,AD
+DOMAIN-SUFFIX,cupid.iqiyi.com,AD
+DOMAIN-SUFFIX,cupid.ptqy.gitv.tv,AD
+
+# > JD
+DOMAIN,dns.jd.com,AD
+DOMAIN,dsp-x.jd.com,AD
+DOMAIN,janapi.jd.com,AD
+DOMAIN,xlog.jd.com,AD
+IP-CIDR,101.124.19.122/32,AD
+IP-CIDR6,2402:db40:5100:1011::5/128,AD
+
+# > Keep
+DOMAIN,httpdns.n.netease.com,AD
+DOMAIN,httpdns.calorietech.com,AD
+DOMAIN,hc-ssp.sm.cn,AD
+
+# > Meituan
+DOMAIN,al-log.d.meituan.net,AD
+DOMAIN,babel-statistics-android.d.meituan.net,AD
+DOMAIN,maplocatesdksnapshot.d.meituan.net,AD
+DOMAIN,metrics-picture.d.meituan.net,AD
+DOMAIN,route-stats.d.meituan.net,AD
+
+# > MGTV
+DOMAIN,credits.bz.mgtv.com,AD
+DOMAIN,credits2.bz.mgtv.com,AD
+DOMAIN,credits3.bz.mgtv.com,AD
+DOMAIN,dflow.bz.mgtv.com,AD
+DOMAIN,encounter.bz.mgtv.com,AD
+DOMAIN,floor.bz.mgtv.com,AD
+DOMAIN,layer.bz.mgtv.com,AD
+DOMAIN,mob.bz.mgtv.com,AD
+DOMAIN,rc-topic-api.bz.mgtv.com,AD
+DOMAIN,rprain.bz.mgtv.com,AD
+DOMAIN,rprain.log.mgtv.com,AD
+DOMAIN,vip.bz.mgtv.com,AD
+DOMAIN-SUFFIX,da.mgtv.com,AD
+
+# > NetEase
+DOMAIN,adx-bj.anythinktech.com,AD
+DOMAIN,api.anythinktech.com,AD
+DOMAIN,da.anythinktech.com,AD
+DOMAIN,httpdns.music.163.com,AD
+DOMAIN,httpdns.n.netease.com,AD
+DOMAIN,iad.g.163.com,AD
+DOMAIN,iadmat.nosdn.127.net,AD
+DOMAIN,iadmatapk.nosdn.127.net,AD
+DOMAIN,iadmusicmat.music.126.net,AD
+DOMAIN,iadmusicmatvideo.music.126.net,AD
+DOMAIN,nex.163.com,AD
+DOMAIN,tk.anythinktech.com,AD
+DOMAIN-SUFFIX,163jiasu.com,AD
+
+# > Outlook
+DOMAIN,acdn.adnxs.com,AD
+DOMAIN,mediation.adnxs.com,AD
+DOMAIN,sin3-ib.adnxs.com,AD
+
+# > PeacockTV
+DOMAIN,video-ads-module.ad-tech.nbcuni.com,AD
+
+# > SMZDM
+DOMAIN,api.zuihuimai.com,AD
+
+# > Tencent
+DOMAIN-KEYWORD,adstats,AD
+DOMAIN,adcdn.tencentmusic.com,AD
+DOMAIN,adclick.tencentmusic.com,AD
+DOMAIN,adexpo.tencentmusic.com,AD
+DOMAIN,adsmind.gdtimg.com,AD
+DOMAIN,adstats.tencentmusic.com,AD
+DOMAIN,ad.tencentmusic.com,AD
+DOMAIN,btrace.qq.com,AD
+DOMAIN,btrace.video.qq.com,AD
+DOMAIN,info4.video.qq.com,AD
+DOMAIN,info6.video.qq.com,AD
+DOMAIN,ios.video.mpush.qq.com,AD
+DOMAIN,gdt.qq.com,AD
+DOMAIN,mtrace.qq.com,AD
+DOMAIN,monitor.music.qq.com,AD
+DOMAIN,otheve.beacon.qq.com,AD
+DOMAIN,p.l.qq.com,AD
+DOMAIN,pgdt.gtimg.cn,AD
+DOMAIN,rpt.gdt.qq.com,AD
+DOMAIN,tytx.m.cn.miaozhen.com,AD
+DOMAIN,wxsmsdy.video.qq.com,AD
+DOMAIN,wxsnsdy.wxs.qq.com,AD
+DOMAIN,wxsnsdythumb.wxs.qq.com,AD
+DOMAIN-SUFFIX,beacon.qq.com,AD
+DOMAIN-SUFFIX,gdt.qq.com,AD
+DOMAIN-SUFFIX,imtmp.net,AD
+DOMAIN-SUFFIX,tpns.qq.com,AD
+DOMAIN-SUFFIX,trace.qq.com,AD
+
+# > TVB
+DOMAIN,adstvb.akamaized.net,AD
+
+# > TVer
+DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp,AD
+
+# > UnionPay
+DOMAIN,ads.95516.com,AD
+DOMAIN,tysdk.95516.com,AD
+DOMAIN,cm-10-138.getui.com,AD
+DOMAIN,sdk-conf.getui.com,AD
+DOMAIN,sdk.open.talk.getui.net,AD
+DOMAIN,switch.cup.com.cn,AD
+
+# > Viu
+DOMAIN-SUFFIX,adcolony.com,AD
+DOMAIN,r2---sn-j5o76n7e.gvt1.com,AD
+
+# > WeChat
+DOMAIN,wxsnsdy.wxs.qq.com,AD
+DOMAIN,wxsnsdythumb.wxs.qq.com,AD
+DOMAIN,badjs.weixinbridge.com,AD
+
+# > Weibo
+DOMAIN,huodong.weibo.cn,AD
+DOMAIN,adstrategy.biz.weibo.com,AD
+DOMAIN,kadmimage.biz.weibo.com,AD
+DOMAIN,sdkaction.biz.weibo.com,AD
+DOMAIN,sdkclick.biz.weibo.com,AD
+DOMAIN,sdkmonitor.biz.weibo.com,AD
+DOMAIN-SUFFIX,biz.weibo.com,AD
+IP-CIDR,39.97.130.51/32,AD
+IP-CIDR,39.97.128.148/32,AD
+
+# > WeTV
+DOMAIN,btrace.wetvinfo.com,AD
+DOMAIN,mtrace.wetvinfo.com,AD
+
+# > Xiaomi
+DOMAIN,sdkconfig.ad.xiaomi.com,AD
+
+# > Youku
+DOMAIN,adsmind.ugdtimg.com,AD
+DOMAIN,huichuan-mc.sm.cn,AD
+DOMAIN,amdc.m.youku.com,AD
+DOMAIN,apiv4-iyes.youku.com,AD
+DOMAIN,huichuan.sm.cn,AD
+DOMAIN,iyes.youku.com,AD
+DOMAIN,mc.atm.youku.com,AD
+DOMAIN,yk-ssp.ad.youku.com,AD
+DOMAIN,ykad-data.youku.com,AD
+DOMAIN,m-vali.cp31.ott.cibntv.net,AD
+DOMAIN,vali-g1.cp31.ott.cibntv.net,AD
+DOMAIN,vali-ugc.cp31.ott.cibntv.net,AD
+
+# > Zhihu
+DOMAIN,appcloud2.in.zhihu.com,AD
+DOMAIN,appcloud.zhihu.com,AD
+DOMAIN,crash2.zhihu.com,AD
+DOMAIN,mqtt.zhihu.com,AD
+DOMAIN,sugar.zhihu.com,AD
+DOMAIN,zxid-m.mobileservice.cn,AD
+IP-CIDR,103.41.167.237/32,AD
+IP-CIDR,118.89.204.198/32,AD
+IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,AD
+
+# > 10000
+DOMAIN,ad.21cn.com,AD
+DOMAIN,ad.k.21cn.com,AD
+DOMAIN,admarket.21cn.com,AD
+DOMAIN,adshows.21cn.com,AD
+
+# > 10010
+DOMAIN-SUFFIX,m1.ad.10010.com,AD

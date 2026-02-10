@@ -1,50 +1,61 @@
-# Unbreak
-# > General
-DOMAIN,app.adjust.com,DIRECT
-DOMAIN,app.appsflyer.com,DIRECT
-DOMAIN,bdtj.tagtic.cn,DIRECT
-
-# > Alibaba
-DOMAIN,log.mmstat.com,DIRECT
-DOMAIN,sycm.mmstat.com,DIRECT
-
-# > Google
-DOMAIN-SUFFIX,blog.google,DIRECT
-DOMAIN-SUFFIX,googletraveladservices.com,DIRECT
-DOMAIN,clientservices.googleapis.com,DIRECT
-DOMAIN,update.googleapis.com,DIRECT
-DOMAIN,dl.google.com,DIRECT
-DOMAIN,dl.l.google.com,DIRECT
-DOMAIN,update.googleapis.com,DIRECT
-# >> Firebase Cloud Messaging
-DOMAIN,mtalk.google.com,DIRECT
-DOMAIN,alt1-mtalk.google.com,DIRECT
-DOMAIN,alt2-mtalk.google.com,DIRECT
-DOMAIN,alt3-mtalk.google.com,DIRECT
-DOMAIN,alt4-mtalk.google.com,DIRECT
-DOMAIN,alt5-mtalk.google.com,DIRECT
-DOMAIN,alt6-mtalk.google.com,DIRECT
-DOMAIN,alt7-mtalk.google.com,DIRECT
-DOMAIN,alt8-mtalk.google.com,DIRECT
-
-# >> Paramount+
-# DOMAIN,pubads.g.doubleclick.net,DIRECT
-
-# > Tencent
-DOMAIN,fairplay.l.qq.com,DIRECT
-DOMAIN,livew.l.qq.com,DIRECT
-DOMAIN,vd.l.qq.com,DIRECT
-DOMAIN,vi.l.qq.com,DIRECT
-
-# > Strava
-DOMAIN,analytics.strava.com,DIRECT
-
-# > Umeng
-DOMAIN,msg.umeng.com,DIRECT
-DOMAIN,msg.umengcloud.com,DIRECT
+# > Unbreak
+DOMAIN,app.adjust.com,Unbreak
+DOMAIN,app.appsflyer.com,Unbreak
+DOMAIN,bdtj.tagtic.cn,Unbreak
 
 # > CNTV
-DOMAIN-SUFFIX,cupid.iqiyi.com,DIRECT
-DOMAIN,push.m.youku.com,DIRECT
-DOMAIN,un-acs.youku.com,DIRECT
-DOMAIN,dorangesource.alicdn.com,DIRECT
+DOMAIN-SUFFIX,cupid.iqiyi.com,Unbreak
+DOMAIN,push.m.youku.com,Unbreak
+DOMAIN,un-acs.youku.com,Unbreak
+DOMAIN,dorangesource.alicdn.com,Unbreak
+
+# > Alibaba
+DOMAIN,log.mmstat.com,Unbreak
+DOMAIN,sycm.mmstat.com,Unbreak
+
+# > Tencent
+DOMAIN,fairplay.l.qq.com,Unbreak
+DOMAIN,livew.l.qq.com,Unbreak
+DOMAIN,vd.l.qq.com,Unbreak
+DOMAIN,vi.l.qq.com,Unbreak
+
+# > Strava
+DOMAIN,analytics.strava.com,Unbreak
+
+# > Umeng
+DOMAIN,msg.umeng.com,Unbreak
+DOMAIN,msg.umengcloud.com,Unbreak
+
+# > Google
+DOMAIN-SUFFIX,blog.google,Unbreak
+DOMAIN-SUFFIX,googletraveladservices.com,Unbreak
+DOMAIN,clientservices.googleapis.com,Unbreak
+DOMAIN,dl.google.com,Unbreak
+DOMAIN,dl.l.google.com,Unbreak
+DOMAIN,update.googleapis.com,Unbreak
+# >> Firebase Cloud Messaging
+DOMAIN,mtalk.google.com,Unbreak
+DOMAIN,alt1-mtalk.google.com,Unbreak
+DOMAIN,alt2-mtalk.google.com,Unbreak
+DOMAIN,alt3-mtalk.google.com,Unbreak
+DOMAIN,alt4-mtalk.google.com,Unbreak
+DOMAIN,alt5-mtalk.google.com,Unbreak
+DOMAIN,alt6-mtalk.google.com,Unbreak
+DOMAIN,alt7-mtalk.google.com,Unbreak
+DOMAIN,alt8-mtalk.google.com,Unbreak
+
+# > Samsung Galaxy App Store
+DOMAIN-SUFFIX,galaxyappstore.com,Unbreak
+DOMAIN-SUFFIX,samsungapps.com,Unbreak
+
+# > Windows NTP
+DOMAIN,time.windows.com,Unbreak
+
+# > Marriott
+DOMAIN-SUFFIX,marriottwifi.com,Unbreak
+DOMAIN,portal.linkbroad.com,Unbreak
+
+# > BOC HK
+DOMAIN-SUFFIX,bochk.com,Unbreak
+
+# > ziniao

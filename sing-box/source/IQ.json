@@ -1,0 +1,57 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "akcdnoversea.inter.71edge.com",
+        "akmcdnoversea-tw.inter.iqiyi.com",
+        "akmcdnoversea-tw.inter.ptqy.gitv.tv",
+        "akmcdnoversea.inter.iqiyi.com",
+        "akmcdnoversea.inter.ptqy.gitv.tv",
+        "chuangcachecdnoversea-tw.inter.iqiyi.com",
+        "chuangcachecdnoversea-tw.inter.ptqy.gitv.tv",
+        "chuangcachecdnoversea.inter.iqiyi.com",
+        "chuangcachecdnoversea.inter.ptqy.gitv.tv",
+        "intl-im-hist-api.iqiyi.com",
+        "intl-rcd.iqiyi.com",
+        "intl-subscription.iqiyi.com",
+        "ip.geo.iqiyi.com",
+        "msg-intl.qy.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "intl.iqiyi.com",
+        "iq.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "akmcdnoverse",
+        "chuangcachecdnoversea"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "110.238.107.47/32",
+        "110.238.109.184/32",
+        "114.119.175.88/32",
+        "118.26.32.0/22",
+        "159.138.102.146/32",
+        "184.25.254.178/32",
+        "2.21.22.17/32",
+        "203.198.80.99/32",
+        "203.80.97.208/32",
+        "23.210.215.154/32",
+        "23.40.241.251/32",
+        "23.40.242.10/32"
+      ]
+    },
+    {
+      "process_name": [
+        "com.iqiyi.i18n",
+        "com.iqiyi.i18n.tv"
+      ]
+    }
+  ]
+}

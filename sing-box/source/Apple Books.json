@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "bookkeeper.itunes.apple.com",
+        "books-analytics-events.apple.com",
+        "books.itunes.apple.com",
+        "buy.itunes.apple.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "books.apple.com"
+      ]
+    }
+  ]
+}

@@ -1,19 +1,13 @@
 payload:
   # > Crunchyroll
-  # USER-AGENT,Crunchyroll*
   - DOMAIN-SUFFIX,crunchyroll.com
-  - DOMAIN-SUFFIX,vrv.co
-  
   # > Discovery+
-  # USER-AGENT,discovery+*
-  # USER-AGENT,DPlus*
-  # PROCESS-NAME,com.discovery.discoveryplus.mobile
-  # PROCESS-NAME,com.discovery.discoveryplus.androidtv
   - DOMAIN-SUFFIX,discoveryplus.com
   - DOMAIN-SUFFIX,disco-api.com
   - DOMAIN-SUFFIX,dnitv.com
   - DOMAIN-SUFFIX,dplus.us.prd.media.max.com
   - DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com
+  - AND,((USER-AGENT,*DPlus*),(DOMAIN,default.any-any.prd.api.discomax.com))
   - DOMAIN,us1-prod.disco-api.com
   - DOMAIN,us1-prod-images.disco-api.com
   - DOMAIN,kvinit-prod.api.kochava.com
@@ -21,69 +15,35 @@ payload:
   - DOMAIN,content-ause1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
-  # DOMAIN,go-prod-vz.akamaized.net
-
   # > HBO Max
-  # USER-AGENT,HBOMAX*
-  # PROCESS-NAME,com.hbo.hbonow
-  # DOMAIN-SUFFIX,hbo.com
-  # DOMAIN-SUFFIX,hbogo.com
-  # DOMAIN-SUFFIX,hbonow.com
-  # DOMAIN-SUFFIX,hbomax.com
-  # DOMAIN-SUFFIX,hbomaxcdn.com
-  
   # > Hulu
-  # PROCESS-NAME,com.hulu.plus
   - DOMAIN-SUFFIX,hulu.com
+  - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
-  # DOMAIN,assetshuluimcom-a.akamaihd.net
-   
   # > Max
-  # USER-AGENT,Max*
-  # PROCESS-NAME,com.wbd.stream
-  # DOMAIN-SUFFIX,max.com
-  # DOMAIN-SUFFIX,discomax.com
-  
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
   - DOMAIN-SUFFIX,epix.com
   - DOMAIN-SUFFIX,epixnow.com
   - DOMAIN,epixhls.akamaized.net
   - DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com
-
+  # > PBS
+  - DOMAIN-SUFFIX,pbs.org
   # > Paramount+
-  # USER-AGENT,PPlus*
-  # USER-AGENT,Paramountlus*
-  # PROCESS-NAME,com.cbs.app
-  # PROCESS-NAME,com.cbs.ott
-  # PROCESS-NAME,com.cbs.ca
   - DOMAIN-SUFFIX,cbsi.com
-  # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
-  # DOMAIN-SUFFIX,mtvnservices.com
-  # DOMAIN-SUFFIX,cws.conviva.com
   - DOMAIN,link.theplatform.com
   - DOMAIN,cbsi.live.ott.irdeto.com
-  # DOMAIN,thumbnails.cbsig.net
-  # DOMAIN,cbsinteractive.hb.omtrdc.net
-  # DOMAIN,ads.play.cbsi.video
-  # DOMAIN,cbsnews.akamaized.net
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
-
   # > Peacock
-  # USER-AGENT,Peacock*
-  - PROCESS-NAME,com.peacocktv.peacockandroid
   - DOMAIN-SUFFIX,peacocktv.com
-  
   # > Roku
   - DOMAIN-SUFFIX,roku.com
   - DOMAIN-SUFFIX,rokutime.com
-  
-  # > Star+
-  # 此条分流只是让 Star+ 串流时走 US 节点，需搭配 Star+ 相关分流使用
-  - DOMAIN-SUFFIX,media.starott.com
+  # > T-Mobile
+  - DOMAIN-SUFFIX,t-mobile.com

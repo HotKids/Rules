@@ -1,7 +1,5 @@
 payload:
   # > AbemaTV
-  # USER-AGENT,AbemaTV*
-  - PROCESS-NAME,tv.abema
   - DOMAIN-SUFFIX,abema.io
   - DOMAIN-SUFFIX,abema.tv
   - DOMAIN-SUFFIX,ameba.jp
@@ -10,32 +8,22 @@ payload:
   - DOMAIN,ds-vod-abematv.akamaized.net
   - DOMAIN,linear-abematv.akamaized.net
   - DOMAIN,ds-linear-abematv.akamaized.net
-
   # > FOD
-  # USER-AGENT,FOD*
   - DOMAIN-SUFFIX,fujitv.co.jp
   - DOMAIN-SUFFIX,stream.ne.jp
   - DOMAIN,measure.ic.tver.jp
-  
   # > Hulu JP
   - DOMAIN-SUFFIX,hulu.jp
   - DOMAIN-SUFFIX,happyon.jp
   - DOMAIN-SUFFIX,prod.hjholdings.tv
-  
   # > Paravi
-  # USER-AGENT,Paravi*
   - DOMAIN-SUFFIX,paravi.jp
-  
   # > TVer
   - DOMAIN-SUFFIX,tver.jp
   - DOMAIN-SUFFIX,interactive-circle.jp
   - DOMAIN-SUFFIX,brightcove.com
   - DOMAIN-SUFFIX,prod.boltdns.net
-  
   # > U-NEXT
-  - PROCESS-NAME,jp.unext.mediaplayer
-  - PROCESS-NAME,jp.unext.tv.player
   - DOMAIN-SUFFIX,unext.jp
   - DOMAIN-SUFFIX,nxtv.jp
-  # DOMAIN,streamd01ca-nxtv-jp.akamaized.net
   - DOMAIN,us-central1-u-next-apps.cloudfunctions.net

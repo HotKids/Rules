@@ -11,17 +11,16 @@ payload:
   - DOMAIN-KEYWORD,pangolin.snssdk.com
   - DOMAIN-KEYWORD,pangolin.snssdk.com
   - DOMAIN-KEYWORD,video-cn.snssdk.com
-
   # > 安全浏览限制解除
   - DOMAIN,lookup.api.bsb.baidu.com
   - DOMAIN-SUFFIX,u3.ucweb.com
-  - DOMAIN-KEYWORD,safebrowsing.
-
+  # DOMAIN-KEYWORD,safebrowsing. 会影响 Pixel VPN
+  # > 农行防代理检测
+  - DOMAIN,msmp.abchina.com.cn
   # > Amap
   - DOMAIN,amap-aos-info-nogw.amap.com
   - DOMAIN,free-aos-cdn-image.amap.com
   - DOMAIN-SUFFIX,v.smtcdns.com
-
   # > Apple
   - DOMAIN,advertising.apple.com
   - DOMAIN,api-adservices.apple.com
@@ -37,7 +36,6 @@ payload:
   - DOMAIN-SUFFIX,advp.apple.com
   - DOMAIN-SUFFIX,iadsdk.apple.com
   - DOMAIN-KEYWORD,.iad-apple.com
-
   # > Baidu
   - DOMAIN,afd.baidu.com
   - DOMAIN,afdconf.baidu.com
@@ -53,10 +51,8 @@ payload:
   - DOMAIN-SUFFIX,union.baidu.cn
   - DOMAIN-SUFFIX,union.baidu.com
   - IP-CIDR,180.76.76.200/32
-
   # > Bilibili
   - DOMAIN,mall.bilibili.com
-
   # > ByteDance
   - DOMAIN,ad.zijieapi.com
   - DOMAIN,lf-cdn-tos.bytescm.com
@@ -64,21 +60,15 @@ payload:
   - DOMAIN-KEYWORD,-be-pack-sign.pglstatp-toutiao.com
   - DOMAIN-KEYWORD,-be-pack.pglstatp-toutiao.com
   - DOMAIN-KEYWORD,-fe-tos.pglstatp-toutiao.com
-  - DOMAIN-KEYWORD,-sign.douyinpic.com
   - DOMAIN-KEYWORD,api-access.pangolin-sdk-toutiao
   - DOMAIN-KEYWORD,asiad.byteactivity
   - DOMAIN-KEYWORD,log-api.pangolin-sdk-toutiao
-
   # > Caiyun Weather
   - DOMAIN,ad.cyapi.cn
-
-  # > ChatGPT
-  - DOMAIN,o33249.ingest.sentry.io
-  
   # > Disney+ with Hulu
   - DOMAIN-SUFFIX,disneyadvertising.com
-  # DOMAIN-SUFFIX,ads.digital.disneyadvertising.com
-
+  # > ChatGPT
+  - DOMAIN,o33249.ingest.sentry.io
   # > Google
   - DOMAIN,adservice.google.com
   - DOMAIN,googleads.g.doubleclick-cn.net
@@ -87,7 +77,6 @@ payload:
   - DOMAIN,pubads.g.doubleclick.net
   - DOMAIN,www.googleadservices.com
   - DOMAIN-KEYWORD,adservice.google.com.
-
   # > HeyTap(OPPO)
   - DOMAIN,event.dc.oppomobile.com
   - DOMAIN,adx.ads.heytapmobi.com
@@ -95,16 +84,13 @@ payload:
   - DOMAIN,adsfs.heytapimage.com
   - DOMAIN,cc-algo-cn.heytapimage.com
   - DOMAIN,cc-img-cn.heytapimage.com
-
   # > ICBC
   - DOMAIN,oisc.icbc.com.cn
   - DOMAIN,pageviewp.icbc.com.cn
-
   # > iQIYI
   - DOMAIN,api.iqiyi.com
   - DOMAIN-SUFFIX,cupid.iqiyi.com
   - DOMAIN-SUFFIX,cupid.ptqy.gitv.tv
-
   # > JD
   - DOMAIN,dns.jd.com
   - DOMAIN,dsp-x.jd.com
@@ -112,14 +98,16 @@ payload:
   - DOMAIN,xlog.jd.com
   - IP-CIDR,101.124.19.122/32
   - IP-CIDR6,2402:db40:5100:1011::5/128
-
+  # > Keep
+  - DOMAIN,httpdns.n.netease.com
+  - DOMAIN,httpdns.calorietech.com
+  - DOMAIN,hc-ssp.sm.cn
   # > Meituan
   - DOMAIN,al-log.d.meituan.net
   - DOMAIN,babel-statistics-android.d.meituan.net
   - DOMAIN,maplocatesdksnapshot.d.meituan.net
   - DOMAIN,metrics-picture.d.meituan.net
   - DOMAIN,route-stats.d.meituan.net
-
   # > MGTV
   - DOMAIN,credits.bz.mgtv.com
   - DOMAIN,credits2.bz.mgtv.com
@@ -134,7 +122,6 @@ payload:
   - DOMAIN,rprain.log.mgtv.com
   - DOMAIN,vip.bz.mgtv.com
   - DOMAIN-SUFFIX,da.mgtv.com
-
   # > NetEase
   - DOMAIN,adx-bj.anythinktech.com
   - DOMAIN,api.anythinktech.com
@@ -149,18 +136,14 @@ payload:
   - DOMAIN,nex.163.com
   - DOMAIN,tk.anythinktech.com
   - DOMAIN-SUFFIX,163jiasu.com
-
   # > Outlook
   - DOMAIN,acdn.adnxs.com
   - DOMAIN,mediation.adnxs.com
   - DOMAIN,sin3-ib.adnxs.com
-
   # > PeacockTV
   - DOMAIN,video-ads-module.ad-tech.nbcuni.com
-
   # > SMZDM
   - DOMAIN,api.zuihuimai.com
-
   # > Tencent
   - DOMAIN-KEYWORD,adstats
   - DOMAIN,adcdn.tencentmusic.com
@@ -190,13 +173,10 @@ payload:
   - DOMAIN-SUFFIX,imtmp.net
   - DOMAIN-SUFFIX,tpns.qq.com
   - DOMAIN-SUFFIX,trace.qq.com
-
   # > TVB
   - DOMAIN,adstvb.akamaized.net
-  
   # > TVer
   - DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
-
   # > UnionPay
   - DOMAIN,ads.95516.com
   - DOMAIN,tysdk.95516.com
@@ -204,16 +184,13 @@ payload:
   - DOMAIN,sdk-conf.getui.com
   - DOMAIN,sdk.open.talk.getui.net
   - DOMAIN,switch.cup.com.cn
-
   # > Viu
   - DOMAIN-SUFFIX,adcolony.com
   - DOMAIN,r2---sn-j5o76n7e.gvt1.com
-
   # > WeChat
   - DOMAIN,wxsnsdy.wxs.qq.com
   - DOMAIN,wxsnsdythumb.wxs.qq.com
   - DOMAIN,badjs.weixinbridge.com
-
   # > Weibo
   - DOMAIN,huodong.weibo.cn
   - DOMAIN,adstrategy.biz.weibo.com
@@ -221,18 +198,14 @@ payload:
   - DOMAIN,sdkaction.biz.weibo.com
   - DOMAIN,sdkclick.biz.weibo.com
   - DOMAIN,sdkmonitor.biz.weibo.com
-  - DOMAIN,bootpreload.uve.weibo.com
   - DOMAIN-SUFFIX,biz.weibo.com
   - IP-CIDR,39.97.130.51/32
   - IP-CIDR,39.97.128.148/32
-
   # > WeTV
   - DOMAIN,btrace.wetvinfo.com
   - DOMAIN,mtrace.wetvinfo.com
-
   # > Xiaomi
   - DOMAIN,sdkconfig.ad.xiaomi.com
-
   # > Youku
   - DOMAIN,adsmind.ugdtimg.com
   - DOMAIN,huichuan-mc.sm.cn
@@ -246,7 +219,6 @@ payload:
   - DOMAIN,m-vali.cp31.ott.cibntv.net
   - DOMAIN,vali-g1.cp31.ott.cibntv.net
   - DOMAIN,vali-ugc.cp31.ott.cibntv.net
-
   # > Zhihu
   - DOMAIN,appcloud2.in.zhihu.com
   - DOMAIN,appcloud.zhihu.com
@@ -257,12 +229,10 @@ payload:
   - IP-CIDR,103.41.167.237/32
   - IP-CIDR,118.89.204.198/32
   - IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128
-
-  - # > 10000
+  # > 10000
   - DOMAIN,ad.21cn.com
   - DOMAIN,ad.k.21cn.com
   - DOMAIN,admarket.21cn.com
   - DOMAIN,adshows.21cn.com
-
-  - # > 10010
+  # > 10010
   - DOMAIN-SUFFIX,m1.ad.10010.com

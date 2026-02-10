@@ -1,8 +1,5 @@
 payload:
   # > U-NEXT
-  - PROCESS-NAME,jp.unext.mediaplayer
-  - PROCESS-NAME,jp.unext.tv.player
   - DOMAIN-SUFFIX,unext.jp
   - DOMAIN-SUFFIX,nxtv.jp
-  # DOMAIN,streamd01ca-nxtv-jp.akamaized.net
   - DOMAIN,us-central1-u-next-apps.cloudfunctions.net

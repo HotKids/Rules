@@ -1,64 +1,40 @@
 payload:
   # > Bahamut
-  # USER-AGENT,Anime*
-  - PROCESS-NAME,tw.com.gamer.android.animad
   - DOMAIN-SUFFIX,bahamut.com.tw
   - DOMAIN-SUFFIX,gamer.com.tw
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
-  
   # > CATCHPLAY+
-  # USER-AGENT,CATCHPLAY*
-  - PROCESS-NAME,com.catchplay.asiaplay
-  - PROCESS-NAME,com.catchplay.asiaplay.tv
-  - PROCESS-NAME,com.catchplay.asiaplay.common.tv
   - DOMAIN-SUFFIX,catchplay.com
   - DOMAIN,asiaplay-origin.s3.amazonaws.com
   - DOMAIN,tra-ww000-cp.akamaized.net
   - DOMAIN,ols-ww000-cp.akamaized.net
   - DOMAIN,ols-ww100-cp.akamaized.net
   - DOMAIN,dkfhw9rzsr80z.cloudfront.net
-  
   # > friDay
-  # USER-AGENT,friDay*
-  - PROCESS-NAME,net.fetnet.fetvod
-  - PROCESS-NAME,net.fetnet.fetvod.tv
   - DOMAIN-SUFFIX,friday.tw
   - DOMAIN-SUFFIX,fridaylogger.com
   - DOMAIN-SUFFIX,svc.litv.tv
   - DOMAIN,aka01p.akamaized.net
   - DOMAIN,aka02p.akamaized.net
   - DOMAIN,aka36p.akamaized.net
-
   # > HBO GO Asia
-  # USER-AGENT,HBO%20GO%20PROD*
-  # PROCESS-NAME,sg.hbo.hbogo
-  # PROCESS-NAME,com.hbo.asia.androidtv
-  # DOMAIN-KEYWORD,hboasia
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
   - DOMAIN-SUFFIX,hbogoasia.com
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
-  # DOMAIN,hbogoprod-vod.akamaized.net
-  # DOMAIN,hboasialive.akamaized.net
-  # DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net
-  
   # > iQIYI Intl
-  # USER-AGENT,iQIYI*
-  # USER-AGENT,QIYIVideo*
-  # USER-AGENT,QYPlayer*
-  # USER-AGENT,QTP*
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
-  - DOMAIN,msg-intl.qy.net
   - DOMAIN-SUFFIX,intl.iqiyi.com
-  - DOMAIN,ip.geo.iqiyi.com
   - DOMAIN,intl-rcd.iqiyi.com
-  - DOMAIN,intl-subscription.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
+  - DOMAIN,intl-subscription.iqiyi.com
+  - DOMAIN,msg-intl.qy.net
+  - DOMAIN,ip.geo.iqiyi.com
   - DOMAIN,akcdnoversea.inter.71edge.com
   - DOMAIN,akmcdnoversea.inter.iqiyi.com
   - DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
@@ -70,12 +46,10 @@ payload:
   - DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
   - DOMAIN-KEYWORD,akmcdnoverse
   - DOMAIN-KEYWORD,chuangcachecdnoversea
-  - IP-CIDR,2.21.22.17/32,no-resolve 
+  - IP-CIDR,2.21.22.17/32,no-resolve
   - IP-CIDR,23.40.241.251/32,no-resolve
   - IP-CIDR,23.40.242.10/32,no-resolve
-  - IP-CIDR,23.210.215.154/32,no-resolve 
-  - IP-CIDR,104.109.129.153/32,no-resolve
-  - IP-CIDR,104.109.129.179/32,no-resolve 
+  - IP-CIDR,23.210.215.154/32,no-resolve
   - IP-CIDR,110.238.107.47/32,no-resolve
   - IP-CIDR,110.238.109.184/32,no-resolve
   - IP-CIDR,114.119.175.88/32,no-resolve
@@ -84,44 +58,28 @@ payload:
   - IP-CIDR,184.25.254.178/32,no-resolve
   - IP-CIDR,203.80.97.208/32,no-resolve
   - IP-CIDR,203.198.80.99/32,no-resolve
-  
   # > KKBOX
-  # USER-AGENT,*KKBOX
   - DOMAIN-SUFFIX,kkbox.com
   - DOMAIN-SUFFIX,kkbox.com.tw
   - DOMAIN-SUFFIX,kfs.io
-
   # > KKTV
-  # USER-AGENT,KKTV*
-  # USER-AGENT,com.kktv*
-  - PROCESS-NAME,com.kktv.kktv
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw
   - DOMAIN,kktv-theater.kk.stream
   - DOMAIN,theater-kktv.cdn.hinet.net
-  
   # > LINE TV
-  # USER-AGENT,LINE%20TV*
   - DOMAIN-SUFFIX,linetv.tw
   - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
   - DOMAIN,d3c7rimkq79yfu.cloudfront.net
-  
   # > myVideo
-  # USER-AGENT,myVideo*
-  - PROCESS-NAME,com.taiwanmobile.myVideo
-  - PROCESS-NAME,com.taiwanmobile.myVideotv
   - DOMAIN-SUFFIX,myvideo.net.tw
   - DOMAIN-SUFFIX,catch.net.tw
   - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
   - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
-
   # > Readmoo
   - DOMAIN-SUFFIX,readmoo.com
-  
   # > Spotify
   # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
-  # USER-AGENT,Spotify*
-  - PROCESS-NAME,com.spotify.music
   - DOMAIN-SUFFIX,pscdn.co
   - DOMAIN-SUFFIX,scdn.co
   - DOMAIN-SUFFIX,spoti.fi

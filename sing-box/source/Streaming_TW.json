@@ -1,0 +1,106 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "aka01p.akamaized.net",
+        "aka02p.akamaized.net",
+        "aka36p.akamaized.net",
+        "akamaiendpoint-applemediaservice-aase.streaming.media.azure.net",
+        "akcdnoversea.inter.71edge.com",
+        "akmcdnoversea-tw.inter.iqiyi.com",
+        "akmcdnoversea-tw.inter.ptqy.gitv.tv",
+        "akmcdnoversea.inter.iqiyi.com",
+        "akmcdnoversea.inter.ptqy.gitv.tv",
+        "applemediaservice.keydelivery.southeastasia.media.azure.net",
+        "asiaplay-origin.s3.amazonaws.com",
+        "chuangcachecdnoversea-tw.inter.iqiyi.com",
+        "chuangcachecdnoversea-tw.inter.ptqy.gitv.tv",
+        "chuangcachecdnoversea.inter.iqiyi.com",
+        "chuangcachecdnoversea.inter.ptqy.gitv.tv",
+        "d17lx9ucc6k9fc.cloudfront.net",
+        "d3c7rimkq79yfu.cloudfront.net",
+        "dai3fd1oh325y.cloudfront.net",
+        "dkfhw9rzsr80z.cloudfront.net",
+        "gamer-cds.cdn.hinet.net",
+        "gamer2-cds.cdn.hinet.net",
+        "hbolb.onwardsmg.com",
+        "hbounify-prod.evergent.com",
+        "intl-im-hist-api.iqiyi.com",
+        "intl-rcd.iqiyi.com",
+        "intl-subscription.iqiyi.com",
+        "ip.geo.iqiyi.com",
+        "kktv-theater.kk.stream",
+        "msg-intl.qy.net",
+        "ols-ww000-cp.akamaized.net",
+        "ols-ww100-cp.akamaized.net",
+        "theater-kktv.cdn.hinet.net",
+        "tra-ww000-cp.akamaized.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "bahamut.com.tw",
+        "catch.net.tw",
+        "catchplay.com",
+        "friday.tw",
+        "fridaylogger.com",
+        "gamer.com.tw",
+        "hboasia.com",
+        "hbogoasia.com",
+        "intl.iqiyi.com",
+        "iq.com",
+        "kfs.io",
+        "kkbox.com",
+        "kkbox.com.tw",
+        "kktv.com.tw",
+        "kktv.me",
+        "linetv.tw",
+        "myvideo.net.tw",
+        "pscdn.co",
+        "readmoo.com",
+        "scdn.co",
+        "spoti.fi",
+        "spotify.com",
+        "spotifycdn.com",
+        "spotifycdn.net",
+        "spotifycharts.com",
+        "spotifycodes.com",
+        "spotifyjobs.com",
+        "spotifynewsroom.jp",
+        "spotilocal.com",
+        "svc.litv.tv",
+        "tospotify.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "akmcdnoverse",
+        "chuangcachecdnoversea",
+        "hbogoasia"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "110.238.107.47/32",
+        "110.238.109.184/32",
+        "114.119.175.88/32",
+        "118.26.32.0/22",
+        "159.138.102.146/32",
+        "184.25.254.178/32",
+        "2.21.22.17/32",
+        "203.198.80.99/32",
+        "203.80.97.208/32",
+        "23.210.215.154/32",
+        "23.40.241.251/32",
+        "23.40.242.10/32"
+      ]
+    },
+    {
+      "process_name": [
+        "com.iqiyi.i18n",
+        "com.iqiyi.i18n.tv"
+      ]
+    }
+  ]
+}

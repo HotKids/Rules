@@ -1,12 +1,7 @@
 # > HBO GO Asia
-// USER-AGENT,HBO%20GO%20PROD*,HBO GO Asia
-// DOMAIN-KEYWORD,hboasia,HBO GO Asia
-DOMAIN-KEYWORD,hbogoasia,HBO GO Asia
-DOMAIN-SUFFIX,hboasia.com,HBO GO Asia
-DOMAIN-SUFFIX,hbogoasia.com,HBO GO Asia
-DOMAIN,hbolb.onwardsmg.com,HBO GO Asia
-DOMAIN,hbounify-prod.evergent.com,HBO GO Asia
-// DOMAIN,hbogoprod-vod.akamaized.net,HBO GO Asia
-// DOMAIN,hboasialive.akamaized.net,HBO GO Asia
-// DOMAIN,bcbolthboa-a.akamaihd.net,HBO GO Asia
-DOMAIN,dai3fd1oh325y.cloudfront.net,HBO GO Asia
+DOMAIN-KEYWORD,hbogoasia,HBO_Go
+DOMAIN-SUFFIX,hboasia.com,HBO_Go
+DOMAIN-SUFFIX,hbogoasia.com,HBO_Go
+DOMAIN,hbolb.onwardsmg.com,HBO_Go
+DOMAIN,hbounify-prod.evergent.com,HBO_Go
+DOMAIN,dai3fd1oh325y.cloudfront.net,HBO_Go

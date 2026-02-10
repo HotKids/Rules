@@ -1,9 +1,5 @@
 payload:
   # > CATCHPLAY+
-  # USER-AGENT,CATCHPLAY*
-  - PROCESS-NAME,com.catchplay.asiaplay
-  - PROCESS-NAME,com.catchplay.asiaplay.tv
-  - PROCESS-NAME,com.catchplay.asiaplay.common.tv
   - DOMAIN-SUFFIX,catchplay.com
   - DOMAIN,asiaplay-origin.s3.amazonaws.com
   - DOMAIN,tra-ww000-cp.akamaized.net

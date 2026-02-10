@@ -1,5 +1,4 @@
 # > Bilibili
-USER-AGENT,*bili*,Bilibili
 DOMAIN-SUFFIX,bilibili.com,Bilibili
 DOMAIN-SUFFIX,bilibili.tv,Bilibili
 DOMAIN-SUFFIX,biliapi.net,Bilibili
@@ -13,6 +12,4 @@ DOMAIN,upos-hz-mirrorakam.akamaized.net,Bilibili
 DOMAIN-KEYWORD,bilibili,Bilibili
 DOMAIN-KEYWORD,cn-hk-eq-bcache-,Bilibili
 IP-CIDR,121.11.192.0/24,Bilibili
-// 港台版 Bilibili App
-USER-AGENT,bili-inter*,Bilibili
 DOMAIN,apiintl.biliapi.net,Bilibili

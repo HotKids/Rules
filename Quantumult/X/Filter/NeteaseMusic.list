@@ -1,4 +1,3 @@
-# > Netease Music
-USER-AGENT,NeteaseMusic*,Netease Music
-HOST-SUFFIX,music.126.net,Netease Music
-HOST-SUFFIX,music.163.com,Netease Music
+# > NeteaseMusic
+DOMAIN-SUFFIX,music.126.net,NeteaseMusic
+DOMAIN-SUFFIX,music.163.com,NeteaseMusic
