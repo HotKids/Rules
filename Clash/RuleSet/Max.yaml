@@ -1,5 +1,2 @@
 payload:
   # > Max
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,discomax.com

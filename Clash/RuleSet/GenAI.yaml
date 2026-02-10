@@ -9,11 +9,13 @@ payload:
   - DOMAIN,guzzoni.apple.com
   - DOMAIN,gspe1-ssl.ls.apple.com
   - DOMAIN-SUFFIX,gateway.icloud.com
+
   # Anthropic
   # > Claude
   - DOMAIN-SUFFIX,claude.ai
   - DOMAIN-SUFFIX,claude.com
   - DOMAIN-SUFFIX,anthropic.com
+
   # OpenAI
   # > ChatGPT
   - AND,((DOMAIN-KEYWORD,openaicom-api-),(DOMAIN-SUFFIX,azurefd.net))
@@ -37,14 +39,17 @@ payload:
   - DOMAIN,openaicomproductionae4b.blob.core.windows.net
   - DOMAIN-KEYWORD,openaiapi
   - DOMAIN-KEYWORD,openaicom
+
   # Cloudflare
   # > AI Gateway
   - DOMAIN,gateway.ai.cloudflare.com
+
   # Cursor
   - DOMAIN-SUFFIX,cursor-cdn.com
   - DOMAIN-SUFFIX,cursor.com
   - DOMAIN-SUFFIX,cursor.sh
   - DOMAIN-SUFFIX,cursorapi.com
+
   # Google
   # > AI Studio
   - DOMAIN-SUFFIX,generativeai.google
@@ -66,11 +71,14 @@ payload:
   - DOMAIN-KEYWORD,notebooklm.google
   # > Search Labs
   - DOMAIN-KEYWORD,labs.google
+
   # JetBrains AI
   - DOMAIN-SUFFIX,grazie.ai
+
   # Meta
   - DOMAIN-SUFFIX,meta.ai
   - DOMAIN,imagine.meta.com
+
   # Microsoft
   # > Copilot
   - DOMAIN,copilot.microsoft.com
@@ -78,16 +86,20 @@ payload:
   - DOMAIN,www.bing.com
   # > GitHub Copilot
   - DOMAIN-SUFFIX,githubcopilot.com
+
   # NVIDIA
   # > Groq
   - DOMAIN-SUFFIX,groq.com
+
   # Perplexity
   - DOMAIN-SUFFIX,perplexity.ai
   - DOMAIN-SUFFIX,pplx.ai
   - DOMAIN,pplx-res.cloudinary.com
+
   # xAI
   - DOMAIN-SUFFIX,grok.com
   - DOMAIN-SUFFIX,x.ai
+
   # ByteDance
   # > Doubao Dola
   - DOMAIN-SUFFIX,dola.com
@@ -95,5 +107,6 @@ payload:
   - DOMAIN-SUFFIX,ciciai.com
   - DOMAIN,abtestvm-sg.bytedance.com
   - DOMAIN-WILDCARD,abtest*.byteoversea.com
+
   # Affinity
   - DOMAIN,d3ssuo6fbvr.cloudfront.net

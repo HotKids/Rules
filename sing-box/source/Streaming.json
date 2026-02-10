@@ -6,6 +6,7 @@
         "4unal8ngvngjm07lj2q2umlc4.litix.io",
         "abematv.akamaized.net",
         "atv-ps.amazon.com",
+        "avodmp4s3ww-a.akamaihd.net",
         "aws.stan.video",
         "cbsi.live.ott.irdeto.com",
         "cbsplaylistserver.aws.syncbak.com",
@@ -16,19 +17,11 @@
         "content-ausw2-ur-discovery1.uplynk.com",
         "cws-hulu.conviva.com",
         "d151l6v8er5bdm.cloudfront.net",
-        "d184dfn36gombl.cloudfront.net",
-        "d1v5ir2lpwr8os.cloudfront.net",
-        "d1xfray82862hr.cloudfront.net",
-        "d22qjgkvxw22r6.cloudfront.net",
-        "d25xi40x97liuc.cloudfront.net",
-        "d27xxe7juh1us6.cloudfront.net",
         "d2z3p34itxwaj7.cloudfront.net",
-        "d3196yreox78o9.cloudfront.net",
         "disney.api.edge.bamgrid.com",
         "disney.connections.edge.bamgrid.com",
         "disney.content.edge.bamgrid.com",
         "disney.playback.edge.bamgrid.com",
-        "dmqdd6hw24ucf.cloudfront.net",
         "ds-linear-abematv.akamaized.net",
         "ds-vod-abematv.akamaized.net",
         "epixhls.akamaized.net",
@@ -64,7 +57,6 @@
         "amazonvideo.com",
         "ameba.jp",
         "bahamut.com.tw",
-        "bamgrid.com",
         "bbc.co",
         "bbc.co.uk",
         "bbc.com",
@@ -77,8 +69,8 @@
         "crunchyroll.com",
         "dazn-api.com",
         "dazn.com",
+        "dazndn.com",
         "disco-api.com",
-        "discomax.com",
         "discoveryplus.com",
         "disney-plus.net",
         "disneyplus.com",
@@ -93,14 +85,13 @@
         "gamer.com.tw",
         "googlevideo.com",
         "hayabusa.io",
-        "hbomax.com",
         "hulu.com",
         "hulu.tv",
         "huluim.com",
         "hulustream.com",
         "indazn.com",
+        "indaznlab.com",
         "interactive-circle.jp",
-        "max.com",
         "media-amazon.com",
         "mgmplus.com",
         "moviesanywhere.com",
@@ -140,7 +131,6 @@
         "tvb.com",
         "tver.jp",
         "unext.jp",
-        "vrv.co",
         "youtu.be"
       ]
     },
@@ -172,11 +162,6 @@
         "54.148.37.5/32",
         "64.120.128.0/17",
         "66.197.128.0/17"
-      ]
-    },
-    {
-      "process_name": [
-        "com.wbd.stream"
       ]
     }
   ]

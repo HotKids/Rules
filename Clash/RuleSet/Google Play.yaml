@@ -3,6 +3,7 @@ payload:
   - DOMAIN-SUFFIX,xn--ngstr-lra8j.com
   - DOMAIN-SUFFIX,xn--ngstr-cn-8za9o.com
   - DOMAIN-SUFFIX,services.googleapis.cn
+
   - DOMAIN,play.google.com
   - DOMAIN,play.googleapis.com
   - DOMAIN,play-fe.googleapis.com

@@ -1,4 +1,5 @@
 # > Spotify
+# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,pscdn.co
 DOMAIN-SUFFIX,scdn.co

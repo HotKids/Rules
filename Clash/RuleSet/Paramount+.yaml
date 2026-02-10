@@ -5,8 +5,6 @@ payload:
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
   - DOMAIN,link.theplatform.com
-  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,PPlus*))
-  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,Paramountlus*))
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com

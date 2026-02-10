@@ -1,6 +1,2 @@
 payload:
   # > HBO Max
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,hbomax.com
-  - DOMAIN-SUFFIX,discomax.com

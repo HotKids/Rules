@@ -107,7 +107,7 @@ DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
 
 # > Readmoo
 DOMAIN-SUFFIX,readmoo.com
-  
+
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*

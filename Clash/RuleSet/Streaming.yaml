@@ -8,6 +8,7 @@ payload:
   - DOMAIN,ds-vod-abematv.akamaized.net
   - DOMAIN,linear-abematv.akamaized.net
   - DOMAIN,ds-linear-abematv.akamaized.net
+
   # > Amazon Prime Video
   - DOMAIN-SUFFIX,primevideo.com
   - DOMAIN-SUFFIX,amazonvideo.com
@@ -17,15 +18,10 @@ payload:
   - DOMAIN-SUFFIX,aiv-delivery.net
   - DOMAIN,ktpx.amazon.com
   - DOMAIN,atv-ps.amazon.com
-  - DOMAIN,d184dfn36gombl.cloudfront.net
-  - DOMAIN,d1xfray82862hr.cloudfront.net
-  - DOMAIN,d1v5ir2lpwr8os.cloudfront.net
-  - DOMAIN,d22qjgkvxw22r6.cloudfront.net
-  - DOMAIN,d25xi40x97liuc.cloudfront.net
-  - DOMAIN,d27xxe7juh1us6.cloudfront.net
-  - DOMAIN,d3196yreox78o9.cloudfront.net
-  - DOMAIN,dmqdd6hw24ucf.cloudfront.net
+  - DOMAIN,avodmp4s3ww-a.akamaihd.net
   - DOMAIN-KEYWORD,avoddashs
+
+
   # > BBC iPlayer
   - DOMAIN-KEYWORD,bbcfmt
   - DOMAIN-KEYWORD,co.uk
@@ -40,24 +36,30 @@ payload:
   - DOMAIN,vod-thumb-uk-live.akamaized.net
   - DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net
   - DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net
+
   # > Bahamut
   - DOMAIN-SUFFIX,bahamut.com.tw
   - DOMAIN-SUFFIX,gamer.com.tw
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
+
   # > Britbox
   - DOMAIN-SUFFIX,britbox.com
   - DOMAIN-SUFFIX,bbc.co.uk
   - DOMAIN,d2z3p34itxwaj7.cloudfront.net
+
   # > Crunchyroll
   - DOMAIN-SUFFIX,crunchyroll.com
-  - DOMAIN-SUFFIX,vrv.co
+
   # > DAZN
   - DOMAIN-SUFFIX,dazn.com
+  - DOMAIN-SUFFIX,dazndn.com
   - DOMAIN-SUFFIX,indazn.com
+  - DOMAIN-SUFFIX,indaznlab.com
   - DOMAIN-SUFFIX,dazn-api.com
   - DOMAIN,d151l6v8er5bdm.cloudfront.net
   - DOMAIN-KEYWORD,voddazn
+
   # > Discovery+
   - DOMAIN-SUFFIX,discoveryplus.com
   - DOMAIN-SUFFIX,disco-api.com
@@ -72,12 +74,12 @@ payload:
   - DOMAIN,content-ause1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
+
   # > Disney+
   - DOMAIN-SUFFIX,disneyplus.com
   - DOMAIN-SUFFIX,disney-plus.net
   - DOMAIN-SUFFIX,disneystreaming.com
   - DOMAIN-SUFFIX,dssott.com
-  - DOMAIN-SUFFIX,bamgrid.com
   - DOMAIN,playback-certs.bamgrid.com
   - DOMAIN,disney.api.edge.bamgrid.com
   - DOMAIN,disney.connections.edge.bamgrid.com
@@ -85,28 +87,30 @@ payload:
   - DOMAIN,disney.playback.edge.bamgrid.com
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
+
   # > HBO Max
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,hbomax.com
-  - DOMAIN-SUFFIX,discomax.com
+
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
+
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
   - DOMAIN-SUFFIX,epix.com
   - DOMAIN-SUFFIX,epixnow.com
   - DOMAIN,epixhls.akamaized.net
   - DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com
+
   # > Movies Anywhere
   - DOMAIN-SUFFIX,moviesanywhere.com
+
   # > MUBI
   - DOMAIN-SUFFIX,mubi.com
   - DOMAIN-SUFFIX,mubicdn.net
+
   # > Netflix
   - DOMAIN-SUFFIX,netflix.com
   - DOMAIN-SUFFIX,netflix.net
@@ -130,23 +134,26 @@ payload:
   - IP-CIDR,192.173.64.0/18,no-resolve
   - IP-CIDR,198.38.96.0/19,no-resolve
   - IP-CIDR,198.45.48.0/20,no-resolve
+
   # > Paramount+
   - DOMAIN-SUFFIX,cbsi.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
   - DOMAIN,link.theplatform.com
-  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,PPlus*))
-  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,Paramountlus*))
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
+
   # > Peacock
   - DOMAIN-SUFFIX,peacocktv.com
+
   # > SBS On Demand
   - DOMAIN-SUFFIX,sbsod.com
   - DOMAIN-SUFFIX,sbs.com.au
+
   # > Spotify
+  # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
   - DOMAIN-SUFFIX,pscdn.co
   - DOMAIN-SUFFIX,scdn.co
   - DOMAIN-SUFFIX,spoti.fi
@@ -159,9 +166,11 @@ payload:
   - DOMAIN-SUFFIX,spotifynewsroom.jp
   - DOMAIN-SUFFIX,spotilocal.com
   - DOMAIN-SUFFIX,tospotify.com
+
   # > Stan
   - DOMAIN-SUFFIX,stan.com.au
   - DOMAIN,aws.stan.video
+
   # > Star+
   - DOMAIN-SUFFIX,starplus.com
   - DOMAIN-SUFFIX,starott.com
@@ -169,18 +178,22 @@ payload:
   - DOMAIN,star.connections.edge.bamgrid.com
   - DOMAIN,star.content.edge.bamgrid.com
   - DOMAIN,star.playback.edge.bamgrid.com
+
   # > TVBAnywhere
   - DOMAIN-SUFFIX,tvb.com
   - DOMAIN-KEYWORD,tvbanywhere
+
   # > TVer
   - DOMAIN-SUFFIX,tver.jp
   - DOMAIN-SUFFIX,interactive-circle.jp
   - DOMAIN-SUFFIX,brightcove.com
   - DOMAIN-SUFFIX,prod.boltdns.net
+
   # > U-NEXT
   - DOMAIN-SUFFIX,unext.jp
   - DOMAIN-SUFFIX,nxtv.jp
   - DOMAIN,us-central1-u-next-apps.cloudfunctions.net
+
   # > YouTube
   - DOMAIN-SUFFIX,youtu.be
   - DOMAIN-SUFFIX,googlevideo.com
