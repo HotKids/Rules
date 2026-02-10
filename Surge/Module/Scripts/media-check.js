@@ -7,7 +7,7 @@
  * @author       HotKids & ChatGPT & Claude
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 📋 支持的服务（10 项）
+ * 📋 支持的服务（9 项）
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * 🎬 流媒体
@@ -23,8 +23,7 @@
  *    └─ Claude        地区可用性检测
  *
  * 🌐 社交 & 其他
- *    ├─ Reddit        地区访问检测
- *    └─ IG Music      Instagram 授权音乐检测
+ *    └─ Reddit        地区访问检测
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * ⚙️ 参数配置
@@ -710,42 +709,6 @@ class ServiceChecker {
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
 
-  /**
-   * Instagram Music 授权检测
-   * 并行检测：oEmbed API（基础可访问性）+ Music API（音乐可用性）
-   * @returns {Promise<Object>} 检测结果
-   */
-  static async checkInstagramMusic() {
-    try {
-      // 并行请求: oEmbed 检测 IG 可访问性, Music API 检测音乐可用性
-      const [oembedRes, musicRes] = await Promise.all([
-        Utils.request({
-          url: "https://www.instagram.com/api/v1/oembed/?url=https://www.instagram.com/reel/C2YEAdOh9AB/"
-        }).catch(() => null),
-        Utils.request({
-          url: "https://i.instagram.com/api/v1/music/trending/",
-          headers: {
-            "User-Agent": "Instagram 275.0.0.27.98 Android (33/13; 420dpi; 1080x2400; samsung; SM-G991B; o1s; exynos2100; en_US; 458229258)",
-            "X-IG-App-ID": "936619743392459"
-          }
-        }).catch(() => null)
-      ]);
-
-      // Music API 返回 200（有音乐数据）→ 可用
-      if (musicRes?.status === 200) return Utils.createResult(STATUS.OK, "OK");
-
-      // oEmbed 可访问 → Instagram 未被封锁
-      if (oembedRes?.status === 200) {
-        // Music API 401（需登录，端点可达）→ 音乐可用
-        // Music API 403（地区限制）→ 音乐不可用
-        if (musicRes?.status === 403) return Utils.createResult(STATUS.FAIL, "No");
-        return Utils.createResult(STATUS.OK, "OK");
-      }
-
-      // 两个请求都失败 → Instagram 被封锁
-      return Utils.createResult(STATUS.FAIL, "No");
-    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
-  }
 }
 
 /**
@@ -762,11 +725,10 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit(),
-      ServiceChecker.checkInstagramMusic()
+      ServiceChecker.checkReddit()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, igMusic] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
@@ -781,8 +743,7 @@ class ServiceChecker {
       { name: "ChatGPT", result: chatgpt },
       { name: "Gemini", result: gemini },
       { name: "Claude", result: claude },
-      { name: "Reddit", result: reddit },
-      { name: "IG Music", result: igMusic }
+      { name: "Reddit", result: reddit }
     ].filter(Boolean);
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
