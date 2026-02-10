@@ -11,11 +11,6 @@ DOMAIN-SUFFIX,pplusstatic.com
 // DOMAIN-SUFFIX,mtvnservices.com #MTV
 // DOMAIN-SUFFIX,cws.conviva.com
 DOMAIN,link.theplatform.com
-// US
-AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
-// Intl.
-AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
-// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
 // DOMAIN,thumbnails.cbsig.net #缩略图
 // DOMAIN,cbsinteractive.hb.omtrdc.net

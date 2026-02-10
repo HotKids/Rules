@@ -3,24 +3,30 @@ payload:
   - DOMAIN,app.adjust.com
   - DOMAIN,app.appsflyer.com
   - DOMAIN,bdtj.tagtic.cn
+
   # > CNTV
   - DOMAIN-SUFFIX,cupid.iqiyi.com
   - DOMAIN,push.m.youku.com
   - DOMAIN,un-acs.youku.com
   - DOMAIN,dorangesource.alicdn.com
+
   # > Alibaba
   - DOMAIN,log.mmstat.com
   - DOMAIN,sycm.mmstat.com
+
   # > Tencent
   - DOMAIN,fairplay.l.qq.com
   - DOMAIN,livew.l.qq.com
   - DOMAIN,vd.l.qq.com
   - DOMAIN,vi.l.qq.com
+
   # > Strava
   - DOMAIN,analytics.strava.com
+
   # > Umeng
   - DOMAIN,msg.umeng.com
   - DOMAIN,msg.umengcloud.com
+
   # > Google
   - DOMAIN-SUFFIX,blog.google
   - DOMAIN-SUFFIX,googletraveladservices.com
@@ -39,15 +45,20 @@ payload:
   - DOMAIN,alt6-mtalk.google.com
   - DOMAIN,alt7-mtalk.google.com
   - DOMAIN,alt8-mtalk.google.com
+
   # > Samsung Galaxy App Store
   - DOMAIN-SUFFIX,galaxyappstore.com
   - DOMAIN-SUFFIX,samsungapps.com
+
   # > Windows NTP
   - DOMAIN,time.windows.com
+
   # > Marriott
   - DOMAIN-SUFFIX,marriottwifi.com
   - DOMAIN,portal.linkbroad.com
+
   # > BOC HK
   - DOMAIN-SUFFIX,bochk.com
+
   # > ziniao
   - PROCESS-NAME,*ziniao*

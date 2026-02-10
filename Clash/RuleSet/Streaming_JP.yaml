@@ -8,21 +8,26 @@ payload:
   - DOMAIN,ds-vod-abematv.akamaized.net
   - DOMAIN,linear-abematv.akamaized.net
   - DOMAIN,ds-linear-abematv.akamaized.net
+
   # > FOD
   - DOMAIN-SUFFIX,fujitv.co.jp
   - DOMAIN-SUFFIX,stream.ne.jp
   - DOMAIN,measure.ic.tver.jp
+
   # > Hulu JP
   - DOMAIN-SUFFIX,hulu.jp
   - DOMAIN-SUFFIX,happyon.jp
   - DOMAIN-SUFFIX,prod.hjholdings.tv
+
   # > Paravi
   - DOMAIN-SUFFIX,paravi.jp
+
   # > TVer
   - DOMAIN-SUFFIX,tver.jp
   - DOMAIN-SUFFIX,interactive-circle.jp
   - DOMAIN-SUFFIX,brightcove.com
   - DOMAIN-SUFFIX,prod.boltdns.net
+
   # > U-NEXT
   - DOMAIN-SUFFIX,unext.jp
   - DOMAIN-SUFFIX,nxtv.jp
