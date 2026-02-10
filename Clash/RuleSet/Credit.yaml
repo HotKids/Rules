@@ -5,18 +5,22 @@ payload:
   - DOMAIN-SUFFIX,membershiprewards.com
   - DOMAIN-SUFFIX,aexp.com
   - DOMAIN-SUFFIX,aexp-static.com
+
   # > Chase
   - DOMAIN-SUFFIX,chase.com
   - DOMAIN-SUFFIX,chasecdn.com
   - DOMAIN-SUFFIX,chasepay.com
   - DOMAIN-SUFFIX,jpmorganchase.com
   - DOMAIN-SUFFIX,jpmorgan.com
+
   # > IBKR
   - DOMAIN-SUFFIX,interactivebrokers.com
   - DOMAIN-SUFFIX,ibkr.com
   - DOMAIN-SUFFIX,ibllc.com
+
   # > N26
   - DOMAIN-SUFFIX,n26.com
   - DOMAIN-SUFFIX,tech26.de
+
   # > bonify
   - DOMAIN-SUFFIX,bonify.de

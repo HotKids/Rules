@@ -3,6 +3,7 @@ payload:
   - DOMAIN-SUFFIX,kkbox.com
   - DOMAIN-SUFFIX,kkbox.com.tw
   - DOMAIN-SUFFIX,kfs.io
+
   # > KKTV
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw

@@ -1,6 +1,7 @@
 payload:
   # > Crunchyroll
   - DOMAIN-SUFFIX,crunchyroll.com
+
   # > Discovery+
   - DOMAIN-SUFFIX,discoveryplus.com
   - DOMAIN-SUFFIX,disco-api.com
@@ -15,22 +16,28 @@ payload:
   - DOMAIN,content-ause1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
+
   # > HBO Max
+
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
+
   # > Max
+
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
   - DOMAIN-SUFFIX,epix.com
   - DOMAIN-SUFFIX,epixnow.com
   - DOMAIN,epixhls.akamaized.net
   - DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com
+
   # > PBS
   - DOMAIN-SUFFIX,pbs.org
+
   # > Paramount+
   - DOMAIN-SUFFIX,cbsi.com
   - DOMAIN-SUFFIX,cbsivideo.com
@@ -40,10 +47,13 @@ payload:
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
+
   # > Peacock
   - DOMAIN-SUFFIX,peacocktv.com
+
   # > Roku
   - DOMAIN-SUFFIX,roku.com
   - DOMAIN-SUFFIX,rokutime.com
+
   # > T-Mobile
   - DOMAIN-SUFFIX,t-mobile.com

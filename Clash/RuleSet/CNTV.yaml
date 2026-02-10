@@ -14,12 +14,14 @@ payload:
   - DOMAIN-KEYWORD,cn-hk-eq-bcache-
   - IP-CIDR,203.107.1.65/32,no-resolve
   - DOMAIN,apiintl.biliapi.net
+
   # > Bilibili SEA
   - DOMAIN-SUFFIX,biliintl.com
   - DOMAIN,apm-misaka.biliapi.net
   - DOMAIN,p-bstarstatic.akamaized.net
   - DOMAIN,upos-bstar-mirrorakam.akamaized.net
   - DOMAIN,upos-bstar1-mirrorakam.akamaized.net
+
   # > iQIYI Intl
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
@@ -45,6 +47,7 @@ payload:
   - IP-CIDR,159.138.102.146/32,no-resolve
   - IP-CIDR,203.80.97.208/32,no-resolve
   - IP-CIDR,203.198.80.99/32,no-resolve
+
   # > WeTV
   - DOMAIN-SUFFIX,wetv.vip
   - DOMAIN-SUFFIX,wetvinfo.com
@@ -52,5 +55,6 @@ payload:
   - DOMAIN,wetv.acc.qq.com
   - DOMAIN,hwvip.video.qq.com
   - IP-CIDR,150.109.28.51/32,no-resolve
+
   # > Youku Intl.
   - DOMAIN,vod-interyk.youku.tv
