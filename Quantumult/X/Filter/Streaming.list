@@ -86,8 +86,6 @@ DOMAIN,disney.playback.edge.bamgrid.com,Streaming
 DOMAIN,cdn.registerdisney.go.com,Streaming
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Streaming
 
-# > HBO Max
-
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming
 DOMAIN-SUFFIX,hulu.tv,Streaming
