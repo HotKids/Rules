@@ -1,4 +1,5 @@
 # > Spotify
+# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 DOMAIN-SUFFIX,pscdn.co,Spotify
 DOMAIN-SUFFIX,scdn.co,Spotify
 DOMAIN-SUFFIX,spoti.fi,Spotify

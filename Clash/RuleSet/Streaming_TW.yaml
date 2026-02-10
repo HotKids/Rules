@@ -4,6 +4,7 @@ payload:
   - DOMAIN-SUFFIX,gamer.com.tw
   - DOMAIN,gamer-cds.cdn.hinet.net
   - DOMAIN,gamer2-cds.cdn.hinet.net
+
   # > CATCHPLAY+
   - DOMAIN-SUFFIX,catchplay.com
   - DOMAIN,asiaplay-origin.s3.amazonaws.com
@@ -11,6 +12,7 @@ payload:
   - DOMAIN,ols-ww000-cp.akamaized.net
   - DOMAIN,ols-ww100-cp.akamaized.net
   - DOMAIN,dkfhw9rzsr80z.cloudfront.net
+
   # > friDay
   - DOMAIN-SUFFIX,friday.tw
   - DOMAIN-SUFFIX,fridaylogger.com
@@ -18,6 +20,7 @@ payload:
   - DOMAIN,aka01p.akamaized.net
   - DOMAIN,aka02p.akamaized.net
   - DOMAIN,aka36p.akamaized.net
+
   # > HBO GO Asia
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
@@ -25,6 +28,7 @@ payload:
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
   - DOMAIN,dai3fd1oh325y.cloudfront.net
+
   # > iQIYI Intl
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
@@ -58,26 +62,32 @@ payload:
   - IP-CIDR,184.25.254.178/32,no-resolve
   - IP-CIDR,203.80.97.208/32,no-resolve
   - IP-CIDR,203.198.80.99/32,no-resolve
+
   # > KKBOX
   - DOMAIN-SUFFIX,kkbox.com
   - DOMAIN-SUFFIX,kkbox.com.tw
   - DOMAIN-SUFFIX,kfs.io
+
   # > KKTV
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw
   - DOMAIN,kktv-theater.kk.stream
   - DOMAIN,theater-kktv.cdn.hinet.net
+
   # > LINE TV
   - DOMAIN-SUFFIX,linetv.tw
   - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
   - DOMAIN,d3c7rimkq79yfu.cloudfront.net
+
   # > myVideo
   - DOMAIN-SUFFIX,myvideo.net.tw
   - DOMAIN-SUFFIX,catch.net.tw
   - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
   - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
+
   # > Readmoo
   - DOMAIN-SUFFIX,readmoo.com
+
   # > Spotify
   # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
   - DOMAIN-SUFFIX,pscdn.co
