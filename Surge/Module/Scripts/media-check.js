@@ -691,25 +691,15 @@ class ServiceChecker {
     const apiKey = (args.geminiapikey || "").trim();
     if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
+    // DEBUG: 临时输出原始响应，排查 Region Blocked 问题
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
       const { status } = res;
-      const body = (res.body || "").toLowerCase();
-
-      // 200 + 含 models 数组 → 可用
-      if (status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
-      // API Key 无效（优先判断，避免与地区限制混淆）
-      if (status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
-        return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-      }
-      // 地区限制：403 / 404（受限区域免费 API 现返回 404）/ body 关键词
-      if (status === 403 || status === 404 || body.includes("region not supported") || body.includes("location is not supported")) {
-        return Utils.createResult(STATUS.FAIL, "Region Blocked");
-      }
-      // 429 → 配额耗尽，但说明地区可用
-      if (status === 429) return Utils.createResult(STATUS.OK, "Rate Limited");
-      return Utils.createResult(STATUS.ERROR, `HTTP ${status}`);
-    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
+      const body = (res.body || "").substring(0, 150);
+      return Utils.createResult(STATUS.ERROR, `[DBG] ${status} | ${body}`);
+    } catch (e) {
+      return Utils.createResult(STATUS.ERROR, `[DBG] ERR: ${e}`);
+    }
   }
 
   /**
