@@ -53,6 +53,7 @@ const CONFIG = {
     ipType: "https://my.ippure.com/v1/info",
     ipTypeCard: "https://my.ippure.com/v1/card",
     inboundInfo: (ip) => `https://api.ip.sb/geoip/${ip}`,
+    biliGeo: (ip) => `https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr?ip=${ip}`,
     ipInfo: (ip) => `https://ipinfo.io/${ip}/json`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
@@ -509,7 +510,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     getRiskScore(outIP),
     getIPType(),
     httpJSON(CONFIG.urls.inboundInfo(inIP)),
-    isZh ? httpJSON(CONFIG.urls.inboundIP) : httpJSON(CONFIG.urls.ipInfo(outIP))
+    isZh ? httpJSON(CONFIG.urls.biliGeo(outIP)) : httpJSON(CONFIG.urls.ipInfo(outIP))
   ];
   if (outIPv6 && !isZh) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
 
@@ -528,15 +529,10 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
       inInfo = inSb;
     }
 
-    // 出口：地区用 bilibili（若走了代理），运营商始终用 ip.sb
+    // 出口：地区用 bilibili（直接查 outIP），运营商始终用 ip.sb
     const outBili = normalizeBilibili(outGeoRaw);
-    const biliIsProxy = outGeoRaw?.data?.addr === outIP;
     const outSb = normalizeIpSb(outRaw);
-    if (biliIsProxy && outBili) {
-      outInfo = { ...outBili, country_code: outSb?.country_code || "", org: outSb?.org || "" };
-    } else {
-      outInfo = outSb;
-    }
+    outInfo = outBili ? { ...outBili, country_code: outSb?.country_code || "", org: outSb?.org || "" } : outSb;
 
     // IPv6：复用 IPv4 出口信息
     ipv6Info = outIPv6 ? outInfo : null;
