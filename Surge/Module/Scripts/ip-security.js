@@ -13,7 +13,7 @@
  * ③ 代理策略: Surge /v1/requests/recent
  * ④ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑤ IP 类型: IPPure API
- * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → 大陆 bilibili, 非大陆 ipwho.is (ip.sb 兜底)
+ * ⑥ 地理/运营商: lang=en → ipinfo.io + ip.sb | lang=zh → 大陆 bilibili, 非大陆地区 ipwho.is + 运营商 ipinfo.io
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
@@ -545,70 +545,79 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
   const isZh = args.lang === "zh";
 
-  // en: ipinfo.io + ip.sb | zh: 大陆用 bilibili，非大陆用 ipwho.is
+  // en: ipinfo.io + ip.sb | zh: 大陆 bilibili，非大陆地区 ipwho.is + 运营商 ipinfo.io
   const queries = [
     getPolicy(),                             // 0
     getRiskScore(outIP),                     // 1
     getIPType(),                             // 2
     httpJSON(CONFIG.urls.inboundInfo(inIP)),  // 3: ip.sb 入口
-    isZh
-      ? httpJSON(CONFIG.urls.ipWhoIs(outIP))   // 4: ipwho.is 出口（zh）
-      : httpJSON(CONFIG.urls.ipInfo(outIP))    // 4: ipinfo.io 出口（en）
+    httpJSON(CONFIG.urls.ipInfo(outIP))       // 4: ipinfo.io 出口（两种模式都用于运营商）
   ];
   if (isZh) {
-    queries.push(httpJSON(CONFIG.urls.biliGeo(outIP)));   // 5: bilibili 出口（zh）
-    queries.push(httpJSON(CONFIG.urls.ipWhoIs(inIP)));    // 6: ipwho.is 入口（zh 非大陆用）
+    queries.push(httpJSON(CONFIG.urls.biliGeo(outIP)));   // 5: bilibili 出口
+    queries.push(httpJSON(CONFIG.urls.ipWhoIs(outIP)));   // 6: ipwho.is 出口（中文地区）
+    queries.push(httpJSON(CONFIG.urls.ipWhoIs(inIP)));    // 7: ipwho.is 入口（中文地区）
   }
   const v6Idx = queries.length;
   if (outIPv6) {
-    queries.push(isZh
-      ? httpJSON(CONFIG.urls.ipWhoIs(outIPv6))             // v6Idx: ipwho.is IPv6（zh）
-      : httpJSON(CONFIG.urls.ipInfo(outIPv6))              // v6Idx: ipinfo.io IPv6（en）
-    );
-    if (isZh) queries.push(httpJSON(CONFIG.urls.biliGeo(outIPv6))); // v6Idx+1: bilibili IPv6（zh）
+    queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));   // v6Idx: ipinfo.io IPv6（运营商）
+    if (isZh) {
+      queries.push(httpJSON(CONFIG.urls.biliGeo(outIPv6)));  // v6Idx+1: bilibili IPv6
+      queries.push(httpJSON(CONFIG.urls.ipWhoIs(outIPv6)));  // v6Idx+2: ipwho.is IPv6（中文地区）
+    }
   }
 
   const results = await Promise.all(queries);
-  const [policy, riskInfo, ipTypeResult, inSbRaw, outGeoRaw] = results;
+  const [policy, riskInfo, ipTypeResult, inSbRaw, outIpInfoRaw] = results;
 
   let inInfo, outInfo, ipv6Info;
   if (isZh) {
     const outBiliRaw = results[5];
-    const inIpWhoRaw = results[6];
-    const v6GeoRaw = outIPv6 ? results[v6Idx] : null;
+    const outIpWhoRaw = results[6];
+    const inIpWhoRaw = results[7];
+    const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
     const v6BiliRaw = outIPv6 ? results[v6Idx + 1] : null;
+    const v6IpWhoRaw = outIPv6 ? results[v6Idx + 2] : null;
 
     const isMainland = (bili) => bili.country_name === "中国" && !/^(香港|澳门|台湾)$/.test(bili.region);
 
-    // 入口：大陆用 bilibili（地区+运营商），非大陆用 ipwho.is（回落 ip.sb）
+    // 入口：大陆用 bilibili（地区+运营商），非大陆地区用 ipwho.is 运营商用 ip.sb
     const inBili = normalizeBilibili(inRaw);
     const inIpWho = normalizeIpWhoIs(inIpWhoRaw);
     const inSb = normalizeIpSb(inSbRaw);
     if (inBili && isMainland(inBili)) {
       inInfo = { ...inBili, country_code: inIpWho?.country_code || inSb?.country_code || "" };
+    } else if (inIpWho) {
+      inInfo = { ...inIpWho, org: inSb?.org || inIpWho.org };
     } else {
-      inInfo = inIpWho || inSb;
+      inInfo = inSb;
     }
 
-    // 出口：大陆用 bilibili（地区+运营商），非大陆用 ipwho.is（回落 ip.sb）
+    // 出口：大陆用 bilibili（地区+运营商），非大陆地区用 ipwho.is 运营商用 ipinfo.io
     const outBili = normalizeBilibili(outBiliRaw);
-    const outIpWho = normalizeIpWhoIs(outGeoRaw);
+    const outIpWho = normalizeIpWhoIs(outIpWhoRaw);
+    const outIpInfo = normalizeIpInfo(outIpInfoRaw);
     const outSb = normalizeIpSb(outRaw);
     if (outBili && isMainland(outBili)) {
-      outInfo = { ...outBili, country_code: outIpWho?.country_code || outSb?.country_code || "" };
+      outInfo = { ...outBili, country_code: outIpWho?.country_code || outIpInfo?.country_code || outSb?.country_code || "" };
+    } else if (outIpWho) {
+      outInfo = { ...outIpWho, org: outIpInfo?.org || outSb?.org || outIpWho.org };
     } else {
-      outInfo = outIpWho || outSb;
+      outInfo = outIpInfo || outSb;
     }
 
     // IPv6：同上逻辑
     const v6Bili = normalizeBilibili(v6BiliRaw);
-    const v6IpWho = normalizeIpWhoIs(v6GeoRaw);
+    const v6IpWho = normalizeIpWhoIs(v6IpWhoRaw);
+    const v6IpInfo = normalizeIpInfo(v6IpInfoRaw);
     const v6Sb = outIPv6 ? normalizeIpSb(v6Raw) : null;
     if (outIPv6) {
       if (v6Bili && isMainland(v6Bili)) {
-        ipv6Info = { ...v6Bili, country_code: v6IpWho?.country_code || v6Sb?.country_code || "" };
+        ipv6Info = { ...v6Bili, country_code: v6IpWho?.country_code || v6IpInfo?.country_code || v6Sb?.country_code || "" };
+      } else if (v6IpWho) {
+        ipv6Info = { ...v6IpWho, org: v6IpInfo?.org || v6Sb?.org || v6IpWho.org };
       } else {
-        ipv6Info = v6IpWho || v6Sb;
+        ipv6Info = v6IpInfo || v6Sb;
       }
     } else {
       ipv6Info = null;
@@ -617,7 +626,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     // 英文模式：入口用 ip.sb，出口用 ipinfo.io（回落 ip.sb）
     const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
     inInfo = normalizeIpSb(inSbRaw);
-    outInfo = normalizeIpInfo(outGeoRaw) || normalizeIpSb(outRaw);
+    outInfo = normalizeIpInfo(outIpInfoRaw) || normalizeIpSb(outRaw);
     ipv6Info = outIPv6 ? (normalizeIpInfo(v6IpInfoRaw) || normalizeIpSb(v6Raw)) : null;
   }
 
