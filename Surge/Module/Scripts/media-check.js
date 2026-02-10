@@ -683,27 +683,43 @@ class ServiceChecker {
   }
 
   /**
-   * Gemini API 解锁检测
-   * @returns {Promise<Object|null>} 检测结果或 null
+   * Gemini 解锁检测
+   * 优先使用网页检测（无需 API Key），有 Key 时追加 API 检测
+   * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
+    // 网页检测：访问 gemini.google.com，从 HTML 判断可用性和地区
+    try {
+      const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
+      const body = res.body || "";
+
+      if (body.includes("45631641,null,true")) {
+        const m = body.match(/,2,1,200,"([A-Z]{2,3})"/);
+        return Utils.createResult(STATUS.OK, m ? m[1] : "OK");
+      }
+    } catch {}
+
+    // API 检测（需要 Key）
     const args = Utils.parseArgs($argument);
     const apiKey = (args.geminiapikey || "").trim();
-    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
+    if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) {
+      return Utils.createResult(STATUS.FAIL, "No");
+    }
 
     try {
       const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
       const body = res.body.toLowerCase();
 
-      if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
-      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
+      if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "API OK");
+      if (res.status === 403 || res.status === 404 || body.includes("region not supported") || body.includes("location is not supported")) {
         return Utils.createResult(STATUS.FAIL, "Region Blocked");
       }
       if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
         return Utils.createResult(STATUS.ERROR, "Invalid API Key");
       }
-      return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-    } catch { return Utils.createResult(STATUS.ERROR, "Invalid API Key"); }
+      if (res.status === 429) return Utils.createResult(STATUS.OK, "API OK (Rate Limited)");
+      return Utils.createResult(STATUS.ERROR, `HTTP ${res.status}`);
+    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
 
   /**
@@ -750,7 +766,7 @@ class ServiceChecker {
       { name: "Spotify", result: spotify },
       { name: "ChatGPT", result: chatgpt },
       { name: "Claude", result: claude },
-      gemini && { name: "Gemini API", result: gemini },
+      { name: "Gemini", result: gemini },
       { name: "Reddit", result: reddit }
     ].filter(Boolean);
 
