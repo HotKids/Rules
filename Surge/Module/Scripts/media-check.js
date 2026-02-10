@@ -574,8 +574,9 @@ class ServiceChecker {
         return Utils.createResult(STATUS.FAIL, "CN");
       }
       
-      // 提取地区码
-      const region = combinedBody.match(/"countryCode":"([A-Z]{2})"/)?.[1];
+      // 提取地区码：countryCode 不一定有，contentRegion 一定有
+      const region = combinedBody.match(/"countryCode":"([A-Z]{2})"/)?.[1]
+                  || combinedBody.match(/"contentRegion":"([A-Z]{2})"/)?.[1];
       
       // 检查可用性标识
       const hasPurchaseButton = combinedBody.includes('purchaseButtonOverride');
