@@ -1,0 +1,25 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "4unal8ngvngjm07lj2q2umlc4.litix.io",
+        "content-ause1-ur-discovery1.uplynk.com",
+        "content-ausw1-ur-discovery1.uplynk.com",
+        "content-ausw2-ur-discovery1.uplynk.com",
+        "kvinit-prod.api.kochava.com",
+        "us1-prod-images.disco-api.com",
+        "us1-prod.disco-api.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "disco-api.com",
+        "discoveryplus.com",
+        "dnitv.com",
+        "dplus-amer.prd.api.discomax.com",
+        "dplus.us.prd.media.max.com"
+      ]
+    }
+  ]
+}

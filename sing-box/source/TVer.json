@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "brightcove.com",
+        "interactive-circle.jp",
+        "prod.boltdns.net",
+        "tver.jp"
+      ]
+    }
+  ]
+}

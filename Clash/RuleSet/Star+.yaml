@@ -1,7 +1,5 @@
 payload:
   # > Star+
-  # USER-AGENT,Star+
-  # PROCESS-NAME,com.disney.starplus
   - DOMAIN-SUFFIX,starplus.com
   - DOMAIN-SUFFIX,starott.com
   - DOMAIN,star.api.edge.bamgrid.com

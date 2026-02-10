@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "dai3fd1oh325y.cloudfront.net",
+        "hbolb.onwardsmg.com",
+        "hbounify-prod.evergent.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "hboasia.com",
+        "hbogoasia.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "hbogoasia"
+      ]
+    }
+  ]
+}

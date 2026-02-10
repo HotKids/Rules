@@ -1,0 +1,57 @@
+# > Bilibili
+DOMAIN-SUFFIX,bilibili.com,CNTV
+DOMAIN-SUFFIX,bilibili.tv,CNTV
+DOMAIN-SUFFIX,biliapi.net,CNTV
+DOMAIN-SUFFIX,biliapi.com,CNTV
+DOMAIN-SUFFIX,bilivideo.com,CNTV
+DOMAIN-SUFFIX,acgvideo.com,CNTV
+DOMAIN-SUFFIX,acg.tv,CNTV
+DOMAIN-SUFFIX,b23.tv,CNTV
+DOMAIN-SUFFIX,hdslb.com,CNTV
+DOMAIN,upos-hz-mirrorakam.akamaized.net,CNTV
+DOMAIN-KEYWORD,bilibili,CNTV
+DOMAIN-KEYWORD,cn-hk-eq-bcache-,CNTV
+IP-CIDR,203.107.1.65/32,CNTV
+DOMAIN,apiintl.biliapi.net,CNTV
+
+# > Bilibili SEA
+DOMAIN-SUFFIX,biliintl.com,CNTV
+DOMAIN,apm-misaka.biliapi.net,CNTV
+DOMAIN,p-bstarstatic.akamaized.net,CNTV
+DOMAIN,upos-bstar-mirrorakam.akamaized.net,CNTV
+DOMAIN,upos-bstar1-mirrorakam.akamaized.net,CNTV
+
+# > iQIYI Intl
+DOMAIN-SUFFIX,iq.com,CNTV
+DOMAIN-SUFFIX,intl.iqiyi.com,CNTV
+DOMAIN,intl-rcd.iqiyi.com,CNTV
+DOMAIN,intl-im-hist-api.iqiyi.com,CNTV
+DOMAIN,intl-subscription.iqiyi.com,CNTV
+DOMAIN,akmcdnoversea.inter.iqiyi.com,CNTV
+DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,CNTV
+DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,CNTV
+DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,CNTV
+DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,CNTV
+DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,CNTV
+DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,CNTV
+DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,CNTV
+DOMAIN-KEYWORD,akmcdnoverse,CNTV
+DOMAIN-KEYWORD,chuangcachecdnoversea,CNTV
+IP-CIDR,23.40.241.251/32,CNTV
+IP-CIDR,23.40.242.10/32,CNTV
+IP-CIDR,110.238.107.47/32,CNTV
+IP-CIDR,118.26.32.162/32,CNTV
+IP-CIDR,159.138.102.146/32,CNTV
+IP-CIDR,203.80.97.208/32,CNTV
+IP-CIDR,203.198.80.99/32,CNTV
+
+# > WeTV
+DOMAIN-SUFFIX,wetv.vip,CNTV
+DOMAIN-SUFFIX,wetvinfo.com,CNTV
+DOMAIN,wetv.tv.qq.com,CNTV
+DOMAIN,wetv.acc.qq.com,CNTV
+DOMAIN,hwvip.video.qq.com,CNTV
+IP-CIDR,150.109.28.51/32,CNTV
+
+# > Youku Intl.
+DOMAIN,vod-interyk.youku.tv,CNTV

@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "d1k2us671qcoau.cloudfront.net",
+        "d2anahhhmp1ffz.cloudfront.net",
+        "d31rgcmny3inu.cloudfront.net",
+        "d3o7oi00quuwqu.cloudfront.net",
+        "dfp6rglgjqszk.cloudfront.net",
+        "pccw-cf-video.akamaized.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "viu.com"
+      ]
+    }
+  ]
+}

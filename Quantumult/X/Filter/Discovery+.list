@@ -1,9 +1,9 @@
 # > Discovery+
-USER-AGENT,discovery+*,Discovery+
-USER-AGENT,DPlus*,Discovery+
 DOMAIN-SUFFIX,discoveryplus.com,Discovery+
 DOMAIN-SUFFIX,disco-api.com,Discovery+
 DOMAIN-SUFFIX,dnitv.com,Discovery+
+DOMAIN-SUFFIX,dplus.us.prd.media.max.com,Discovery+
+DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com,Discovery+
 DOMAIN,us1-prod.disco-api.com,Discovery+
 DOMAIN,us1-prod-images.disco-api.com,Discovery+
 DOMAIN,kvinit-prod.api.kochava.com,Discovery+
@@ -11,4 +11,3 @@ DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io,Discovery+
 DOMAIN,content-ause1-ur-discovery1.uplynk.com,Discovery+
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Discovery+
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Discovery+
-// DOMAIN,go-prod-vz.akamaized.net,Discovery+

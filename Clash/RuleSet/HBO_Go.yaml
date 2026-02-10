@@ -1,15 +1,8 @@
 payload:
   # > HBO GO Asia
-  # USER-AGENT,HBO%20GO%20PROD*
-  # PROCESS-NAME,sg.hbo.hbogo
-  # PROCESS-NAME,com.hbo.asia.androidtv
-  # DOMAIN-KEYWORD,hboasia
   - DOMAIN-KEYWORD,hbogoasia
   - DOMAIN-SUFFIX,hboasia.com
   - DOMAIN-SUFFIX,hbogoasia.com
   - DOMAIN,hbolb.onwardsmg.com
   - DOMAIN,hbounify-prod.evergent.com
-  # DOMAIN,hbogoprod-vod.akamaized.net
-  # DOMAIN,hboasialive.akamaized.net
-  # DOMAIN,bcbolthboa-a.akamaihd.net
   - DOMAIN,dai3fd1oh325y.cloudfront.net

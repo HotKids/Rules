@@ -1,0 +1,31 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "imap.vodafone.de",
+        "smtp.vodafone.de"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "fastmail.com",
+        "gmail.com",
+        "googlemail.com",
+        "hotmail.com",
+        "live.com",
+        "mail.infomaniak.com",
+        "mail.me.com",
+        "mail.yahoo.com",
+        "outlook.com",
+        "vodafonemail.de"
+      ]
+    },
+    {
+      "process_name": [
+        "*spark",
+        "com.readdle.spark"
+      ]
+    }
+  ]
+}

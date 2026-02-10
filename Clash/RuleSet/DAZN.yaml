@@ -1,7 +1,5 @@
 payload:
   # > DAZN
-  # USER-AGENT,DAZN*
-  - PROCESS-NAME,com.dazn
   - DOMAIN-SUFFIX,dazn.com
   - DOMAIN-SUFFIX,dazndn.com
   - DOMAIN-SUFFIX,indazn.com

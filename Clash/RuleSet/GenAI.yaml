@@ -8,15 +8,16 @@ payload:
   - DOMAIN,cp4.cloudflare.com
   - DOMAIN,guzzoni.apple.com
   - DOMAIN,gspe1-ssl.ls.apple.com
-
+  - DOMAIN-SUFFIX,gateway.icloud.com
   # Anthropic
   # > Claude
   - DOMAIN-SUFFIX,claude.ai
   - DOMAIN-SUFFIX,claude.com
   - DOMAIN-SUFFIX,anthropic.com
-
   # OpenAI
   # > ChatGPT
+  - AND,((DOMAIN-KEYWORD,openaicom-api-),(DOMAIN-SUFFIX,azurefd.net))
+  - AND,((DOMAIN-KEYWORD,chatgpt-async-webps-prod-),(DOMAIN-SUFFIX,webpubsub.azure.com))
   - DOMAIN,chatgpt.livekit.cloud
   - DOMAIN,host.livekit.cloud
   - DOMAIN,turn.livekit.cloud
@@ -36,17 +37,14 @@ payload:
   - DOMAIN,openaicomproductionae4b.blob.core.windows.net
   - DOMAIN-KEYWORD,openaiapi
   - DOMAIN-KEYWORD,openaicom
-
   # Cloudflare
   # > AI Gateway
   - DOMAIN,gateway.ai.cloudflare.com
-
   # Cursor
   - DOMAIN-SUFFIX,cursor-cdn.com
   - DOMAIN-SUFFIX,cursor.com
   - DOMAIN-SUFFIX,cursor.sh
   - DOMAIN-SUFFIX,cursorapi.com
-
   # Google
   # > AI Studio
   - DOMAIN-SUFFIX,generativeai.google
@@ -68,17 +66,11 @@ payload:
   - DOMAIN-KEYWORD,notebooklm.google
   # > Search Labs
   - DOMAIN-KEYWORD,labs.google
-
-  # Groq
-  - DOMAIN-SUFFIX,groq.com
-
   # JetBrains AI
   - DOMAIN-SUFFIX,grazie.ai
-
   # Meta
   - DOMAIN-SUFFIX,meta.ai
   - DOMAIN,imagine.meta.com
-
   # Microsoft
   # > Copilot
   - DOMAIN,copilot.microsoft.com
@@ -86,26 +78,22 @@ payload:
   - DOMAIN,www.bing.com
   # > GitHub Copilot
   - DOMAIN-SUFFIX,githubcopilot.com
-
+  # NVIDIA
+  # > Groq
+  - DOMAIN-SUFFIX,groq.com
   # Perplexity
   - DOMAIN-SUFFIX,perplexity.ai
   - DOMAIN-SUFFIX,pplx.ai
   - DOMAIN,pplx-res.cloudinary.com
-
   # xAI
   - DOMAIN-SUFFIX,grok.com
   - DOMAIN-SUFFIX,x.ai
-
   # ByteDance
   # > Doubao Dola
-  - PROCESS-NAME,com.larus.wolf
   - DOMAIN-SUFFIX,dola.com
   - DOMAIN-SUFFIX,cici.com
   - DOMAIN-SUFFIX,ciciai.com
-  - DOMAIN-WILDCARD,abtest*.byteoversea.com
   - DOMAIN,abtestvm-sg.bytedance.com
-  - IP-CIDR,23.202.34.0/24,no-resolve
-  - IP-CIDR,71.18.222.0/24,no-resolve
-
+  - DOMAIN-WILDCARD,abtest*.byteoversea.com
   # Affinity
   - DOMAIN,d3ssuo6fbvr.cloudfront.net

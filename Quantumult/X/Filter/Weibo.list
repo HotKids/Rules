@@ -1,0 +1,14 @@
+# > Weibo 境外势力
+# Domain rules
+DOMAIN-SUFFIX,weibo.com,Weibo
+DOMAIN-SUFFIX,weibo.cn,Weibo
+DOMAIN-SUFFIX,weico.cc,Weibo
+# IP rules
+IP-CIDR,180.149.138.0/24,Weibo
+IP-CIDR,36.51.254.0/24,Weibo
+IP-CIDR,49.7.40.0/24,Weibo
+IP-CIDR,183.60.93.0/24,Weibo
+IP-CIDR,49.7.36.0/24,Weibo
+IP-CIDR,180.149.138.39/32,Weibo
+IP-CIDR,39.97.130.0/24,Weibo
+IP-CIDR,39.97.128.0/24,Weibo

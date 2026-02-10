@@ -1,5 +1,4 @@
 # > CATCHPLAY+
-USER-AGENT,CATCHPLAY*,CATCHPLAY+
 DOMAIN-SUFFIX,catchplay.com,CATCHPLAY+
 DOMAIN,asiaplay-origin.s3.amazonaws.com,CATCHPLAY+
 DOMAIN,tra-ww000-cp.akamaized.net,CATCHPLAY+

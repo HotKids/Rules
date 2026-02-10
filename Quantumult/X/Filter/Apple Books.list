@@ -1,0 +1,6 @@
+# > Apple Books
+DOMAIN,buy.itunes.apple.com,Apple Books
+DOMAIN-SUFFIX,books.apple.com,Apple Books
+DOMAIN,books.itunes.apple.com,Apple Books
+DOMAIN,bookkeeper.itunes.apple.com,Apple Books
+DOMAIN,books-analytics-events.apple.com,Apple Books

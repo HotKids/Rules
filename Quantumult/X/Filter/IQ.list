@@ -1,40 +1,31 @@
 # > iQIYI Intl
-// USER-AGENT,iQIYI*,iQIYI Intl
-// USER-AGENT,QIYIVideo*,iQIYI Intl
-// USER-AGENT,QYPlayer*,iQIYI Intl
-// USER-AGENT,QTP*,iQIYI Intl
-// PROCESS-NAME,com.iqiyi.i18n,iQIYI Intl
-// PROCESS-NAME,com.iqiyi.i18n.tv,iQIYI Intl
-DOMAIN-SUFFIX,iq.com,iQIYI Intl
-// 首页
-DOMAIN-SUFFIX,intl.iqiyi.com,iQIYI Intl
-// 历史
-DOMAIN,intl-rcd.iqiyi.com,iQIYI Intl
-DOMAIN,intl-im-hist-api.iqiyi.com,iQIYI Intl
-// 收藏
-DOMAIN,intl-subscription.iqiyi.com,iQIYI Intl
-// 播放
-DOMAIN,msg-intl.qy.net,iQIYI Intl
-DOMAIN,ip.geo.iqiyi.com,iQIYI Intl
-DOMAIN,akmcdnoversea.inter.iqiyi.com,iQIYI Intl
-DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,iQIYI Intl
-DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,iQIYI Intl
-DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,iQIYI Intl
-DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,iQIYI Intl
-DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
-DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,iQIYI Intl
-DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,iQIYI Intl
-DOMAIN-KEYWORD,akmcdnoverse,iQIYI Intl
-DOMAIN-KEYWORD,chuangcachecdnoversea,iQIYI Intl
-IP-CIDR,2.21.22.17/32,iQIYI Intl
-IP-CIDR,23.40.241.251/32,iQIYI Intl
-IP-CIDR,23.40.242.10/32,iQIYI Intl
-IP-CIDR,23.210.215.154/32,iQIYI Intl
-IP-CIDR,110.238.107.47/32,iQIYI Intl
-IP-CIDR,110.238.109.184/32,iQIYI Intl
-IP-CIDR,114.119.175.88/32,iQIYI Intl
-IP-CIDR,118.26.32.0/22,iQIYI Intl
-IP-CIDR,159.138.102.146/32,iQIYI Intl
-IP-CIDR,184.25.254.178/32,iQIYI Intl
-IP-CIDR,203.80.97.208/32,iQIYI Intl
-IP-CIDR,203.198.80.99/32,iQIYI Intl
+DOMAIN-SUFFIX,iq.com,IQ
+DOMAIN-SUFFIX,intl.iqiyi.com,IQ
+DOMAIN,intl-rcd.iqiyi.com,IQ
+DOMAIN,intl-im-hist-api.iqiyi.com,IQ
+DOMAIN,intl-subscription.iqiyi.com,IQ
+DOMAIN,msg-intl.qy.net,IQ
+DOMAIN,ip.geo.iqiyi.com,IQ
+DOMAIN,akcdnoversea.inter.71edge.com,IQ
+DOMAIN,akmcdnoversea.inter.iqiyi.com,IQ
+DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,IQ
+DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,IQ
+DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,IQ
+DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,IQ
+DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,IQ
+DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,IQ
+DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,IQ
+DOMAIN-KEYWORD,akmcdnoverse,IQ
+DOMAIN-KEYWORD,chuangcachecdnoversea,IQ
+IP-CIDR,2.21.22.17/32,IQ
+IP-CIDR,23.40.241.251/32,IQ
+IP-CIDR,23.40.242.10/32,IQ
+IP-CIDR,23.210.215.154/32,IQ
+IP-CIDR,110.238.107.47/32,IQ
+IP-CIDR,110.238.109.184/32,IQ
+IP-CIDR,114.119.175.88/32,IQ
+IP-CIDR,118.26.32.0/22,IQ
+IP-CIDR,159.138.102.146/32,IQ
+IP-CIDR,184.25.254.178/32,IQ
+IP-CIDR,203.80.97.208/32,IQ
+IP-CIDR,203.198.80.99/32,IQ

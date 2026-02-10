@@ -1,0 +1,21 @@
+# Google
+# > AI Studio
+DOMAIN-SUFFIX,generativeai.google,Gemini
+DOMAIN-SUFFIX,makersuite.google.com,Gemini
+DOMAIN,aistudio.google.com,Gemini
+DOMAIN,alkalicore-pa.clients6.google.com,Gemini
+DOMAIN,alkalimakersuite-pa.clients6.google.com,Gemini
+# > DeepMind
+DOMAIN-SUFFIX,deepmind.com,Gemini
+DOMAIN-SUFFIX,deepmind.google,Gemini
+# > Gemini
+DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,Gemini
+DOMAIN-SUFFIX,geller-pa.googleapis.com,Gemini
+DOMAIN-SUFFIX,generativelanguage.googleapis.com,Gemini
+DOMAIN,ai.google.dev,Gemini
+DOMAIN,bard.google.com,Gemini
+DOMAIN,gemini.google.com,Gemini
+# > NotebookLM
+DOMAIN-KEYWORD,notebooklm.google,Gemini
+# > Search Labs
+DOMAIN-KEYWORD,labs.google,Gemini

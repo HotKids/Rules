@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "ssl-bbcsmarttv.2cnt.net",
+        "vod-dash-uk-live.akamaized.net",
+        "vod-dash-uk-live.bbcfmt.hs.llnwd.net",
+        "vod-thumb-uk-live.akamaized.net",
+        "vod-thumb-uk-live.bbcfmt.hs.llnwd.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "bbc.co",
+        "bbc.co.uk",
+        "bbc.com",
+        "bbci.co",
+        "bbci.co.uk"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "bbcfmt",
+        "co.uk",
+        "uk-live"
+      ]
+    }
+  ]
+}

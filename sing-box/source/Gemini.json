@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "ai.google.dev",
+        "aistudio.google.com",
+        "alkalicore-pa.clients6.google.com",
+        "alkalimakersuite-pa.clients6.google.com",
+        "bard.google.com",
+        "gemini.google.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "deepmind.com",
+        "deepmind.google",
+        "geller-pa.googleapis.com",
+        "generativeai.google",
+        "generativelanguage.googleapis.com",
+        "makersuite.google.com",
+        "proactivebackend-pa.googleapis.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "labs.google",
+        "notebooklm.google"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "d17lx9ucc6k9fc.cloudfront.net",
+        "d3c7rimkq79yfu.cloudfront.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "linetv.tw"
+      ]
+    }
+  ]
+}
