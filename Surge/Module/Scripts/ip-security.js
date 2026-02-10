@@ -393,9 +393,9 @@ function checkIPChange(localIP, outIP, outIPv6) {
 
 // ==================== 面板内容构建 ====================
 function geoLabel(info) {
-  // ip-api.com: country_name="Hong Kong"/"香港" ≠ country_code="HK" → 显示国名
-  // ipinfo.io: country_name="HK" = country_code="HK" → 显示 country_code
-  return (info?.country_name && info.country_name !== info.country_code) ? info.country_name : info?.country_code;
+  // ip-api.com(zh): country_name="香港"(非 ASCII) → 显示中文国名
+  // ip-api.com(en): country_name="Hong Kong" / ipinfo.io: country_name="HK" → 显示 country_code
+  return (info?.country_name && /[^\x00-\x7F]/.test(info.country_name)) ? info.country_name : info?.country_code;
 }
 
 function buildOutboundSection(outIP, outIPv6, outInfo, isMask) {
