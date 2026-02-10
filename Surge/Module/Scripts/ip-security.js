@@ -207,7 +207,7 @@ function normalizeBilibili(data) {
   const d = data?.data;
   if (!d || !d.country) return null;
   let isp = d.isp || "";
-  if (/^(移动|联通|电信)$/.test(isp)) isp = "中国" + isp;
+  if (/^(移动|联通|电信|广电)$/.test(isp)) isp = "中国" + isp;
   return {
     country_code: null,
     country_name: d.country,
@@ -518,10 +518,15 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
 
   let inInfo, outInfo, ipv6Info;
   if (isZh) {
-    // 中文模式：入口地区/运营商用 bilibili，country_code 补充自 ip.sb
+    // 中文模式：入口地区用 bilibili，运营商仅中国用 bilibili，非中国用 ip.sb
     const inBili = normalizeBilibili(inRaw);
     const inSb = normalizeIpSb(inSbRaw);
-    inInfo = inBili ? { ...inBili, country_code: inSb?.country_code || "" } : inSb;
+    if (inBili) {
+      const isChina = inBili.country_name === "中国";
+      inInfo = { ...inBili, country_code: inSb?.country_code || "", org: isChina ? inBili.org : (inSb?.org || "") };
+    } else {
+      inInfo = inSb;
+    }
 
     // 出口：地区用 bilibili（若走了代理），运营商始终用 ip.sb
     const outBili = normalizeBilibili(outGeoRaw);
