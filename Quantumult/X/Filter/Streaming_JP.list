@@ -1,0 +1,33 @@
+# > AbemaTV
+DOMAIN-SUFFIX,abema.io,Streaming_JP
+DOMAIN-SUFFIX,abema.tv,Streaming_JP
+DOMAIN-SUFFIX,ameba.jp,Streaming_JP
+DOMAIN-SUFFIX,hayabusa.io,Streaming_JP
+DOMAIN,abematv.akamaized.net,Streaming_JP
+DOMAIN,ds-vod-abematv.akamaized.net,Streaming_JP
+DOMAIN,linear-abematv.akamaized.net,Streaming_JP
+DOMAIN,ds-linear-abematv.akamaized.net,Streaming_JP
+
+# > FOD
+DOMAIN-SUFFIX,fujitv.co.jp,Streaming_JP
+DOMAIN-SUFFIX,stream.ne.jp,Streaming_JP
+DOMAIN,measure.ic.tver.jp,Streaming_JP
+
+# > Hulu JP
+DOMAIN-SUFFIX,hulu.jp,Streaming_JP
+DOMAIN-SUFFIX,happyon.jp,Streaming_JP
+DOMAIN-SUFFIX,prod.hjholdings.tv,Streaming_JP
+
+# > Paravi
+DOMAIN-SUFFIX,paravi.jp,Streaming_JP
+
+# > TVer
+DOMAIN-SUFFIX,tver.jp,Streaming_JP
+DOMAIN-SUFFIX,interactive-circle.jp,Streaming_JP
+DOMAIN-SUFFIX,brightcove.com,Streaming_JP
+DOMAIN-SUFFIX,prod.boltdns.net,Streaming_JP
+
+# > U-NEXT
+DOMAIN-SUFFIX,unext.jp,Streaming_JP
+DOMAIN-SUFFIX,nxtv.jp,Streaming_JP
+DOMAIN,us-central1-u-next-apps.cloudfunctions.net,Streaming_JP

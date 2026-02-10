@@ -1,14 +1,10 @@
 payload:
-  # > Paramount+ Intl.
+  # > Paramount+ Intl.丨England, Ireland, Canada, Australia, Latin America, Nordic Combined
   # 仅在同时使用 Paramount+ 国际版及美国版时需要此分流以作分离，Surge 可通过 USER-AGENT 区分（iOS 15 需 MITM 相关域名），Clash Surfboard 可通过 PROCESS-NAME 区分
   # Paramount+ Intl. 上线地区较冷门，通过 PROCESS-NAME 分流时部分冷门地区节点串流效果不佳，可前置 Streaming+.yaml 使部分无需验证地区的 HOST 走其他节点代理
-  ## 参考：
-  ### RULE-SET,Paramount++,🇭🇰 Hong Kong
-  ### RULE-SET,Paramount+ Intl,🇦🇺 Australia
-  ### RULE-SET,Paramount+,🇺🇸 America
-  #
-  # USER-AGENT,ParamountPlus*
   - PROCESS-NAME,com.cbs.ca
+  - DOMAIN-KEYWORD,intl.pplus
+  - DOMAIN-KEYWORD,intl.paramountplus
   - DOMAIN-SUFFIX,intl.paramountplus.com
   - DOMAIN,wwwimage-intl.pplusstatic.com
-  # DOMAIN,cbsi.live.ott.irdeto.com
+  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,ParamountPlus*))

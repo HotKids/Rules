@@ -5,16 +5,11 @@ payload:
   - DOMAIN-SUFFIX,weibo.cn
   - DOMAIN-SUFFIX,weico.cc
   # IP rules
-  # weibo.com
   - IP-CIDR,180.149.138.0/24
-  # weibo.cn, api.weibo.cn (The important one!)
   - IP-CIDR,36.51.254.0/24
   - IP-CIDR,49.7.40.0/24
   - IP-CIDR,183.60.93.0/24
-  # dp.im.weibo.cn, *.biz.weibo.com
   - IP-CIDR,49.7.36.0/24
-  # api.uve.weibo.com (Other *.uve.weibo.com are CNAME'd to here)
   - IP-CIDR,180.149.138.39/32
-  # dns.weibo.com (uses AliDNS for Business service)
   - IP-CIDR,39.97.130.0/24
   - IP-CIDR,39.97.128.0/24

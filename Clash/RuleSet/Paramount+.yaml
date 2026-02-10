@@ -1,22 +1,12 @@
 payload:
   # > Paramount+
-  # USER-AGENT,PPlus*
-  # USER-AGENT,Paramountlus*
-  # PROCESS-NAME,com.cbs.app
-  # PROCESS-NAME,com.cbs.ott
-  # PROCESS-NAME,com.cbs.ca
   - DOMAIN-SUFFIX,cbsi.com
-  # DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,cbsivideo.com
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
-  # DOMAIN-SUFFIX,mtvnservices.com
-  # DOMAIN-SUFFIX,cws.conviva.com
   - DOMAIN,link.theplatform.com
+  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,PPlus*))
+  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,Paramountlus*))
   - DOMAIN,cbsi.live.ott.irdeto.com
-  # DOMAIN,thumbnails.cbsig.net
-  # DOMAIN,cbsinteractive.hb.omtrdc.net
-  # DOMAIN,ads.play.cbsi.video
-  # DOMAIN,cbsnews.akamaized.net
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com

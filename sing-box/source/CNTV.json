@@ -1,4 +1,5 @@
 {
+  "version": 2,
   "rules": [
     {
       "domain": [
@@ -16,18 +17,13 @@
         "intl-im-hist-api.iqiyi.com",
         "intl-rcd.iqiyi.com",
         "intl-subscription.iqiyi.com",
+        "p-bstarstatic.akamaized.net",
+        "upos-bstar-mirrorakam.akamaized.net",
+        "upos-bstar1-mirrorakam.akamaized.net",
         "upos-hz-mirrorakam.akamaized.net",
         "vod-interyk.youku.tv",
         "wetv.acc.qq.com",
         "wetv.tv.qq.com"
-      ]
-    },
-    {
-      "domain_keyword": [
-        "akmcdnoverse",
-        "bilibili",
-        "chuangcachecdnoversea",
-        "cn-hk-eq-bcache-"
       ]
     },
     {
@@ -42,11 +38,18 @@
         "biliintl.com",
         "bilivideo.com",
         "hdslb.com",
-        "iflix.com",
         "intl.iqiyi.com",
         "iq.com",
         "wetv.vip",
         "wetvinfo.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "akmcdnoverse",
+        "bilibili",
+        "chuangcachecdnoversea",
+        "cn-hk-eq-bcache-"
       ]
     },
     {
@@ -61,7 +64,12 @@
         "23.40.241.251/32",
         "23.40.242.10/32"
       ]
+    },
+    {
+      "process_name": [
+        "com.iqiyi.i18n",
+        "com.iqiyi.i18n.tv"
+      ]
     }
-  ],
-  "version": 1
+  ]
 }

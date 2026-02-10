@@ -1,0 +1,10 @@
+# > iCloud Private Relay
+# https://developer.apple.com/cn/support/prepare-your-network-for-icloud-private-relay/
+# https://mask-api.icloud.com/egress-ip-ranges.csv
+# Allow for network traffic audits
+DOMAIN,mask.icloud.com,iCloud.PrivateRelay
+DOMAIN,mask.apple-dns.net,iCloud.PrivateRelay
+DOMAIN,mask-canary.icloud.com,iCloud.PrivateRelay
+DOMAIN,canary.mask.apple-dns.net,iCloud.PrivateRelay
+DOMAIN,mask-h2.icloud.com,iCloud.PrivateRelay
+DOMAIN,mask-t.apple-dns.net,iCloud.PrivateRelay

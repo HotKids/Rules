@@ -1,0 +1,26 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "wwwimage-intl.pplusstatic.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "intl.paramountplus.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "intl.paramountplus",
+        "intl.pplus"
+      ]
+    },
+    {
+      "process_name": [
+        "com.cbs.ca"
+      ]
+    }
+  ]
+}

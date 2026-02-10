@@ -1,5 +1,4 @@
 # > Bilibili SEA
-// USER-AGENT,bilibili,BilibiliSEA
 DOMAIN-SUFFIX,biliintl.com,BilibiliSEA
 DOMAIN,apm-misaka.biliapi.net,BilibiliSEA
 DOMAIN,p-bstarstatic.akamaized.net,BilibiliSEA

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "discomax.com",
+        "max.com"
+      ]
+    },
+    {
+      "process_name": [
+        "com.wbd.stream"
+      ]
+    }
+  ]
+}

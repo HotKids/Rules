@@ -4,7 +4,6 @@ payload:
   - DOMAIN-SUFFIX,media.dssott.com
   - DOMAIN-SUFFIX,prod.dssedge.com
   - DOMAIN,prod-ripcut-delivery.disney-plus.net
-
   # > Paramount+
   - DOMAIN-SUFFIX,cbsaavideo.com
   - DOMAIN-SUFFIX,mtvnservices.com
@@ -12,11 +11,8 @@ payload:
   - DOMAIN,thumbnails.cbsig.net
   - DOMAIN,cbsinteractive.hb.omtrdc.net
   - DOMAIN,cbsnews.akamaized.net
-
   # > Peacock TV
   # TV 端需走 US
-  # DOMAIN-SUFFIX,cdn.peacocktv.com
-  
   # > SkyShowtime
   - DOMAIN-SUFFIX,cssott.com
   - DOMAIN,g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com

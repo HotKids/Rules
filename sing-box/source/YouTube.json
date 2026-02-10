@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "youtubei.googleapis.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "googlevideo.com",
+        "youtu.be"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "youtube"
+      ]
+    }
+  ]
+}

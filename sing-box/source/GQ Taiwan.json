@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "gq.com.tw"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "gqtaiwan"
+      ]
+    }
+  ]
+}

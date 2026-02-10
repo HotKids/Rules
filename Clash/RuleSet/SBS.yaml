@@ -1,8 +1,4 @@
 payload:
   # > SBS On Demand
-  # USER-AGENT,SBS*
-  - PROCESS-NAME,com.sbs.ondemand.android
-  - PROCESS-NAME,com.sbs.ondemand.tv
   - DOMAIN-SUFFIX,sbsod.com
   - DOMAIN-SUFFIX,sbs.com.au
-  # DOMAIN,sbsvoddai-vh.akamaihd.net

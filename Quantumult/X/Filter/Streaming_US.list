@@ -1,0 +1,57 @@
+# > Crunchyroll
+DOMAIN-SUFFIX,crunchyroll.com,Streaming_US
+
+# > Discovery+
+DOMAIN-SUFFIX,discoveryplus.com,Streaming_US
+DOMAIN-SUFFIX,disco-api.com,Streaming_US
+DOMAIN-SUFFIX,dnitv.com,Streaming_US
+DOMAIN-SUFFIX,dplus.us.prd.media.max.com,Streaming_US
+DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com,Streaming_US
+DOMAIN,us1-prod.disco-api.com,Streaming_US
+DOMAIN,us1-prod-images.disco-api.com,Streaming_US
+DOMAIN,kvinit-prod.api.kochava.com,Streaming_US
+DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io,Streaming_US
+DOMAIN,content-ause1-ur-discovery1.uplynk.com,Streaming_US
+DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming_US
+DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
+
+# > HBO Max
+
+# > Hulu
+DOMAIN-SUFFIX,hulu.com,Streaming_US
+DOMAIN-SUFFIX,hulu.tv,Streaming_US
+DOMAIN-SUFFIX,huluim.com,Streaming_US
+DOMAIN-SUFFIX,hulustream.com,Streaming_US
+DOMAIN,cws-hulu.conviva.com,Streaming_US
+
+# > Max
+
+# > MGM+
+DOMAIN-SUFFIX,mgmplus.com,Streaming_US
+DOMAIN-SUFFIX,epix.com,Streaming_US
+DOMAIN-SUFFIX,epixnow.com,Streaming_US
+DOMAIN,epixhls.akamaized.net,Streaming_US
+DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com,Streaming_US
+
+# > PBS
+DOMAIN-SUFFIX,pbs.org,Streaming_US
+
+# > Paramount+
+DOMAIN-SUFFIX,cbsi.com,Streaming_US
+DOMAIN-SUFFIX,cbsivideo.com,Streaming_US
+DOMAIN-SUFFIX,paramountplus.com,Streaming_US
+DOMAIN-SUFFIX,pplusstatic.com,Streaming_US
+DOMAIN,link.theplatform.com,Streaming_US
+DOMAIN,cbsi.live.ott.irdeto.com,Streaming_US
+DOMAIN,cbsservice.aws.syncbak.com,Streaming_US
+DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming_US
+
+# > Peacock
+DOMAIN-SUFFIX,peacocktv.com,Streaming_US
+
+# > Roku
+DOMAIN-SUFFIX,roku.com,Streaming_US
+DOMAIN-SUFFIX,rokutime.com,Streaming_US
+
+# > T-Mobile
+DOMAIN-SUFFIX,t-mobile.com,Streaming_US

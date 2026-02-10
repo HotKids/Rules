@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "akamaiendpoint-applemediaservice-aase.streaming.media.azure.net",
+        "applemediaservice.keydelivery.southeastasia.media.azure.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "catch.net.tw",
+        "myvideo.net.tw"
+      ]
+    }
+  ]
+}

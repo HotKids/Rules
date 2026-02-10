@@ -1,0 +1,49 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "4unal8ngvngjm07lj2q2umlc4.litix.io",
+        "cbsi.live.ott.irdeto.com",
+        "cbsplaylistserver.aws.syncbak.com",
+        "cbsservice.aws.syncbak.com",
+        "content-ause1-ur-discovery1.uplynk.com",
+        "content-ausw1-ur-discovery1.uplynk.com",
+        "content-ausw2-ur-discovery1.uplynk.com",
+        "cws-hulu.conviva.com",
+        "epixhls.akamaized.net",
+        "kvinit-prod.api.kochava.com",
+        "link.theplatform.com",
+        "us-ore-00001.s3.dualstack.us-west-2.amazonaws.com",
+        "us1-prod-images.disco-api.com",
+        "us1-prod.disco-api.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "cbsi.com",
+        "cbsivideo.com",
+        "crunchyroll.com",
+        "disco-api.com",
+        "discoveryplus.com",
+        "dnitv.com",
+        "dplus-amer.prd.api.discomax.com",
+        "dplus.us.prd.media.max.com",
+        "epix.com",
+        "epixnow.com",
+        "hulu.com",
+        "hulu.tv",
+        "huluim.com",
+        "hulustream.com",
+        "mgmplus.com",
+        "paramountplus.com",
+        "pbs.org",
+        "peacocktv.com",
+        "pplusstatic.com",
+        "roku.com",
+        "rokutime.com",
+        "t-mobile.com"
+      ]
+    }
+  ]
+}

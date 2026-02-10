@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "androidtvlauncherxfe-pa.googleapis.com",
+        "androidtvwatsonfe-pa.googleapis.com"
+      ]
+    },
+    {
+      "process_name": [
+        "com.google.android.videos"
+      ]
+    }
+  ]
+}

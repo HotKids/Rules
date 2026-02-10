@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "apiintl.biliapi.net",
+        "upos-hz-mirrorakam.akamaized.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "acg.tv",
+        "acgvideo.com",
+        "b23.tv",
+        "biliapi.com",
+        "biliapi.net",
+        "bilibili.com",
+        "bilibili.tv",
+        "bilivideo.com",
+        "hdslb.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "bilibili",
+        "cn-hk-eq-bcache-"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "121.11.192.0/24"
+      ]
+    }
+  ]
+}

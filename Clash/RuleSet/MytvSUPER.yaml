@@ -1,0 +1,6 @@
+payload:
+  # > MytvSUPER
+  - DOMAIN-KEYWORD,nowtv100
+  - DOMAIN-KEYWORD,rthklive
+  - DOMAIN-SUFFIX,tvb.com
+  - DOMAIN-SUFFIX,mytvsuper.com

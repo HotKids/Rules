@@ -1,23 +1,9 @@
 # > Paramount+
-// US UA
-USER-AGENT,PPlus*,Paramount+
-// Intl. UA
-USER-AGENT,ParamountPlus*,Paramount+
 DOMAIN-SUFFIX,cbsi.com,Paramount+
-// DOMAIN-SUFFIX,cbsaavideo.com,Paramount+ #播放
 DOMAIN-SUFFIX,cbsivideo.com,Paramount+
 DOMAIN-SUFFIX,paramountplus.com,Paramount+
 DOMAIN-SUFFIX,pplusstatic.com,Paramount+
-// DOMAIN-SUFFIX,mtvnservices.com,Paramount+ #MTV
-// DOMAIN-SUFFIX,cws.conviva.com,Paramount+
 DOMAIN,link.theplatform.com,Paramount+
-// 播放验证
 DOMAIN,cbsi.live.ott.irdeto.com,Paramount+
-// DOMAIN,thumbnails.cbsig.net,Paramount+ #缩略图
-// DOMAIN,cbsinteractive.hb.omtrdc.net,Paramount+
-// DOMAIN,ads.play.cbsi.video #片头动画，可屏蔽
-// DOMAIN,pubads.g.doubleclick.net #不可屏蔽
-// DOMAIN,cbsnews.akamaized.net,Paramount+ #CBSN Live
-// CBS live丨US
 DOMAIN,cbsservice.aws.syncbak.com,Paramount+
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Paramount+

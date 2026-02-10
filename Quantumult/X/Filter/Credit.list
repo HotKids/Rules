@@ -1,0 +1,25 @@
+# > American Express
+DOMAIN-SUFFIX,americanexpress.com,Credit
+DOMAIN-SUFFIX,amextravel.com,Credit
+DOMAIN-SUFFIX,membershiprewards.com,Credit
+DOMAIN-SUFFIX,aexp.com,Credit
+DOMAIN-SUFFIX,aexp-static.com,Credit
+
+# > Chase
+DOMAIN-SUFFIX,chase.com,Credit
+DOMAIN-SUFFIX,chasecdn.com,Credit
+DOMAIN-SUFFIX,chasepay.com,Credit
+DOMAIN-SUFFIX,jpmorganchase.com,Credit
+DOMAIN-SUFFIX,jpmorgan.com,Credit
+
+# > IBKR
+DOMAIN-SUFFIX,interactivebrokers.com,Credit
+DOMAIN-SUFFIX,ibkr.com,Credit
+DOMAIN-SUFFIX,ibllc.com,Credit
+
+# > N26
+DOMAIN-SUFFIX,n26.com,Credit
+DOMAIN-SUFFIX,tech26.de,Credit
+
+# > bonify
+DOMAIN-SUFFIX,bonify.de,Credit
