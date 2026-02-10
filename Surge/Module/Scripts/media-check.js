@@ -760,6 +760,28 @@ class ServiceChecker {
       return Utils.createResult(STATUS.FAIL, res.status === 403 ? "IP Blocked" : "No");
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
+
+  /**
+   * Instagram Music 授权检测
+   * 参考 1-stream/RegionRestrictionCheck：查询含音乐帖子的 should_mute_audio
+   * @returns {Promise<Object>} 检测结果
+   */
+  static async checkInstagramMusic() {
+    try {
+      const res = await Utils.request({
+        url: "https://www.instagram.com/graphql/query",
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "av=0&__d=www&__user=0&__a=1&__req=3&dpr=1&__ccg=UNKNOWN&__rev=1013915830&__s=e0krj4:y7ob1k:rsdf9x&__hsi=7375722728458088454&__comet_req=7&lsd=AVpOeIV9Tzw&jazoest=2984&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=PolarisPostActionLoadPostQueryQuery&variables=%7B%22shortcode%22%3A%22C2YEAdOh9AB%22%2C%22fetch_comment_count%22%3A0%2C%22parent_comment_count%22%3A0%2C%22child_comment_count%22%3A0%2C%22fetch_like_count%22%3A0%2C%22fetch_tagged_user_count%22%3Anull%2C%22fetch_preview_comment_count%22%3A0%2C%22has_threaded_comments%22%3Atrue%2C%22hoisted_comment_id%22%3Anull%2C%22hoisted_reply_id%22%3Anull%7D&server_timestamps=true&doc_id=25531498899829322"
+      });
+      const body = res.body || "";
+      const m = body.match(/"should_mute_audio"\s*:\s*(true|false)/);
+      if (!m) return Utils.createResult(STATUS.ERROR, "Error");
+      return m[1] === "false"
+        ? Utils.createResult(STATUS.OK, "Yes")
+        : Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
+  }
 }
 
 /**
@@ -776,10 +798,11 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit()
+      ServiceChecker.checkReddit(),
+      ServiceChecker.checkInstagramMusic()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, igMusic] = results;
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
@@ -794,7 +817,8 @@ class ServiceChecker {
       { name: "ChatGPT", result: chatgpt },
       { name: "Gemini", result: gemini },
       { name: "Claude", result: claude },
-      { name: "Reddit", result: reddit }
+      { name: "Reddit", result: reddit },
+      { name: "IG Music", result: igMusic }
     ].filter(Boolean);
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
