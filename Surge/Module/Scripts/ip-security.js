@@ -164,7 +164,7 @@ function riskText(score) {
 
 /**
  * IP 打码：保留首尾段，中间用 * 替代
- * IPv4: 123.45.67.89 → 123.*.*. 89
+ * IPv4: 123.45.67.89 → 123.***.***.89
  * IPv6: 2001:db8:85a3::7334 → 2001:*:*:7334
  */
 function maskIP(ip) {
@@ -178,7 +178,7 @@ function maskIP(ip) {
   // IPv4
   const parts = ip.split(".");
   if (parts.length !== 4) return ip;
-  return parts[0] + ".*.*." + parts[3];
+  return parts[0] + ".***.***." + parts[3];
 }
 
 /**
@@ -553,23 +553,23 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
     const v6BiliRaw = outIPv6 ? results[v6Idx + 1] : null;
 
-    // 入口：地区用 bilibili，运营商仅中国用 bilibili，非中国用 ip.sb
+    // 入口：地区用 bilibili，运营商仅中国大陆用 bilibili（排除港澳台），非大陆用 ip.sb
     const inBili = normalizeBilibili(inRaw);
     const inSb = normalizeIpSb(inSbRaw);
     if (inBili) {
-      const isChina = inBili.country_name === "中国";
-      inInfo = { ...inBili, country_code: inSb?.country_code || "", org: isChina ? inBili.org : (inSb?.org || "") };
+      const isMainlandChina = inBili.country_name === "中国" && !/^(香港|澳门|台湾)$/.test(inBili.region);
+      inInfo = { ...inBili, country_code: inSb?.country_code || "", org: isMainlandChina ? inBili.org : (inSb?.org || "") };
     } else {
       inInfo = inSb;
     }
 
-    // 出口：地区用 bilibili，运营商仅中国用 bilibili，非中国用 ipinfo.io（回落 ip.sb）
+    // 出口：地区用 bilibili，运营商仅中国大陆用 bilibili（排除港澳台），非大陆用 ipinfo.io（回落 ip.sb）
     const outBili = normalizeBilibili(outBiliRaw);
     const outIpInfo = normalizeIpInfo(outIpInfoRaw);
     const outSb = normalizeIpSb(outRaw);
     if (outBili) {
-      const isOutChina = outBili.country_name === "中国";
-      outInfo = { ...outBili, country_code: outIpInfo?.country_code || outSb?.country_code || "", org: isOutChina ? outBili.org : (outIpInfo?.org || outSb?.org || "") };
+      const isOutMainlandChina = outBili.country_name === "中国" && !/^(香港|澳门|台湾)$/.test(outBili.region);
+      outInfo = { ...outBili, country_code: outIpInfo?.country_code || outSb?.country_code || "", org: isOutMainlandChina ? outBili.org : (outIpInfo?.org || outSb?.org || "") };
     } else {
       outInfo = outIpInfo || outSb;
     }
@@ -580,8 +580,8 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
     const v6Sb = outIPv6 ? normalizeIpSb(v6Raw) : null;
     if (outIPv6) {
       if (v6Bili) {
-        const isV6China = v6Bili.country_name === "中国";
-        ipv6Info = { ...v6Bili, country_code: v6IpInfo?.country_code || v6Sb?.country_code || "", org: isV6China ? v6Bili.org : (v6IpInfo?.org || v6Sb?.org || "") };
+        const isV6MainlandChina = v6Bili.country_name === "中国" && !/^(香港|澳门|台湾)$/.test(v6Bili.region);
+        ipv6Info = { ...v6Bili, country_code: v6IpInfo?.country_code || v6Sb?.country_code || "", org: isV6MainlandChina ? v6Bili.org : (v6IpInfo?.org || v6Sb?.org || "") };
       } else {
         ipv6Info = v6IpInfo || v6Sb;
       }
