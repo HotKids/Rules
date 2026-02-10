@@ -6,7 +6,7 @@
 #!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务\nlang:(可选) 地理信息语言，en=英文(ipinfo.io)，zh=中文(bilibili)，默认 en\nmask_ip:(可选) IP 打码，1=开启（123.*.*.89），0=关闭，默认 0\ntw_flag:(可选) 台湾地区旗帜，cn=🇨🇳(默认)，tw=🇹🇼\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
 
 [Panel]
-ip-security-panel = script-name=ip-security-panel,update-interval=600
+ip-security-panel = script-name=ip-security-panel,update-interval=-1
 
 [Script]
 # 面板手动触发
