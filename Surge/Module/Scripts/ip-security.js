@@ -21,6 +21,7 @@
  * - ipqs_key: IPQualityScore API Key (可选)
  * - lang: 本地 IP 地理信息语言，en(默认)=英文(ip.sb)，zh=中文(bilibili)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
+ * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
  * 配置示例：
@@ -99,6 +100,7 @@ function parseArguments() {
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
     lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
+    twFlag: (arg.tw_flag && arg.tw_flag !== "null") ? arg.tw_flag : "cn",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
 }
@@ -147,7 +149,7 @@ function surgeAPI(method, path) {
 // ==================== 数据处理工具 ====================
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
-  if (cc.toUpperCase() === "TW") cc = "CN";
+  if (cc.toUpperCase() === "TW" && args.twFlag !== "tw") cc = "CN";
   const b = 0x1f1e6;
   return String.fromCodePoint(b + cc.charCodeAt(0) - 65, b + cc.charCodeAt(1) - 65);
 }
