@@ -165,7 +165,7 @@ function riskText(score) {
 /**
  * IP 打码：保留首尾段，中间用 * 替代
  * IPv4: 123.45.67.89 → 123.***.***.89
- * IPv6: 2001:db8:85a3::7334 → 2001:*:*:7334
+ * IPv6: 2001:db8:85a3::7334 → 2001:**:**:7334
  */
 function maskIP(ip) {
   if (!ip) return ip;
@@ -173,7 +173,7 @@ function maskIP(ip) {
     // IPv6
     const parts = ip.split(":");
     if (parts.length <= 2) return ip;
-    return parts[0] + ":" + parts.slice(1, -1).map(() => "*").join(":") + ":" + parts.at(-1);
+    return parts[0] + ":" + parts.slice(1, -1).map(() => "**").join(":") + ":" + parts.at(-1);
   }
   // IPv4
   const parts = ip.split(".");
