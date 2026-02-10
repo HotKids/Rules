@@ -14,13 +14,13 @@
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑥ IP 类型: IPPure API
- * ⑦ 地理/运营商: 本地 IP → lang=zh bilibili / lang=en ip.sb | 入口/出口 IP → ipapi=0 ipinfo.io / ipapi=1 ip-api.com(en) / ipapi=2 ip-api.com(zh)
+ * ⑦ 地理/运营商: 本地 IP → lang=zh bilibili / lang=en ip.sb | 入口/出口 IP → geo_api=ipinfo ipinfo.io / geo_api=ipapi ip-api.com(en) / geo_api=ipapi-zh ip-api.com(zh)
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key (可选)
  * - lang: 本地 IP 地理信息语言，en(默认)=英文(ip.sb)，zh=中文(bilibili)
- * - ipapi: 入口/出口地理数据源，0(默认)=ipinfo.io，1=ip-api.com(英文)，2=ip-api.com(中文)
+ * - geo_api: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -103,7 +103,7 @@ function parseArguments() {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
     lang: (arg.lang && arg.lang !== "null") ? arg.lang : "en",
-    ipapi: parseInt(arg.ipapi) || 0,
+    geoApi: (arg.geo_api && arg.geo_api !== "null") ? arg.geo_api : "ipinfo",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
     twFlag: (arg.tw_flag && arg.tw_flag !== "null") ? arg.tw_flag : "cn",
     eventDelay: parseFloat(arg.event_delay) || 2
@@ -501,9 +501,9 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
   const isZh = args.lang === "zh";
 
-  // 入口/出口地理数据源：ipapi=0 → ipinfo.io, ipapi=1 → ip-api.com(en), ipapi=2 → ip-api.com(zh-CN)
-  const useIpApi = args.ipapi > 0;
-  const ipApiLang = args.ipapi === 2 ? "zh-CN" : "en";
+  // 入口/出口地理数据源：geo_api=ipinfo → ipinfo.io, ipapi → ip-api.com(en), ipapi-zh → ip-api.com(zh-CN)
+  const useIpApi = args.geoApi.startsWith("ipapi");
+  const ipApiLang = args.geoApi === "ipapi-zh" ? "zh-CN" : "en";
   function geoUrl(ip) {
     return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
   }
