@@ -212,7 +212,7 @@ function normalizeBilibili(data) {
   return {
     country_code: null,
     country_name: d.country,
-    city: d.city || d.province,
+    city: d.city || "",
     region: d.province,
     org: isp
   };
@@ -506,21 +506,31 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
   const isZh = args.lang === "zh";
 
+  // 两种模式都查 ipinfo.io（出口），zh 额外查 bilibili（中文地名）
   const queries = [
-    getPolicy(),
-    getRiskScore(outIP),
-    getIPType(),
-    httpJSON(CONFIG.urls.inboundInfo(inIP)),
-    isZh ? httpJSON(CONFIG.urls.biliGeo(outIP)) : httpJSON(CONFIG.urls.ipInfo(outIP))
+    getPolicy(),                             // 0
+    getRiskScore(outIP),                     // 1
+    getIPType(),                             // 2
+    httpJSON(CONFIG.urls.inboundInfo(inIP)),  // 3: ip.sb 入口
+    httpJSON(CONFIG.urls.ipInfo(outIP))       // 4: ipinfo 出口（两种模式都用）
   ];
-  if (outIPv6) queries.push(isZh ? httpJSON(CONFIG.urls.biliGeo(outIPv6)) : httpJSON(CONFIG.urls.ipInfo(outIPv6)));
+  if (isZh) queries.push(httpJSON(CONFIG.urls.biliGeo(outIP)));  // 5: bilibili 出口（zh）
+  const v6Idx = queries.length;
+  if (outIPv6) {
+    queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));           // v6Idx: ipinfo IPv6
+    if (isZh) queries.push(httpJSON(CONFIG.urls.biliGeo(outIPv6))); // v6Idx+1: bilibili IPv6（zh）
+  }
 
   const results = await Promise.all(queries);
-  const [policy, riskInfo, ipTypeResult, inSbRaw, outGeoRaw] = results;
+  const [policy, riskInfo, ipTypeResult, inSbRaw, outIpInfoRaw] = results;
 
   let inInfo, outInfo, ipv6Info;
   if (isZh) {
-    // 中文模式：入口地区用 bilibili，运营商仅中国用 bilibili，非中国用 ip.sb
+    const outBiliRaw = results[5];
+    const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
+    const v6BiliRaw = outIPv6 ? results[v6Idx + 1] : null;
+
+    // 入口：地区用 bilibili，运营商仅中国用 bilibili，非中国用 ip.sb
     const inBili = normalizeBilibili(inRaw);
     const inSb = normalizeIpSb(inSbRaw);
     if (inBili) {
@@ -530,24 +540,37 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
       inInfo = inSb;
     }
 
-    // 出口：地区用 bilibili（直接查 outIP），运营商始终用 ip.sb
-    const outBili = normalizeBilibili(outGeoRaw);
+    // 出口：地区用 bilibili，运营商仅中国用 bilibili，非中国用 ipinfo.io（回落 ip.sb）
+    const outBili = normalizeBilibili(outBiliRaw);
+    const outIpInfo = normalizeIpInfo(outIpInfoRaw);
     const outSb = normalizeIpSb(outRaw);
-    outInfo = outBili ? { ...outBili, country_code: outSb?.country_code || "", org: outSb?.org || "" } : outSb;
+    if (outBili) {
+      const isOutChina = outBili.country_name === "中国";
+      outInfo = { ...outBili, country_code: outIpInfo?.country_code || outSb?.country_code || "", org: isOutChina ? outBili.org : (outIpInfo?.org || outSb?.org || "") };
+    } else {
+      outInfo = outIpInfo || outSb;
+    }
 
-    // IPv6：bilibili 查 outIPv6，运营商用 ip.sb
-    const ipv6BiliRaw = outIPv6 ? results[5] : null;
-    const ipv6Bili = normalizeBilibili(ipv6BiliRaw);
-    const ipv6Sb = outIPv6 ? normalizeIpSb(v6Raw) : null;
-    ipv6Info = outIPv6
-      ? (ipv6Bili ? { ...ipv6Bili, country_code: ipv6Sb?.country_code || "", org: ipv6Sb?.org || "" } : ipv6Sb)
-      : null;
+    // IPv6：同上逻辑
+    const v6Bili = normalizeBilibili(v6BiliRaw);
+    const v6IpInfo = normalizeIpInfo(v6IpInfoRaw);
+    const v6Sb = outIPv6 ? normalizeIpSb(v6Raw) : null;
+    if (outIPv6) {
+      if (v6Bili) {
+        const isV6China = v6Bili.country_name === "中国";
+        ipv6Info = { ...v6Bili, country_code: v6IpInfo?.country_code || v6Sb?.country_code || "", org: isV6China ? v6Bili.org : (v6IpInfo?.org || v6Sb?.org || "") };
+      } else {
+        ipv6Info = v6IpInfo || v6Sb;
+      }
+    } else {
+      ipv6Info = null;
+    }
   } else {
     // 英文模式：入口用 ip.sb，出口用 ipinfo.io（回落 ip.sb）
-    const ipv6InfoRaw = outIPv6 ? results[5] : null;
+    const v6IpInfoRaw = outIPv6 ? results[v6Idx] : null;
     inInfo = normalizeIpSb(inSbRaw);
-    outInfo = normalizeIpInfo(outGeoRaw) || normalizeIpSb(outRaw);
-    ipv6Info = outIPv6 ? (normalizeIpInfo(ipv6InfoRaw) || normalizeIpSb(v6Raw)) : null;
+    outInfo = normalizeIpInfo(outIpInfoRaw) || normalizeIpSb(outRaw);
+    ipv6Info = outIPv6 ? (normalizeIpInfo(v6IpInfoRaw) || normalizeIpSb(v6Raw)) : null;
   }
 
   const riskResult = riskText(riskInfo.score);
