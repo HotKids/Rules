@@ -712,27 +712,39 @@ class ServiceChecker {
 
   /**
    * Instagram Music 授权检测
-   * 参考 1-stream/RegionRestrictionCheck：查询含音乐帖子的 should_mute_audio
+   * 并行检测：oEmbed API（基础可访问性）+ Music API（音乐可用性）
    * @returns {Promise<Object>} 检测结果
    */
   static async checkInstagramMusic() {
     try {
-      const res = await Utils.request({
-        url: "https://www.instagram.com/graphql/query",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          "X-IG-App-ID": "936619743392459",
-          "X-Requested-With": "XMLHttpRequest",
-          "Referer": "https://www.instagram.com/",
-          "Origin": "https://www.instagram.com"
-        },
-        body: "av=0&__d=www&__user=0&__a=1&__req=3&__hs=19876.HYP%3Ainstagram_web_pkg.2.1..0.0&dpr=1&__ccg=UNKNOWN&__rev=1013915830&__s=e0krj4%3Ay7ob1k%3Arsdf9x&__hsi=7375722728458088454&__dyn=7xeUjG1mxu1syUbFp40NonwgU7SbzEdF8aUco2qwJw5ux609vCwjE1xoswaq0yE7i0n24oaEd86a3a1YwBgao6C0Mo2iyo7u3i4U2zxe2GewGwso88cobEaU2eUlwhEe87q7U1bobpEbUGdwtU662O0z8c86-3u2WE5B0bK1Iwqo5q1IQp1yUoxe4UrAwCAxW6Uf9EO6VU8U&__csr=gpgJOllNq9nP9ROd9bqTh-GEzh_jppaAGmAyGprFoBkVqmh2QHF28y-GBrgHV9aByaQ8XiyUCl7GX-bl12UHx2gxp8GUSuaBVAGCXK48zHKHUG2mi669G8KcjAgCEW8yax911u6V5yE01mJPw2mpU4yu1I8030e56OmawtxxkaDwkEGu0yQ0eYwdfw6NyGiG2Cae2S0Z80gvwsU2ACkE020ww3UU&__comet_req=7&lsd=AVpOeIV9Tzw&jazoest=2984&__spin_r=1013915830&__spin_b=trunk&__spin_t=1717294270&fb_api_caller_class=RelayModern&fb_api_req_friendly_name=PolarisPostActionLoadPostQueryQuery&variables=%7B%22shortcode%22%3A%22C2YEAdOh9AB%22%2C%22fetch_comment_count%22%3A0%2C%22parent_comment_count%22%3A0%2C%22child_comment_count%22%3A0%2C%22fetch_like_count%22%3A0%2C%22fetch_tagged_user_count%22%3Anull%2C%22fetch_preview_comment_count%22%3A0%2C%22has_threaded_comments%22%3Atrue%2C%22hoisted_comment_id%22%3Anull%2C%22hoisted_reply_id%22%3Anull%7D&server_timestamps=true&doc_id=25531498899829322"
-      });
-      const body = res.body || "";
-      // DEBUG: 临时输出原始响应
-      return Utils.createResult(STATUS.ERROR, `[DBG] ${res.status} | ${body.substring(0, 120)}`);
-    } catch (e) { return Utils.createResult(STATUS.ERROR, `[DBG] ERR: ${e}`); }
+      // 并行请求: oEmbed 检测 IG 可访问性, Music API 检测音乐可用性
+      const [oembedRes, musicRes] = await Promise.all([
+        Utils.request({
+          url: "https://www.instagram.com/api/v1/oembed/?url=https://www.instagram.com/reel/C2YEAdOh9AB/"
+        }).catch(() => null),
+        Utils.request({
+          url: "https://i.instagram.com/api/v1/music/trending/",
+          headers: {
+            "User-Agent": "Instagram 275.0.0.27.98 Android (33/13; 420dpi; 1080x2400; samsung; SM-G991B; o1s; exynos2100; en_US; 458229258)",
+            "X-IG-App-ID": "936619743392459"
+          }
+        }).catch(() => null)
+      ]);
+
+      // Music API 返回 200（有音乐数据）→ 可用
+      if (musicRes?.status === 200) return Utils.createResult(STATUS.OK, "OK");
+
+      // oEmbed 可访问 → Instagram 未被封锁
+      if (oembedRes?.status === 200) {
+        // Music API 401（需登录，端点可达）→ 音乐可用
+        // Music API 403（地区限制）→ 音乐不可用
+        if (musicRes?.status === 403) return Utils.createResult(STATUS.FAIL, "No");
+        return Utils.createResult(STATUS.OK, "OK");
+      }
+
+      // 两个请求都失败 → Instagram 被封锁
+      return Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
 }
 
