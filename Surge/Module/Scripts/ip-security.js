@@ -366,8 +366,7 @@ async function fetchIPs() {
     outIP: exit?.ip || null,
     outIPv6: hasIPv6 ? v6ip : null,
     localRaw: local,
-    outRaw: exit,
-    v6Raw: hasIPv6 ? exit6 : null
+    outRaw: exit
   };
 }
 
@@ -441,18 +440,18 @@ function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, 
 }
 
 // ==================== 通知内容构建 ====================
-function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
+function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const title = "🔄 网络已切换 | " + policy;
   const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
   const bodyLines = [
-    "Ⓓ " + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.country_name) + " · " + (localInfo?.org || "Unknown"),
+    "Ⓓ " + formatGeo(localInfo?.country_code, localInfo?.city, useBilibili ? localInfo?.country_name : localInfo?.country_code) + " · " + (localInfo?.org || "Unknown"),
   ];
   if (entranceInfo) {
-    bodyLines.push("Ⓔ " + m(entranceIP) + " " + formatGeo(entranceInfo?.country_code, entranceInfo?.city, entranceInfo?.region) + " · " + (entranceInfo?.org || "Unknown"));
+    bodyLines.push("Ⓔ " + m(entranceIP) + " " + formatGeo(entranceInfo?.country_code, entranceInfo?.city, geoLabel(entranceInfo)) + " · " + (entranceInfo?.org || "Unknown"));
   }
   bodyLines.push(
-    "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.country_name) + " · " + (outInfo?.org || "Unknown"),
+    "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, geoLabel(outInfo)) + " · " + (outInfo?.org || "Unknown"),
     "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
   );
 
@@ -471,7 +470,7 @@ function sendNetworkChangeNotification({ policy, localIP, outIP, entranceIP, loc
   }
 
   // 2. 获取本地/出口 IP
-  const { localIP, outIP, outIPv6, localRaw, outRaw, v6Raw } = await fetchIPs();
+  const { localIP, outIP, outIPv6, localRaw, outRaw } = await fetchIPs();
 
   if (!localIP || !outIP) {
     console.log("IP 获取失败");
