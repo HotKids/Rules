@@ -1,9 +1,9 @@
 #!name=Streaming & AI Service Monitor
-#!desc=检测流媒体和 AI 服务的可用性：Netflix (可选当前地区 Premium 价格)、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Claude、Gemini API (可选)、Reddit
+#!desc=检测流媒体和 AI 服务的可用性：Netflix (可选当前地区 Premium 价格)、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Claude、Gemini (可选 API Key 增强)、Reddit
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
 #!arguments=geminiapikey:null,nfprice:true
-#!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，填写后启用 Gemini API 检测。💡 本脚本仅调用免费的 models.list 接口，不会产生任何费用）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）
+#!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，无 Key 时通过网页检测，有 Key 时增加 API 检测作为 fallback）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）
 
 [Panel]
 media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill
