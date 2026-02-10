@@ -692,18 +692,24 @@ class ServiceChecker {
     if (!apiKey || ["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) return null;
 
     try {
-      const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
+      const res = await Utils.request({
+        url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contents: [{ parts: [{ text: "hi" }] }] })
+      });
       const body = res.body.toLowerCase();
-      
-      if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
-      if (res.status === 403 || body.includes("region not supported") || body.includes("location is not supported")) {
+
+      if (res.status === 200) return Utils.createResult(STATUS.OK, "OK");
+      if (body.includes("region") || body.includes("location is not supported")) {
         return Utils.createResult(STATUS.FAIL, "Region Blocked");
       }
       if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
         return Utils.createResult(STATUS.ERROR, "Invalid API Key");
       }
-      return Utils.createResult(STATUS.ERROR, "Invalid API Key");
-    } catch { return Utils.createResult(STATUS.ERROR, "Invalid API Key"); }
+      if (res.status === 403) return Utils.createResult(STATUS.FAIL, "Region Blocked");
+      return Utils.createResult(STATUS.ERROR, `HTTP ${res.status}`);
+    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
 
   /**
