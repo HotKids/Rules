@@ -2,15 +2,15 @@
 #!desc=显示 IP 风险评分、类型、代理策略和入口/出口 IP 地理信息，支持网络变化自动通知
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
-#!arguments=ipqs_key:null,lang:en,event_delay:2
-#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务\nlang:(可选) 地理信息语言，en=英文(ipinfo.io)，zh=中文(bilibili)，默认 en\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
+#!arguments=ipqs_key:null,lang:en,mask_ip:0,event_delay:2
+#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，留空使用免费服务\nlang:(可选) 地理信息语言，en=英文(ipinfo.io)，zh=中文(bilibili)，默认 en\nmask_ip:(可选) IP 打码，1=开启（123.*.*.89），0=关闭，默认 0\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
 
 [Panel]
 ip-security-panel = script-name=ip-security-panel,update-interval=600
 
 [Script]
 # 面板手动触发
-ip-security-panel = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={{{ipqs_key}}}&lang={{{lang}}}
+ip-security-panel = type=generic,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={{{ipqs_key}}}&lang={{{lang}}}&mask_ip={{{mask_ip}}}
 
 # 网络变化自动触发
-ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=TYPE=EVENT&ipqs_key={{{ipqs_key}}}&lang={{{lang}}}&event_delay={{{event_delay}}}
+ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=TYPE=EVENT&ipqs_key={{{ipqs_key}}}&lang={{{lang}}}&mask_ip={{{mask_ip}}}&event_delay={{{event_delay}}}
