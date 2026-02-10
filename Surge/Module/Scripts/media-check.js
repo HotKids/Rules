@@ -778,7 +778,7 @@ class ServiceChecker {
       const m = body.match(/"should_mute_audio"\s*:\s*(true|false)/);
       if (!m) return Utils.createResult(STATUS.ERROR, "Error");
       return m[1] === "false"
-        ? Utils.createResult(STATUS.OK, "Yes")
+        ? Utils.createResult(STATUS.OK, "OK")
         : Utils.createResult(STATUS.FAIL, "No");
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
