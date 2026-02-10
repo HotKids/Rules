@@ -322,8 +322,7 @@ async function fetchIPs() {
   return {
     inIP: enter?.data?.addr || null,
     outIP: exit?.ip || null,
-    outIPv6: hasIPv6 ? v6ip : null,
-    outIPv6Data: hasIPv6 ? exit6 : null
+    outIPv6: hasIPv6 ? v6ip : null
   };
 }
 
@@ -355,7 +354,7 @@ function checkIPChange(inIP, outIP, outIPv6) {
 /**
  * 构建出口 IP 显示内容
  */
-function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Data) {
+function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info) {
   const lines = [];
 
   if (!outIPv6) {
@@ -366,8 +365,8 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Data) {
     return lines;
   }
 
-  const sameLocation = outInfo?.country_code === ipv6Data?.country_code
-    && outInfo?.org === ipv6Data?.organization;
+  const sameLocation = outInfo?.country_code === ipv6Info?.country_code
+    && outInfo?.org === ipv6Info?.org;
 
   if (sameLocation) {
     lines.push("出口 IP⁴：" + outIP);
@@ -380,8 +379,8 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Data) {
     lines.push("运营商⁴：" + (outInfo?.org || "Unknown"));
     lines.push("");
     lines.push("出口 IP⁶：" + outIPv6);
-    lines.push("地区⁶：" + formatGeo(ipv6Data?.country_code, ipv6Data?.city, ipv6Data?.region, ipv6Data?.country_code));
-    lines.push("运营商⁶：" + (ipv6Data?.organization || "Unknown"));
+    lines.push("地区⁶：" + formatGeo(ipv6Info?.country_code, ipv6Info?.city, ipv6Info?.region, ipv6Info?.country_code));
+    lines.push("运营商⁶：" + (ipv6Info?.org || "Unknown"));
   }
 
   return lines;
@@ -390,7 +389,7 @@ function buildOutboundSection(outIP, outIPv6, outInfo, ipv6Data) {
 /**
  * 构建完整面板内容
  */
-function buildPanelContent({ riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, outIP, outIPv6, outInfo, ipv6Data }) {
+function buildPanelContent({ riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, outIP, outIPv6, outInfo, ipv6Info }) {
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
     "",
@@ -400,7 +399,7 @@ function buildPanelContent({ riskInfo, riskResult, ipType, ipSrc, inIP, inInfo, 
     "地区：" + formatGeo(inInfo?.country_code, inInfo?.city, inInfo?.region, inInfo?.country_code),
     "运营商：" + (inInfo?.org || "Unknown"),
     "",
-    ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Data)
+    ...buildOutboundSection(outIP, outIPv6, outInfo, ipv6Info)
   ];
 
   return lines.join("\n");
@@ -434,7 +433,7 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   }
 
   // 2. 获取入口/出口 IP
-  const { inIP, outIP, outIPv6, outIPv6Data } = await fetchIPs();
+  const { inIP, outIP, outIPv6 } = await fetchIPs();
 
   if (!inIP || !outIP) {
     console.log("IP 获取失败");
@@ -448,19 +447,24 @@ function sendNetworkChangeNotification({ policy, inIP, outIP, inInfo, outInfo, r
   }
 
   // 4. 并行获取：代理策略、风险评分、IP 类型、地理/运营商信息
-  const [policy, riskInfo, ipTypeResult, inInfo, outInfo] = await Promise.all([
+  const queries = [
     getPolicy(),
     getRiskScore(outIP),
     getIPType(),
     httpJSON(CONFIG.urls.ipInfo(inIP)),
     httpJSON(CONFIG.urls.ipInfo(outIP))
-  ]);
+  ];
+  if (outIPv6) queries.push(httpJSON(CONFIG.urls.ipInfo(outIPv6)));
+
+  const results = await Promise.all(queries);
+  const [policy, riskInfo, ipTypeResult, inInfo, outInfo] = results;
+  const ipv6Info = outIPv6 ? results[5] : null;
 
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
 
   // 5. 根据触发类型输出结果
-  const context = { policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, outIPv6Data, inInfo, outInfo, ipv6Data: outIPv6Data };
+  const context = { policy, riskInfo, riskResult, ipType, ipSrc, inIP, outIP, outIPv6, inInfo, outInfo, ipv6Info };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
