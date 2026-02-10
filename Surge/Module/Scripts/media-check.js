@@ -721,8 +721,11 @@ class ServiceChecker {
 
       // 方式1: RegionRestrictionCheck 标记
       if (body.includes("45631641,null,true")) {
-        const m = body.match(/,2,1,200,"([A-Z]{2,3})"/);
-        return Utils.createResult(STATUS.OK, m ? m[1] : "OK");
+        // 优先提取两字母码，fallback 三字母码
+        const m2 = body.match(/,2,1,200,"([A-Z]{2})"/);
+        if (m2) return Utils.createResult(STATUS.OK, m2[1]);
+        const m3 = body.match(/,2,1,200,"([A-Z]{3})"/);
+        return Utils.createResult(STATUS.OK, m3 ? m3[1].substring(0, 2) : "OK");
       }
       // 方式2: 页面含 Gemini app 内容（未被重定向到不可用页）
       if (res.status === 200 && !body.includes("not available") && !body.includes("not supported")
