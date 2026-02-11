@@ -503,12 +503,11 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
     lines.push("出口 IP：" + m(outIP));
   }
   lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-  const orgText = outInfo?.org || "Unknown";
+  lines.push("运营商：" + (outInfo?.org || "Unknown"));
   if (reverseDNS) {
-    const rdns = reverseDNS.length > 22 ? reverseDNS.slice(0, 21) + "…" : reverseDNS;
-    lines.push("运营商：" + orgText + " | " + rdns);
-  } else {
-    lines.push("运营商：" + orgText);
+    const max = 28;
+    const rdns = reverseDNS.length > max ? reverseDNS.slice(0, max - 1) + "…" : reverseDNS;
+    lines.push("rDNS：" + rdns);
   }
 
   return lines;
