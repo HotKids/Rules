@@ -314,15 +314,21 @@ async function getPolicyAndEntrance() {
 async function getRiskScore(ip) {
   const api = args.riskApi;
   const hasKey = !!args.ipqsKey;
-  const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
-  if (cached) {
-    try {
-      const c = JSON.parse(cached);
-      if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey) {
-        console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
-        return { score: c.score, source: c.source };
-      }
-    } catch (e) {}
+
+  // 手动刷新（非 EVENT）→ 强制跳过缓存，始终获取最新数据
+  if (!args.isEvent) {
+    console.log("手动刷新，跳过风险评分缓存");
+  } else {
+    const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
+    if (cached) {
+      try {
+        const c = JSON.parse(cached);
+        if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey) {
+          console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
+          return { score: c.score, source: c.source };
+        }
+      } catch (e) {}
+    }
   }
 
   function saveAndReturn(score, source) {
@@ -451,10 +457,12 @@ async function getTrafficStats() {
   }
   console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 300));
 
-  const iface = data.interface || data.connector || data;
+  // interface 可能是字符串（接口名）或对象，需判断类型
+  const iface = (typeof data.interface === "object" && data.interface) || data.connector || data;
   console.log("iface 字段: " + Object.keys(iface).join(", "));
-  const upload = iface.outCurrentSpeed ?? iface.out ?? iface.outTotal ?? iface.outboundTraffic ?? 0;
-  const download = iface.inCurrentSpeed ?? iface.in ?? iface.inTotal ?? iface.inboundTraffic ?? 0;
+  // 优先用累计流量 (out/in)，而非实时速率 (outCurrentSpeed)，因为速率为 0 时 ?? 不会穿透
+  const upload = iface.out ?? iface.outCurrentSpeed ?? 0;
+  const download = iface.in ?? iface.inCurrentSpeed ?? 0;
   const rawStart = data.startTime;
   const startMs = rawStart
     ? (typeof rawStart === "number" && rawStart < 1e12 ? rawStart * 1000 : new Date(rawStart).getTime())
