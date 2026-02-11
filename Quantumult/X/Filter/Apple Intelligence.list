@@ -1,0 +1,9 @@
+# > Apple Intelligence
+DOMAIN-SUFFIX,smoot.apple.com,Apple Intelligence
+DOMAIN,apple-relay.apple.com,Apple Intelligence
+DOMAIN,apple-relay.cloudflare.com,Apple Intelligence
+DOMAIN,apple-relay.fastly-edge.com,Apple Intelligence
+DOMAIN,cp4.cloudflare.com,Apple Intelligence
+DOMAIN,guzzoni.apple.com,Apple Intelligence
+DOMAIN,gspe1-ssl.ls.apple.com,Apple Intelligence
+DOMAIN-SUFFIX,gateway.icloud.com,Apple Intelligence

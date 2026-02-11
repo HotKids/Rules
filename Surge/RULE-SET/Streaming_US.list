@@ -22,14 +22,6 @@ DOMAIN,content-ausw1-ur-discovery1.uplynk.com
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 // DOMAIN,go-prod-vz.akamaized.net
 
-# > HBO Max
-// USER-AGENT,HBOMAX*
-// DOMAIN-SUFFIX,hbo.com
-// DOMAIN-SUFFIX,hbogo.com
-// DOMAIN-SUFFIX,hbonow.com
-// DOMAIN-SUFFIX,hbomax.com
-// DOMAIN-SUFFIX,hbomaxcdn.com
-
 # > Hulu
 DOMAIN-SUFFIX,hulu.com
 DOMAIN-SUFFIX,hulu.tv
@@ -37,12 +29,6 @@ DOMAIN-SUFFIX,huluim.com
 DOMAIN-SUFFIX,hulustream.com
 DOMAIN,cws-hulu.conviva.com
 // DOMAIN,assetshuluimcom-a.akamaihd.net
-
-# > Max
-// USER-AGENT,Max*
-// PROCESS-NAME,com.wbd.stream
-// DOMAIN-SUFFIX,max.com
-// DOMAIN-SUFFIX,discomax.com
 
 # > MGM+
 DOMAIN-SUFFIX,mgmplus.com

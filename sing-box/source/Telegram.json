@@ -1,0 +1,43 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "cdn-telegram.org",
+        "comments.app",
+        "graph.org",
+        "legra.ph",
+        "quiz.directory",
+        "t.me",
+        "tdesktop.com",
+        "telegra.ph",
+        "telegram-cdn.org",
+        "telegram.dog",
+        "telegram.me",
+        "telegram.org",
+        "telegram.space",
+        "telesco.pe",
+        "tg.dev",
+        "tx.me"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "149.154.160.0/20",
+        "185.76.151.0/24",
+        "2001:67c:4e8::/48",
+        "2001:b28:f23c::/48",
+        "2001:b28:f23d::/48",
+        "2001:b28:f23f::/48",
+        "2a0a:f280::/32",
+        "91.105.192.0/23",
+        "91.108.12.0/22",
+        "91.108.16.0/22",
+        "91.108.20.0/22",
+        "91.108.4.0/22",
+        "91.108.56.0/22",
+        "91.108.8.0/22"
+      ]
+    }
+  ]
+}
