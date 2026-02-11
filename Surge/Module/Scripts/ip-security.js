@@ -163,6 +163,11 @@ function surgeAPI(method, path) {
   });
 }
 
+// IPPure 请求去重：getIPType 和 tryIPPure 共享同一个请求
+let _ippureInfoP = null, _ippureCardP = null;
+function getIPPureInfo() { return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType)); }
+function getIPPureCard() { return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard)); }
+
 // ==================== 数据处理工具 ====================
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
@@ -195,7 +200,7 @@ function formatGeo(countryCode, ...parts) {
 }
 
 function normalizeIpSb(data) {
-  if (!data) return null;
+  if (!data || !data.country_code) return null;
   return {
     country_code: data.country_code,
     country_name: data.country,
@@ -332,10 +337,10 @@ async function getRiskScore(ip) {
   }
 
   async function tryIPPure() {
-    const info = await httpJSON(CONFIG.urls.ipType);
+    const info = await getIPPureInfo();
     if (info?.fraudScore !== undefined) return saveAndReturn(info.fraudScore, "IPPure");
     console.log("IPPure /v1/info 无 fraudScore，回落到 /v1/card");
-    const html = await httpRaw(CONFIG.urls.ipTypeCard);
+    const html = await getIPPureCard();
     if (html) {
       const m = html.match(/(\d+)\s*%\s*(极度纯净|纯净|一般|微风险|一般风险|极度风险)/);
       if (m) return saveAndReturn(Number(m[1]), "IPPure");
@@ -372,7 +377,7 @@ async function getRiskScore(ip) {
 
 // ==================== IP 类型检测（二级回落） ====================
 async function getIPType() {
-  const info = await httpJSON(CONFIG.urls.ipType);
+  const info = await getIPPureInfo();
   if (info && info.isResidential !== undefined) {
     console.log("IPPure /v1/info 返回 IP 类型数据");
     return {
@@ -382,7 +387,7 @@ async function getIPType() {
   }
   console.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
-  const html = await httpRaw(CONFIG.urls.ipTypeCard);
+  const html = await getIPPureCard();
   if (html) {
     const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
     const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
@@ -423,8 +428,10 @@ function formatDuration(seconds) {
   if (!seconds || seconds < 0) return "0s";
   const h = Math.floor(seconds / 3600);
   const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
   if (h > 0) return h + "h " + m + "m";
-  return m + "m";
+  if (m > 0) return m + "m " + s + "s";
+  return s + "s";
 }
 
 async function getTrafficStats() {
@@ -687,7 +694,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
   let isMask = maskStored !== null ? maskStored === "1" : args.maskIP;
   if (!args.isEvent) {
     const now = Math.floor(Date.now() / 1000);
-    const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun)) || 0;
+    const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
     $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
     const elapsed = now - lastRun;
     const interval = 600; // 需与 sgmodule update-interval 一致
