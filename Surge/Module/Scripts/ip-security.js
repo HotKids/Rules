@@ -22,7 +22,8 @@
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
- * - ipqs_key: IPQualityScore API Key（可选，不填则回落 ProxyCheck → Scamalytics）
+ * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
+ * - risk_api: 风险评分数据源，ipqs / proxycheck / scamalytics（可选，不填则三级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
  * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
@@ -112,6 +113,7 @@ function parseArguments() {
   return {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
+    riskApi: (arg.risk_api && arg.risk_api !== "null") ? arg.risk_api.toLowerCase() : "",
     localGeoApi: (arg.local_geoapi && arg.local_geoapi !== "null") ? arg.local_geoapi : "bilibili",
     remoteGeoApi: (arg.remote_geoapi && arg.remote_geoapi !== "null") ? arg.remote_geoapi : "ipinfo",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
@@ -286,7 +288,9 @@ async function getPolicyAndEntrance() {
   return { policy, entranceIP };
 }
 
-// ==================== 风险评分获取（三级回落） ====================
+// ==================== 风险评分获取 ====================
+// risk_api 参数：ipqs / proxycheck / scamalytics → 指定单一数据源
+// 不填或其他值 → 三级回落（IPQS → ProxyCheck → Scamalytics）
 async function getRiskScore(ip) {
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
   if (cached) {
@@ -305,29 +309,48 @@ async function getRiskScore(ip) {
     return { score, source };
   }
 
-  if (args.ipqsKey) {
+  async function tryIPQS() {
+    if (!args.ipqsKey) return null;
     const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
-    if (data?.success && data?.fraud_score !== undefined) {
-      return saveAndReturn(data.fraud_score, "IPQS");
-    }
-    console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
+    if (data?.success && data?.fraud_score !== undefined) return saveAndReturn(data.fraud_score, "IPQS");
+    console.log("IPQS 失败: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
+    return null;
   }
 
-  const [proxyData, scamHtml] = await Promise.all([
-    httpJSON(CONFIG.urls.proxyCheck(ip)),
-    httpRaw(CONFIG.urls.scamalytics(ip))
-  ]);
-
-  if (proxyData?.[ip]?.risk !== undefined) {
-    return saveAndReturn(proxyData[ip].risk, "ProxyCheck");
+  async function tryProxyCheck() {
+    const data = await httpJSON(CONFIG.urls.proxyCheck(ip));
+    if (data?.[ip]?.risk !== undefined) return saveAndReturn(data[ip].risk, "ProxyCheck");
+    console.log("ProxyCheck 失败: " + (data ? JSON.stringify(data).slice(0, 100) : "请求失败"));
+    return null;
   }
-  console.log("ProxyCheck 失败: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
 
-  const score = parseScamalyticsScore(scamHtml);
-  if (score !== null) {
-    return saveAndReturn(score, "Scamalytics");
+  async function tryScamalytics() {
+    const html = await httpRaw(CONFIG.urls.scamalytics(ip));
+    const score = parseScamalyticsScore(html);
+    if (score !== null) return saveAndReturn(score, "Scamalytics");
+    console.log("Scamalytics 失败: " + (html ? "解析失败" : "请求失败"));
+    return null;
   }
-  console.log("Scamalytics 失败: " + (scamHtml ? "解析失败" : "请求失败"));
+
+  // 指定单一数据源
+  const api = args.riskApi;
+  if (api === "ipqs") {
+    return (await tryIPQS()) || saveAndReturn(50, "Default");
+  }
+  if (api === "proxycheck") {
+    return (await tryProxyCheck()) || saveAndReturn(50, "Default");
+  }
+  if (api === "scamalytics") {
+    return (await tryScamalytics()) || saveAndReturn(50, "Default");
+  }
+
+  // 三级回落
+  const ipqsResult = await tryIPQS();
+  if (ipqsResult) return ipqsResult;
+
+  const [pcResult, scamResult] = await Promise.all([tryProxyCheck(), tryScamalytics()]);
+  if (pcResult) return pcResult;
+  if (scamResult) return scamResult;
 
   return saveAndReturn(50, "Default");
 }
