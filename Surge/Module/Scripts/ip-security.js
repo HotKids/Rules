@@ -435,8 +435,11 @@ async function getTrafficStats() {
   const iface = data.interface || data.connector || data;
   const upload = iface.out ?? iface.outboundTraffic ?? 0;
   const download = iface.in ?? iface.inboundTraffic ?? 0;
-  const startTime = data.startTime ? new Date(data.startTime).getTime() : null;
-  const duration = startTime ? Math.floor((Date.now() - startTime) / 1000) : null;
+  const rawStart = data.startTime;
+  const startMs = rawStart
+    ? (typeof rawStart === "number" && rawStart < 1e12 ? rawStart * 1000 : new Date(rawStart).getTime())
+    : null;
+  const duration = startMs ? Math.floor((Date.now() - startMs) / 1000) : null;
 
   return { upload, download, duration };
 }
