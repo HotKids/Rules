@@ -313,11 +313,12 @@ async function getPolicyAndEntrance() {
 // 不填或其他值 → 四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）
 async function getRiskScore(ip) {
   const api = args.riskApi;
+  const hasKey = !!args.ipqsKey;
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
   if (cached) {
     try {
       const c = JSON.parse(cached);
-      if (c.ip === ip && (c.api || "") === api) {
+      if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey) {
         console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
         return { score: c.score, source: c.source };
       }
@@ -325,7 +326,7 @@ async function getRiskScore(ip) {
   }
 
   function saveAndReturn(score, source) {
-    $persistentStore.write(JSON.stringify({ ip, score, source, api }), CONFIG.storeKeys.riskCache);
+    $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey }), CONFIG.storeKeys.riskCache);
     console.log("风险评分已缓存: " + score + "% (" + source + ")");
     return { score, source };
   }
@@ -448,11 +449,12 @@ async function getTrafficStats() {
     console.log("流量统计获取失败");
     return null;
   }
-  console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 200));
+  console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 300));
 
   const iface = data.interface || data.connector || data;
-  const upload = iface.out ?? iface.outboundTraffic ?? 0;
-  const download = iface.in ?? iface.inboundTraffic ?? 0;
+  console.log("iface 字段: " + Object.keys(iface).join(", "));
+  const upload = iface.outCurrentSpeed ?? iface.out ?? iface.outTotal ?? iface.outboundTraffic ?? 0;
+  const download = iface.inCurrentSpeed ?? iface.in ?? iface.inTotal ?? iface.inboundTraffic ?? 0;
   const rawStart = data.startTime;
   const startMs = rawStart
     ? (typeof rawStart === "number" && rawStart < 1e12 ? rawStart * 1000 : new Date(rawStart).getTime())
