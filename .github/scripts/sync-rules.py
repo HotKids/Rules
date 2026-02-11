@@ -176,14 +176,33 @@ def sync_regional():
             print(f"  [SKIP] {regional_name}.list 不存在")
             continue
 
-        regional_mtime = regional_path.stat().st_mtime
+        # 解析地区合集当前包含的 section
+        text = regional_path.read_text(encoding="utf-8")
+        sections = parse_sections(text)
+        regional_stems = {section_name_to_file(s) for s in sections}
 
-        # 所有成员独立文件的最大 mtime
-        max_member_mtime = 0.0
-        for m in members:
-            mp = SURGE_DIR / f"{m}.list"
-            if mp.exists():
-                max_member_mtime = max(max_member_mtime, mp.stat().st_mtime)
+        # 检测独立文件是否被删除
+        existing = [m for m in members if (SURGE_DIR / f"{m}.list").exists()]
+        deleted = [m for m in members
+                   if m in regional_stems and not (SURGE_DIR / f"{m}.list").exists()]
+
+        if deleted and existing:
+            # 有独立文件被删除 → 从地区合集中移除对应段落
+            for d in deleted:
+                print(f"  ✗ {d}.list 已删除 → 从 {regional_name} 移除")
+            _rebuild_regional(regional_path, regional_name, members)
+            continue
+
+        if not existing:
+            # 首次运行，全部从地区合集提取
+            _extract_regional(regional_path, regional_name, members)
+            continue
+
+        # 正常 mtime 比较
+        regional_mtime = regional_path.stat().st_mtime
+        max_member_mtime = max(
+            (SURGE_DIR / f"{m}.list").stat().st_mtime for m in existing
+        )
 
         if regional_mtime >= max_member_mtime:
             _extract_regional(regional_path, regional_name, members)
@@ -474,12 +493,16 @@ def cleanup_stale():
     for sf in SURGE_DIR.rglob("*.list"):
         surge_stems.add(sf.stem)
 
+    # 外部规则名也需保留（Step 5 生成的 sing-box 文件）
+    external_stems = {p["name"] for p in parse_sample_providers()}
+    keep = surge_stems | external_stems
+
     deleted = 0
     for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
         if not target_dir.exists():
             continue
         for f in sorted(target_dir.iterdir()):
-            if f.suffix == ext and f.stem not in surge_stems:
+            if f.suffix == ext and f.stem not in keep:
                 f.unlink()
                 print(f"  ✗ 删除 {f.relative_to(REPO_ROOT)}")
                 deleted += 1

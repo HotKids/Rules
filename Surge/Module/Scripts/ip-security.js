@@ -12,14 +12,18 @@
  * ② 出口 IP: ip.sb API (IPv4/IPv6)
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
- * ⑤ 风险评分: IPQualityScore (主，需 API) → ProxyCheck (备) → Scamalytics (兜底)
+ * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck (备) → Scamalytics (兜底)
  * ⑥ IP 类型: IPPure API
  * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / local_geoapi=ipsb ip.sb | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / remote_geoapi=ipapi ip-api.com(en) / remote_geoapi=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
+ * ⑨ DNS 泄露: edns.ip-api.com（检测 DNS 解析器是否泄露到本地 ISP）
+ * ⑩ 反向 DNS: ipinfo.io hostname 字段
+ * ⑪ 流量统计: Surge /v1/traffic API
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
- * - ipqs_key: IPQualityScore API Key (可选)
+ * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
+ * - risk_api: 风险评分数据源，ipqs / proxycheck / scamalytics（可选，不填则三级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
  * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
@@ -31,15 +35,15 @@
  * ip-security-panel = script-name=ip-security-panel,update-interval=600
  *
  * [Script]
- * # 手动触发（面板）
+ * # 手动触发（面板）- ipqs_key 可选，不填自动回落
  * ip-security-panel = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
  *
  * # 网络变化自动触发
  * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2
  *
  * @author HotKids&Claude
- * @version 5.0.0
- * @date 2026-02-10
+ * @version 6.0.0
+ * @date 2026-02-11
  */
 
 // ==================== 全局配置 ====================
@@ -64,17 +68,23 @@ const CONFIG = {
     ipApi: (ip, lang) => `http://ip-api.com/json/${ip}?lang=${lang}&fields=status,country,countryCode,regionName,city,isp,org`,
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
-    scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`
+    scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`,
+    dnsLeak: () => {
+      const c = "abcdefghijklmnopqrstuvwxyz0123456789";
+      let id = "";
+      for (let i = 0; i < 32; i++) id += c[Math.floor(Math.random() * c.length)];
+      return `http://${id}.edns.ip-api.com/json`;
+    }
   },
   ipv6Timeout: 3000,
   policyRetryDelay: 500,
   riskLevels: [
-    { max: 15, label: "极度纯净 IP", color: "#0D6E3D" },
-    { max: 25, label: "纯净 IP",     color: "#2E9F5E" },
-    { max: 40, label: "一般 IP",     color: "#8BC34A" },
-    { max: 50, label: "微风险 IP",   color: "#FFC107" },
-    { max: 70, label: "一般风险 IP", color: "#FF9800" },
-    { max: 100, label: "极度风险 IP", color: "#F44336" }
+    { max: 15, label: "极度纯净", color: "#0D6E3D" },
+    { max: 25, label: "纯净",     color: "#2E9F5E" },
+    { max: 40, label: "一般",     color: "#8BC34A" },
+    { max: 50, label: "微风险",   color: "#FFC107" },
+    { max: 70, label: "一般风险", color: "#FF9800" },
+    { max: 100, label: "极度风险", color: "#F44336" }
   ]
 };
 
@@ -103,6 +113,7 @@ function parseArguments() {
   return {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
+    riskApi: (arg.risk_api && arg.risk_api !== "null") ? arg.risk_api.toLowerCase() : "",
     localGeoApi: (arg.local_geoapi && arg.local_geoapi !== "null") ? arg.local_geoapi : "bilibili",
     remoteGeoApi: (arg.remote_geoapi && arg.remote_geoapi !== "null") ? arg.remote_geoapi : "ipinfo",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
@@ -283,7 +294,9 @@ async function getPolicyAndEntrance() {
   return { policy, entranceIP };
 }
 
-// ==================== 风险评分获取（三级回落） ====================
+// ==================== 风险评分获取 ====================
+// risk_api 参数：ipqs / proxycheck / scamalytics → 指定单一数据源
+// 不填或其他值 → 三级回落（IPQS → ProxyCheck → Scamalytics）
 async function getRiskScore(ip) {
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
   if (cached) {
@@ -302,29 +315,48 @@ async function getRiskScore(ip) {
     return { score, source };
   }
 
-  if (args.ipqsKey) {
+  async function tryIPQS() {
+    if (!args.ipqsKey) return null;
     const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
-    if (data?.success && data?.fraud_score !== undefined) {
-      return saveAndReturn(data.fraud_score, "IPQS");
-    }
-    console.log("IPQS 回落: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
+    if (data?.success && data?.fraud_score !== undefined) return saveAndReturn(data.fraud_score, "IPQS");
+    console.log("IPQS 失败: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
+    return null;
   }
 
-  const [proxyData, scamHtml] = await Promise.all([
-    httpJSON(CONFIG.urls.proxyCheck(ip)),
-    httpRaw(CONFIG.urls.scamalytics(ip))
-  ]);
-
-  if (proxyData?.[ip]?.risk !== undefined) {
-    return saveAndReturn(proxyData[ip].risk, "ProxyCheck");
+  async function tryProxyCheck() {
+    const data = await httpJSON(CONFIG.urls.proxyCheck(ip));
+    if (data?.[ip]?.risk !== undefined) return saveAndReturn(data[ip].risk, "ProxyCheck");
+    console.log("ProxyCheck 失败: " + (data ? JSON.stringify(data).slice(0, 100) : "请求失败"));
+    return null;
   }
-  console.log("ProxyCheck 失败: " + (proxyData ? JSON.stringify(proxyData).slice(0, 100) : "请求失败"));
 
-  const score = parseScamalyticsScore(scamHtml);
-  if (score !== null) {
-    return saveAndReturn(score, "Scamalytics");
+  async function tryScamalytics() {
+    const html = await httpRaw(CONFIG.urls.scamalytics(ip));
+    const score = parseScamalyticsScore(html);
+    if (score !== null) return saveAndReturn(score, "Scamalytics");
+    console.log("Scamalytics 失败: " + (html ? "解析失败" : "请求失败"));
+    return null;
   }
-  console.log("Scamalytics 失败: " + (scamHtml ? "解析失败" : "请求失败"));
+
+  // 指定单一数据源
+  const api = args.riskApi;
+  if (api === "ipqs") {
+    return (await tryIPQS()) || saveAndReturn(50, "Default");
+  }
+  if (api === "proxycheck") {
+    return (await tryProxyCheck()) || saveAndReturn(50, "Default");
+  }
+  if (api === "scamalytics") {
+    return (await tryScamalytics()) || saveAndReturn(50, "Default");
+  }
+
+  // 三级回落
+  const ipqsResult = await tryIPQS();
+  if (ipqsResult) return ipqsResult;
+
+  const [pcResult, scamResult] = await Promise.all([tryProxyCheck(), tryScamalytics()]);
+  if (pcResult) return pcResult;
+  if (scamResult) return scamResult;
 
   return saveAndReturn(50, "Default");
 }
@@ -351,6 +383,57 @@ async function getIPType() {
 
   console.log("IPPure 所有接口均失败");
   return { ipType: "未知", ipSrc: "未知" };
+}
+
+// ==================== DNS 泄露检测 ====================
+async function checkDNSLeak() {
+  const data = await httpJSON(CONFIG.urls.dnsLeak());
+  if (!data || !data.dns) {
+    console.log("DNS 泄露检测失败");
+    return { leaked: null, resolver: null, geo: null };
+  }
+
+  const geo = data.dns.geo || "";
+  const resolver = data.dns.ip || "";
+  const chinaISP = geo.match(/(China Telecom|China Unicom|China Mobile|CMCC|ChinaNet|中国电信|中国联通|中国移动)/i);
+  const leaked = !!chinaISP;
+
+  console.log("DNS 解析器: " + resolver + " (" + geo + ") 泄露: " + leaked);
+  return { leaked, resolver, geo };
+}
+
+// ==================== 流量统计 ====================
+function formatBytes(bytes) {
+  if (!bytes || bytes < 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(1024));
+  return (bytes / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0) + " " + units[i];
+}
+
+function formatDuration(seconds) {
+  if (!seconds || seconds < 0) return "0s";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return h + "h " + m + "m";
+  return m + "m";
+}
+
+async function getTrafficStats() {
+  const data = await surgeAPI("GET", "/v1/traffic");
+  if (!data) {
+    console.log("流量统计获取失败");
+    return null;
+  }
+  console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 200));
+
+  const iface = data.interface || data.connector || data;
+  const upload = iface.outCurrentSpeed !== undefined ? null : (iface.out || iface.outboundTraffic || 0);
+  const download = iface.inCurrentSpeed !== undefined ? null : (iface.in || iface.inboundTraffic || 0);
+  const startTime = data.startTime ? new Date(data.startTime).getTime() : null;
+  const duration = startTime ? Math.floor((Date.now() - startTime) / 1000) : null;
+
+  if (!upload && !download) return null;
+  return { upload, download, duration };
 }
 
 // ==================== IP 获取 ====================
@@ -403,7 +486,7 @@ function geoLabel(info) {
   return (info?.country_name && /[^\x00-\x7F]/.test(info.country_name)) ? info.country_name : info?.country_code;
 }
 
-function buildOutboundSection(outIP, outIPv6, outInfo, isMask) {
+function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
   const lines = [];
   const m = (ip) => isMask ? maskIP(ip) : ip;
 
@@ -415,21 +498,37 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask) {
   }
   lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
   lines.push("运营商：" + (outInfo?.org || "Unknown"));
+  if (reverseDNS) lines.push("反向 DNS：" + reverseDNS);
 
   return lines;
 }
 
-function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo }) {
+function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
+  ];
+
+  // DNS 泄露检测
+  if (dnsLeak) {
+    if (dnsLeak.leaked === null) {
+      lines.push("DNS 检测：检测失败");
+    } else if (dnsLeak.leaked) {
+      lines.push("DNS 检测：泄露! " + dnsLeak.geo);
+    } else {
+      const dnsName = dnsLeak.geo.includes(" - ") ? dnsLeak.geo.split(" - ").pop().trim() : dnsLeak.geo;
+      lines.push("DNS 检测：无泄露 (" + dnsName + ")");
+    }
+  }
+
+  lines.push(
     "",
     "IP 类型：" + ipType + " | " + ipSrc,
     "",
     "本地 IP：" + m(localIP),
     "地区：" + formatGeo(localInfo?.country_code, localInfo?.city, localInfo?.region, useBilibili ? localInfo?.country_name : localInfo?.country_code),
     "运营商：" + (localInfo?.org || "Unknown"),
-  ];
+  );
 
   if (entranceInfo) {
     lines.push(
@@ -440,13 +539,22 @@ function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, 
     );
   }
 
-  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, isMask));
+  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS));
+
+  // 流量统计
+  if (traffic) {
+    lines.push(
+      "",
+      "流量统计：↑ " + formatBytes(traffic.upload) + "  ↓ " + formatBytes(traffic.download)
+        + (traffic.duration ? " | ⏱ " + formatDuration(traffic.duration) : "")
+    );
+  }
 
   return lines.join("\n");
 }
 
 // ==================== 通知内容构建 ====================
-function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask }) {
+function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask, dnsLeak }) {
   const m = (ip) => isMask ? maskIP(ip) : ip;
   const title = "🔄 网络已切换 | " + policy;
   const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
@@ -460,6 +568,9 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, geoLabel(outInfo)) + " · " + (outInfo?.org || "Unknown"),
     "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
   );
+  if (dnsLeak && dnsLeak.leaked) {
+    bodyLines.push("⚠️ DNS 泄露! " + dnsLeak.geo);
+  }
 
   $notification.post(title, subtitle, bodyLines.join("\n"));
   console.log("=== 已发送通知 ===");
@@ -505,12 +616,14 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
 
   // 先并行发起所有 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
   // 这样 getPolicyAndEntrance 能在 recent 里找到刚完成的请求，避免 Unknown
-  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw] = await Promise.all([
+  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, dnsLeakResult, trafficResult] = await Promise.all([
     getRiskScore(outIP),                     // 0
     getIPType(),                             // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
     httpJSON(geoUrl(outIP)),                 // 3: 出口地理
-    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）
+    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）+ hostname
+    checkDNSLeak(),                          // 5: DNS 泄露检测
+    getTrafficStats(),                       // 6: 流量统计
   ]);
 
   // API 请求已完成，此时 recent 里一定有匹配记录
@@ -531,6 +644,11 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
   // 出口 IP 地理信息：remote_geoapi 决定地区来源，运营商始终用 ipinfo.io（回落 ip.sb）
   // IPv6 只显示 IP 地址，不单独查询地区和运营商
   let outInfo = normalizeGeo(outGeoRaw) || normalizeIpSb(outRaw);
+  // 反向 DNS：从 ipinfo.io 响应中提取 hostname
+  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; ipapi 模式: outOrgRaw 来自 ipinfo.io
+  const ipinfoRaw = useIpApi ? outOrgRaw : outGeoRaw;
+  const reverseDNS = ipinfoRaw?.hostname || null;
+  if (reverseDNS) console.log("反向 DNS: " + reverseDNS);
   if (useIpApi && outInfo) {
     const orgData = normalizeIpInfo(outOrgRaw);
     if (orgData?.org) outInfo.org = orgData.org;
@@ -571,7 +689,9 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
       $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
     }
   }
-  const context = { useBilibili, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo };
+  const dnsLeak = dnsLeakResult;
+  const traffic = trafficResult;
+  const context = { useBilibili, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
