@@ -93,9 +93,10 @@ function parseArguments() {
   let arg = {};
 
   if (typeof $argument !== "undefined") {
+    console.log("原始 $argument: " + $argument);
     arg = Object.fromEntries($argument.split("&").map(i => {
       const idx = i.indexOf("=");
-      return idx === -1 ? [i, ""] : [i.slice(0, idx), i.slice(idx + 1)];
+      return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decodeURIComponent(i.slice(idx + 1)).trim()];
     }));
   }
 
@@ -110,14 +111,22 @@ function parseArguments() {
     arg.TYPE = "EVENT";
   }
 
+  function clean(val) {
+    if (!val) return "";
+    const v = String(val).trim();
+    return (v === "" || v.toLowerCase() === "null") ? "" : v;
+  }
+
+  console.log("参数解析: risk_api=" + JSON.stringify(arg.risk_api) + " ipqs_key=" + (arg.ipqs_key ? "已设置" : "未设置"));
+
   return {
     isEvent: arg.TYPE === "EVENT",
-    ipqsKey: (arg.ipqs_key && arg.ipqs_key !== "null") ? arg.ipqs_key : "",
-    riskApi: (arg.risk_api && arg.risk_api !== "null") ? arg.risk_api.toLowerCase() : "",
-    localGeoApi: (arg.local_geoapi && arg.local_geoapi !== "null") ? arg.local_geoapi : "bilibili",
-    remoteGeoApi: (arg.remote_geoapi && arg.remote_geoapi !== "null") ? arg.remote_geoapi : "ipinfo",
+    ipqsKey: clean(arg.ipqs_key),
+    riskApi: clean(arg.risk_api).toLowerCase(),
+    localGeoApi: clean(arg.local_geoapi) || "bilibili",
+    remoteGeoApi: clean(arg.remote_geoapi) || "ipinfo",
     maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
-    twFlag: (arg.tw_flag && arg.tw_flag !== "null") ? arg.tw_flag : "cn",
+    twFlag: clean(arg.tw_flag) || "cn",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
 }
@@ -365,12 +374,8 @@ async function getRiskScore(ip) {
     if (r) return r;
   }
 
-  // 回落：指定了 risk_api → 只回落非 IPQS 的剩余源（避免 IPQS key 抢结果）
-  //       未指定 → 完整四级含 IPQS
-  const fallback = api
-    ? ["proxycheck", "ippure", "scamalytics"].filter(k => k !== api)
-    : ["ipqs", "proxycheck", "ippure", "scamalytics"];
-  for (const key of fallback) {
+  // 未指定 → 四级回落 / 指定但失败 → 回落到剩余数据源
+  for (const key of ["ipqs", "proxycheck", "ippure", "scamalytics"].filter(k => k !== api)) {
     const r = await tryMap[key]();
     if (r) return r;
   }
