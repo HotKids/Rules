@@ -433,12 +433,11 @@ async function getTrafficStats() {
   console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 200));
 
   const iface = data.interface || data.connector || data;
-  const upload = iface.outCurrentSpeed !== undefined ? null : (iface.out || iface.outboundTraffic || 0);
-  const download = iface.inCurrentSpeed !== undefined ? null : (iface.in || iface.inboundTraffic || 0);
+  const upload = iface.out ?? iface.outboundTraffic ?? 0;
+  const download = iface.in ?? iface.inboundTraffic ?? 0;
   const startTime = data.startTime ? new Date(data.startTime).getTime() : null;
   const duration = startTime ? Math.floor((Date.now() - startTime) / 1000) : null;
 
-  if (!upload && !download) return null;
   return { upload, download, duration };
 }
 
@@ -503,13 +502,8 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
     lines.push("出口 IP：" + m(outIP));
   }
   lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-  const orgText = outInfo?.org || "Unknown";
-  if (reverseDNS) {
-    const rdns = reverseDNS.length > 22 ? reverseDNS.slice(0, 21) + "…" : reverseDNS;
-    lines.push("运营商：" + orgText + " | " + rdns);
-  } else {
-    lines.push("运营商：" + orgText);
-  }
+  lines.push("运营商：" + (outInfo?.org || "Unknown"));
+  if (reverseDNS) lines.push("rDNS：" + reverseDNS);
 
   return lines;
 }
