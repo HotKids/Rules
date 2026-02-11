@@ -457,12 +457,18 @@ async function getTrafficStats() {
   }
   console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 300));
 
-  // interface 可能是字符串（接口名）或对象，需判断类型
-  const iface = (typeof data.interface === "object" && data.interface) || data.connector || data;
-  console.log("iface 字段: " + Object.keys(iface).join(", "));
-  // 优先用累计流量 (out/in)，而非实时速率 (outCurrentSpeed)，因为速率为 0 时 ?? 不会穿透
-  const upload = iface.out ?? iface.outCurrentSpeed ?? 0;
-  const download = iface.in ?? iface.inCurrentSpeed ?? 0;
+  // Surge 返回 interface 为嵌套字典 { en0: {...}, pdp_ip0: {...}, lo0: {...} }
+  let network = null;
+  if (data.interface && typeof data.interface === "object") {
+    const keys = Object.keys(data.interface).filter(k => k !== "lo0");
+    if (keys.length > 0) {
+      network = data.interface[keys[0]];
+      console.log("使用网卡: " + keys[0]);
+    }
+  }
+  if (!network) network = data.connector || data;
+  const upload = network.out ?? 0;
+  const download = network.in ?? 0;
   const rawStart = data.startTime;
   const startMs = rawStart
     ? (typeof rawStart === "number" && rawStart < 1e12 ? rawStart * 1000 : new Date(rawStart).getTime())
