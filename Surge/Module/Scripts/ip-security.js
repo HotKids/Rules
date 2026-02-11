@@ -101,7 +101,7 @@ function parseArguments() {
 
   const storedArg = $persistentStore.read(CONFIG.name);
   if (storedArg) {
-    try { arg = { ...arg, ...JSON.parse(storedArg) }; } catch (e) {}
+    try { arg = { ...JSON.parse(storedArg), ...arg }; } catch (e) {}
   }
 
   const isPanel = typeof $input !== "undefined" && $input.purpose === "panel";
@@ -123,7 +123,7 @@ function parseArguments() {
 }
 
 const args = parseArguments();
-console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", 本地: " + args.localGeoApi);
+console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
@@ -298,11 +298,12 @@ async function getPolicyAndEntrance() {
 // risk_api 参数：ipqs / proxycheck / scamalytics → 指定单一数据源
 // 不填或其他值 → 三级回落（IPQS → ProxyCheck → Scamalytics）
 async function getRiskScore(ip) {
+  const api = args.riskApi;
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
   if (cached) {
     try {
       const c = JSON.parse(cached);
-      if (c.ip === ip) {
+      if (c.ip === ip && (c.api || "") === api) {
         console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
         return { score: c.score, source: c.source };
       }
@@ -310,7 +311,7 @@ async function getRiskScore(ip) {
   }
 
   function saveAndReturn(score, source) {
-    $persistentStore.write(JSON.stringify({ ip, score, source }), CONFIG.storeKeys.riskCache);
+    $persistentStore.write(JSON.stringify({ ip, score, source, api }), CONFIG.storeKeys.riskCache);
     console.log("风险评分已缓存: " + score + "% (" + source + ")");
     return { score, source };
   }
@@ -339,7 +340,6 @@ async function getRiskScore(ip) {
   }
 
   // 指定数据源时优先使用，失败则回落到其他
-  const api = args.riskApi;
   if (api === "ipqs") {
     const r = await tryIPQS();
     if (r) return r;
