@@ -3,7 +3,7 @@
 #!author=HotKids&ChatGPT&Claude
 #!system=ios
 #!arguments=ipqs_key:null,risk_api:null,local_geoapi:bilibili,remote_geoapi:ipinfo,mask_ip:0,tw_flag:cn,event_delay:2
-#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，仅 risk_api=ipqs 或回落模式需要\nrisk_api:(可选) 风险评分数据源，ipqs / proxycheck / scamalytics，不填则三级回落（IPQS → ProxyCheck → Scamalytics）\nlocal_geoapi:(可选) 本地 IP 地理数据源，bilibili=bilibili(中文，默认)，ipsb=ip.sb(英文)\nremote_geoapi:(可选) 入口/出口地区数据源（仅影响地区，运营商始终用 ipinfo.io），ipinfo=ipinfo.io(默认)，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)\nmask_ip:(可选) IP 打码，1=开启（123.*.*.89），0=关闭，默认 0\ntw_flag:(可选) 台湾地区旗帜，cn=🇨🇳(默认)，tw=🇹🇼\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
+#!arguments-desc=ipqs_key:(可选) IPQualityScore API Key，仅 risk_api=ipqs 或回落模式需要\nrisk_api:(可选) 风险评分数据源，ipqs / proxycheck / ippure / scamalytics，不填则四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）\nlocal_geoapi:(可选) 本地 IP 地理数据源，bilibili=bilibili(中文，默认)，ipsb=ip.sb(英文)\nremote_geoapi:(可选) 入口/出口地区数据源（仅影响地区，运营商始终用 ipinfo.io），ipinfo=ipinfo.io(默认)，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)\nmask_ip:(可选) IP 打码，1=开启（123.*.*.89），0=关闭，默认 0\ntw_flag:(可选) 台湾地区旗帜，cn=🇨🇳(默认)，tw=🇹🇼\nevent_delay:(可选) 网络变化后延迟检测时间（秒），默认 2 秒
 
 [Panel]
 ip-security-panel = script-name=ip-security-panel,update-interval=600
