@@ -352,17 +352,15 @@ async function getRiskScore(ip) {
     return null;
   }
 
-  // 指定数据源时优先使用，失败则回落到其他
   const tryMap = { ipqs: tryIPQS, proxycheck: tryProxyCheck, ippure: tryIPPure, scamalytics: tryScamalytics };
+
+  // 指定数据源 → 只用该数据源，不回落
   if (tryMap[api]) {
-    const r = await tryMap[api]();
-    if (r) return r;
+    return (await tryMap[api]()) || saveAndReturn(50, "Default");
   }
 
-  // 四级回落（跳过已尝试的指定数据源）
-  const fallback = ["ipqs", "proxycheck", "ippure", "scamalytics"];
-  for (const key of fallback) {
-    if (key === api) continue;
+  // 未指定 → 四级回落
+  for (const key of ["ipqs", "proxycheck", "ippure", "scamalytics"]) {
     const r = await tryMap[key]();
     if (r) return r;
   }
