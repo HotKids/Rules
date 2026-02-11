@@ -26,7 +26,7 @@
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
  * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
- * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
+ * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  *
@@ -125,7 +125,7 @@ function parseArguments() {
     riskApi: clean(arg.risk_api).toLowerCase(),
     localGeoApi: clean(arg.local_geoapi) || "bilibili",
     remoteGeoApi: clean(arg.remote_geoapi) || "ipinfo",
-    maskIP: arg.mask_ip === "1" || arg.mask_ip === "true",
+    maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
     twFlag: clean(arg.tw_flag) || "cn",
     eventDelay: parseFloat(arg.event_delay) || 2
   };
@@ -191,8 +191,9 @@ function riskText(score) {
   return { label: level.label, color: level.color };
 }
 
-function maskIP(ip) {
-  if (!ip) return ip;
+function maskIP(ip, mode) {
+  if (!ip || !mode) return ip;
+  if (mode === 2) return "[IP 已隐藏]";
   if (ip.includes(":")) {
     const parts = ip.split(":");
     if (parts.length <= 2) return ip;
@@ -528,9 +529,9 @@ function geoLabel(info) {
   return (info?.country_name && /[^\x00-\x7F]/.test(info.country_name)) ? info.country_name : info?.country_code;
 }
 
-function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
+function buildOutboundSection(outIP, outIPv6, outInfo, maskMode, reverseDNS) {
   const lines = [];
-  const m = (ip) => isMask ? maskIP(ip) : ip;
+  const m = (ip) => maskIP(ip, maskMode);
 
   if (outIPv6) {
     lines.push("出口 IP⁴：" + m(outIP));
@@ -545,8 +546,8 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
   return lines;
 }
 
-function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
-  const m = (ip) => isMask ? maskIP(ip) : ip;
+function buildPanelContent({ useBilibili, maskMode, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
+  const m = (ip) => maskIP(ip, maskMode);
   const lines = [
     "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
   ];
@@ -581,7 +582,7 @@ function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, 
     );
   }
 
-  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS));
+  lines.push("", ...buildOutboundSection(outIP, outIPv6, outInfo, maskMode, reverseDNS));
 
   // 流量统计
   if (traffic) {
@@ -596,8 +597,8 @@ function buildPanelContent({ useBilibili, isMask, riskInfo, riskResult, ipType, 
 }
 
 // ==================== 通知内容构建 ====================
-function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, isMask, dnsLeak }) {
-  const m = (ip) => isMask ? maskIP(ip) : ip;
+function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, maskMode, dnsLeak }) {
+  const m = (ip) => maskIP(ip, maskMode);
   const title = "🔄 网络已切换 | " + policy;
   const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
   const bodyLines = [
@@ -713,10 +714,10 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
   const riskResult = riskText(riskInfo.score);
   const { ipType, ipSrc } = ipTypeResult;
 
-  // 5. IP 打码切换：手动点击切换，自动刷新和 EVENT 保持当前状态
+  // 5. IP 打码：mask_ip=2 锁定全隐藏；0/1 手动点击切换
   const maskStored = $persistentStore.read(CONFIG.storeKeys.maskToggle);
-  let isMask = maskStored !== null ? maskStored === "1" : args.maskIP;
-  if (!args.isEvent) {
+  let maskMode = args.maskIP === 2 ? 2 : (maskStored !== null ? parseInt(maskStored, 10) : args.maskIP);
+  if (args.maskIP !== 2 && !args.isEvent) {
     const now = Math.floor(Date.now() / 1000);
     const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
     $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
@@ -727,13 +728,13 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     const isAutoRefresh = lastRun > 0 && elapsed > tolerance
       && (remainder <= tolerance || remainder >= interval - tolerance);
     if (!isAutoRefresh) {
-      isMask = !isMask;
-      $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
+      maskMode = maskMode === 1 ? 0 : 1;
+      $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
     }
   }
   const dnsLeak = dnsLeakResult;
   const traffic = trafficResult;
-  const context = { useBilibili, isMask, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic };
+  const context = { useBilibili, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
