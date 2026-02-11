@@ -450,7 +450,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/Apple.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
+    url: https://ruleset.skk.moe/Clash/non_ip/apple_services.txt
     interval: 86400
     
   Global:

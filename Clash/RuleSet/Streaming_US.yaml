@@ -17,16 +17,12 @@ payload:
   - DOMAIN,content-ausw1-ur-discovery1.uplynk.com
   - DOMAIN,content-ausw2-ur-discovery1.uplynk.com
 
-  # > HBO Max
-
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
   - DOMAIN-SUFFIX,huluim.com
   - DOMAIN-SUFFIX,hulustream.com
   - DOMAIN,cws-hulu.conviva.com
-
-  # > Max
 
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com

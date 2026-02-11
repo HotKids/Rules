@@ -86,8 +86,6 @@ DOMAIN,disney.playback.edge.bamgrid.com,Streaming
 DOMAIN,cdn.registerdisney.go.com,Streaming
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Streaming
 
-# > HBO Max
-
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming
 DOMAIN-SUFFIX,hulu.tv,Streaming
@@ -168,14 +166,6 @@ DOMAIN-SUFFIX,tospotify.com,Streaming
 # > Stan
 DOMAIN-SUFFIX,stan.com.au,Streaming
 DOMAIN,aws.stan.video,Streaming
-
-# > Star+
-DOMAIN-SUFFIX,starplus.com,Streaming
-DOMAIN-SUFFIX,starott.com,Streaming
-DOMAIN,star.api.edge.bamgrid.com,Streaming
-DOMAIN,star.connections.edge.bamgrid.com,Streaming
-DOMAIN,star.content.edge.bamgrid.com,Streaming
-DOMAIN,star.playback.edge.bamgrid.com,Streaming
 
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com,Streaming

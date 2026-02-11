@@ -166,7 +166,8 @@ function surgeAPI(method, path) {
 // ==================== 数据处理工具 ====================
 function flag(cc) {
   if (!cc || cc.length !== 2) return "";
-  if (cc.toUpperCase() === "TW" && args.twFlag !== "tw") cc = "CN";
+  cc = cc.toUpperCase();
+  if (cc === "TW" && args.twFlag !== "tw") cc = "CN";
   const b = 0x1f1e6;
   return String.fromCodePoint(b + cc.charCodeAt(0) - 65, b + cc.charCodeAt(1) - 65);
 }
@@ -262,11 +263,16 @@ async function getPolicyAndEntrance() {
     return (res?.requests || []).slice(0, limit).find(i => pattern.test(i.URL));
   }
 
-  let hit = await findInRecent(10);
+  let hit = await findInRecent(50);
   if (!hit) {
-    console.log("未找到策略记录，等待后重试");
+    console.log("未找到策略记录，等待后重试 (1/2)");
     await wait(CONFIG.policyRetryDelay);
-    hit = await findInRecent(5);
+    hit = await findInRecent(50);
+  }
+  if (!hit) {
+    console.log("未找到策略记录，等待后重试 (2/2)");
+    await wait(CONFIG.policyRetryDelay * 2);
+    hit = await findInRecent(100);
   }
 
   if (!hit) {
@@ -572,6 +578,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
 
 // ==================== 主执行函数 ====================
 (async () => {
+  try {
   console.log("=== IP 安全检测开始 ===");
 
   // 1. EVENT 触发时延迟等待网络稳定
@@ -607,20 +614,20 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
-  const queries = [
-    getPolicyAndEntrance(),                  // 0: {policy, entranceIP}
-    getRiskScore(outIP),                     // 1
-    getIPType(),                             // 2
-    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 3: ip.sb 本地（en 地理 / zh country_code）
-    httpJSON(geoUrl(outIP)),                 // 4: 出口地理
-    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 5: 出口运营商（仅 ip-api 模式）+ hostname
-    checkDNSLeak(),                          // 6: DNS 泄露检测
-    getTrafficStats(),                       // 7: 流量统计
-  ];
+  // 先并行发起所有 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
+  // 这样 getPolicyAndEntrance 能在 recent 里找到刚完成的请求，避免 Unknown
+  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, dnsLeakResult, trafficResult] = await Promise.all([
+    getRiskScore(outIP),                     // 0
+    getIPType(),                             // 1
+    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
+    httpJSON(geoUrl(outIP)),                 // 3: 出口地理
+    useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）+ hostname
+    checkDNSLeak(),                          // 5: DNS 泄露检测
+    getTrafficStats(),                       // 6: 流量统计
+  ]);
 
-  const results = await Promise.all(queries);
-  const [policyResult, riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, dnsLeakResult, trafficResult] = results;
-  const { policy, entranceIP } = policyResult;
+  // API 请求已完成，此时 recent 里一定有匹配记录
+  const { policy, entranceIP } = await getPolicyAndEntrance();
 
   // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
   let localInfo;
@@ -676,7 +683,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     const tolerance = 15;
     const remainder = elapsed % interval;
     const isAutoRefresh = lastRun > 0 && elapsed > tolerance
-      && (remainder < tolerance || remainder > interval - tolerance);
+      && (remainder <= tolerance || remainder >= interval - tolerance);
     if (!isAutoRefresh) {
       isMask = !isMask;
       $persistentStore.write(isMask ? "1" : "0", CONFIG.storeKeys.maskToggle);
@@ -697,5 +704,9 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
       icon: "leaf.fill",
       "icon-color": riskResult.color
     });
+  }
+  } catch (e) {
+    console.log("未捕获异常: " + (e.message || e));
+    done({ title: "检测异常", content: e.message || String(e), icon: "leaf", "icon-color": "#9E9E9E" });
   }
 })();

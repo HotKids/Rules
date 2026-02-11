@@ -88,8 +88,6 @@ payload:
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
-  # > HBO Max
-
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
@@ -170,14 +168,6 @@ payload:
   # > Stan
   - DOMAIN-SUFFIX,stan.com.au
   - DOMAIN,aws.stan.video
-
-  # > Star+
-  - DOMAIN-SUFFIX,starplus.com
-  - DOMAIN-SUFFIX,starott.com
-  - DOMAIN,star.api.edge.bamgrid.com
-  - DOMAIN,star.connections.edge.bamgrid.com
-  - DOMAIN,star.content.edge.bamgrid.com
-  - DOMAIN,star.playback.edge.bamgrid.com
 
   # > TVBAnywhere
   - DOMAIN-SUFFIX,tvb.com

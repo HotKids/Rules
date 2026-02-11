@@ -1,7 +1,11 @@
 # > HBO Max
-// USER-AGENT,HBOMAX*
-// DOMAIN-SUFFIX,hbo.com
-// DOMAIN-SUFFIX,hbogo.com
-// DOMAIN-SUFFIX,hbonow.com
-// DOMAIN-SUFFIX,hbomax.com
-// DOMAIN-SUFFIX,hbomaxcdn.com
+USER-AGENT,HBOMAX*
+USER-AGENT,Max*
+PROCESS-NAME,com.wbd.stream
+DOMAIN-SUFFIX,hbo.com
+DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
+DOMAIN-SUFFIX,hbomax.com
+DOMAIN-SUFFIX,hbomaxcdn.com
+DOMAIN-SUFFIX,max.com
+DOMAIN-SUFFIX,discomax.com
