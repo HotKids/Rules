@@ -365,9 +365,12 @@ async function getRiskScore(ip) {
     if (r) return r;
   }
 
-  // 未指定 → 四级回落 / 指定但失败 → 回落到剩余数据源
-  for (const key of ["ipqs", "proxycheck", "ippure", "scamalytics"]) {
-    if (key === api) continue;
+  // 回落：指定了 risk_api → 只回落非 IPQS 的剩余源（避免 IPQS key 抢结果）
+  //       未指定 → 完整四级含 IPQS
+  const fallback = api
+    ? ["proxycheck", "ippure", "scamalytics"].filter(k => k !== api)
+    : ["ipqs", "proxycheck", "ippure", "scamalytics"];
+  for (const key of fallback) {
     const r = await tryMap[key]();
     if (r) return r;
   }
