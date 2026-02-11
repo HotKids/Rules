@@ -12,7 +12,7 @@
  * ② 出口 IP: ip.sb API (IPv4/IPv6)
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
- * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck (备) → Scamalytics (兜底)
+ * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  * ⑥ IP 类型: IPPure API
  * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / local_geoapi=ipsb ip.sb | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / remote_geoapi=ipapi ip-api.com(en) / remote_geoapi=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
@@ -23,7 +23,7 @@
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
- * - risk_api: 风险评分数据源，ipqs / proxycheck / scamalytics（可选，不填则三级回落）
+ * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
  * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文)
  * - mask_ip: IP 打码，1=开启，0=关闭，默认 0
@@ -295,8 +295,8 @@ async function getPolicyAndEntrance() {
 }
 
 // ==================== 风险评分获取 ====================
-// risk_api 参数：ipqs / proxycheck / scamalytics → 指定单一数据源
-// 不填或其他值 → 三级回落（IPQS → ProxyCheck → Scamalytics）
+// risk_api 参数：ipqs / proxycheck / ippure / scamalytics → 指定单一数据源
+// 不填或其他值 → 四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）
 async function getRiskScore(ip) {
   const api = args.riskApi;
   const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
@@ -331,6 +331,19 @@ async function getRiskScore(ip) {
     return null;
   }
 
+  async function tryIPPure() {
+    const info = await httpJSON(CONFIG.urls.ipType);
+    if (info?.fraudScore !== undefined) return saveAndReturn(info.fraudScore, "IPPure");
+    console.log("IPPure /v1/info 无 fraudScore，回落到 /v1/card");
+    const html = await httpRaw(CONFIG.urls.ipTypeCard);
+    if (html) {
+      const m = html.match(/(\d+)\s*%\s*(极度纯净|纯净|一般|微风险|一般风险|极度风险)/);
+      if (m) return saveAndReturn(Number(m[1]), "IPPure");
+    }
+    console.log("IPPure 风险评分获取失败");
+    return null;
+  }
+
   async function tryScamalytics() {
     const html = await httpRaw(CONFIG.urls.scamalytics(ip));
     const score = parseScamalyticsScore(html);
@@ -340,29 +353,19 @@ async function getRiskScore(ip) {
   }
 
   // 指定数据源时优先使用，失败则回落到其他
-  if (api === "ipqs") {
-    const r = await tryIPQS();
-    if (r) return r;
-  } else if (api === "proxycheck") {
-    const r = await tryProxyCheck();
-    if (r) return r;
-  } else if (api === "scamalytics") {
-    const r = await tryScamalytics();
+  const tryMap = { ipqs: tryIPQS, proxycheck: tryProxyCheck, ippure: tryIPPure, scamalytics: tryScamalytics };
+  if (tryMap[api]) {
+    const r = await tryMap[api]();
     if (r) return r;
   }
 
-  // 通用回落（未指定数据源 或 指定数据源失败时）
-  if (api !== "ipqs") {
-    const ipqsResult = await tryIPQS();
-    if (ipqsResult) return ipqsResult;
+  // 四级回落（跳过已尝试的指定数据源）
+  const fallback = ["ipqs", "proxycheck", "ippure", "scamalytics"];
+  for (const key of fallback) {
+    if (key === api) continue;
+    const r = await tryMap[key]();
+    if (r) return r;
   }
-
-  const [pcResult, scamResult] = await Promise.all([
-    api !== "proxycheck" ? tryProxyCheck() : Promise.resolve(null),
-    api !== "scamalytics" ? tryScamalytics() : Promise.resolve(null)
-  ]);
-  if (pcResult) return pcResult;
-  if (scamResult) return scamResult;
 
   return saveAndReturn(50, "Default");
 }
