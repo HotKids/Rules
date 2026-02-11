@@ -338,23 +338,29 @@ async function getRiskScore(ip) {
     return null;
   }
 
-  // 指定单一数据源
+  // 指定数据源时优先使用，失败则回落到其他
   const api = args.riskApi;
   if (api === "ipqs") {
-    return (await tryIPQS()) || saveAndReturn(50, "Default");
-  }
-  if (api === "proxycheck") {
-    return (await tryProxyCheck()) || saveAndReturn(50, "Default");
-  }
-  if (api === "scamalytics") {
-    return (await tryScamalytics()) || saveAndReturn(50, "Default");
+    const r = await tryIPQS();
+    if (r) return r;
+  } else if (api === "proxycheck") {
+    const r = await tryProxyCheck();
+    if (r) return r;
+  } else if (api === "scamalytics") {
+    const r = await tryScamalytics();
+    if (r) return r;
   }
 
-  // 三级回落
-  const ipqsResult = await tryIPQS();
-  if (ipqsResult) return ipqsResult;
+  // 通用回落（未指定数据源 或 指定数据源失败时）
+  if (api !== "ipqs") {
+    const ipqsResult = await tryIPQS();
+    if (ipqsResult) return ipqsResult;
+  }
 
-  const [pcResult, scamResult] = await Promise.all([tryProxyCheck(), tryScamalytics()]);
+  const [pcResult, scamResult] = await Promise.all([
+    api !== "proxycheck" ? tryProxyCheck() : Promise.resolve(null),
+    api !== "scamalytics" ? tryScamalytics() : Promise.resolve(null)
+  ]);
   if (pcResult) return pcResult;
   if (scamResult) return scamResult;
 
@@ -497,8 +503,13 @@ function buildOutboundSection(outIP, outIPv6, outInfo, isMask, reverseDNS) {
     lines.push("出口 IP：" + m(outIP));
   }
   lines.push("地区：" + formatGeo(outInfo?.country_code, outInfo?.city, outInfo?.region, geoLabel(outInfo)));
-  lines.push("运营商：" + (outInfo?.org || "Unknown"));
-  if (reverseDNS) lines.push("反向 DNS：" + reverseDNS);
+  const orgText = outInfo?.org || "Unknown";
+  if (reverseDNS) {
+    const rdns = reverseDNS.length > 22 ? reverseDNS.slice(0, 21) + "…" : reverseDNS;
+    lines.push("运营商：" + orgText + " | " + rdns);
+  } else {
+    lines.push("运营商：" + orgText);
+  }
 
   return lines;
 }
