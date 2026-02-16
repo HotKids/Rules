@@ -115,12 +115,12 @@ DOMAIN,cdn.registerdisney.go.com
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
 # > HBO Max
-// USER-AGENT,HBOMAX*
-// DOMAIN-SUFFIX,hbo.com
-// DOMAIN-SUFFIX,hbogo.com
-// DOMAIN-SUFFIX,hbonow.com
-// DOMAIN-SUFFIX,hbomax.com
-// DOMAIN-SUFFIX,hbomaxcdn.com
+USER-AGENT,HBOMAX*
+DOMAIN-SUFFIX,hbo.com
+DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
+DOMAIN-SUFFIX,hbomax.com
+DOMAIN-SUFFIX,hbomaxcdn.com
 
 # > Hulu
 DOMAIN-SUFFIX,hulu.com
