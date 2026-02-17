@@ -216,20 +216,6 @@ DOMAIN-SUFFIX,spotifynewsroom.jp
 DOMAIN-SUFFIX,spotilocal.com
 DOMAIN-SUFFIX,tospotify.com
 
-# > Stan
-DOMAIN-SUFFIX,stan.com.au
-DOMAIN,aws.stan.video
-// DOMAIN,streamcoimg-a.akamaihd.net
-
-# > Star+
-USER-AGENT,Star+*
-DOMAIN-SUFFIX,starplus.com
-DOMAIN-SUFFIX,starott.com
-DOMAIN,star.api.edge.bamgrid.com
-DOMAIN,star.connections.edge.bamgrid.com
-DOMAIN,star.content.edge.bamgrid.com
-DOMAIN,star.playback.edge.bamgrid.com
-
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com
 DOMAIN-KEYWORD,tvbanywhere
