@@ -3,6 +3,7 @@
   "rules": [
     {
       "domain_suffix": [
+        "cdn.peacocktv.com",
         "peacocktv.com"
       ]
     }

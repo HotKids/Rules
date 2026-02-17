@@ -86,6 +86,11 @@ DOMAIN,disney.playback.edge.bamgrid.com,Streaming
 DOMAIN,cdn.registerdisney.go.com,Streaming
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Streaming
 
+# > HBO Max
+DOMAIN-SUFFIX,max.com,Streaming
+DOMAIN-SUFFIX,hbomax.com,Streaming
+DOMAIN-SUFFIX,discomax.com,Streaming
+
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming
 DOMAIN-SUFFIX,hulu.tv,Streaming
@@ -142,6 +147,7 @@ DOMAIN,cbsservice.aws.syncbak.com,Streaming
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming
 
 # > Peacock
+DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming
 DOMAIN-SUFFIX,peacocktv.com,Streaming
 
 # > SBS On Demand
@@ -162,6 +168,10 @@ DOMAIN-SUFFIX,spotifyjobs.com,Streaming
 DOMAIN-SUFFIX,spotifynewsroom.jp,Streaming
 DOMAIN-SUFFIX,spotilocal.com,Streaming
 DOMAIN-SUFFIX,tospotify.com,Streaming
+
+# > Stan
+DOMAIN-SUFFIX,stan.com.au,Streaming
+DOMAIN,aws.stan.video,Streaming
 
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com,Streaming
