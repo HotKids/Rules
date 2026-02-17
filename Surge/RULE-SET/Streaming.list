@@ -112,8 +112,12 @@ DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 USER-AGENT,HBOMAX*
 USER-AGENT,Max*
 PROCESS-NAME,com.wbd.stream
-DOMAIN-SUFFIX,max.com
+DOMAIN-SUFFIX,hbo.com
+DOMAIN-SUFFIX,hbogo.com
+DOMAIN-SUFFIX,hbonow.com
 DOMAIN-SUFFIX,hbomax.com
+DOMAIN-SUFFIX,hbomaxcdn.com
+DOMAIN-SUFFIX,max.com
 DOMAIN-SUFFIX,discomax.com
 
 # > Hulu
