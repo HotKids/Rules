@@ -16,7 +16,7 @@
  * ⑥ IP 类型: IPPure API
  * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / local_geoapi=ipsb ip.sb | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / remote_geoapi=ipapi ip-api.com(en) / remote_geoapi=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
- * ⑨ DNS 泄露: edns.ip-api.com（检测 DNS 解析器是否泄露到本地 ISP）
+ * ⑨ DNS 泄露: ipleak.net（多次探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
  * ⑪ 流量统计: Surge /v1/traffic API
  *
@@ -69,12 +69,8 @@ const CONFIG = {
     ipqs: (key, ip) => `https://ipqualityscore.com/api/json/ip/${key}/${ip}?strictness=1`,
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`,
-    dnsLeak: () => {
-      const c = "abcdefghijklmnopqrstuvwxyz0123456789";
-      let id = "";
-      for (let i = 0; i < 32; i++) id += c[Math.floor(Math.random() * c.length)];
-      return `http://${id}.edns.ip-api.com/json`;
-    }
+    dnsLeak: (hash, n) => `https://${n}${hash}.ipleak.net/dnsdetect/`,
+    dnsLeakGeo: (ip) => `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,isp`
   },
   ipv6Timeout: 3000,
   policyRetryDelay: 500,
@@ -417,18 +413,41 @@ async function getIPType() {
 
 // ==================== DNS 泄露检测 ====================
 async function checkDNSLeak() {
-  const data = await httpJSON(CONFIG.urls.dnsLeak());
-  if (!data || !data.dns) {
-    console.log("DNS 泄露检测失败");
+  // 1. 生成随机 hash，构造唯一子域名触发 DNS 查询
+  const c = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let hash = "";
+  for (let i = 0; i < 39; i++) hash += c[Math.floor(Math.random() * c.length)];
+
+  // 2. 并行发起 3 次探测，ipleak.net 权威 DNS 记录解析器 IP
+  const results = await Promise.all([1, 2, 3].map(n => httpRaw(CONFIG.urls.dnsLeak(hash, n))));
+  const ips = [...new Set(results.map(r => (r || "").trim()).filter(r => /^[\d.:a-f]+$/i.test(r)))];
+
+  if (ips.length === 0) {
+    console.log("DNS 泄露检测失败: 无有效解析器 IP");
     return { leaked: null, resolver: null, geo: null };
   }
+  console.log("DNS 解析器 (" + ips.length + " 个): " + ips.join(", "));
 
-  const geo = data.dns.geo || "";
-  const resolver = data.dns.ip || "";
-  const chinaISP = geo.match(/(China Telecom|China Unicom|China Mobile|CMCC|ChinaNet|中国电信|中国联通|中国移动)/i);
-  const leaked = !!chinaISP;
+  // 3. 查询每个解析器 IP 的地理位置，判断是否泄露
+  const geos = await Promise.all(ips.map(ip => httpJSON(CONFIG.urls.dnsLeakGeo(ip))));
+  let leaked = false, leakedGeo = "", leakedResolver = "";
+  const geoNames = [];
 
-  console.log("DNS 解析器: " + resolver + " (" + geo + ") 泄露: " + leaked);
+  for (let i = 0; i < ips.length; i++) {
+    const g = geos[i];
+    if (!g || g.status !== "success") continue;
+    const name = [g.city, g.country].filter(Boolean).join(", ") + (g.isp ? " - " + g.isp : "");
+    geoNames.push(name);
+    if (/China|中国/i.test(g.country) || g.countryCode === "CN") {
+      leaked = true;
+      leakedGeo = name;
+      leakedResolver = ips[i];
+    }
+  }
+
+  const geo = leaked ? leakedGeo : (geoNames[0] || "");
+  const resolver = leaked ? leakedResolver : ips[0];
+  console.log("DNS 检测: " + (leaked ? "泄露" : "无泄露") + " resolver=" + resolver + " geo=" + geo);
   return { leaked, resolver, geo };
 }
 
@@ -557,10 +576,12 @@ function buildPanelContent({ useBilibili, maskMode, riskInfo, riskResult, ipType
     if (dnsLeak.leaked === null) {
       lines.push("DNS 检测：检测失败");
     } else if (dnsLeak.leaked) {
-      lines.push("DNS 检测：泄露! " + dnsLeak.geo);
+      lines.push("DNS 检测：⚠️ 泄露! " + (dnsLeak.geo || dnsLeak.resolver || "未知来源"));
     } else {
-      const dnsName = dnsLeak.geo.includes(" - ") ? dnsLeak.geo.split(" - ").pop().trim() : dnsLeak.geo;
-      lines.push("DNS 检测：无泄露 (" + dnsName + ")");
+      const dnsName = dnsLeak.geo
+        ? (dnsLeak.geo.includes(" - ") ? dnsLeak.geo.split(" - ").pop().trim() : dnsLeak.geo)
+        : (dnsLeak.resolver || "");
+      lines.push("DNS 检测：无泄露" + (dnsName ? " (" + dnsName + ")" : ""));
     }
   }
 
@@ -612,7 +633,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
   );
   if (dnsLeak && dnsLeak.leaked) {
-    bodyLines.push("⚠️ DNS 泄露! " + dnsLeak.geo);
+    bodyLines.push("⚠️ DNS 泄露! " + (dnsLeak.geo || dnsLeak.resolver || ""));
   }
 
   $notification.post(title, subtitle, bodyLines.join("\n"));

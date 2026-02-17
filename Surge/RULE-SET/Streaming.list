@@ -21,19 +21,15 @@ DOMAIN-SUFFIX,aiv-delivery.net
 // DOMAIN,www.amazon.com
 DOMAIN,ktpx.amazon.com
 DOMAIN,atv-ps.amazon.com
-DOMAIN,avodmp4s3ww-a.akamaihd.net
-// DOMAIN,d184dfn36gombl.cloudfront.net
-// DOMAIN,d1xfray82862hr.cloudfront.net
-// DOMAIN,d1v5ir2lpwr8os.cloudfront.net
-// DOMAIN,d22qjgkvxw22r6.cloudfront.net
-// DOMAIN,d25xi40x97liuc.cloudfront.net
-// DOMAIN,d27xxe7juh1us6.cloudfront.net
-// DOMAIN,d3196yreox78o9.cloudfront.net
-// DOMAIN,dmqdd6hw24ucf.cloudfront.net
+DOMAIN,d184dfn36gombl.cloudfront.net
+DOMAIN,d1xfray82862hr.cloudfront.net
+DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+DOMAIN,d22qjgkvxw22r6.cloudfront.net
+DOMAIN,d25xi40x97liuc.cloudfront.net
+DOMAIN,d27xxe7juh1us6.cloudfront.net
+DOMAIN,d3196yreox78o9.cloudfront.net
+DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs
-
-// 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
-// DOMAIN,www.amazon.com
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
 # > BBC iPlayer
@@ -68,21 +64,19 @@ DOMAIN,d2z3p34itxwaj7.cloudfront.net
 # > Crunchyroll
 USER-AGENT,Crunchyroll*
 DOMAIN-SUFFIX,crunchyroll.com
-// DOMAIN-SUFFIX,vrv.co
+DOMAIN-SUFFIX,vrv.co
 
 # > DAZN
 USER-AGENT,DAZN*
 DOMAIN-SUFFIX,dazn.com
-DOMAIN-SUFFIX,dazndn.com
 DOMAIN-SUFFIX,indazn.com
-DOMAIN-SUFFIX,indaznlab.com
 DOMAIN-SUFFIX,dazn-api.com
 DOMAIN,d151l6v8er5bdm.cloudfront.net
 DOMAIN-KEYWORD,voddazn
 
 # > Discovery+
 USER-AGENT,discovery+*
-USER-AGENT,DPlus*
+USER-AGENT,*DPlus*
 DOMAIN-SUFFIX,discoveryplus.com
 DOMAIN-SUFFIX,disco-api.com
 DOMAIN-SUFFIX,dnitv.com
@@ -105,7 +99,7 @@ DOMAIN-SUFFIX,disneyplus.com
 DOMAIN-SUFFIX,disney-plus.net
 DOMAIN-SUFFIX,disneystreaming.com
 DOMAIN-SUFFIX,dssott.com
-// DOMAIN-SUFFIX,bamgrid.com
+DOMAIN-SUFFIX,bamgrid.com
 DOMAIN,playback-certs.bamgrid.com
 DOMAIN,disney.api.edge.bamgrid.com
 DOMAIN,disney.connections.edge.bamgrid.com
@@ -186,6 +180,11 @@ DOMAIN-SUFFIX,pplusstatic.com
 // DOMAIN-SUFFIX,mtvnservices.com #MTV
 // DOMAIN-SUFFIX,cws.conviva.com
 DOMAIN,link.theplatform.com
+// US
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,PPlus*))
+// Intl.
+AND,((DOMAIN,cbsi.live.ott.irdeto.com), (USER-AGENT,Paramountlus*))
+// 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com
 // DOMAIN,thumbnails.cbsig.net #缩略图
 // DOMAIN,cbsinteractive.hb.omtrdc.net
@@ -207,7 +206,6 @@ DOMAIN-SUFFIX,sbs.com.au
 // DOMAIN,sbsvoddai-vh.akamaihd.net
 
 # > Spotify
-# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,pscdn.co
 DOMAIN-SUFFIX,scdn.co
@@ -222,24 +220,6 @@ DOMAIN-SUFFIX,spotifynewsroom.jp
 DOMAIN-SUFFIX,spotilocal.com
 DOMAIN-SUFFIX,tospotify.com
 
-# > Stan
-USER-AGENT,Stan*
-DOMAIN-SUFFIX,stan.com.au
-DOMAIN,aws.stan.video
-// DOMAIN,streamcoimg-a.akamaihd.net
-
-# > Star+
-// USER-AGENT,Star+*
-DOMAIN-SUFFIX,starplus.com
-// 拉美节点在大陆使用并不友好，可将此条独立出来单独走 US 线路
-DOMAIN-SUFFIX,starott.com
-DOMAIN,star.api.edge.bamgrid.com
-DOMAIN,star.connections.edge.bamgrid.com
-DOMAIN,star.content.edge.bamgrid.com
-DOMAIN,star.playback.edge.bamgrid.com
-// 此条与 Disney+ 共用，主要是加载海报，可注释。注释后打开 App 会提示账号漫游，但不影响正常使用。
-// DOMAIN,prod-ripcut-delivery.disney-plus.net
-
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com
 DOMAIN-KEYWORD,tvbanywhere
@@ -249,6 +229,7 @@ DOMAIN-SUFFIX,tver.jp
 DOMAIN-SUFFIX,interactive-circle.jp
 DOMAIN-SUFFIX,brightcove.com
 DOMAIN-SUFFIX,prod.boltdns.net
+// DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp

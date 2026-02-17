@@ -163,10 +163,6 @@ DOMAIN-SUFFIX,spotifynewsroom.jp,Streaming
 DOMAIN-SUFFIX,spotilocal.com,Streaming
 DOMAIN-SUFFIX,tospotify.com,Streaming
 
-# > Stan
-DOMAIN-SUFFIX,stan.com.au,Streaming
-DOMAIN,aws.stan.video,Streaming
-
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com,Streaming
 DOMAIN-KEYWORD,tvbanywhere,Streaming
