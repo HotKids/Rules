@@ -1,3 +1,4 @@
 payload:
   # > Peacock
+  - DOMAIN-SUFFIX,cdn.peacocktv.com
   - DOMAIN-SUFFIX,peacocktv.com

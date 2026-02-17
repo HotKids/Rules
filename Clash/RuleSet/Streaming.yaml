@@ -88,6 +88,12 @@ payload:
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
+  # > HBO Max
+  - PROCESS-NAME,com.wbd.stream
+  - DOMAIN-SUFFIX,max.com
+  - DOMAIN-SUFFIX,hbomax.com
+  - DOMAIN-SUFFIX,discomax.com
+
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
@@ -139,11 +145,14 @@ payload:
   - DOMAIN-SUFFIX,paramountplus.com
   - DOMAIN-SUFFIX,pplusstatic.com
   - DOMAIN,link.theplatform.com
+  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,PPlus*))
+  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,Paramountlus*))
   - DOMAIN,cbsi.live.ott.irdeto.com
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
 
   # > Peacock
+  - DOMAIN-SUFFIX,cdn.peacocktv.com
   - DOMAIN-SUFFIX,peacocktv.com
 
   # > SBS On Demand
@@ -164,6 +173,10 @@ payload:
   - DOMAIN-SUFFIX,spotifynewsroom.jp
   - DOMAIN-SUFFIX,spotilocal.com
   - DOMAIN-SUFFIX,tospotify.com
+
+  # > Stan
+  - DOMAIN-SUFFIX,stan.com.au
+  - DOMAIN,aws.stan.video
 
   # > TVBAnywhere
   - DOMAIN-SUFFIX,tvb.com

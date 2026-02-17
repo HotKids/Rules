@@ -15,6 +15,11 @@ DOMAIN,content-ause1-ur-discovery1.uplynk.com,Streaming_US
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming_US
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
 
+# > HBO Max
+DOMAIN-SUFFIX,max.com,Streaming_US
+DOMAIN-SUFFIX,hbomax.com,Streaming_US
+DOMAIN-SUFFIX,discomax.com,Streaming_US
+
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming_US
 DOMAIN-SUFFIX,hulu.tv,Streaming_US
@@ -43,11 +48,9 @@ DOMAIN,cbsservice.aws.syncbak.com,Streaming_US
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming_US
 
 # > Peacock
+DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming_US
 DOMAIN-SUFFIX,peacocktv.com,Streaming_US
 
 # > Roku
 DOMAIN-SUFFIX,roku.com,Streaming_US
 DOMAIN-SUFFIX,rokutime.com,Streaming_US
-
-# > T-Mobile
-DOMAIN-SUFFIX,t-mobile.com,Streaming_US

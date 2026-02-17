@@ -23,26 +23,34 @@
       "domain_suffix": [
         "cbsi.com",
         "cbsivideo.com",
+        "cdn.peacocktv.com",
         "crunchyroll.com",
         "disco-api.com",
+        "discomax.com",
         "discoveryplus.com",
         "dnitv.com",
         "dplus-amer.prd.api.discomax.com",
         "dplus.us.prd.media.max.com",
         "epix.com",
         "epixnow.com",
+        "hbomax.com",
         "hulu.com",
         "hulu.tv",
         "huluim.com",
         "hulustream.com",
+        "max.com",
         "mgmplus.com",
         "paramountplus.com",
         "pbs.org",
         "peacocktv.com",
         "pplusstatic.com",
         "roku.com",
-        "rokutime.com",
-        "t-mobile.com"
+        "rokutime.com"
+      ]
+    },
+    {
+      "process_name": [
+        "com.wbd.stream"
       ]
     }
   ]
