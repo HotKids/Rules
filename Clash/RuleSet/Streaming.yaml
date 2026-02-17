@@ -165,10 +165,6 @@ payload:
   - DOMAIN-SUFFIX,spotilocal.com
   - DOMAIN-SUFFIX,tospotify.com
 
-  # > Stan
-  - DOMAIN-SUFFIX,stan.com.au
-  - DOMAIN,aws.stan.video
-
   # > TVBAnywhere
   - DOMAIN-SUFFIX,tvb.com
   - DOMAIN-KEYWORD,tvbanywhere

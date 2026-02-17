@@ -425,8 +425,7 @@ async function checkDNSLeak() {
 
   const geo = data.dns.geo || "";
   const resolver = data.dns.ip || "";
-  const chinaISP = geo.match(/(China Telecom|China Unicom|China Mobile|CMCC|ChinaNet|中国电信|中国联通|中国移动)/i);
-  const leaked = !!chinaISP;
+  const leaked = /China|中国/i.test(geo);
 
   console.log("DNS 解析器: " + resolver + " (" + geo + ") 泄露: " + leaked);
   return { leaked, resolver, geo };
@@ -557,10 +556,12 @@ function buildPanelContent({ useBilibili, maskMode, riskInfo, riskResult, ipType
     if (dnsLeak.leaked === null) {
       lines.push("DNS 检测：检测失败");
     } else if (dnsLeak.leaked) {
-      lines.push("DNS 检测：泄露! " + dnsLeak.geo);
+      lines.push("DNS 检测：⚠️ 泄露! " + (dnsLeak.geo || dnsLeak.resolver || "未知来源"));
     } else {
-      const dnsName = dnsLeak.geo.includes(" - ") ? dnsLeak.geo.split(" - ").pop().trim() : dnsLeak.geo;
-      lines.push("DNS 检测：无泄露 (" + dnsName + ")");
+      const dnsName = dnsLeak.geo
+        ? (dnsLeak.geo.includes(" - ") ? dnsLeak.geo.split(" - ").pop().trim() : dnsLeak.geo)
+        : (dnsLeak.resolver || "");
+      lines.push("DNS 检测：无泄露" + (dnsName ? " (" + dnsName + ")" : ""));
     }
   }
 
@@ -612,7 +613,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
   );
   if (dnsLeak && dnsLeak.leaked) {
-    bodyLines.push("⚠️ DNS 泄露! " + dnsLeak.geo);
+    bodyLines.push("⚠️ DNS 泄露! " + (dnsLeak.geo || dnsLeak.resolver || ""));
   }
 
   $notification.post(title, subtitle, bodyLines.join("\n"));
