@@ -464,7 +464,7 @@ async function checkDNSLeak() {
       seen.add(ip);
       const geo = d.dns.geo || "";
       const isChina = /China|中国/i.test(geo);
-      const name = geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip);
+      const name = (geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip)).replace(/\s*communications\s+corporation/gi, "");
       resolvers.push({ ip, name, isChina });
       if (isChina) leaked = true;
     }
@@ -482,7 +482,7 @@ async function checkDNSLeak() {
   for (let i = 0; i < ips.length; i++) {
     const g = geos[i];
     const isChina = g?.status === "success" && (/China|中国/i.test(g.country) || g.countryCode === "CN");
-    const name = g?.status === "success" ? (g.isp || g.country || ips[i]) : ips[i];
+    const name = (g?.status === "success" ? (g.isp || g.country || ips[i]) : ips[i]).replace(/\s*communications\s+corporation/gi, "");
     resolvers.push({ ip: ips[i], name, isChina });
     if (isChina) leaked = true;
   }
