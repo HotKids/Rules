@@ -413,17 +413,19 @@ async function getIPType() {
 }
 
 // ==================== DNS 泄露检测 ====================
-async function checkDNSLeak() {
+async function checkDNSLeak(policy) {
   const c = "abcdefghijklmnopqrstuvwxyz0123456789";
   function randStr(len) { let s = ""; for (let i = 0; i < len; i++) s += c[Math.floor(Math.random() * c.length)]; return s; }
 
-  // 带 User-Agent 的请求（ipleak.net 会拦截无 UA 请求）
+  // 带 User-Agent 的请求（ipleak.net 会拦截无 UA 请求），强制走代理策略
   function dnsGet(url) {
+    const opts = {
+      url,
+      headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" }
+    };
+    if (policy) opts.policy = policy;
     return new Promise(r => {
-      $httpClient.get({
-        url,
-        headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" }
-      }, (err, _, d) => r(err ? null : (d || null)));
+      $httpClient.get(opts, (err, _, d) => r(err ? null : (d || null)));
     });
   }
 
@@ -446,7 +448,7 @@ async function checkDNSLeak() {
   // 2. ipleak.net 失败 → 回落 edns.ip-api.com（单次请求即可，同一 DNS 解析器结果不变）
   if (ips.length === 0) {
     console.log("ipleak.net 无结果，回落 edns.ip-api.com");
-    const ednsData = await httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32)));
+    const ednsData = await httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32)), policy);
     if (!ednsData?.dns) {
       console.log("DNS 泄露检测失败");
       return { leaked: null, resolvers: null, resolver: null, geo: null };
@@ -464,7 +466,7 @@ async function checkDNSLeak() {
   console.log("DNS 解析器 (" + ips.length + " 个): " + ips.join(", "));
 
   // 3. 查询每个解析器 IP 的地理位置，判断是否泄露
-  const geos = await Promise.all(ips.map(ip => httpJSON(CONFIG.urls.dnsLeakGeo(ip))));
+  const geos = await Promise.all(ips.map(ip => httpJSON(CONFIG.urls.dnsLeakGeo(ip), policy)));
   let leaked = false;
   const resolvers = [];
 
@@ -723,20 +725,28 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
-  // 先并行发起所有 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
-  // 这样 getPolicyAndEntrance 能在 recent 里找到刚完成的请求，避免 Unknown
-  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, dnsLeakResult, trafficResult] = await Promise.all([
+  // 先并行发起 geo/risk/流量 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
+  // DNS 泄露检测需要走代理策略，必须等拿到 policy 后再执行
+  const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, trafficResult] = await Promise.all([
     getRiskScore(outIP),                     // 0
     getIPType(),                             // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
     httpJSON(geoUrl(outIP)),                 // 3: 出口地理
     useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）+ hostname
-    checkDNSLeak(),                          // 5: DNS 泄露检测
-    getTrafficStats(),                       // 6: 流量统计
+    getTrafficStats(),                       // 5: 流量统计
   ]);
 
   // API 请求已完成，此时 recent 里一定有匹配记录
   const { policy, entranceIP } = await getPolicyAndEntrance();
+
+  // DNS 泄露检测：直连无意义，仅代理时执行，强制走代理策略
+  const isDirect = !policy || policy === "DIRECT" || policy === "Unknown";
+  let dnsLeakResult = null;
+  if (!isDirect) {
+    dnsLeakResult = await checkDNSLeak(policy);
+  } else {
+    console.log("当前为直连，跳过 DNS 泄露检测");
+  }
 
   // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
   let localInfo;
