@@ -70,6 +70,7 @@ const CONFIG = {
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`,
     dnsLeak: (hash, n) => `https://${n}${hash}.ipleak.net/dnsdetect/`,
+    dnsLeakEdns: (id) => `http://${id}.edns.ip-api.com/json`,
     dnsLeakGeo: (ip) => `http://ip-api.com/json/${ip}?fields=status,country,countryCode,city,isp`
   },
   ipv6Timeout: 3000,
@@ -413,19 +414,48 @@ async function getIPType() {
 
 // ==================== DNS 泄露检测 ====================
 async function checkDNSLeak() {
-  // 1. 生成随机 hash，构造唯一子域名触发 DNS 查询
   const c = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let hash = "";
-  for (let i = 0; i < 39; i++) hash += c[Math.floor(Math.random() * c.length)];
+  function randStr(len) { let s = ""; for (let i = 0; i < len; i++) s += c[Math.floor(Math.random() * c.length)]; return s; }
 
-  // 2. 并行发起 3 次探测，ipleak.net 权威 DNS 记录解析器 IP
-  const results = await Promise.all([1, 2, 3].map(n => httpRaw(CONFIG.urls.dnsLeak(hash, n))));
-  const ips = [...new Set(results.map(r => (r || "").trim()).filter(r => /^[\d.:a-f]+$/i.test(r)))];
-
-  if (ips.length === 0) {
-    console.log("DNS 泄露检测失败: 无有效解析器 IP");
-    return { leaked: null, resolver: null, geo: null };
+  // 带 User-Agent 的请求（ipleak.net 会拦截无 UA 请求）
+  function dnsGet(url) {
+    return new Promise(r => {
+      $httpClient.get({
+        url,
+        headers: { "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36" }
+      }, (err, _, d) => r(err ? null : (d || null)));
+    });
   }
+
+  // 解析响应：纯 IP 或 JSON
+  function parseIP(raw) {
+    if (!raw) return null;
+    const t = raw.trim();
+    if (/^[\d.:a-f]+$/i.test(t)) return t;
+    try { const j = JSON.parse(t); return j.ip || null; } catch { return null; }
+  }
+
+  // 1. ipleak.net 多次探测
+  const hash = randStr(39);
+  const results = await Promise.all([1, 2, 3].map(n => dnsGet(CONFIG.urls.dnsLeak(hash, n))));
+  results.forEach((r, i) => console.log("ipleak #" + (i + 1) + ": " + JSON.stringify((r || "").slice(0, 80))));
+  let ips = [...new Set(results.map(parseIP).filter(Boolean))];
+
+  // 2. ipleak.net 失败 → 回落 edns.ip-api.com
+  if (ips.length === 0) {
+    console.log("ipleak.net 无结果，回落 edns.ip-api.com");
+    const data = await httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32)));
+    if (!data?.dns) {
+      console.log("DNS 泄露检测失败");
+      return { leaked: null, resolver: null, geo: null };
+    }
+    const geo = data.dns.geo || "";
+    const resolver = data.dns.ip || "";
+    const leaked = /China|中国/i.test(geo);
+    console.log("DNS 解析器 (edns): " + resolver + " (" + geo + ") 泄露: " + leaked);
+    return { leaked, resolver, geo };
+  }
+
   console.log("DNS 解析器 (" + ips.length + " 个): " + ips.join(", "));
 
   // 3. 查询每个解析器 IP 的地理位置，判断是否泄露
