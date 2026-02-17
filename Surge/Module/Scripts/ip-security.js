@@ -443,32 +443,21 @@ async function checkDNSLeak() {
   results.forEach((r, i) => console.log("ipleak #" + (i + 1) + ": " + JSON.stringify((r || "").slice(0, 80))));
   let ips = [...new Set(results.map(parseIP).filter(Boolean))];
 
-  // 2. ipleak.net 失败 → 回落 edns.ip-api.com
+  // 2. ipleak.net 失败 → 回落 edns.ip-api.com（单次请求即可，同一 DNS 解析器结果不变）
   if (ips.length === 0) {
     console.log("ipleak.net 无结果，回落 edns.ip-api.com");
-    const ednsResults = await Promise.all(
-      Array.from({ length: 5 }, () => httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32))))
-    );
-    const ednsValid = ednsResults.filter(d => d?.dns);
-    if (ednsValid.length === 0) {
+    const ednsData = await httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32)));
+    if (!ednsData?.dns) {
       console.log("DNS 泄露检测失败");
       return { leaked: null, resolvers: null, resolver: null, geo: null };
     }
-    // 按 IP 去重，构造 resolvers 数组
-    const seen = new Set();
-    let leaked = false;
-    const resolvers = [];
-    for (const d of ednsValid) {
-      const ip = d.dns.ip || "";
-      if (!ip || seen.has(ip)) continue;
-      seen.add(ip);
-      const geo = d.dns.geo || "";
-      const isChina = /China|中国/i.test(geo);
-      const name = (geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip)).replace(/\s*communications\s+corporation/gi, "");
-      resolvers.push({ ip, name, isChina });
-      if (isChina) leaked = true;
-    }
-    console.log("DNS 解析器 (edns, " + resolvers.length + " 个): " + resolvers.map(r => r.name + (r.isChina ? " [CN]" : "")).join(", "));
+    const ip = ednsData.dns.ip || "";
+    const geo = ednsData.dns.geo || "";
+    const isChina = /China|中国/i.test(geo);
+    const name = (geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip)).replace(/\s*communications\s+corporation/gi, "");
+    const resolvers = ip ? [{ ip, name, isChina }] : [];
+    const leaked = isChina;
+    console.log("DNS 解析器 (edns): " + (resolvers.length ? resolvers[0].name + (isChina ? " [CN]" : "") : "无"));
     return { leaked, resolvers: resolvers.length > 0 ? resolvers : null, resolver: null, geo: null };
   }
 
@@ -617,9 +606,9 @@ function buildPanelContent({ useBilibili, maskMode, riskInfo, riskResult, ipType
       lines.push("DNS 检测：检测失败");
     } else if (dnsLeak.resolvers) {
       // ipleak.net 路径：显示所有解析器
-      const names = dnsLeak.resolvers.map(r => r.name).filter(Boolean);
+      const names = [...new Set(dnsLeak.resolvers.map(r => r.name).filter(Boolean))];
       if (dnsLeak.leaked) {
-        const leakedNames = dnsLeak.resolvers.filter(r => r.isChina).map(r => r.name);
+        const leakedNames = [...new Set(dnsLeak.resolvers.filter(r => r.isChina).map(r => r.name))];
         lines.push("DNS 检测：⚠️ 泄露! " + leakedNames.join(", ") + " [" + leakedNames.length + "/" + dnsLeak.resolvers.length + "]");
       } else {
         lines.push("DNS 检测：无泄露 (" + names.join(" / ") + ")");
@@ -685,7 +674,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
   );
   if (dnsLeak && dnsLeak.leaked) {
     if (dnsLeak.resolvers) {
-      const leakedNames = dnsLeak.resolvers.filter(r => r.isChina).map(r => r.name);
+      const leakedNames = [...new Set(dnsLeak.resolvers.filter(r => r.isChina).map(r => r.name))];
       bodyLines.push("⚠️ DNS 泄露! " + leakedNames.join(", "));
     } else {
       bodyLines.push("⚠️ DNS 泄露! " + (dnsLeak.geo || dnsLeak.resolver || ""));
