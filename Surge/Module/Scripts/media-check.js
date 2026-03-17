@@ -604,10 +604,26 @@ class ServiceChecker {
 
   /**
    * Spotify 解锁检测
+   * 不能用通用 checkByRegex，因为页面 body 中存在大量 spotify.com/us/ 链接，
+   * 正则会先命中 us，与实际代理地区无关。
+   * 改为匹配 canonical URL，该标签直接反映服务器认定的当前地区。
    * @returns {Promise<Object>} 检测结果
    */
-  static checkSpotify() {
-    return Utils.checkByRegex("https://www.spotify.com/premium/", /spotify\.com\/([a-z]{2})\//);
+  static async checkSpotify() {
+    try {
+      const res = await Utils.request({ url: "https://www.spotify.com/premium/" });
+      const body = res.body || "";
+      // canonical URL 是最可靠的地区指示符，形如：
+      // <link rel="canonical" href="https://www.spotify.com/tw/premium/" />
+      const canonical = body.match(/<link[^>]+rel="canonical"[^>]+href="https:\/\/www\.spotify\.com\/([a-z]{2})\//i)
+                     || body.match(/href="https:\/\/www\.spotify\.com\/([a-z]{2})\/premium\/"[^>]+rel="canonical"/i);
+      if (canonical) return Utils.createResult(STATUS.OK, canonical[1].toUpperCase());
+      // 次选：og:url
+      const ogUrl = body.match(/property="og:url"\s+content="https:\/\/www\.spotify\.com\/([a-z]{2})\//i)
+                 || body.match(/content="https:\/\/www\.spotify\.com\/([a-z]{2})\/[^"]*"\s+property="og:url"/i);
+      if (ogUrl) return Utils.createResult(STATUS.OK, ogUrl[1].toUpperCase());
+      return Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.FAIL, "No"); }
   }
 
   /**
