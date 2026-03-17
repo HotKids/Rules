@@ -604,18 +604,10 @@ class ServiceChecker {
 
   /**
    * Spotify 解锁检测
-   * 参考 1-stream/RegionRestrictionCheck check.sh 写法：
-   * 请求 signup 页，提取嵌入 JSON 中的 "geoCountry":"XX" 字段
    * @returns {Promise<Object>} 检测结果
    */
-  static async checkSpotify() {
-    try {
-      const res = await Utils.request({ url: "https://www.spotify.com/tw/signup" });
-      const match = (res.body || "").match(/"geoCountry":"([A-Z]{2})","geoCountryMarket"/);
-      return match
-        ? Utils.createResult(STATUS.OK, match[1])
-        : Utils.createResult(STATUS.FAIL, "No");
-    } catch { return Utils.createResult(STATUS.FAIL, "No"); }
+  static checkSpotify() {
+    return Utils.checkByRegex("https://www.spotify.com/premium/", /spotify\.com\/([a-z]{2})\//);
   }
 
   /**
