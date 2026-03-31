@@ -21,6 +21,9 @@ DOMAIN-SUFFIX,gateway.icloud.com
 DOMAIN-SUFFIX,claude.ai
 DOMAIN-SUFFIX,claude.com
 DOMAIN-SUFFIX,anthropic.com
+DOMAIN-SUFFIX,claudeusercontent.com
+IP-CIDR,160.79.104.0/23,no-resolve
+IP-CIDR6,2607:6bc0::/48,no-resolve
 
 # OpenAI
 # > ChatGPT
@@ -63,6 +66,7 @@ DOMAIN-SUFFIX,makersuite.google.com
 DOMAIN,aistudio.google.com
 DOMAIN,alkalicore-pa.clients6.google.com
 DOMAIN,alkalimakersuite-pa.clients6.google.com
+DOMAIN,aida.googleapis.com
 # > DeepMind
 DOMAIN-SUFFIX,deepmind.com
 DOMAIN-SUFFIX,deepmind.google
@@ -80,6 +84,8 @@ DOMAIN-KEYWORD,labs.google
 
 # JetBrains AI
 DOMAIN-SUFFIX,grazie.ai
+DOMAIN-SUFFIX,jetbrains.ai
+DOMAIN-SUFFIX,grazie.aws.intellij.net
 
 # Meta
 DOMAIN-SUFFIX,meta.ai
@@ -90,6 +96,7 @@ DOMAIN,imagine.meta.com
 DOMAIN,copilot.microsoft.com
 DOMAIN,sydney.bing.com
 DOMAIN,www.bing.com
+DOMAIN,copilot-proxy.githubusercontent.com
 # > GitHub Copilot
 DOMAIN-SUFFIX,githubcopilot.com
 
