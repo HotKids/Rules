@@ -5,6 +5,7 @@
       "domain": [
         "abtestvm-sg.bytedance.com",
         "ai.google.dev",
+        "aida.googleapis.com",
         "aistudio.google.com",
         "alkalicore-pa.clients6.google.com",
         "alkalimakersuite-pa.clients6.google.com",
@@ -15,6 +16,7 @@
         "apple-relay.fastly-edge.com",
         "bard.google.com",
         "chatgpt.livekit.cloud",
+        "copilot-proxy.githubusercontent.com",
         "copilot.microsoft.com",
         "cp4.cloudflare.com",
         "d3ssuo6fbvr.cloudfront.net",
@@ -44,6 +46,7 @@
         "ciciai.com",
         "claude.ai",
         "claude.com",
+        "claudeusercontent.com",
         "cursor-cdn.com",
         "cursor.com",
         "cursor.sh",
@@ -57,8 +60,10 @@
         "generativelanguage.googleapis.com",
         "githubcopilot.com",
         "grazie.ai",
+        "grazie.aws.intellij.net",
         "grok.com",
         "groq.com",
+        "jetbrains.ai",
         "livekit.cloud",
         "makersuite.google.com",
         "meta.ai",
@@ -84,6 +89,12 @@
     {
       "domain_regex": [
         "^abtest.*\\.byteoversea\\.com$"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "160.79.104.0/23",
+        "2607:6bc0::/48"
       ]
     },
     {
