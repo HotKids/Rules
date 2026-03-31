@@ -15,6 +15,9 @@ payload:
   - DOMAIN-SUFFIX,claude.ai
   - DOMAIN-SUFFIX,claude.com
   - DOMAIN-SUFFIX,anthropic.com
+  - DOMAIN-SUFFIX,claudeusercontent.com
+  - IP-CIDR,160.79.104.0/23,no-resolve
+  - IP-CIDR6,2607:6bc0::/48,no-resolve
 
   # OpenAI
   # > ChatGPT
@@ -57,6 +60,7 @@ payload:
   - DOMAIN,aistudio.google.com
   - DOMAIN,alkalicore-pa.clients6.google.com
   - DOMAIN,alkalimakersuite-pa.clients6.google.com
+  - DOMAIN,aida.googleapis.com
   # > DeepMind
   - DOMAIN-SUFFIX,deepmind.com
   - DOMAIN-SUFFIX,deepmind.google
@@ -74,6 +78,8 @@ payload:
 
   # JetBrains AI
   - DOMAIN-SUFFIX,grazie.ai
+  - DOMAIN-SUFFIX,jetbrains.ai
+  - DOMAIN-SUFFIX,grazie.aws.intellij.net
 
   # Meta
   - DOMAIN-SUFFIX,meta.ai
@@ -84,6 +90,7 @@ payload:
   - DOMAIN,copilot.microsoft.com
   - DOMAIN,sydney.bing.com
   - DOMAIN,www.bing.com
+  - DOMAIN,copilot-proxy.githubusercontent.com
   # > GitHub Copilot
   - DOMAIN-SUFFIX,githubcopilot.com
 

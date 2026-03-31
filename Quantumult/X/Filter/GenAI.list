@@ -14,6 +14,9 @@ DOMAIN-SUFFIX,gateway.icloud.com,GenAI
 DOMAIN-SUFFIX,claude.ai,GenAI
 DOMAIN-SUFFIX,claude.com,GenAI
 DOMAIN-SUFFIX,anthropic.com,GenAI
+DOMAIN-SUFFIX,claudeusercontent.com,GenAI
+IP-CIDR,160.79.104.0/23,GenAI
+IP-CIDR6,2607:6bc0::/48,GenAI
 
 # OpenAI
 # > ChatGPT
@@ -54,6 +57,7 @@ DOMAIN-SUFFIX,makersuite.google.com,GenAI
 DOMAIN,aistudio.google.com,GenAI
 DOMAIN,alkalicore-pa.clients6.google.com,GenAI
 DOMAIN,alkalimakersuite-pa.clients6.google.com,GenAI
+DOMAIN,aida.googleapis.com,GenAI
 # > DeepMind
 DOMAIN-SUFFIX,deepmind.com,GenAI
 DOMAIN-SUFFIX,deepmind.google,GenAI
@@ -71,6 +75,8 @@ DOMAIN-KEYWORD,labs.google,GenAI
 
 # JetBrains AI
 DOMAIN-SUFFIX,grazie.ai,GenAI
+DOMAIN-SUFFIX,jetbrains.ai,GenAI
+DOMAIN-SUFFIX,grazie.aws.intellij.net,GenAI
 
 # Meta
 DOMAIN-SUFFIX,meta.ai,GenAI
@@ -81,6 +87,7 @@ DOMAIN,imagine.meta.com,GenAI
 DOMAIN,copilot.microsoft.com,GenAI
 DOMAIN,sydney.bing.com,GenAI
 DOMAIN,www.bing.com,GenAI
+DOMAIN,copilot-proxy.githubusercontent.com,GenAI
 # > GitHub Copilot
 DOMAIN-SUFFIX,githubcopilot.com,GenAI
 
