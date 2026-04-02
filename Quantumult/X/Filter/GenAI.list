@@ -106,10 +106,6 @@ DOMAIN-SUFFIX,x.ai,GenAI
 
 # ByteDance
 # > Doubao Dola
-DOMAIN-SUFFIX,dola.com,GenAI
-DOMAIN-SUFFIX,cici.com,GenAI
-DOMAIN-SUFFIX,ciciai.com,GenAI
-DOMAIN,abtestvm-sg.bytedance.com,GenAI
 
 # Affinity
 DOMAIN,d3ssuo6fbvr.cloudfront.net,GenAI

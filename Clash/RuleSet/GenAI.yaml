@@ -109,11 +109,6 @@ payload:
 
   # ByteDance
   # > Doubao Dola
-  - DOMAIN-SUFFIX,dola.com
-  - DOMAIN-SUFFIX,cici.com
-  - DOMAIN-SUFFIX,ciciai.com
-  - DOMAIN,abtestvm-sg.bytedance.com
-  - DOMAIN-WILDCARD,abtest*.byteoversea.com
 
   # Affinity
   - DOMAIN,d3ssuo6fbvr.cloudfront.net
