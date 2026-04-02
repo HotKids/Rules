@@ -3,7 +3,6 @@
   "rules": [
     {
       "domain": [
-        "abtestvm-sg.bytedance.com",
         "ai.google.dev",
         "aida.googleapis.com",
         "aistudio.google.com",
@@ -42,8 +41,6 @@
         "anthropic.com",
         "chat.com",
         "chatgpt.com",
-        "cici.com",
-        "ciciai.com",
         "claude.ai",
         "claude.com",
         "claudeusercontent.com",
@@ -53,7 +50,6 @@
         "cursorapi.com",
         "deepmind.com",
         "deepmind.google",
-        "dola.com",
         "gateway.icloud.com",
         "geller-pa.googleapis.com",
         "generativeai.google",
@@ -84,11 +80,6 @@
         "notebooklm.google",
         "openaiapi",
         "openaicom"
-      ]
-    },
-    {
-      "domain_regex": [
-        "^abtest.*\\.byteoversea\\.com$"
       ]
     },
     {
