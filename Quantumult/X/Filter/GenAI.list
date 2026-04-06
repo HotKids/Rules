@@ -101,9 +101,11 @@ DOMAIN-SUFFIX,pplx.ai,GenAI
 DOMAIN,pplx-res.cloudinary.com,GenAI
 
 # xAI
-DOMAIN-SUFFIX,grok.com,GenAI
 DOMAIN-SUFFIX,x.ai,GenAI
+DOMAIN-SUFFIX,grok.com,GenAI
+DOMAIN-SUFFIX,grokipedia.com,GenAI
 
 
-# Affinity
+# Canva
+# > Affinity
 DOMAIN,d3ssuo6fbvr.cloudfront.net,GenAI
