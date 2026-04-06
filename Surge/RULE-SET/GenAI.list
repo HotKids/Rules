@@ -110,8 +110,9 @@ DOMAIN-SUFFIX,pplx.ai
 DOMAIN,pplx-res.cloudinary.com
 
 # xAI
+DOMAIN-SUFFIX,x.ai
 DOMAIN-SUFFIX,grok.com
-DOMAIN-SUFFIX,x.ai  
+DOMAIN-SUFFIX,grokipedia.com
 
 // # ByteDance
 // # > Doubao Dola
@@ -121,5 +122,6 @@ DOMAIN-SUFFIX,x.ai  
 // DOMAIN,abtestvm-sg.bytedance.com
 // DOMAIN-WILDCARD,abtest*.byteoversea.com
 
-# Affinity
+# Canva 
+# > Affinity
 DOMAIN,d3ssuo6fbvr.cloudfront.net
