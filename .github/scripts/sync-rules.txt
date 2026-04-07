@@ -5,5 +5,5 @@ https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/P
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list,Telegram
 
 # >> Clash
-https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.conf,Apple CDN
 https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf,Apple
+https://raw.githubusercontent.com/LM-Firefly/Rules/master/Clash-RuleSet-Classical/PROXY/Dropbox.yaml,Dropbox
