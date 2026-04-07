@@ -12,8 +12,8 @@ URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{Proxy}}}
 
 # ByteDance
 # (Amemv)
-DOMAIN-KEYWORD,core-hl.amemv.com,{{{Proxy}}},extended-matching
-DOMAIN-KEYWORD,core-lf.amemv.com,{{{Proxy}}},extended-matching
+DOMAIN-KEYWORD,-core-hl.amemv.com,{{{Proxy}}},extended-matching
+DOMAIN-KEYWORD,-core-lf.amemv.com,{{{Proxy}}},extended-matching
 # (TouTiao)
 DOMAIN,ib.snssdk.com,{{{Proxy}}}
 
