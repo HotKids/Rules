@@ -1,11 +1,25 @@
 # > Amazon Prime Video
+# USER-AGENT,InstantVideo.US*
+# USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com,Prime Video
 DOMAIN-SUFFIX,amazonvideo.com,Prime Video
 DOMAIN-SUFFIX,media-amazon.com,Prime Video
 DOMAIN-SUFFIX,pv-cdn.net,Prime Video
 DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
 DOMAIN-SUFFIX,aiv-delivery.net,Prime Video
+# DOMAIN,www.amazon.com
 DOMAIN,ktpx.amazon.com,Prime Video
 DOMAIN,atv-ps.amazon.com,Prime Video
 DOMAIN,avodmp4s3ww-a.akamaihd.net,Prime Video
+# DOMAIN,d184dfn36gombl.cloudfront.net
+# DOMAIN,d1xfray82862hr.cloudfront.net
+# DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+# DOMAIN,d22qjgkvxw22r6.cloudfront.net
+# DOMAIN,d25xi40x97liuc.cloudfront.net
+# DOMAIN,d27xxe7juh1us6.cloudfront.net
+# DOMAIN,d3196yreox78o9.cloudfront.net
+# DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs,Prime Video
+
+# 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
+# DOMAIN,www.amazon.com

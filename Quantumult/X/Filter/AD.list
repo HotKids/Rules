@@ -75,6 +75,7 @@ DOMAIN,ad.cyapi.cn,AD
 
 # > Disney+ with Hulu
 DOMAIN-SUFFIX,disneyadvertising.com,AD
+# DOMAIN-SUFFIX,ads.digital.disneyadvertising.com
 
 # > ChatGPT
 DOMAIN,o33249.ingest.sentry.io,AD

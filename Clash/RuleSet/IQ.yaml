@@ -3,10 +3,14 @@ payload:
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
+  # 首页
   - DOMAIN-SUFFIX,intl.iqiyi.com
+  # 历史
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
+  # 收藏
   - DOMAIN,intl-subscription.iqiyi.com
+  # 播放
   - DOMAIN,msg-intl.qy.net
   - DOMAIN,ip.geo.iqiyi.com
   - DOMAIN,akcdnoversea.inter.71edge.com

@@ -31,10 +31,14 @@ USER-AGENT,QTP*,Streaming_TW
 PROCESS-NAME,com.iqiyi.i18n,Streaming_TW
 PROCESS-NAME,com.iqiyi.i18n.tv,Streaming_TW
 DOMAIN-SUFFIX,iq.com,Streaming_TW
+# 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,Streaming_TW
+# 历史
 DOMAIN,intl-rcd.iqiyi.com,Streaming_TW
 DOMAIN,intl-im-hist-api.iqiyi.com,Streaming_TW
+# 收藏
 DOMAIN,intl-subscription.iqiyi.com,Streaming_TW
+# 播放
 DOMAIN,msg-intl.qy.net,Streaming_TW
 DOMAIN,ip.geo.iqiyi.com,Streaming_TW
 DOMAIN,akcdnoversea.inter.71edge.com,Streaming_TW

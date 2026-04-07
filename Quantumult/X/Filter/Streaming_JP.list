@@ -29,8 +29,10 @@ DOMAIN-SUFFIX,tver.jp,Streaming_JP
 DOMAIN-SUFFIX,interactive-circle.jp,Streaming_JP
 DOMAIN-SUFFIX,brightcove.com,Streaming_JP
 DOMAIN-SUFFIX,prod.boltdns.net,Streaming_JP
+# DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp,Streaming_JP
 DOMAIN-SUFFIX,nxtv.jp,Streaming_JP
+# DOMAIN,streamd01ca-nxtv-jp.akamaized.net
 DOMAIN,us-central1-u-next-apps.cloudfunctions.net,Streaming_JP

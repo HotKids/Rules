@@ -27,8 +27,10 @@ payload:
   - DOMAIN-SUFFIX,interactive-circle.jp
   - DOMAIN-SUFFIX,brightcove.com
   - DOMAIN-SUFFIX,prod.boltdns.net
+  # DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
   # > U-NEXT
   - DOMAIN-SUFFIX,unext.jp
   - DOMAIN-SUFFIX,nxtv.jp
+  # DOMAIN,streamd01ca-nxtv-jp.akamaized.net
   - DOMAIN,us-central1-u-next-apps.cloudfunctions.net

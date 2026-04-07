@@ -6,10 +6,14 @@ USER-AGENT,QTP*,IQ
 PROCESS-NAME,com.iqiyi.i18n,IQ
 PROCESS-NAME,com.iqiyi.i18n.tv,IQ
 DOMAIN-SUFFIX,iq.com,IQ
+# 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,IQ
+# 历史
 DOMAIN,intl-rcd.iqiyi.com,IQ
 DOMAIN,intl-im-hist-api.iqiyi.com,IQ
+# 收藏
 DOMAIN,intl-subscription.iqiyi.com,IQ
+# 播放
 DOMAIN,msg-intl.qy.net,IQ
 DOMAIN,ip.geo.iqiyi.com,IQ
 DOMAIN,akcdnoversea.inter.71edge.com,IQ

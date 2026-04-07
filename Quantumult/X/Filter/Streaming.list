@@ -10,17 +10,30 @@ DOMAIN,linear-abematv.akamaized.net,Streaming
 DOMAIN,ds-linear-abematv.akamaized.net,Streaming
 
 # > Amazon Prime Video
+# USER-AGENT,InstantVideo.US*
+# USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com,Streaming
 DOMAIN-SUFFIX,amazonvideo.com,Streaming
 DOMAIN-SUFFIX,media-amazon.com,Streaming
 DOMAIN-SUFFIX,pv-cdn.net,Streaming
 DOMAIN-SUFFIX,aiv-cdn.net,Streaming
 DOMAIN-SUFFIX,aiv-delivery.net,Streaming
+# DOMAIN,www.amazon.com
 DOMAIN,ktpx.amazon.com,Streaming
 DOMAIN,atv-ps.amazon.com,Streaming
 DOMAIN,avodmp4s3ww-a.akamaihd.net,Streaming
+# DOMAIN,d184dfn36gombl.cloudfront.net
+# DOMAIN,d1xfray82862hr.cloudfront.net
+# DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+# DOMAIN,d22qjgkvxw22r6.cloudfront.net
+# DOMAIN,d25xi40x97liuc.cloudfront.net
+# DOMAIN,d27xxe7juh1us6.cloudfront.net
+# DOMAIN,d3196yreox78o9.cloudfront.net
+# DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs,Streaming
 
+# 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
+# DOMAIN,www.amazon.com
 
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*,Streaming
@@ -54,6 +67,8 @@ DOMAIN,d2z3p34itxwaj7.cloudfront.net,Streaming
 # > Crunchyroll
 USER-AGENT,Crunchyroll*,Streaming
 DOMAIN-SUFFIX,crunchyroll.com,Streaming
+# 如需使用 VRV，请将此条取消注释并走 US 代理
+# DOMAIN-SUFFIX,vrv.co
 
 # > DAZN
 USER-AGENT,DAZN*,Streaming
@@ -73,6 +88,7 @@ DOMAIN-SUFFIX,disco-api.com,Streaming
 DOMAIN-SUFFIX,dnitv.com,Streaming
 DOMAIN-SUFFIX,dplus.us.prd.media.max.com,Streaming
 DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com,Streaming
+# DOMAIN,default.any-any.prd.api.discomax.com // 会影响 HBO Max
 DOMAIN,us1-prod.disco-api.com,Streaming
 DOMAIN,us1-prod-images.disco-api.com,Streaming
 DOMAIN,kvinit-prod.api.kochava.com,Streaming
@@ -80,6 +96,7 @@ DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io,Streaming
 DOMAIN,content-ause1-ur-discovery1.uplynk.com,Streaming
 DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming
+# DOMAIN,go-prod-vz.akamaized.net
 
 # > Disney+
 USER-AGENT,Disney*,Streaming
@@ -87,6 +104,7 @@ DOMAIN-SUFFIX,disneyplus.com,Streaming
 DOMAIN-SUFFIX,disney-plus.net,Streaming
 DOMAIN-SUFFIX,disneystreaming.com,Streaming
 DOMAIN-SUFFIX,dssott.com,Streaming
+# DOMAIN-SUFFIX,bamgrid.com
 DOMAIN,playback-certs.bamgrid.com,Streaming
 DOMAIN,disney.api.edge.bamgrid.com,Streaming
 DOMAIN,disney.connections.edge.bamgrid.com,Streaming
@@ -109,6 +127,7 @@ DOMAIN-SUFFIX,hulu.tv,Streaming
 DOMAIN-SUFFIX,huluim.com,Streaming
 DOMAIN-SUFFIX,hulustream.com,Streaming
 DOMAIN,cws-hulu.conviva.com,Streaming
+# DOMAIN,assetshuluimcom-a.akamaihd.net
 
 # > MGM+
 DOMAIN-SUFFIX,mgmplus.com,Streaming
@@ -150,14 +169,28 @@ IP-CIDR,198.38.96.0/19,Streaming,no-resolve
 IP-CIDR,198.45.48.0/20,Streaming,no-resolve
 
 # > Paramount+
+# US UA
 USER-AGENT,PPlus*,Streaming
+# Intl. UA
 USER-AGENT,ParamountPlus*,Streaming
 DOMAIN-SUFFIX,cbsi.com,Streaming
+# DOMAIN-SUFFIX,cbsaavideo.com #播放
 DOMAIN-SUFFIX,cbsivideo.com,Streaming
 DOMAIN-SUFFIX,paramountplus.com,Streaming
 DOMAIN-SUFFIX,pplusstatic.com,Streaming
+# DOMAIN-SUFFIX,mtvnservices.com #MTV
+# DOMAIN-SUFFIX,cws.conviva.com
 DOMAIN,link.theplatform.com,Streaming
+# US
+# Intl.
+# 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
 DOMAIN,cbsi.live.ott.irdeto.com,Streaming
+# DOMAIN,thumbnails.cbsig.net #缩略图
+# DOMAIN,cbsinteractive.hb.omtrdc.net
+# DOMAIN,ads.play.cbsi.video #片头动画，可屏蔽
+# DOMAIN,pubads.g.doubleclick.net #不可屏蔽
+# DOMAIN,cbsnews.akamaized.net #CBSN Live
+# CBS live丨US
 DOMAIN,cbsservice.aws.syncbak.com,Streaming
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming
 
@@ -165,11 +198,14 @@ DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming
 USER-AGENT,peacock*,Streaming
 DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming
 DOMAIN-SUFFIX,peacocktv.com,Streaming
+# 屏蔽广告
+# DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
 # > SBS On Demand
 USER-AGENT,SBS*,Streaming
 DOMAIN-SUFFIX,sbsod.com,Streaming
 DOMAIN-SUFFIX,sbs.com.au,Streaming
+# DOMAIN,sbsvoddai-vh.akamaihd.net
 
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
@@ -191,6 +227,7 @@ DOMAIN-SUFFIX,tospotify.com,Streaming
 USER-AGENT,Stan*,Streaming
 DOMAIN-SUFFIX,stan.com.au,Streaming
 DOMAIN,aws.stan.video,Streaming
+# DOMAIN,streamcoimg-a.akamaihd.net
 
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com,Streaming
@@ -201,10 +238,12 @@ DOMAIN-SUFFIX,tver.jp,Streaming
 DOMAIN-SUFFIX,interactive-circle.jp,Streaming
 DOMAIN-SUFFIX,brightcove.com,Streaming
 DOMAIN-SUFFIX,prod.boltdns.net,Streaming
+# DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp,Streaming
 DOMAIN-SUFFIX,nxtv.jp,Streaming
+# DOMAIN,streamd01ca-nxtv-jp.akamaized.net
 DOMAIN,us-central1-u-next-apps.cloudfunctions.net,Streaming
 
 # > YouTube

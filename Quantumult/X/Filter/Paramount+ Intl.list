@@ -7,3 +7,6 @@ DOMAIN-KEYWORD,intl.pplus,Paramount+ Intl
 DOMAIN-KEYWORD,intl.paramountplus,Paramount+ Intl
 DOMAIN-SUFFIX,intl.paramountplus.com,Paramount+ Intl
 DOMAIN,wwwimage-intl.pplusstatic.com,Paramount+ Intl
+# iOS 15 下 UA 不可用，需 MITM cbsi.live.ott.irdeto.com
+# 播放验证，此条 Paramount+ 国际版与美国版冲突，故使用 AND 语法区分
+# DOMAIN,cbsi.live.ott.irdeto.com

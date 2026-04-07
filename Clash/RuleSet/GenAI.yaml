@@ -1,13 +1,20 @@
 payload:
   ## GenAI
   # Apple Intelligence
+  # https://support.apple.com/zh-cn/101555
+  # 搜索服务，包括 Siri、聚焦、查询、Safari 浏览器、新闻、信息和音乐
   - DOMAIN-SUFFIX,smoot.apple.com
+  # Apple 智能扩展
   - DOMAIN,apple-relay.apple.com
+  # 私有云计算
   - DOMAIN,apple-relay.cloudflare.com
   - DOMAIN,apple-relay.fastly-edge.com
   - DOMAIN,cp4.cloudflare.com
+  # Siri 和听写请求
   - DOMAIN,guzzoni.apple.com
+  # Apple 定位与系统服务域名
   - DOMAIN,gspe1-ssl.ls.apple.com
+  # CloudKit 内容，包括 XProtect 更新和语音控制资源
   - DOMAIN-SUFFIX,gateway.icloud.com
 
   # Anthropic
@@ -108,6 +115,13 @@ payload:
   - DOMAIN-SUFFIX,grok.com
   - DOMAIN-SUFFIX,grokipedia.com
 
+  # # ByteDance
+  # # > Doubao Dola
+  # DOMAIN-SUFFIX,dola.com
+  # DOMAIN-SUFFIX,cici.com
+  # DOMAIN-SUFFIX,ciciai.com
+  # DOMAIN,abtestvm-sg.bytedance.com
+  # DOMAIN-WILDCARD,abtest*.byteoversea.com
 
   # Canva
   # > Affinity

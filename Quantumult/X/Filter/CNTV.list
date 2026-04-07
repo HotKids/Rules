@@ -13,10 +13,12 @@ DOMAIN,upos-hz-mirrorakam.akamaized.net,CNTV
 DOMAIN-KEYWORD,bilibili,CNTV
 DOMAIN-KEYWORD,cn-hk-eq-bcache-,CNTV
 IP-CIDR,203.107.1.65/32,CNTV,no-resolve
+# 港台版 Bilibili App
 USER-AGENT,bili-inter*,CNTV
 DOMAIN,apiintl.biliapi.net,CNTV
 
 # > Bilibili SEA
+# USER-AGENT,bilibili
 DOMAIN-SUFFIX,biliintl.com,CNTV
 DOMAIN,apm-misaka.biliapi.net,CNTV
 DOMAIN,p-bstarstatic.akamaized.net,CNTV
@@ -31,10 +33,14 @@ USER-AGENT,QTP*,CNTV
 PROCESS-NAME,com.iqiyi.i18n,CNTV
 PROCESS-NAME,com.iqiyi.i18n.tv,CNTV
 DOMAIN-SUFFIX,iq.com,CNTV
+# 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,CNTV
+# 历史
 DOMAIN,intl-rcd.iqiyi.com,CNTV
 DOMAIN,intl-im-hist-api.iqiyi.com,CNTV
+# 收藏
 DOMAIN,intl-subscription.iqiyi.com,CNTV
+# 播放
 DOMAIN,akmcdnoversea.inter.iqiyi.com,CNTV
 DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,CNTV
 DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,CNTV
@@ -54,6 +60,7 @@ IP-CIDR,203.80.97.208/32,CNTV,no-resolve
 IP-CIDR,203.198.80.99/32,CNTV,no-resolve
 
 # > WeTV
+# USER-AGENT,WeTV*
 DOMAIN-SUFFIX,wetv.vip,CNTV
 DOMAIN-SUFFIX,wetvinfo.com,CNTV
 DOMAIN,wetv.tv.qq.com,CNTV
@@ -63,3 +70,4 @@ IP-CIDR,150.109.28.51/32,CNTV,no-resolve
 
 # > Youku Intl.
 DOMAIN,vod-interyk.youku.tv,CNTV
+# DOMAIN-SUFFIX,youku.tv

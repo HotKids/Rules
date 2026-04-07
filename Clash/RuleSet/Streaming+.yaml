@@ -16,6 +16,7 @@ payload:
 
   # > Peacock TV
   # TV 端需走 US
+  # DOMAIN-SUFFIX,cdn.peacocktv.com
 
 
   # > SkyShowtime

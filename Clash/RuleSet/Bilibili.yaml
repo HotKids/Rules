@@ -13,4 +13,5 @@ payload:
   - DOMAIN-KEYWORD,bilibili
   - DOMAIN-KEYWORD,cn-hk-eq-bcache-
   - IP-CIDR,121.11.192.0/24,no-resolve
+  # 港台版 Bilibili App
   - DOMAIN,apiintl.biliapi.net

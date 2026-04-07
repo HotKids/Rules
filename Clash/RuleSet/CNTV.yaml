@@ -13,9 +13,11 @@ payload:
   - DOMAIN-KEYWORD,bilibili
   - DOMAIN-KEYWORD,cn-hk-eq-bcache-
   - IP-CIDR,203.107.1.65/32,no-resolve
+  # 港台版 Bilibili App
   - DOMAIN,apiintl.biliapi.net
 
   # > Bilibili SEA
+  # USER-AGENT,bilibili
   - DOMAIN-SUFFIX,biliintl.com
   - DOMAIN,apm-misaka.biliapi.net
   - DOMAIN,p-bstarstatic.akamaized.net
@@ -26,10 +28,14 @@ payload:
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
+  # 首页
   - DOMAIN-SUFFIX,intl.iqiyi.com
+  # 历史
   - DOMAIN,intl-rcd.iqiyi.com
   - DOMAIN,intl-im-hist-api.iqiyi.com
+  # 收藏
   - DOMAIN,intl-subscription.iqiyi.com
+  # 播放
   - DOMAIN,akmcdnoversea.inter.iqiyi.com
   - DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
   - DOMAIN,chuangcachecdnoversea.inter.iqiyi.com
@@ -49,6 +55,7 @@ payload:
   - IP-CIDR,203.198.80.99/32,no-resolve
 
   # > WeTV
+  # USER-AGENT,WeTV*
   - DOMAIN-SUFFIX,wetv.vip
   - DOMAIN-SUFFIX,wetvinfo.com
   - DOMAIN,wetv.tv.qq.com
@@ -58,3 +65,4 @@ payload:
 
   # > Youku Intl.
   - DOMAIN,vod-interyk.youku.tv
+  # DOMAIN-SUFFIX,youku.tv
