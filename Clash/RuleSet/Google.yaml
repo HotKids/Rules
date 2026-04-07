@@ -1,5 +1,5 @@
-### fork from https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Google.list
 payload:
+  ### fork from https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Google.list
   # 内容：Google
   # 数量：25条
   - DOMAIN-KEYWORD,gmail

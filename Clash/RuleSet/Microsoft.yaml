@@ -1,5 +1,5 @@
-### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/microsoft.conf
 payload:
+  ### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/microsoft.conf
   # $ meta_title Sukka's Ruleset - Microsoft Domains
   # $ meta_description This file contains domains of Microsoft.
 
