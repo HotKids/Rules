@@ -369,6 +369,11 @@ def convert_clash(lines: list[str]) -> str:
         if rule_type in CLASH_SKIP:
             continue
 
+        if rule_type == "AND":
+            sub_rules = parse_and_rule(stripped) or []
+            if any(st in CLASH_SKIP for st, sv in sub_rules):
+                continue
+
         rule_line = ",".join(parts)
         out.append(f"  - {rule_line}")
 

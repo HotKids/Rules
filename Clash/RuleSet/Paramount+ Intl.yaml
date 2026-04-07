@@ -7,4 +7,3 @@ payload:
   - DOMAIN-KEYWORD,intl.paramountplus
   - DOMAIN-SUFFIX,intl.paramountplus.com
   - DOMAIN,wwwimage-intl.pplusstatic.com
-  - AND,((DOMAIN,cbsi.live.ott.irdeto.com),(USER-AGENT,ParamountPlus*))
