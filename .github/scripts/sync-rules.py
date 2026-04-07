@@ -46,10 +46,8 @@ SINGBOX_MAP = {
 # section 名 → 文件名 stem（只列特殊映射，其余 section 名即文件名）
 SECTION_TO_FILE = {
     "Hulu JP":            "Hulu_JP",
-    "HBO GO Asia":        "HBO_Go",
     "iQIYI Intl":         "IQ",
     "LINE TV":            "LINETV",
-    "HBO Max":            "HBO_Max",
     "Amazon Prime Video": "Prime Video",
     "BBC iPlayer":        "BBC",
     "SBS On Demand":      "SBS",
@@ -74,9 +72,9 @@ for _file, _secs in MERGE_GROUPS.items():
 # 地区合集成员（值为文件名 stem）
 REGIONAL_MEMBERS = {
     "Streaming_JP": ["AbemaTV", "FOD", "Hulu_JP", "Paravi", "TVer", "U-NEXT"],
-    "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "HBO_Go", "IQ",
+    "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "IQ",
                       "KKBOX&KKTV", "LINETV", "myVideo", "Readmoo", "Spotify"],
-    "Streaming_US": ["Crunchyroll", "Discovery+", "HBO_Max", "Hulu", "Max",
+    "Streaming_US": ["Crunchyroll", "Discovery+", "Hulu",
                       "MGM+", "PBS", "Paramount+", "Peacock", "Roku", "T-Mobile"],
 }
 
@@ -84,9 +82,9 @@ REGIONAL_MEMBERS = {
 # Movies Anywhere 不在此列，内联保留
 STREAMING_MEMBERS = [
     "AbemaTV", "Prime Video", "BBC", "Bahamut", "Britbox", "Crunchyroll",
-    "DAZN", "Discovery+", "Disney+", "HBO_Max", "Hulu", "MGM+",
+    "DAZN", "Discovery+", "Disney+", "Hulu", "MGM+",
     "MUBI", "Netflix", "Paramount+", "Peacock", "SBS", "Spotify",
-    "Stan", "Star+", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
+    "Stan", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
 ]
 
 MOVIES_ANYWHERE_SECTION = "# > Movies Anywhere\nDOMAIN-SUFFIX,moviesanywhere.com"
@@ -168,7 +166,7 @@ def read_standalone(stem: str) -> str | None:
 
 def sync_regional():
     """地区合集 ↔ 独立子项双向同步。"""
-    print("\n── Step 1: 地区合集 ↔ 独立子项同步 ──")
+    print("\n── Step 2: 地区合集 ↔ 独立子项同步 ──")
 
     for regional_name, members in REGIONAL_MEMBERS.items():
         regional_path = SURGE_DIR / f"{regional_name}.list"
@@ -262,7 +260,7 @@ def _rebuild_regional(regional_path: Path, regional_name: str, members: list[str
 
 def rebuild_streaming():
     """独立子项 → 重建 Streaming.list。"""
-    print("\n── Step 2: 重建 Streaming.list ──")
+    print("\n── Step 3: 重建 Streaming.list ──")
 
     parts = []
     for stem in STREAMING_MEMBERS:
@@ -499,17 +497,32 @@ def convert_all():
 # ═══════════════════════════════════════════════════════════════════════
 
 def cleanup_stale():
-    """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。"""
+    """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。
+    同时清理 Surge/RULE-SET/ 中以前由 # >> Surge 拉取、现已从 sync-rules.txt 移除的文件
+    （通过 '### fork from' 首行识别为外部来源）。
+    """
     print("\n── Step 5: 清理已删除的文件 ──")
 
-    surge_stems = set()
-    for sf in SURGE_DIR.rglob("*.list"):
-        surge_stems.add(sf.stem)
-
-    # # >> Clash 直接写入的文件也需保留（Step 1 生成的 Clash / sing-box 文件）
     sync_rules = parse_sync_rules()
-    external_stems = {e["name"] for e in sync_rules["clash"]}
-    keep = surge_stems | external_stems
+    # 当前 sync-rules.txt 管理的 stems
+    surge_managed = {e["name"] for e in sync_rules["surge"]}
+    clash_managed = {e["name"] for e in sync_rules["clash"]}
+
+    # 清理 Surge/RULE-SET/ 中不再被 # >> Surge 管理的外部拉取文件
+    for sf in sorted(SURGE_DIR.rglob("*.list")):
+        if sf.stem in surge_managed:
+            continue
+        try:
+            first_line = sf.read_text(encoding="utf-8").splitlines()[0].strip()
+        except (IndexError, OSError):
+            continue
+        if first_line.startswith("### fork from "):
+            sf.unlink()
+            print(f"  ✗ 删除 {sf.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除）")
+
+    # QX / Clash / sing-box：保留有 Surge 源或 # >> Clash 管理的文件
+    surge_stems = {sf.stem for sf in SURGE_DIR.rglob("*.list")}
+    keep = surge_stems | clash_managed
 
     deleted = 0
     for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
@@ -563,6 +576,67 @@ def _is_clash_payload(text: str) -> bool:
         if line.strip() == "payload:":
             return True
     return False
+
+
+def normalize_surge_rules(text: str) -> str | None:
+    """规范化 Surge 规则文本为项目风格。
+    保留 '# > Section' header，剥掉其他来源注释，输出干净规则行。
+    """
+    out = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("//"):
+            continue
+        if stripped.startswith("#"):
+            # 仅保留 '# > Name' section header（排除 '# >>' 配置标记）
+            if re.match(r"^#\s*>(?!>)\s*\S", stripped):
+                out.append(stripped)
+            continue
+        out.append(stripped)
+    return ("\n".join(out) + "\n") if out else None
+
+
+def normalize_clash_payload(text: str) -> str | None:
+    """规范化 Clash payload 格式：提取规则行，剥掉内嵌元数据注释，重新格式化输出。"""
+    rules = []
+    in_payload = False
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        if stripped == "payload:":
+            in_payload = True
+            continue
+        if not in_payload:
+            continue
+        if stripped.startswith("- "):
+            rule = stripped[2:].strip().strip("'\"")
+            if rule and not rule.startswith("#"):
+                rules.append(rule)
+    if not rules:
+        return None
+    out = ["payload:"]
+    for r in rules:
+        out.append(f"  - {r}")
+    return "\n".join(out) + "\n"
+
+
+def convert_clash_payload_to_surge(text: str) -> str | None:
+    """Clash classical payload: → Surge RULE-SET .list 格式（仅规则行，无注释）。"""
+    out = []
+    in_payload = False
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        if stripped == "payload:":
+            in_payload = True
+            continue
+        if not in_payload:
+            continue
+        if stripped.startswith("- "):
+            rule = stripped[2:].strip().strip("'\"")
+            if rule and not rule.startswith("#"):
+                out.append(rule)
+    return ("\n".join(out) + "\n") if out else None
 
 
 # ── domain behavior ──────────────────────────────────────────────────
@@ -698,7 +772,18 @@ def fetch_external_rules():
         text = fetch_url(url)
         if text is None:
             continue
-        content = f"### fork from {url}\n{text}"
+        # 若远端文件是 Clash payload 格式，先转换为 Surge 格式
+        if _is_clash_payload(text):
+            text = convert_clash_payload_to_surge(text)
+            if text is None:
+                print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
+                continue
+        # 统一规范化为项目风格（保留 # > Section header，剥掉来源注释）
+        normalized = normalize_surge_rules(text)
+        if normalized is None:
+            print(f"    [WARN] {name} 规范化后为空，跳过")
+            continue
+        content = f"### fork from {url}\n{normalized}"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
@@ -719,7 +804,8 @@ def fetch_external_rules():
         if is_ipcidr:
             body = convert_ipcidr_to_clash(text) or ""
         elif is_clash:
-            body = text
+            # 已是 Clash payload：规范化去除内嵌元数据注释
+            body = normalize_clash_payload(text) or ""
         else:
             body = convert_clash(text.splitlines())
 
