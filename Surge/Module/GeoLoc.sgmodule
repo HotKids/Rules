@@ -5,13 +5,12 @@
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
-AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
-
 # bilibili
 URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{Proxy}}}
 
 # ByteDance
 # (Amemv)
+AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
 DOMAIN-KEYWORD,-core-hl.amemv.com,{{{Proxy}}},extended-matching
 DOMAIN-KEYWORD,-core-lf.amemv.com,{{{Proxy}}},extended-matching
 # (TouTiao)
