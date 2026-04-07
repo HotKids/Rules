@@ -87,12 +87,6 @@ payload:
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
-  # > HBO Max
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,hbomax.com
-  - DOMAIN-SUFFIX,discomax.com
-
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv

@@ -1,6 +1,4 @@
 ### fork from https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Twitter.list
-# 内容：Twitter
-# 数量：12条
 DOMAIN-KEYWORD,twitter,Twitter
 DOMAIN-SUFFIX,periscope.tv,Twitter
 DOMAIN-SUFFIX,pscp.tv,Twitter

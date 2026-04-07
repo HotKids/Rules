@@ -1,5 +1,4 @@
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list
-# Telegram
 DOMAIN-SUFFIX,cdn-telegram.org,Telegram
 DOMAIN-SUFFIX,comments.app,Telegram
 DOMAIN-SUFFIX,graph.org,Telegram
@@ -16,7 +15,6 @@ DOMAIN-SUFFIX,telegram-cdn.org,Telegram
 DOMAIN-SUFFIX,telesco.pe,Telegram
 DOMAIN-SUFFIX,tg.dev,Telegram
 DOMAIN-SUFFIX,tx.me,Telegram
-
 IP-CIDR,91.108.56.0/22,Telegram,no-resolve
 IP-CIDR,91.108.4.0/22,Telegram,no-resolve
 IP-CIDR,91.108.8.0/22,Telegram,no-resolve

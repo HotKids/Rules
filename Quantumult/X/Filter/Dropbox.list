@@ -1,19 +1,18 @@
 ### fork from https://raw.githubusercontent.com/LM-Firefly/Rules/master/Clash-RuleSet-Classical/PROXY/Dropbox.yaml
-## > Dropbox
-- DOMAIN-SUFFIX,db.tt,Dropbox
-- DOMAIN-SUFFIX,dropbox.com,Dropbox
-- DOMAIN-SUFFIX,dropboxapi.com,Dropbox
-- DOMAIN-SUFFIX,dropboxusercontent.com,Dropbox
-- DOMAIN-SUFFIX,dropboxbusiness.com,Dropbox
-- DOMAIN-SUFFIX,dropboxforums.com,Dropbox
-- DOMAIN-SUFFIX,dropboxforum.com,Dropbox
-- DOMAIN-SUFFIX,dropboxinsiders.com,Dropbox
-- DOMAIN-SUFFIX,dropboxmail.com,Dropbox
-- DOMAIN-SUFFIX,dropboxpartners.com,Dropbox
-- DOMAIN-SUFFIX,dropboxstatic.com,Dropbox
-- DOMAIN-SUFFIX,dropbox.zendesk.com,Dropbox
-- DOMAIN-SUFFIX,getdropbox.com,Dropbox
-- DOMAIN-SUFFIX,dropbox-dns.com,Dropbox
-- DOMAIN-SUFFIX,dropbox.tech,Dropbox
-- DOMAIN-SUFFIX,dropboxcaptcha.com,Dropbox
-- DOMAIN-SUFFIX,paper-attachments.s3.amazonaws.com,Dropbox
+DOMAIN-SUFFIX,db.tt,Dropbox
+DOMAIN-SUFFIX,dropbox.com,Dropbox
+DOMAIN-SUFFIX,dropboxapi.com,Dropbox
+DOMAIN-SUFFIX,dropboxusercontent.com,Dropbox
+DOMAIN-SUFFIX,dropboxbusiness.com,Dropbox
+DOMAIN-SUFFIX,dropboxforums.com,Dropbox
+DOMAIN-SUFFIX,dropboxforum.com,Dropbox
+DOMAIN-SUFFIX,dropboxinsiders.com,Dropbox
+DOMAIN-SUFFIX,dropboxmail.com,Dropbox
+DOMAIN-SUFFIX,dropboxpartners.com,Dropbox
+DOMAIN-SUFFIX,dropboxstatic.com,Dropbox
+DOMAIN-SUFFIX,dropbox.zendesk.com,Dropbox
+DOMAIN-SUFFIX,getdropbox.com,Dropbox
+DOMAIN-SUFFIX,dropbox-dns.com,Dropbox
+DOMAIN-SUFFIX,dropbox.tech,Dropbox
+DOMAIN-SUFFIX,dropboxcaptcha.com,Dropbox
+DOMAIN-SUFFIX,paper-attachments.s3.amazonaws.com,Dropbox
