@@ -1,9 +1,9 @@
 # >> Surge
 https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Google.list,Google
+https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Twitter.list,Twitter
 https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/microsoft.conf,Microsoft
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/PayPal.list,PayPal
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list,Telegram
-
+https://raw.githubusercontent.com/LM-Firefly/Rules/master/Clash-RuleSet-Classical/PROXY/Dropbox.yaml,Dropbox
 # >> Clash
 https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf,Apple
-https://raw.githubusercontent.com/LM-Firefly/Rules/master/Clash-RuleSet-Classical/PROXY/Dropbox.yaml,Dropbox
