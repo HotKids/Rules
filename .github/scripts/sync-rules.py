@@ -854,7 +854,7 @@ def fetch_external_rules():
         header = " & ".join(section_names) if section_names else name.rsplit("/", 1)[-1]
         rule_lines.insert(0, f"# > {header}")
 
-        content = "\n".join(fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
+        content = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
@@ -887,7 +887,8 @@ def fetch_external_rules():
             continue
 
         body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
-        clash_content = "\n".join(fork_headers) + "\n" + body
+        fork_line = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers)
+        clash_content = fork_line + "\n" + body
         if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
             print(f"    ✓ Clash:    {name}.yaml")
         else:
