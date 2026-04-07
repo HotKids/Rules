@@ -4,4 +4,4 @@ DOMAIN-SUFFIX,wetvinfo.com,WeTV
 DOMAIN,wetv.tv.qq.com,WeTV
 DOMAIN,wetv.acc.qq.com,WeTV
 DOMAIN,hwvip.video.qq.com,WeTV
-IP-CIDR,150.109.28.51/32,WeTV
+IP-CIDR,150.109.28.51/32,WeTV,no-resolve

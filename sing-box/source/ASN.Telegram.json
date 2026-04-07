@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "comments.app // @CommentsBot",
+        "graph.org",
+        "legra.ph",
+        "t.me",
+        "tdesktop.com",
+        "telegra.ph // Telegraph",
+        "telegram-cdn.org",
+        "telegram.me",
+        "telegram.org",
+        "telesco.pe // Telescope",
+        "tx.me"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "109.239.140.0/24",
+        "2a0a:f280::/32",
+        "5.28.192.0/18"
+      ]
+    },
+    {
+      "process_name": [
+        "org.telegram.messenger"
+      ]
+    }
+  ]
+}

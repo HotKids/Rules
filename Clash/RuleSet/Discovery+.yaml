@@ -5,7 +5,6 @@ payload:
   - DOMAIN-SUFFIX,dnitv.com
   - DOMAIN-SUFFIX,dplus.us.prd.media.max.com
   - DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com
-  - AND,((USER-AGENT,*DPlus*),(DOMAIN,default.any-any.prd.api.discomax.com))
   - DOMAIN,us1-prod.disco-api.com
   - DOMAIN,us1-prod-images.disco-api.com
   - DOMAIN,kvinit-prod.api.kochava.com

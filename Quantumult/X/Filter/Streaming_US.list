@@ -1,7 +1,10 @@
 # > Crunchyroll
+USER-AGENT,Crunchyroll*,Streaming_US
 DOMAIN-SUFFIX,crunchyroll.com,Streaming_US
 
 # > Discovery+
+USER-AGENT,discovery+*,Streaming_US
+USER-AGENT,*DPlus*,Streaming_US
 DOMAIN-SUFFIX,discoveryplus.com,Streaming_US
 DOMAIN-SUFFIX,disco-api.com,Streaming_US
 DOMAIN-SUFFIX,dnitv.com,Streaming_US
@@ -16,6 +19,9 @@ DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming_US
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
 
 # > HBO Max
+USER-AGENT,HBOMAX*,Streaming_US
+USER-AGENT,Max*,Streaming_US
+PROCESS-NAME,com.wbd.stream,Streaming_US
 DOMAIN-SUFFIX,max.com,Streaming_US
 DOMAIN-SUFFIX,hbomax.com,Streaming_US
 DOMAIN-SUFFIX,discomax.com,Streaming_US
@@ -35,9 +41,12 @@ DOMAIN,epixhls.akamaized.net,Streaming_US
 DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com,Streaming_US
 
 # > PBS
+USER-AGENT,PBS*,Streaming_US
 DOMAIN-SUFFIX,pbs.org,Streaming_US
 
 # > Paramount+
+USER-AGENT,PPlus*,Streaming_US
+USER-AGENT,ParamountPlus*,Streaming_US
 DOMAIN-SUFFIX,cbsi.com,Streaming_US
 DOMAIN-SUFFIX,cbsivideo.com,Streaming_US
 DOMAIN-SUFFIX,paramountplus.com,Streaming_US
@@ -48,6 +57,7 @@ DOMAIN,cbsservice.aws.syncbak.com,Streaming_US
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming_US
 
 # > Peacock
+USER-AGENT,peacock*,Streaming_US
 DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming_US
 DOMAIN-SUFFIX,peacocktv.com,Streaming_US
 

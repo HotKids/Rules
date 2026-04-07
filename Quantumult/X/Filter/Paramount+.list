@@ -1,4 +1,6 @@
 # > Paramount+
+USER-AGENT,PPlus*,Paramount+
+USER-AGENT,ParamountPlus*,Paramount+
 DOMAIN-SUFFIX,cbsi.com,Paramount+
 DOMAIN-SUFFIX,cbsivideo.com,Paramount+
 DOMAIN-SUFFIX,paramountplus.com,Paramount+

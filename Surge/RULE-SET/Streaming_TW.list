@@ -37,10 +37,10 @@ DOMAIN,hbounify-prod.evergent.com
 DOMAIN,dai3fd1oh325y.cloudfront.net
 
 # > iQIYI Intl
-// USER-AGENT,iQIYI*
-// USER-AGENT,QIYIVideo*
-// USER-AGENT,QYPlayer*
-// USER-AGENT,QTP*
+USER-AGENT,iQIYI*
+USER-AGENT,QIYIVideo*
+USER-AGENT,QYPlayer*
+USER-AGENT,QTP*
 PROCESS-NAME,com.iqiyi.i18n
 PROCESS-NAME,com.iqiyi.i18n.tv
 DOMAIN-SUFFIX,iq.com

@@ -1,4 +1,5 @@
 # > Bilibili
+USER-AGENT,*bili*,CNTV
 DOMAIN-SUFFIX,bilibili.com,CNTV
 DOMAIN-SUFFIX,bilibili.tv,CNTV
 DOMAIN-SUFFIX,biliapi.net,CNTV
@@ -11,7 +12,8 @@ DOMAIN-SUFFIX,hdslb.com,CNTV
 DOMAIN,upos-hz-mirrorakam.akamaized.net,CNTV
 DOMAIN-KEYWORD,bilibili,CNTV
 DOMAIN-KEYWORD,cn-hk-eq-bcache-,CNTV
-IP-CIDR,203.107.1.65/32,CNTV
+IP-CIDR,203.107.1.65/32,CNTV,no-resolve
+USER-AGENT,bili-inter*,CNTV
 DOMAIN,apiintl.biliapi.net,CNTV
 
 # > Bilibili SEA
@@ -22,6 +24,12 @@ DOMAIN,upos-bstar-mirrorakam.akamaized.net,CNTV
 DOMAIN,upos-bstar1-mirrorakam.akamaized.net,CNTV
 
 # > iQIYI Intl
+USER-AGENT,iQIYI*,CNTV
+USER-AGENT,QIYIVideo*,CNTV
+USER-AGENT,QYPlayer*,CNTV
+USER-AGENT,QTP*,CNTV
+PROCESS-NAME,com.iqiyi.i18n,CNTV
+PROCESS-NAME,com.iqiyi.i18n.tv,CNTV
 DOMAIN-SUFFIX,iq.com,CNTV
 DOMAIN-SUFFIX,intl.iqiyi.com,CNTV
 DOMAIN,intl-rcd.iqiyi.com,CNTV
@@ -37,13 +45,13 @@ DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,CNTV
 DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,CNTV
 DOMAIN-KEYWORD,akmcdnoverse,CNTV
 DOMAIN-KEYWORD,chuangcachecdnoversea,CNTV
-IP-CIDR,23.40.241.251/32,CNTV
-IP-CIDR,23.40.242.10/32,CNTV
-IP-CIDR,110.238.107.47/32,CNTV
-IP-CIDR,118.26.32.162/32,CNTV
-IP-CIDR,159.138.102.146/32,CNTV
-IP-CIDR,203.80.97.208/32,CNTV
-IP-CIDR,203.198.80.99/32,CNTV
+IP-CIDR,23.40.241.251/32,CNTV,no-resolve
+IP-CIDR,23.40.242.10/32,CNTV,no-resolve
+IP-CIDR,110.238.107.47/32,CNTV,no-resolve
+IP-CIDR,118.26.32.162/32,CNTV,no-resolve
+IP-CIDR,159.138.102.146/32,CNTV,no-resolve
+IP-CIDR,203.80.97.208/32,CNTV,no-resolve
+IP-CIDR,203.198.80.99/32,CNTV,no-resolve
 
 # > WeTV
 DOMAIN-SUFFIX,wetv.vip,CNTV
@@ -51,7 +59,7 @@ DOMAIN-SUFFIX,wetvinfo.com,CNTV
 DOMAIN,wetv.tv.qq.com,CNTV
 DOMAIN,wetv.acc.qq.com,CNTV
 DOMAIN,hwvip.video.qq.com,CNTV
-IP-CIDR,150.109.28.51/32,CNTV
+IP-CIDR,150.109.28.51/32,CNTV,no-resolve
 
 # > Youku Intl.
 DOMAIN,vod-interyk.youku.tv,CNTV

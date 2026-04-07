@@ -3,11 +3,11 @@
 Surge RULE-SET 同步脚本
 
 功能：
-1. 地区合集 ↔ 独立子项双向同步
-2. 独立子项 → 重建 Streaming.list
-3. Surge → QX / Clash / sing-box 格式转换
-4. 清理已删除的规则文件
-5. 拉取 Sample.yaml 外部规则 → sing-box
+1. 拉取 sync-rules.txt 外部规则（Surge section → Surge/RULE-SET；Clash section → Clash/sing-box）
+2. 地区合集 ↔ 独立子项双向同步
+3. 独立子项 → 重建 Streaming.list
+4. Surge → QX / Clash / sing-box 格式转换（# >> Clash 条目已由 Step 1 直接写入，跳过）
+5. 清理已删除的规则文件
 """
 
 import json
@@ -23,10 +23,10 @@ SURGE_DIR = REPO_ROOT / "Surge" / "RULE-SET"
 QX_DIR = REPO_ROOT / "Quantumult" / "X" / "Filter"
 CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
-SAMPLE_YAML = REPO_ROOT / "Clash" / "Sample.yaml"
+SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
-QX_SKIP = {"USER-AGENT", "URL-REGEX", "PROCESS-NAME", "DOMAIN-WILDCARD", "AND", "OR", "NOT"}
+QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT"}
 
 # ─── Clash 不支持的规则类型 ──────────────────────────────────────────
 CLASH_SKIP = {"USER-AGENT", "URL-REGEX"}
@@ -337,8 +337,10 @@ def convert_qx(lines: list[str], policy: str) -> str:
             continue
 
         value = parts[1] if len(parts) > 1 else ""
+        no_resolve = len(parts) > 2 and parts[2].lower() == "no-resolve"
         if rule_type in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR", "GEOIP", "IP-ASN"):
-            out.append(f"{rule_type},{value},{policy}")
+            suffix = ",no-resolve" if no_resolve else ""
+            out.append(f"{rule_type},{value},{policy}{suffix}")
         elif rule_type in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"):
             out.append(f"{rule_type},{value},{policy}")
         elif value:
@@ -368,6 +370,11 @@ def convert_clash(lines: list[str]) -> str:
         rule_type = parts[0] if parts else ""
         if rule_type in CLASH_SKIP:
             continue
+
+        if rule_type == "AND":
+            sub_rules = parse_and_rule(stripped) or []
+            if any(st in CLASH_SKIP for st, sv in sub_rules):
+                continue
 
         rule_line = ",".join(parts)
         out.append(f"  - {rule_line}")
@@ -436,36 +443,42 @@ def convert_singbox(lines: list[str]) -> str | None:
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def process_file(surge_file: Path) -> int:
+def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
     lines = surge_file.read_text(encoding="utf-8").splitlines()
     stem = surge_file.stem
     updated = 0
+    # sync-rules.txt # >> Clash 条目已由 Step 1 直接写入 Clash/sing-box，跳过自动转换
+    skip_clash_singbox = clash_override is not None and stem in clash_override
 
-    # QX
+    # QX（始终生成）
     qx_content = convert_qx(lines, stem)
     if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
         print(f"    ✓ QX:      {stem}.list")
         updated += 1
 
-    # Clash
-    clash_content = convert_clash(lines)
-    if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
-        print(f"    ✓ Clash:   {stem}.yaml")
-        updated += 1
-
-    # sing-box
-    sb_content = convert_singbox(lines)
-    if sb_content:
-        if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
-            print(f"    ✓ sing-box: {stem}.json")
+    if not skip_clash_singbox:
+        # Clash
+        clash_content = convert_clash(lines)
+        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
+            print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
+
+        # sing-box
+        sb_content = convert_singbox(lines)
+        if sb_content:
+            if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
+                print(f"    ✓ sing-box: {stem}.json")
+                updated += 1
 
     return updated
 
 
 def convert_all():
     """遍历 Surge/RULE-SET 所有 .list（含子目录），逐文件转换。"""
-    print("\n── Step 3: Surge → QX / Clash / sing-box ──")
+    print("\n── Step 4: Surge → QX / Clash / sing-box ──")
+
+    # # >> Clash 条目优先级高于 Surge 自动转换（Clash/sing-box 已由 Step 1 写入）
+    clash_override = {e["name"] for e in parse_sync_rules()["clash"]}
 
     surge_files = sorted(SURGE_DIR.rglob("*.list"))
     if not surge_files:
@@ -476,7 +489,7 @@ def convert_all():
     for sf in surge_files:
         rel = sf.relative_to(SURGE_DIR)
         print(f"  [{rel}]")
-        total += process_file(sf)
+        total += process_file(sf, clash_override)
 
     print(f"  更新 {total} 个文件")
 
@@ -487,14 +500,15 @@ def convert_all():
 
 def cleanup_stale():
     """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。"""
-    print("\n── Step 4: 清理已删除的文件 ──")
+    print("\n── Step 5: 清理已删除的文件 ──")
 
     surge_stems = set()
     for sf in SURGE_DIR.rglob("*.list"):
         surge_stems.add(sf.stem)
 
-    # 外部规则名也需保留（Step 5 生成的 sing-box 文件）
-    external_stems = {p["name"] for p in parse_sample_providers()}
+    # # >> Clash 直接写入的文件也需保留（Step 1 生成的 Clash / sing-box 文件）
+    sync_rules = parse_sync_rules()
+    external_stems = {e["name"] for e in sync_rules["clash"]}
     keep = surge_stems | external_stems
 
     deleted = 0
@@ -512,54 +526,25 @@ def cleanup_stale():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Step 5: Sample.yaml 外部规则 → sing-box
+#  Step 1: sync-rules.txt 外部规则拉取
 # ═══════════════════════════════════════════════════════════════════════
 
-def parse_sample_providers() -> list[dict]:
-    """解析 Clash/Sample.yaml 中的外部 rule-providers。"""
-    if not SAMPLE_YAML.exists():
-        return []
-
-    text = SAMPLE_YAML.read_text(encoding="utf-8")
-    providers = []
-    current_name = None
-    current = {}
-
-    in_providers = False
-    for line in text.splitlines():
-        stripped = line.strip()
-
-        if stripped == "rule-providers:":
-            in_providers = True
-            continue
-        if in_providers and line and not line[0].isspace() and not stripped.startswith("#"):
-            break
-        if not in_providers:
-            continue
-        if not stripped or stripped.startswith("#"):
-            continue
-
-        # provider name（2 空格缩进）
-        m = re.match(r"^  (\S.*?):\s*$", line)
-        if m:
-            if current_name and current.get("url"):
-                current["name"] = current_name
-                providers.append(current)
-            current_name = m.group(1)
-            current = {}
-            continue
-
-        # 属性
-        m = re.match(r"^\s+(url|behavior):\s*(.+)$", line)
-        if m:
-            current[m.group(1)] = m.group(2).strip()
-
-    if current_name and current.get("url"):
-        current["name"] = current_name
-        providers.append(current)
-
-    # 只保留外部（非本仓库）
-    return [p for p in providers if "HotKids/Rules" not in p.get("url", "")]
+def parse_sync_rules() -> dict:
+    """解析 sync-rules.txt，返回 {"surge": [{url, name}], "clash": [{url, name}]}。"""
+    result: dict[str, list[dict]] = {"surge": [], "clash": []}
+    if not SYNC_RULES_TXT.exists():
+        return result
+    section = None
+    for line in SYNC_RULES_TXT.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if s == "# >> Surge":
+            section = "surge"
+        elif s == "# >> Clash":
+            section = "clash"
+        elif section and s and not s.startswith("#") and "," in s:
+            url, name = s.split(",", 1)
+            result[section].append({"url": url.strip(), "name": name.strip()})
+    return result
 
 
 def fetch_url(url: str) -> str | None:
@@ -572,8 +557,36 @@ def fetch_url(url: str) -> str | None:
         return None
 
 
-def convert_domain_list_to_singbox(text: str) -> str | None:
-    """behavior: domain → sing-box JSON。"""
+def _is_clash_payload(text: str) -> bool:
+    """检测文本是否为 Clash payload: 格式（前 10 行内含 'payload:'）。"""
+    for line in text.splitlines()[:10]:
+        if line.strip() == "payload:":
+            return True
+    return False
+
+
+# ── domain behavior ──────────────────────────────────────────────────
+
+def convert_domain_to_clash(text: str) -> str | None:
+    """Surge DOMAIN-SET（+.domain 格式）→ Clash domain YAML。"""
+    domains = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or line.startswith("//"):
+            continue
+        if line.startswith("+."):
+            line = line[2:]
+        domains.append(line)
+    if not domains:
+        return None
+    out = ["payload:"]
+    for d in sorted(set(domains)):
+        out.append(f"  - '{d}'")
+    return "\n".join(out) + "\n"
+
+
+def convert_domain_to_singbox(text: str) -> str | None:
+    """Surge DOMAIN-SET（+.domain 格式）→ sing-box JSON。"""
     domains = []
     for line in text.splitlines():
         line = line.strip()
@@ -588,22 +601,48 @@ def convert_domain_list_to_singbox(text: str) -> str | None:
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def convert_ipcidr_list_to_singbox(text: str) -> str | None:
-    """behavior: ipcidr → sing-box JSON。"""
+# ── ipcidr behavior ──────────────────────────────────────────────────
+
+def _extract_cidrs(text: str) -> list[str]:
+    """从 Surge RULE-SET 或纯 CIDR 列表中提取 IP CIDR 字符串。"""
     cidrs = []
     for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith("#") or line.startswith("//"):
             continue
-        cidrs.append(line)
+        parts = [p.strip() for p in line.split(",")]
+        if parts[0].upper() in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR") and len(parts) > 1:
+            cidrs.append(parts[1])
+        elif "/" in line and "," not in line:
+            # 纯 CIDR 行（无规则类型前缀）
+            cidrs.append(line)
+    return cidrs
+
+
+def convert_ipcidr_to_clash(text: str) -> str | None:
+    """Surge IP-CIDR 规则列表 → Clash ipcidr YAML。"""
+    cidrs = _extract_cidrs(text)
+    if not cidrs:
+        return None
+    out = ["payload:"]
+    for c in sorted(set(cidrs)):
+        out.append(f"  - '{c}'")
+    return "\n".join(out) + "\n"
+
+
+def convert_ipcidr_to_singbox(text: str) -> str | None:
+    """Surge IP-CIDR 规则列表 → sing-box JSON。"""
+    cidrs = _extract_cidrs(text)
     if not cidrs:
         return None
     result = {"version": 2, "rules": [{"ip_cidr": sorted(set(cidrs))}]}
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def convert_classical_yaml_to_singbox(text: str) -> str | None:
-    """Clash classical payload → sing-box JSON。"""
+# ── classical behavior ───────────────────────────────────────────────
+
+def convert_classical_payload_to_singbox(text: str) -> str | None:
+    """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。"""
     lines = []
     in_payload = False
     for raw in text.splitlines():
@@ -622,8 +661,7 @@ def convert_classical_yaml_to_singbox(text: str) -> str | None:
         if line.startswith("#") or line.startswith("//"):
             continue
         parts = [p.strip() for p in line.split(",")]
-        rule_type = parts[0]
-        sb_type = SINGBOX_MAP.get(rule_type)
+        sb_type = SINGBOX_MAP.get(parts[0])
         if sb_type and len(parts) > 1:
             groups.setdefault(sb_type, []).append(parts[1])
 
@@ -635,46 +673,80 @@ def convert_classical_yaml_to_singbox(text: str) -> str | None:
         if key in groups:
             rules.append({key: sorted(set(groups[key]))})
 
-    if not rules:
-        return None
-
-    result = {"version": 2, "rules": rules}
-    return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
+    return (json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
+            if rules else None)
 
 
 def fetch_external_rules():
-    """拉取 Sample.yaml 外部规则 → sing-box。"""
-    print("\n── Step 5: 外部规则 → sing-box ──")
+    """拉取 sync-rules.txt 外部规则。
 
-    providers = parse_sample_providers()
-    if not providers:
-        print("  无外部 rule-provider")
+    # >> Surge  → Surge/RULE-SET/<name>.list（首行加 fork header，Step 4 正常转换）
+    # >> Clash  → Clash/RuleSet/<name>.yaml + sing-box/source/<name>.json（直接写入，
+                  Step 4 对同名 Surge 文件跳过 Clash/sing-box 输出）
+    """
+    print("\n── Step 1: 拉取外部规则 ──")
+    rules = parse_sync_rules()
+
+    if not rules["surge"] and not rules["clash"]:
+        print("  sync-rules.txt 无规则条目")
         return
 
-    for p in providers:
-        name = p["name"]
-        url = p["url"]
-        behavior = p.get("behavior", "classical")
+    # ── # >> Surge section ──────────────────────────────────────────
+    for e in rules["surge"]:
+        name, url = e["name"], e["url"]
+        print(f"  [Surge] {name} ← {url}")
+        text = fetch_url(url)
+        if text is None:
+            continue
+        content = f"### fork from {url}\n{text}"
+        if write_if_changed(SURGE_DIR / f"{name}.list", content):
+            print(f"    ✓ Surge/RULE-SET/{name}.list")
+        else:
+            print(f"    ✓ {name}.list 无变化")
 
-        print(f"  [{name}] {behavior} ← {url}")
+    # ── # >> Clash section ──────────────────────────────────────────
+    for e in rules["clash"]:
+        name, url = e["name"], e["url"]
+        print(f"  [Clash] {name} ← {url}")
         text = fetch_url(url)
         if text is None:
             continue
 
-        if behavior == "domain":
-            content = convert_domain_list_to_singbox(text)
-        elif behavior == "ipcidr":
-            content = convert_ipcidr_list_to_singbox(text)
-        else:
-            content = convert_classical_yaml_to_singbox(text)
+        is_clash = _is_clash_payload(text)
+        is_ipcidr = "cidr" in name.lower()
 
-        if content:
-            if write_if_changed(SINGBOX_DIR / f"{name}.json", content):
+        # Clash YAML（首行加 fork header）
+        if is_ipcidr:
+            body = convert_ipcidr_to_clash(text) or ""
+        elif is_clash:
+            body = text
+        else:
+            body = convert_clash(text.splitlines())
+
+        if body.strip():
+            clash_content = f"### fork from {url}\n{body}"
+            if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
+                print(f"    ✓ Clash:    {name}.yaml")
+            else:
+                print(f"    ✓ Clash:    {name}.yaml 无变化")
+        else:
+            print(f"    [WARN] {name} Clash 转换为空，跳过")
+
+        # sing-box JSON（JSON 不支持注释，不加 fork header）
+        if is_ipcidr:
+            sb_content = convert_ipcidr_to_singbox(text)
+        elif is_clash:
+            sb_content = convert_classical_payload_to_singbox(text)
+        else:
+            sb_content = convert_singbox(text.splitlines())
+
+        if sb_content:
+            if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")
             else:
-                print(f"    ✓ {name}.json 无变化")
+                print(f"    ✓ sing-box: {name}.json 无变化")
         else:
-            print(f"    [WARN] {name} 转换结果为空")
+            print(f"    [WARN] {name} sing-box 转换为空，跳过")
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -686,20 +758,20 @@ def main():
     print("  Rules 同步脚本")
     print("=" * 60)
 
-    # Step 1: 地区合集 ↔ 独立子项
+    # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
+    fetch_external_rules()
+
+    # Step 2: 地区合集 ↔ 独立子项
     sync_regional()
 
-    # Step 2: 独立子项 → Streaming.list
+    # Step 3: 独立子项 → Streaming.list
     rebuild_streaming()
 
-    # Step 3: Surge → QX / Clash / sing-box
+    # Step 4: Surge → QX / Clash / sing-box
     convert_all()
 
-    # Step 4: 清理
+    # Step 5: 清理
     cleanup_stale()
-
-    # Step 5: 外部规则 → sing-box
-    fetch_external_rules()
 
     print(f"\n{'=' * 60}")
     print("  完成")

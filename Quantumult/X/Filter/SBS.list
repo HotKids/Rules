@@ -1,3 +1,4 @@
 # > SBS On Demand
+USER-AGENT,SBS*,SBS
 DOMAIN-SUFFIX,sbsod.com,SBS
 DOMAIN-SUFFIX,sbs.com.au,SBS

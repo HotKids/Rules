@@ -1,4 +1,5 @@
 # > Netflix
+USER-AGENT,Argo*,Netflix
 DOMAIN-SUFFIX,netflix.com,Netflix
 DOMAIN-SUFFIX,netflix.net,Netflix
 DOMAIN-SUFFIX,nflxext.com,Netflix
@@ -9,15 +10,15 @@ DOMAIN-SUFFIX,nflxvideo.net,Netflix
 DOMAIN-KEYWORD,netflixdnstest,Netflix
 DOMAIN-KEYWORD,dualstack.apiproxy-,Netflix
 DOMAIN-KEYWORD,dualstack.ichnaea-web-,Netflix
-IP-CIDR,23.246.0.0/18,Netflix
-IP-CIDR,34.210.42.111/32,Netflix
-IP-CIDR,37.77.184.0/21,Netflix
-IP-CIDR,45.57.0.0/17,Netflix
-IP-CIDR,52.89.124.203/32,Netflix
-IP-CIDR,54.148.37.5/32,Netflix
-IP-CIDR,64.120.128.0/17,Netflix
-IP-CIDR,66.197.128.0/17,Netflix
-IP-CIDR,108.175.32.0/20,Netflix
-IP-CIDR,192.173.64.0/18,Netflix
-IP-CIDR,198.38.96.0/19,Netflix
-IP-CIDR,198.45.48.0/20,Netflix
+IP-CIDR,23.246.0.0/18,Netflix,no-resolve
+IP-CIDR,34.210.42.111/32,Netflix,no-resolve
+IP-CIDR,37.77.184.0/21,Netflix,no-resolve
+IP-CIDR,45.57.0.0/17,Netflix,no-resolve
+IP-CIDR,52.89.124.203/32,Netflix,no-resolve
+IP-CIDR,54.148.37.5/32,Netflix,no-resolve
+IP-CIDR,64.120.128.0/17,Netflix,no-resolve
+IP-CIDR,66.197.128.0/17,Netflix,no-resolve
+IP-CIDR,108.175.32.0/20,Netflix,no-resolve
+IP-CIDR,192.173.64.0/18,Netflix,no-resolve
+IP-CIDR,198.38.96.0/19,Netflix,no-resolve
+IP-CIDR,198.45.48.0/20,Netflix,no-resolve

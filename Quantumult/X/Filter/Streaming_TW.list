@@ -1,10 +1,12 @@
 # > Bahamut
+USER-AGENT,Anime*,Streaming_TW
 DOMAIN-SUFFIX,bahamut.com.tw,Streaming_TW
 DOMAIN-SUFFIX,gamer.com.tw,Streaming_TW
 DOMAIN,gamer-cds.cdn.hinet.net,Streaming_TW
 DOMAIN,gamer2-cds.cdn.hinet.net,Streaming_TW
 
 # > CATCHPLAY+
+USER-AGENT,CATCHPLAY*,Streaming_TW
 DOMAIN-SUFFIX,catchplay.com,Streaming_TW
 DOMAIN,asiaplay-origin.s3.amazonaws.com,Streaming_TW
 DOMAIN,tra-ww000-cp.akamaized.net,Streaming_TW
@@ -13,6 +15,7 @@ DOMAIN,ols-ww100-cp.akamaized.net,Streaming_TW
 DOMAIN,dkfhw9rzsr80z.cloudfront.net,Streaming_TW
 
 # > friDay
+USER-AGENT,friDay*,Streaming_TW
 DOMAIN-SUFFIX,friday.tw,Streaming_TW
 DOMAIN-SUFFIX,fridaylogger.com,Streaming_TW
 DOMAIN-SUFFIX,svc.litv.tv,Streaming_TW
@@ -29,6 +32,12 @@ DOMAIN,hbounify-prod.evergent.com,Streaming_TW
 DOMAIN,dai3fd1oh325y.cloudfront.net,Streaming_TW
 
 # > iQIYI Intl
+USER-AGENT,iQIYI*,Streaming_TW
+USER-AGENT,QIYIVideo*,Streaming_TW
+USER-AGENT,QYPlayer*,Streaming_TW
+USER-AGENT,QTP*,Streaming_TW
+PROCESS-NAME,com.iqiyi.i18n,Streaming_TW
+PROCESS-NAME,com.iqiyi.i18n.tv,Streaming_TW
 DOMAIN-SUFFIX,iq.com,Streaming_TW
 DOMAIN-SUFFIX,intl.iqiyi.com,Streaming_TW
 DOMAIN,intl-rcd.iqiyi.com,Streaming_TW
@@ -47,36 +56,41 @@ DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,Streaming_TW
 DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,Streaming_TW
 DOMAIN-KEYWORD,akmcdnoverse,Streaming_TW
 DOMAIN-KEYWORD,chuangcachecdnoversea,Streaming_TW
-IP-CIDR,2.21.22.17/32,Streaming_TW
-IP-CIDR,23.40.241.251/32,Streaming_TW
-IP-CIDR,23.40.242.10/32,Streaming_TW
-IP-CIDR,23.210.215.154/32,Streaming_TW
-IP-CIDR,110.238.107.47/32,Streaming_TW
-IP-CIDR,110.238.109.184/32,Streaming_TW
-IP-CIDR,114.119.175.88/32,Streaming_TW
-IP-CIDR,118.26.32.0/22,Streaming_TW
-IP-CIDR,159.138.102.146/32,Streaming_TW
-IP-CIDR,184.25.254.178/32,Streaming_TW
-IP-CIDR,203.80.97.208/32,Streaming_TW
-IP-CIDR,203.198.80.99/32,Streaming_TW
+IP-CIDR,2.21.22.17/32,Streaming_TW,no-resolve
+IP-CIDR,23.40.241.251/32,Streaming_TW,no-resolve
+IP-CIDR,23.40.242.10/32,Streaming_TW,no-resolve
+IP-CIDR,23.210.215.154/32,Streaming_TW,no-resolve
+IP-CIDR,110.238.107.47/32,Streaming_TW,no-resolve
+IP-CIDR,110.238.109.184/32,Streaming_TW,no-resolve
+IP-CIDR,114.119.175.88/32,Streaming_TW,no-resolve
+IP-CIDR,118.26.32.0/22,Streaming_TW,no-resolve
+IP-CIDR,159.138.102.146/32,Streaming_TW,no-resolve
+IP-CIDR,184.25.254.178/32,Streaming_TW,no-resolve
+IP-CIDR,203.80.97.208/32,Streaming_TW,no-resolve
+IP-CIDR,203.198.80.99/32,Streaming_TW,no-resolve
 
 # > KKBOX
+USER-AGENT,*KKBOX,Streaming_TW
 DOMAIN-SUFFIX,kkbox.com,Streaming_TW
 DOMAIN-SUFFIX,kkbox.com.tw,Streaming_TW
 DOMAIN-SUFFIX,kfs.io,Streaming_TW
 
 # > KKTV
+USER-AGENT,KKTV*,Streaming_TW
+USER-AGENT,com.kktv*,Streaming_TW
 DOMAIN-SUFFIX,kktv.me,Streaming_TW
 DOMAIN-SUFFIX,kktv.com.tw,Streaming_TW
 DOMAIN,kktv-theater.kk.stream,Streaming_TW
 DOMAIN,theater-kktv.cdn.hinet.net,Streaming_TW
 
 # > LINE TV
+USER-AGENT,LINE%20TV*,Streaming_TW
 DOMAIN-SUFFIX,linetv.tw,Streaming_TW
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming_TW
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming_TW
 
 # > myVideo
+USER-AGENT,myVideo*,Streaming_TW
 DOMAIN-SUFFIX,myvideo.net.tw,Streaming_TW
 DOMAIN-SUFFIX,catch.net.tw,Streaming_TW
 DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net,Streaming_TW
@@ -87,6 +101,7 @@ DOMAIN-SUFFIX,readmoo.com,Streaming_TW
 
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
+USER-AGENT,*Spotify*,Streaming_TW
 DOMAIN-SUFFIX,pscdn.co,Streaming_TW
 DOMAIN-SUFFIX,scdn.co,Streaming_TW
 DOMAIN-SUFFIX,spoti.fi,Streaming_TW

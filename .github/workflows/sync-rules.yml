@@ -5,6 +5,9 @@ on:
     branches: [master]
     paths:
       - 'Surge/RULE-SET/**'
+      - '.github/scripts/sync-rules.txt'
+  schedule:
+    - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:
 
 permissions:
@@ -27,7 +30,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Quantumult/X/Filter/ Clash/RuleSet/ sing-box/source/
+          git add Surge/RULE-SET/ Quantumult/X/Filter/ Clash/RuleSet/ sing-box/source/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

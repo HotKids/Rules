@@ -21,15 +21,19 @@ DOMAIN-SUFFIX,aiv-delivery.net
 // DOMAIN,www.amazon.com
 DOMAIN,ktpx.amazon.com
 DOMAIN,atv-ps.amazon.com
-DOMAIN,d184dfn36gombl.cloudfront.net
-DOMAIN,d1xfray82862hr.cloudfront.net
-DOMAIN,d1v5ir2lpwr8os.cloudfront.net
-DOMAIN,d22qjgkvxw22r6.cloudfront.net
-DOMAIN,d25xi40x97liuc.cloudfront.net
-DOMAIN,d27xxe7juh1us6.cloudfront.net
-DOMAIN,d3196yreox78o9.cloudfront.net
-DOMAIN,dmqdd6hw24ucf.cloudfront.net
+DOMAIN,avodmp4s3ww-a.akamaihd.net
+// DOMAIN,d184dfn36gombl.cloudfront.net
+// DOMAIN,d1xfray82862hr.cloudfront.net
+// DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+// DOMAIN,d22qjgkvxw22r6.cloudfront.net
+// DOMAIN,d25xi40x97liuc.cloudfront.net
+// DOMAIN,d27xxe7juh1us6.cloudfront.net
+// DOMAIN,d3196yreox78o9.cloudfront.net
+// DOMAIN,dmqdd6hw24ucf.cloudfront.net
 DOMAIN-KEYWORD,avoddashs
+
+// 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
+// DOMAIN,www.amazon.com
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
 # > BBC iPlayer
@@ -64,12 +68,15 @@ DOMAIN,d2z3p34itxwaj7.cloudfront.net
 # > Crunchyroll
 USER-AGENT,Crunchyroll*
 DOMAIN-SUFFIX,crunchyroll.com
-DOMAIN-SUFFIX,vrv.co
+// 如需使用 VRV，请将此条取消注释并走 US 代理
+// DOMAIN-SUFFIX,vrv.co
 
 # > DAZN
 USER-AGENT,DAZN*
 DOMAIN-SUFFIX,dazn.com
+DOMAIN-SUFFIX,dazndn.com
 DOMAIN-SUFFIX,indazn.com
+DOMAIN-SUFFIX,indaznlab.com
 DOMAIN-SUFFIX,dazn-api.com
 DOMAIN,d151l6v8er5bdm.cloudfront.net
 DOMAIN-KEYWORD,voddazn
@@ -99,7 +106,7 @@ DOMAIN-SUFFIX,disneyplus.com
 DOMAIN-SUFFIX,disney-plus.net
 DOMAIN-SUFFIX,disneystreaming.com
 DOMAIN-SUFFIX,dssott.com
-DOMAIN-SUFFIX,bamgrid.com
+// DOMAIN-SUFFIX,bamgrid.com
 DOMAIN,playback-certs.bamgrid.com
 DOMAIN,disney.api.edge.bamgrid.com
 DOMAIN,disney.connections.edge.bamgrid.com
@@ -112,12 +119,8 @@ DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 USER-AGENT,HBOMAX*
 USER-AGENT,Max*
 PROCESS-NAME,com.wbd.stream
-DOMAIN-SUFFIX,hbo.com
-DOMAIN-SUFFIX,hbogo.com
-DOMAIN-SUFFIX,hbonow.com
-DOMAIN-SUFFIX,hbomax.com
-DOMAIN-SUFFIX,hbomaxcdn.com
 DOMAIN-SUFFIX,max.com
+DOMAIN-SUFFIX,hbomax.com
 DOMAIN-SUFFIX,discomax.com
 
 # > Hulu
@@ -197,7 +200,10 @@ DOMAIN,cbsplaylistserver.aws.syncbak.com
 
 # > Peacock
 USER-AGENT,peacock*
+DOMAIN-SUFFIX,cdn.peacocktv.com
 DOMAIN-SUFFIX,peacocktv.com
+// 屏蔽广告
+// DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
 # > SBS On Demand
 USER-AGENT,SBS*
@@ -206,6 +212,7 @@ DOMAIN-SUFFIX,sbs.com.au
 // DOMAIN,sbsvoddai-vh.akamaihd.net
 
 # > Spotify
+# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*
 DOMAIN-SUFFIX,pscdn.co
 DOMAIN-SUFFIX,scdn.co
@@ -219,6 +226,12 @@ DOMAIN-SUFFIX,spotifyjobs.com
 DOMAIN-SUFFIX,spotifynewsroom.jp
 DOMAIN-SUFFIX,spotilocal.com
 DOMAIN-SUFFIX,tospotify.com
+
+# > Stan
+USER-AGENT,Stan*
+DOMAIN-SUFFIX,stan.com.au
+DOMAIN,aws.stan.video
+// DOMAIN,streamcoimg-a.akamaihd.net
 
 # > TVBAnywhere
 DOMAIN-SUFFIX,tvb.com
