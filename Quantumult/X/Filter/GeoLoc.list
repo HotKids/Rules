@@ -1,13 +1,7 @@
 # SNS GeoLoc
-# ByteDance
-# > Amemv
-# AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
-DOMAIN-KEYWORD,-core-hl.amemv.com,GeoLoc
-DOMAIN-KEYWORD,-core-lf.amemv.com,GeoLoc
+# > Douyin
+DOMAIN-SUFFIX,amemv.com,GeoLoc
 DOMAIN-SUFFIX,douyinvod.com,GeoLoc
 
-# > TouTiao
-DOMAIN,ib.snssdk.com,GeoLoc
-
-# RedNote
+# > RedNote
 DOMAIN,edith.xiaohongshu.com,GeoLoc

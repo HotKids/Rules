@@ -3,19 +3,13 @@
   "rules": [
     {
       "domain": [
-        "edith.xiaohongshu.com",
-        "ib.snssdk.com"
+        "edith.xiaohongshu.com"
       ]
     },
     {
       "domain_suffix": [
+        "amemv.com",
         "douyinvod.com"
-      ]
-    },
-    {
-      "domain_keyword": [
-        "-core-hl.amemv.com",
-        "-core-lf.amemv.com"
       ]
     }
   ]
