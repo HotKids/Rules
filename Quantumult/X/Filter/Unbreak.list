@@ -35,6 +35,7 @@ DOMAIN,dl.l.google.com,Unbreak
 DOMAIN,update.googleapis.com,Unbreak
 # >> Firebase Cloud Messaging
 DOMAIN,mtalk.google.com,Unbreak
+DOMAIN-WILDCARD,*mtalk*.google.com,Unbreak
 DOMAIN,alt1-mtalk.google.com,Unbreak
 DOMAIN,alt2-mtalk.google.com,Unbreak
 DOMAIN,alt3-mtalk.google.com,Unbreak
@@ -59,3 +60,4 @@ DOMAIN,portal.linkbroad.com,Unbreak
 DOMAIN-SUFFIX,bochk.com,Unbreak
 
 # > ziniao
+PROCESS-NAME,*ziniao*,Unbreak

@@ -26,7 +26,7 @@ SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SAMPLE_YAML = REPO_ROOT / "Clash" / "Sample.yaml"
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
-QX_SKIP = {"USER-AGENT", "URL-REGEX", "PROCESS-NAME", "DOMAIN-WILDCARD", "AND", "OR", "NOT"}
+QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT"}
 
 # ─── Clash 不支持的规则类型 ──────────────────────────────────────────
 CLASH_SKIP = {"USER-AGENT", "URL-REGEX"}
@@ -337,8 +337,10 @@ def convert_qx(lines: list[str], policy: str) -> str:
             continue
 
         value = parts[1] if len(parts) > 1 else ""
+        no_resolve = len(parts) > 2 and parts[2].lower() == "no-resolve"
         if rule_type in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR", "GEOIP", "IP-ASN"):
-            out.append(f"{rule_type},{value},{policy}")
+            suffix = ",no-resolve" if no_resolve else ""
+            out.append(f"{rule_type},{value},{policy}{suffix}")
         elif rule_type in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"):
             out.append(f"{rule_type},{value},{policy}")
         elif value:

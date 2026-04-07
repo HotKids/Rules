@@ -1,4 +1,5 @@
 # > AbemaTV
+USER-AGENT,AbemaTV*,Streaming
 DOMAIN-SUFFIX,abema.io,Streaming
 DOMAIN-SUFFIX,abema.tv,Streaming
 DOMAIN-SUFFIX,ameba.jp,Streaming
@@ -22,6 +23,7 @@ DOMAIN-KEYWORD,avoddashs,Streaming
 
 
 # > BBC iPlayer
+USER-AGENT,BBCiPlayer*,Streaming
 DOMAIN-KEYWORD,bbcfmt,Streaming
 DOMAIN-KEYWORD,co.uk,Streaming
 DOMAIN-KEYWORD,uk-live,Streaming
@@ -37,20 +39,24 @@ DOMAIN,vod-dash-uk-live.bbcfmt.hs.llnwd.net,Streaming
 DOMAIN,vod-thumb-uk-live.bbcfmt.hs.llnwd.net,Streaming
 
 # > Bahamut
+USER-AGENT,Anime*,Streaming
 DOMAIN-SUFFIX,bahamut.com.tw,Streaming
 DOMAIN-SUFFIX,gamer.com.tw,Streaming
 DOMAIN,gamer-cds.cdn.hinet.net,Streaming
 DOMAIN,gamer2-cds.cdn.hinet.net,Streaming
 
 # > Britbox
+USER-AGENT,Britbox*,Streaming
 DOMAIN-SUFFIX,britbox.com,Streaming
 DOMAIN-SUFFIX,bbc.co.uk,Streaming
 DOMAIN,d2z3p34itxwaj7.cloudfront.net,Streaming
 
 # > Crunchyroll
+USER-AGENT,Crunchyroll*,Streaming
 DOMAIN-SUFFIX,crunchyroll.com,Streaming
 
 # > DAZN
+USER-AGENT,DAZN*,Streaming
 DOMAIN-SUFFIX,dazn.com,Streaming
 DOMAIN-SUFFIX,dazndn.com,Streaming
 DOMAIN-SUFFIX,indazn.com,Streaming
@@ -60,6 +66,8 @@ DOMAIN,d151l6v8er5bdm.cloudfront.net,Streaming
 DOMAIN-KEYWORD,voddazn,Streaming
 
 # > Discovery+
+USER-AGENT,discovery+*,Streaming
+USER-AGENT,*DPlus*,Streaming
 DOMAIN-SUFFIX,discoveryplus.com,Streaming
 DOMAIN-SUFFIX,disco-api.com,Streaming
 DOMAIN-SUFFIX,dnitv.com,Streaming
@@ -74,6 +82,7 @@ DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming
 DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming
 
 # > Disney+
+USER-AGENT,Disney*,Streaming
 DOMAIN-SUFFIX,disneyplus.com,Streaming
 DOMAIN-SUFFIX,disney-plus.net,Streaming
 DOMAIN-SUFFIX,disneystreaming.com,Streaming
@@ -87,6 +96,9 @@ DOMAIN,cdn.registerdisney.go.com,Streaming
 DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Streaming
 
 # > HBO Max
+USER-AGENT,HBOMAX*,Streaming
+USER-AGENT,Max*,Streaming
+PROCESS-NAME,com.wbd.stream,Streaming
 DOMAIN-SUFFIX,max.com,Streaming
 DOMAIN-SUFFIX,hbomax.com,Streaming
 DOMAIN-SUFFIX,discomax.com,Streaming
@@ -113,6 +125,7 @@ DOMAIN-SUFFIX,mubi.com,Streaming
 DOMAIN-SUFFIX,mubicdn.net,Streaming
 
 # > Netflix
+USER-AGENT,Argo*,Streaming
 DOMAIN-SUFFIX,netflix.com,Streaming
 DOMAIN-SUFFIX,netflix.net,Streaming
 DOMAIN-SUFFIX,nflxext.com,Streaming
@@ -123,20 +136,22 @@ DOMAIN-SUFFIX,nflxvideo.net,Streaming
 DOMAIN-KEYWORD,netflixdnstest,Streaming
 DOMAIN-KEYWORD,dualstack.apiproxy-,Streaming
 DOMAIN-KEYWORD,dualstack.ichnaea-web-,Streaming
-IP-CIDR,23.246.0.0/18,Streaming
-IP-CIDR,34.210.42.111/32,Streaming
-IP-CIDR,37.77.184.0/21,Streaming
-IP-CIDR,45.57.0.0/17,Streaming
-IP-CIDR,52.89.124.203/32,Streaming
-IP-CIDR,54.148.37.5/32,Streaming
-IP-CIDR,64.120.128.0/17,Streaming
-IP-CIDR,66.197.128.0/17,Streaming
-IP-CIDR,108.175.32.0/20,Streaming
-IP-CIDR,192.173.64.0/18,Streaming
-IP-CIDR,198.38.96.0/19,Streaming
-IP-CIDR,198.45.48.0/20,Streaming
+IP-CIDR,23.246.0.0/18,Streaming,no-resolve
+IP-CIDR,34.210.42.111/32,Streaming,no-resolve
+IP-CIDR,37.77.184.0/21,Streaming,no-resolve
+IP-CIDR,45.57.0.0/17,Streaming,no-resolve
+IP-CIDR,52.89.124.203/32,Streaming,no-resolve
+IP-CIDR,54.148.37.5/32,Streaming,no-resolve
+IP-CIDR,64.120.128.0/17,Streaming,no-resolve
+IP-CIDR,66.197.128.0/17,Streaming,no-resolve
+IP-CIDR,108.175.32.0/20,Streaming,no-resolve
+IP-CIDR,192.173.64.0/18,Streaming,no-resolve
+IP-CIDR,198.38.96.0/19,Streaming,no-resolve
+IP-CIDR,198.45.48.0/20,Streaming,no-resolve
 
 # > Paramount+
+USER-AGENT,PPlus*,Streaming
+USER-AGENT,ParamountPlus*,Streaming
 DOMAIN-SUFFIX,cbsi.com,Streaming
 DOMAIN-SUFFIX,cbsivideo.com,Streaming
 DOMAIN-SUFFIX,paramountplus.com,Streaming
@@ -147,15 +162,18 @@ DOMAIN,cbsservice.aws.syncbak.com,Streaming
 DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming
 
 # > Peacock
+USER-AGENT,peacock*,Streaming
 DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming
 DOMAIN-SUFFIX,peacocktv.com,Streaming
 
 # > SBS On Demand
+USER-AGENT,SBS*,Streaming
 DOMAIN-SUFFIX,sbsod.com,Streaming
 DOMAIN-SUFFIX,sbs.com.au,Streaming
 
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
+USER-AGENT,*Spotify*,Streaming
 DOMAIN-SUFFIX,pscdn.co,Streaming
 DOMAIN-SUFFIX,scdn.co,Streaming
 DOMAIN-SUFFIX,spoti.fi,Streaming
@@ -170,6 +188,7 @@ DOMAIN-SUFFIX,spotilocal.com,Streaming
 DOMAIN-SUFFIX,tospotify.com,Streaming
 
 # > Stan
+USER-AGENT,Stan*,Streaming
 DOMAIN-SUFFIX,stan.com.au,Streaming
 DOMAIN,aws.stan.video,Streaming
 
@@ -189,6 +208,8 @@ DOMAIN-SUFFIX,nxtv.jp,Streaming
 DOMAIN,us-central1-u-next-apps.cloudfunctions.net,Streaming
 
 # > YouTube
+USER-AGENT,*YouTube*,Streaming
+USER-AGENT,*youtube*,Streaming
 DOMAIN-SUFFIX,youtu.be,Streaming
 DOMAIN-SUFFIX,googlevideo.com,Streaming
 DOMAIN,youtubei.googleapis.com,Streaming

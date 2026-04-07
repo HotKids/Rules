@@ -1,4 +1,5 @@
 # > AbemaTV
+USER-AGENT,AbemaTV*,AbemaTV
 DOMAIN-SUFFIX,abema.io,AbemaTV
 DOMAIN-SUFFIX,abema.tv,AbemaTV
 DOMAIN-SUFFIX,ameba.jp,AbemaTV

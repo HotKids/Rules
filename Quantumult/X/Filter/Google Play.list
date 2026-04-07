@@ -10,3 +10,7 @@ DOMAIN,playatoms-pa.googleapis.com,Google Play
 DOMAIN,playgateway-pa.googleapis.com,Google Play
 DOMAIN,play-lh.googleusercontent.com,Google Play
 DOMAIN-KEYWORD,play.google,Google Play
+DOMAIN-WILDCARD,*play*.google.com,Google Play
+DOMAIN-WILDCARD,*play*.google.com,Google Play
+DOMAIN-WILDCARD,*play*.googleapis.com,Google Play
+DOMAIN-WILDCARD,*play*.googleusercontent.com,Google Play

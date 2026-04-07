@@ -1,4 +1,5 @@
 # > AbemaTV
+USER-AGENT,AbemaTV*,Streaming_JP
 DOMAIN-SUFFIX,abema.io,Streaming_JP
 DOMAIN-SUFFIX,abema.tv,Streaming_JP
 DOMAIN-SUFFIX,ameba.jp,Streaming_JP
@@ -9,6 +10,7 @@ DOMAIN,linear-abematv.akamaized.net,Streaming_JP
 DOMAIN,ds-linear-abematv.akamaized.net,Streaming_JP
 
 # > FOD
+USER-AGENT,FOD*,Streaming_JP
 DOMAIN-SUFFIX,fujitv.co.jp,Streaming_JP
 DOMAIN-SUFFIX,stream.ne.jp,Streaming_JP
 DOMAIN,measure.ic.tver.jp,Streaming_JP
@@ -19,6 +21,7 @@ DOMAIN-SUFFIX,happyon.jp,Streaming_JP
 DOMAIN-SUFFIX,prod.hjholdings.tv,Streaming_JP
 
 # > Paravi
+USER-AGENT,Paravi*,Streaming_JP
 DOMAIN-SUFFIX,paravi.jp,Streaming_JP
 
 # > TVer
