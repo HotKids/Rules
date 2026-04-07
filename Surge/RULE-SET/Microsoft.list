@@ -1,4 +1,5 @@
 ### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/microsoft.conf
+# > Microsoft
 DOMAIN,officecdn-microsoft-com.akamaized.net
 DOMAIN-KEYWORD,1drv
 DOMAIN-KEYWORD,microsoft

@@ -1,5 +1,6 @@
 payload:
   ### fork from https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Twitter.list
+  # > Twitter
   - DOMAIN-KEYWORD,twitter
   - DOMAIN-SUFFIX,periscope.tv
   - DOMAIN-SUFFIX,pscp.tv

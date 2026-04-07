@@ -1,4 +1,5 @@
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list
+# > Telegram
 DOMAIN-SUFFIX,cdn-telegram.org,Telegram
 DOMAIN-SUFFIX,comments.app,Telegram
 DOMAIN-SUFFIX,graph.org,Telegram
