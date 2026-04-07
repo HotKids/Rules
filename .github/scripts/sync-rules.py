@@ -580,6 +580,26 @@ def _is_clash_payload(text: str) -> bool:
     return False
 
 
+def convert_clash_payload_to_surge(text: str) -> str | None:
+    """Clash classical payload: → Surge RULE-SET .list 格式。"""
+    out = []
+    in_payload = False
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        if stripped == "payload:":
+            in_payload = True
+            continue
+        if not in_payload:
+            continue
+        if stripped.startswith("- "):
+            rule = stripped[2:].strip().strip("'\"")
+            if rule:
+                out.append(rule)
+        elif stripped.startswith("#"):
+            out.append(stripped)
+    return ("\n".join(out) + "\n") if out else None
+
+
 # ── domain behavior ──────────────────────────────────────────────────
 
 def convert_domain_to_clash(text: str) -> str | None:
@@ -713,6 +733,14 @@ def fetch_external_rules():
         text = fetch_url(url)
         if text is None:
             continue
+        # 若远端文件是 Clash payload 格式，自动转换为 Surge .list 格式
+        if _is_clash_payload(text):
+            converted = convert_clash_payload_to_surge(text)
+            if converted is None:
+                print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
+                continue
+            print(f"    [INFO] 检测到 Clash payload，已自动转换为 Surge 格式")
+            text = converted
         content = f"### fork from {url}\n{text}"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
