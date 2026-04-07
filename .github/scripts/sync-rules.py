@@ -433,7 +433,7 @@ def convert_singbox(lines: list[str]) -> str | None:
 
     rules: list[dict] = []
     type_order = ["domain", "domain_suffix", "domain_keyword", "domain_regex",
-                  "ip_cidr", "process_name"]
+                  "ip_cidr", "process_name", "process_name_regex"]
     for key in type_order:
         if key in groups:
             rules.append({key: sorted(set(groups[key]))})
@@ -791,7 +791,8 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
         return None
 
     rules: list[dict] = []
-    for key in ["domain", "domain_suffix", "domain_keyword", "ip_cidr", "process_name"]:
+    for key in ["domain", "domain_suffix", "domain_keyword", "ip_cidr",
+                "process_name", "process_name_regex"]:
         if key in groups:
             rules.append({key: sorted(set(groups[key]))})
 
@@ -819,11 +820,10 @@ def fetch_external_rules():
         surge_groups[e["name"]].append(e["url"])
 
     for name, urls in surge_groups.items():
-        fork_headers: list[str] = []
+        fork_urls: list[str] = []
         rule_lines: list[str] = []
         seen_rules: set[str] = set()
         section_names: list[str] = []  # 各来源的 # > Name，最终拼成 A & B
-
 
         for url in urls:
             print(f"  [Surge] {name} ← {url}")
@@ -838,7 +838,7 @@ def fetch_external_rules():
             normalized = normalize_surge_rules(text)
             if not normalized:
                 continue
-            fork_headers.append(f"### fork from {url}")
+            fork_urls.append(url)
             for line in normalized.splitlines():
                 if re.match(r"^#\s*>(?!>)\s*\S", line):
                     display = re.sub(r"^#\s*>\s*", "", line).strip()
@@ -854,7 +854,7 @@ def fetch_external_rules():
         header = " & ".join(section_names) if section_names else name.rsplit("/", 1)[-1]
         rule_lines.insert(0, f"# > {header}")
 
-        content = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
+        content = "### fork from " + " & ".join(fork_urls) + "\n" + "\n".join(rule_lines) + "\n"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
@@ -867,7 +867,7 @@ def fetch_external_rules():
 
     for name, urls in clash_groups.items():
         is_ipcidr = "cidr" in name.lower()
-        fork_headers = []
+        fork_urls = []
         all_rules: list[str] = []
         seen_rules = set()
 
@@ -876,7 +876,7 @@ def fetch_external_rules():
             text = fetch_url(url)
             if text is None:
                 continue
-            fork_headers.append(f"### fork from {url}")
+            fork_urls.append(url)
             for rule in _clash_body_rules(text, is_ipcidr):
                 if rule not in seen_rules:
                     seen_rules.add(rule)
@@ -887,8 +887,7 @@ def fetch_external_rules():
             continue
 
         body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
-        fork_line = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers)
-        clash_content = fork_line + "\n" + body
+        clash_content = "### fork from " + " & ".join(fork_urls) + "\n" + body
         if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
             print(f"    ✓ Clash:    {name}.yaml")
         else:
