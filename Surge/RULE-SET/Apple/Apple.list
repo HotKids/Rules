@@ -1,6 +1,5 @@
-### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf
-### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/ip/apple_services.conf
-# > Apple/Apple
+### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf & https://raw.githubusercontent.com/SukkaW/Surge/master/Source/ip/apple_services.conf
+# > Apple
 DOMAIN-SUFFIX,aaplimg.com
 DOMAIN-SUFFIX,apple-dns.net
 DOMAIN-SUFFIX,apple.co
