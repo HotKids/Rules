@@ -463,29 +463,18 @@ def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
         # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
         preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
 
-        # Clash：转换后追加保留规则
-        clash_content = convert_clash(lines)
+        # Surge → Clash：保留规则插在 payload: 首行
+        clash_body = convert_clash(lines)
         if preserved:
             extra = "\n".join(f"  - {t},{v}" for t, v in preserved)
-            clash_content = clash_content.rstrip("\n") + "\n" + extra + "\n"
-        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
+            # 将保留规则插在 "payload:" 之后、其余规则之前
+            clash_body = clash_body.replace("payload:\n", f"payload:\n{extra}\n", 1)
+        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
 
-        # sing-box：转换后将保留规则合并进 JSON
-        sb_content = convert_singbox(lines)
-        if preserved and sb_content:
-            obj = json.loads(sb_content)
-            for rule_type, value in preserved:
-                sb_key = SINGBOX_MAP[rule_type]
-                for r in obj["rules"]:
-                    if sb_key in r:
-                        if value not in r[sb_key]:
-                            r[sb_key].append(value)
-                        break
-                else:
-                    obj["rules"].append({sb_key: [value]})
-            sb_content = json.dumps(obj, indent=2, ensure_ascii=False) + "\n"
+        # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
+        sb_content = convert_classical_payload_to_singbox(clash_body)
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
                 print(f"    ✓ sing-box: {stem}.json")
