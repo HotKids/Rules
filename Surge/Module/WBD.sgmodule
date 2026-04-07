@@ -1,0 +1,19 @@
+#!name=WBD Streaming
+#!desc=WBD 旗下 HBO Max 与 Discovery+ 分流模块
+#!arguments=DPlus:🇺🇸 America,Max:🎬 Streaming
+[MITM]
+# iOS 15+ 起 UA 会被系统隐藏，需对该 HOST 启用 MITM 才能正确识别 Max / Discovery+ 客户端类型
+hostname = %APPEND% default.any-any.prd.api.discomax.com
+
+[Rule]
+# 地区验证说明：
+# HBO Max 与 Discovery+ 均使用同一验证接口 default.any-any.prd.api.discomax.com
+# 可通过 AND 语法根据不同客户端 UA 进行区分：
+#   Discovery+ UA 识别：*DPlus*
+#   HBO Max   UA 识别：*Max*
+# 以下注释示例按需启用：
+# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*DPlus*)),{{{DPlus}}}
+# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*Max*)),{{{Max}}}
+
+# Discovery+ 服务域名分流
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},force-remote-dns,extended-matching
