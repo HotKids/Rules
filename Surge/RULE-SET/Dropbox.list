@@ -1,4 +1,4 @@
-### fork from https://raw.githubusercontent.com/LM-Firefly/Rules/master/Clash-RuleSet-Classical/PROXY/Dropbox.yaml
+### fork from https://raw.githubusercontent.com/LM-Firefly/Rules/master/PROXY/Dropbox.list
 # > Dropbox
 DOMAIN-SUFFIX,db.tt
 DOMAIN-SUFFIX,dropbox.com
