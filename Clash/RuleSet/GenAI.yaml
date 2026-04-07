@@ -19,6 +19,7 @@ payload:
 
   # Anthropic
   # > Claude
+  - DOMAIN-SUFFIX,clau.de
   - DOMAIN-SUFFIX,claude.ai
   - DOMAIN-SUFFIX,claude.com
   - DOMAIN-SUFFIX,anthropic.com

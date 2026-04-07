@@ -18,6 +18,7 @@ DOMAIN-SUFFIX,gateway.icloud.com,GenAI
 
 # Anthropic
 # > Claude
+DOMAIN-SUFFIX,clau.de,GenAI
 DOMAIN-SUFFIX,claude.ai,GenAI
 DOMAIN-SUFFIX,claude.com,GenAI
 DOMAIN-SUFFIX,anthropic.com,GenAI
