@@ -33,13 +33,17 @@ CLASH_SKIP = {"USER-AGENT", "URL-REGEX"}
 
 # ─── sing-box 字段映射 ───────────────────────────────────────────────
 SINGBOX_MAP = {
-    "DOMAIN":         "domain",
-    "DOMAIN-SUFFIX":  "domain_suffix",
-    "DOMAIN-KEYWORD": "domain_keyword",
-    "IP-CIDR":        "ip_cidr",
-    "IP-CIDR6":       "ip_cidr",
-    "PROCESS-NAME":   "process_name",
+    "DOMAIN":              "domain",
+    "DOMAIN-SUFFIX":       "domain_suffix",
+    "DOMAIN-KEYWORD":      "domain_keyword",
+    "IP-CIDR":             "ip_cidr",
+    "IP-CIDR6":            "ip_cidr",
+    "PROCESS-NAME":        "process_name",
+    "PROCESS-NAME-REGEX":  "process_name_regex",
 }
+
+# ─── Clash 专属规则类型（Surge 不支持，手动维护后同步到 sing-box）────────
+CLASH_PRESERVE_TYPES = {"PROCESS-NAME", "PROCESS-NAME-REGEX"}
 
 # ─── Streaming 配置 ──────────────────────────────────────────────────
 
@@ -456,14 +460,21 @@ def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
         updated += 1
 
     if not skip_clash_singbox:
-        # Clash
-        clash_content = convert_clash(lines)
-        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
+        # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
+        preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
+
+        # Surge → Clash：保留规则插在 payload: 首行
+        clash_body = convert_clash(lines)
+        if preserved:
+            extra = "\n".join(f"  - {t},{v}" for t, v in preserved)
+            # 将保留规则插在 "payload:" 之后、其余规则之前
+            clash_body = clash_body.replace("payload:\n", f"payload:\n{extra}\n", 1)
+        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
 
-        # sing-box
-        sb_content = convert_singbox(lines)
+        # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
+        sb_content = convert_classical_payload_to_singbox(clash_body)
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
                 print(f"    ✓ sing-box: {stem}.json")
@@ -597,6 +608,24 @@ def normalize_surge_rules(text: str) -> str | None:
             continue
         out.append(stripped)
     return ("\n".join(out) + "\n") if out else None
+
+
+def _extract_preserved_clash_rules(path: Path) -> list[tuple[str, str]]:
+    """从已有 Clash YAML 中提取 CLASH_PRESERVE_TYPES 规则，返回 [(rule_type, value), ...]。
+    用于在 Surge 自动转换覆盖 Clash 文件前保留手动添加的 Clash 专属规则。
+    """
+    if not path.exists():
+        return []
+    result = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("- "):
+            continue
+        rule = stripped[2:].strip()
+        parts = rule.split(",", 1)
+        if len(parts) == 2 and parts[0].strip() in CLASH_PRESERVE_TYPES:
+            result.append((parts[0].strip(), parts[1].strip()))
+    return result
 
 
 def normalize_clash_payload(text: str) -> str | None:
