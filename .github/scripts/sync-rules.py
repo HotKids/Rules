@@ -464,11 +464,15 @@ def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
         # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
         preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
 
-        # Surge → Clash：保留规则插在 payload: 首行
+        # Surge → Clash：只追加 Surge 源中没有的手动规则（末尾），防止重复
         clash_body = convert_clash(lines)
         if preserved:
-            extra = "\n".join(f"  - {t},{v}" for t, v in preserved)
-            clash_body = clash_body.replace("payload:\n", f"payload:\n{extra}\n", 1)
+            existing = {l.strip()[2:].strip() for l in clash_body.splitlines()
+                        if l.strip().startswith("- ")}
+            extra = [(t, v) for t, v in preserved if f"{t},{v}" not in existing]
+            if extra:
+                lines_extra = "\n".join(f"  - {t},{v}" for t, v in extra)
+                clash_body = clash_body.rstrip("\n") + "\n" + lines_extra + "\n"
         if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
