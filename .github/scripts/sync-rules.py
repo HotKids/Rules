@@ -448,12 +448,13 @@ def convert_singbox(lines: list[str]) -> str | None:
 
 def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
     lines = surge_file.read_text(encoding="utf-8").splitlines()
-    stem = surge_file.stem
+    stem = surge_file.stem                                           # 文件名，用作输出文件名及 QX policy
+    rel  = str(surge_file.relative_to(SURGE_DIR).with_suffix(""))  # 含子目录，用于 clash_override 匹配
     updated = 0
     # sync-rules.txt # >> Clash 条目已由 Step 1 直接写入 Clash/sing-box，跳过自动转换
-    skip_clash_singbox = clash_override is not None and stem in clash_override
+    skip_clash_singbox = clash_override is not None and rel in clash_override
 
-    # QX（始终生成）
+    # QX / Clash / sing-box 输出全部摊平（不保留子目录结构）
     qx_content = convert_qx(lines, stem)
     if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
         print(f"    ✓ QX:      {stem}.list")
@@ -467,7 +468,6 @@ def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
         clash_body = convert_clash(lines)
         if preserved:
             extra = "\n".join(f"  - {t},{v}" for t, v in preserved)
-            # 将保留规则插在 "payload:" 之后、其余规则之前
             clash_body = clash_body.replace("payload:\n", f"payload:\n{extra}\n", 1)
         if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
@@ -522,7 +522,8 @@ def cleanup_stale():
 
     # 清理 Surge/RULE-SET/ 中不再被 # >> Surge 管理的外部拉取文件
     for sf in sorted(SURGE_DIR.rglob("*.list")):
-        if sf.stem in surge_managed:
+        rel = str(sf.relative_to(SURGE_DIR).with_suffix(""))
+        if rel in surge_managed:
             continue
         try:
             first_line = sf.read_text(encoding="utf-8").splitlines()[0].strip()
@@ -532,7 +533,7 @@ def cleanup_stale():
             sf.unlink()
             print(f"  ✗ 删除 {sf.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除）")
 
-    # QX / Clash / sing-box：保留有 Surge 源或 # >> Clash 管理的文件
+    # QX / Clash / sing-box：保留有 Surge 源（摊平，用 stem）或 # >> Clash 管理（保留路径）的文件
     surge_stems = {sf.stem for sf in SURGE_DIR.rglob("*.list")}
     keep = surge_stems | clash_managed
 
@@ -540,8 +541,9 @@ def cleanup_stale():
     for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
         if not target_dir.exists():
             continue
-        for f in sorted(target_dir.iterdir()):
-            if f.suffix == ext and f.stem not in keep:
+        for f in sorted(target_dir.rglob(f"*{ext}")):
+            rel = str(f.relative_to(target_dir).with_suffix(""))
+            if rel not in keep:
                 f.unlink()
                 print(f"  ✗ 删除 {f.relative_to(REPO_ROOT)}")
                 deleted += 1
