@@ -851,7 +851,7 @@ def fetch_external_rules():
             print(f"    [WARN] {name} 全部来源为空，跳过")
             continue
         if not has_section_header:
-            rule_lines.insert(0, f"# > {name}")
+            rule_lines.insert(0, f"# > {name.rsplit('/', 1)[-1]}")
 
         content = "\n".join(fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
