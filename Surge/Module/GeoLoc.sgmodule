@@ -1,7 +1,7 @@
 #!name=SNS GeoLoc
 #!desc=修改中国大陆常见社群 IP 归属地显示
 #!system=ios
-#!arguments=sns=proxy
+#!argument=sns=%sns%
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
