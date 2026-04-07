@@ -1,0 +1,39 @@
+#!name=SNS GeoLoc
+#!desc=修改中国大陆常见社群 IP 归属地显示
+#!system=ios
+#!arguments=sns=proxy
+### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
+
+[Rule]
+AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
+
+# bilibili
+URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,argument=sns=%sns%
+
+# ByteDance
+# (Amemv)
+DOMAIN-KEYWORD,core-hl.amemv.com,argument=sns=%sns%,extended-matching
+DOMAIN-KEYWORD,core-lf.amemv.com,argument=sns=%sns%,extended-matching
+# (TouTiao)
+DOMAIN,ib.snssdk.com,argument=sns=%sns%
+
+# Kuwo
+DOMAIN,ip.i.kuwo.cn,argument=sns=%sns%
+
+# Xiaohongshu
+DOMAIN,edith.xiaohongshu.com,argument=sns=%sns%,extended-matching
+
+# Weibo
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),argument=sns=%sns%
+URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,argument=sns=%sns%
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,argument=sns=%sns%
+# (Web)
+DOMAIN,www.weibo.com,argument=sns=%sns%
+DOMAIN,s.weibo.com,argument=sns=%sns%
+
+# Zhihu
+URL-REGEX,https:\/\/api\.zhihu\.com\/answers,argument=sns=%sns%
+URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,argument=sns=%sns%
+
+[MITM]
+hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, www.weibo.com, s.weibo.com, api.zhihu.com
