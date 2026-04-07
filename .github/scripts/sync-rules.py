@@ -168,7 +168,7 @@ def read_standalone(stem: str) -> str | None:
 
 def sync_regional():
     """地区合集 ↔ 独立子项双向同步。"""
-    print("\n── Step 1: 地区合集 ↔ 独立子项同步 ──")
+    print("\n── Step 2: 地区合集 ↔ 独立子项同步 ──")
 
     for regional_name, members in REGIONAL_MEMBERS.items():
         regional_path = SURGE_DIR / f"{regional_name}.list"
@@ -262,7 +262,7 @@ def _rebuild_regional(regional_path: Path, regional_name: str, members: list[str
 
 def rebuild_streaming():
     """独立子项 → 重建 Streaming.list。"""
-    print("\n── Step 2: 重建 Streaming.list ──")
+    print("\n── Step 3: 重建 Streaming.list ──")
 
     parts = []
     for stem in STREAMING_MEMBERS:
@@ -499,17 +499,32 @@ def convert_all():
 # ═══════════════════════════════════════════════════════════════════════
 
 def cleanup_stale():
-    """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。"""
+    """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。
+    同时清理 Surge/RULE-SET/ 中以前由 # >> Surge 拉取、现已从 sync-rules.txt 移除的文件
+    （通过 '### fork from' 首行识别为外部来源）。
+    """
     print("\n── Step 5: 清理已删除的文件 ──")
 
-    surge_stems = set()
-    for sf in SURGE_DIR.rglob("*.list"):
-        surge_stems.add(sf.stem)
-
-    # # >> Clash 直接写入的文件也需保留（Step 1 生成的 Clash / sing-box 文件）
     sync_rules = parse_sync_rules()
-    external_stems = {e["name"] for e in sync_rules["clash"]}
-    keep = surge_stems | external_stems
+    # 当前 sync-rules.txt 管理的 stems
+    surge_managed = {e["name"] for e in sync_rules["surge"]}
+    clash_managed = {e["name"] for e in sync_rules["clash"]}
+
+    # 清理 Surge/RULE-SET/ 中不再被 # >> Surge 管理的外部拉取文件
+    for sf in sorted(SURGE_DIR.rglob("*.list")):
+        if sf.stem in surge_managed:
+            continue
+        try:
+            first_line = sf.read_text(encoding="utf-8").splitlines()[0].strip()
+        except (IndexError, OSError):
+            continue
+        if first_line.startswith("### fork from "):
+            sf.unlink()
+            print(f"  ✗ 删除 {sf.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除）")
+
+    # QX / Clash / sing-box：保留有 Surge 源或 # >> Clash 管理的文件
+    surge_stems = {sf.stem for sf in SURGE_DIR.rglob("*.list")}
+    keep = surge_stems | clash_managed
 
     deleted = 0
     for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
