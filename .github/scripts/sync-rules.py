@@ -48,6 +48,7 @@ SECTION_TO_FILE = {
     "Hulu JP":            "Hulu_JP",
     "iQIYI Intl":         "IQ",
     "LINE TV":            "LINETV",
+    "HBO Max":            "HBO_Max",
     "Amazon Prime Video": "Prime Video",
     "BBC iPlayer":        "BBC",
     "SBS On Demand":      "SBS",
@@ -74,7 +75,7 @@ REGIONAL_MEMBERS = {
     "Streaming_JP": ["AbemaTV", "FOD", "Hulu_JP", "Paravi", "TVer", "U-NEXT"],
     "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "IQ",
                       "KKBOX&KKTV", "LINETV", "myVideo", "Readmoo", "Spotify"],
-    "Streaming_US": ["Crunchyroll", "Discovery+", "Hulu",
+    "Streaming_US": ["Crunchyroll", "Discovery+", "HBO_Max", "Hulu",
                       "MGM+", "PBS", "Paramount+", "Peacock", "Roku", "T-Mobile"],
 }
 
@@ -82,7 +83,7 @@ REGIONAL_MEMBERS = {
 # Movies Anywhere 不在此列，内联保留
 STREAMING_MEMBERS = [
     "AbemaTV", "Prime Video", "BBC", "Bahamut", "Britbox", "Crunchyroll",
-    "DAZN", "Discovery+", "Disney+", "Hulu", "MGM+",
+    "DAZN", "Discovery+", "Disney+", "HBO_Max", "Hulu", "MGM+",
     "MUBI", "Netflix", "Paramount+", "Peacock", "SBS", "Spotify",
     "Stan", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
 ]
