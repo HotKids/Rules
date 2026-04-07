@@ -332,6 +332,7 @@ def convert_qx(lines: list[str], policy: str) -> str:
             out.append(stripped)
             continue
         if stripped.startswith("//"):
+            out.append(f"# {stripped[2:].strip()}")
             continue
 
         parts = [p.strip() for p in stripped.split(",")]
@@ -367,6 +368,7 @@ def convert_clash(lines: list[str]) -> str:
             out.append(f"  {stripped}")
             continue
         if stripped.startswith("//"):
+            out.append(f"  # {stripped[2:].strip()}")
             continue
 
         parts = [p.strip() for p in stripped.split(",")]
@@ -606,6 +608,7 @@ def normalize_surge_rules(text: str) -> str | None:
         if not stripped:
             continue
         if stripped.startswith("//"):
+            out.append(f"# {stripped[2:].strip()}")
             continue
         if stripped.startswith("#"):
             # 仅保留 '# > Name' section header（排除 '# >>' 配置标记）
