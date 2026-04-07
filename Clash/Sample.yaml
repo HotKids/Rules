@@ -441,16 +441,16 @@ rule-providers:
     
   Apple CDN:
     type: http
-    behavior: domain
+    behavior: classical
     path: ./Provider/RuleSet/Extra/AppleCDN.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple%20CDN.yaml
     interval: 86400
 
   Apple:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Extra/Apple.yaml
-    url: https://ruleset.skk.moe/Clash/non_ip/apple_services.txt
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
     interval: 86400
     
   Global:
