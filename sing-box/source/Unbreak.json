@@ -50,6 +50,11 @@
       "process_name": [
         "*ziniao*"
       ]
+    },
+    {
+      "process_name_regex": [
+        "*ziniao*"
+      ]
     }
   ]
 }
