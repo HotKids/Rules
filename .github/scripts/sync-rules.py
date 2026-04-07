@@ -580,8 +580,51 @@ def _is_clash_payload(text: str) -> bool:
     return False
 
 
+def normalize_surge_rules(text: str) -> str | None:
+    """规范化 Surge 规则文本为项目风格。
+    保留 '# > Section' header，剥掉其他来源注释，输出干净规则行。
+    """
+    out = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped:
+            continue
+        if stripped.startswith("//"):
+            continue
+        if stripped.startswith("#"):
+            # 仅保留 '# > Name' section header（排除 '# >>' 配置标记）
+            if re.match(r"^#\s*>(?!>)\s*\S", stripped):
+                out.append(stripped)
+            continue
+        out.append(stripped)
+    return ("\n".join(out) + "\n") if out else None
+
+
+def normalize_clash_payload(text: str) -> str | None:
+    """规范化 Clash payload 格式：提取规则行，剥掉内嵌元数据注释，重新格式化输出。"""
+    rules = []
+    in_payload = False
+    for raw in text.splitlines():
+        stripped = raw.strip()
+        if stripped == "payload:":
+            in_payload = True
+            continue
+        if not in_payload:
+            continue
+        if stripped.startswith("- "):
+            rule = stripped[2:].strip().strip("'\"")
+            if rule and not rule.startswith("#"):
+                rules.append(rule)
+    if not rules:
+        return None
+    out = ["payload:"]
+    for r in rules:
+        out.append(f"  - {r}")
+    return "\n".join(out) + "\n"
+
+
 def convert_clash_payload_to_surge(text: str) -> str | None:
-    """Clash classical payload: → Surge RULE-SET .list 格式。"""
+    """Clash classical payload: → Surge RULE-SET .list 格式（仅规则行，无注释）。"""
     out = []
     in_payload = False
     for raw in text.splitlines():
@@ -593,10 +636,8 @@ def convert_clash_payload_to_surge(text: str) -> str | None:
             continue
         if stripped.startswith("- "):
             rule = stripped[2:].strip().strip("'\"")
-            if rule:
+            if rule and not rule.startswith("#"):
                 out.append(rule)
-        elif stripped.startswith("#"):
-            out.append(stripped)
     return ("\n".join(out) + "\n") if out else None
 
 
@@ -733,15 +774,18 @@ def fetch_external_rules():
         text = fetch_url(url)
         if text is None:
             continue
-        # 若远端文件是 Clash payload 格式，自动转换为 Surge .list 格式
+        # 若远端文件是 Clash payload 格式，先转换为 Surge 格式
         if _is_clash_payload(text):
-            converted = convert_clash_payload_to_surge(text)
-            if converted is None:
+            text = convert_clash_payload_to_surge(text)
+            if text is None:
                 print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
                 continue
-            print(f"    [INFO] 检测到 Clash payload，已自动转换为 Surge 格式")
-            text = converted
-        content = f"### fork from {url}\n{text}"
+        # 统一规范化为项目风格（保留 # > Section header，剥掉来源注释）
+        normalized = normalize_surge_rules(text)
+        if normalized is None:
+            print(f"    [WARN] {name} 规范化后为空，跳过")
+            continue
+        content = f"### fork from {url}\n{normalized}"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
@@ -762,7 +806,8 @@ def fetch_external_rules():
         if is_ipcidr:
             body = convert_ipcidr_to_clash(text) or ""
         elif is_clash:
-            body = text
+            # 已是 Clash payload：规范化去除内嵌元数据注释
+            body = normalize_clash_payload(text) or ""
         else:
             body = convert_clash(text.splitlines())
 
