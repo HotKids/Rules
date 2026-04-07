@@ -46,10 +46,8 @@ SINGBOX_MAP = {
 # section 名 → 文件名 stem（只列特殊映射，其余 section 名即文件名）
 SECTION_TO_FILE = {
     "Hulu JP":            "Hulu_JP",
-    "HBO GO Asia":        "HBO_Go",
     "iQIYI Intl":         "IQ",
     "LINE TV":            "LINETV",
-    "HBO Max":            "HBO_Max",
     "Amazon Prime Video": "Prime Video",
     "BBC iPlayer":        "BBC",
     "SBS On Demand":      "SBS",
@@ -74,9 +72,9 @@ for _file, _secs in MERGE_GROUPS.items():
 # 地区合集成员（值为文件名 stem）
 REGIONAL_MEMBERS = {
     "Streaming_JP": ["AbemaTV", "FOD", "Hulu_JP", "Paravi", "TVer", "U-NEXT"],
-    "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "HBO_Go", "IQ",
+    "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "IQ",
                       "KKBOX&KKTV", "LINETV", "myVideo", "Readmoo", "Spotify"],
-    "Streaming_US": ["Crunchyroll", "Discovery+", "HBO_Max", "Hulu", "Max",
+    "Streaming_US": ["Crunchyroll", "Discovery+", "Hulu",
                       "MGM+", "PBS", "Paramount+", "Peacock", "Roku", "T-Mobile"],
 }
 
@@ -84,9 +82,9 @@ REGIONAL_MEMBERS = {
 # Movies Anywhere 不在此列，内联保留
 STREAMING_MEMBERS = [
     "AbemaTV", "Prime Video", "BBC", "Bahamut", "Britbox", "Crunchyroll",
-    "DAZN", "Discovery+", "Disney+", "HBO_Max", "Hulu", "MGM+",
+    "DAZN", "Discovery+", "Disney+", "Hulu", "MGM+",
     "MUBI", "Netflix", "Paramount+", "Peacock", "SBS", "Spotify",
-    "Stan", "Star+", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
+    "Stan", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
 ]
 
 MOVIES_ANYWHERE_SECTION = "# > Movies Anywhere\nDOMAIN-SUFFIX,moviesanywhere.com"

@@ -1,7 +1,0 @@
-# > HBO Max
-USER-AGENT,HBOMAX*
-USER-AGENT,Max*
-PROCESS-NAME,com.wbd.stream
-DOMAIN-SUFFIX,max.com
-DOMAIN-SUFFIX,hbomax.com
-DOMAIN-SUFFIX,discomax.com
