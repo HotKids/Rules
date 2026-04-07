@@ -68,6 +68,7 @@
         "dazn.com",
         "dazndn.com",
         "disco-api.com",
+        "discomax.com",
         "discoveryplus.com",
         "disney-plus.net",
         "disneyplus.com",
@@ -82,6 +83,7 @@
         "gamer.com.tw",
         "googlevideo.com",
         "hayabusa.io",
+        "hbomax.com",
         "hulu.com",
         "hulu.tv",
         "huluim.com",
@@ -89,6 +91,7 @@
         "indazn.com",
         "indaznlab.com",
         "interactive-circle.jp",
+        "max.com",
         "media-amazon.com",
         "mgmplus.com",
         "moviesanywhere.com",
@@ -157,6 +160,11 @@
         "54.148.37.5/32",
         "64.120.128.0/17",
         "66.197.128.0/17"
+      ]
+    },
+    {
+      "process_name": [
+        "com.wbd.stream"
       ]
     }
   ]
