@@ -35,4 +35,4 @@ URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{Proxy}}}
 URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{Proxy}}}
 
 [MITM]
-hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, www.weibo.com, s.weibo.com, api.zhihu.com
+hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, api.zhihu.com
