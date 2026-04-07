@@ -16,4 +16,4 @@ hostname = %APPEND% default.any-any.prd.api.discomax.com
 # AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*Max*)),{{{Max}}}
 
 # Discovery+ 服务域名分流
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},force-remote-dns,extended-matching
