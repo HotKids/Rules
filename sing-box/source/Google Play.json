@@ -22,13 +22,6 @@
       "domain_keyword": [
         "play.google"
       ]
-    },
-    {
-      "domain_regex": [
-        "^.*play.*\\.google\\.com$",
-        "^.*play.*\\.googleapis\\.com$",
-        "^.*play.*\\.googleusercontent\\.com$"
-      ]
     }
   ]
 }

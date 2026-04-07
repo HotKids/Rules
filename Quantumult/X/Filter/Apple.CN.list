@@ -1,0 +1,11 @@
+### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.conf
+# > Apple/Apple.CN
+DOMAIN-SUFFIX,cn.apple.com,Apple.CN
+DOMAIN-SUFFIX,apple.com.cn,Apple.CN
+DOMAIN,api.smoot.apple.cn,Apple.CN
+DOMAIN-SUFFIX,cn.ls.apple.com,Apple.CN
+DOMAIN-SUFFIX,cn-ssl.ls.apple.com,Apple.CN
+DOMAIN,gs-loc-cn.apple.com,Apple.CN
+DOMAIN-SUFFIX,icloud.com.cn,Apple.CN
+DOMAIN-SUFFIX,gspe19-cn-ssl.ls.apple.com,Apple.CN
+DOMAIN,appleintelligencefeedback.care.apple.com,Apple.CN

@@ -1,4 +1,6 @@
 payload:
+  - PROCESS-NAME,*spark
+  - PROCESS-NAME,com.readdle.spark
   # > Spark Mail
   # 通用 SMTP 端口
   # 明文 SMTP

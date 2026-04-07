@@ -47,11 +47,6 @@
       ]
     },
     {
-      "domain_regex": [
-        "^.*mtalk.*\\.google\\.com$"
-      ]
-    },
-    {
       "process_name": [
         "*ziniao*"
       ]
