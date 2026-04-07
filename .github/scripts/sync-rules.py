@@ -822,7 +822,8 @@ def fetch_external_rules():
         fork_headers: list[str] = []
         rule_lines: list[str] = []
         seen_rules: set[str] = set()
-        has_section_header = False
+        section_names: list[str] = []  # 各来源的 # > Name，最终拼成 A & B
+
 
         for url in urls:
             print(f"  [Surge] {name} ← {url}")
@@ -840,9 +841,9 @@ def fetch_external_rules():
             fork_headers.append(f"### fork from {url}")
             for line in normalized.splitlines():
                 if re.match(r"^#\s*>(?!>)\s*\S", line):
-                    if not has_section_header:   # 只保留首个 section header
-                        rule_lines.append(line)
-                        has_section_header = True
+                    display = re.sub(r"^#\s*>\s*", "", line).strip()
+                    if display not in section_names:
+                        section_names.append(display)
                 elif line not in seen_rules:
                     seen_rules.add(line)
                     rule_lines.append(line)
@@ -850,10 +851,10 @@ def fetch_external_rules():
         if not rule_lines:
             print(f"    [WARN] {name} 全部来源为空，跳过")
             continue
-        if not has_section_header:
-            rule_lines.insert(0, f"# > {name}")
+        header = " & ".join(section_names) if section_names else name.rsplit("/", 1)[-1]
+        rule_lines.insert(0, f"# > {header}")
 
-        content = "\n".join(fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
+        content = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
@@ -886,7 +887,8 @@ def fetch_external_rules():
             continue
 
         body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
-        clash_content = "\n".join(fork_headers) + "\n" + body
+        fork_line = "### fork from " + " & ".join(u[len("### fork from "):] for u in fork_headers)
+        clash_content = fork_line + "\n" + body
         if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
             print(f"    ✓ Clash:    {name}.yaml")
         else:
