@@ -448,36 +448,36 @@ def convert_singbox(lines: list[str]) -> str | None:
 
 def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
     lines = surge_file.read_text(encoding="utf-8").splitlines()
-    stem = surge_file.stem                                           # 仅文件名，用作 QX policy
-    rel  = str(surge_file.relative_to(SURGE_DIR).with_suffix(""))  # 含子目录，如 Apple/Apple
+    stem = surge_file.stem                                           # 文件名，用作输出文件名及 QX policy
+    rel  = str(surge_file.relative_to(SURGE_DIR).with_suffix(""))  # 含子目录，用于 clash_override 匹配
     updated = 0
     # sync-rules.txt # >> Clash 条目已由 Step 1 直接写入 Clash/sing-box，跳过自动转换
     skip_clash_singbox = clash_override is not None and rel in clash_override
 
-    # QX（始终生成，policy 用文件名 stem）
+    # QX / Clash / sing-box 输出全部摊平（不保留子目录结构）
     qx_content = convert_qx(lines, stem)
-    if write_if_changed(QX_DIR / f"{rel}.list", qx_content):
-        print(f"    ✓ QX:      {rel}.list")
+    if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
+        print(f"    ✓ QX:      {stem}.list")
         updated += 1
 
     if not skip_clash_singbox:
         # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
-        preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{rel}.yaml")
+        preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
 
         # Surge → Clash：保留规则插在 payload: 首行
         clash_body = convert_clash(lines)
         if preserved:
             extra = "\n".join(f"  - {t},{v}" for t, v in preserved)
             clash_body = clash_body.replace("payload:\n", f"payload:\n{extra}\n", 1)
-        if write_if_changed(CLASH_DIR / f"{rel}.yaml", clash_body):
-            print(f"    ✓ Clash:   {rel}.yaml")
+        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
+            print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
 
         # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
         sb_content = convert_classical_payload_to_singbox(clash_body)
         if sb_content:
-            if write_if_changed(SINGBOX_DIR / f"{rel}.json", sb_content):
-                print(f"    ✓ sing-box: {rel}.json")
+            if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
+                print(f"    ✓ sing-box: {stem}.json")
                 updated += 1
 
     return updated
@@ -533,9 +533,9 @@ def cleanup_stale():
             sf.unlink()
             print(f"  ✗ 删除 {sf.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除）")
 
-    # QX / Clash / sing-box：保留有 Surge 源或 # >> Clash 管理的文件
-    surge_rels = {str(sf.relative_to(SURGE_DIR).with_suffix("")) for sf in SURGE_DIR.rglob("*.list")}
-    keep = surge_rels | clash_managed
+    # QX / Clash / sing-box：保留有 Surge 源（摊平，用 stem）或 # >> Clash 管理（保留路径）的文件
+    surge_stems = {sf.stem for sf in SURGE_DIR.rglob("*.list")}
+    keep = surge_stems | clash_managed
 
     deleted = 0
     for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
