@@ -441,9 +441,9 @@ rule-providers:
     
   Apple CDN:
     type: http
-    behavior: classical
+    behavior: domain
     path: ./Provider/RuleSet/Extra/AppleCDN.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple%20CDN.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt
     interval: 86400
 
   Apple:
