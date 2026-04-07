@@ -62,3 +62,4 @@ payload:
 
   # > ziniao
   - PROCESS-NAME,*ziniao*
+  - PROCESS-NAME-REGEX,*ziniao*
