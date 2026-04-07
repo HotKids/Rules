@@ -1,9 +1,4 @@
 payload:
-  - PROCESS-NAME,com.wbd.stream
-  - PROCESS-NAME,com.wbd.stream
-  - PROCESS-NAME,com.wbd.stream
-  - PROCESS-NAME,com.wbd.stream
-  - PROCESS-NAME,com.wbd.stream
   # > Crunchyroll
   - DOMAIN-SUFFIX,crunchyroll.com
 

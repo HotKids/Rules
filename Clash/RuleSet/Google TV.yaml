@@ -1,9 +1,4 @@
 payload:
-  - PROCESS-NAME,com.google.android.videos
-  - PROCESS-NAME,com.google.android.videos
-  - PROCESS-NAME,com.google.android.videos
-  - PROCESS-NAME,com.google.android.videos
-  - PROCESS-NAME,com.google.android.videos
   # > Chromecast with Google TV
   - PROCESS-NAME,com.google.android.videos
   - DOMAIN,androidtvlauncherxfe-pa.googleapis.com

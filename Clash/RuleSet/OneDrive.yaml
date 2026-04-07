@@ -1,9 +1,4 @@
 payload:
-  - PROCESS-NAME,OneDrive*
-  - PROCESS-NAME,OneDrive*
-  - PROCESS-NAME,OneDrive*
-  - PROCESS-NAME,OneDrive*
-  - PROCESS-NAME,OneDrive*
   # > OneDrive
   - PROCESS-NAME,OneDrive*
   - DOMAIN-SUFFIX,1drv.com

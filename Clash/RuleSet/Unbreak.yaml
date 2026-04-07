@@ -1,9 +1,4 @@
 payload:
-  - PROCESS-NAME,*ziniao*
-  - PROCESS-NAME,*ziniao*
-  - PROCESS-NAME,*ziniao*
-  - PROCESS-NAME,*ziniao*
-  - PROCESS-NAME,*ziniao*
   # > Unbreak
   - DOMAIN,app.adjust.com
   - DOMAIN,app.appsflyer.com
