@@ -23,14 +23,6 @@ DOMAIN,aka01p.akamaized.net,Streaming_TW
 DOMAIN,aka02p.akamaized.net,Streaming_TW
 DOMAIN,aka36p.akamaized.net,Streaming_TW
 
-# > HBO GO Asia
-DOMAIN-KEYWORD,hbogoasia,Streaming_TW
-DOMAIN-SUFFIX,hboasia.com,Streaming_TW
-DOMAIN-SUFFIX,hbogoasia.com,Streaming_TW
-DOMAIN,hbolb.onwardsmg.com,Streaming_TW
-DOMAIN,hbounify-prod.evergent.com,Streaming_TW
-DOMAIN,dai3fd1oh325y.cloudfront.net,Streaming_TW
-
 # > iQIYI Intl
 USER-AGENT,iQIYI*,Streaming_TW
 USER-AGENT,QIYIVideo*,Streaming_TW

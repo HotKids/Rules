@@ -1,8 +1,0 @@
-payload:
-  # > HBO GO Asia
-  - DOMAIN-KEYWORD,hbogoasia
-  - DOMAIN-SUFFIX,hboasia.com
-  - DOMAIN-SUFFIX,hbogoasia.com
-  - DOMAIN,hbolb.onwardsmg.com
-  - DOMAIN,hbounify-prod.evergent.com
-  - DOMAIN,dai3fd1oh325y.cloudfront.net
