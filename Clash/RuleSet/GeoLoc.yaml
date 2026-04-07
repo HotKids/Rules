@@ -1,0 +1,14 @@
+payload:
+  # SNS GeoLoc
+  # ByteDance
+  # > Amemv
+  # AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
+  - DOMAIN-KEYWORD,-core-hl.amemv.com,extended-matching
+  - DOMAIN-KEYWORD,-core-lf.amemv.com,extended-matching
+  - DOMAIN-SUFFIX,douyinvod.com
+
+  # > TouTiao
+  - DOMAIN,ib.snssdk.com
+
+  # RedNote
+  - DOMAIN,edith.xiaohongshu.com

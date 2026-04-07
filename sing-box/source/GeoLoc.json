@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "edith.xiaohongshu.com",
+        "ib.snssdk.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "douyinvod.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "-core-hl.amemv.com",
+        "-core-lf.amemv.com"
+      ]
+    }
+  ]
+}
