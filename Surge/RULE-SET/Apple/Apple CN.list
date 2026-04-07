@@ -1,5 +1,5 @@
 ### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.conf
-# > Apple/Apple.CN
+# > Apple/Apple CN
 DOMAIN-SUFFIX,cn.apple.com
 DOMAIN-SUFFIX,apple.com.cn
 DOMAIN,api.smoot.apple.cn
