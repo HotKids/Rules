@@ -784,6 +784,10 @@ def fetch_external_rules():
         if normalized is None:
             print(f"    [WARN] {name} 规范化后为空，跳过")
             continue
+        # 若来源文件没有 section header，自动补上 # > Name
+        first = normalized.splitlines()[0] if normalized.strip() else ""
+        if not re.match(r"^#\s*>\s*\S", first):
+            normalized = f"# > {name}\n{normalized}"
         content = f"### fork from {url}\n{normalized}"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
