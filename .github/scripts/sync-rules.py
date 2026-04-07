@@ -14,7 +14,7 @@ import json
 import re
 import sys
 import urllib.request
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
 from pathlib import Path
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
@@ -651,6 +651,22 @@ def normalize_clash_payload(text: str) -> str | None:
     return "\n".join(out) + "\n"
 
 
+def _clash_body_rules(text: str, is_ipcidr: bool) -> list[str]:
+    """将原始下载文本转换为规则字符串列表（去掉 '  - ' 前缀），供同名条目合并使用。"""
+    if is_ipcidr:
+        body = convert_ipcidr_to_clash(text) or ""
+    elif _is_clash_payload(text):
+        body = normalize_clash_payload(text) or ""
+    else:
+        body = convert_clash(text.splitlines())
+    rules = []
+    for line in body.splitlines():
+        s = line.strip()
+        if s.startswith("- "):
+            rules.append(s[2:].strip())
+    return rules
+
+
 def convert_clash_payload_to_surge(text: str) -> str | None:
     """Clash classical payload: → Surge RULE-SET .list 格式（仅规则行，无注释）。"""
     out = []
@@ -795,71 +811,86 @@ def fetch_external_rules():
         print("  sync-rules.txt 无规则条目")
         return
 
-    # ── # >> Surge section ──────────────────────────────────────────
+    # ── # >> Surge section（同名多 URL 合并去重）──────────────────────
+    surge_groups: dict[str, list[str]] = defaultdict(list)
     for e in rules["surge"]:
-        name, url = e["name"], e["url"]
-        print(f"  [Surge] {name} ← {url}")
-        text = fetch_url(url)
-        if text is None:
-            continue
-        # 若远端文件是 Clash payload 格式，先转换为 Surge 格式
-        if _is_clash_payload(text):
-            text = convert_clash_payload_to_surge(text)
+        surge_groups[e["name"]].append(e["url"])
+
+    for name, urls in surge_groups.items():
+        fork_headers: list[str] = []
+        rule_lines: list[str] = []
+        seen_rules: set[str] = set()
+        has_section_header = False
+
+        for url in urls:
+            print(f"  [Surge] {name} ← {url}")
+            text = fetch_url(url)
             if text is None:
-                print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
                 continue
-        # 统一规范化为项目风格（保留 # > Section header，剥掉来源注释）
-        normalized = normalize_surge_rules(text)
-        if normalized is None:
-            print(f"    [WARN] {name} 规范化后为空，跳过")
+            if _is_clash_payload(text):
+                text = convert_clash_payload_to_surge(text)
+                if text is None:
+                    print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
+                    continue
+            normalized = normalize_surge_rules(text)
+            if not normalized:
+                continue
+            fork_headers.append(f"### fork from {url}")
+            for line in normalized.splitlines():
+                if re.match(r"^#\s*>(?!>)\s*\S", line):
+                    if not has_section_header:   # 只保留首个 section header
+                        rule_lines.append(line)
+                        has_section_header = True
+                elif line not in seen_rules:
+                    seen_rules.add(line)
+                    rule_lines.append(line)
+
+        if not rule_lines:
+            print(f"    [WARN] {name} 全部来源为空，跳过")
             continue
-        # 若来源文件没有 section header，自动补上 # > Name
-        first = normalized.splitlines()[0] if normalized.strip() else ""
-        if not re.match(r"^#\s*>\s*\S", first):
-            normalized = f"# > {name}\n{normalized}"
-        content = f"### fork from {url}\n{normalized}"
+        if not has_section_header:
+            rule_lines.insert(0, f"# > {name}")
+
+        content = "\n".join(fork_headers) + "\n" + "\n".join(rule_lines) + "\n"
         if write_if_changed(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
             print(f"    ✓ {name}.list 无变化")
 
-    # ── # >> Clash section ──────────────────────────────────────────
+    # ── # >> Clash section（同名多 URL 合并去重）──────────────────────
+    clash_groups: dict[str, list[str]] = defaultdict(list)
     for e in rules["clash"]:
-        name, url = e["name"], e["url"]
-        print(f"  [Clash] {name} ← {url}")
-        text = fetch_url(url)
-        if text is None:
+        clash_groups[e["name"]].append(e["url"])
+
+    for name, urls in clash_groups.items():
+        is_ipcidr = "cidr" in name.lower()
+        fork_headers = []
+        all_rules: list[str] = []
+        seen_rules = set()
+
+        for url in urls:
+            print(f"  [Clash] {name} ← {url}")
+            text = fetch_url(url)
+            if text is None:
+                continue
+            fork_headers.append(f"### fork from {url}")
+            for rule in _clash_body_rules(text, is_ipcidr):
+                if rule not in seen_rules:
+                    seen_rules.add(rule)
+                    all_rules.append(rule)
+
+        if not all_rules:
+            print(f"    [WARN] {name} Clash 转换为空，跳过")
             continue
 
-        is_clash = _is_clash_payload(text)
-        is_ipcidr = "cidr" in name.lower()
-
-        # Clash YAML（首行加 fork header）
-        if is_ipcidr:
-            body = convert_ipcidr_to_clash(text) or ""
-        elif is_clash:
-            # 已是 Clash payload：规范化去除内嵌元数据注释
-            body = normalize_clash_payload(text) or ""
+        body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
+        clash_content = "\n".join(fork_headers) + "\n" + body
+        if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
+            print(f"    ✓ Clash:    {name}.yaml")
         else:
-            body = convert_clash(text.splitlines())
+            print(f"    ✓ Clash:    {name}.yaml 无变化")
 
-        if body.strip():
-            clash_content = f"### fork from {url}\n{body}"
-            if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
-                print(f"    ✓ Clash:    {name}.yaml")
-            else:
-                print(f"    ✓ Clash:    {name}.yaml 无变化")
-        else:
-            print(f"    [WARN] {name} Clash 转换为空，跳过")
-
-        # sing-box JSON（JSON 不支持注释，不加 fork header）
-        if is_ipcidr:
-            sb_content = convert_ipcidr_to_singbox(text)
-        elif is_clash:
-            sb_content = convert_classical_payload_to_singbox(text)
-        else:
-            sb_content = convert_singbox(text.splitlines())
-
+        sb_content = convert_classical_payload_to_singbox(body)
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")
