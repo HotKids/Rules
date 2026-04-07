@@ -3,11 +3,11 @@
 Surge RULE-SET 同步脚本
 
 功能：
-1. 地区合集 ↔ 独立子项双向同步
-2. 独立子项 → 重建 Streaming.list
-3. Surge → QX / Clash / sing-box 格式转换
-4. 清理已删除的规则文件
-5. 拉取 Sample.yaml 外部规则 → sing-box
+1. 拉取 sync-rules.txt 外部规则（Surge section → Surge/RULE-SET；Clash section → Clash/sing-box）
+2. 地区合集 ↔ 独立子项双向同步
+3. 独立子项 → 重建 Streaming.list
+4. Surge → QX / Clash / sing-box 格式转换（# >> Clash 条目已由 Step 1 直接写入，跳过）
+5. 清理已删除的规则文件
 """
 
 import json
@@ -23,7 +23,7 @@ SURGE_DIR = REPO_ROOT / "Surge" / "RULE-SET"
 QX_DIR = REPO_ROOT / "Quantumult" / "X" / "Filter"
 CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
-PROFILE_CONF = REPO_ROOT / "Surge" / "Profile.conf"
+SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT"}
@@ -443,36 +443,42 @@ def convert_singbox(lines: list[str]) -> str | None:
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def process_file(surge_file: Path) -> int:
+def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
     lines = surge_file.read_text(encoding="utf-8").splitlines()
     stem = surge_file.stem
     updated = 0
+    # sync-rules.txt # >> Clash 条目已由 Step 1 直接写入 Clash/sing-box，跳过自动转换
+    skip_clash_singbox = clash_override is not None and stem in clash_override
 
-    # QX
+    # QX（始终生成）
     qx_content = convert_qx(lines, stem)
     if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
         print(f"    ✓ QX:      {stem}.list")
         updated += 1
 
-    # Clash
-    clash_content = convert_clash(lines)
-    if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
-        print(f"    ✓ Clash:   {stem}.yaml")
-        updated += 1
-
-    # sing-box
-    sb_content = convert_singbox(lines)
-    if sb_content:
-        if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
-            print(f"    ✓ sing-box: {stem}.json")
+    if not skip_clash_singbox:
+        # Clash
+        clash_content = convert_clash(lines)
+        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_content):
+            print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
+
+        # sing-box
+        sb_content = convert_singbox(lines)
+        if sb_content:
+            if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
+                print(f"    ✓ sing-box: {stem}.json")
+                updated += 1
 
     return updated
 
 
 def convert_all():
     """遍历 Surge/RULE-SET 所有 .list（含子目录），逐文件转换。"""
-    print("\n── Step 3: Surge → QX / Clash / sing-box ──")
+    print("\n── Step 4: Surge → QX / Clash / sing-box ──")
+
+    # # >> Clash 条目优先级高于 Surge 自动转换（Clash/sing-box 已由 Step 1 写入）
+    clash_override = {e["name"] for e in parse_sync_rules()["clash"]}
 
     surge_files = sorted(SURGE_DIR.rglob("*.list"))
     if not surge_files:
@@ -483,7 +489,7 @@ def convert_all():
     for sf in surge_files:
         rel = sf.relative_to(SURGE_DIR)
         print(f"  [{rel}]")
-        total += process_file(sf)
+        total += process_file(sf, clash_override)
 
     print(f"  更新 {total} 个文件")
 
@@ -494,14 +500,15 @@ def convert_all():
 
 def cleanup_stale():
     """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。"""
-    print("\n── Step 4: 清理已删除的文件 ──")
+    print("\n── Step 5: 清理已删除的文件 ──")
 
     surge_stems = set()
     for sf in SURGE_DIR.rglob("*.list"):
         surge_stems.add(sf.stem)
 
-    # 外部规则名也需保留（Step 5 生成的 Clash / sing-box 文件）
-    external_stems = {p["name"] for p in parse_profile_rules()}
+    # # >> Clash 直接写入的文件也需保留（Step 1 生成的 Clash / sing-box 文件）
+    sync_rules = parse_sync_rules()
+    external_stems = {e["name"] for e in sync_rules["clash"]}
     keep = surge_stems | external_stems
 
     deleted = 0
@@ -519,65 +526,25 @@ def cleanup_stale():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Step 5: Profile.conf 外部规则 → Clash / sing-box
+#  Step 1: sync-rules.txt 外部规则拉取
 # ═══════════════════════════════════════════════════════════════════════
 
-def parse_profile_rules() -> list[dict]:
-    """解析 Surge/Profile.conf [Rule] 段中的外部 RULE-SET / DOMAIN-SET 引用。
-
-    返回 list[{name, url, behavior}]，跳过：
-      - 非 http(s) URL（内置规则集，如 RULE-SET,LAN）
-      - 本仓库（HotKids/Rules）规则，已由 Step 3 处理
-      - 重名条目（同 name 只保留首次出现）
-    """
-    if not PROFILE_CONF.exists():
-        return []
-
-    text = PROFILE_CONF.read_text(encoding="utf-8")
-    rules = []
-    seen: set[str] = set()
-    in_rule = False
-
-    for line in text.splitlines():
-        stripped = line.strip()
-        if stripped == "[Rule]":
-            in_rule = True
-            continue
-        if in_rule and stripped.startswith("[") and stripped != "[Rule]":
-            break
-        if not in_rule or not stripped or stripped.startswith("#") or stripped.startswith("//"):
-            continue
-
-        m = re.match(r"^(RULE-SET|DOMAIN-SET),(\S+?),", stripped)
-        if not m:
-            continue
-
-        rule_type, url = m.group(1), m.group(2)
-
-        if not url.startswith("http"):
-            continue
-        if "HotKids/Rules" in url:
-            continue
-
-        # 从 URL 路径末段推导文件名 stem
-        basename = url.rstrip("/").split("/")[-1]
-        name = basename.rsplit(".", 1)[0] if "." in basename else basename
-
-        if name in seen:
-            continue
-        seen.add(name)
-
-        # 推断 behavior
-        if rule_type == "DOMAIN-SET":
-            behavior = "domain"
-        elif "cidr" in name.lower():
-            behavior = "ipcidr"
-        else:
-            behavior = "classical"
-
-        rules.append({"name": name, "url": url, "behavior": behavior})
-
-    return rules
+def parse_sync_rules() -> dict:
+    """解析 sync-rules.txt，返回 {"surge": [{url, name}], "clash": [{url, name}]}。"""
+    result: dict[str, list[dict]] = {"surge": [], "clash": []}
+    if not SYNC_RULES_TXT.exists():
+        return result
+    section = None
+    for line in SYNC_RULES_TXT.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if s == "# >> Surge":
+            section = "surge"
+        elif s == "# >> Clash":
+            section = "clash"
+        elif section and s and not s.startswith("#") and "," in s:
+            url, name = s.split(",", 1)
+            result[section].append({"url": url.strip(), "name": name.strip()})
+    return result
 
 
 def fetch_url(url: str) -> str | None:
@@ -711,35 +678,53 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
 
 
 def fetch_external_rules():
-    """拉取 Profile.conf 外部规则 → Clash RuleSet / sing-box。"""
-    print("\n── Step 5: 外部规则 → Clash / sing-box ──")
+    """拉取 sync-rules.txt 外部规则。
 
-    providers = parse_profile_rules()
-    if not providers:
-        print("  Profile.conf 无外部规则引用")
+    # >> Surge  → Surge/RULE-SET/<name>.list（首行加 fork header，Step 4 正常转换）
+    # >> Clash  → Clash/RuleSet/<name>.yaml + sing-box/source/<name>.json（直接写入，
+                  Step 4 对同名 Surge 文件跳过 Clash/sing-box 输出）
+    """
+    print("\n── Step 1: 拉取外部规则 ──")
+    rules = parse_sync_rules()
+
+    if not rules["surge"] and not rules["clash"]:
+        print("  sync-rules.txt 无规则条目")
         return
 
-    for p in providers:
-        name, url, behavior = p["name"], p["url"], p["behavior"]
-        print(f"  [{name}] {behavior} ← {url}")
+    # ── # >> Surge section ──────────────────────────────────────────
+    for e in rules["surge"]:
+        name, url = e["name"], e["url"]
+        print(f"  [Surge] {name} ← {url}")
+        text = fetch_url(url)
+        if text is None:
+            continue
+        content = f"### fork from {url}\n{text}"
+        if write_if_changed(SURGE_DIR / f"{name}.list", content):
+            print(f"    ✓ Surge/RULE-SET/{name}.list")
+        else:
+            print(f"    ✓ {name}.list 无变化")
 
+    # ── # >> Clash section ──────────────────────────────────────────
+    for e in rules["clash"]:
+        name, url = e["name"], e["url"]
+        print(f"  [Clash] {name} ← {url}")
         text = fetch_url(url)
         if text is None:
             continue
 
         is_clash = _is_clash_payload(text)
+        is_ipcidr = "cidr" in name.lower()
 
-        # ── Clash 输出 ──────────────────────────────────────────────
-        if behavior == "domain":
-            clash_content = convert_domain_to_clash(text)
-        elif behavior == "ipcidr":
-            clash_content = convert_ipcidr_to_clash(text)
+        # Clash YAML（首行加 fork header）
+        if is_ipcidr:
+            body = convert_ipcidr_to_clash(text) or ""
         elif is_clash:
-            clash_content = text  # 已是 Clash payload 格式，直接保存
+            body = text
         else:
-            clash_content = convert_clash(text.splitlines())
+            body = convert_clash(text.splitlines())
 
-        if clash_content:
+        if body.strip():
+            clash_content = f"### fork from {url}\n{body}"
             if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
                 print(f"    ✓ Clash:    {name}.yaml")
             else:
@@ -747,10 +732,8 @@ def fetch_external_rules():
         else:
             print(f"    [WARN] {name} Clash 转换为空，跳过")
 
-        # ── sing-box 输出 ───────────────────────────────────────────
-        if behavior == "domain":
-            sb_content = convert_domain_to_singbox(text)
-        elif behavior == "ipcidr":
+        # sing-box JSON（JSON 不支持注释，不加 fork header）
+        if is_ipcidr:
             sb_content = convert_ipcidr_to_singbox(text)
         elif is_clash:
             sb_content = convert_classical_payload_to_singbox(text)
@@ -775,20 +758,20 @@ def main():
     print("  Rules 同步脚本")
     print("=" * 60)
 
-    # Step 1: 地区合集 ↔ 独立子项
+    # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
+    fetch_external_rules()
+
+    # Step 2: 地区合集 ↔ 独立子项
     sync_regional()
 
-    # Step 2: 独立子项 → Streaming.list
+    # Step 3: 独立子项 → Streaming.list
     rebuild_streaming()
 
-    # Step 3: Surge → QX / Clash / sing-box
+    # Step 4: Surge → QX / Clash / sing-box
     convert_all()
 
-    # Step 4: 清理
+    # Step 5: 清理
     cleanup_stale()
-
-    # Step 5: 外部规则 → sing-box
-    fetch_external_rules()
 
     print(f"\n{'=' * 60}")
     print("  完成")

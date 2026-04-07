@@ -5,6 +5,9 @@ on:
     branches: [master]
     paths:
       - 'Surge/RULE-SET/**'
+      - '.github/scripts/sync-rules.txt'
+  schedule:
+    - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:
 
 permissions:
