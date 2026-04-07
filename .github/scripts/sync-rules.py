@@ -23,7 +23,7 @@ SURGE_DIR = REPO_ROOT / "Surge" / "RULE-SET"
 QX_DIR = REPO_ROOT / "Quantumult" / "X" / "Filter"
 CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
-SAMPLE_YAML = REPO_ROOT / "Clash" / "Sample.yaml"
+PROFILE_CONF = REPO_ROOT / "Surge" / "Profile.conf"
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT"}
@@ -500,8 +500,8 @@ def cleanup_stale():
     for sf in SURGE_DIR.rglob("*.list"):
         surge_stems.add(sf.stem)
 
-    # 外部规则名也需保留（Step 5 生成的 sing-box 文件）
-    external_stems = {p["name"] for p in parse_sample_providers()}
+    # 外部规则名也需保留（Step 5 生成的 Clash / sing-box 文件）
+    external_stems = {p["name"] for p in parse_profile_rules()}
     keep = surge_stems | external_stems
 
     deleted = 0
@@ -519,54 +519,65 @@ def cleanup_stale():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Step 5: Sample.yaml 外部规则 → sing-box
+#  Step 5: Profile.conf 外部规则 → Clash / sing-box
 # ═══════════════════════════════════════════════════════════════════════
 
-def parse_sample_providers() -> list[dict]:
-    """解析 Clash/Sample.yaml 中的外部 rule-providers。"""
-    if not SAMPLE_YAML.exists():
+def parse_profile_rules() -> list[dict]:
+    """解析 Surge/Profile.conf [Rule] 段中的外部 RULE-SET / DOMAIN-SET 引用。
+
+    返回 list[{name, url, behavior}]，跳过：
+      - 非 http(s) URL（内置规则集，如 RULE-SET,LAN）
+      - 本仓库（HotKids/Rules）规则，已由 Step 3 处理
+      - 重名条目（同 name 只保留首次出现）
+    """
+    if not PROFILE_CONF.exists():
         return []
 
-    text = SAMPLE_YAML.read_text(encoding="utf-8")
-    providers = []
-    current_name = None
-    current = {}
+    text = PROFILE_CONF.read_text(encoding="utf-8")
+    rules = []
+    seen: set[str] = set()
+    in_rule = False
 
-    in_providers = False
     for line in text.splitlines():
         stripped = line.strip()
-
-        if stripped == "rule-providers:":
-            in_providers = True
+        if stripped == "[Rule]":
+            in_rule = True
             continue
-        if in_providers and line and not line[0].isspace() and not stripped.startswith("#"):
+        if in_rule and stripped.startswith("[") and stripped != "[Rule]":
             break
-        if not in_providers:
-            continue
-        if not stripped or stripped.startswith("#"):
+        if not in_rule or not stripped or stripped.startswith("#") or stripped.startswith("//"):
             continue
 
-        # provider name（2 空格缩进）
-        m = re.match(r"^  (\S.*?):\s*$", line)
-        if m:
-            if current_name and current.get("url"):
-                current["name"] = current_name
-                providers.append(current)
-            current_name = m.group(1)
-            current = {}
+        m = re.match(r"^(RULE-SET|DOMAIN-SET),(\S+?),", stripped)
+        if not m:
             continue
 
-        # 属性
-        m = re.match(r"^\s+(url|behavior):\s*(.+)$", line)
-        if m:
-            current[m.group(1)] = m.group(2).strip()
+        rule_type, url = m.group(1), m.group(2)
 
-    if current_name and current.get("url"):
-        current["name"] = current_name
-        providers.append(current)
+        if not url.startswith("http"):
+            continue
+        if "HotKids/Rules" in url:
+            continue
 
-    # 只保留外部（非本仓库）
-    return [p for p in providers if "HotKids/Rules" not in p.get("url", "")]
+        # 从 URL 路径末段推导文件名 stem
+        basename = url.rstrip("/").split("/")[-1]
+        name = basename.rsplit(".", 1)[0] if "." in basename else basename
+
+        if name in seen:
+            continue
+        seen.add(name)
+
+        # 推断 behavior
+        if rule_type == "DOMAIN-SET":
+            behavior = "domain"
+        elif "cidr" in name.lower():
+            behavior = "ipcidr"
+        else:
+            behavior = "classical"
+
+        rules.append({"name": name, "url": url, "behavior": behavior})
+
+    return rules
 
 
 def fetch_url(url: str) -> str | None:
@@ -579,8 +590,36 @@ def fetch_url(url: str) -> str | None:
         return None
 
 
-def convert_domain_list_to_singbox(text: str) -> str | None:
-    """behavior: domain → sing-box JSON。"""
+def _is_clash_payload(text: str) -> bool:
+    """检测文本是否为 Clash payload: 格式（前 10 行内含 'payload:'）。"""
+    for line in text.splitlines()[:10]:
+        if line.strip() == "payload:":
+            return True
+    return False
+
+
+# ── domain behavior ──────────────────────────────────────────────────
+
+def convert_domain_to_clash(text: str) -> str | None:
+    """Surge DOMAIN-SET（+.domain 格式）→ Clash domain YAML。"""
+    domains = []
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or line.startswith("//"):
+            continue
+        if line.startswith("+."):
+            line = line[2:]
+        domains.append(line)
+    if not domains:
+        return None
+    out = ["payload:"]
+    for d in sorted(set(domains)):
+        out.append(f"  - '{d}'")
+    return "\n".join(out) + "\n"
+
+
+def convert_domain_to_singbox(text: str) -> str | None:
+    """Surge DOMAIN-SET（+.domain 格式）→ sing-box JSON。"""
     domains = []
     for line in text.splitlines():
         line = line.strip()
@@ -595,22 +634,48 @@ def convert_domain_list_to_singbox(text: str) -> str | None:
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def convert_ipcidr_list_to_singbox(text: str) -> str | None:
-    """behavior: ipcidr → sing-box JSON。"""
+# ── ipcidr behavior ──────────────────────────────────────────────────
+
+def _extract_cidrs(text: str) -> list[str]:
+    """从 Surge RULE-SET 或纯 CIDR 列表中提取 IP CIDR 字符串。"""
     cidrs = []
     for line in text.splitlines():
         line = line.strip()
         if not line or line.startswith("#") or line.startswith("//"):
             continue
-        cidrs.append(line)
+        parts = [p.strip() for p in line.split(",")]
+        if parts[0].upper() in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR") and len(parts) > 1:
+            cidrs.append(parts[1])
+        elif "/" in line and "," not in line:
+            # 纯 CIDR 行（无规则类型前缀）
+            cidrs.append(line)
+    return cidrs
+
+
+def convert_ipcidr_to_clash(text: str) -> str | None:
+    """Surge IP-CIDR 规则列表 → Clash ipcidr YAML。"""
+    cidrs = _extract_cidrs(text)
+    if not cidrs:
+        return None
+    out = ["payload:"]
+    for c in sorted(set(cidrs)):
+        out.append(f"  - '{c}'")
+    return "\n".join(out) + "\n"
+
+
+def convert_ipcidr_to_singbox(text: str) -> str | None:
+    """Surge IP-CIDR 规则列表 → sing-box JSON。"""
+    cidrs = _extract_cidrs(text)
     if not cidrs:
         return None
     result = {"version": 2, "rules": [{"ip_cidr": sorted(set(cidrs))}]}
     return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
-def convert_classical_yaml_to_singbox(text: str) -> str | None:
-    """Clash classical payload → sing-box JSON。"""
+# ── classical behavior ───────────────────────────────────────────────
+
+def convert_classical_payload_to_singbox(text: str) -> str | None:
+    """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。"""
     lines = []
     in_payload = False
     for raw in text.splitlines():
@@ -629,8 +694,7 @@ def convert_classical_yaml_to_singbox(text: str) -> str | None:
         if line.startswith("#") or line.startswith("//"):
             continue
         parts = [p.strip() for p in line.split(",")]
-        rule_type = parts[0]
-        sb_type = SINGBOX_MAP.get(rule_type)
+        sb_type = SINGBOX_MAP.get(parts[0])
         if sb_type and len(parts) > 1:
             groups.setdefault(sb_type, []).append(parts[1])
 
@@ -642,46 +706,64 @@ def convert_classical_yaml_to_singbox(text: str) -> str | None:
         if key in groups:
             rules.append({key: sorted(set(groups[key]))})
 
-    if not rules:
-        return None
-
-    result = {"version": 2, "rules": rules}
-    return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
+    return (json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
+            if rules else None)
 
 
 def fetch_external_rules():
-    """拉取 Sample.yaml 外部规则 → sing-box。"""
-    print("\n── Step 5: 外部规则 → sing-box ──")
+    """拉取 Profile.conf 外部规则 → Clash RuleSet / sing-box。"""
+    print("\n── Step 5: 外部规则 → Clash / sing-box ──")
 
-    providers = parse_sample_providers()
+    providers = parse_profile_rules()
     if not providers:
-        print("  无外部 rule-provider")
+        print("  Profile.conf 无外部规则引用")
         return
 
     for p in providers:
-        name = p["name"]
-        url = p["url"]
-        behavior = p.get("behavior", "classical")
-
+        name, url, behavior = p["name"], p["url"], p["behavior"]
         print(f"  [{name}] {behavior} ← {url}")
+
         text = fetch_url(url)
         if text is None:
             continue
 
-        if behavior == "domain":
-            content = convert_domain_list_to_singbox(text)
-        elif behavior == "ipcidr":
-            content = convert_ipcidr_list_to_singbox(text)
-        else:
-            content = convert_classical_yaml_to_singbox(text)
+        is_clash = _is_clash_payload(text)
 
-        if content:
-            if write_if_changed(SINGBOX_DIR / f"{name}.json", content):
+        # ── Clash 输出 ──────────────────────────────────────────────
+        if behavior == "domain":
+            clash_content = convert_domain_to_clash(text)
+        elif behavior == "ipcidr":
+            clash_content = convert_ipcidr_to_clash(text)
+        elif is_clash:
+            clash_content = text  # 已是 Clash payload 格式，直接保存
+        else:
+            clash_content = convert_clash(text.splitlines())
+
+        if clash_content:
+            if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
+                print(f"    ✓ Clash:    {name}.yaml")
+            else:
+                print(f"    ✓ Clash:    {name}.yaml 无变化")
+        else:
+            print(f"    [WARN] {name} Clash 转换为空，跳过")
+
+        # ── sing-box 输出 ───────────────────────────────────────────
+        if behavior == "domain":
+            sb_content = convert_domain_to_singbox(text)
+        elif behavior == "ipcidr":
+            sb_content = convert_ipcidr_to_singbox(text)
+        elif is_clash:
+            sb_content = convert_classical_payload_to_singbox(text)
+        else:
+            sb_content = convert_singbox(text.splitlines())
+
+        if sb_content:
+            if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")
             else:
-                print(f"    ✓ {name}.json 无变化")
+                print(f"    ✓ sing-box: {name}.json 无变化")
         else:
-            print(f"    [WARN] {name} 转换结果为空")
+            print(f"    [WARN] {name} sing-box 转换为空，跳过")
 
 
 # ═══════════════════════════════════════════════════════════════════════
