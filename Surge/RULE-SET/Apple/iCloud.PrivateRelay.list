@@ -1,8 +1,0 @@
-### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/domainset/icloud_private_relay.conf
-# > iCloud.PrivateRelay
-mask.icloud.com
-mask-canary.icloud.com
-mask-h2.icloud.com
-mask-api.icloud.com
-mask.apple-dns.net
-canary.mask.apple-dns.net
