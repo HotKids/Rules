@@ -22,21 +22,18 @@ Speedtest
 
 # Clash
 >> Clash/Sample.yaml
+# > Builtin
+<< .github/scripts/sync-config/clash.ini
 # > Skip
 iCloud
 Apple News
 Apple TV
 Speedtest
 ConnersHua
-
-# > Builtin
-<< .github/scripts/sync-config/clash.ini
-
 # > Mapping
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
-
 # > Rename
 rule-providers:
   AD => Advertising
