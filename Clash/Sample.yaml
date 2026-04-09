@@ -332,6 +332,22 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
+  - name: "💳 Credit"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+    proxies:
+      - 🔘 DIRECT
+      - 🇺🇸 America
+      - 🔰 Proxy
+
+  - name: "📬 Telegram"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
+    proxies:
+      - 🔰 Proxy
+      - 🇸🇬 Singapore
+      - 🔘 DIRECT
+
   - name: "📧 Mail"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
@@ -339,12 +355,11 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
-  - name: "🏠 Gateway"
+  - name: "⏱️ Speedtest"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Back.png
-    proxies:
-      - 🔘 DIRECT
-      - 🔰 Proxy
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
+    use:
+      - Server
 
   - name: "🇺🇳 Server"
     type: select
@@ -536,6 +551,34 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Google.yaml
     interval: 86400
 
+  Credit:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Credit.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Credit.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/PayPal.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/PayPal.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Telegram.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
+    interval: 86400
+
+  ASN.Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/ASN.Telegram.yaml
+    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
+    interval: 86400
+
   Spark:
     type: http
     behavior: classical
@@ -601,6 +644,10 @@ rules:
   - RULE-SET,Apple,🍎 Apple
   - RULE-SET,Crypto,🪙 Crypto
   - RULE-SET,Google,🔍 Google
+  - RULE-SET,Credit,💳 Credit
+  - RULE-SET,PayPal,💳 Credit
+  - RULE-SET,Telegram,📬 Telegram
+  - RULE-SET,ASN.Telegram,📬 Telegram
   - RULE-SET,Spark,📧 Mail
   - RULE-SET,proxy,🔰 Proxy
   - RULE-SET,direct,🔘 DIRECT
