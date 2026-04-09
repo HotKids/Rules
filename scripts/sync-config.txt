@@ -1,131 +1,82 @@
 # ════════════════════════════════════════════════════════════════
-# sync-config.txt — Surge Profile 多平台同步映射表
+# sync-config.txt
 # ════════════════════════════════════════════════════════════════
-#
-# 分区格式：# >> <Section> [/ <Platform>]
-#
-#   共享分区（无 /Platform 后缀）：
-#
-#     # >> Skip
-#       keyword       整链路跳过，URL / 策略名 / 组名含此关键词即跳过
-#                     对所有平台生效
-#
-#     # >> Builtin
-#       X => Y        Surge 内置规则集名称 → 实际 URL
-#                     对所有平台生效
-#
-#   平台专属分区（/Platform 后缀，当前支持 Clash）：
-#
-#     # >> URL Mapping / <Platform>
-#       X => Y        Surge URL → 目标平台 URL
-#                     支持：完整 URL 精确替换 / 路径前缀替换 / 仓库简写
-#                     仓库简写：owner/repo/branch
-#                     （自动补全为 https://raw.githubusercontent.com/owner/repo/branch/）
-#
-#     # >> Group / <Platform>
-#       group => <name>
-#       ...           平台原生格式的策略组/policy 块，原样注入输出文件
-#       end
-#                     优先级高于 skip 和普通转换
+# 格式：
+#   # Platform          平台块（Surge / Clash / Quantumult X / Loon）
+#   >>  path            文件路径（Surge 块为源文件；其他为输出目标）
+#   # > Skip            跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
+#   # > Builtin         静态注入块（内容原样写入输出文件）
+#                       proxy-groups: 首条注释 # desc // AnchorGroupName
+#                       指定插入锚点（插入到 AnchorGroupName 之后）
+#   # > Mapping         URL 映射（X => Y）与内置规则集映射
 # ════════════════════════════════════════════════════════════════
 
-# ── 共享：Skip ───────────────────────────────────────────────────
+# Surge
+>>  Surge/Profile.conf
 
-# >> Skip
-
-# ConnersHua/RuleGo: 无公开 Clash / Loon / QX 镜像路径
+# > Skip
 ConnersHua
-
-# NSRingo: Apple News（iOS 限制，目标平台无对应策略）
 NSRingo
-
-# Speedtest: SukkaW domainset 无兼容镜像
 Speedtest
-
-# Telegram
 Telegram
-
-# Credit / PayPal
 Credit
 PayPal
 
-# ── 共享：Builtin ────────────────────────────────────────────────
+# Clash
+>>  Clash/Sample.yaml
 
-# >> Builtin
+# > Builtin
+# 服务器订阅配置
+proxy-providers:
+  Server:
+    type: http
+    path: ./Provider/Proxy/Server.yaml
+    url: https://sub.hotkids.me
+    interval: 3600
+    proxy: DIRECT
+    header:
+      User-Agent:
+      - "Clash/v1.18.0"
+      - "mihomo/1.18.3"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: 600
 
-# Surge 内置 LAN 规则集（各平台通用出口）
-LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
-
-# ── Clash ────────────────────────────────────────────────────────
-
-# >> URL Mapping / Clash
-
-# Loyalsoldier: surge-rules → clash-rules（仓库简写）
-Loyalsoldier/surge-rules/release => Loyalsoldier/clash-rules/release
-
-# VirgilClyne: .list → .yaml
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
-
-# >> Group / Clash
-
-# 说明：
-#   - 若 group 名匹配 [Proxy Group] 中的条目 → 替换 Surge 转换，原样注入
-#   - 若 group 名不在 Surge 中              → 追加到 proxy-groups 末尾
-#   - 优先级高于 skip 和普通转换
-
-group => 🚧 AdGuard
+proxy-groups:
+  # 去广告以及隐私追踪保护、反运营商劫持开关 // 🤖 AIGC
   - name: "🚧 AdGuard"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
     proxies:
       - ⛔️ REJECT
       - 🔘 DIRECT
-end
 
-group => ⛔️ REJECT
+  # 阻止
   - name: "⛔️ REJECT"
     type: select
     hidden: true
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
     proxies:
       - REJECT
-end
 
-group => 🔘 DIRECT
+  # 直连
   - name: "🔘 DIRECT"
     type: select
     hidden: true
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - DIRECT
-end
 
-# ── Loon ─────────────────────────────────────────────────────────
+# > Mapping
+LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
+Loyalsoldier/surge-rules/release => Loyalsoldier/clash-rules/release
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
 
-# >> URL Mapping / Loon
+# Quantumult X
+>>  Quantumult/Sample.conf
 
-# （待补充：Surge URL → Loon 兼容 URL 映射）
-
-# >> Group / Loon
-
-# 说明：group 块内容为 Loon [Proxy Group] 格式原文
-# 示例（取消注释并按需修改）：
-# group => 🚧 AdGuard
-#   🚧 AdGuard = select, ⛔️ REJECT, 🔘 DIRECT, img-url=https://...
-# end
-
-# ── Quantumult X ─────────────────────────────────────────────────
-
-# >> URL Mapping / QX
-
-# （待补充：Surge URL → QX filter_remote 兼容 URL 映射）
-
-# >> Group / QX
-
-# 说明：group 块内容为 QX [policy] 格式原文
-# 示例（取消注释并按需修改）：
-# group => 🚧 AdGuard
-#   static=🚧 AdGuard, ⛔️ REJECT, 🔘 DIRECT, img-url=https://...
-# end
+# Loon
+>>  Surge/Balloon.lcf

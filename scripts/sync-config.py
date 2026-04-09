@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """
-Surge Profile.conf → Clash Sample.yaml 同步脚本
+Surge Profile.conf → 多平台配置同步脚本
 
-从 Surge/Profile.conf 和 Clash/General.yaml 生成 Clash/Sample.yaml：
-  1. Clash/General.yaml 头部内容（proxies: 之前）
-  2. proxies（仅内置，通常为空）
-  3. proxy-providers（固定 Server 订阅块）
-  4. proxy-groups（从 [Proxy Group] 转换，支持 group block 覆盖和 skip）
-  5. rule-providers + rules（从 [Rule] 转换，支持 URL 映射和 skip）
+从 sync-config.txt + Surge/Profile.conf + Clash/General.yaml 生成：
+  Clash/Sample.yaml（当前实现）
+  Quantumult/Sample.conf, Surge/Balloon.lcf（占位，待扩展）
 
-映射规则见 scripts/sync-config.txt。
+sync-config.txt 格式（平台块 + 子分区）：
+  # Platform        平台块
+  >>  path          文件路径
+  # > Skip          跳过关键词
+  # > Builtin       静态注入（proxy-providers + proxy-groups + 锚点）
+  # > Mapping       URL / 规则集映射
 """
 
 import re
@@ -30,26 +32,6 @@ HOTKIDS_CLASH_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/C
 
 # ─── Clash 不支持的 Surge 规则类型 ───────────────────────────────────────────
 CLASH_UNSUPPORTED_RULE_TYPES = {"PROTOCOL", "URL-REGEX", "USER-AGENT"}
-
-# ─── 固定 proxy-providers 块（Server 订阅） ───────────────────────────────────
-PROXY_PROVIDERS_BLOCK = """\
-# 服务器订阅配置
-proxy-providers:
-  Server:
-    type: http
-    path: ./Provider/Proxy/Server.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    proxy: DIRECT
-    header:
-      User-Agent:
-      - "Clash/v1.18.0"
-      - "mihomo/1.18.3"
-    health-check:
-      enable: true
-      url: https://cp.cloudflare.com/generate_204
-      interval: 600\
-"""
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -89,101 +71,176 @@ def strip_emoji(name: str) -> str:
 #  解析 sync-config.txt
 # ══════════════════════════════════════════════════════════════════════════════
 
-def parse_sync_txt(
-    platform: str = "Clash",
-) -> tuple[list[tuple[str, str]], list[str], dict[str, str], dict[str, str]]:
-    """解析 sync-config.txt，返回指定平台的配置：
-    - url_maps:     [(surge_side, target_side), ...]  按出现顺序
-    - skips:        [keyword, ...]                    共享，所有平台生效
-    - group_blocks: {name: block_text}               当前平台专属
-    - builtin_maps: {name: url}                      共享，所有平台生效
+def _process_builtin(lines: list[str]) -> tuple[str, dict | None]:
+    """从 Builtin 分区的原始行提取 proxy-providers 块和 proxy-groups 注入配置。
 
-    分区格式（# >> Section [/ Platform]）：
-      Skip                   共享跳过关键词，每行一个
-      Builtin                共享内置规则集映射，X => Y
-      URL Mapping / Clash    平台专属 URL 映射，X => Y
-      Group / Clash          平台专属 group 块，group => <name> ... end
-      （Loon、QX 同上，替换 /Platform 后缀即可）
+    返回：
+      proxy_providers  str       proxy-providers: 之前的注释 + 该段完整文本
+      pg_inject        dict|None {anchor, block, names} 或 None
+        anchor  str|None  注入锚点（插入到该组之后）
+        block   str       清理后的 YAML 注入文本（不含 proxy-groups: 行）
+        names   set[str]  块中定义的组名（用于在 Surge 转换时跳过）
     """
-    url_maps: list[tuple[str, str]] = []
-    skips: list[str] = []
-    group_blocks: dict[str, str] = {}
-    builtin_maps: dict[str, str] = {}
+    pp_lines: list[str] = []
+    pg_lines: list[str] = []
+    in_pg = False
+
+    for line in lines:
+        if re.match(r"^proxy-groups:", line):
+            in_pg = True
+            continue  # 丢弃 'proxy-groups:' 标题行本身
+        if in_pg:
+            pg_lines.append(line)
+        else:
+            pp_lines.append(line)
+
+    proxy_providers = "\n".join(l.rstrip() for l in pp_lines).rstrip()
+
+    pg_inject: dict | None = None
+    if pg_lines:
+        anchor: str | None = None
+        cleaned: list[str] = []
+        for line in pg_lines:
+            s = line.strip()
+            if s.startswith("#") and "//" in s and anchor is None:
+                # 提取锚点名：// 之后到第一个中文字符或行尾
+                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    anchor = m.group(1).strip()
+                # 清理锚点标记，保留描述文字
+                clean_comment = re.sub(r"\s*//.*$", "", s).rstrip()
+                if clean_comment and clean_comment != "#":
+                    cleaned.append(re.sub(r"\s*//.*$", "", line).rstrip())
+                # 仅有 // 标记的注释行（无描述）直接丢弃
+                continue
+            cleaned.append(line.rstrip())
+
+        names: set[str] = set(re.findall(r'- name:\s*"([^"]+)"', "\n".join(pg_lines)))
+        block = "\n".join(cleaned).rstrip()
+        pg_inject = {"anchor": anchor, "block": block, "names": names}
+
+    return proxy_providers, pg_inject
+
+
+def parse_sync_txt() -> dict:
+    """解析 sync-config.txt（平台块格式），返回所有平台配置。
+
+    分区格式：
+      # Platform         平台块（Surge / Clash / Quantumult X / Loon）
+      >>  path           文件路径
+      # > Skip           跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
+      # > Builtin        静态注入块
+      # > Mapping        URL / 规则集映射（X => Y）
+
+    返回结构：
+    {
+      'global_skips': [...],
+      'Clash': {
+        'output': 'Clash/Sample.yaml',
+        'skips':  [...],
+        'url_maps': [...],
+        'builtin_rule_maps': {...},
+        'proxy_providers': str,
+        'pg_inject': {anchor, block, names} | None,
+      },
+      'Quantumult X': {...},
+      'Loon': {...},
+    }
+    """
+    result: dict = {"global_skips": []}
 
     if not SYNC_CONFIG_TXT.exists():
-        return url_maps, skips, group_blocks, builtin_maps
+        return result
 
     lines = SYNC_CONFIG_TXT.read_text(encoding="utf-8").splitlines()
 
-    # 解析 "# >> Section" 或 "# >> Section / Platform"
-    # section_type: "Skip" | "Builtin" | "URL Mapping" | "Group" | ""
-    # section_platform: 平台名或 "" 表示共享
-    section_type: str = ""
-    section_platform: str = ""
+    # 当前状态
+    current_platform: str = ""      # "Surge" | "Clash" | ...
+    current_section:  str = ""      # "Skip" | "Builtin" | "Mapping"
+    builtin_buf:  list[str] = []    # 收集 Builtin 分区的原始行
 
-    i = 0
-    while i < len(lines):
-        raw = lines[i]
+    def _flush_builtin() -> None:
+        """将已收集的 Builtin 行解析并写入当前平台配置。"""
+        if current_section == "Builtin" and current_platform and current_platform != "Surge":
+            plat = result.setdefault(current_platform, _empty_plat())
+            pp, pg = _process_builtin(builtin_buf)
+            plat["proxy_providers"] = pp
+            plat["pg_inject"] = pg
+        builtin_buf.clear()
+
+    def _empty_plat() -> dict:
+        return {
+            "output": None,
+            "skips": [],
+            "url_maps": [],
+            "builtin_rule_maps": {},
+            "proxy_providers": "",
+            "pg_inject": None,
+        }
+
+    for raw in lines:
         stripped = raw.strip()
-        i += 1
 
-        # 分区标题：# >> SectionName [/ Platform]
-        m = re.match(r"^#\s*>>\s*(.+)$", stripped)
-        if m:
-            header = m.group(1).strip()
-            if "/" in header:
-                sec, _, plat = header.partition("/")
-                section_type = sec.strip()
-                section_platform = plat.strip()
-            else:
-                section_type = header
-                section_platform = ""
+        # ── 平台块标题：# Platform（不含 >） ─────────────────────────────
+        m_plat = re.match(r"^#\s+([A-Za-z][\w\s/]*)$", stripped)
+        if m_plat:
+            _flush_builtin()
+            current_platform = m_plat.group(1).strip()
+            current_section = ""
+            if current_platform not in ("Surge",):
+                result.setdefault(current_platform, _empty_plat())
             continue
 
-        # 空行 / 注释
-        if not stripped or stripped.startswith("#"):
+        # ── 子分区：# > SubSection ─────────────────────────────────────
+        m_sec = re.match(r"^#\s+>\s+(.+)$", stripped)
+        if m_sec:
+            _flush_builtin()
+            current_section = m_sec.group(1).strip()
             continue
 
-        # group => <name> ... end
-        if stripped.startswith("group =>"):
-            name = stripped[len("group =>"):].strip()
-            block_lines: list[str] = []
-            while i < len(lines):
-                line = lines[i]
-                i += 1
-                if line.strip() == "end":
-                    break
-                block_lines.append(line)
-            # 只收录目标平台的 group 块
-            if section_type == "Group" and (
-                not section_platform or section_platform == platform
-            ):
-                group_blocks[name] = "\n".join(block_lines)
+        # ── 空行（Builtin 分区内保留，用于 YAML 块结构）─────────────────
+        if not stripped:
+            if current_section == "Builtin":
+                builtin_buf.append(raw)
             continue
 
-        # Skip（共享，无平台限制）
-        if section_type == "Skip" and not section_platform:
-            skips.append(stripped)
+        # ── 注释（Builtin 分区内保留）───────────────────────────────────
+        if stripped.startswith("#"):
+            if current_section == "Builtin":
+                builtin_buf.append(raw)
+            continue
 
-        # Builtin（共享，无平台限制）
-        elif section_type == "Builtin" and not section_platform:
+        # ── 文件路径指令：>>  path ──────────────────────────────────────
+        if stripped.startswith(">>"):
+            path = stripped[2:].strip()
+            if current_platform and current_platform != "Surge":
+                result.setdefault(current_platform, _empty_plat())["output"] = path
+            continue
+
+        # ── 内容行（按分区路由）─────────────────────────────────────────
+        if current_section == "Builtin":
+            builtin_buf.append(raw)
+
+        elif current_section == "Skip":
+            if current_platform == "Surge":
+                result["global_skips"].append(stripped)
+            elif current_platform:
+                result.setdefault(current_platform, _empty_plat())["skips"].append(stripped)
+
+        elif current_section == "Mapping" and current_platform and current_platform != "Surge":
             if "=>" in stripped:
                 left, _, right = stripped.partition("=>")
                 left, right = left.strip(), right.strip()
-                if left and right:
-                    builtin_maps[left] = right
+                if not left or not right:
+                    continue
+                plat = result.setdefault(current_platform, _empty_plat())
+                if not left.startswith("http") and "/" not in left:
+                    plat["builtin_rule_maps"][left] = right
+                else:
+                    plat["url_maps"].append((left, right))
 
-        # URL Mapping（平台专属，或兜底无平台）
-        elif section_type in ("URL Mapping", "") and (
-            not section_platform or section_platform == platform
-        ):
-            if "=>" in stripped:
-                left, _, right = stripped.partition("=>")
-                left, right = left.strip(), right.strip()
-                if left and right:
-                    url_maps.append((left, right))
-
-    return url_maps, skips, group_blocks, builtin_maps
+    _flush_builtin()
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -425,11 +482,18 @@ def _fmt_group_smart(name: str, params: dict[str, str]) -> list[str]:
 def gen_proxy_groups(
     group_lines: list[str],
     skips: list[str],
-    group_blocks: dict[str, str],
+    pg_inject: dict | None,
 ) -> str:
-    """生成 proxy-groups 段落。"""
+    """生成 proxy-groups 段落。
+
+    pg_inject（来自 Builtin 分区）：
+      anchor  str|None  将注入块插入到该组之后；None = 追加到末尾
+      block   str       要注入的 YAML 文本
+      names   set[str]  块中已定义的组名 → 从 Surge 转换中跳过
+    """
     out_lines = ["proxy-groups:"]
-    used_blocks: set[str] = set()
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
 
     for line in group_lines:
         g = parse_group_line(line)
@@ -437,11 +501,8 @@ def gen_proxy_groups(
             continue
         name = g["name"]
 
-        # 1. group block 优先
-        if name in group_blocks:
-            out_lines.append(group_blocks[name])
-            out_lines.append("")  # 组间空行
-            used_blocks.add(name)
+        # 1. 在 pg_inject 中已定义 → 由注入块处理，跳过 Surge 转换
+        if name in inject_names:
             continue
 
         # 2. skip
@@ -459,16 +520,20 @@ def gen_proxy_groups(
         elif gtype == "select":
             out_lines.extend(_fmt_group_select(name, params, proxies))
         else:
-            # 其他类型原样尝试
             out_lines.extend(_fmt_group_select(name, params, proxies))
 
         out_lines.append("")  # 组间空行
 
-    # 追加未使用的 group blocks（Clash 专属组）
-    for name, block in group_blocks.items():
-        if name not in used_blocks:
-            out_lines.append(block)
+        # 4. 锚点命中 → 在该组之后注入
+        if pg_inject and not injected and pg_inject["anchor"] == name:
+            out_lines.append(pg_inject["block"])
             out_lines.append("")
+            injected = True
+
+    # 未命中锚点（或无锚点）→ 追加到末尾
+    if pg_inject and not injected:
+        out_lines.append(pg_inject["block"])
+        out_lines.append("")
 
     return "\n".join(out_lines)
 
@@ -674,9 +739,18 @@ def gen_rules_and_providers(
 def main() -> None:
     print("── sync-config: Surge Profile → Clash Sample.yaml ──")
 
-    # 解析映射表
-    url_maps, skips, group_blocks, builtin_maps = parse_sync_txt()
-    print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips} | group blocks: {list(group_blocks)}")
+    # 解析 sync-config.txt
+    config       = parse_sync_txt()
+    clash        = config.get("Clash", {})
+    skips        = config.get("global_skips", []) + clash.get("skips", [])
+    url_maps     = clash.get("url_maps", [])
+    builtin_maps = clash.get("builtin_rule_maps", {})
+    pp_block     = clash.get("proxy_providers", "")
+    pg_inject    = clash.get("pg_inject")
+
+    print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
+    if pg_inject:
+        print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
 
     # 解析 Surge Profile
     proxy_lines, group_lines, rule_lines = parse_surge_profile()
@@ -685,16 +759,15 @@ def main() -> None:
     # 生成各段
     header        = CLASH_GENERAL.read_text(encoding="utf-8").rstrip()
     proxies_yaml  = gen_proxies(proxy_lines)
-    groups_yaml   = gen_proxy_groups(group_lines, skips, group_blocks)
+    groups_yaml   = gen_proxy_groups(group_lines, skips, pg_inject)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps)
 
-    output = "\n\n".join([
-        header,
-        proxies_yaml,
-        PROXY_PROVIDERS_BLOCK,
-        groups_yaml,
-        rp_rules_yaml,
-    ]) + "\n"
+    parts = [header, proxies_yaml]
+    if pp_block:
+        parts.append(pp_block)
+    parts += [groups_yaml, rp_rules_yaml]
+
+    output = "\n\n".join(parts) + "\n"
 
     changed = write_if_changed(CLASH_SAMPLE, output)
     if changed:

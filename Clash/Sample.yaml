@@ -300,6 +300,30 @@ proxy-groups:
       - 🇺🇸 America
       - 🔰 Proxy
 
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  - name: "🚧 AdGuard"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+    proxies:
+      - ⛔️ REJECT
+      - 🔘 DIRECT
+
+  # 阻止
+  - name: "⛔️ REJECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
+    proxies:
+      - REJECT
+
+  # 直连
+  - name: "🔘 DIRECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+    proxies:
+      - DIRECT
+
   - name: "🪙 Crypto"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
@@ -321,13 +345,6 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
-
-  - name: "🚧 AdGuard"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
-    proxies:
-      - ⛔️ REJECT
-      - 🔘 DIRECT
 
   - name: "🇺🇳 Server"
     type: select
@@ -374,20 +391,6 @@ proxy-groups:
       - Server
     filter: '🇺🇸|United States|美国'
     hidden: true
-
-  - name: "⛔️ REJECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
-    proxies:
-      - REJECT
-
-  - name: "🔘 DIRECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
-    proxies:
-      - DIRECT
 
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
