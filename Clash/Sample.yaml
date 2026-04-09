@@ -482,25 +482,11 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
-  Bilibili:
+  CNTV:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Bilibili.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
-    interval: 86400
-
-  IQ:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/IQ.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQ.yaml
-    interval: 86400
-
-  WeTV:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/WeTV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
+    path: ./Provider/RuleSet/CNTV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
     interval: 86400
 
   Gemini:
@@ -522,6 +508,13 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/iCloud.PrivateRelay.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/iCloud.PrivateRelay.yaml
+    interval: 86400
+
+  Apple News:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Apple News.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
     interval: 86400
 
   Apple TV:
@@ -578,13 +571,6 @@ rule-providers:
     behavior: classical
     path: ./Provider/RuleSet/Telegram.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
-    interval: 86400
-
-  ASN.Telegram:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/ASN.Telegram.yaml
-    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
     interval: 86400
 
   Spark:
@@ -660,16 +646,8 @@ rules:
   # > Streaming
   - RULE-SET,Streaming,🎬 Streaming
 
-  # 国内流媒体服务代理规则（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
-
-  # > Biliili｜CN TW
-  - RULE-SET,Bilibili,📺 CNTV
-
-  # > iQIYI Intl｜TW HK SEA
-  - RULE-SET,IQ,🇨🇳 Taiwan
-
-  # > WeTV｜TW SEA
-  - RULE-SET,WeTV,📺 CNTV
+  # > CNTV（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
+  - RULE-SET,CNTV,📺 CNTV
 
   # Global 全球代理规则
 
@@ -680,6 +658,8 @@ rules:
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
   # >> iCloud Private Relay
   - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
+  # >> Apple News
+  - RULE-SET,Apple News,🇺🇸 America
   # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
@@ -700,15 +680,14 @@ rules:
 
   # > Telegram
   - RULE-SET,Telegram,📬 Telegram
-  - RULE-SET,ASN.Telegram,📬 Telegram
 
   # > Mail
   - RULE-SET,Spark,📧 Mail
 
-  # Global
+  # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
-  # China
+  # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT

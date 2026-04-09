@@ -1,0 +1,6 @@
+### fork from https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list
+# > News
+DOMAIN,news-edge.apple.com
+DOMAIN,news-events.apple.com
+DOMAIN,apple.comscoreresearch.com
+URL-REGEX,^https?:\/\/news-assets\.apple\.com\/(audio-narrative|podcast\/audio)\/.*
