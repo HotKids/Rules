@@ -18,7 +18,6 @@
 >> Surge/Profile.conf
 # > Skip
 Gateway
-ConnersHua
 
 # Clash
 >> Clash/Sample.yaml
@@ -27,6 +26,7 @@ iCloud
 Apple News
 Apple TV
 Speedtest
+ConnersHua
 
 # > Builtin
 << .github/scripts/sync-config/clash.ini

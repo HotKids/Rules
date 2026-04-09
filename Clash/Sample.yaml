@@ -22,7 +22,7 @@ proxy-groups:
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
     include-all: true
 
-  # 节点选项
+  # Proxy
   - name: "🔰 Proxy"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
@@ -35,7 +35,7 @@ proxy-groups:
       - 🇺🇳 Server
       - 🔘 DIRECT
 
-  # 海外流媒体服务策略组（适用于 Netflix, Disney+, HBO Max, Prime Video 等海外流媒体服务）
+  # Streaming Global
   - name: "🎬 Streaming"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
@@ -48,7 +48,7 @@ proxy-groups:
       - 🇺🇳 Server
       - 🔰 Proxy
 
-  # 国内流媒体服务策略组（适用于 iQIYI Intl, WeTV, Bilibili 等大陆在港台东南亚地区提供服务的流媒体服务）
+  # CNTV APAC
   - name: "📺 CNTV"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
@@ -57,6 +57,8 @@ proxy-groups:
       - 🇨🇳 Taiwan
       - 🇭🇰 Hong Kong
 
+  # Apple
+  # > Apple Services
   - name: "🍎 Apple"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
@@ -66,25 +68,24 @@ proxy-groups:
       - 🇺🇸 America
       - 🇯🇵 Japan
 
-  # Google 服务策略组
+  # Google
   - name: "🔍 Google"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
     proxies:
-      - 🔰 Proxy
       - 🇺🇸 America
+      - 🔰 Proxy
 
-  # AIGC 服务策略组
+  # AIGC
   - name: "🤖 AIGC"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
     proxies:
-      - 🇸🇬 Singapore
-      - 🇯🇵 Japan
       - 🇺🇸 America
+      - 🇸🇬 Singapore
       - 🔰 Proxy
 
-  # Crypto 服务策略组
+  # Crypto
   - name: "🪙 Crypto"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
@@ -93,16 +94,16 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
-  # Finance 服务策略组
+  # Finance
   - name: "💳 Credit"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
     proxies:
-      - 🔘 DIRECT
       - 🇺🇸 America
       - 🔰 Proxy
+      - 🔘 DIRECT
 
-  # Telegram 服务策略组
+  # Telegram
   - name: "📬 Telegram"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
@@ -111,7 +112,7 @@ proxy-groups:
       - 🇸🇬 Singapore
       - 🔘 DIRECT
 
-  # Mail 邮件服务策略组
+  # Mail
   - name: "📧 Mail"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
@@ -155,35 +156,35 @@ proxy-groups:
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     use:
       - Server
-    filter: '🇭🇰|Hong Kong|香港'
+    filter: '🇭🇰|HK|Hong Kong|香港'
 
   - name: "🇨🇳 Taiwan"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     use:
       - Server
-    filter: '🇨🇳|🇹🇼|Taiwan|台湾'
+    filter: '🇨🇳|🇹🇼|TW|Taiwan|台湾'
 
   - name: "🇸🇬 Singapore"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
     use:
       - Server
-    filter: '🇸🇬|Singapore|新加坡'
+    filter: '🇸🇬|SG|Singapore|新加坡'
 
   - name: "🇯🇵 Japan"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     use:
       - Server
-    filter: '🇯🇵|Japan|日本'
+    filter: '🇯🇵|JP|Japan|日本'
 
   - name: "🇺🇸 America"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     use:
       - Server
-    filter: '🇺🇸|United States|美国'
+    filter: '🇺🇸|US|United States|美国'
 
 
 # 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/
@@ -349,18 +350,18 @@ rule-providers:
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
-  CNCIDR:
-    type: http
-    behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
-    interval: 86400
-
   CNASN:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/CNASN.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+    interval: 86400
+
+  CNCIDR:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/CNCIDR.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
   LAN:
@@ -385,7 +386,7 @@ rules:
   - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
-  # 自定义多区域媒体应用
+  # # Global Area Network
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
 
@@ -404,11 +405,11 @@ rules:
   - RULE-SET,CNTV,📺 CNTV
 
   # Global 全球代理规则
-  # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
+  # > AIGC
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
 
-  # > Apple 部分服务代理（App Store、TV、Music、News 等）
+  # > Apple
   # >> Apple Services
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
@@ -436,8 +437,8 @@ rules:
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
+  - RULE-SET,CNCIDR,🔘 DIRECT
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
