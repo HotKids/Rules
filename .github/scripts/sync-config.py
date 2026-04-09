@@ -473,9 +473,6 @@ def _fmt_group(
     if regex := params.get("policy-regex-filter", ""):
         lines.append(f"    filter: '{regex}'")
 
-    # hidden（smart 类型）
-    if gtype == "smart" and params.get("hidden", "0") in ("1", "true"):
-        lines.append("    hidden: true")
 
     # 无 use 时用静态节点列表
     if not use_name and proxies:
@@ -621,6 +618,9 @@ def gen_rules_and_providers(
             # 已注释掉的 Clash 不支持类型（如 AND/OR/NOT/PROTOCOL）直接丢弃
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
+                # # >> 叶子注释：若上一条也是 # >>（即上一条规则被 // 禁用）则替换
+                if s.startswith("# >>") and pending_comments and pending_comments[-1].strip().startswith("# >>"):
+                    pending_comments.pop()
                 pending_comments.append(f"  {s}")
             continue
 
