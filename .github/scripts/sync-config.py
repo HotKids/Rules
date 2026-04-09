@@ -498,22 +498,28 @@ def gen_proxy_groups(
     out: list[str] = ["proxy-groups:"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
+    pending_comments: list[str] = []
 
     for line in group_lines:
         if line.startswith("#"):
-            out.append(f"  {line}")
+            pending_comments.append(f"  {line}")
             continue
         g = parse_group_line(line)
         if g is None:
+            pending_comments.clear()
             continue
         name = g["name"]
 
         if name in inject_names:
+            pending_comments.clear()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP group] {name}")
+            pending_comments.clear()
             continue
 
+        out.extend(pending_comments)
+        pending_comments = []
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
@@ -596,7 +602,8 @@ def gen_rules_and_providers(
     providers: OrderedDict[str, dict] = OrderedDict()
     seen: dict[str, str] = {}  # provider_name → url
     rules_out: list[str] = []
-    pending_comments: list[str] = []  # 待输出注释行，与下一条规则绑定
+    pending_headers: list[str] = []  # # / # > 注释，跳过规则时保留
+    pending_leaf: list[str] = []     # # >> 叶子注释，跳过规则时清除
 
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
@@ -618,10 +625,11 @@ def gen_rules_and_providers(
             # 已注释掉的 Clash 不支持类型（如 AND/OR/NOT/PROTOCOL）直接丢弃
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
-                # # >> 叶子注释：若上一条也是 # >>（即上一条规则被 // 禁用）则替换
-                if s.startswith("# >>") and pending_comments and pending_comments[-1].strip().startswith("# >>"):
-                    pending_comments.pop()
-                pending_comments.append(f"  {s}")
+                if s.startswith("# >>"):
+                    pending_leaf = [f"  {s}"]  # 每次替换，丢弃前一条孤立叶子
+                else:
+                    pending_leaf.clear()        # 新段落边界，丢弃孤立叶子
+                    pending_headers.append(f"  {s}")
             continue
 
         parts = [p.strip() for p in s.split(",")]
@@ -630,7 +638,7 @@ def gen_rules_and_providers(
 
         if rule_type in CLASH_UNSUPPORTED_RULE_TYPES:
             print(f"  [SKIP rule] 不支持类型: {s}")
-            pending_comments.clear()
+            pending_leaf.clear()
             continue
 
         if rule_type == "FINAL":
@@ -640,7 +648,7 @@ def gen_rules_and_providers(
         elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
-                pending_comments.clear()
+                pending_leaf.clear()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
             emit.append("  - " + ",".join(keep))
@@ -653,7 +661,7 @@ def gen_rules_and_providers(
             # RULE-SET / DOMAIN-SET
             if len(parts) < 3:
                 print(f"  [WARN] 解析失败（字段不足）: {s}")
-                pending_comments.clear()
+                pending_leaf.clear()
                 continue
 
             url_or_builtin, policy = parts[1], parts[2]
@@ -662,7 +670,7 @@ def gen_rules_and_providers(
                 # 内置规则集
                 if url_or_builtin not in builtin_maps:
                     print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                    pending_comments.clear()
+                    pending_leaf.clear()
                     continue
                 clash_url = builtin_maps[url_or_builtin]
                 pname = register(clash_url, _behavior_from_url(clash_url))
@@ -670,7 +678,7 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    pending_comments.clear()
+                    pending_leaf.clear()
                     continue
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
@@ -678,13 +686,13 @@ def gen_rules_and_providers(
                 # 外部 URL
                 if skip := _should_skip([url_or_builtin, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
-                    pending_comments.clear()
+                    pending_leaf.clear()
                     continue
 
                 clash_url = map_surge_url(url_or_builtin, url_maps)
                 if clash_url is None:
                     print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
-                    pending_comments.clear()
+                    pending_leaf.clear()
                     continue
 
                 # cidr 文件名覆盖 > rule type > 文件名兜底
@@ -703,19 +711,21 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {clash_url}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    pending_comments.clear()
+                    pending_leaf.clear()
                     continue
 
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
         # 规则会被输出：先刷缓冲注释，再写规则行
-        rules_out.extend(pending_comments)
-        pending_comments = []
+        rules_out.extend(pending_headers)
+        rules_out.extend(pending_leaf)
+        pending_headers = []
+        pending_leaf = []
         rules_out.extend(emit)
 
     # rule-providers
     rp_lines = [
-        "# 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider",
+        "# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/",
         "",
         "rule-providers:",
         "# name: # Provider 名称",
