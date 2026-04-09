@@ -17,6 +17,7 @@
 # Surge
 >> Surge/Profile.conf
 # > Skip
+iCloud
 Gateway
 ConnersHua
 
@@ -84,11 +85,13 @@ rule-providers:
   AD => Advertising
   HTTPDNS.Block => HTTPDNS
   ASN.China => CNASN
+  Gemini => Google AI Studio
+  GenAI => AIGC
   proxy => Global
   direct => China
+  reject => Adblock
   cncidr => CNCIDR
   lancidr => LAN
-
 
 # Quantumult X
 # >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
