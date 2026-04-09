@@ -157,7 +157,7 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     return proxy_providers, pg_inject, rules_inject
 
 
-def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str, str, str, str]:
+def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str, str, str, str, dict]:
     """从 Loon Builtin 内容解析头部和各段落块。
 
     返回：
@@ -169,6 +169,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
       host_block      str        [Host] 内容（不含段落标题）
       rewrite_block   str        [Rewrite] 内容（不含段落标题）
       script_block    str        [Script] 内容（不含段落标题）
+      filter_defs     dict       {filter_name: filterkey_regex}（来自 [Remote Filter]）
     """
     header_lines: list[str] = []
     pg_lines: list[str] = []
@@ -178,12 +179,16 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     host_lines: list[str] = []
     rewrite_lines: list[str] = []
     script_lines: list[str] = []
-    mode = "header"  # header | pg | Rule | RemoteRule | Host | Rewrite | Script | Plugin | Mitm
+    remote_filter_lines: list[str] = []
+    mode = "header"  # header | RemoteFilter | pg | Rule | RemoteRule | Host | Rewrite | Script | Plugin | Mitm
 
     for line in lines:
         s = line.strip()
         if s in ("proxy-groups:", "[Proxy Group]"):
             mode = "pg"
+            continue
+        if s == "[Remote Filter]":
+            mode = "RemoteFilter"
             continue
         if s == "[Rule]":
             mode = "Rule"
@@ -208,6 +213,8 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
             continue
         if mode == "header":
             header_lines.append(line)
+        elif mode == "RemoteFilter":
+            remote_filter_lines.append(line)
         elif mode == "pg":
             pg_lines.append(line)
         elif mode == "Rule":
@@ -276,7 +283,24 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     rewrite_block = "\n".join(l.rstrip() for l in rewrite_lines).strip()
     script_block = "\n".join(l.rstrip() for l in script_lines).strip()
 
-    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block
+    # 解析 [Remote Filter] → {filter_name: filterkey_regex}（保序，catch-all 排末尾）
+    filter_defs: dict[str, str] = {}
+    catchalls: dict[str, str] = {}
+    for l in remote_filter_lines:
+        s = l.strip()
+        if not s or s.startswith("#"):
+            continue
+        m = re.match(r'^(\S+)\s*=\s*NameRegex,\s*FilterKey\s*=\s*"(.+)"', s)
+        if m:
+            fname, pattern = m.group(1), m.group(2)
+            # catch-all：positive lookahead 仅为 (?=.+)，无 (?i) 关键词
+            if re.match(r'^\^\(\?=\.\+\)', pattern):
+                catchalls[fname] = pattern
+            else:
+                filter_defs[fname] = pattern
+    filter_defs.update(catchalls)  # catch-all 排到最后
+
+    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block, filter_defs
 
 
 def _empty_plat() -> dict:
@@ -291,6 +315,7 @@ def _empty_plat() -> dict:
         "pg_inject": None,
         "rules_inject": None,
         "filter_map": {},
+        "filter_defs": {},
         "pg_inject_loon": None,
         "loon_blocks": {},
     }
@@ -330,9 +355,10 @@ def parse_sync_txt() -> dict:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
             if current_platform == "Loon":
-                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk, host_blk, rewrite_blk, script_blk = _process_builtin_loon(builtin_buf)
+                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk, host_blk, rewrite_blk, script_blk, fdefs = _process_builtin_loon(builtin_buf)
                 plat["loon_header"] = hdr
                 plat["pg_inject_loon"] = pg_inj
+                plat["filter_defs"] = fdefs
                 plat["loon_blocks"] = {
                     "Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk,
                     "Host": host_blk, "Rewrite": rewrite_blk, "Script": script_blk,
@@ -1251,10 +1277,34 @@ def main() -> None:
         loon_host_block = loon_blocks.get("Host", "")
         loon_rewrite_block = loon_blocks.get("Rewrite", "")
         loon_script_block = loon_blocks.get("Script", "")
-        filter_map = loon.get("filter_map", {})
+        explicit_filter_map = loon.get("filter_map", {})
+        filter_defs = loon.get("filter_defs", {})
         loon_skips = config.get("global_skips", []) + loon.get("skips", [])
 
-        print(f"  FilterMap: {list(filter_map.keys())}")
+        # 若无手动 FilterMap，从 loon.ini [Remote Filter] regex 自动推导
+        if explicit_filter_map:
+            filter_map = explicit_filter_map
+        elif filter_defs:
+            auto_map: dict[str, str] = {}
+            for grp_line in group_lines:
+                g = parse_group_line(grp_line)
+                if g and g["type"] == "smart":
+                    name = g["name"]
+                    for filter_name, pattern in filter_defs.items():
+                        try:
+                            # Loon FilterKey 中 (?i) 可出现在非开头位置；
+                            # Python re 不允许，将其剥离后以 IGNORECASE 标志替代
+                            clean_pat = pattern.replace("(?i)", "")
+                            if re.search(clean_pat, name, re.IGNORECASE):
+                                auto_map[name] = filter_name
+                                break
+                        except re.error:
+                            pass
+            filter_map = auto_map
+        else:
+            filter_map = {}
+
+        print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
         print(f"  Loon skip: {loon_skips}")
         if loon_pg_inject:
             print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")

@@ -56,10 +56,3 @@ rule-providers:
 >> Surge/Balloon.lcf
 # > Builtin
 << .github/scripts/sync-config/loon.ini
-# > FilterMap
-🇭🇰 Hong Kong => Sub-HK
-🇨🇳 Taiwan => Sub-TW
-🇸🇬 Singapore => Sub-SG
-🇯🇵 Japan => Sub-JP
-🇺🇸 America => Sub-US
-🇺🇳 Server => Sub-UN
