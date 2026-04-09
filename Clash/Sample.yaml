@@ -619,16 +619,22 @@ rule-providers:
 rules:
   # 标准 SSH 端口
   - DEST-PORT,22,🔘 DIRECT
+
   # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
+
   # HTTPDNS 请求/流量阻止
   - RULE-SET,HTTPDNS,🚧 AdGuard
+
   # Advertising 广告
   - RULE-SET,reject,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
+
   # 自定义多区域媒体应用
+
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
+
   # > Streaming by Region
   # >> Streaming TW
   - RULE-SET,Streaming_TW,🇨🇳 Taiwan
@@ -636,14 +642,19 @@ rules:
   - RULE-SET,Streaming_JP,🇯🇵 Japan
   # >> Streaming US
   - RULE-SET,Streaming_US,🇺🇸 America
+
   # > Streaming
   - RULE-SET,Streaming,🎬 Streaming
+
   # > CNTV（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
   - RULE-SET,CNTV,📺 CNTV
+
   # Global 全球代理规则
+
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Gemini,🔍 Google
   - RULE-SET,GenAI,🤖 AIGC
+
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
   # >> iCloud Private Relay
   - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
@@ -654,29 +665,39 @@ rules:
   # >> Apple
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
+
   # > Crypto
   - RULE-SET,Crypto,🪙 Crypto
+
   # > Google
   - RULE-SET,Google,🔍 Google
+
   # > Finance
   - RULE-SET,Credit,💳 Credit
+
   # > PayPal
   - RULE-SET,PayPal,💳 Credit
+
   # > Telegram
   - RULE-SET,Telegram,📬 Telegram
+
   # > Mail
   - RULE-SET,Spark,📧 Mail
+
   # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
+
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
+
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
+
   # Final
   - MATCH,🔰 Proxy
 
