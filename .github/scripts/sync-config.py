@@ -104,20 +104,32 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     pg_inject: dict | None = None
     if pg_lines:
         anchor: str | None = None
-        cleaned: list[str] = []
+        pre_lines: list[str] = []
+        post_lines: list[str] = []
+        found_anchor = False
         for line in pg_lines:
             s = line.strip()
-            if s.startswith("#") and "//" in s and anchor is None:
+            if s.startswith("#") and "//" in s and not found_anchor:
+                found_anchor = True
                 m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
                 if m:
                     anchor = m.group(1).strip()
                 clean_comment = re.sub(r"\s*//.*$", "", s).rstrip()
                 if clean_comment and clean_comment != "#":
-                    cleaned.append(re.sub(r"\s*//.*$", "", line).rstrip())
+                    post_lines.append(re.sub(r"\s*//.*$", "", line).rstrip())
                 continue
-            cleaned.append(line.rstrip())
+            if found_anchor:
+                post_lines.append(line.rstrip())
+            else:
+                pre_lines.append(line.rstrip())
         names: set[str] = set(re.findall(r'- name:\s*"([^"]+)"', "\n".join(pg_lines)))
-        pg_inject = {"anchor": anchor, "block": "\n".join(cleaned).rstrip(), "names": names}
+        prepend_block = "\n".join(pre_lines).rstrip() or None
+        pg_inject = {
+            "anchor": anchor,
+            "block": "\n".join(post_lines).rstrip(),
+            "names": names,
+            "prepend_block": prepend_block,
+        }
 
     # rules 注入
     rules_inject: dict | None = None
@@ -499,6 +511,11 @@ def gen_proxy_groups(
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
     pending_comments: list[str] = []
+
+    # prepend_block：Builtin 中无 // 锚点的分组 → 插到最前
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+        out.append("")
 
     for line in group_lines:
         if line.startswith("#"):

@@ -235,6 +235,12 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
+  # 全局代理
+  - name: "GLOBAL"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    include-all: true
+
   # 节点选项
   - name: "🔰 Proxy"
     type: select
@@ -269,15 +275,6 @@ proxy-groups:
       - 🔘 DIRECT
       - 🇨🇳 Taiwan
       - 🇭🇰 Hong Kong
-
-  # Apple 服务策略组
-  - name: "🍏 Apple TV"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
-    proxies:
-      - 🔘 DIRECT
-      - 🔰 Proxy
-      - 🇺🇸 America
 
   - name: "🍎 Apple"
     type: select
@@ -431,10 +428,10 @@ rule-providers:
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
-  reject:
+  Adblock:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/reject.yaml
+    path: ./Provider/RuleSet/Adblock.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
 
@@ -487,39 +484,18 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
     interval: 86400
 
-  Gemini:
+  Google AI Studio:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Gemini.yaml
+    path: ./Provider/RuleSet/Google_AI_Studio.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Gemini.yaml
     interval: 86400
 
-  GenAI:
+  AIGC:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/GenAI.yaml
+    path: ./Provider/RuleSet/AIGC.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
-    interval: 86400
-
-  iCloud.PrivateRelay:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/iCloud.PrivateRelay.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/iCloud.PrivateRelay.yaml
-    interval: 86400
-
-  Apple News:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Apple_News.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
-    interval: 86400
-
-  Apple TV:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Apple_TV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20TV.yaml
     interval: 86400
 
   Apple CN:
@@ -625,7 +601,7 @@ rules:
   - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Advertising 广告
-  - RULE-SET,reject,🚧 AdGuard
+  - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
   # 自定义多区域媒体应用
@@ -648,16 +624,10 @@ rules:
 
   # Global 全球代理规则
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
-  - RULE-SET,Gemini,🔍 Google
-  - RULE-SET,GenAI,🤖 AIGC
+  - RULE-SET,Google AI Studio,🔍 Google
+  - RULE-SET,AIGC,🤖 AIGC
 
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
-  # >> iCloud Private Relay
-  - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
-  # >> Apple News
-  - RULE-SET,Apple News,🇺🇸 America
-  # >> Apple TV
-  - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
