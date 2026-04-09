@@ -25,6 +25,7 @@ Speedtest
 # > Builtin
 << .github/scripts/sync-config/clash.ini
 # > Skip
+ConnersHua
 iCloud
 Apple News
 Apple TV
