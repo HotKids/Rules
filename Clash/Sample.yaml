@@ -306,30 +306,6 @@ proxy-groups:
       - 🇺🇸 America
       - 🔰 Proxy
 
-  # 去广告以及隐私追踪保护、反运营商劫持开关
-  - name: "🚧 AdGuard"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
-    proxies:
-      - ⛔️ REJECT
-      - 🔘 DIRECT
-
-  # 阻止
-  - name: "⛔️ REJECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
-    proxies:
-      - REJECT
-
-  # 直连
-  - name: "🔘 DIRECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
-    proxies:
-      - DIRECT
-
   # Crypto 服务策略组
   - name: "🪙 Crypto"
     type: select
@@ -364,6 +340,30 @@ proxy-groups:
     proxies:
       - 🔰 Proxy
       - 🔘 DIRECT
+
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  - name: "🚧 AdGuard"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+    proxies:
+      - ⛔️ REJECT
+      - 🔘 DIRECT
+
+  # 阻止
+  - name: "⛔️ REJECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
+    proxies:
+      - REJECT
+
+  # 直连
+  - name: "🔘 DIRECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+    proxies:
+      - DIRECT
 
   # ⏱️ Speedtest 服务策略组
   # 内网穿透策略组
@@ -426,24 +426,24 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
-  HTTPDNS.Block:
+  HTTPDNS:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/HTTPDNS.Block.yaml
+    path: ./Provider/RuleSet/HTTPDNS.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
-  Reject:
+  reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Reject.yaml
+    path: ./Provider/RuleSet/reject.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
 
-  AD:
+  Advertising:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/AD.yaml
+    path: ./Provider/RuleSet/Advertising.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
     interval: 86400
 
@@ -517,10 +517,10 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
 
-  ICloud.PrivateRelay:
+  iCloud.PrivateRelay:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/ICloud.PrivateRelay.yaml
+    path: ./Provider/RuleSet/iCloud.PrivateRelay.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/iCloud.PrivateRelay.yaml
     interval: 86400
 
@@ -594,31 +594,38 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
-  Proxy:
+  Global:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Proxy.yaml
+    path: ./Provider/RuleSet/Global.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
     interval: 86400
 
-  Direct:
+  China:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Direct.yaml
+    path: ./Provider/RuleSet/China.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
-  Cncidr:
+  CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/Cncidr.yaml
+    path: ./Provider/RuleSet/CNCIDR.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
-  Lancidr:
+  CNASN:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/CNASN.yaml
+    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+    interval: 86400
+
+  LAN:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/Lancidr.yaml
+    path: ./Provider/RuleSet/LAN.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
     interval: 86400
 
@@ -629,10 +636,10 @@ rules:
   # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
   # HTTPDNS 请求/流量阻止
-  - RULE-SET,HTTPDNS.Block,🚧 AdGuard
+  - RULE-SET,HTTPDNS,🚧 AdGuard
   # Advertising 广告
-  - RULE-SET,Reject,🚧 AdGuard
-  - RULE-SET,AD,🚧 AdGuard
+  - RULE-SET,reject,🚧 AdGuard
+  - RULE-SET,Advertising,🚧 AdGuard
   # 自定义多区域媒体应用
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
@@ -658,7 +665,7 @@ rules:
   - RULE-SET,GenAI,🤖 AIGC
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
   # >> iCloud Private Relay
-  - RULE-SET,ICloud.PrivateRelay,🔰 Proxy
+  - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
   # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
@@ -678,12 +685,13 @@ rules:
   # > Mail
   - RULE-SET,Spark,📧 Mail
   # Global
-  - RULE-SET,Proxy,🔰 Proxy
+  - RULE-SET,Global,🔰 Proxy
   # China
-  - RULE-SET,Direct,🔘 DIRECT
-  - RULE-SET,Cncidr,🔘 DIRECT
+  - RULE-SET,China,🔘 DIRECT
+  - RULE-SET,CNCIDR,🔘 DIRECT
+  - RULE-SET,CNASN,🔘 DIRECT
   # Local Area Network
-  - RULE-SET,Lancidr,🔘 DIRECT
+  - RULE-SET,LAN,🔘 DIRECT
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy

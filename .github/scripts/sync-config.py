@@ -149,6 +149,7 @@ def _empty_plat() -> dict:
         "skips": [],
         "url_maps": [],
         "builtin_rule_maps": {},
+        "rename_map": {},
         "proxy_providers": "",
         "pg_inject": None,
         "rules_inject": None,
@@ -262,6 +263,13 @@ def parse_sync_txt() -> dict:
                 plat["builtin_rule_maps"][left] = right
             else:
                 plat["url_maps"].append((left, right))
+        elif current_section == "Rename" and current_platform and current_platform != "Surge":
+            if "=>" not in stripped:
+                continue  # 跳过 "rule-providers:" 等标题行
+            left, _, right = stripped.partition("=>")
+            left, right = left.strip(), right.strip()
+            if left and right:
+                result.setdefault(current_platform, _empty_plat())["rename_map"][left] = right
 
     flush_builtin()
     return result
@@ -536,15 +544,18 @@ def _should_skip(candidates: list[str], skips: list[str]) -> str | None:
 # Provider 命名
 # ---------------------------------------------------------------------------
 
-def _derive_provider_name(clash_url: str, seen: dict[str, str]) -> str:
-    """从 Clash URL 文件名派生 provider 名（首字母大写），处理冲突。"""
+def _derive_provider_name(
+    clash_url: str, seen: dict[str, str], rename_map: dict[str, str] | None = None
+) -> str:
+    """从 Clash URL 文件名派生 provider 名，处理冲突。"""
     stem = clash_url.rstrip("/").rsplit("/", 1)[-1]
     for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
     stem = stem.replace("%20", " ")
-    stem = stem[0].upper() + stem[1:] if stem else stem
+    if rename_map:
+        stem = rename_map.get(stem, stem)
     name, counter = stem, 2
     while name in seen and seen[name] != clash_url:
         name = f"{stem}_{counter}"
@@ -579,6 +590,7 @@ def gen_rules_and_providers(
     url_maps: list[tuple[str, str]],
     builtin_maps: dict[str, str],
     rules_inject: dict | None = None,
+    rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 rule-providers + rules 的完整 YAML 文本。"""
     providers: OrderedDict[str, dict] = OrderedDict()
@@ -589,7 +601,7 @@ def gen_rules_and_providers(
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
             return providers[clash_url]["name"]
-        name = _derive_provider_name(clash_url, seen)
+        name = _derive_provider_name(clash_url, seen, rename_map)
         providers[clash_url] = {"name": name, "behavior": behavior}
         seen[name] = clash_url
         return name
@@ -756,6 +768,7 @@ def main() -> None:
     pp_block = clash.get("proxy_providers", "")
     pg_inject = clash.get("pg_inject")
     rules_inject = clash.get("rules_inject")
+    rename_map = clash.get("rename_map", {})
     provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
 
     print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
@@ -779,7 +792,7 @@ def main() -> None:
 
     header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
-    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject)
+    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
 
     parts = [header]
     if pp_block:
