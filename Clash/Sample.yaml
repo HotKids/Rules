@@ -271,14 +271,6 @@ proxy-groups:
       - 🇭🇰 Hong Kong
 
   # Apple 服务策略组
-  - name: "🍏 Apple TV"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
-    proxies:
-      - 🔘 DIRECT
-      - 🔰 Proxy
-      - 🇺🇸 America
-
   - name: "🍎 Apple"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
@@ -509,13 +501,6 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
 
-  Apple TV:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Apple_TV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20TV.yaml
-    interval: 86400
-
   Apple CN:
     type: http
     behavior: classical
@@ -644,8 +629,6 @@ rules:
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
-  # >> Apple TV
-  - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
