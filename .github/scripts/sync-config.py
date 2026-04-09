@@ -476,14 +476,22 @@ def _derive_provider_name(clash_url: str, seen: dict[str, str]) -> str:
     return name
 
 
-def _behavior_from_url(url: str, base: str) -> str:
-    """文件名含 cidr 时将 base 覆盖为 ipcidr，否则返回 base。"""
-    stem = url.rstrip("/").rsplit("/", 1)[-1].lower()
+def _behavior_from_url(url: str) -> str:
+    """从 URL 文件名推断 rule-provider behavior（兜底检测）。
+
+    优先级：cidr（文件名含）→ ipcidr；.txt → domain；其他 → classical
+    """
+    filename = url.rstrip("/").rsplit("/", 1)[-1].lower()
+    stem = filename
     for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
-    return "ipcidr" if "cidr" in stem else base
+    if "cidr" in stem:
+        return "ipcidr"
+    if filename.endswith(".txt"):
+        return "domain"
+    return "classical"
 
 # ---------------------------------------------------------------------------
 # 生成 rule-providers + rules
@@ -548,7 +556,6 @@ def gen_rules_and_providers(
             continue
 
         url_or_builtin, policy = parts[1], parts[2]
-        base_behavior = "domain" if rule_type == "DOMAIN-SET" else "classical"
 
         if not url_or_builtin.startswith("http"):
             # 内置规则集
@@ -556,7 +563,7 @@ def gen_rules_and_providers(
                 print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
                 continue
             clash_url = builtin_maps[url_or_builtin]
-            pname = register(clash_url, _behavior_from_url(clash_url, "classical"))
+            pname = register(clash_url, _behavior_from_url(clash_url))
             if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
                 print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                 providers.pop(clash_url, None)
@@ -575,7 +582,17 @@ def gen_rules_and_providers(
             print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
             continue
 
-        pname = register(clash_url, _behavior_from_url(clash_url, base_behavior))
+        # cidr 文件名覆盖 > rule type > 文件名兜底
+        url_beh = _behavior_from_url(clash_url)
+        if url_beh == "ipcidr":
+            behavior = "ipcidr"
+        elif rule_type == "DOMAIN-SET":
+            behavior = "domain"
+        elif rule_type == "RULE-SET":
+            behavior = "classical"
+        else:
+            behavior = url_beh
+        pname = register(clash_url, behavior)
 
         if skip := _should_skip([pname, clash_url], skips):
             print(f"  [SKIP rule] skip={skip}: {clash_url}")
