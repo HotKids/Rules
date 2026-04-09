@@ -409,10 +409,10 @@ rule-providers:
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
-  reject:
+  Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/reject.yaml
+    path: ./Provider/RuleSet/Reject.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
 
@@ -493,10 +493,10 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
 
-  iCloud.PrivateRelay:
+  ICloud.PrivateRelay:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/iCloud.PrivateRelay.yaml
+    path: ./Provider/RuleSet/ICloud.PrivateRelay.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/iCloud.PrivateRelay.yaml
     interval: 86400
 
@@ -570,24 +570,24 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
-  proxy:
+  Proxy:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/proxy.yaml
+    path: ./Provider/RuleSet/Proxy.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
     interval: 86400
 
-  direct:
+  Direct:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/direct.yaml
+    path: ./Provider/RuleSet/Direct.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
-  cncidr:
+  Cncidr:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/cncidr.yaml
+    path: ./Provider/RuleSet/Cncidr.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
@@ -598,10 +598,10 @@ rule-providers:
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
     interval: 86400
 
-  lancidr:
+  Lancidr:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/lancidr.yaml
+    path: ./Provider/RuleSet/Lancidr.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
     interval: 86400
 
@@ -610,7 +610,7 @@ rules:
   - DEST-PORT,22,🔘 DIRECT
   - RULE-SET,Unbreak,🔘 DIRECT
   - RULE-SET,HTTPDNS.Block,🚧 AdGuard
-  - RULE-SET,reject,🚧 AdGuard
+  - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AD,🚧 AdGuard
   - RULE-SET,Streaming+,🔰 Proxy
   - RULE-SET,Streaming_TW,🇨🇳 Taiwan
@@ -622,7 +622,7 @@ rules:
   - RULE-SET,WeTV,📺 CNTV
   - RULE-SET,Gemini,🔍 Google
   - RULE-SET,GenAI,🤖 AIGC
-  - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
+  - RULE-SET,ICloud.PrivateRelay,🔰 Proxy
   - RULE-SET,Apple TV,🍏 Apple TV
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
@@ -633,10 +633,10 @@ rules:
   - RULE-SET,Telegram,📬 Telegram
   - RULE-SET,ASN.Telegram,📬 Telegram
   - RULE-SET,Spark,📧 Mail
-  - RULE-SET,proxy,🔰 Proxy
-  - RULE-SET,direct,🔘 DIRECT
-  - RULE-SET,cncidr,🔘 DIRECT
+  - RULE-SET,Proxy,🔰 Proxy
+  - RULE-SET,Direct,🔘 DIRECT
+  - RULE-SET,Cncidr,🔘 DIRECT
   - RULE-SET,ASN.China,🔘 DIRECT
-  - RULE-SET,lancidr,🔘 DIRECT
+  - RULE-SET,Lancidr,🔘 DIRECT
   - MATCH,🔰 Proxy
 

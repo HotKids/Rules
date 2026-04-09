@@ -462,17 +462,38 @@ def _should_skip(candidates: list[str], skips: list[str]) -> str | None:
 # ---------------------------------------------------------------------------
 
 def _derive_provider_name(clash_url: str, seen: dict[str, str]) -> str:
-    """从 Clash URL 文件名派生 provider 名，处理冲突。"""
+    """从 Clash URL 文件名派生 provider 名（首字母大写），处理冲突。"""
     stem = clash_url.rstrip("/").rsplit("/", 1)[-1]
     for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
+    stem = stem[0].upper() + stem[1:] if stem else stem
     name, counter = stem, 2
     while name in seen and seen[name] != clash_url:
         name = f"{stem}_{counter}"
         counter += 1
     return name
+
+
+def _behavior_from_url(url: str) -> str:
+    """从 Clash URL 文件名推断 rule-provider behavior。
+
+    cidr（文件名含）→ ipcidr
+    .txt             → domain
+    .yaml / 其他     → classical
+    """
+    filename = url.rstrip("/").rsplit("/", 1)[-1].lower()
+    stem = filename
+    for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
+        if stem.endswith(ext):
+            stem = stem[: -len(ext)]
+            break
+    if "cidr" in stem:
+        return "ipcidr"
+    if filename.endswith(".txt"):
+        return "domain"
+    return "classical"
 
 # ---------------------------------------------------------------------------
 # 生成 rule-providers + rules
@@ -537,7 +558,6 @@ def gen_rules_and_providers(
             continue
 
         url_or_builtin, policy = parts[1], parts[2]
-        behavior = "domain" if rule_type == "DOMAIN-SET" else "classical"
 
         if not url_or_builtin.startswith("http"):
             # 内置规则集
@@ -545,7 +565,7 @@ def gen_rules_and_providers(
                 print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
                 continue
             clash_url = builtin_maps[url_or_builtin]
-            pname = register(clash_url, "ipcidr")
+            pname = register(clash_url, _behavior_from_url(clash_url))
             if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
                 print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                 providers.pop(clash_url, None)
@@ -564,11 +584,7 @@ def gen_rules_and_providers(
             print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
             continue
 
-        # 文件名含 "cidr" → ipcidr
-        if behavior == "classical" and "cidr" in clash_url.rstrip("/").rsplit("/", 1)[-1].lower():
-            behavior = "ipcidr"
-
-        pname = register(clash_url, behavior)
+        pname = register(clash_url, _behavior_from_url(clash_url))
 
         if skip := _should_skip([pname, clash_url], skips):
             print(f"  [SKIP rule] skip={skip}: {clash_url}")
