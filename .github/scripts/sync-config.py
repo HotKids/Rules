@@ -171,6 +171,7 @@ def parse_sync_txt() -> dict:
     def _empty_plat() -> dict:
         return {
             "output": None,
+            "include_file": None,
             "skips": [],
             "url_maps": [],
             "builtin_rule_maps": {},
@@ -210,11 +211,17 @@ def parse_sync_txt() -> dict:
                 builtin_buf.append(raw)
             continue
 
-        # ── 文件路径指令：>>  path ──────────────────────────────────────
+        # ── 输出路径指令：>> path ───────────────────────────────────────
         if stripped.startswith(">>"):
             path = stripped[2:].strip()
             if current_platform and current_platform != "Surge":
                 result.setdefault(current_platform, _empty_plat())["output"] = path
+            continue
+
+        # ── Include 指令：<< path（Builtin 分区内引用文件作为输出头部）──
+        if stripped.startswith("<<"):
+            if current_section == "Builtin" and current_platform and current_platform != "Surge":
+                result.setdefault(current_platform, _empty_plat())["include_file"] = stripped[2:].strip()
             continue
 
         # ── 内容行（按分区路由）─────────────────────────────────────────
@@ -757,7 +764,9 @@ def main() -> None:
     print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
 
     # 生成各段
-    header        = CLASH_GENERAL.read_text(encoding="utf-8").rstrip()
+    inc = clash.get("include_file")
+    header_path   = REPO_ROOT / inc if inc else CLASH_GENERAL
+    header        = header_path.read_text(encoding="utf-8").rstrip()
     proxies_yaml  = gen_proxies(proxy_lines)
     groups_yaml   = gen_proxy_groups(group_lines, skips, pg_inject)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps)

@@ -3,24 +3,26 @@
 # ════════════════════════════════════════════════════════════════
 # 格式：
 #   # Platform          平台块（Surge / Clash / Quantumult X / Loon）
-#   >>  path            文件路径（Surge 块为源文件；其他为输出目标）
+#   >> path             文件路径（Surge 块为源文件；其他为输出目标）
 #   # > Skip            跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
 #   # > Builtin         静态注入块（内容原样写入输出文件）
+#                       << path 引用文件作为输出头部
 #                       proxy-groups: 首条注释 # desc // AnchorGroupName
 #                       指定插入锚点（插入到 AnchorGroupName 之后）
 #   # > Mapping         URL 映射（X => Y）与内置规则集映射
 # ════════════════════════════════════════════════════════════════
 
 # Surge
->>  Surge/Profile.conf
+>> Surge/Profile.conf
 
 # > Skip
 🏠 Gateway
 
 # Clash
->>  Clash/Sample.yaml
+>> Clash/Sample.yaml
 
 # > Builtin
+<< Clash/General.yaml
 # 服务器订阅配置
 proxy-providers:
   Server:
@@ -71,10 +73,10 @@ https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Tele
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
 
 # Quantumult X
-# >>  Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
+# >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
 
 # Loon
-# >>  Surge/Balloon.lcf 输出目录，前面加 # 表示关闭 不转换
+# >> Surge/Balloon.lcf 输出目录，前面加 # 表示关闭 不转换
 # > Builtin
 [Plugin]
 https://raw.githubusercontent.com/chavyleung/scripts/master/box/rewrite/boxjs.rewrite.loon.plugin, tag=BoxJS, enabled=true
