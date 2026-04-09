@@ -18,9 +18,12 @@
 >> Surge/Profile.conf
 # > Skip
 Gateway
+Speedtest
 
 # Clash
 >> Clash/Sample.yaml
+# > Builtin
+<< .github/scripts/sync-config/clash.ini
 # > Skip
 ConnersHua
 iCloud
@@ -35,7 +38,6 @@ Speedtest
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
-
 # > Rename
 rule-providers:
   AD => Advertising
@@ -54,8 +56,6 @@ rule-providers:
 
 # Loon
 >> Surge/Balloon.lcf
-# > Skip
-Speedtest
 # > Builtin
 << .github/scripts/sync-config/loon.ini
 # > FilterMap
