@@ -89,18 +89,21 @@ def strip_emoji(name: str) -> str:
 #  解析 sync-config.txt
 # ══════════════════════════════════════════════════════════════════════════════
 
-def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], dict[str, str]]:
-    """解析 sync-config.txt，返回：
-    - url_maps:     [(surge_side, clash_side), ...]  按出现顺序
-    - skips:        [keyword, ...]
-    - group_blocks: {name: yaml_text}               保留声明顺序
-    - builtin_maps: {name: clash_url}               Surge 内置规则集
+def parse_sync_txt(
+    platform: str = "Clash",
+) -> tuple[list[tuple[str, str]], list[str], dict[str, str], dict[str, str]]:
+    """解析 sync-config.txt，返回指定平台的配置：
+    - url_maps:     [(surge_side, target_side), ...]  按出现顺序
+    - skips:        [keyword, ...]                    共享，所有平台生效
+    - group_blocks: {name: block_text}               当前平台专属
+    - builtin_maps: {name: url}                      共享，所有平台生效
 
-    分区格式（# >> SectionName）：
-      URL Mapping  —  X => Y  URL / 前缀 / 仓库简写映射
-      Builtin      —  X => Y  Surge 内置规则集 → Clash URL
-      Skip         —  keyword  整链路跳过关键词（每行一个，无需 =>）
-      Group        —  group => <name> ... end  Clash 专属 group 块
+    分区格式（# >> Section [/ Platform]）：
+      Skip                   共享跳过关键词，每行一个
+      Builtin                共享内置规则集映射，X => Y
+      URL Mapping / Clash    平台专属 URL 映射，X => Y
+      Group / Clash          平台专属 group 块，group => <name> ... end
+      （Loon、QX 同上，替换 /Platform 后缀即可）
     """
     url_maps: list[tuple[str, str]] = []
     skips: list[str] = []
@@ -111,24 +114,37 @@ def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], 
         return url_maps, skips, group_blocks, builtin_maps
 
     lines = SYNC_CONFIG_TXT.read_text(encoding="utf-8").splitlines()
-    section: str = ""
+
+    # 解析 "# >> Section" 或 "# >> Section / Platform"
+    # section_type: "Skip" | "Builtin" | "URL Mapping" | "Group" | ""
+    # section_platform: 平台名或 "" 表示共享
+    section_type: str = ""
+    section_platform: str = ""
+
     i = 0
     while i < len(lines):
         raw = lines[i]
         stripped = raw.strip()
         i += 1
 
-        # 分区标题：# >> SectionName
+        # 分区标题：# >> SectionName [/ Platform]
         m = re.match(r"^#\s*>>\s*(.+)$", stripped)
         if m:
-            section = m.group(1).strip()
+            header = m.group(1).strip()
+            if "/" in header:
+                sec, _, plat = header.partition("/")
+                section_type = sec.strip()
+                section_platform = plat.strip()
+            else:
+                section_type = header
+                section_platform = ""
             continue
 
         # 空行 / 注释
         if not stripped or stripped.startswith("#"):
             continue
 
-        # group => <name> ... end（任何分区均可，Group 分区为主）
+        # group => <name> ... end
         if stripped.startswith("group =>"):
             name = stripped[len("group =>"):].strip()
             block_lines: list[str] = []
@@ -138,24 +154,29 @@ def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], 
                 if line.strip() == "end":
                     break
                 block_lines.append(line)
-            group_blocks[name] = "\n".join(block_lines)
+            # 只收录目标平台的 group 块
+            if section_type == "Group" and (
+                not section_platform or section_platform == platform
+            ):
+                group_blocks[name] = "\n".join(block_lines)
             continue
 
-        # 按分区处理
-        if section == "Skip":
-            # 每行直接是关键词
+        # Skip（共享，无平台限制）
+        if section_type == "Skip" and not section_platform:
             skips.append(stripped)
 
-        elif section == "Builtin":
-            # X => Y
+        # Builtin（共享，无平台限制）
+        elif section_type == "Builtin" and not section_platform:
             if "=>" in stripped:
                 left, _, right = stripped.partition("=>")
                 left, right = left.strip(), right.strip()
                 if left and right:
                     builtin_maps[left] = right
 
-        elif section in ("URL Mapping", ""):
-            # X => Y（兜底：无分区时也按 URL Mapping 处理，保持向后兼容）
+        # URL Mapping（平台专属，或兜底无平台）
+        elif section_type in ("URL Mapping", "") and (
+            not section_platform or section_platform == platform
+        ):
             if "=>" in stripped:
                 left, _, right = stripped.partition("=>")
                 left, right = left.strip(), right.strip()
