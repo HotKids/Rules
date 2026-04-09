@@ -133,6 +133,9 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
                     m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
                     if m:
                         anchor_r = m.group(1).strip()
+                comment_text = re.sub(r"\s*//.*$", "", s).strip()
+                if comment_text and comment_text != "#":
+                    rules.append(comment_text)
                 continue
             # "  - RULE,..." → extract rule string
             if s.startswith("-"):
@@ -736,7 +739,10 @@ def gen_rules_and_providers(
 
     # 注入 Builtin rules（按锚点插入，否则追加到 MATCH 之前）
     if rules_inject and rules_inject.get("rules"):
-        inject_lines = [f"  - {r}" for r in rules_inject["rules"]]
+        inject_lines = [
+            f"  {r}" if r.startswith("#") else f"  - {r}"
+            for r in rules_inject["rules"]
+        ]
         anchor_r = (rules_inject.get("anchor") or "").lower()
         inserted = False
         if anchor_r:
