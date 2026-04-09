@@ -569,18 +569,18 @@ rule-providers:
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
-  CNCIDR:
-    type: http
-    behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
-    interval: 86400
-
   CNASN:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/CNASN.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+    interval: 86400
+
+  CNCIDR:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/CNCIDR.yaml
+    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
   LAN:
@@ -656,8 +656,8 @@ rules:
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
+  - RULE-SET,CNCIDR,🔘 DIRECT
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
