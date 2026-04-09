@@ -728,7 +728,7 @@ def gen_rules_and_providers(
             f"  {pname}:",
             "    type: http",
             f"    behavior: {behavior}",
-            f"    path: ./Provider/RuleSet/{pname}.yaml",
+            f"    path: ./Provider/RuleSet/{pname.replace(' ', '_')}.yaml",
             f"    url: {clash_url}",
             "    interval: 86400",
             "",

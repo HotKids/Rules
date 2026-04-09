@@ -519,21 +519,21 @@ rule-providers:
   Apple News:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple News.yaml
+    path: ./Provider/RuleSet/Apple_News.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
     interval: 86400
 
   Apple TV:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple TV.yaml
+    path: ./Provider/RuleSet/Apple_TV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20TV.yaml
     interval: 86400
 
   Apple CN:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple CN.yaml
+    path: ./Provider/RuleSet/Apple_CN.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20CN.yaml
     interval: 86400
 
