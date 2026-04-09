@@ -213,9 +213,6 @@ tun:
   # 排除路由，这些网段不经过 TUN
   # route-exclude-address:
   #   - 192.168.31.0/24
-  
-# 本地节点配置（订阅为空）
-proxies: []
 
 # 本地节点配置（订阅为空）
 proxies: []
@@ -517,7 +514,7 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Apple News.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple News.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
     interval: 86400
 
   Apple TV:
@@ -650,6 +647,8 @@ rules:
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
   # >> iCloud Private Relay
   - RULE-SET,iCloud.PrivateRelay,🔰 Proxy
+  # >> Apple News
+  - RULE-SET,Apple News,🇺🇸 America
   # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
@@ -667,9 +666,9 @@ rules:
   - RULE-SET,Telegram,📬 Telegram
   # > Mail
   - RULE-SET,Spark,📧 Mail
-  # Global
+  # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
-  # China
+  # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
