@@ -8,19 +8,22 @@
 #   # > Builtin         静态注入块（内容原样写入输出文件）
 #                       << path 引用文件作为输出头部
 #                       proxy-groups: 首条注释 # desc // AnchorGroupName
-#                       指定插入锚点（插入到 AnchorGroupName 之后）
-#   # > Mapping         URL 映射（X => Y）与内置规则集映射
+#                       rules: 首条注释 # desc // AnchorRulePattern
+#                       指定插入锚点（插入到匹配行之后）
+#   # > Mapping         URL 映射（X => Y）；右侧留空表示路径不变仅规范扩展名
 # ════════════════════════════════════════════════════════════════
 
 # Surge
 >> Surge/Profile.conf
 # > Skip
-🏠 Gateway
+Gateway
+ConnersHua
+ASN.China
 
 # Clash
 >> Clash/Sample.yaml
 # > Skip
-⏱️ Speedtest
+Speedtest
 # > Builtin
 << Clash/General.yaml
 # 服务器订阅配置
@@ -65,12 +68,16 @@ proxy-groups:
     proxies:
       - DIRECT
 
+rules:
+  # GeoIP // RULE-SET,LAN
+  - GEOSITE,cn,🔘 DIRECT
+  - GEOIP,CN,🔘 DIRECT
+  - GEOSITE,geolocation-!cn,🔰 Proxy
+
 # > Mapping
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
-Loyalsoldier/surge-rules/release => Loyalsoldier/clash-rules/release
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+VirgilClyne/GetSomeFries =>
+Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
 
 # Quantumult X
 # >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换

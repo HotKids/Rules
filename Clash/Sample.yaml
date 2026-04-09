@@ -591,13 +591,6 @@ rule-providers:
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
-  ASN.China:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/ASN.China.yaml
-    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
-    interval: 86400
-
   Lancidr:
     type: http
     behavior: ipcidr
@@ -636,7 +629,9 @@ rules:
   - RULE-SET,Proxy,🔰 Proxy
   - RULE-SET,Direct,🔘 DIRECT
   - RULE-SET,Cncidr,🔘 DIRECT
-  - RULE-SET,ASN.China,🔘 DIRECT
   - RULE-SET,Lancidr,🔘 DIRECT
+  - GEOSITE,cn,🔘 DIRECT
+  - GEOIP,CN,🔘 DIRECT
+  - GEOSITE,geolocation-!cn,🔰 Proxy
   - MATCH,🔰 Proxy
 

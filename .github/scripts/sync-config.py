@@ -67,51 +67,80 @@ def strip_emoji(name: str) -> str:
 # 解析 sync-config.txt
 # ---------------------------------------------------------------------------
 
-def _process_builtin(lines: list[str]) -> tuple[str, dict | None]:
-    """从 Builtin 分区的原始行提取 proxy-providers 块和 proxy-groups 注入配置。
+def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
+    """从 Builtin 分区的原始行提取 proxy-providers、proxy-groups 和 rules 注入配置。
 
     返回：
       proxy_providers  str        proxy-providers: 之前的注释 + 该段完整文本
-      pg_inject        dict|None  {anchor, block, names} 或 None
-        anchor  str|None   注入锚点（插入到该组之后）
-        block   str        清理后的 YAML 注入文本（不含 proxy-groups: 行）
-        names   set[str]   块中定义的组名（用于在 Surge 转换时跳过）
+      pg_inject        dict|None  {anchor, block, names}
+        anchor  str|None   注入到该 group 之后；None = 追加
+        block   str        清理后的 YAML 文本
+        names   set[str]   块中定义的组名
+      rules_inject     dict|None  {anchor, rules}
+        anchor  str|None   注入到含该字符串的 rule 之后；None = 追加
+        rules   list[str]  要注入的规则字符串列表
     """
     pp_lines: list[str] = []
     pg_lines: list[str] = []
-    in_pg = False
+    rules_lines: list[str] = []
+    mode = "pp"  # pp | pg | rules
 
     for line in lines:
         if re.match(r"^proxy-groups:", line):
-            in_pg = True
-            continue  # 丢弃 'proxy-groups:' 标题行本身
-        if in_pg:
-            pg_lines.append(line)
-        else:
+            mode = "pg"
+            continue
+        if re.match(r"^rules:", line):
+            mode = "rules"
+            continue
+        if mode == "pp":
             pp_lines.append(line)
+        elif mode == "pg":
+            pg_lines.append(line)
+        elif mode == "rules":
+            rules_lines.append(line)
 
     proxy_providers = "\n".join(l.rstrip() for l in pp_lines).rstrip()
 
-    if not pg_lines:
-        return proxy_providers, None
+    # proxy-groups 注入
+    pg_inject: dict | None = None
+    if pg_lines:
+        anchor: str | None = None
+        cleaned: list[str] = []
+        for line in pg_lines:
+            s = line.strip()
+            if s.startswith("#") and "//" in s and anchor is None:
+                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    anchor = m.group(1).strip()
+                clean_comment = re.sub(r"\s*//.*$", "", s).rstrip()
+                if clean_comment and clean_comment != "#":
+                    cleaned.append(re.sub(r"\s*//.*$", "", line).rstrip())
+                continue
+            cleaned.append(line.rstrip())
+        names: set[str] = set(re.findall(r'- name:\s*"([^"]+)"', "\n".join(pg_lines)))
+        pg_inject = {"anchor": anchor, "block": "\n".join(cleaned).rstrip(), "names": names}
 
-    anchor: str | None = None
-    cleaned: list[str] = []
-    for line in pg_lines:
-        s = line.strip()
-        if s.startswith("#") and "//" in s and anchor is None:
-            m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
-            if m:
-                anchor = m.group(1).strip()
-            clean_comment = re.sub(r"\s*//.*$", "", s).rstrip()
-            if clean_comment and clean_comment != "#":
-                cleaned.append(re.sub(r"\s*//.*$", "", line).rstrip())
-            continue
-        cleaned.append(line.rstrip())
+    # rules 注入
+    rules_inject: dict | None = None
+    if rules_lines:
+        anchor_r: str | None = None
+        rules: list[str] = []
+        for line in rules_lines:
+            s = line.strip()
+            if not s:
+                continue
+            if s.startswith("#"):
+                if "//" in s and anchor_r is None:
+                    m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                    if m:
+                        anchor_r = m.group(1).strip()
+                continue
+            # "  - RULE,..." → extract rule string
+            if s.startswith("-"):
+                rules.append(s[1:].strip())
+        rules_inject = {"anchor": anchor_r, "rules": rules}
 
-    names: set[str] = set(re.findall(r'- name:\s*"([^"]+)"', "\n".join(pg_lines)))
-    pg_inject = {"anchor": anchor, "block": "\n".join(cleaned).rstrip(), "names": names}
-    return proxy_providers, pg_inject
+    return proxy_providers, pg_inject, rules_inject
 
 
 def _empty_plat() -> dict:
@@ -123,6 +152,7 @@ def _empty_plat() -> dict:
         "builtin_rule_maps": {},
         "proxy_providers": "",
         "pg_inject": None,
+        "rules_inject": None,
     }
 
 
@@ -159,9 +189,10 @@ def parse_sync_txt() -> dict:
     def flush_builtin() -> None:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
-            pp, pg = _process_builtin(builtin_buf)
+            pp, pg, ri = _process_builtin(builtin_buf)
             plat["proxy_providers"] = pp
             plat["pg_inject"] = pg
+            plat["rules_inject"] = ri
         builtin_buf.clear()
 
     for raw in lines:
@@ -221,8 +252,9 @@ def parse_sync_txt() -> dict:
                 continue
             left, _, right = stripped.partition("=>")
             left, right = left.strip(), right.strip()
-            if not left or not right:
+            if not left:
                 continue
+            # right 留空表示"路径不变，仅规范扩展名为 .yaml"
             plat = result.setdefault(current_platform, _empty_plat())
             if not left.startswith("http") and "/" not in left:
                 plat["builtin_rule_maps"][left] = right
@@ -276,13 +308,21 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     if best_result:
         return best_result
 
-    # 4. 仓库简写
+    # 4. 仓库简写（或同仓库扩展名规范化：right 为空）
     for left, right in url_maps:
         if left.startswith("http"):
             continue
         prefix = _expand_shorthand(left)
         if url.startswith(prefix):
-            return _expand_shorthand(right) + url[len(prefix):]
+            suffix = url[len(prefix):]
+            if right:
+                return _expand_shorthand(right) + suffix
+            # right 为空：保持路径，将文件扩展名规范为 .yaml
+            filename = suffix.rsplit("/", 1)[-1] if "/" in suffix else suffix
+            if "." in filename:
+                stem = suffix.rsplit(".", 1)[0]
+                return prefix + stem + ".yaml"
+            return prefix + suffix + ".yaml"
 
     return None
 
@@ -368,11 +408,45 @@ def parse_group_line(line: str) -> dict | None:
 # 生成 proxy-groups
 # ---------------------------------------------------------------------------
 
+def _parse_provider_urls(pp_block: str) -> dict[str, str]:
+    """从 proxy-providers YAML 文本提取 {name → url}。"""
+    result: dict[str, str] = {}
+    current = None
+    for line in pp_block.splitlines():
+        # 两格缩进的顶层键 = provider 名称
+        if m := re.match(r"^  ([A-Za-z]\S*):\s*$", line):
+            current = m.group(1)
+        elif current and (m := re.match(r"    url:\s+(\S+)", line)):
+            result[current] = m.group(1)
+            current = None
+    return result
+
+
+def _match_provider(policy_path: str, provider_urls: dict[str, str]) -> str | None:
+    """通过域名模糊匹配，从 proxy-providers 中找到对应 policy-path 的 provider 名。"""
+    m = re.match(r"https?://([^/:]+)", policy_path)
+    if not m:
+        return None
+    pp_host = m.group(1)
+    for name, url in provider_urls.items():
+        if m2 := re.match(r"https?://([^/:]+)", url):
+            pv_host = m2.group(1)
+            if pp_host in pv_host or pv_host in pp_host:
+                return name
+    return None
+
+
 def _is_skipped(name: str, skips: list[str]) -> bool:
     return any(kw in name for kw in skips)
 
 
-def _fmt_group(name: str, gtype: str, params: dict[str, str], proxies: list[str]) -> list[str]:
+def _fmt_group(
+    name: str,
+    gtype: str,
+    params: dict[str, str],
+    proxies: list[str],
+    provider_urls: dict[str, str] | None = None,
+) -> list[str]:
     """生成 proxy-group 的 YAML 行列表（select / smart 均输出为 select）。"""
     lines = [f'  - name: "{name}"', "    type: select"]
 
@@ -388,6 +462,13 @@ def _fmt_group(name: str, gtype: str, params: dict[str, str], proxies: list[str]
     if other:
         lines += ["    use:", f"      - {strip_emoji(other)}"]
         return lines
+
+    # policy-path → 通过域名匹配找到对应 proxy-provider
+    policy_path = params.get("policy-path", "")
+    if policy_path and provider_urls:
+        if matched := _match_provider(policy_path, provider_urls):
+            lines += ["    use:", f"      - {matched}"]
+            return lines
 
     regex = params.get("policy-regex-filter", "")
     if regex:
@@ -407,6 +488,7 @@ def gen_proxy_groups(
     group_lines: list[str],
     skips: list[str],
     pg_inject: dict | None,
+    provider_urls: dict[str, str] | None = None,
 ) -> str:
     """生成 proxy-groups 段落。
 
@@ -431,7 +513,7 @@ def gen_proxy_groups(
             print(f"  [SKIP group] {name}")
             continue
 
-        out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"]))
+        out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
         if pg_inject and not injected and pg_inject["anchor"] == name:
@@ -502,6 +584,7 @@ def gen_rules_and_providers(
     skips: list[str],
     url_maps: list[tuple[str, str]],
     builtin_maps: dict[str, str],
+    rules_inject: dict | None = None,
 ) -> str:
     """生成 rule-providers + rules 的完整 YAML 文本。"""
     providers: OrderedDict[str, dict] = OrderedDict()
@@ -620,6 +703,36 @@ def gen_rules_and_providers(
             "",
         ]
 
+    # 注入 Builtin rules（按锚点插入，否则追加到 MATCH 之前）
+    if rules_inject and rules_inject.get("rules"):
+        inject_lines = [f"  - {r}" for r in rules_inject["rules"]]
+        anchor_r = (rules_inject.get("anchor") or "").lower()
+        if anchor_r:
+            inserted = False
+            new_out: list[str] = []
+            for rule in rules_out:
+                new_out.append(rule)
+                if not inserted and anchor_r in rule.lower():
+                    new_out.extend(inject_lines)
+                    inserted = True
+            if not inserted:
+                # anchor not found: insert before MATCH
+                for i, rule in enumerate(new_out):
+                    if "MATCH," in rule:
+                        new_out[i:i] = inject_lines
+                        break
+                else:
+                    new_out.extend(inject_lines)
+            rules_out = new_out
+        else:
+            # no anchor: insert before MATCH
+            for i, rule in enumerate(rules_out):
+                if "MATCH," in rule:
+                    rules_out[i:i] = inject_lines
+                    break
+            else:
+                rules_out.extend(inject_lines)
+
     rules_block = ["# 规则", "rules:"] + rules_out
     return "\n".join(rp_lines) + "\n" + "\n".join(rules_block) + "\n"
 
@@ -637,10 +750,14 @@ def main() -> None:
     builtin_maps = clash.get("builtin_rule_maps", {})
     pp_block = clash.get("proxy_providers", "")
     pg_inject = clash.get("pg_inject")
+    rules_inject = clash.get("rules_inject")
+    provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
 
     print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
     if pg_inject:
         print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
+    if rules_inject:
+        print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
     proxy_lines, group_lines, rule_lines = parse_surge_profile()
     print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
@@ -648,8 +765,8 @@ def main() -> None:
     inc = clash.get("include_file")
     header = (REPO_ROOT / inc if inc else CLASH_GENERAL).read_text(encoding="utf-8").rstrip()
     proxies_yaml = gen_proxies(proxy_lines)
-    groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject)
-    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps)
+    groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
+    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject)
 
     parts = [header, proxies_yaml]
     if pp_block:
