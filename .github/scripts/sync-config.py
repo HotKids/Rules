@@ -176,7 +176,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
 
     for line in lines:
         s = line.strip()
-        if s == "proxy-groups:":
+        if s in ("proxy-groups:", "[Proxy Group]"):
             mode = "pg"
             continue
         if s == "[Rule]":
