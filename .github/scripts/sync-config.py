@@ -510,7 +510,23 @@ def gen_proxy_groups(
     out: list[str] = ["proxy-groups:"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
-    pending_comments: list[str] = []
+    # 三级注释缓冲：h[0]=# h[1]=# > h[2]=# >>（与 gen_rules_and_providers 同逻辑）
+    pending_h: list[str | None] = [None, None, None]
+
+    def _h_skip() -> None:
+        for i in range(2, -1, -1):
+            if pending_h[i] is not None:
+                for j in range(i, 3):
+                    pending_h[j] = None
+                return
+
+    def _h_flush() -> list[str]:
+        result = []
+        for i in range(3):
+            if pending_h[i] is not None:
+                result.append(pending_h[i])
+                pending_h[i] = None
+        return result
 
     # prepend_block：Builtin 中无 // 锚点的分组 → 插到最前
     if pg_inject and pg_inject.get("prepend_block"):
@@ -519,24 +535,27 @@ def gen_proxy_groups(
 
     for line in group_lines:
         if line.startswith("#"):
-            pending_comments.append(f"  {line}")
+            lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
+            idx = lvl - 1
+            pending_h[idx] = f"  {line}"
+            for i in range(idx + 1, 3):
+                pending_h[i] = None
             continue
         g = parse_group_line(line)
         if g is None:
-            pending_comments.clear()
+            _h_skip()
             continue
         name = g["name"]
 
         if name in inject_names:
-            pending_comments.clear()
+            _h_skip()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP group] {name}")
-            pending_comments.clear()
+            _h_skip()
             continue
 
-        out.extend(pending_comments)
-        pending_comments = []
+        out.extend(_h_flush())
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
