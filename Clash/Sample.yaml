@@ -270,7 +270,6 @@ proxy-groups:
       - 🇨🇳 Taiwan
       - 🇭🇰 Hong Kong
 
-  # Apple 服务策略组
   - name: "🍎 Apple"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
@@ -625,6 +624,8 @@ rules:
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
+
+  # > Apple 部分服务代理（App Store、TV、Music、News 等）
   # >> Apple Services
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
