@@ -8,6 +8,7 @@ on:
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
       - '.github/scripts/sync-config.txt'
+      - '.github/scripts/sync-config/**'
   workflow_dispatch:
 
 permissions:
@@ -30,10 +31,10 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Clash/Sample.yaml
+          git add Clash/Sample.yaml Surge/Balloon.lcf
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: sync Profile.conf → Clash/Sample.yaml [auto]"
+            git commit -m "chore: sync Profile.conf → Clash/Sample.yaml + Balloon.lcf [auto]"
             git push
           fi
