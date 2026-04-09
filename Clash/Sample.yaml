@@ -687,6 +687,8 @@ rules:
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
+
+  # GeoIP
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
