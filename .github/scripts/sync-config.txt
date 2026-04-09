@@ -48,6 +48,12 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
+  # 全局代理
+  - name: "GLOBAL"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    include-all: true
+
   # 去广告以及隐私追踪保护、反运营商劫持开关 // 📧 Mail
   - name: "🚧 AdGuard"
     type: select

@@ -235,6 +235,12 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
+  # 全局代理
+  - name: "GLOBAL"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    include-all: true
+
   # 节点选项
   - name: "🔰 Proxy"
     type: select
@@ -585,8 +591,6 @@ rule-providers:
 
 # 规则
 rules:
-  # HTTP3/QUIC 协议开始流行，但是国内 ISP 和国际出口的 UDP 优先级都很低，表现很差，屏蔽掉以强制回退 HTTP2/HTTP1.1。
-  # REJECT-NO-DROP 表示不使用默认的自动丢包逻辑，这样 Surge 每次都会返回 ICMP Port Unreachable，应用会立刻回退而不是等超时。
   # 标准 SSH 端口
   - DEST-PORT,22,🔘 DIRECT
 
@@ -600,8 +604,6 @@ rules:
   - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
-  # Privacy 隐私
-  # Hijacking 运营商劫持或恶意网站
   # 自定义多区域媒体应用
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
@@ -625,8 +627,8 @@ rules:
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
 
-  # > Apple 部分服务代理（App Store、TV、Music、News 等）
-  # >> Apple Services
+  # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
+  # >> Apple
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
@@ -648,7 +650,6 @@ rules:
   # > Mail
   - RULE-SET,Spark,📧 Mail
 
-  # > Speedtest
   # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy
 
@@ -657,8 +658,6 @@ rules:
   - RULE-SET,CNCIDR,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
 
-  # GEOIP,CN,🔘 DIRECT,no-resolve
-  # Surge 的自动 REJECT 保护丢包，防止应用循环请求
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
 
