@@ -157,6 +157,94 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     return proxy_providers, pg_inject, rules_inject
 
 
+def _process_builtin_loon(lines: list[str]) -> tuple[dict | None, str, str, str]:
+    """从 Loon Builtin 内容解析代理组覆盖和各段落块。
+
+    返回：
+      pg_inject_loon  dict|None  {anchor, block, names, prepend_block}
+      rule_block      str        [Rule] 内容（不含段落标题）
+      plugin_block    str        [Plugin] 内容（不含段落标题）
+      mitm_block      str        [Mitm] 内容（不含段落标题）
+    """
+    pg_lines: list[str] = []
+    rule_lines: list[str] = []
+    plugin_lines: list[str] = []
+    mitm_lines: list[str] = []
+    mode = "pg"  # pg | Rule | Plugin | Mitm
+
+    for line in lines:
+        s = line.strip()
+        if s == "proxy-groups:":
+            mode = "pg"
+            continue
+        if s == "[Rule]":
+            mode = "Rule"
+            continue
+        if s == "[Plugin]":
+            mode = "Plugin"
+            continue
+        if s in ("[Mitm]", "[MITM]"):
+            mode = "Mitm"
+            continue
+        if mode == "pg":
+            pg_lines.append(line)
+        elif mode == "Rule":
+            rule_lines.append(line)
+        elif mode == "Plugin":
+            plugin_lines.append(line)
+        elif mode == "Mitm":
+            mitm_lines.append(line)
+
+    # proxy-groups 注入（Loon 格式：Name = type,...,img-url = URL）
+    pg_inject_loon: dict | None = None
+    if pg_lines:
+        anchor: str | None = None
+        pre_lines: list[str] = []
+        post_lines: list[str] = []
+        found_anchor = False
+
+        for line in pg_lines:
+            s = line.strip()
+            if not s:
+                continue
+            if s.startswith("#") and "//" in s and not found_anchor:
+                found_anchor = True
+                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    anchor = m.group(1).strip()
+                clean_s = re.sub(r"\s*//.*$", "", s).rstrip()
+                if clean_s and clean_s != "#":
+                    post_lines.append(clean_s)
+                continue
+            if found_anchor:
+                post_lines.append(s)
+            else:
+                pre_lines.append(s)
+
+        # 从 Loon 行（Name = type,...）提取 names
+        names: set[str] = set()
+        for line in pg_lines:
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                name = s.split("=")[0].strip()
+                if name:
+                    names.add(name)
+
+        prepend_block = "\n".join(pre_lines).strip() or None
+        pg_inject_loon = {
+            "anchor": anchor,
+            "block": "\n".join(post_lines).strip(),
+            "names": names,
+            "prepend_block": prepend_block,
+        }
+
+    rule_block = "\n".join(l.rstrip() for l in rule_lines).strip()
+    plugin_block = "\n".join(l.rstrip() for l in plugin_lines).strip()
+    mitm_block = "\n".join(l.rstrip() for l in mitm_lines).strip()
+
+    return pg_inject_loon, rule_block, plugin_block, mitm_block
+
+
 def _empty_plat() -> dict:
     return {
         "output": None,
@@ -168,6 +256,9 @@ def _empty_plat() -> dict:
         "proxy_providers": "",
         "pg_inject": None,
         "rules_inject": None,
+        "filter_map": {},
+        "pg_inject_loon": None,
+        "loon_blocks": {},
     }
 
 
@@ -204,10 +295,15 @@ def parse_sync_txt() -> dict:
     def flush_builtin() -> None:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
-            pp, pg, ri = _process_builtin(builtin_buf)
-            plat["proxy_providers"] = pp
-            plat["pg_inject"] = pg
-            plat["rules_inject"] = ri
+            if current_platform == "Loon":
+                pg_inj, rule_blk, plugin_blk, mitm_blk = _process_builtin_loon(builtin_buf)
+                plat["pg_inject_loon"] = pg_inj
+                plat["loon_blocks"] = {"Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk}
+            else:
+                pp, pg, ri = _process_builtin(builtin_buf)
+                plat["proxy_providers"] = pp
+                plat["pg_inject"] = pg
+                plat["rules_inject"] = ri
         builtin_buf.clear()
 
     for raw in lines:
@@ -251,10 +347,21 @@ def parse_sync_txt() -> dict:
                 result.setdefault(current_platform, _empty_plat())["output"] = path
             continue
 
-        # << path：Builtin 分区内的文件引用（作为输出头部）
+        # << path：Builtin 分区内的文件引用（作为输出头部，或展开 .ini 文件）
         if stripped.startswith("<<"):
             if current_section == "Builtin" and current_platform and current_platform != "Surge":
-                result.setdefault(current_platform, _empty_plat())["include_file"] = stripped[2:].strip()
+                path = stripped[2:].strip()
+                if path.endswith(".ini"):
+                    ini_path = REPO_ROOT / path
+                    if ini_path.exists():
+                        for ini_line in ini_path.read_text(encoding="utf-8").splitlines():
+                            ini_s = ini_line.strip()
+                            if ini_s.startswith("<<"):
+                                result.setdefault(current_platform, _empty_plat())["include_file"] = ini_s[2:].strip()
+                            else:
+                                builtin_buf.append(ini_line)
+                else:
+                    result.setdefault(current_platform, _empty_plat())["include_file"] = path
             continue
 
         # 内容行：按分区路由
@@ -285,6 +392,13 @@ def parse_sync_txt() -> dict:
             left, right = left.strip(), right.strip()
             if left and right:
                 result.setdefault(current_platform, _empty_plat())["rename_map"][left] = right
+        elif current_section == "FilterMap" and current_platform and current_platform != "Surge":
+            if "=>" not in stripped:
+                continue
+            left, _, right = stripped.partition("=>")
+            left, right = left.strip(), right.strip()
+            if left:
+                result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
 
     flush_builtin()
     return result
@@ -840,54 +954,284 @@ def gen_rules_and_providers(
     return "\n".join(rp_lines) + "\n" + "\n".join(rules_block) + "\n"
 
 # ---------------------------------------------------------------------------
+# 生成 Loon [Proxy Group]
+# ---------------------------------------------------------------------------
+
+def _fmt_loon_group(
+    name: str,
+    gtype: str,
+    params: dict[str, str],
+    proxies: list[str],
+    filter_map: dict[str, str],
+) -> str | None:
+    """格式化为 Loon Proxy Group 单行。返回 None 表示跳过该组。"""
+    icon = params.get("icon-url", "")
+    icon_part = f",img-url = {icon}" if icon else ""
+
+    if gtype == "smart":
+        fm_val = filter_map.get(name, "")
+        if not fm_val:
+            return None  # 无 FilterMap 映射，跳过
+        parts = fm_val.split(",", 1)
+        filter_name = parts[0].strip()
+        extra = "," + parts[1].strip() if len(parts) > 1 else ""
+        return f"{name} = url-test,{filter_name}{extra}{icon_part}"
+
+    if params.get("include-all-proxies", "").lower() in ("true", "1"):
+        # include-all-proxies → 使用 FilterMap 指定的 Remote Filter（默认 Sub-UN）
+        fm_val = filter_map.get(name, "Sub-UN")
+        filter_name = fm_val.split(",")[0].strip()
+        return f"{name} = select,{filter_name}{icon_part}"
+
+    if params.get("include-other-group", ""):
+        return None  # Loon 不直接支持，由 builtin inject_names 或 FilterMap 覆盖
+
+    if params.get("policy-path", ""):
+        return None  # 由 Builtin inject_names 替换
+
+    if proxies:
+        proxy_str = ",".join(proxies)
+        return f"{name} = select,{proxy_str}{icon_part}"
+
+    return None
+
+
+def gen_loon_proxy_groups(
+    group_lines: list[str],
+    skips: list[str],
+    pg_inject: dict | None,
+    filter_map: dict[str, str],
+) -> str:
+    """生成 Loon [Proxy Group] 段落。"""
+    out: list[str] = ["[Proxy Group]"]
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
+    pending_h: list[str | None] = [None, None, None]
+
+    def _h_skip() -> None:
+        for i in range(2, -1, -1):
+            if pending_h[i] is not None:
+                for j in range(i, 3):
+                    pending_h[j] = None
+                return
+
+    def _h_flush() -> list[str]:
+        result_h = []
+        for i in range(3):
+            if pending_h[i] is not None:
+                result_h.append(pending_h[i])
+                pending_h[i] = None
+        return result_h
+
+    # prepend_block（无 // 锚点的 Builtin 分组 → 插到最前）
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+
+    for line in group_lines:
+        if line.startswith("#"):
+            lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
+            idx = lvl - 1
+            pending_h[idx] = line
+            for i in range(idx + 1, 3):
+                pending_h[i] = None
+            continue
+        g = parse_group_line(line)
+        if g is None:
+            _h_skip()
+            continue
+        name = g["name"]
+
+        if name in inject_names:
+            _h_skip()
+            continue
+        if _is_skipped(name, skips):
+            print(f"  [SKIP Loon group] {name}")
+            _h_skip()
+            continue
+
+        loon_line = _fmt_loon_group(name, g["type"], g["params"], g["proxies"], filter_map)
+        if loon_line is None:
+            _h_skip()
+            continue
+
+        out.extend(_h_flush())
+        out.append(loon_line)
+
+        # 锚点注入
+        if pg_inject and not injected and pg_inject.get("anchor") == name:
+            out.append(pg_inject["block"])
+            injected = True
+
+    if pg_inject and not injected and pg_inject.get("block"):
+        out.append(pg_inject["block"])
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 Loon [Remote Rule]
+# ---------------------------------------------------------------------------
+
+def _derive_tag(url: str) -> str:
+    """从 URL 文件名派生 Loon Remote Rule tag。"""
+    filename = url.rstrip("/").rsplit("/", 1)[-1]
+    for ext in (".list", ".txt", ".yaml", ".yml", ".conf"):
+        if filename.endswith(ext):
+            filename = filename[: -len(ext)]
+            break
+    return filename.replace("%20", " ")
+
+
+def gen_loon_remote_rules(
+    rule_lines: list[str],
+    skips: list[str],
+) -> str:
+    """生成 Loon [Remote Rule] 段落。
+
+    Loon 原生支持 Surge .list 格式，URL 直接复用无需转换。
+    """
+    out: list[str] = ["[Remote Rule]"]
+    pending_h: list[str | None] = [None, None, None]
+
+    def _h_skip() -> None:
+        for i in range(2, -1, -1):
+            if pending_h[i] is not None:
+                for j in range(i, 3):
+                    pending_h[j] = None
+                return
+
+    def _h_flush() -> None:
+        for i in range(3):
+            if pending_h[i] is not None:
+                out.append(pending_h[i])
+                pending_h[i] = None
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _COMMENT_DROP_TYPES:
+                lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
+                idx = lvl - 1
+                pending_h[idx] = s
+                for i in range(idx + 1, 3):
+                    pending_h[i] = None
+            continue
+
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+
+        if rule_type not in ("RULE-SET", "DOMAIN-SET"):
+            _h_skip()
+            continue
+        if len(parts) < 3:
+            _h_skip()
+            continue
+
+        url, policy = parts[1], parts[2]
+        if not url.startswith("http"):
+            _h_skip()
+            continue  # 内置规则集（LAN 等）跳过
+
+        if _should_skip([url, policy], skips):
+            print(f"  [SKIP Loon remote rule] {url}")
+            _h_skip()
+            continue
+
+        tag = _derive_tag(url)
+        _h_flush()
+        out.append(f"{url}, policy={policy}, tag={tag}, enabled=true")
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
 def main() -> None:
-    print("── sync-config: Surge Profile → Clash Sample.yaml ──")
-
     config = parse_sync_txt()
-    clash = config.get("Clash", {})
-    skips = config.get("global_skips", []) + clash.get("skips", [])
-    url_maps = clash.get("url_maps", [])
-    builtin_maps = clash.get("builtin_rule_maps", {})
-    pp_block = clash.get("proxy_providers", "")
-    pg_inject = clash.get("pg_inject")
-    rules_inject = clash.get("rules_inject")
-    rename_map = clash.get("rename_map", {})
-    provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
-
-    print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
-    if pg_inject:
-        print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
-    if rules_inject:
-        print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
     surge_src = config.get("Surge", {}).get("source")
     if not surge_src:
         raise ValueError("Surge 块缺少 >> 源文件路径指令")
-    clash_out = clash.get("output")
-    if not clash_out:
-        raise ValueError("Clash 块缺少 >> 输出路径指令")
-    inc = clash.get("include_file")
-    if not inc:
-        raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
 
     _, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
-    header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
-    groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
-    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
+    # ── Clash ──────────────────────────────────────────────────────────────
+    clash = config.get("Clash", {})
+    if clash.get("output"):
+        print("\n── sync-config: Surge Profile → Clash Sample.yaml ──")
+        clash_out = clash["output"]
+        skips = config.get("global_skips", []) + clash.get("skips", [])
+        url_maps = clash.get("url_maps", [])
+        builtin_maps = clash.get("builtin_rule_maps", {})
+        pp_block = clash.get("proxy_providers", "")
+        pg_inject = clash.get("pg_inject")
+        rules_inject = clash.get("rules_inject")
+        rename_map = clash.get("rename_map", {})
+        provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
+        inc = clash.get("include_file")
 
-    parts = [header]
-    if pp_block:
-        parts.append(pp_block)
-    parts += [groups_yaml, rp_rules_yaml]
+        print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
+        if pg_inject:
+            print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
+        if rules_inject:
+            print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
-    clash_sample = REPO_ROOT / clash_out
-    changed = write_if_changed(clash_sample, "\n\n".join(parts) + "\n")
-    print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
+        groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
+        rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
+
+        parts = []
+        if inc:
+            parts.append((REPO_ROOT / inc).read_text(encoding="utf-8").rstrip())
+        if pp_block:
+            parts.append(pp_block)
+        parts += [groups_yaml, rp_rules_yaml]
+
+        changed = write_if_changed(REPO_ROOT / clash_out, "\n\n".join(parts) + "\n")
+        print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
+
+    # ── Loon ───────────────────────────────────────────────────────────────
+    loon = config.get("Loon", {})
+    if loon.get("output"):
+        print("\n── sync-config: Surge Profile → Loon Balloon.lcf ──")
+        loon_out_path = loon["output"]
+        loon_inc = loon.get("include_file")
+        if not loon_inc:
+            raise ValueError("Loon Builtin 缺少 << include_file (Loon/Header.lcf)")
+
+        loon_header = (REPO_ROOT / loon_inc).read_text(encoding="utf-8").rstrip()
+        loon_pg_inject = loon.get("pg_inject_loon")
+        loon_blocks = loon.get("loon_blocks", {})
+        loon_rule_block = loon_blocks.get("Rule", "")
+        loon_plugin_block = loon_blocks.get("Plugin", "")
+        loon_mitm_block = loon_blocks.get("Mitm", "")
+        filter_map = loon.get("filter_map", {})
+        loon_skips = config.get("global_skips", []) + loon.get("skips", [])
+
+        print(f"  FilterMap: {list(filter_map.keys())}")
+        print(f"  Loon skip: {loon_skips}")
+        if loon_pg_inject:
+            print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")
+
+        pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map)
+        remote_rules = gen_loon_remote_rules(rule_lines, loon_skips)
+
+        loon_parts = [loon_header, pg_loon]
+        if loon_rule_block:
+            loon_parts.append("[Rule]\n" + loon_rule_block)
+        loon_parts.append(remote_rules)
+        if loon_plugin_block:
+            loon_parts.append("[Plugin]\n" + loon_plugin_block)
+        if loon_mitm_block:
+            loon_parts.append("[Mitm]\n" + loon_mitm_block)
+
+        changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
+        print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
 
 
 if __name__ == "__main__":
