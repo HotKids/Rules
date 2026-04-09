@@ -29,60 +29,7 @@ Apple TV
 Speedtest
 
 # > Builtin
-<< Clash/General.yaml
-# 服务器订阅配置
-proxy-providers:
-  Server:
-    type: http
-    path: ./Provider/Proxy/Server.yaml
-    url: https://sub.hotkids.me
-    interval: 3600
-    proxy: DIRECT
-    header:
-      User-Agent:
-      - "Clash/v1.18.0"
-      - "mihomo/1.18.3"
-    health-check:
-      enable: true
-      url: https://cp.cloudflare.com/generate_204
-      interval: 600
-
-proxy-groups:
-  # 全局代理
-  - name: "GLOBAL"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
-    include-all: true
-
-  # 去广告以及隐私追踪保护、反运营商劫持开关 // 📧 Mail
-  - name: "🚧 AdGuard"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
-    proxies:
-      - ⛔️ REJECT
-      - 🔘 DIRECT
-
-  # 阻止
-  - name: "⛔️ REJECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
-    proxies:
-      - REJECT
-
-  # 直连
-  - name: "🔘 DIRECT"
-    type: select
-    hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
-    proxies:
-      - DIRECT
-
-rules:
-  # GeoIP // RULE-SET,LAN
-  - GEOSITE,cn,🔘 DIRECT
-  - GEOIP,CN,🔘 DIRECT
-  - GEOSITE,geolocation-!cn,🔰 Proxy
+<< .github/scripts/sync-config/clash.ini
 
 # > Mapping
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
@@ -106,12 +53,15 @@ rule-providers:
 # >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
 
 # Loon
-# >> Surge/Balloon.lcf 输出目录，前面加 # 表示关闭 不转换
+>> Surge/Balloon.lcf
+# > Skip
+Speedtest
 # > Builtin
-[Plugin]
-https://raw.githubusercontent.com/chavyleung/scripts/master/box/rewrite/boxjs.rewrite.loon.plugin, tag=BoxJS, enabled=true
-https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/modules/script-hub.loon.plugin, tag=Script Hub, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/DNS.plugin, tag=DNS Enhanced, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/HTTPDNS.Block.plugin, tag=HTTPDNS Block, enabled=true
-https://raw.githubusercontent.com/mw418/Loon/main/plugin/jd_price.plugin, tag=京东比价, enabled=true
-https://raw.githubusercontent.com/fmz200/wool_scripts/main/Loon/plugin/blockAds.plugin, tag=去广告合集, enabled=false
+<< .github/scripts/sync-config/loon.ini
+# > FilterMap
+🇭🇰 Hong Kong => Sub-HK,interval = 60,tolerance = 50
+🇨🇳 Taiwan => Sub-TW,interval = 60,tolerance = 50
+🇸🇬 Singapore => Sub-SG,interval = 60,tolerance = 50
+🇯🇵 Japan => Sub-JP,interval = 60,tolerance = 50
+🇺🇸 America => Sub-US,interval = 60,tolerance = 50
+🇺🇳 Server => Sub-UN
