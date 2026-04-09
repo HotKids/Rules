@@ -765,6 +765,7 @@ def gen_rules_and_providers(
             and not s.startswith("# >>")
             and formatted
             and formatted[-1] != ""
+            and not formatted[-1].strip().startswith("#")
         ):
             formatted.append("")
         formatted.append(line)

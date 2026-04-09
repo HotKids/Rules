@@ -637,7 +637,6 @@ rules:
   - RULE-SET,Advertising,🚧 AdGuard
 
   # 自定义多区域媒体应用
-
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
 
@@ -656,7 +655,6 @@ rules:
   - RULE-SET,CNTV,📺 CNTV
 
   # Global 全球代理规则
-
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Gemini,🔍 Google
   - RULE-SET,GenAI,🤖 AIGC
