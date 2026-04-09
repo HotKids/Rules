@@ -292,17 +292,16 @@ proxy-groups:
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
     proxies:
-      - 🔰 Proxy
       - 🇺🇸 America
+      - 🔰 Proxy
 
   # AIGC 服务策略组
   - name: "🤖 AIGC"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
     proxies:
-      - 🇸🇬 Singapore
-      - 🇯🇵 Japan
       - 🇺🇸 America
+      - 🇸🇬 Singapore
       - 🔰 Proxy
 
   # Crypto 服务策略组
@@ -319,9 +318,9 @@ proxy-groups:
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
     proxies:
-      - 🔘 DIRECT
       - 🇺🇸 America
       - 🔰 Proxy
+      - 🔘 DIRECT
 
   # Telegram 服务策略组
   - name: "📬 Telegram"
