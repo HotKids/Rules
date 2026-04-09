@@ -21,7 +21,6 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SURGE_PROFILE = REPO_ROOT / "Surge" / "Profile.conf"
-CLASH_GENERAL = REPO_ROOT / "Clash" / "General.yaml"
 CLASH_SAMPLE = REPO_ROOT / "Clash" / "Sample.yaml"
 SYNC_CONFIG_TXT = REPO_ROOT / ".github" / "scripts" / "sync-config.txt"
 
@@ -774,7 +773,9 @@ def main() -> None:
     print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
 
     inc = clash.get("include_file")
-    header = (REPO_ROOT / inc if inc else CLASH_GENERAL).read_text(encoding="utf-8").rstrip()
+    if not inc:
+        raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
+    header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
     proxies_yaml = gen_proxies(proxy_lines)
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject)
