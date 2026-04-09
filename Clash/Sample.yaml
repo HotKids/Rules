@@ -509,13 +509,6 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
 
-  Apple News:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Apple_News.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
-    interval: 86400
-
   Apple TV:
     type: http
     behavior: classical
@@ -651,8 +644,6 @@ rules:
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
-  # >> Apple News
-  - RULE-SET,Apple News,🇺🇸 America
   # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
