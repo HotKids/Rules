@@ -34,7 +34,7 @@ disconnect-on-policy-change = false
 # 直连延迟测试 URL
 internet-test-url = http://wifi.vivo.com.cn/generate_204
 # 代理延迟测试 URL
-proxy-test-url = http://www.gstatic.com/generate_204
+proxy-test-url = http://cp.cloudflare.com/generate_204
 # 资源解析器
 resource-parser = https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
 # GeoIP 数据库
@@ -60,7 +60,7 @@ Sub-TW = NameRegex, FilterKey = "^(?=.*(?i)(🇨🇳|🇹🇼|台湾|\b(TW|Taiwa
 Sub-SG = NameRegex, FilterKey = "^(?=.*(?i)(🇸🇬|新加坡|狮城|\b(SG|Singapore)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 Sub-JP = NameRegex, FilterKey = "^(?=.*(?i)(🇯🇵|日本|\b(JP|Japan)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 Sub-US = NameRegex, FilterKey = "^(?=.*(?i)(🇺🇸|美国|\b(US|United States)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
+Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium|DIRECT|REJECT)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 
 [Proxy Group]
 # Proxy

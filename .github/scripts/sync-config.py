@@ -12,7 +12,6 @@ sync-config.txt 格式（平台块 + 子分区）：
 """
 
 import re
-from collections import OrderedDict
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -209,8 +208,6 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
             continue
         if mode == "header":
             header_lines.append(line)
-        elif mode == "RemoteFilter":
-            remote_filter_lines.append(line)
         elif mode == "pg":
             pg_lines.append(line)
         elif mode == "Rule":
@@ -677,6 +674,33 @@ def _fmt_group(
     return lines
 
 
+class PendingHeaders:
+    """三级注释缓冲（# / # > / # >>），用于各 gen_* 函数中的注释懒刷逻辑。"""
+
+    __slots__ = ("_h",)
+
+    def __init__(self) -> None:
+        self._h: list[str | None] = [None, None, None]
+
+    def push(self, line: str, lvl: int) -> None:
+        idx = lvl - 1
+        self._h[idx] = line
+        for i in range(idx + 1, 3):
+            self._h[i] = None
+
+    def skip(self) -> None:
+        for i in range(2, -1, -1):
+            if self._h[i] is not None:
+                for j in range(i, 3):
+                    self._h[j] = None
+                return
+
+    def flush(self) -> list[str]:
+        out = [h for h in self._h if h is not None]
+        self._h = [None, None, None]
+        return out
+
+
 def gen_proxy_groups(
     group_lines: list[str],
     skips: list[str],
@@ -693,23 +717,7 @@ def gen_proxy_groups(
     out: list[str] = ["proxy-groups:"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
-    # 三级注释缓冲：h[0]=# h[1]=# > h[2]=# >>（与 gen_rules_and_providers 同逻辑）
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> list[str]:
-        result = []
-        for i in range(3):
-            if pending_h[i] is not None:
-                result.append(pending_h[i])
-                pending_h[i] = None
-        return result
+    ph = PendingHeaders()
 
     # prepend_block：Builtin 中无 // 锚点的分组 → 插到最前
     if pg_inject and pg_inject.get("prepend_block"):
@@ -719,26 +727,23 @@ def gen_proxy_groups(
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
-            idx = lvl - 1
-            pending_h[idx] = f"  {line}"
-            for i in range(idx + 1, 3):
-                pending_h[i] = None
+            ph.push(f"  {line}", lvl)
             continue
         g = parse_group_line(line)
         if g is None:
-            _h_skip()
+            ph.skip()
             continue
         name = g["name"]
 
         if name in inject_names:
-            _h_skip()
+            ph.skip()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP group] {name}")
-            _h_skip()
+            ph.skip()
             continue
 
-        out.extend(_h_flush())
+        out.extend(ph.flush())
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
@@ -818,27 +823,10 @@ def gen_rules_and_providers(
     rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 rule-providers + rules 的完整 YAML 文本。"""
-    providers: OrderedDict[str, dict] = OrderedDict()
+    providers: dict[str, dict] = {}
     seen: dict[str, str] = {}  # provider_name → url
     rules_out: list[str] = []
-    # 三级注释缓冲：h[0]=# h[1]=# > h[2]=# >>
-    # 规则跳过时，从最深非空层起向下清除；成功时全部刷出
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        """跳过/无映射时：从最深非空层起清除（保留更高层直到下一条规则出现）。"""
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> None:
-        """规则输出前：将所有待定注释刷入 rules_out。"""
-        for i in range(3):
-            if pending_h[i] is not None:
-                rules_out.append(pending_h[i])
-                pending_h[i] = None
+    ph = PendingHeaders()
 
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
@@ -861,10 +849,7 @@ def gen_rules_and_providers(
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
                 lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
-                idx = lvl - 1
-                pending_h[idx] = f"  {s}"
-                for i in range(idx + 1, 3):  # 清除更深层的孤立注释
-                    pending_h[i] = None
+                ph.push(f"  {s}", lvl)
             continue
 
         parts = [p.strip() for p in s.split(",")]
@@ -873,7 +858,7 @@ def gen_rules_and_providers(
 
         if rule_type in CLASH_UNSUPPORTED_RULE_TYPES:
             print(f"  [SKIP rule] 不支持类型: {s}")
-            _h_skip()
+            ph.skip()
             continue
 
         if rule_type == "FINAL":
@@ -883,7 +868,7 @@ def gen_rules_and_providers(
         elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
-                _h_skip()
+                ph.skip()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
             emit.append("  - " + ",".join(keep))
@@ -896,7 +881,7 @@ def gen_rules_and_providers(
             # RULE-SET / DOMAIN-SET
             if len(parts) < 3:
                 print(f"  [WARN] 解析失败（字段不足）: {s}")
-                _h_skip()
+                ph.skip()
                 continue
 
             url_or_builtin, policy = parts[1], parts[2]
@@ -905,7 +890,7 @@ def gen_rules_and_providers(
                 # 内置规则集
                 if url_or_builtin not in builtin_maps:
                     print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
                 clash_url = builtin_maps[url_or_builtin]
                 pname = register(clash_url, _behavior_from_url(clash_url))
@@ -913,7 +898,7 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    _h_skip()
+                    ph.skip()
                     continue
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
@@ -921,13 +906,13 @@ def gen_rules_and_providers(
                 # 外部 URL
                 if skip := _should_skip([url_or_builtin, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 clash_url = map_surge_url(url_or_builtin, url_maps)
                 if clash_url is None:
                     print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 # cidr 文件名覆盖 > rule type > 文件名兜底
@@ -946,13 +931,13 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {clash_url}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
         # 规则会被输出：先刷缓冲注释，再写规则行
-        _h_flush()
+        rules_out.extend(ph.flush())
         rules_out.extend(emit)
 
     # rule-providers
@@ -1075,22 +1060,7 @@ def gen_loon_proxy_groups(
     out: list[str] = ["[Proxy Group]"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> list[str]:
-        result_h = []
-        for i in range(3):
-            if pending_h[i] is not None:
-                result_h.append(pending_h[i])
-                pending_h[i] = None
-        return result_h
+    ph = PendingHeaders()
 
     # prepend_block（无 // 锚点的 Builtin 分组 → 插到最前）
     if pg_inject and pg_inject.get("prepend_block"):
@@ -1099,31 +1069,28 @@ def gen_loon_proxy_groups(
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
-            idx = lvl - 1
-            pending_h[idx] = line
-            for i in range(idx + 1, 3):
-                pending_h[i] = None
+            ph.push(line, lvl)
             continue
         g = parse_group_line(line)
         if g is None:
-            _h_skip()
+            ph.skip()
             continue
         name = g["name"]
 
         if name in inject_names:
-            _h_skip()
+            ph.skip()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP Loon group] {name}")
-            _h_skip()
+            ph.skip()
             continue
 
         loon_line = _fmt_loon_group(name, g["type"], g["params"], g["proxies"], filter_map)
         if loon_line is None:
-            _h_skip()
+            ph.skip()
             continue
 
-        out.extend(_h_flush())
+        out.extend(ph.flush())
         out.append(loon_line)
 
         # 锚点注入
@@ -1161,20 +1128,7 @@ def gen_loon_remote_rules(
     Loon 原生支持 Surge .list 格式，URL 直接复用无需转换。
     """
     out: list[str] = ["[Remote Rule]"]
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> None:
-        for i in range(3):
-            if pending_h[i] is not None:
-                out.append(pending_h[i])
-                pending_h[i] = None
+    ph = PendingHeaders()
 
     for line in rule_lines:
         s = line.strip()
@@ -1184,36 +1138,33 @@ def gen_loon_remote_rules(
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
                 lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
-                idx = lvl - 1
-                pending_h[idx] = s
-                for i in range(idx + 1, 3):
-                    pending_h[i] = None
+                ph.push(s, lvl)
             continue
 
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
 
         if rule_type not in ("RULE-SET", "DOMAIN-SET"):
-            _h_skip()
+            ph.skip()
             continue
         if len(parts) < 3:
-            _h_skip()
+            ph.skip()
             continue
 
         url, policy = parts[1], parts[2]
         if not url.startswith("http"):
-            _h_skip()
+            ph.skip()
             continue  # 内置规则集（LAN 等）跳过
 
         if _should_skip([url, policy], skips):
             print(f"  [SKIP Loon remote rule] {url}")
-            _h_skip()
+            ph.skip()
             continue
 
         tag = _derive_tag(url)
         if rename_map:
             tag = rename_map.get(tag, tag)
-        _h_flush()
+        out.extend(ph.flush())
         out.append(f"{url}, policy={policy}, tag={tag}, enabled=true")
 
     return "\n".join(out)

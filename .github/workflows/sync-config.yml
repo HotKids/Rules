@@ -5,7 +5,6 @@ on:
     branches: [master]
     paths:
       - 'Surge/Profile.conf'
-      - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
       - '.github/scripts/sync-config.txt'
       - '.github/scripts/sync-config/**'

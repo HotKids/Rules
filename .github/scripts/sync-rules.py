@@ -14,7 +14,7 @@ import json
 import re
 import sys
 import urllib.request
-from collections import OrderedDict, defaultdict
+from collections import defaultdict
 from pathlib import Path
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
@@ -122,9 +122,9 @@ def write_if_changed(filepath: Path, content: str) -> bool:
 #  Step 1 & 2: Streaming 双向同步
 # ═══════════════════════════════════════════════════════════════════════
 
-def parse_sections(text: str) -> OrderedDict:
+def parse_sections(text: str) -> dict:
     """按 '# > Name' 分隔符拆分为 {section_name: content_lines}。"""
-    sections = OrderedDict()
+    sections: dict = {}
     current = None
     buf = []
     for line in text.splitlines():
@@ -696,8 +696,8 @@ def convert_clash_payload_to_surge(text: str) -> str | None:
 
 # ── domain behavior ──────────────────────────────────────────────────
 
-def convert_domain_to_clash(text: str) -> str | None:
-    """Surge DOMAIN-SET（+.domain 格式）→ Clash domain YAML。"""
+def _extract_domains(text: str) -> list[str]:
+    """从 Surge DOMAIN-SET 文本提取域名（去掉 +. 前缀）。"""
     domains = []
     for line in text.splitlines():
         line = line.strip()
@@ -706,6 +706,12 @@ def convert_domain_to_clash(text: str) -> str | None:
         if line.startswith("+."):
             line = line[2:]
         domains.append(line)
+    return domains
+
+
+def convert_domain_to_clash(text: str) -> str | None:
+    """Surge DOMAIN-SET（+.domain 格式）→ Clash domain YAML。"""
+    domains = _extract_domains(text)
     if not domains:
         return None
     out = ["payload:"]
@@ -716,14 +722,7 @@ def convert_domain_to_clash(text: str) -> str | None:
 
 def convert_domain_to_singbox(text: str) -> str | None:
     """Surge DOMAIN-SET（+.domain 格式）→ sing-box JSON。"""
-    domains = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or line.startswith("//"):
-            continue
-        if line.startswith("+."):
-            line = line[2:]
-        domains.append(line)
+    domains = _extract_domains(text)
     if not domains:
         return None
     result = {"version": 2, "rules": [{"domain_suffix": sorted(set(domains))}]}
