@@ -157,20 +157,22 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     return proxy_providers, pg_inject, rules_inject
 
 
-def _process_builtin_loon(lines: list[str]) -> tuple[dict | None, str, str, str]:
-    """从 Loon Builtin 内容解析代理组覆盖和各段落块。
+def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str]:
+    """从 Loon Builtin 内容解析头部和各段落块。
 
     返回：
+      loon_header     str        proxy-groups: 之前的所有内容（[General] 等静态段落）
       pg_inject_loon  dict|None  {anchor, block, names, prepend_block}
       rule_block      str        [Rule] 内容（不含段落标题）
       plugin_block    str        [Plugin] 内容（不含段落标题）
       mitm_block      str        [Mitm] 内容（不含段落标题）
     """
+    header_lines: list[str] = []
     pg_lines: list[str] = []
     rule_lines: list[str] = []
     plugin_lines: list[str] = []
     mitm_lines: list[str] = []
-    mode = "pg"  # pg | Rule | Plugin | Mitm
+    mode = "header"  # header | pg | Rule | Plugin | Mitm
 
     for line in lines:
         s = line.strip()
@@ -186,7 +188,9 @@ def _process_builtin_loon(lines: list[str]) -> tuple[dict | None, str, str, str]
         if s in ("[Mitm]", "[MITM]"):
             mode = "Mitm"
             continue
-        if mode == "pg":
+        if mode == "header":
+            header_lines.append(line)
+        elif mode == "pg":
             pg_lines.append(line)
         elif mode == "Rule":
             rule_lines.append(line)
@@ -194,6 +198,8 @@ def _process_builtin_loon(lines: list[str]) -> tuple[dict | None, str, str, str]
             plugin_lines.append(line)
         elif mode == "Mitm":
             mitm_lines.append(line)
+
+    loon_header = "\n".join(l.rstrip() for l in header_lines).strip()
 
     # proxy-groups 注入（Loon 格式：Name = type,...,img-url = URL）
     pg_inject_loon: dict | None = None
@@ -242,7 +248,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[dict | None, str, str, str]
     plugin_block = "\n".join(l.rstrip() for l in plugin_lines).strip()
     mitm_block = "\n".join(l.rstrip() for l in mitm_lines).strip()
 
-    return pg_inject_loon, rule_block, plugin_block, mitm_block
+    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block
 
 
 def _empty_plat() -> dict:
@@ -296,7 +302,8 @@ def parse_sync_txt() -> dict:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
             if current_platform == "Loon":
-                pg_inj, rule_blk, plugin_blk, mitm_blk = _process_builtin_loon(builtin_buf)
+                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk = _process_builtin_loon(builtin_buf)
+                plat["loon_header"] = hdr
                 plat["pg_inject_loon"] = pg_inj
                 plat["loon_blocks"] = {"Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk}
             else:
@@ -1201,10 +1208,10 @@ def main() -> None:
         print("\n── sync-config: Surge Profile → Loon Balloon.lcf ──")
         loon_out_path = loon["output"]
         loon_inc = loon.get("include_file")
-        if not loon_inc:
-            raise ValueError("Loon Builtin 缺少 << include_file (Loon/Header.lcf)")
-
-        loon_header = (REPO_ROOT / loon_inc).read_text(encoding="utf-8").rstrip()
+        if loon_inc:
+            loon_header = (REPO_ROOT / loon_inc).read_text(encoding="utf-8").rstrip()
+        else:
+            loon_header = loon.get("loon_header", "")
         loon_pg_inject = loon.get("pg_inject_loon")
         loon_blocks = loon.get("loon_blocks", {})
         loon_rule_block = loon_blocks.get("Rule", "")
