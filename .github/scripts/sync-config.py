@@ -26,6 +26,8 @@ HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/S
 HOTKIDS_CLASH_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/"
 
 CLASH_UNSUPPORTED_RULE_TYPES = {"PROTOCOL", "URL-REGEX", "USER-AGENT"}
+# 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
+_COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
 _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
@@ -598,6 +600,7 @@ def gen_rules_and_providers(
     providers: OrderedDict[str, dict] = OrderedDict()
     seen: dict[str, str] = {}  # provider_name → url
     rules_out: list[str] = []
+    pending_comments: list[str] = []  # 待输出注释行，与下一条规则绑定
 
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
@@ -616,85 +619,100 @@ def gen_rules_and_providers(
         if not s:
             continue
         if s.startswith("#"):
-            rules_out.append(f"  {s}")
+            # 已注释掉的 Clash 不支持类型（如 AND/OR/NOT/PROTOCOL）直接丢弃
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _COMMENT_DROP_TYPES:
+                pending_comments.append(f"  {s}")
             continue
 
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
+        emit: list[str] = []  # 本次迭代要写入 rules_out 的行
 
         if rule_type in CLASH_UNSUPPORTED_RULE_TYPES:
             print(f"  [SKIP rule] 不支持类型: {s}")
+            pending_comments.clear()
             continue
 
         if rule_type == "FINAL":
             policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
-            rules_out.append(f"  - MATCH,{policy}")
-            continue
+            emit.append(f"  - MATCH,{policy}")
 
-        if rule_type in PASSTHROUGH:
+        elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
+                pending_comments.clear()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
-            rules_out.append("  - " + ",".join(keep))
-            continue
+            emit.append("  - " + ",".join(keep))
 
-        if rule_type not in ("RULE-SET", "DOMAIN-SET"):
+        elif rule_type not in ("RULE-SET", "DOMAIN-SET"):
             keep = [p for p in parts if p not in _SURGE_FLAGS]
-            rules_out.append("  - " + ",".join(keep))
-            continue
+            emit.append("  - " + ",".join(keep))
 
-        # RULE-SET / DOMAIN-SET
-        if len(parts) < 3:
-            print(f"  [WARN] 解析失败（字段不足）: {s}")
-            continue
-
-        url_or_builtin, policy = parts[1], parts[2]
-
-        if not url_or_builtin.startswith("http"):
-            # 内置规则集
-            if url_or_builtin not in builtin_maps:
-                print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                continue
-            clash_url = builtin_maps[url_or_builtin]
-            pname = register(clash_url, _behavior_from_url(clash_url))
-            if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
-                print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
-                providers.pop(clash_url, None)
-                seen.pop(pname, None)
-                continue
-            rules_out.append(f"  - RULE-SET,{pname},{policy}")
-            continue
-
-        # 外部 URL
-        if skip := _should_skip([url_or_builtin, policy], skips):
-            print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
-            continue
-
-        clash_url = map_surge_url(url_or_builtin, url_maps)
-        if clash_url is None:
-            print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
-            continue
-
-        # cidr 文件名覆盖 > rule type > 文件名兜底
-        url_beh = _behavior_from_url(clash_url)
-        if url_beh == "ipcidr":
-            behavior = "ipcidr"
-        elif rule_type == "DOMAIN-SET":
-            behavior = "domain"
-        elif rule_type == "RULE-SET":
-            behavior = "classical"
         else:
-            behavior = url_beh
-        pname = register(clash_url, behavior)
+            # RULE-SET / DOMAIN-SET
+            if len(parts) < 3:
+                print(f"  [WARN] 解析失败（字段不足）: {s}")
+                pending_comments.clear()
+                continue
 
-        if skip := _should_skip([pname, clash_url], skips):
-            print(f"  [SKIP rule] skip={skip}: {clash_url}")
-            providers.pop(clash_url, None)
-            seen.pop(pname, None)
-            continue
+            url_or_builtin, policy = parts[1], parts[2]
 
-        rules_out.append(f"  - RULE-SET,{pname},{policy}")
+            if not url_or_builtin.startswith("http"):
+                # 内置规则集
+                if url_or_builtin not in builtin_maps:
+                    print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+                clash_url = builtin_maps[url_or_builtin]
+                pname = register(clash_url, _behavior_from_url(clash_url))
+                if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
+                    print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
+                    providers.pop(clash_url, None)
+                    seen.pop(pname, None)
+                    pending_comments.clear()
+                    continue
+                emit.append(f"  - RULE-SET,{pname},{policy}")
+
+            else:
+                # 外部 URL
+                if skip := _should_skip([url_or_builtin, policy], skips):
+                    print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+
+                clash_url = map_surge_url(url_or_builtin, url_maps)
+                if clash_url is None:
+                    print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+
+                # cidr 文件名覆盖 > rule type > 文件名兜底
+                url_beh = _behavior_from_url(clash_url)
+                if url_beh == "ipcidr":
+                    behavior = "ipcidr"
+                elif rule_type == "DOMAIN-SET":
+                    behavior = "domain"
+                elif rule_type == "RULE-SET":
+                    behavior = "classical"
+                else:
+                    behavior = url_beh
+                pname = register(clash_url, behavior)
+
+                if skip := _should_skip([pname, clash_url], skips):
+                    print(f"  [SKIP rule] skip={skip}: {clash_url}")
+                    providers.pop(clash_url, None)
+                    seen.pop(pname, None)
+                    pending_comments.clear()
+                    continue
+
+                emit.append(f"  - RULE-SET,{pname},{policy}")
+
+        # 规则会被输出：先刷缓冲注释，再写规则行
+        rules_out.extend(pending_comments)
+        pending_comments = []
+        rules_out.extend(emit)
 
     # rule-providers
     rp_lines = [
