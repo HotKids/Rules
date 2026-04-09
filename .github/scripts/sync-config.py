@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Surge Profile → Clash Sample.yaml 同步脚本
 
-从 sync-config.txt + Surge/Profile.conf + Clash/General.yaml 生成 Clash/Sample.yaml。
+从 sync-config.txt + Surge/Profile.conf + 平台头部文件生成 Clash/Sample.yaml。
 
 sync-config.txt 格式（平台块 + 子分区）：
   # Platform    平台块（Surge / Clash / Quantumult X / Loon）
-  >> path       文件路径（Surge 块为源文件；其他为输出目标）
+  >> path       文件路径（Surge 块 = 源文件；其他 = 输出目标）
   # > Skip      跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
-  # > Builtin   静态注入块（proxy-providers / proxy-groups / << include）
+  # > Builtin   静态注入块（<< 头部文件 / proxy-providers / proxy-groups / rules）
   # > Mapping   URL 映射（X => Y）与内置规则集映射
 """
 
@@ -20,8 +20,6 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-SURGE_PROFILE = REPO_ROOT / "Surge" / "Profile.conf"
-CLASH_SAMPLE = REPO_ROOT / "Clash" / "Sample.yaml"
 SYNC_CONFIG_TXT = REPO_ROOT / ".github" / "scripts" / "sync-config.txt"
 
 HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/"
@@ -85,10 +83,10 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     mode = "pp"  # pp | pg | rules
 
     for line in lines:
-        if re.match(r"^proxy-groups:", line):
+        if line.strip() == "proxy-groups:":
             mode = "pg"
             continue
-        if re.match(r"^rules:", line):
+        if line.strip() == "rules:":
             mode = "rules"
             continue
         if mode == "pp":
@@ -226,10 +224,13 @@ def parse_sync_txt() -> dict:
                 builtin_buf.append(raw)
             continue
 
-        # >> path：输出路径指令
+        # >> path：路径指令（Surge = 源文件；其他 = 输出目标）
         if stripped.startswith(">>"):
-            if current_platform and current_platform != "Surge":
-                result.setdefault(current_platform, _empty_plat())["output"] = stripped[2:].strip()
+            path = stripped[2:].strip()
+            if current_platform == "Surge":
+                result.setdefault("Surge", {})["source"] = path
+            elif current_platform:
+                result.setdefault(current_platform, _empty_plat())["output"] = path
             continue
 
         # << path：Builtin 分区内的文件引用（作为输出头部）
@@ -329,9 +330,9 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
 # 解析 Surge Profile.conf
 # ---------------------------------------------------------------------------
 
-def parse_surge_profile() -> tuple[list[str], list[str], list[str]]:
-    """读取 Surge/Profile.conf，返回 proxy_lines, group_lines, rule_lines。"""
-    text = SURGE_PROFILE.read_text(encoding="utf-8")
+def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[str]]:
+    """读取 Surge Profile.conf，返回 proxy_lines, group_lines, rule_lines。"""
+    text = profile_path.read_text(encoding="utf-8")
     sections: dict[str, list[str]] = {}
     current: str | None = None
 
@@ -717,25 +718,17 @@ def gen_rules_and_providers(
     if rules_inject and rules_inject.get("rules"):
         inject_lines = [f"  - {r}" for r in rules_inject["rules"]]
         anchor_r = (rules_inject.get("anchor") or "").lower()
+        inserted = False
         if anchor_r:
-            inserted = False
             new_out: list[str] = []
             for rule in rules_out:
                 new_out.append(rule)
                 if not inserted and anchor_r in rule.lower():
                     new_out.extend(inject_lines)
                     inserted = True
-            if not inserted:
-                # anchor not found: insert before MATCH
-                for i, rule in enumerate(new_out):
-                    if "MATCH," in rule:
-                        new_out[i:i] = inject_lines
-                        break
-                else:
-                    new_out.extend(inject_lines)
             rules_out = new_out
-        else:
-            # no anchor: insert before MATCH
+        if not inserted:
+            # 锚点未命中或无锚点：插到 MATCH 之前，没有 MATCH 则追加
             for i, rule in enumerate(rules_out):
                 if "MATCH," in rule:
                     rules_out[i:i] = inject_lines
@@ -769,12 +762,19 @@ def main() -> None:
     if rules_inject:
         print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
-    proxy_lines, group_lines, rule_lines = parse_surge_profile()
-    print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
-
+    surge_src = config.get("Surge", {}).get("source")
+    if not surge_src:
+        raise ValueError("Surge 块缺少 >> 源文件路径指令")
+    clash_out = clash.get("output")
+    if not clash_out:
+        raise ValueError("Clash 块缺少 >> 输出路径指令")
     inc = clash.get("include_file")
     if not inc:
         raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
+
+    proxy_lines, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
+
     header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
     proxies_yaml = gen_proxies(proxy_lines)
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
@@ -785,8 +785,9 @@ def main() -> None:
         parts.append(pp_block)
     parts += [groups_yaml, rp_rules_yaml]
 
-    changed = write_if_changed(CLASH_SAMPLE, "\n\n".join(parts) + "\n")
-    print(f"  {'✓ Clash/Sample.yaml 已更新' if changed else '✓ Clash/Sample.yaml 无变化'}")
+    clash_sample = REPO_ROOT / clash_out
+    changed = write_if_changed(clash_sample, "\n\n".join(parts) + "\n")
+    print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
 
 if __name__ == "__main__":
