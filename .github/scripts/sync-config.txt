@@ -11,6 +11,7 @@
 #                       rules: 首条注释 # desc // AnchorRulePattern
 #                       指定插入锚点（插入到匹配行之后）
 #   # > Mapping         URL 映射（X => Y）；右侧留空表示路径不变仅规范扩展名
+#   # > Rename          Provider 名称映射（stem => 自定义名称）
 # ════════════════════════════════════════════════════════════════
 
 # Surge
@@ -18,8 +19,6 @@
 # > Skip
 Gateway
 ConnersHua
-NSRingo
-ASN.China
 
 # Clash
 >> Clash/Sample.yaml
@@ -45,7 +44,7 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
-  # 去广告以及隐私追踪保护、反运营商劫持开关 // 🤖 AIGC
+  # 去广告以及隐私追踪保护、反运营商劫持开关 // 📧 Mail
   - name: "🚧 AdGuard"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
@@ -79,6 +78,17 @@ rules:
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
+
+# > Rename
+rule-providers:
+  AD => Advertising
+  HTTPDNS.Block => HTTPDNS
+  ASN.China => CNASN
+  proxy => Global
+  direct => China
+  cncidr => CNCIDR
+  lancidr => LAN
+
 
 # Quantumult X
 # >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换

@@ -26,6 +26,8 @@ HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/S
 HOTKIDS_CLASH_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/"
 
 CLASH_UNSUPPORTED_RULE_TYPES = {"PROTOCOL", "URL-REGEX", "USER-AGENT"}
+# 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
+_COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
 _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
@@ -147,6 +149,7 @@ def _empty_plat() -> dict:
         "skips": [],
         "url_maps": [],
         "builtin_rule_maps": {},
+        "rename_map": {},
         "proxy_providers": "",
         "pg_inject": None,
         "rules_inject": None,
@@ -260,6 +263,13 @@ def parse_sync_txt() -> dict:
                 plat["builtin_rule_maps"][left] = right
             else:
                 plat["url_maps"].append((left, right))
+        elif current_section == "Rename" and current_platform and current_platform != "Surge":
+            if "=>" not in stripped:
+                continue  # 跳过 "rule-providers:" 等标题行
+            left, _, right = stripped.partition("=>")
+            left, right = left.strip(), right.strip()
+            if left and right:
+                result.setdefault(current_platform, _empty_plat())["rename_map"][left] = right
 
     flush_builtin()
     return result
@@ -288,7 +298,6 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     # 1. HotKids 自动映射
     if HOTKIDS_SURGE_PREFIX in url:
         rest = url[url.index(HOTKIDS_SURGE_PREFIX) + len(HOTKIDS_SURGE_PREFIX):]
-        rest = rest.replace("%20", " ")
         if rest.endswith(".list"):
             rest = rest[:-5] + ".yaml"
         return HOTKIDS_CLASH_PREFIX + rest
@@ -360,20 +369,6 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         clean(sections.get("Proxy Group", [])),
         clean(sections.get("Rule", [])),
     )
-
-# ---------------------------------------------------------------------------
-# 生成 proxies
-# ---------------------------------------------------------------------------
-
-def gen_proxies(proxy_lines: list[str]) -> str:
-    """生成 proxies 段落。当前 Profile.conf 只有内置 DIRECT/REJECT，输出空列表。"""
-    real = [
-        l for l in proxy_lines
-        if "=" in l and l.partition("=")[2].strip().lower() not in ("direct", "reject")
-    ]
-    if not real:
-        return "# 本地节点配置（订阅为空）\nproxies: []"
-    return "proxies:\n" + "\n".join(f"  - {p}" for p in real)
 
 # ---------------------------------------------------------------------------
 # 解析 Proxy Group 行
@@ -459,30 +454,28 @@ def _fmt_group(
     if icon:
         lines.append(f"    icon: {icon}")
 
+    # 确定 use 来源（三选一，优先级依次降低）
+    use_name: str | None = None
     if params.get("include-all-proxies", "").lower() in ("true", "1"):
-        lines += ["    use:", "      - Server"]
-        return lines
+        use_name = "Server"
+    elif other := params.get("include-other-group", ""):
+        use_name = strip_emoji(other)
+    elif (pp := params.get("policy-path", "")) and provider_urls:
+        use_name = _match_provider(pp, provider_urls)
 
-    other = params.get("include-other-group", "")
-    if other:
-        lines += ["    use:", f"      - {strip_emoji(other)}"]
-        return lines
+    if use_name:
+        lines += ["    use:", f"      - {use_name}"]
 
-    # policy-path → 通过域名匹配找到对应 proxy-provider
-    policy_path = params.get("policy-path", "")
-    if policy_path and provider_urls:
-        if matched := _match_provider(policy_path, provider_urls):
-            lines += ["    use:", f"      - {matched}"]
-            return lines
-
-    regex = params.get("policy-regex-filter", "")
-    if regex:
+    # 节点筛选（可与 use 共存，smart 类型的核心功能）
+    if regex := params.get("policy-regex-filter", ""):
         lines.append(f"    filter: '{regex}'")
 
+    # hidden（smart 类型）
     if gtype == "smart" and params.get("hidden", "0") in ("1", "true"):
         lines.append("    hidden: true")
 
-    if proxies:
+    # 无 use 时用静态节点列表
+    if not use_name and proxies:
         lines.append("    proxies:")
         lines += [f"      - {p}" for p in proxies]
 
@@ -551,14 +544,18 @@ def _should_skip(candidates: list[str], skips: list[str]) -> str | None:
 # Provider 命名
 # ---------------------------------------------------------------------------
 
-def _derive_provider_name(clash_url: str, seen: dict[str, str]) -> str:
-    """从 Clash URL 文件名派生 provider 名（首字母大写），处理冲突。"""
+def _derive_provider_name(
+    clash_url: str, seen: dict[str, str], rename_map: dict[str, str] | None = None
+) -> str:
+    """从 Clash URL 文件名派生 provider 名，处理冲突。"""
     stem = clash_url.rstrip("/").rsplit("/", 1)[-1]
     for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
-    stem = stem[0].upper() + stem[1:] if stem else stem
+    stem = stem.replace("%20", " ")
+    if rename_map:
+        stem = rename_map.get(stem, stem)
     name, counter = stem, 2
     while name in seen and seen[name] != clash_url:
         name = f"{stem}_{counter}"
@@ -593,16 +590,18 @@ def gen_rules_and_providers(
     url_maps: list[tuple[str, str]],
     builtin_maps: dict[str, str],
     rules_inject: dict | None = None,
+    rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 rule-providers + rules 的完整 YAML 文本。"""
     providers: OrderedDict[str, dict] = OrderedDict()
     seen: dict[str, str] = {}  # provider_name → url
     rules_out: list[str] = []
+    pending_comments: list[str] = []  # 待输出注释行，与下一条规则绑定
 
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
             return providers[clash_url]["name"]
-        name = _derive_provider_name(clash_url, seen)
+        name = _derive_provider_name(clash_url, seen, rename_map)
         providers[clash_url] = {"name": name, "behavior": behavior}
         seen[name] = clash_url
         return name
@@ -616,85 +615,100 @@ def gen_rules_and_providers(
         if not s:
             continue
         if s.startswith("#"):
-            rules_out.append(f"  {s}")
+            # 已注释掉的 Clash 不支持类型（如 AND/OR/NOT/PROTOCOL）直接丢弃
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _COMMENT_DROP_TYPES:
+                pending_comments.append(f"  {s}")
             continue
 
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
+        emit: list[str] = []  # 本次迭代要写入 rules_out 的行
 
         if rule_type in CLASH_UNSUPPORTED_RULE_TYPES:
             print(f"  [SKIP rule] 不支持类型: {s}")
+            pending_comments.clear()
             continue
 
         if rule_type == "FINAL":
             policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
-            rules_out.append(f"  - MATCH,{policy}")
-            continue
+            emit.append(f"  - MATCH,{policy}")
 
-        if rule_type in PASSTHROUGH:
+        elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
+                pending_comments.clear()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
-            rules_out.append("  - " + ",".join(keep))
-            continue
+            emit.append("  - " + ",".join(keep))
 
-        if rule_type not in ("RULE-SET", "DOMAIN-SET"):
+        elif rule_type not in ("RULE-SET", "DOMAIN-SET"):
             keep = [p for p in parts if p not in _SURGE_FLAGS]
-            rules_out.append("  - " + ",".join(keep))
-            continue
+            emit.append("  - " + ",".join(keep))
 
-        # RULE-SET / DOMAIN-SET
-        if len(parts) < 3:
-            print(f"  [WARN] 解析失败（字段不足）: {s}")
-            continue
-
-        url_or_builtin, policy = parts[1], parts[2]
-
-        if not url_or_builtin.startswith("http"):
-            # 内置规则集
-            if url_or_builtin not in builtin_maps:
-                print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                continue
-            clash_url = builtin_maps[url_or_builtin]
-            pname = register(clash_url, _behavior_from_url(clash_url))
-            if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
-                print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
-                providers.pop(clash_url, None)
-                seen.pop(pname, None)
-                continue
-            rules_out.append(f"  - RULE-SET,{pname},{policy}")
-            continue
-
-        # 外部 URL
-        if skip := _should_skip([url_or_builtin, policy], skips):
-            print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
-            continue
-
-        clash_url = map_surge_url(url_or_builtin, url_maps)
-        if clash_url is None:
-            print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
-            continue
-
-        # cidr 文件名覆盖 > rule type > 文件名兜底
-        url_beh = _behavior_from_url(clash_url)
-        if url_beh == "ipcidr":
-            behavior = "ipcidr"
-        elif rule_type == "DOMAIN-SET":
-            behavior = "domain"
-        elif rule_type == "RULE-SET":
-            behavior = "classical"
         else:
-            behavior = url_beh
-        pname = register(clash_url, behavior)
+            # RULE-SET / DOMAIN-SET
+            if len(parts) < 3:
+                print(f"  [WARN] 解析失败（字段不足）: {s}")
+                pending_comments.clear()
+                continue
 
-        if skip := _should_skip([pname, clash_url], skips):
-            print(f"  [SKIP rule] skip={skip}: {clash_url}")
-            providers.pop(clash_url, None)
-            seen.pop(pname, None)
-            continue
+            url_or_builtin, policy = parts[1], parts[2]
 
-        rules_out.append(f"  - RULE-SET,{pname},{policy}")
+            if not url_or_builtin.startswith("http"):
+                # 内置规则集
+                if url_or_builtin not in builtin_maps:
+                    print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+                clash_url = builtin_maps[url_or_builtin]
+                pname = register(clash_url, _behavior_from_url(clash_url))
+                if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
+                    print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
+                    providers.pop(clash_url, None)
+                    seen.pop(pname, None)
+                    pending_comments.clear()
+                    continue
+                emit.append(f"  - RULE-SET,{pname},{policy}")
+
+            else:
+                # 外部 URL
+                if skip := _should_skip([url_or_builtin, policy], skips):
+                    print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+
+                clash_url = map_surge_url(url_or_builtin, url_maps)
+                if clash_url is None:
+                    print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
+                    pending_comments.clear()
+                    continue
+
+                # cidr 文件名覆盖 > rule type > 文件名兜底
+                url_beh = _behavior_from_url(clash_url)
+                if url_beh == "ipcidr":
+                    behavior = "ipcidr"
+                elif rule_type == "DOMAIN-SET":
+                    behavior = "domain"
+                elif rule_type == "RULE-SET":
+                    behavior = "classical"
+                else:
+                    behavior = url_beh
+                pname = register(clash_url, behavior)
+
+                if skip := _should_skip([pname, clash_url], skips):
+                    print(f"  [SKIP rule] skip={skip}: {clash_url}")
+                    providers.pop(clash_url, None)
+                    seen.pop(pname, None)
+                    pending_comments.clear()
+                    continue
+
+                emit.append(f"  - RULE-SET,{pname},{policy}")
+
+        # 规则会被输出：先刷缓冲注释，再写规则行
+        rules_out.extend(pending_comments)
+        pending_comments = []
+        rules_out.extend(emit)
 
     # rule-providers
     rp_lines = [
@@ -754,6 +768,7 @@ def main() -> None:
     pp_block = clash.get("proxy_providers", "")
     pg_inject = clash.get("pg_inject")
     rules_inject = clash.get("rules_inject")
+    rename_map = clash.get("rename_map", {})
     provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
 
     print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
@@ -772,15 +787,14 @@ def main() -> None:
     if not inc:
         raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
 
-    proxy_lines, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
-    print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
+    _, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
     header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
-    proxies_yaml = gen_proxies(proxy_lines)
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
-    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject)
+    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
 
-    parts = [header, proxies_yaml]
+    parts = [header]
     if pp_block:
         parts.append(pp_block)
     parts += [groups_yaml, rp_rules_yaml]
