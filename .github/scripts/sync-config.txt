@@ -22,6 +22,8 @@ Speedtest
 
 # Clash
 >> Clash/Sample.yaml
+# > Builtin
+<< .github/scripts/sync-config/clash.ini
 # > Skip
 ConnersHua
 iCloud
