@@ -18,6 +18,7 @@
 >> Surge/Profile.conf
 # > Skip
 iCloud
+Apple News
 Gateway
 ConnersHua
 
