@@ -614,9 +614,6 @@ rule-providers:
 
 # 规则
 rules:
-  # HTTP3/QUIC 协议开始流行，但是国内 ISP 和国际出口的 UDP 优先级都很低，表现很差，屏蔽掉以强制回退 HTTP2/HTTP1.1。
-  # REJECT-NO-DROP 表示不使用默认的自动丢包逻辑，这样 Surge 每次都会返回 ICMP Port Unreachable，应用会立刻回退而不是等超时。
-  # AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
   # 标准 SSH 端口
   - DEST-PORT,22,🔘 DIRECT
   # Unbreak 后续规则修正
@@ -626,8 +623,6 @@ rules:
   # Advertising 广告
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AD,🚧 AdGuard
-  # Privacy 隐私
-  # Hijacking 运营商劫持或恶意网站
   # 自定义多区域媒体应用
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
@@ -654,7 +649,6 @@ rules:
   # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
   # >> iCloud Private Relay
   - RULE-SET,ICloud.PrivateRelay,🔰 Proxy
-  # >> Apple News
   # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
   # >> Apple
@@ -673,14 +667,11 @@ rules:
   - RULE-SET,ASN.Telegram,📬 Telegram
   # > Mail
   - RULE-SET,Spark,📧 Mail
-  # > Speedtest
   # Global
   - RULE-SET,Proxy,🔰 Proxy
   # China
   - RULE-SET,Direct,🔘 DIRECT
   - RULE-SET,Cncidr,🔘 DIRECT
-  # GEOIP,CN,🔘 DIRECT,no-resolve
-  # Surge 的自动 REJECT 保护丢包，防止应用循环请求
   # Local Area Network
   - RULE-SET,Lancidr,🔘 DIRECT
   - GEOSITE,cn,🔘 DIRECT
