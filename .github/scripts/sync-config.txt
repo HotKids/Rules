@@ -22,8 +22,6 @@ Speedtest
 
 # Clash
 >> Clash/Sample.yaml
-# > Builtin
-<< .github/scripts/sync-config/clash.ini
 # > Skip
 ConnersHua
 iCloud
@@ -54,9 +52,9 @@ rule-providers:
 # > Builtin
 << .github/scripts/sync-config/loon.ini
 # > FilterMap
-🇭🇰 Hong Kong => Sub-HK,interval = 60,tolerance = 50
-🇨🇳 Taiwan => Sub-TW,interval = 60,tolerance = 50
-🇸🇬 Singapore => Sub-SG,interval = 60,tolerance = 50
-🇯🇵 Japan => Sub-JP,interval = 60,tolerance = 50
-🇺🇸 America => Sub-US,interval = 60,tolerance = 50
+🇭🇰 Hong Kong => Sub-HK
+🇨🇳 Taiwan => Sub-TW
+🇸🇬 Singapore => Sub-SG
+🇯🇵 Japan => Sub-JP
+🇺🇸 America => Sub-US
 🇺🇳 Server => Sub-UN
