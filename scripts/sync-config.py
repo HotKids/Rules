@@ -91,10 +91,16 @@ def strip_emoji(name: str) -> str:
 
 def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], dict[str, str]]:
     """解析 sync-config.txt，返回：
-    - url_maps:     [(surge_side, clash_side), ...]  # 按出现顺序
+    - url_maps:     [(surge_side, clash_side), ...]  按出现顺序
     - skips:        [keyword, ...]
-    - group_blocks: {name: yaml_text}               # 保留声明顺序
-    - builtin_maps: {name: clash_url}               # 内置规则集（非 http URL）
+    - group_blocks: {name: yaml_text}               保留声明顺序
+    - builtin_maps: {name: clash_url}               Surge 内置规则集
+
+    分区格式（# >> SectionName）：
+      URL Mapping  —  X => Y  URL / 前缀 / 仓库简写映射
+      Builtin      —  X => Y  Surge 内置规则集 → Clash URL
+      Skip         —  keyword  整链路跳过关键词（每行一个，无需 =>）
+      Group        —  group => <name> ... end  Clash 专属 group 块
     """
     url_maps: list[tuple[str, str]] = []
     skips: list[str] = []
@@ -105,17 +111,24 @@ def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], 
         return url_maps, skips, group_blocks, builtin_maps
 
     lines = SYNC_CONFIG_TXT.read_text(encoding="utf-8").splitlines()
+    section: str = ""
     i = 0
     while i < len(lines):
         raw = lines[i]
         stripped = raw.strip()
         i += 1
 
+        # 分区标题：# >> SectionName
+        m = re.match(r"^#\s*>>\s*(.+)$", stripped)
+        if m:
+            section = m.group(1).strip()
+            continue
+
         # 空行 / 注释
         if not stripped or stripped.startswith("#"):
             continue
 
-        # group => <name> ... end
+        # group => <name> ... end（任何分区均可，Group 分区为主）
         if stripped.startswith("group =>"):
             name = stripped[len("group =>"):].strip()
             block_lines: list[str] = []
@@ -128,27 +141,26 @@ def parse_sync_txt() -> tuple[list[tuple[str, str]], list[str], dict[str, str], 
             group_blocks[name] = "\n".join(block_lines)
             continue
 
-        # skip => <keyword>
-        if stripped.startswith("skip =>"):
-            kw = stripped[len("skip =>"):].strip()
-            if kw:
-                skips.append(kw)
-            continue
+        # 按分区处理
+        if section == "Skip":
+            # 每行直接是关键词
+            skips.append(stripped)
 
-        # X => Y
-        if "=>" in stripped:
-            left, _, right = stripped.partition("=>")
-            left = left.strip()
-            right = right.strip()
-            if not left or not right:
-                continue
-            # 判断是否是内置规则集（左边非 http URL 且不含 /）
-            # 内置：如 "LAN"；URL 映射：包含 http 或 /
-            if not left.startswith("http") and "/" not in left:
-                builtin_maps[left] = right
-            else:
-                url_maps.append((left, right))
-            continue
+        elif section == "Builtin":
+            # X => Y
+            if "=>" in stripped:
+                left, _, right = stripped.partition("=>")
+                left, right = left.strip(), right.strip()
+                if left and right:
+                    builtin_maps[left] = right
+
+        elif section in ("URL Mapping", ""):
+            # X => Y（兜底：无分区时也按 URL Mapping 处理，保持向后兼容）
+            if "=>" in stripped:
+                left, _, right = stripped.partition("=>")
+                left, right = left.strip(), right.strip()
+                if left and right:
+                    url_maps.append((left, right))
 
     return url_maps, skips, group_blocks, builtin_maps
 

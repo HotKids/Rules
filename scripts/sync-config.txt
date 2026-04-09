@@ -2,17 +2,28 @@
 # sync-config.txt — Surge Profile → Clash Sample.yaml 映射表
 # ════════════════════════════════════════════════════════════════
 #
-# 格式说明：
-#   左 => 右              URL / 前缀 / 仓库简写映射
-#   skip => 关键词        整链路跳过（URL / 策略名 / 组名 均匹配）
-#   <name> => <url>       Surge 内置规则集 → 真实 Clash URL
-#   group => <name>       Clash 专属 proxy-group 块（到 end 为止）
-#                         优先级最高，直接写入 proxy-groups
+# 分区格式（# >> SectionName）：
+#
+#   # >> URL Mapping
+#     X => Y    完整 URL 精确替换、路径前缀替换、或仓库简写
+#               仓库简写：owner/repo/branch（自动补全 raw.githubusercontent.com）
+#
+#   # >> Builtin
+#     X => Y    Surge 内置规则集名称 → 真实 Clash URL
+#
+#   # >> Skip
+#     keyword   整链路跳过：URL / 策略名 / 组名 含此关键词时全部跳过
+#
+#   # >> Group
+#     group => <name>
+#     ...       Clash 专属 proxy-group YAML 块，原样注入 proxy-groups
+#     end
+#               优先级高于 skip 和普通转换
 # ════════════════════════════════════════════════════════════════
 
-# ── URL / 前缀 / 仓库简写映射 ────────────────────────────────────
+# >> URL Mapping
 
-# Loyalsoldier: surge-rules → clash-rules（仓库简写，自动补全 raw URL 前缀）
+# Loyalsoldier: surge-rules → clash-rules（仓库简写，自动补全 raw URL）
 Loyalsoldier/surge-rules/release => Loyalsoldier/clash-rules/release
 
 # VirgilClyne: .list → .yaml（完整 URL 精确替换）
@@ -20,33 +31,35 @@ https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list => https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
 
-# ── Surge 内置规则集 → Clash provider URL ───────────────────────
+# >> Builtin
 
+# Surge 内置 LAN 规则集 → Clash IP CIDR provider
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 
-# ── Skip 关键词（整链路跳过） ────────────────────────────────────
+# >> Skip
 
 # ConnersHua/RuleGo: 无公开 Clash 镜像路径
-skip => ConnersHua
+ConnersHua
 
 # NSRingo: Apple News（iOS 限制，Clash 无对应策略）
-skip => NSRingo
+NSRingo
 
 # Speedtest: SukkaW domainset 无 Clash 兼容镜像
-skip => Speedtest
+Speedtest
 
-# Telegram: 用户主动跳过
-skip => Telegram
+# Telegram
+Telegram
 
-# Credit / PayPal: 用户主动跳过
-skip => Credit
-skip => PayPal
+# Credit / PayPal
+Credit
+PayPal
 
-# ── Clash 专属 proxy-group 块 ────────────────────────────────────
+# >> Group
+
 # 说明：
 #   - 若 group 名在 [Proxy Group] 中存在 → 替换 Surge 转换，原样注入
-#   - 若 group 名不存在于 Surge → 追加到 proxy-groups 末尾
-#   - 优先级高于 skip 和普通同步
+#   - 若 group 名不存在于 Surge      → 追加到 proxy-groups 末尾
+#   - 优先级高于 skip 和普通转换
 
 group => 🚧 AdGuard
   - name: "🚧 AdGuard"
