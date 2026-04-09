@@ -29,11 +29,6 @@ ConnersHua
 iCloud
 Apple News
 Apple TV
-Speedtest
-
-# > Builtin
-<< .github/scripts/sync-config/clash.ini
-
 # > Mapping
 LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 VirgilClyne/GetSomeFries =>
