@@ -629,7 +629,7 @@ rules:
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
-  # >> Apple
+  # >> Apple Services
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
