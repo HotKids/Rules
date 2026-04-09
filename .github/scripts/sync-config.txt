@@ -3,7 +3,7 @@
 # ════════════════════════════════════════════════════════════════
 # 格式：
 #   # Platform          平台块（Surge / Clash / Quantumult X / Loon）
-#   >> path             文件路径（Surge 块为源文件；其他为输出目标）
+#   >>  path            文件路径（Surge 块为源文件；其他为输出目标）
 #   # > Skip            跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
 #   # > Builtin         静态注入块（内容原样写入输出文件）
 #                       << path 引用文件作为输出头部
@@ -14,13 +14,13 @@
 
 # Surge
 >> Surge/Profile.conf
-
 # > Skip
 🏠 Gateway
 
 # Clash
 >> Clash/Sample.yaml
-
+# > Skip
+⏱️ Speedtest
 # > Builtin
 << Clash/General.yaml
 # 服务器订阅配置

@@ -355,12 +355,6 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
-  - name: "⏱️ Speedtest"
-    type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Speedtest.png
-    use:
-      - Server
-
   - name: "🇺🇳 Server"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
