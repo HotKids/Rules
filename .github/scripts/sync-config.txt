@@ -17,15 +17,17 @@
 # Surge
 >> Surge/Profile.conf
 # > Skip
-iCloud
-Apple News
 Gateway
 ConnersHua
 
 # Clash
 >> Clash/Sample.yaml
 # > Skip
+iCloud
+Apple News
+Apple TV
 Speedtest
+
 # > Builtin
 << Clash/General.yaml
 # 服务器订阅配置
