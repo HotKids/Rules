@@ -528,14 +528,14 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Apple TV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple TV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20TV.yaml
     interval: 86400
 
   Apple CN:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Apple CN.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple CN.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20CN.yaml
     interval: 86400
 
   Apple:

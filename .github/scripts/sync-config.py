@@ -290,7 +290,6 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     # 1. HotKids 自动映射
     if HOTKIDS_SURGE_PREFIX in url:
         rest = url[url.index(HOTKIDS_SURGE_PREFIX) + len(HOTKIDS_SURGE_PREFIX):]
-        rest = rest.replace("%20", " ")
         if rest.endswith(".list"):
             rest = rest[:-5] + ".yaml"
         return HOTKIDS_CLASH_PREFIX + rest
@@ -544,6 +543,7 @@ def _derive_provider_name(clash_url: str, seen: dict[str, str]) -> str:
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
+    stem = stem.replace("%20", " ")
     stem = stem[0].upper() + stem[1:] if stem else stem
     name, counter = stem, 2
     while name in seen and seen[name] != clash_url:
