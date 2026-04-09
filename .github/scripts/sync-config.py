@@ -364,20 +364,6 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
     )
 
 # ---------------------------------------------------------------------------
-# 生成 proxies
-# ---------------------------------------------------------------------------
-
-def gen_proxies(proxy_lines: list[str]) -> str:
-    """生成 proxies 段落。当前 Profile.conf 只有内置 DIRECT/REJECT，输出空列表。"""
-    real = [
-        l for l in proxy_lines
-        if "=" in l and l.partition("=")[2].strip().lower() not in ("direct", "reject")
-    ]
-    if not real:
-        return "# 本地节点配置（订阅为空）\nproxies: []"
-    return "proxies:\n" + "\n".join(f"  - {p}" for p in real)
-
-# ---------------------------------------------------------------------------
 # 解析 Proxy Group 行
 # ---------------------------------------------------------------------------
 
@@ -461,30 +447,28 @@ def _fmt_group(
     if icon:
         lines.append(f"    icon: {icon}")
 
+    # 确定 use 来源（三选一，优先级依次降低）
+    use_name: str | None = None
     if params.get("include-all-proxies", "").lower() in ("true", "1"):
-        lines += ["    use:", "      - Server"]
-        return lines
+        use_name = "Server"
+    elif other := params.get("include-other-group", ""):
+        use_name = strip_emoji(other)
+    elif (pp := params.get("policy-path", "")) and provider_urls:
+        use_name = _match_provider(pp, provider_urls)
 
-    other = params.get("include-other-group", "")
-    if other:
-        lines += ["    use:", f"      - {strip_emoji(other)}"]
-        return lines
+    if use_name:
+        lines += ["    use:", f"      - {use_name}"]
 
-    # policy-path → 通过域名匹配找到对应 proxy-provider
-    policy_path = params.get("policy-path", "")
-    if policy_path and provider_urls:
-        if matched := _match_provider(policy_path, provider_urls):
-            lines += ["    use:", f"      - {matched}"]
-            return lines
-
-    regex = params.get("policy-regex-filter", "")
-    if regex:
+    # 节点筛选（可与 use 共存，smart 类型的核心功能）
+    if regex := params.get("policy-regex-filter", ""):
         lines.append(f"    filter: '{regex}'")
 
+    # hidden（smart 类型）
     if gtype == "smart" and params.get("hidden", "0") in ("1", "true"):
         lines.append("    hidden: true")
 
-    if proxies:
+    # 无 use 时用静态节点列表
+    if not use_name and proxies:
         lines.append("    proxies:")
         lines += [f"      - {p}" for p in proxies]
 
@@ -790,15 +774,14 @@ def main() -> None:
     if not inc:
         raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
 
-    proxy_lines, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
-    print(f"  Surge: {len(proxy_lines)} proxies, {len(group_lines)} groups, {len(rule_lines)} rules")
+    _, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
     header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
-    proxies_yaml = gen_proxies(proxy_lines)
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject)
 
-    parts = [header, proxies_yaml]
+    parts = [header]
     if pp_block:
         parts.append(pp_block)
     parts += [groups_yaml, rp_rules_yaml]
