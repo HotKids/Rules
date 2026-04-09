@@ -161,7 +161,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     """从 Loon Builtin 内容解析头部和各段落块。
 
     返回：
-      loon_header     str        [Proxy Group] 之前的所有内容（[General] 等静态段落）
+      loon_header     str        [Proxy Group] 之前的所有内容（含 [Remote Filter] 等静态段落）
       pg_inject_loon  dict|None  {anchor, block, names, prepend_block}
       rule_block      str        [Rule] 内容（不含段落标题）
       plugin_block    str        [Plugin] 内容（不含段落标题）
@@ -169,7 +169,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
       host_block      str        [Host] 内容（不含段落标题）
       rewrite_block   str        [Rewrite] 内容（不含段落标题）
       script_block    str        [Script] 内容（不含段落标题）
-      filter_defs     dict       {filter_name: filterkey_regex}（来自 [Remote Filter]）
+      filter_defs     dict       {filter_name: filterkey_regex}（从 [Remote Filter] 扫描）
     """
     header_lines: list[str] = []
     pg_lines: list[str] = []
@@ -179,16 +179,12 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     host_lines: list[str] = []
     rewrite_lines: list[str] = []
     script_lines: list[str] = []
-    remote_filter_lines: list[str] = []
-    mode = "header"  # header | RemoteFilter | pg | Rule | RemoteRule | Host | Rewrite | Script | Plugin | Mitm
+    mode = "header"  # header | pg | Rule | RemoteRule | Host | Rewrite | Script | Plugin | Mitm
 
     for line in lines:
         s = line.strip()
         if s in ("proxy-groups:", "[Proxy Group]"):
             mode = "pg"
-            continue
-        if s == "[Remote Filter]":
-            mode = "RemoteFilter"
             continue
         if s == "[Rule]":
             mode = "Rule"
@@ -230,6 +226,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
         elif mode == "Mitm":
             mitm_lines.append(line)
         # RemoteRule: 忽略（由 Surge 生成）
+        # [Remote Filter] 留在 header_lines，同时用于解析 filter_defs
 
     loon_header = "\n".join(l.rstrip() for l in header_lines).strip()
 
@@ -283,12 +280,19 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     rewrite_block = "\n".join(l.rstrip() for l in rewrite_lines).strip()
     script_block = "\n".join(l.rstrip() for l in script_lines).strip()
 
-    # 解析 [Remote Filter] → {filter_name: filterkey_regex}（保序，catch-all 排末尾）
+    # 从 header_lines 扫描 [Remote Filter] 段落 → {filter_name: filterkey_regex}（catch-all 排末尾）
     filter_defs: dict[str, str] = {}
     catchalls: dict[str, str] = {}
-    for l in remote_filter_lines:
+    in_rf = False
+    for l in header_lines:
         s = l.strip()
-        if not s or s.startswith("#"):
+        if s == "[Remote Filter]":
+            in_rf = True
+            continue
+        if s.startswith("[") and s.endswith("]"):
+            in_rf = False
+            continue
+        if not in_rf or not s or s.startswith("#"):
             continue
         m = re.match(r'^(\S+)\s*=\s*NameRegex,\s*FilterKey\s*=\s*"(.+)"', s)
         if m:
