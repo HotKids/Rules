@@ -1150,6 +1150,7 @@ def _derive_tag(url: str) -> str:
 def gen_loon_remote_rules(
     rule_lines: list[str],
     skips: list[str],
+    rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 Loon [Remote Rule] 段落。
 
@@ -1206,6 +1207,8 @@ def gen_loon_remote_rules(
             continue
 
         tag = _derive_tag(url)
+        if rename_map:
+            tag = rename_map.get(tag, tag)
         _h_flush()
         out.append(f"{url}, policy={policy}, tag={tag}, enabled=true")
 
@@ -1318,8 +1321,9 @@ def main() -> None:
                 surge_final = f"# Final\nFINAL,{_policy}"
                 break
 
+        loon_rename_map = loon.get("rename_map", {})
         pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map)
-        remote_rules = gen_loon_remote_rules(rule_lines, loon_skips)
+        remote_rules = gen_loon_remote_rules(rule_lines, loon_skips, loon_rename_map)
 
         # [Rule]：静态规则 + FINAL（来自 Surge）
         rule_section_parts = []

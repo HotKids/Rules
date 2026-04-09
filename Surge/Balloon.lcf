@@ -133,10 +133,10 @@ FINAL,🔰 Proxy
 # Unbreak 后续规则修正
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list, policy=🔘 DIRECT, tag=Unbreak, enabled=true
 # HTTPDNS 请求/流量阻止
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=HTTPDNS.Block, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=HTTPDNS, enabled=true
 # Advertising 广告
-https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=reject, enabled=true
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list, policy=🚧 AdGuard, tag=AD, enabled=true
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Reject, enabled=true
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list, policy=🚧 AdGuard, tag=Adblock, enabled=true
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 # Privacy 隐私
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Tracking, enabled=true
@@ -162,7 +162,7 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Gemini.lis
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GenAI.list, policy=🤖 AIGC, tag=GenAI, enabled=true
 # > Apple
 # >> iCloud Private Relay
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/iCloud.PrivateRelay.list, policy=🔰 Proxy, tag=iCloud.PrivateRelay, enabled=true
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/iCloud.PrivateRelay.list, policy=🔰 Proxy, tag=iCloud Private Relay, enabled=true
 # >> Apple News
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Apple%20News.list, policy=🇺🇸 America, tag=Apple News, enabled=true
 # >> Apple TV
@@ -181,13 +181,13 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/PayPal.lis
 # > Telegram
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Telegram.list, policy=📬 Telegram, tag=Telegram, enabled=true
 # > Mail
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Spark, enabled=true
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Mail, enabled=true
 # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
-https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=proxy, enabled=true
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=Global, enabled=true
 # China Area Network
-https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=direct, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=ASN.China, enabled=true
-https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=cncidr, enabled=true
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=China, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=ASN China, enabled=true
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=CNCIDR, enabled=true
 
 [Host]
 

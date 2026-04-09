@@ -56,3 +56,15 @@ rule-providers:
 >> Surge/Balloon.lcf
 # > Builtin
 << .github/scripts/sync-config/loon.ini
+# > Rename
+[Remote Rule]
+  AD => Adblock
+  HTTPDNS.Block => HTTPDNS
+  Spark => Mail
+  ASN.China => ASN China
+  iCloud.PrivateRelay => iCloud Private Relay
+  proxy => Global
+  direct => China
+  reject => Reject
+  cncidr => CNCIDR
+  lancidr => LAN
