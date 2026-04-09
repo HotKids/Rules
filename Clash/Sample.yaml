@@ -627,8 +627,8 @@ rules:
   - RULE-SET,Google AI Studio,🔍 Google
   - RULE-SET,AIGC,🤖 AIGC
 
-  # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
-  # >> Apple
+  # > Apple 部分服务代理（App Store、TV、Music、News 等）
+  # >> Apple Services
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
