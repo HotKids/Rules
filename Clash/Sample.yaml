@@ -381,7 +381,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇭🇰|Hong Kong|香港'
-    hidden: true
 
   - name: "🇨🇳 Taiwan"
     type: select
@@ -389,7 +388,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇨🇳|🇹🇼|Taiwan|台湾'
-    hidden: true
 
   - name: "🇸🇬 Singapore"
     type: select
@@ -397,7 +395,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇸🇬|Singapore|新加坡'
-    hidden: true
 
   - name: "🇯🇵 Japan"
     type: select
@@ -405,7 +402,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇯🇵|Japan|日本'
-    hidden: true
 
   - name: "🇺🇸 America"
     type: select
@@ -413,7 +409,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇺🇸|United States|美国'
-    hidden: true
 
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider

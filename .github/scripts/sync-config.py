@@ -473,9 +473,6 @@ def _fmt_group(
     if regex := params.get("policy-regex-filter", ""):
         lines.append(f"    filter: '{regex}'")
 
-    # hidden（smart 类型）
-    if gtype == "smart" and params.get("hidden", "0") in ("1", "true"):
-        lines.append("    hidden: true")
 
     # 无 use 时用静态节点列表
     if not use_name and proxies:
