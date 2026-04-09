@@ -1175,8 +1175,6 @@ def main() -> None:
         rename_map = clash.get("rename_map", {})
         provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
         inc = clash.get("include_file")
-        if not inc:
-            raise ValueError("Clash Builtin 分区缺少 << include_file 指令")
 
         print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
         if pg_inject:
@@ -1184,11 +1182,12 @@ def main() -> None:
         if rules_inject:
             print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
-        header = (REPO_ROOT / inc).read_text(encoding="utf-8").rstrip()
         groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
         rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
 
-        parts = [header]
+        parts = []
+        if inc:
+            parts.append((REPO_ROOT / inc).read_text(encoding="utf-8").rstrip())
         if pp_block:
             parts.append(pp_block)
         parts += [groups_yaml, rp_rules_yaml]
