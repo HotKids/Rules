@@ -715,6 +715,12 @@ def gen_rules_and_providers(
         "# 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider",
         "",
         "rule-providers:",
+        "# name: # Provider 名称",
+        "#   type: http # http 或 file",
+        "#   behavior: classical # 或 ipcidr、domain",
+        "#   path: # 文件路径",
+        "#   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。",
+        "#   interval: # 自动更新间隔，仅在类型为 HTTP 时可用",
     ]
     for clash_url, info in providers.items():
         pname, behavior = info["name"], info["behavior"]
@@ -722,7 +728,7 @@ def gen_rules_and_providers(
             f"  {pname}:",
             "    type: http",
             f"    behavior: {behavior}",
-            f"    path: ./Provider/RuleSet/{pname}.yaml",
+            f"    path: ./Provider/RuleSet/{pname.replace(' ', '_')}.yaml",
             f"    url: {clash_url}",
             "    interval: 86400",
             "",
@@ -759,6 +765,7 @@ def gen_rules_and_providers(
             and not s.startswith("# >>")
             and formatted
             and formatted[-1] != ""
+            and not formatted[-1].strip().startswith("#")
         ):
             formatted.append("")
         formatted.append(line)

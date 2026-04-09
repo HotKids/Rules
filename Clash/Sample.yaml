@@ -419,6 +419,12 @@ proxy-groups:
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
 rule-providers:
+# name: # Provider 名称
+#   type: http # http 或 file
+#   behavior: classical # 或 ipcidr、domain
+#   path: # 文件路径
+#   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。
+#   interval: # 自动更新间隔，仅在类型为 HTTP 时可用
   Unbreak:
     type: http
     behavior: classical
@@ -513,21 +519,21 @@ rule-providers:
   Apple News:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple News.yaml
+    path: ./Provider/RuleSet/Apple_News.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20News.yaml
     interval: 86400
 
   Apple TV:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple TV.yaml
+    path: ./Provider/RuleSet/Apple_TV.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20TV.yaml
     interval: 86400
 
   Apple CN:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Apple CN.yaml
+    path: ./Provider/RuleSet/Apple_CN.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple%20CN.yaml
     interval: 86400
 
@@ -631,7 +637,6 @@ rules:
   - RULE-SET,Advertising,🚧 AdGuard
 
   # 自定义多区域媒体应用
-
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
 
@@ -650,7 +655,6 @@ rules:
   - RULE-SET,CNTV,📺 CNTV
 
   # Global 全球代理规则
-
   # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Gemini,🔍 Google
   - RULE-SET,GenAI,🤖 AIGC
