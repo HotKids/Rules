@@ -18,6 +18,7 @@
 >> Surge/Profile.conf
 # > Skip
 Gateway
+Speedtest
 
 # Clash
 >> Clash/Sample.yaml
@@ -54,8 +55,6 @@ rule-providers:
 
 # Loon
 >> Surge/Balloon.lcf
-# > Skip
-Speedtest
 # > Builtin
 << .github/scripts/sync-config/loon.ini
 # > FilterMap
