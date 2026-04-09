@@ -1,4 +1,4 @@
-name: Sync RULE-SET
+name: Sync Rules
 
 on:
   push:
