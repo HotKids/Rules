@@ -750,6 +750,20 @@ def gen_rules_and_providers(
             else:
                 rules_out.extend(inject_lines)
 
+    # 在 # / # > 注释行前插入空行（# >> 子项不加），改善可读性
+    formatted: list[str] = []
+    for line in rules_out:
+        s = line.strip()
+        if (
+            s.startswith("#")
+            and not s.startswith("# >>")
+            and formatted
+            and formatted[-1] != ""
+        ):
+            formatted.append("")
+        formatted.append(line)
+    rules_out = formatted
+
     rules_block = ["# 规则", "rules:"] + rules_out
     return "\n".join(rp_lines) + "\n" + "\n".join(rules_block) + "\n"
 
