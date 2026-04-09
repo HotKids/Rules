@@ -366,40 +366,30 @@ proxy-groups:
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     use:
       - Server
-    filter: '🇭🇰|Hong Kong|香港'
-    hidden: true
 
   - name: "🇨🇳 Taiwan"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
     use:
       - Server
-    filter: '🇨🇳|🇹🇼|Taiwan|台湾'
-    hidden: true
 
   - name: "🇸🇬 Singapore"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
     use:
       - Server
-    filter: '🇸🇬|Singapore|新加坡'
-    hidden: true
 
   - name: "🇯🇵 Japan"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     use:
       - Server
-    filter: '🇯🇵|Japan|日本'
-    hidden: true
 
   - name: "🇺🇸 America"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     use:
       - Server
-    filter: '🇺🇸|United States|美国'
-    hidden: true
 
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
