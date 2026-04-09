@@ -1,0 +1,39 @@
+name: Sync Config
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'Surge/Profile.conf'
+      - 'Clash/General.yaml'
+      - '.github/scripts/sync-config.py'
+      - '.github/scripts/sync-config.txt'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run sync script
+        run: python .github/scripts/sync-config.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Clash/Sample.yaml
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: sync Profile.conf → Clash/Sample.yaml [auto]"
+            git push
+          fi

@@ -1,0 +1,95 @@
+# ════════════════════════════════════════════════════════════════
+# sync-config.txt
+# ════════════════════════════════════════════════════════════════
+# 格式：
+#   # Platform          平台块（Surge / Clash / Quantumult X / Loon）
+#   >>  path            文件路径（Surge 块为源文件；其他为输出目标）
+#   # > Skip            跳过关键词（Surge 块 = 全局；平台块 = 仅该平台）
+#   # > Builtin         静态注入块（内容原样写入输出文件）
+#                       << path 引用文件作为输出头部
+#                       proxy-groups: 首条注释 # desc // AnchorGroupName
+#                       rules: 首条注释 # desc // AnchorRulePattern
+#                       指定插入锚点（插入到匹配行之后）
+#   # > Mapping         URL 映射（X => Y）；右侧留空表示路径不变仅规范扩展名
+# ════════════════════════════════════════════════════════════════
+
+# Surge
+>> Surge/Profile.conf
+# > Skip
+Gateway
+ConnersHua
+NSRingo
+ASN.China
+
+# Clash
+>> Clash/Sample.yaml
+# > Skip
+Speedtest
+# > Builtin
+<< Clash/General.yaml
+# 服务器订阅配置
+proxy-providers:
+  Server:
+    type: http
+    path: ./Provider/Proxy/Server.yaml
+    url: https://sub.hotkids.me
+    interval: 3600
+    proxy: DIRECT
+    header:
+      User-Agent:
+      - "Clash/v1.18.0"
+      - "mihomo/1.18.3"
+    health-check:
+      enable: true
+      url: https://cp.cloudflare.com/generate_204
+      interval: 600
+
+proxy-groups:
+  # 去广告以及隐私追踪保护、反运营商劫持开关 // 🤖 AIGC
+  - name: "🚧 AdGuard"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+    proxies:
+      - ⛔️ REJECT
+      - 🔘 DIRECT
+
+  # 阻止
+  - name: "⛔️ REJECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
+    proxies:
+      - REJECT
+
+  # 直连
+  - name: "🔘 DIRECT"
+    type: select
+    hidden: true
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+    proxies:
+      - DIRECT
+
+rules:
+  # GeoIP // RULE-SET,LAN
+  - GEOSITE,cn,🔘 DIRECT
+  - GEOIP,CN,🔘 DIRECT
+  - GEOSITE,geolocation-!cn,🔰 Proxy
+
+# > Mapping
+LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
+VirgilClyne/GetSomeFries =>
+Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
+
+# Quantumult X
+# >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
+
+# Loon
+# >> Surge/Balloon.lcf 输出目录，前面加 # 表示关闭 不转换
+# > Builtin
+[Plugin]
+https://raw.githubusercontent.com/chavyleung/scripts/master/box/rewrite/boxjs.rewrite.loon.plugin, tag=BoxJS, enabled=true
+https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/main/modules/script-hub.loon.plugin, tag=Script Hub, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/DNS.plugin, tag=DNS Enhanced, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/HTTPDNS.Block.plugin, tag=HTTPDNS Block, enabled=true
+https://raw.githubusercontent.com/mw418/Loon/main/plugin/jd_price.plugin, tag=京东比价, enabled=true
+https://raw.githubusercontent.com/fmz200/wool_scripts/main/Loon/plugin/blockAds.plugin, tag=去广告合集, enabled=false

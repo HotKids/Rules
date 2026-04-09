@@ -213,10 +213,10 @@ tun:
   # 排除路由，这些网段不经过 TUN
   # route-exclude-address:
   #   - 192.168.31.0/24
-  
+
 # 本地节点配置（订阅为空）
 proxies: []
-  
+
 # 服务器订阅配置
 proxy-providers:
   Server:
@@ -229,16 +229,16 @@ proxy-providers:
       User-Agent:
       - "Clash/v1.18.0"
       - "mihomo/1.18.3"
-    health-check: 
+    health-check:
       enable: true
       url: https://cp.cloudflare.com/generate_204
       interval: 600
 
 proxy-groups:
-  # 代理节点选项
+  # 节点选项
   - name: "🔰 Proxy"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Global.png
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
@@ -248,7 +248,7 @@ proxy-groups:
       - 🇺🇳 Server
       - 🔘 DIRECT
 
-  # 海外流媒体服务
+  # 海外流媒体服务策略组（适用于 Netflix, Disney+, HBO Max, Prime Video 等海外流媒体服务）
   - name: "🎬 Streaming"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
@@ -259,18 +259,26 @@ proxy-groups:
       - 🇯🇵 Japan
       - 🇺🇸 America
       - 🇺🇳 Server
+      - 🔰 Proxy
 
-  # 大陆流媒体服务（面向港台版本）
+  # 国内流媒体服务策略组（适用于 iQIYI Intl, WeTV, Bilibili 等大陆在港台东南亚地区提供服务的流媒体服务）
   - name: "📺 CNTV"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
     proxies:
       - 🔘 DIRECT
-      - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
-      - 🇸🇬 Singapore
-    
-  # 特殊代理服务
+      - 🇭🇰 Hong Kong
+
+  # Apple 服务策略组
+  - name: "🍏 Apple TV"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
+    proxies:
+      - 🔘 DIRECT
+      - 🔰 Proxy
+      - 🇺🇸 America
+
   - name: "🍎 Apple"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
@@ -278,7 +286,17 @@ proxy-groups:
       - 🔘 DIRECT
       - 🔰 Proxy
       - 🇺🇸 America
-      
+      - 🇯🇵 Japan
+
+  # Google 服务策略组
+  - name: "🔍 Google"
+    type: select
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
+    proxies:
+      - 🔰 Proxy
+      - 🇺🇸 America
+
+  # AIGC 服务策略组
   - name: "🤖 AIGC"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
@@ -287,7 +305,7 @@ proxy-groups:
       - 🇯🇵 Japan
       - 🇺🇸 America
       - 🔰 Proxy
-      
+
   # 去广告以及隐私追踪保护、反运营商劫持开关
   - name: "🚧 AdGuard"
     type: select
@@ -295,7 +313,7 @@ proxy-groups:
     proxies:
       - ⛔️ REJECT
       - 🔘 DIRECT
-      
+
   # 阻止
   - name: "⛔️ REJECT"
     type: select
@@ -312,63 +330,85 @@ proxy-groups:
     proxies:
       - DIRECT
 
-  # UN
+  # Crypto 服务策略组
+  - name: "🪙 Crypto"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
+    proxies:
+      - 🇺🇸 America
+      - 🔰 Proxy
+      - 🔘 DIRECT
+
+  # Finance 服务策略组
+  - name: "💳 Credit"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+    proxies:
+      - 🔘 DIRECT
+      - 🇺🇸 America
+      - 🔰 Proxy
+
+  # Telegram 服务策略组
+  - name: "📬 Telegram"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
+    proxies:
+      - 🔰 Proxy
+      - 🇸🇬 Singapore
+      - 🔘 DIRECT
+
+  # Mail 邮件服务策略组
+  - name: "📧 Mail"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
+    proxies:
+      - 🔰 Proxy
+      - 🔘 DIRECT
+
+  # ⏱️ Speedtest 服务策略组
+  # 内网穿透策略组
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  # Nodes
   - name: "🇺🇳 Server"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
     use:
       - Server
 
-  # HK
   - name: "🇭🇰 Hong Kong"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/HK.png
-    filter: '香港|HK|Hong Kong|🇭🇰'
-    use:
-      - Server
-      
-  # TW
-  - name: "🇨🇳 Taiwan"
-    type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/TW.png
-    filter: '台湾|TW|Taiwan|🇹🇼|🇨🇳'
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
     use:
       - Server
 
-  # SG
+  - name: "🇨🇳 Taiwan"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+    use:
+      - Server
+
   - name: "🇸🇬 Singapore"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/SG.png
-    filter: '新加坡|狮城|SG|Singapore|🇸🇬'
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
     use:
       - Server
-      
-  # JP
+
   - name: "🇯🇵 Japan"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/JP.png
-    filter: '日本|JP|Japan|🇯🇵'
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
     use:
       - Server
-    
-  # US
+
   - name: "🇺🇸 America"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Flags/US.png
-    filter: '美国|US|USA|America|United States|🇺🇸'
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
     use:
       - Server
+
 
 # 关于 Rule Provider 请查阅：https://lancellc.gitbook.io/clash/clash-config-file/rule-provider
 
 rule-providers:
-# name: # Provider 名称
-#   type: http # http 或 file
-#   behavior: classical # 或 ipcidr、domain
-#   path: # 文件路径
-#   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。
-#   interval: # 自动更新间隔，仅在类型为 HTTP 时可用
-
   Unbreak:
     type: http
     behavior: classical
@@ -376,160 +416,276 @@ rule-providers:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
-  HTTPDNS:
+  HTTPDNS.Block:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Guard/HTTPDNS.yaml
+    path: ./Provider/RuleSet/HTTPDNS.Block.yaml
     url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
-    
-  Advertising:
+
+  Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Guard/Reject.yaml
+    path: ./Provider/RuleSet/Reject.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
     interval: 86400
-      
+
+  AD:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/AD.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
+    interval: 86400
+
   Streaming+:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming+.yaml
+    path: ./Provider/RuleSet/Streaming+.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming+.yaml
     interval: 86400
 
-  Streaming TW:
+  Streaming_TW:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming_TW.yaml
+    path: ./Provider/RuleSet/Streaming_TW.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_TW.yaml
     interval: 86400
 
-  Streaming JP:
+  Streaming_JP:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming_JP.yaml
+    path: ./Provider/RuleSet/Streaming_JP.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_JP.yaml
     interval: 86400
 
-  Streaming US:
+  Streaming_US:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming_US.yaml
+    path: ./Provider/RuleSet/Streaming_US.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_US.yaml
     interval: 86400
-    
+
   Streaming:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/Streaming.yaml
+    path: ./Provider/RuleSet/Streaming.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
-  CNTV:
+  Bilibili:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Streaming/CNTV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
+    path: ./Provider/RuleSet/Bilibili.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Bilibili.yaml
     interval: 86400
 
-  AIGC:
+  IQ:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Extra/GenAI.yaml
+    path: ./Provider/RuleSet/IQ.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/IQ.yaml
+    interval: 86400
+
+  WeTV:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/WeTV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/WeTV.yaml
+    interval: 86400
+
+  Gemini:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Gemini.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Gemini.yaml
+    interval: 86400
+
+  GenAI:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/GenAI.yaml
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
     interval: 86400
-    
-  Apple CDN:
+
+  ICloud.PrivateRelay:
     type: http
-    behavior: domain
-    path: ./Provider/RuleSet/Extra/AppleCDN.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/apple.txt
+    behavior: classical
+    path: ./Provider/RuleSet/ICloud.PrivateRelay.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/iCloud.PrivateRelay.yaml
+    interval: 86400
+
+  Apple TV:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Apple TV.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple TV.yaml
+    interval: 86400
+
+  Apple CN:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Apple CN.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple CN.yaml
     interval: 86400
 
   Apple:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Extra/Apple.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
+    path: ./Provider/RuleSet/Apple.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple/Apple.yaml
     interval: 86400
-    
-  Global:
+
+  Crypto:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Crypto.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Crypto.yaml
+    interval: 86400
+
+  Google:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Google.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Google.yaml
+    interval: 86400
+
+  Credit:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Credit.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Credit.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/PayPal.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/PayPal.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Telegram.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
+    interval: 86400
+
+  ASN.Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/ASN.Telegram.yaml
+    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.Telegram.yaml
+    interval: 86400
+
+  Spark:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Spark.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Spark.yaml
+    interval: 86400
+
+  Proxy:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Global.yaml
+    path: ./Provider/RuleSet/Proxy.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
     interval: 86400
 
-  China:
+  Direct:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/China.yaml
+    path: ./Provider/RuleSet/Direct.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
     interval: 86400
 
-  CNASN:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Extra/CNASN.yaml
-    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
-    interval: 86400
-    
-  CNCIDR:
+  Cncidr:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/Extra/CNCIDR.yaml
+    path: ./Provider/RuleSet/Cncidr.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
-    
-  LAN:
+
+  Lancidr:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/Extra/LANCIDR.yaml
+    path: ./Provider/RuleSet/Lancidr.yaml
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
     interval: 86400
 
 # 规则
 rules:
-  # Unbreak
+  # HTTP3/QUIC 协议开始流行，但是国内 ISP 和国际出口的 UDP 优先级都很低，表现很差，屏蔽掉以强制回退 HTTP2/HTTP1.1。
+  # REJECT-NO-DROP 表示不使用默认的自动丢包逻辑，这样 Surge 每次都会返回 ICMP Port Unreachable，应用会立刻回退而不是等超时。
+  # AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
+  # 标准 SSH 端口
+  - DEST-PORT,22,🔘 DIRECT
+  # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
-  
-  # AdBlock
-  - RULE-SET,HTTPDNS,🚧 AdGuard
-  - RULE-SET,Advertising,🚧 AdGuard
-
-  # Global Area Network
-
-  # Streaming
+  # HTTPDNS 请求/流量阻止
+  - RULE-SET,HTTPDNS.Block,🚧 AdGuard
+  # Advertising 广告
+  - RULE-SET,Reject,🚧 AdGuard
+  - RULE-SET,AD,🚧 AdGuard
+  # Privacy 隐私
+  # Hijacking 运营商劫持或恶意网站
+  # 自定义多区域媒体应用
+  # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
-  - RULE-SET,Streaming TW,🇨🇳 Taiwan
-  - RULE-SET,Streaming JP,🇯🇵 Japan
-  - RULE-SET,Streaming US,🇺🇸 America
+  # > Streaming by Region
+  # >> Streaming TW
+  - RULE-SET,Streaming_TW,🇨🇳 Taiwan
+  # >> Streaming JP
+  - RULE-SET,Streaming_JP,🇯🇵 Japan
+  # >> Streaming US
+  - RULE-SET,Streaming_US,🇺🇸 America
+  # > Streaming
   - RULE-SET,Streaming,🎬 Streaming
-  
-  # CNTV
-  - RULE-SET,CNTV,📺 CNTV
-
-  # AIGC
-  - RULE-SET,AIGC,🤖 AIGC
-  
-  # Apple
-  - RULE-SET,Apple CDN,🔘 DIRECT
+  # 国内流媒体服务代理规则（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
+  # > Biliili｜CN TW
+  - RULE-SET,Bilibili,📺 CNTV
+  # > iQIYI Intl｜TW HK SEA
+  - RULE-SET,IQ,🇨🇳 Taiwan
+  # > WeTV｜TW SEA
+  - RULE-SET,WeTV,📺 CNTV
+  # Global 全球代理规则
+  # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
+  - RULE-SET,Gemini,🔍 Google
+  - RULE-SET,GenAI,🤖 AIGC
+  # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
+  # >> iCloud Private Relay
+  - RULE-SET,ICloud.PrivateRelay,🔰 Proxy
+  # >> Apple News
+  # >> Apple TV
+  - RULE-SET,Apple TV,🍏 Apple TV
+  # >> Apple
+  - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
-
-  # (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
-  - RULE-SET,Global,🔰 Proxy
-
-  # China Area Network
-  - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,CNASN,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
-  
+  # > Crypto
+  - RULE-SET,Crypto,🪙 Crypto
+  # > Google
+  - RULE-SET,Google,🔍 Google
+  # > Finance
+  - RULE-SET,Credit,💳 Credit
+  # > PayPal
+  - RULE-SET,PayPal,💳 Credit
+  # > Telegram
+  - RULE-SET,Telegram,📬 Telegram
+  - RULE-SET,ASN.Telegram,📬 Telegram
+  # > Mail
+  - RULE-SET,Spark,📧 Mail
+  # > Speedtest
+  # Global
+  - RULE-SET,Proxy,🔰 Proxy
+  # China
+  - RULE-SET,Direct,🔘 DIRECT
+  - RULE-SET,Cncidr,🔘 DIRECT
+  # GEOIP,CN,🔘 DIRECT,no-resolve
+  # Surge 的自动 REJECT 保护丢包，防止应用循环请求
   # Local Area Network
-  - RULE-SET,LAN,🔘 DIRECT
-  
-  # GeoIP
+  - RULE-SET,Lancidr,🔘 DIRECT
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
-  
+  # Final
   - MATCH,🔰 Proxy
+
