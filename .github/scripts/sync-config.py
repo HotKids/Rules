@@ -20,11 +20,11 @@ from collections import OrderedDict
 from pathlib import Path
 
 # ─── 路径配置 ─────────────────────────────────────────────────────────────────
-REPO_ROOT       = Path(__file__).resolve().parent.parent
+REPO_ROOT       = Path(__file__).resolve().parent.parent.parent
 SURGE_PROFILE   = REPO_ROOT / "Surge" / "Profile.conf"
 CLASH_GENERAL   = REPO_ROOT / "Clash" / "General.yaml"
 CLASH_SAMPLE    = REPO_ROOT / "Clash" / "Sample.yaml"
-SYNC_CONFIG_TXT = REPO_ROOT / "scripts" / "sync-config.txt"
+SYNC_CONFIG_TXT = REPO_ROOT / ".github" / "scripts" / "sync-config.txt"
 
 # ─── HotKids 自动路径映射 ────────────────────────────────────────────────────
 HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/"
