@@ -235,6 +235,7 @@ proxy-providers:
       interval: 600
 
 proxy-groups:
+  # 节点选项
   - name: "🔰 Proxy"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
@@ -247,6 +248,7 @@ proxy-groups:
       - 🇺🇳 Server
       - 🔘 DIRECT
 
+  # 海外流媒体服务策略组（适用于 Netflix, Disney+, HBO Max, Prime Video 等海外流媒体服务）
   - name: "🎬 Streaming"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
@@ -259,6 +261,7 @@ proxy-groups:
       - 🇺🇳 Server
       - 🔰 Proxy
 
+  # 国内流媒体服务策略组（适用于 iQIYI Intl, WeTV, Bilibili 等大陆在港台东南亚地区提供服务的流媒体服务）
   - name: "📺 CNTV"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
@@ -267,6 +270,7 @@ proxy-groups:
       - 🇨🇳 Taiwan
       - 🇭🇰 Hong Kong
 
+  # Apple 服务策略组
   - name: "🍏 Apple TV"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
@@ -284,6 +288,7 @@ proxy-groups:
       - 🇺🇸 America
       - 🇯🇵 Japan
 
+  # Google 服务策略组
   - name: "🔍 Google"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
@@ -291,6 +296,7 @@ proxy-groups:
       - 🔰 Proxy
       - 🇺🇸 America
 
+  # AIGC 服务策略组
   - name: "🤖 AIGC"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
@@ -324,6 +330,7 @@ proxy-groups:
     proxies:
       - DIRECT
 
+  # Crypto 服务策略组
   - name: "🪙 Crypto"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
@@ -332,6 +339,7 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
+  # Finance 服务策略组
   - name: "💳 Credit"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
@@ -340,6 +348,7 @@ proxy-groups:
       - 🇺🇸 America
       - 🔰 Proxy
 
+  # Telegram 服务策略组
   - name: "📬 Telegram"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
@@ -348,6 +357,7 @@ proxy-groups:
       - 🇸🇬 Singapore
       - 🔘 DIRECT
 
+  # Mail 邮件服务策略组
   - name: "📧 Mail"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
@@ -355,6 +365,10 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
+  # ⏱️ Speedtest 服务策略组
+  # 内网穿透策略组
+  # 去广告以及隐私追踪保护、反运营商劫持开关
+  # Nodes
   - name: "🇺🇳 Server"
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
@@ -600,38 +614,78 @@ rule-providers:
 
 # 规则
 rules:
+  # HTTP3/QUIC 协议开始流行，但是国内 ISP 和国际出口的 UDP 优先级都很低，表现很差，屏蔽掉以强制回退 HTTP2/HTTP1.1。
+  # REJECT-NO-DROP 表示不使用默认的自动丢包逻辑，这样 Surge 每次都会返回 ICMP Port Unreachable，应用会立刻回退而不是等超时。
+  # AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
+  # 标准 SSH 端口
   - DEST-PORT,22,🔘 DIRECT
+  # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
+  # HTTPDNS 请求/流量阻止
   - RULE-SET,HTTPDNS.Block,🚧 AdGuard
+  # Advertising 广告
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AD,🚧 AdGuard
+  # Privacy 隐私
+  # Hijacking 运营商劫持或恶意网站
+  # 自定义多区域媒体应用
+  # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
+  # > Streaming by Region
+  # >> Streaming TW
   - RULE-SET,Streaming_TW,🇨🇳 Taiwan
+  # >> Streaming JP
   - RULE-SET,Streaming_JP,🇯🇵 Japan
+  # >> Streaming US
   - RULE-SET,Streaming_US,🇺🇸 America
+  # > Streaming
   - RULE-SET,Streaming,🎬 Streaming
+  # 国内流媒体服务代理规则（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
+  # > Biliili｜CN TW
   - RULE-SET,Bilibili,📺 CNTV
+  # > iQIYI Intl｜TW HK SEA
   - RULE-SET,IQ,🇨🇳 Taiwan
+  # > WeTV｜TW SEA
   - RULE-SET,WeTV,📺 CNTV
+  # Global 全球代理规则
+  # > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
   - RULE-SET,Gemini,🔍 Google
   - RULE-SET,GenAI,🤖 AIGC
+  # > Apple 部分服务代理（App Store、TV、Movies、Music、News）
+  # >> iCloud Private Relay
   - RULE-SET,ICloud.PrivateRelay,🔰 Proxy
+  # >> Apple News
+  # >> Apple TV
   - RULE-SET,Apple TV,🍏 Apple TV
+  # >> Apple
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
+  # > Crypto
   - RULE-SET,Crypto,🪙 Crypto
+  # > Google
   - RULE-SET,Google,🔍 Google
+  # > Finance
   - RULE-SET,Credit,💳 Credit
+  # > PayPal
   - RULE-SET,PayPal,💳 Credit
+  # > Telegram
   - RULE-SET,Telegram,📬 Telegram
   - RULE-SET,ASN.Telegram,📬 Telegram
+  # > Mail
   - RULE-SET,Spark,📧 Mail
+  # > Speedtest
+  # Global
   - RULE-SET,Proxy,🔰 Proxy
+  # China
   - RULE-SET,Direct,🔘 DIRECT
   - RULE-SET,Cncidr,🔘 DIRECT
+  # GEOIP,CN,🔘 DIRECT,no-resolve
+  # Surge 的自动 REJECT 保护丢包，防止应用循环请求
+  # Local Area Network
   - RULE-SET,Lancidr,🔘 DIRECT
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
+  # Final
   - MATCH,🔰 Proxy
 

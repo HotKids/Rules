@@ -18,6 +18,7 @@
 # > Skip
 Gateway
 ConnersHua
+NSRingo
 ASN.China
 
 # Clash

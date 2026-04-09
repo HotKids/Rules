@@ -345,10 +345,15 @@ def parse_surge_profile() -> tuple[list[str], list[str], list[str]]:
             sections[current].append(line)
 
     def clean(lines: list[str]) -> list[str]:
-        return [
-            l.strip() for l in lines
-            if l.strip() and not l.strip().startswith(("//", "#"))
-        ]
+        out = []
+        for l in lines:
+            s = l.strip()
+            if not s:
+                continue
+            if s.startswith("//"):
+                continue  # Surge // 注释行（已注释掉的配置）丢弃
+            out.append(s)  # 保留 # 注释行和内容行
+        return out
 
     return (
         clean(sections.get("Proxy", [])),
@@ -502,6 +507,9 @@ def gen_proxy_groups(
     injected = False
 
     for line in group_lines:
+        if line.startswith("#"):
+            out.append(f"  {line}")
+            continue
         g = parse_group_line(line)
         if g is None:
             continue
@@ -605,7 +613,10 @@ def gen_rules_and_providers(
 
     for line in rule_lines:
         s = line.strip()
-        if not s or s.startswith("#"):
+        if not s:
+            continue
+        if s.startswith("#"):
+            rules_out.append(f"  {s}")
             continue
 
         parts = [p.strip() for p in s.split(",")]
