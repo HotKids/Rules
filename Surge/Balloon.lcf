@@ -63,29 +63,79 @@ Sub-JP = NameRegex, FilterKey = "^(?=.*(?i)(🇯🇵|日本|\b(JP|Japan)\d*\b))(
 Sub-US = NameRegex, FilterKey = "^(?=.*(?i)(🇺🇸|美国|\b(US|United States)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 
+[General]
+# IP 查询模式
+ip-mode = v4-only
+# TUN IPv6 配置
+ipv6-vif = off
+# DNS 服务器
+dns-server = system
+# Wi-Fi 共享开启时 HTTP 服务的端口
+wifi-access-http-port = 6154
+# Wi-Fi 共享开启时 SOCKS5 服务的端口
+wifi-access-socks5-port = 6153
+# 是否允许 Wi-Fi 下共享网络
+allow-wifi-access = false
+# 节点测速时的超时秒数
+test-timeout = 3
+# 网络接口
+interface-mode = auto
+# 域名拦截行为
+domain-reject-mode = DNS
+# DNS 拦截方式
+dns-reject-mode = LoopbackIP
+# SNI 辅助规则匹配
+sni-sniffing = true
+# 直连时丢弃STUN
+disable-stun = true
+# UDP 回落策略
+udp-fallback-mode = REJECT
+# 策略切换时关闭连接
+disconnect-on-policy-change = false
+# 直连延迟测试 URL
+internet-test-url = http://wifi.vivo.com.cn/generate_204
+# 代理延迟测试 URL
+proxy-test-url = http://www.gstatic.com/generate_204
+# 资源解析器
+resource-parser = https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
+# GeoIP 数据库
+geoip-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-Country.mmdb
+# ASN 数据库
+ipasn-url = https://raw.githubusercontent.com/Loyalsoldier/geoip/release/GeoLite2-ASN.mmdb
+# 绕过代理
+skip-proxy = 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,localhost,*.local,e.crashlynatics.com
+# 绕过路由
+bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
+
+[Proxy]
+🔘 DIRECT = DIRECT
+🚫 REJECT = REJECT
+
 [Proxy Group]
-# 节点选项
+# Proxy
 🔰 Proxy = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
-# 海外流媒体服务策略组（适用于 Netflix, Disney+, HBO Max, Prime Video 等海外流媒体服务）
+# Streaming Global
 🎬 Streaming = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
-# 国内流媒体服务策略组（适用于 iQIYI Intl, WeTV, Bilibili 等大陆在港台东南亚地区提供服务的流媒体服务）
+# CNTV APAC
 📺 CNTV = select,🔘 DIRECT,🇨🇳 Taiwan,🇭🇰 Hong Kong,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
-# Apple 服务策略组
+# Apple
+# > Apple TV
 🍏 Apple TV = select,🔘 DIRECT,🔰 Proxy,🇺🇸 America,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
+# > Apple Services
 🍎 Apple = select,🔘 DIRECT,🔰 Proxy,🇺🇸 America,🇯🇵 Japan,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
-# Google 服务策略组
-🔍 Google = select,🔰 Proxy,🇺🇸 America,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
-# AIGC 服务策略组
-🤖 AIGC = select,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
-# Crypto 服务策略组
+# Google
+🔍 Google = select,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
+# AIGC
+🤖 AIGC = select,🇺🇸 America,🇸🇬 Singapore,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
+# Crypto
 🪙 Crypto = select,🇺🇸 America,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
-# Finance 服务策略组
-💳 Credit = select,🔘 DIRECT,🇺🇸 America,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
-# Telegram 服务策略组
+# Finance
+💳 Credit = select,🇺🇸 America,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+# Telegram
 📬 Telegram = select,🔰 Proxy,🇸🇬 Singapore,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
-# Mail 邮件服务策略组
+# Mail
 📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
-# 去广告以及隐私追踪保护、反运营商劫持开关
+# Adblock
 🚧 AdGuard = select,🚫 REJECT,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
 # Nodes
 🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
@@ -96,9 +146,43 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 🇺🇸 America = url-test,Sub-US,interval = 60,tolerance = 50,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
 
 [Rule]
-# SSH 标准端口
-DEST-PORT,22,DIRECT
-FINAL,🔰 Proxy
+# Local Rule
+# Type:DOMAIN-SUFFIX,DOMAIN,DOMAIN-KEYWORD,USER-AGENT,URL-REGEX,IP-CIDR
+# Strategy:DIRECT,Proxy,REJECT
+# Options:no-resolve(no-resolve(only for cidr))
+# 请勿在此添加GEOIP,cn,DIRECT
+# 请勿修改CN REGION规则的排序甚至删除
+# 通过 ChatGPT 收集整理
+# 私有内网地址段（Class A）
+IP-CIDR,10.0.0.0/8,DIRECT
+# 私有内网地址段（Class B）
+IP-CIDR,172.16.0.0/12,DIRECT
+# 私有内网地址段（Class C）
+IP-CIDR,192.168.0.0/16,DIRECT
+# 本地回环地址（localhost）
+IP-CIDR,127.0.0.0/8,DIRECT
+# 链路本地地址（APIPA）
+IP-CIDR,169.254.0.0/16,DIRECT
+# 多播地址段
+IP-CIDR,224.0.0.0/4,DIRECT
+# 保留地址段
+IP-CIDR,240.0.0.0/4,DIRECT
+# 特殊地址：本网络段
+IP-CIDR,0.0.0.0/8,DIRECT
+# 运营商大内网（Carrier-Grade NAT）
+IP-CIDR,100.64.0.0/10,DIRECT
+# IPv6 回环地址
+IP-CIDR6,::1/128,DIRECT
+# IPv6 本地唯一地址（类似内网）
+IP-CIDR6,fc00::/7,DIRECT
+# IPv6 链路本地地址（Link-Local）
+IP-CIDR6,fe80::/10,DIRECT
+# IPv4 映射到 IPv6 的地址段
+IP-CIDR6,::ffff:0:0/96,DIRECT
+# IPv6 未指定地址（默认路由起始）
+IP-CIDR6,::/128,DIRECT
+# IPv6 多播地址段
+IP-CIDR6,ff00::/8,DIRECT
 
 [Remote Rule]
 # Unbreak 后续规则修正
@@ -113,7 +197,7 @@ https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/R
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Tracking, enabled=true
 # Hijacking 运营商劫持或恶意网站
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list, policy=🚧 AdGuard, tag=Malicious, enabled=true
-# 自定义多区域媒体应用
+# # Global Area Network
 # > 一些无需验证地区的分流 HOST
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming+.list, policy=🔰 Proxy, tag=Streaming+, enabled=true
 # > Streaming by Region
@@ -128,10 +212,10 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming.
 # > CNTV（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/CNTV.list, policy=📺 CNTV, tag=CNTV, enabled=true
 # Global 全球代理规则
-# > AIGC（ChatGPT、Claude、Gemini、Apple Intelligence 等）
+# > AIGC
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Gemini.list, policy=🔍 Google, tag=Gemini, enabled=true
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GenAI.list, policy=🤖 AIGC, tag=GenAI, enabled=true
-# > Apple 部分服务代理（App Store、TV、Music、News 等）
+# > Apple
 # >> iCloud Private Relay
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/iCloud.PrivateRelay.list, policy=🔰 Proxy, tag=iCloud.PrivateRelay, enabled=true
 # >> Apple News
@@ -157,8 +241,8 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=proxy, enabled=true
 # China Area Network
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=direct, enabled=true
-https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=cncidr, enabled=true
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=ASN.China, enabled=true
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=cncidr, enabled=true
 
 [Plugin]
 https://raw.githubusercontent.com/chavyleung/scripts/master/box/rewrite/boxjs.rewrite.loon.plugin, tag=BoxJS, enabled=true
@@ -167,9 +251,3 @@ https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/DNS.plugi
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/HTTPDNS.Block.plugin, tag=HTTPDNS Block, enabled=true
 https://raw.githubusercontent.com/mw418/Loon/main/plugin/jd_price.plugin, tag=京东比价, enabled=true
 https://raw.githubusercontent.com/fmz200/wool_scripts/main/Loon/plugin/blockAds.plugin, tag=去广告合集, enabled=false
-
-[Mitm]
-skip-server-cert-verify = true
-h2 = true
-ca-passphrase = Dler
-ca-p12 = MIIDGgIBAzCCAuAGCSqGSIb3DQEHAaCCAtEEggLNMIICyTCCAb8GCSqGSIb3DQEHBqCCAbAwggGsAgEAMIIBpQYJKoZIhvcNAQcBMBwGCiqGSIb3DQEMAQYwDgQI5e4W8st2yMMCAggAgIIBeBDhcB5oCpEtPyamF2QSSZMoKnIQ9idB7/spS4BgYMq/zDT8c7SDSKM746+4D98feqkJmAYFUWlXtXOHwSR8QlFad9dTYw4SulHDpDAVr/+da6iCX+LeQuducormCI6xVcmpfZ8qvHWzpfHy5mrKxkuyj5OHlehvYOedDZ9P9s9ME2qZFsffKC4kk398QPjoBMLCb73m7QcFdzdus7NuVAd/kYZRww7ODcXcb5a45Yv4NeRwRjnVT8eCgjGXjJXQgJPAtyAWPLW+o1uS132Qdkmg+8EjwuxL/lOu3rLKh0gWWUFHcxv2rg4OcezyoZuv70zs3A8Ju3wmQ6oZuakeRuRyKu6+9BtgOqxnoBwvTMCI4saY8E318DWZjBOzg9N2vPOhKDeoh8ES9TAbRlcp5Bnp5TWrPhae+XeHlHde5KCr3kjB15/DAhrlh7+ht18I/p1shnRKAd1tH6p62to51j9mSHNxOFFCbBPiFqBSnPmuV2SSOOYHcjUwggECBgkqhkiG9w0BBwGggfQEgfEwge4wgesGCyqGSIb3DQEMCgECoIG0MIGxMBwGCiqGSIb3DQEMAQMwDgQI/FfHqSBxFUoCAggABIGQIJa8eopsdqunR4ZwxWt/ThhdkRw2LFHTbgg5jWdAUQfK2b+I6+Wk9Dimdb2xGzAaYcAVt3ArbfuDTjDUTI4m3pzXBe/edyeXagr6i6DgM9TluB4OsG6hC/MFtF3rvqnCT3DGf5b48hSj0Y5OfJy+iFXmasxtwVIf4pFFylXOOJeJdQry1NgImb0nZwsS8NJAMSUwIwYJKoZIhvcNAQkVMRYEFHijHPCciGG5pbv+qBYZvjpHBIFnMDEwITAJBgUrDgMCGgUABBSxzZGBSpKB8R5FQ6wdiWxFka+xcgQIxB+kS2hfUpkCAggA
