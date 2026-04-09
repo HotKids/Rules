@@ -519,6 +519,9 @@ def gen_rules_and_providers(
             continue
 
         if rule_type in PASSTHROUGH:
+            # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
+            if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
+                continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
             rules_out.append("  - " + ",".join(keep))
             continue
