@@ -157,22 +157,28 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     return proxy_providers, pg_inject, rules_inject
 
 
-def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str]:
+def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str, str, str, str]:
     """从 Loon Builtin 内容解析头部和各段落块。
 
     返回：
-      loon_header     str        proxy-groups: 之前的所有内容（[General] 等静态段落）
+      loon_header     str        [Proxy Group] 之前的所有内容（[General] 等静态段落）
       pg_inject_loon  dict|None  {anchor, block, names, prepend_block}
       rule_block      str        [Rule] 内容（不含段落标题）
       plugin_block    str        [Plugin] 内容（不含段落标题）
-      mitm_block      str        [Mitm] 内容（不含段落标题）
+      mitm_block      str        [Mitm] 内容（不含段落标题，通常由 Surge 覆盖）
+      host_block      str        [Host] 内容（不含段落标题）
+      rewrite_block   str        [Rewrite] 内容（不含段落标题）
+      script_block    str        [Script] 内容（不含段落标题）
     """
     header_lines: list[str] = []
     pg_lines: list[str] = []
     rule_lines: list[str] = []
     plugin_lines: list[str] = []
     mitm_lines: list[str] = []
-    mode = "header"  # header | pg | Rule | Plugin | Mitm
+    host_lines: list[str] = []
+    rewrite_lines: list[str] = []
+    script_lines: list[str] = []
+    mode = "header"  # header | pg | Rule | RemoteRule | Host | Rewrite | Script | Plugin | Mitm
 
     for line in lines:
         s = line.strip()
@@ -181,6 +187,18 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
             continue
         if s == "[Rule]":
             mode = "Rule"
+            continue
+        if s == "[Remote Rule]":
+            mode = "RemoteRule"  # 内容由 Surge 生成，忽略 ini 中的占位内容
+            continue
+        if s == "[Host]":
+            mode = "Host"
+            continue
+        if s == "[Rewrite]":
+            mode = "Rewrite"
+            continue
+        if s == "[Script]":
+            mode = "Script"
             continue
         if s == "[Plugin]":
             mode = "Plugin"
@@ -194,10 +212,17 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
             pg_lines.append(line)
         elif mode == "Rule":
             rule_lines.append(line)
+        elif mode == "Host":
+            host_lines.append(line)
+        elif mode == "Rewrite":
+            rewrite_lines.append(line)
+        elif mode == "Script":
+            script_lines.append(line)
         elif mode == "Plugin":
             plugin_lines.append(line)
         elif mode == "Mitm":
             mitm_lines.append(line)
+        # RemoteRule: 忽略（由 Surge 生成）
 
     loon_header = "\n".join(l.rstrip() for l in header_lines).strip()
 
@@ -247,8 +272,11 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     rule_block = "\n".join(l.rstrip() for l in rule_lines).strip()
     plugin_block = "\n".join(l.rstrip() for l in plugin_lines).strip()
     mitm_block = "\n".join(l.rstrip() for l in mitm_lines).strip()
+    host_block = "\n".join(l.rstrip() for l in host_lines).strip()
+    rewrite_block = "\n".join(l.rstrip() for l in rewrite_lines).strip()
+    script_block = "\n".join(l.rstrip() for l in script_lines).strip()
 
-    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block
+    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block
 
 
 def _empty_plat() -> dict:
@@ -302,10 +330,13 @@ def parse_sync_txt() -> dict:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
             if current_platform == "Loon":
-                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk = _process_builtin_loon(builtin_buf)
+                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk, host_blk, rewrite_blk, script_blk = _process_builtin_loon(builtin_buf)
                 plat["loon_header"] = hdr
                 plat["pg_inject_loon"] = pg_inj
-                plat["loon_blocks"] = {"Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk}
+                plat["loon_blocks"] = {
+                    "Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk,
+                    "Host": host_blk, "Rewrite": rewrite_blk, "Script": script_blk,
+                }
             else:
                 pp, pg, ri = _process_builtin(builtin_buf)
                 plat["proxy_providers"] = pp
@@ -475,8 +506,8 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
 # 解析 Surge Profile.conf
 # ---------------------------------------------------------------------------
 
-def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[str]]:
-    """读取 Surge Profile.conf，返回 proxy_lines, group_lines, rule_lines。"""
+def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[str], list[str]]:
+    """读取 Surge Profile.conf，返回 proxy_lines, group_lines, rule_lines, mitm_lines。"""
     text = profile_path.read_text(encoding="utf-8")
     sections: dict[str, list[str]] = {}
     current: str | None = None
@@ -504,6 +535,7 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         clean(sections.get("Proxy", [])),
         clean(sections.get("Proxy Group", [])),
         clean(sections.get("Rule", [])),
+        clean(sections.get("MITM", [])),
     )
 
 # ---------------------------------------------------------------------------
@@ -1165,7 +1197,7 @@ def main() -> None:
     if not surge_src:
         raise ValueError("Surge 块缺少 >> 源文件路径指令")
 
-    _, group_lines, rule_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    _, group_lines, rule_lines, surge_mitm_lines = parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
     # ── Clash ──────────────────────────────────────────────────────────────
@@ -1216,7 +1248,9 @@ def main() -> None:
         loon_blocks = loon.get("loon_blocks", {})
         loon_rule_block = loon_blocks.get("Rule", "")
         loon_plugin_block = loon_blocks.get("Plugin", "")
-        loon_mitm_block = loon_blocks.get("Mitm", "")
+        loon_host_block = loon_blocks.get("Host", "")
+        loon_rewrite_block = loon_blocks.get("Rewrite", "")
+        loon_script_block = loon_blocks.get("Script", "")
         filter_map = loon.get("filter_map", {})
         loon_skips = config.get("global_skips", []) + loon.get("skips", [])
 
@@ -1225,17 +1259,40 @@ def main() -> None:
         if loon_pg_inject:
             print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")
 
+        # 从 Surge rule_lines 提取 FINAL 规则
+        surge_final = ""
+        for _rl in rule_lines:
+            _parts = [p.strip() for p in _rl.split(",")]
+            if _parts[0].upper() == "FINAL":
+                _policy = _parts[1] if len(_parts) > 1 else "🔰 Proxy"
+                surge_final = f"# Final\nFINAL,{_policy}"
+                break
+
         pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map)
         remote_rules = gen_loon_remote_rules(rule_lines, loon_skips)
 
-        loon_parts = [loon_header, pg_loon]
+        # [Rule]：静态规则 + FINAL（来自 Surge）
+        rule_section_parts = []
         if loon_rule_block:
-            loon_parts.append("[Rule]\n" + loon_rule_block)
+            rule_section_parts.append(loon_rule_block)
+        if surge_final:
+            rule_section_parts.append(surge_final)
+        rule_section = "[Rule]\n" + "\n".join(rule_section_parts) if rule_section_parts else ""
+
+        # [Mitm]：来自 Surge Profile [MITM] 段落
+        surge_mitm_block = "\n".join(surge_mitm_lines).strip()
+
+        loon_parts = [loon_header, pg_loon]
+        if rule_section:
+            loon_parts.append(rule_section)
         loon_parts.append(remote_rules)
+        loon_parts.append("[Host]\n" + loon_host_block if loon_host_block else "[Host]")
+        loon_parts.append("[Rewrite]\n" + loon_rewrite_block if loon_rewrite_block else "[Rewrite]")
+        loon_parts.append("[Script]\n" + loon_script_block if loon_script_block else "[Script]")
         if loon_plugin_block:
             loon_parts.append("[Plugin]\n" + loon_plugin_block)
-        if loon_mitm_block:
-            loon_parts.append("[Mitm]\n" + loon_mitm_block)
+        if surge_mitm_block:
+            loon_parts.append("[Mitm]\n" + surge_mitm_block)
 
         changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
         print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
