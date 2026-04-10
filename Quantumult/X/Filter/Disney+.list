@@ -1,4 +1,5 @@
 # > Disney+
+user-agent, Disney*, Disney+
 host-suffix, disneyplus.com, Disney+
 host-suffix, disney-plus.net, Disney+
 host-suffix, disneystreaming.com, Disney+

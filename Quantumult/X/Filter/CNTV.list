@@ -1,4 +1,10 @@
 # > Bilibili
+user-agent, *bili*, CNTV
+user-agent, bili-inter*, CNTV
+user-agent, iQIYI*, CNTV
+user-agent, QIYIVideo*, CNTV
+user-agent, QYPlayer*, CNTV
+user-agent, QTP*, CNTV
 host-suffix, bilibili.com, CNTV
 host-suffix, bilibili.tv, CNTV
 host-suffix, biliapi.net, CNTV

@@ -1,4 +1,17 @@
 # > Bahamut
+user-agent, Anime*, Streaming_TW
+user-agent, CATCHPLAY*, Streaming_TW
+user-agent, friDay*, Streaming_TW
+user-agent, iQIYI*, Streaming_TW
+user-agent, QIYIVideo*, Streaming_TW
+user-agent, QYPlayer*, Streaming_TW
+user-agent, QTP*, Streaming_TW
+user-agent, *KKBOX, Streaming_TW
+user-agent, KKTV*, Streaming_TW
+user-agent, com.kktv*, Streaming_TW
+user-agent, LINE%20TV*, Streaming_TW
+user-agent, myVideo*, Streaming_TW
+user-agent, *Spotify*, Streaming_TW
 host-suffix, bahamut.com.tw, Streaming_TW
 host-suffix, gamer.com.tw, Streaming_TW
 host, gamer-cds.cdn.hinet.net, Streaming_TW

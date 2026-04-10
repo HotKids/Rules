@@ -1,4 +1,5 @@
 # > Peacock
+user-agent, peacock*, Peacock
 host-suffix, cdn.peacocktv.com, Peacock
 host-suffix, peacocktv.com, Peacock
 # 屏蔽广告

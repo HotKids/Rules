@@ -1,4 +1,6 @@
 # > HBO Max
+user-agent, HBOMAX*, HBO_Max
+user-agent, Max*, HBO_Max
 host-suffix, max.com, HBO_Max
 host-suffix, hbomax.com, HBO_Max
 host-suffix, discomax.com, HBO_Max

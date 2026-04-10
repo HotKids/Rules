@@ -1,4 +1,6 @@
 # > Bilibili
+user-agent, *bili*, Bilibili
+user-agent, bili-inter*, Bilibili
 host-suffix, bilibili.com, Bilibili
 host-suffix, bilibili.tv, Bilibili
 host-suffix, biliapi.net, Bilibili

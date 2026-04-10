@@ -1,4 +1,5 @@
 # > Netflix
+user-agent, Argo*, Netflix
 host-suffix, netflix.com, Netflix
 host-suffix, netflix.net, Netflix
 host-suffix, nflxext.com, Netflix

@@ -1,4 +1,5 @@
 # > BBC iPlayer
+user-agent, BBCiPlayer*, BBC
 host-keyword, bbcfmt, BBC
 host-keyword, co.uk, BBC
 host-keyword, uk-live, BBC

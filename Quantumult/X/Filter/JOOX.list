@@ -1,3 +1,5 @@
 # > JOOX
+user-agent, WeMusic*, JOOX
+user-agent, JOOX*, JOOX
 host-suffix, joox.com, JOOX
 host-keyword, joox, JOOX

@@ -6,6 +6,8 @@
 # DEST-PORT,465
 # SMTP Submission (STARTTLS)
 # DEST-PORT,587
+user-agent, *spark, Spark
+user-agent, *Spark, Spark
 host-suffix, gmail.com, Spark
 host-suffix, googlemail.com, Spark
 host-suffix, live.com, Spark

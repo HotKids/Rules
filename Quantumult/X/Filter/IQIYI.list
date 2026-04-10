@@ -1,4 +1,6 @@
 # > IQIYI
+user-agent, *QIYI*, IQIYI
+user-agent, iQiYi*, IQIYI
 host-suffix, iqiyi.com, IQIYI
 host-suffix, iqiyipic.com, IQIYI
 host-suffix, iq.com, IQIYI

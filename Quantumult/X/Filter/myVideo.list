@@ -1,4 +1,5 @@
 # > myVideo
+user-agent, myVideo*, myVideo
 host-suffix, myvideo.net.tw, myVideo
 host-suffix, catch.net.tw, myVideo
 host, applemediaservice.keydelivery.southeastasia.media.azure.net, myVideo

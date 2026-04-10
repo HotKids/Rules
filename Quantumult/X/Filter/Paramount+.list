@@ -1,6 +1,8 @@
 # > Paramount+
 # US UA
 # Intl. UA
+user-agent, PPlus*, Paramount+
+user-agent, ParamountPlus*, Paramount+
 host-suffix, cbsi.com, Paramount+
 # DOMAIN-SUFFIX,cbsaavideo.com #播放
 host-suffix, cbsivideo.com, Paramount+

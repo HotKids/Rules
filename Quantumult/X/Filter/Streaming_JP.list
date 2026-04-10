@@ -1,4 +1,7 @@
 # > AbemaTV
+user-agent, AbemaTV*, Streaming_JP
+user-agent, FOD*, Streaming_JP
+user-agent, Paravi*, Streaming_JP
 host-suffix, abema.io, Streaming_JP
 host-suffix, abema.tv, Streaming_JP
 host-suffix, ameba.jp, Streaming_JP

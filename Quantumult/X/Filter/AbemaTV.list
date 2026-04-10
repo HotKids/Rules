@@ -1,4 +1,5 @@
 # > AbemaTV
+user-agent, AbemaTV*, AbemaTV
 host-suffix, abema.io, AbemaTV
 host-suffix, abema.tv, AbemaTV
 host-suffix, ameba.jp, AbemaTV

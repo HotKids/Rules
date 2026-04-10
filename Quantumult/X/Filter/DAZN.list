@@ -1,4 +1,5 @@
 # > DAZN
+user-agent, DAZN*, DAZN
 host-suffix, dazn.com, DAZN
 host-suffix, dazndn.com, DAZN
 host-suffix, indazn.com, DAZN
