@@ -87,3 +87,6 @@ Speedtest
   reject => Reject
   cncidr => CNCIDR
   lancidr => LAN
+
+# Surfboard
+>> Surge/Surfboard.conf
