@@ -32,7 +32,7 @@ _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
-SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "IP-CIDR6"}
+SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
 SURFBOARD_SKIP_GENERAL_KEYS = {
     "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
