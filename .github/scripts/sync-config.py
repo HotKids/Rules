@@ -23,6 +23,7 @@ SYNC_CONFIG_TXT = REPO_ROOT / ".github" / "scripts" / "sync-config.txt"
 
 HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/"
 HOTKIDS_CLASH_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/"
+HOTKIDS_QX_FILTER_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Filter/"
 
 CLASH_UNSUPPORTED_RULE_TYPES = {"PROTOCOL", "URL-REGEX", "USER-AGENT"}
 # 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
@@ -420,6 +421,7 @@ def _empty_plat() -> dict:
         "qx_blocks": {},
         "pg_inject_qx": None,
         "emoji": False,
+        "policy_rename_map": {},
     }
 
 
@@ -451,6 +453,7 @@ def parse_sync_txt() -> dict:
 
     current_platform = ""
     current_section = ""
+    _rename_sub = ""
     builtin_buf: list[str] = []
 
     def flush_builtin() -> None:
@@ -486,6 +489,7 @@ def parse_sync_txt() -> dict:
             flush_builtin()
             current_platform = m.group(1).strip()
             current_section = ""
+            _rename_sub = ""
             if current_platform != "Surge":
                 result.setdefault(current_platform, _empty_plat())
             continue
@@ -495,6 +499,7 @@ def parse_sync_txt() -> dict:
         if m:
             flush_builtin()
             current_section = m.group(1).strip()
+            _rename_sub = ""
             continue
 
         # 空行：Builtin 分区内保留（YAML 块结构需要）
@@ -557,12 +562,21 @@ def parse_sync_txt() -> dict:
             else:
                 plat["url_maps"].append((left, right))
         elif current_section == "Rename" and current_platform and current_platform != "Surge":
+            # 子分区标题行（如 [policy] 或 [filter_remote]）
+            m_sub = re.match(r"^\[(.+)\]$", stripped)
+            if m_sub:
+                _rename_sub = m_sub.group(1)
+                continue
             if "=>" not in stripped:
                 continue  # 跳过 "rule-providers:" 等标题行
             left, _, right = stripped.partition("=>")
             left, right = left.strip(), right.strip()
             if left and right:
-                result.setdefault(current_platform, _empty_plat())["rename_map"][left] = right
+                plat = result.setdefault(current_platform, _empty_plat())
+                if _rename_sub == "policy":
+                    plat["policy_rename_map"][left] = right
+                else:
+                    plat["rename_map"][left] = right
         elif current_section == "FilterMap" and current_platform and current_platform != "Surge":
             if "=>" not in stripped:
                 continue
@@ -572,6 +586,13 @@ def parse_sync_txt() -> dict:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
         elif current_section == "Options" and current_platform and current_platform != "Surge":
             if "=" in stripped:
+                key, _, val = stripped.partition("=")
+                key, val = key.strip(), val.strip().lower()
+                if key == "emoji":
+                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
+        elif current_section == "" and current_platform and current_platform != "Surge":
+            # 裸平台选项（如 emoji=false，无需 # > Options 标题）
+            if "=" in stripped and not stripped.startswith("["):
                 key, _, val = stripped.partition("=")
                 key, val = key.strip(), val.strip().lower()
                 if key == "emoji":
@@ -1289,14 +1310,18 @@ def gen_loon_remote_rules(
 _QX_PROXY_MAP = {"🚫 REJECT": "reject", "🔘 DIRECT": "direct"}
 
 
-def _qx_strip_emoji_text(text: str) -> str:
-    """Strip emoji from policy name references in QX config text blocks.
+def _qx_normalize_text(text: str, policy_rename: dict[str, str] | None = None) -> str:
+    """Strip emoji and apply policy renames in QX config text blocks.
 
     Handles:
       static=🚧 AdGuard, reject, direct, img-url=...
       force-policy=🚧 AdGuard  (within filter_remote lines)
       final, 🔰 Proxy
     """
+    def _apply(name: str) -> str:
+        s = strip_emoji(name)
+        return policy_rename.get(s, s) if policy_rename else s
+
     result = []
     for line in text.splitlines():
         s = line.strip()
@@ -1306,18 +1331,17 @@ def _qx_strip_emoji_text(text: str) -> str:
         if m:
             kind, rest = m.group(1), m.group(2)
             parts = [p.strip() for p in rest.split(",")]
-            # Strip emoji from all non-key=value tokens (policy name + proxy refs)
-            out_parts = [strip_emoji(p) if "=" not in p else p for p in parts]
+            out_parts = [_apply(p) if "=" not in p else p for p in parts]
             result.append(kind + ", ".join(out_parts))
         elif "force-policy=" in line:
             new_line = re.sub(
                 r"(force-policy=)([^,]+)",
-                lambda m2: m2.group(1) + strip_emoji(m2.group(2).strip()),
+                lambda m2: m2.group(1) + _apply(m2.group(2).strip()),
                 line,
             )
             result.append(new_line)
         elif s.startswith("final,"):
-            result.append("final, " + strip_emoji(s[6:].strip()))
+            result.append("final, " + _apply(s[6:].strip()))
         else:
             result.append(line)
     return "\n".join(result)
@@ -1329,6 +1353,7 @@ def _fmt_qx_policy(
     params: dict[str, str],
     proxies: list[str],
     strip_names: bool = True,
+    policy_rename_map: dict[str, str] | None = None,
 ) -> str | None:
     """格式化为 QX policy 单行。返回 None 表示跳过该组。"""
     icon_part = ""
@@ -1336,6 +1361,8 @@ def _fmt_qx_policy(
         icon_part = f", img-url={icon_url}"
 
     emit_name = strip_emoji(name) if strip_names else name
+    if policy_rename_map:
+        emit_name = policy_rename_map.get(emit_name, emit_name)
 
     # smart + policy-regex-filter → static with server-tag-regex（必须先于 include-other-group 检查）
     if gtype == "smart" and (regex := params.get("policy-regex-filter", "")):
@@ -1354,6 +1381,8 @@ def _fmt_qx_policy(
         mapped = [_QX_PROXY_MAP.get(p, p) for p in proxies]
         if strip_names:
             mapped = [strip_emoji(p) for p in mapped]
+        if policy_rename_map:
+            mapped = [policy_rename_map.get(p, p) for p in mapped]
         return f"static={emit_name}, {', '.join(mapped)}{icon_part}"
 
     return None
@@ -1364,6 +1393,7 @@ def gen_qx_policies(
     skips: list[str],
     pg_inject: dict | None,
     strip_names: bool = True,
+    policy_rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 QX [policy] 段落。"""
     out: list[str] = ["[policy]"]
@@ -1372,7 +1402,7 @@ def gen_qx_policies(
     ph = PendingHeaders()
 
     if pg_inject and pg_inject.get("prepend_block"):
-        prepend = _qx_strip_emoji_text(pg_inject["prepend_block"]) if strip_names else pg_inject["prepend_block"]
+        prepend = _qx_normalize_text(pg_inject["prepend_block"], policy_rename_map) if strip_names else pg_inject["prepend_block"]
         out.append(prepend)
 
     for line in group_lines:
@@ -1386,7 +1416,12 @@ def gen_qx_policies(
             continue
         name = g["name"]
 
-        if name in inject_names:
+        # 计算最终输出名（strip + rename），用于 inject_names 和 anchor 比较
+        emit_name = strip_emoji(name) if strip_names else name
+        if policy_rename_map:
+            emit_name = policy_rename_map.get(emit_name, emit_name)
+
+        if emit_name in inject_names or name in inject_names:
             ph.skip()
             continue
         if _is_skipped(name, skips):
@@ -1394,7 +1429,7 @@ def gen_qx_policies(
             ph.skip()
             continue
 
-        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"], strip_names)
+        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"], strip_names, policy_rename_map)
         if qx_line is None:
             ph.skip()
             continue
@@ -1402,14 +1437,14 @@ def gen_qx_policies(
         out.extend(ph.flush())
         out.append(qx_line)
 
-        # anchor 比较使用原始名称（inject_names 也用原始名称存储）
-        if pg_inject and not injected and pg_inject.get("anchor") == name:
-            block = _qx_strip_emoji_text(pg_inject["block"]) if strip_names else pg_inject["block"]
+        # anchor 比较使用最终输出名（strip + rename 后）
+        if pg_inject and not injected and pg_inject.get("anchor") == emit_name:
+            block = _qx_normalize_text(pg_inject["block"], policy_rename_map) if strip_names else pg_inject["block"]
             out.append(block)
             injected = True
 
     if pg_inject and not injected and pg_inject.get("block"):
-        block = _qx_strip_emoji_text(pg_inject["block"]) if strip_names else pg_inject["block"]
+        block = _qx_normalize_text(pg_inject["block"], policy_rename_map) if strip_names else pg_inject["block"]
         out.append(block)
 
     return "\n".join(out)
@@ -1419,23 +1454,70 @@ def gen_qx_policies(
 # 生成 QX [filter_remote]
 # ---------------------------------------------------------------------------
 
+def _resolve_qx_url(surge_url: str, url_maps: list | None = None) -> tuple[str, str]:
+    """将 Surge 规则 URL 解析为 QX URL 及对应 opt-parser 值。
+
+    优先级：
+    1. HotKids 自动映射：Surge/RULE-SET/<subdir>/<name>.list → Quantumult/X/Filter/<name>.list
+       （本地文件存在时使用 QX 版本，opt-parser=false）
+    2. 外部 URL 映射（url_maps），opt-parser=false
+    3. 无匹配：保留 Surge URL，opt-parser=true
+    """
+    # 1. HotKids 自动映射
+    if surge_url.startswith(HOTKIDS_SURGE_PREFIX):
+        rest = surge_url[len(HOTKIDS_SURGE_PREFIX):]  # e.g. "Apple/Apple%20TV.list"
+        basename = rest.rsplit("/", 1)[-1] if "/" in rest else rest  # e.g. "Apple%20TV.list"
+        local_name = basename.replace("%20", " ")
+        qx_local = REPO_ROOT / "Quantumult" / "X" / "Filter" / local_name
+        if qx_local.exists():
+            return HOTKIDS_QX_FILTER_PREFIX + basename, "false"
+
+    # 2. 外部 URL 映射
+    if url_maps:
+        best_len = 0
+        best_url: str | None = None
+        for left, right in url_maps:
+            if not left.startswith("http") or not right:
+                continue
+            if surge_url == left:
+                return right, "false"
+            if surge_url.startswith(left) and len(left) > best_len:
+                best_len = len(left)
+                best_url = right.rstrip("/") + "/" + surge_url[len(left):]
+        if best_url:
+            return best_url, "false"
+
+    # 3. 保留 Surge URL，需要 opt-parser 解析
+    return surge_url, "true"
+
+
 def gen_qx_filter_remote(
     rule_lines: list[str],
     skips: list[str],
     rename_map: dict[str, str] | None = None,
     static_fr: str = "",
     strip_names: bool = True,
+    policy_rename_map: dict[str, str] | None = None,
+    url_maps: list | None = None,
 ) -> str:
     """生成 QX [filter_remote] 段落。
 
     static_fr 为 qx.ini 中的静态条目（流媒体等），prepend 到动态生成内容之前。
     """
     out: list[str] = ["[filter_remote]"]
+
+    # 收集 static_fr 中已包含的 URL，避免动态生成重复条目
+    static_urls: set[str] = set()
     if static_fr:
-        fr_text = _qx_strip_emoji_text(static_fr) if strip_names else static_fr
+        fr_text = _qx_normalize_text(static_fr, policy_rename_map) if strip_names else static_fr
+        for line in fr_text.splitlines():
+            s = line.strip()
+            if s and not s.startswith(";") and not s.startswith("#") and s.startswith("http"):
+                static_urls.add(s.split(",", 1)[0].strip())
         for line in fr_text.splitlines():
             out.append(line)
         out.append("")
+
     ph = PendingHeaders()
 
     for line in rule_lines:
@@ -1470,14 +1552,20 @@ def gen_qx_filter_remote(
             ph.skip()
             continue
 
+        emit_url, opt_parser = _resolve_qx_url(url, url_maps)
+        if emit_url in static_urls:
+            ph.skip()
+            continue
+
         if rename_map:
             tag = rename_map.get(tag, tag)
         # _QX_PROXY_MAP 优先（🔘 DIRECT→direct 等 QX 内建值），其余按 strip_names 处理
-        emit_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+        stripped_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+        emit_policy = policy_rename_map.get(stripped_policy, stripped_policy) if policy_rename_map else stripped_policy
         out.extend(ph.flush())
         out.append(
-            f"{url}, tag={tag}, force-policy={emit_policy}, "
-            f"update-interval=86400, opt-parser=true, enabled=true"
+            f"{emit_url}, tag={tag}, force-policy={emit_policy}, "
+            f"update-interval=86400, opt-parser={opt_parser}, enabled=true"
         )
 
     return "\n".join(out)
@@ -1491,6 +1579,7 @@ def gen_qx_filter_local(
     rule_lines: list[str],
     static_fl: str = "",
     strip_names: bool = True,
+    policy_rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 QX [filter_local] 段落。
 
@@ -1519,13 +1608,41 @@ def gen_qx_filter_local(
             out.append(f"geoip, {geoip_val}, {policy}")
         elif rule_type == "FINAL" and final_line is None:
             policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
-            emit_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+            stripped_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+            emit_policy = policy_rename_map.get(stripped_policy, stripped_policy) if policy_rename_map else stripped_policy
             final_line = f"final, {emit_policy}"
 
     if final_line:
         out.append(final_line)
 
     return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# QX [mitm] 同步
+# ---------------------------------------------------------------------------
+
+def _sync_qx_mitm(mitm_block: str, surge_mitm_lines: list[str]) -> str:
+    """将 Surge [MITM] 的 ca-passphrase / ca-p12 同步到 QX [mitm] 块。"""
+    surge_passphrase = ""
+    surge_p12 = ""
+    for line in surge_mitm_lines:
+        s = line.strip()
+        if s.startswith("ca-passphrase") and "=" in s:
+            surge_passphrase = s.split("=", 1)[1].strip()
+        elif s.startswith("ca-p12") and "=" in s:
+            surge_p12 = s.split("=", 1)[1].strip()
+
+    result = []
+    for line in mitm_block.splitlines():
+        s = line.strip()
+        if s.startswith("passphrase") and "=" in s and surge_passphrase:
+            result.append(f"passphrase = {surge_passphrase}")
+        elif s.startswith("p12") and "=" in s and surge_p12:
+            result.append(f"p12 = {surge_p12}")
+        else:
+            result.append(line)
+    return "\n".join(result)
 
 
 # ---------------------------------------------------------------------------
@@ -1675,18 +1792,26 @@ def main() -> None:
         qx_skips = config.get("global_skips", []) + qx.get("skips", [])
         qx_rename_map = qx.get("rename_map", {})
         qx_strip_names = not qx.get("emoji", False)  # emoji=False(default) → strip names
+        qx_policy_rename = qx.get("policy_rename_map") or None  # 空 dict → None
 
         print(f"  QX skip: {qx_skips}")
         print(f"  QX emoji: {qx.get('emoji', False)} | strip_names: {qx_strip_names}")
+        if qx_policy_rename:
+            print(f"  QX policy_rename: {qx_policy_rename}")
         if qx_pg_inject:
             print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
 
-        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject, strip_names=qx_strip_names)
+        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject, strip_names=qx_strip_names, policy_rename_map=qx_policy_rename)
+        qx_url_maps = qx.get("url_maps") or None
         filter_remote = gen_qx_filter_remote(
             rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", ""),
-            strip_names=qx_strip_names,
+            strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
+            url_maps=qx_url_maps,
         )
-        filter_local = gen_qx_filter_local(rule_lines, qx_blocks.get("filter_local", ""), strip_names=qx_strip_names)
+        filter_local = gen_qx_filter_local(
+            rule_lines, qx_blocks.get("filter_local", ""),
+            strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
+        )
 
         def _qx_section(key: str, header: str) -> str:
             content = qx_blocks.get(key, "")
@@ -1703,6 +1828,7 @@ def main() -> None:
         qx_parts.append("[rewrite_local]")
         mitm_content = qx_blocks.get("mitm", "")
         if mitm_content:
+            mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
             qx_parts.append(f"[mitm]\n{mitm_content}")
 
         changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")

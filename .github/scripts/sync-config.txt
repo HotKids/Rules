@@ -48,6 +48,7 @@ rule-providers:
 
 # Quantumult X
 >> Quantumult/Sample.conf
+emoji=false
 # > Builtin
 << .github/scripts/sync-config/qx.ini
 # > Skip
@@ -55,15 +56,18 @@ iCloud
 Apple News
 Speedtest
 # > Rename
+[policy]
+  Proxy => Outbound
+  AdGuard => AdBlock
 [filter_remote]
-  AD => Advertising
+  AD => Adblock
   HTTPDNS.Block => HTTPDNS
+  Spark => Mail
   ASN.China => ASN China
-  Gemini => Google
-  GenAI => AIGC
+  iCloud.PrivateRelay => iCloud Private Relay
   proxy => Global
   direct => China
-  reject => Adblock
+  reject => Reject
   cncidr => CNCIDR
   lancidr => LAN
 
