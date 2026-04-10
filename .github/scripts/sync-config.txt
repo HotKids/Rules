@@ -90,3 +90,5 @@ Speedtest
 
 # Surfboard
 >> Surge/Surfboard.conf
+# > Builtin
+<< .github/scripts/sync-config/surfboard.ini

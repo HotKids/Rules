@@ -34,6 +34,12 @@ RAW_PREFIX = "https://raw.githubusercontent.com/"
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
 SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
+# Loon 输出 [Proxy] 段落（script 生成，不依赖 loon.ini）
+# 🔘 DIRECT 用于 Surge 派生的 proxy-group 引用；DIRECT/REJECT 供 builtin inject 使用
+_LOON_BUILTIN_PROXY_SECTION = "[Proxy]\n🔘 DIRECT = DIRECT\nDIRECT = DIRECT\nREJECT = REJECT"
+# Surfboard 输出 [Proxy] 中额外追加的内建代理别名（补充 Surge Profile 的 🔘 DIRECT = direct）
+_SURFBOARD_EXTRA_PROXIES = ["DIRECT = direct", "REJECT = reject"]
+
 SURFBOARD_SKIP_GENERAL_KEYS = {
     "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
     "http-listen", "socks5-listen",
@@ -411,6 +417,68 @@ def _process_builtin_qx(lines: list[str]) -> tuple[str, dict | None, dict]:
     return qx_header, pg_inject_qx, qx_blocks
 
 
+def _process_builtin_surfboard(lines: list[str]) -> dict | None:
+    """从 Surfboard builtin INI（Surge 格式）解析 [Proxy Group] 注入配置。
+
+    返回 pg_inject 字典 {anchor, block, names, prepend_block}，或 None。
+    """
+    pg_lines: list[str] = []
+    in_pg = False
+
+    for line in lines:
+        s = line.strip()
+        if s == "[Proxy Group]":
+            in_pg = True
+            continue
+        if s.startswith("[") and s.endswith("]"):
+            in_pg = False
+            continue
+        if in_pg:
+            pg_lines.append(line)
+
+    if not pg_lines:
+        return None
+
+    anchor: str | None = None
+    pre_lines: list[str] = []
+    post_lines: list[str] = []
+    found_anchor = False
+
+    for line in pg_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#") and "//" in s and not found_anchor:
+            found_anchor = True
+            m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+            if m:
+                anchor = m.group(1).strip()
+            clean_s = re.sub(r"\s*//.*$", "", s).rstrip()
+            if clean_s and clean_s != "#":
+                post_lines.append(clean_s)
+            continue
+        if found_anchor:
+            post_lines.append(s)
+        else:
+            pre_lines.append(s)
+
+    # 从 Surge 格式行（Name = type, ...）提取 names
+    names: set[str] = set()
+    for line in pg_lines:
+        s = line.strip()
+        if s and not s.startswith("#") and "=" in s:
+            name = s.split("=")[0].strip()
+            if name:
+                names.add(name)
+
+    return {
+        "anchor": anchor,
+        "block": "\n".join(post_lines).strip(),
+        "names": names,
+        "prepend_block": "\n".join(pre_lines).strip() or None,
+    }
+
+
 def _empty_plat() -> dict:
     return {
         "output": None,
@@ -431,6 +499,7 @@ def _empty_plat() -> dict:
         "pg_inject_qx": None,
         "emoji": False,
         "policy_rename_map": {},
+        "pg_inject_surfboard": None,
     }
 
 
@@ -482,6 +551,8 @@ def parse_sync_txt() -> dict:
                 plat["qx_header"] = qx_hdr
                 plat["pg_inject_qx"] = pg_inj_qx
                 plat["qx_blocks"] = qx_blks
+            elif current_platform == "Surfboard":
+                plat["pg_inject_surfboard"] = _process_builtin_surfboard(builtin_buf)
             else:
                 pp, pg, ri = _process_builtin(builtin_buf)
                 plat["proxy_providers"] = pp
@@ -1710,10 +1781,20 @@ def _gen_surfboard_general(lines: list[str]) -> str:
     return "\n".join(out).strip()
 
 
-def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str:
+def _gen_surfboard_proxy_groups(
+    group_lines: list[str],
+    skips: list[str],
+    pg_inject: dict | None = None,
+) -> str:
     """生成 Surfboard [Proxy Group] 段落，将 smart 类型转换为 url-test。"""
     out: list[str] = ["[Proxy Group]"]
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
     ph = PendingHeaders()
+
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
@@ -1724,6 +1805,9 @@ def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str
             ph.skip()
             continue
         name = g["name"]
+        if name in inject_names:
+            ph.skip()
+            continue
         if _is_skipped(name, skips):
             print(f"  [SKIP Surfboard group] {name}")
             ph.skip()
@@ -1736,6 +1820,14 @@ def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str
 
         out.extend(ph.flush())
         out.append(f"{name} = {', '.join(tokens)}")
+
+        if pg_inject and not injected and pg_inject.get("anchor") == name:
+            out.append(pg_inject["block"])
+            injected = True
+
+    if pg_inject and not injected and pg_inject.get("block"):
+        out.append(pg_inject["block"])
+
     return "\n".join(out)
 
 
@@ -1787,6 +1879,7 @@ def gen_surfboard_profile(
     rule_lines: list[str],
     skips: list[str],
     general_lines: list[str] | None = None,
+    pg_inject: dict | None = None,
 ) -> str:
     """从 Surge 解析结果生成 Surfboard 兼容 Profile（Surge 精简版，无 MITM）。"""
     parts = []
@@ -1794,9 +1887,10 @@ def gen_surfboard_profile(
         gen_text = _gen_surfboard_general(general_lines)
         if gen_text:
             parts.append("[General]\n" + gen_text)
-    if proxy_lines:
-        parts.append("[Proxy]\n" + "\n".join(proxy_lines))
-    parts.append(_gen_surfboard_proxy_groups(group_lines, skips))
+    # [Proxy]：Surge 源代理 + 脚本注入的内建别名（DIRECT / REJECT）
+    all_proxy_lines = list(proxy_lines) + _SURFBOARD_EXTRA_PROXIES
+    parts.append("[Proxy]\n" + "\n".join(all_proxy_lines))
+    parts.append(_gen_surfboard_proxy_groups(group_lines, skips, pg_inject))
     parts.append(_gen_surfboard_rules(rule_lines, skips))
     return "\n\n".join(parts) + "\n"
 
@@ -1922,7 +2016,7 @@ def main() -> None:
         # [Mitm]：来自 Surge Profile [MITM] 段落
         surge_mitm_block = "\n".join(surge_mitm_lines).strip()
 
-        loon_parts = [loon_header, pg_loon]
+        loon_parts = [loon_header, _LOON_BUILTIN_PROXY_SECTION, pg_loon]
         if rule_section:
             loon_parts.append(rule_section)
         loon_parts.append(remote_rules)
@@ -1996,8 +2090,11 @@ def main() -> None:
         print("\n── sync-config: Surge Profile → Surfboard.conf ──")
         sb_out = surfboard["output"]
         sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
+        sb_pg_inject = surfboard.get("pg_inject_surfboard")
         print(f"  Surfboard skip: {sb_skips}")
-        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines)
+        if sb_pg_inject:
+            print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
+        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject)
         changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
         print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 

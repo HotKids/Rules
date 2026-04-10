@@ -46,10 +46,6 @@ skip-proxy = 192.168.0.0/16,10.0.0.0/8,172.16.0.0/12,localhost,*.local,e.crashly
 # 绕过路由
 bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,192.0.0.0/24,192.0.2.0/24,192.88.99.0/24,192.168.0.0/16,198.51.100.0/24,203.0.113.0/24,224.0.0.0/4,255.255.255.255/32
 
-[Proxy]
-🔘 DIRECT = DIRECT
-🚫 REJECT = REJECT
-
 [Remote Proxy]
 # 仅修改此处订阅链接即可
 # Sub = https://sub.hotkids.me
@@ -61,6 +57,11 @@ Sub-SG = NameRegex, FilterKey = "^(?=.*(?i)(🇸🇬|新加坡|狮城|\b(SG|Sing
 Sub-JP = NameRegex, FilterKey = "^(?=.*(?i)(🇯🇵|日本|\b(JP|Japan)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 Sub-US = NameRegex, FilterKey = "^(?=.*(?i)(🇺🇸|美国|\b(US|United States)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium|DIRECT|REJECT)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
+
+[Proxy]
+🔘 DIRECT = DIRECT
+DIRECT = DIRECT
+REJECT = REJECT
 
 [Proxy Group]
 # Proxy
@@ -87,7 +88,7 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Mail
 📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
 # Adblock
-🚧 AdGuard = select,🚫 REJECT,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+🚧 AdGuard = select,REJECT,DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
 # Nodes
 🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
 # Area
