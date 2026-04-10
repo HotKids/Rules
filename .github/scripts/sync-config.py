@@ -304,6 +304,103 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block, filter_defs
 
 
+def _process_builtin_qx(lines: list[str]) -> tuple[str, dict | None, dict]:
+    """从 QX Builtin 内容解析头部和各段落块。
+
+    返回：
+      qx_header      str        [general]+[dns] 内容（[policy] 前）
+      pg_inject_qx   dict|None  {anchor, block, names, prepend_block}
+      qx_blocks      dict       各静态段落文本 {server_remote, filter_remote,
+                                  rewrite_remote, task_local, http_backend,
+                                  server_local, filter_local, rewrite_local, mitm}
+    """
+    _BLOCK_KEYS = (
+        "server_remote", "filter_remote", "rewrite_remote", "task_local",
+        "http_backend", "server_local", "filter_local", "rewrite_local", "mitm",
+    )
+    _SECTION_MODE: dict[str, str] = {
+        "[policy]": "pg",
+        "[server_remote]": "server_remote",
+        "[filter_remote]": "filter_remote",
+        "[rewrite_remote]": "rewrite_remote",
+        "[task_local]": "task_local",
+        "[http_backend]": "http_backend",
+        "[server_local]": "server_local",
+        "[filter_local]": "filter_local",
+        "[rewrite_local]": "rewrite_local",
+        "[mitm]": "mitm",
+        "[MITM]": "mitm",
+    }
+
+    header_lines: list[str] = []
+    pg_lines: list[str] = []
+    block_lines: dict[str, list[str]] = {k: [] for k in _BLOCK_KEYS}
+    mode = "header"
+
+    for line in lines:
+        s = line.strip()
+        if s in _SECTION_MODE:
+            mode = _SECTION_MODE[s]
+            continue
+        if mode == "header":
+            header_lines.append(line)
+        elif mode == "pg":
+            pg_lines.append(line)
+        elif mode in block_lines:
+            block_lines[mode].append(line)
+
+    qx_header = "\n".join(l.rstrip() for l in header_lines).strip()
+
+    # [policy] 注入解析（与 _process_builtin_loon 相同逻辑）
+    pg_inject_qx: dict | None = None
+    if pg_lines:
+        anchor: str | None = None
+        pre_lines: list[str] = []
+        post_lines: list[str] = []
+        found_anchor = False
+        for line in pg_lines:
+            s = line.strip()
+            if not s:
+                continue
+            if s.startswith("#") and "//" in s and not found_anchor:
+                found_anchor = True
+                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    anchor = m.group(1).strip()
+                clean_s = re.sub(r"\s*//.*$", "", s).rstrip()
+                if clean_s and clean_s != "#":
+                    post_lines.append(clean_s)
+                continue
+            if found_anchor:
+                post_lines.append(s)
+            else:
+                pre_lines.append(s)
+
+        # QX format: "static=Name, ..." / "url-latency-benchmark=Name, ..."
+        # Name is the part AFTER the first "=", before the first ","
+        names: set[str] = set()
+        for line in pg_lines:
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                after_eq = s.split("=", 1)[1]
+                name = after_eq.split(",")[0].strip()
+                if name:
+                    names.add(name)
+
+        pg_inject_qx = {
+            "anchor": anchor,
+            "block": "\n".join(post_lines).strip(),
+            "names": names,
+            "prepend_block": "\n".join(pre_lines).strip() or None,
+        }
+
+    qx_blocks = {
+        k: "\n".join(l.rstrip() for l in v).strip()
+        for k, v in block_lines.items()
+    }
+    return qx_header, pg_inject_qx, qx_blocks
+
+
 def _empty_plat() -> dict:
     return {
         "output": None,
@@ -319,6 +416,9 @@ def _empty_plat() -> dict:
         "filter_defs": {},
         "pg_inject_loon": None,
         "loon_blocks": {},
+        "qx_header": "",
+        "qx_blocks": {},
+        "pg_inject_qx": None,
     }
 
 
@@ -364,6 +464,11 @@ def parse_sync_txt() -> dict:
                     "Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk,
                     "Host": host_blk, "Rewrite": rewrite_blk, "Script": script_blk,
                 }
+            elif current_platform == "Quantumult X":
+                qx_hdr, pg_inj_qx, qx_blks = _process_builtin_qx(builtin_buf)
+                plat["qx_header"] = qx_hdr
+                plat["pg_inject_qx"] = pg_inj_qx
+                plat["qx_blocks"] = qx_blks
             else:
                 pp, pg, ri = _process_builtin(builtin_buf)
                 plat["proxy_providers"] = pp
@@ -1171,6 +1276,203 @@ def gen_loon_remote_rules(
 
 
 # ---------------------------------------------------------------------------
+# 生成 QX [policy]
+# ---------------------------------------------------------------------------
+
+_QX_PROXY_MAP = {"🚫 REJECT": "reject", "🔘 DIRECT": "direct"}
+
+
+def _fmt_qx_policy(
+    name: str,
+    gtype: str,
+    params: dict[str, str],
+    proxies: list[str],
+) -> str | None:
+    """格式化为 QX policy 单行。返回 None 表示跳过该组。"""
+    icon_part = ""
+    if icon_url := params.get("icon-url", ""):
+        icon_part = f", img-url={icon_url}"
+
+    # smart + policy-regex-filter → url-latency-benchmark（必须先于 include-other-group 检查）
+    if gtype == "smart" and (regex := params.get("policy-regex-filter", "")):
+        return (
+            f"url-latency-benchmark={name}, server-tag-regex={regex}, "
+            f"check-url=http://cp.cloudflare.com/generate_204, "
+            f"tolerance=100, alive-checking=false{icon_part}"
+        )
+
+    # include-all-proxies / include-other-group / policy-path → 跳过
+    if (
+        params.get("include-all-proxies", "").lower() in ("true", "1")
+        or "include-other-group" in params
+        or "policy-path" in params
+    ):
+        return None
+
+    # select with explicit proxies → static
+    if proxies:
+        mapped = [_QX_PROXY_MAP.get(p, p) for p in proxies]
+        return f"static={name}, {', '.join(mapped)}{icon_part}"
+
+    return None
+
+
+def gen_qx_policies(
+    group_lines: list[str],
+    skips: list[str],
+    pg_inject: dict | None,
+) -> str:
+    """生成 QX [policy] 段落。"""
+    out: list[str] = ["[policy]"]
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
+    ph = PendingHeaders()
+
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+
+    for line in group_lines:
+        if line.startswith("#"):
+            lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
+            ph.push(line, lvl)
+            continue
+        g = parse_group_line(line)
+        if g is None:
+            ph.skip()
+            continue
+        name = g["name"]
+
+        if name in inject_names:
+            ph.skip()
+            continue
+        if _is_skipped(name, skips):
+            print(f"  [SKIP QX policy] {name}")
+            ph.skip()
+            continue
+
+        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"])
+        if qx_line is None:
+            ph.skip()
+            continue
+
+        out.extend(ph.flush())
+        out.append(qx_line)
+
+        if pg_inject and not injected and pg_inject.get("anchor") == name:
+            out.append(pg_inject["block"])
+            injected = True
+
+    if pg_inject and not injected and pg_inject.get("block"):
+        out.append(pg_inject["block"])
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 QX [filter_remote]
+# ---------------------------------------------------------------------------
+
+def gen_qx_filter_remote(
+    rule_lines: list[str],
+    skips: list[str],
+    rename_map: dict[str, str] | None = None,
+    static_fr: str = "",
+) -> str:
+    """生成 QX [filter_remote] 段落。
+
+    static_fr 为 qx.ini 中的静态条目（流媒体等），prepend 到动态生成内容之前。
+    """
+    out: list[str] = ["[filter_remote]"]
+    if static_fr:
+        for line in static_fr.splitlines():
+            out.append(line)
+        out.append("")
+    ph = PendingHeaders()
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _COMMENT_DROP_TYPES:
+                lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
+                ph.push(s, lvl)
+            continue
+
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+
+        if rule_type not in ("RULE-SET", "DOMAIN-SET"):
+            ph.skip()
+            continue
+        if len(parts) < 3:
+            ph.skip()
+            continue
+
+        url, policy = parts[1], parts[2]
+        if not url.startswith("http"):
+            ph.skip()
+            continue
+
+        tag = _derive_tag(url)
+        if _should_skip([url, policy, tag], skips):
+            print(f"  [SKIP QX filter_remote] {url}")
+            ph.skip()
+            continue
+
+        if rename_map:
+            tag = rename_map.get(tag, tag)
+        out.extend(ph.flush())
+        out.append(
+            f"{url}, tag={tag}, force-policy={policy}, "
+            f"update-interval=86400, opt-parser=true, enabled=true"
+        )
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 QX [filter_local]
+# ---------------------------------------------------------------------------
+
+def gen_qx_filter_local(rule_lines: list[str], static_fl: str = "") -> str:
+    """生成 QX [filter_local] 段落。
+
+    static_fl 为 qx.ini 中的静态 LAN 规则（含 geoip, cn, direct），
+    再从 Surge rule_lines 提取 GEOIP（非 CN）和 FINAL。
+    """
+    out: list[str] = ["[filter_local]"]
+    if static_fl:
+        for line in static_fl.splitlines():
+            out.append(line)
+        out.append("")
+
+    final_line: str | None = None
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+        if rule_type == "GEOIP" and len(parts) >= 3:
+            geoip_val = parts[1].lower()
+            if geoip_val == "cn":
+                continue  # 已在 static_fl 中
+            policy = parts[2]
+            out.append(f"geoip, {geoip_val}, {policy}")
+        elif rule_type == "FINAL" and final_line is None:
+            policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
+            final_line = f"final, {policy}"
+
+    if final_line:
+        out.append(final_line)
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -1305,6 +1607,47 @@ def main() -> None:
 
         changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
         print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
+
+    # ── Quantumult X ───────────────────────────────────────────────────────
+    qx = config.get("Quantumult X", {})
+    if qx.get("output"):
+        print("\n── sync-config: Surge Profile → QX Sample.conf ──")
+        qx_out_path = qx["output"]
+        qx_header = qx.get("qx_header", "")
+        qx_blocks = qx.get("qx_blocks", {})
+        qx_pg_inject = qx.get("pg_inject_qx")
+        qx_skips = config.get("global_skips", []) + qx.get("skips", [])
+        qx_rename_map = qx.get("rename_map", {})
+
+        print(f"  QX skip: {qx_skips}")
+        if qx_pg_inject:
+            print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
+
+        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject)
+        filter_remote = gen_qx_filter_remote(
+            rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", "")
+        )
+        filter_local = gen_qx_filter_local(rule_lines, qx_blocks.get("filter_local", ""))
+
+        def _qx_section(key: str, header: str) -> str:
+            content = qx_blocks.get(key, "")
+            return f"{header}\n{content}" if content else header
+
+        qx_parts = [qx_header, policies]
+        qx_parts.append(_qx_section("server_remote", "[server_remote]"))
+        qx_parts.append(filter_remote)
+        qx_parts.append(_qx_section("rewrite_remote", "[rewrite_remote]"))
+        qx_parts.append(_qx_section("task_local", "[task_local]"))
+        qx_parts.append(_qx_section("http_backend", "[http_backend]"))
+        qx_parts.append("[server_local]")
+        qx_parts.append(filter_local)
+        qx_parts.append("[rewrite_local]")
+        mitm_content = qx_blocks.get("mitm", "")
+        if mitm_content:
+            qx_parts.append(f"[mitm]\n{mitm_content}")
+
+        changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
+        print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
 
 
 if __name__ == "__main__":

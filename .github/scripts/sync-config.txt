@@ -47,7 +47,25 @@ rule-providers:
   lancidr => LAN
 
 # Quantumult X
-# >> Quantumult/Sample.conf 输出目录，前面加 # 表示关闭 不转换
+>> Quantumult/Sample.conf
+# > Builtin
+<< .github/scripts/sync-config/qx.ini
+# > Skip
+iCloud
+Apple News
+Speedtest
+# > Rename
+[filter_remote]
+  AD => Advertising
+  HTTPDNS.Block => HTTPDNS
+  ASN.China => ASN China
+  Gemini => Google
+  GenAI => AIGC
+  proxy => Global
+  direct => China
+  reject => Adblock
+  cncidr => CNCIDR
+  lancidr => LAN
 
 # Loon
 >> Surge/Balloon.lcf
