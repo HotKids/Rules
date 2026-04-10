@@ -349,15 +349,8 @@ proxy-groups:
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
     proxies:
-      - ⛔️ REJECT
       - 🔘 DIRECT
-
-  # REJECT
-  - name: "⛔️ REJECT"
-    type: select
-    hidden: true
-    proxies:
-      - REJECT
+      - ⛔️ REJECT
 
   # DIRECT
   - name: "🔘 DIRECT"
@@ -365,6 +358,13 @@ proxy-groups:
     hidden: true
     proxies:
       - DIRECT
+
+  # REJECT
+  - name: "⛔️ REJECT"
+    type: select
+    hidden: true
+    proxies:
+      - REJECT
 
   # Nodes
   - name: "🇺🇳 Server"

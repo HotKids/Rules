@@ -1,4 +1,7 @@
 # > KKBOX
+user-agent, *KKBOX, KKBOX&KKTV
+user-agent, KKTV*, KKBOX&KKTV
+user-agent, com.kktv*, KKBOX&KKTV
 host-suffix, kkbox.com, KKBOX&KKTV
 host-suffix, kkbox.com.tw, KKBOX&KKTV
 host-suffix, kfs.io, KKBOX&KKTV

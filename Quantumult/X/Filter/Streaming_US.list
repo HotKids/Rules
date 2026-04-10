@@ -1,4 +1,13 @@
 # > Crunchyroll
+user-agent, Crunchyroll*, Streaming_US
+user-agent, discovery+*, Streaming_US
+user-agent, *DPlus*, Streaming_US
+user-agent, HBOMAX*, Streaming_US
+user-agent, Max*, Streaming_US
+user-agent, PBS*, Streaming_US
+user-agent, PPlus*, Streaming_US
+user-agent, ParamountPlus*, Streaming_US
+user-agent, peacock*, Streaming_US
 host-suffix, crunchyroll.com, Streaming_US
 # 如需使用 VRV，请将此条取消注释并走 US 代理
 # DOMAIN-SUFFIX,vrv.co

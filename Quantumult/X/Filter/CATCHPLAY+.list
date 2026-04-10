@@ -1,4 +1,5 @@
 # > CATCHPLAY+
+user-agent, CATCHPLAY*, CATCHPLAY+
 host-suffix, catchplay.com, CATCHPLAY+
 host, asiaplay-origin.s3.amazonaws.com, CATCHPLAY+
 host, tra-ww000-cp.akamaized.net, CATCHPLAY+

@@ -1,4 +1,8 @@
 # > iQIYI Intl
+user-agent, iQIYI*, IQ
+user-agent, QIYIVideo*, IQ
+user-agent, QYPlayer*, IQ
+user-agent, QTP*, IQ
 host-suffix, iq.com, IQ
 # 首页
 host-suffix, intl.iqiyi.com, IQ

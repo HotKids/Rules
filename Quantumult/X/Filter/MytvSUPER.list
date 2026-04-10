@@ -1,4 +1,5 @@
 # > MytvSUPER
+user-agent, mytv*, MytvSUPER
 host-keyword, nowtv100, MytvSUPER
 host-keyword, rthklive, MytvSUPER
 host-suffix, tvb.com, MytvSUPER

@@ -1,4 +1,6 @@
 # > YouTube
+user-agent, *YouTube*, YouTube
+user-agent, *youtube*, YouTube
 host-suffix, youtu.be, YouTube
 host-suffix, googlevideo.com, YouTube
 host, youtubei.googleapis.com, YouTube

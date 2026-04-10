@@ -1,5 +1,6 @@
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
+user-agent, *Spotify*, Spotify
 host-suffix, pscdn.co, Spotify
 host-suffix, scdn.co, Spotify
 host-suffix, spoti.fi, Spotify

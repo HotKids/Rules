@@ -1,4 +1,6 @@
 # > Discovery+
+user-agent, discovery+*, Discovery+
+user-agent, *DPlus*, Discovery+
 host-suffix, discoveryplus.com, Discovery+
 host-suffix, disco-api.com, Discovery+
 host-suffix, dnitv.com, Discovery+

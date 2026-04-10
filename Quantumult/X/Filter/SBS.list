@@ -1,4 +1,5 @@
 # > SBS On Demand
+user-agent, SBS*, SBS
 host-suffix, sbsod.com, SBS
 host-suffix, sbs.com.au, SBS
 # DOMAIN,sbsvoddai-vh.akamaihd.net
