@@ -12,7 +12,6 @@ sync-config.txt 格式（平台块 + 子分区）：
 """
 
 import re
-from collections import OrderedDict
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -209,8 +208,6 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
             continue
         if mode == "header":
             header_lines.append(line)
-        elif mode == "RemoteFilter":
-            remote_filter_lines.append(line)
         elif mode == "pg":
             pg_lines.append(line)
         elif mode == "Rule":
@@ -307,6 +304,103 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block, filter_defs
 
 
+def _process_builtin_qx(lines: list[str]) -> tuple[str, dict | None, dict]:
+    """从 QX Builtin 内容解析头部和各段落块。
+
+    返回：
+      qx_header      str        [general]+[dns] 内容（[policy] 前）
+      pg_inject_qx   dict|None  {anchor, block, names, prepend_block}
+      qx_blocks      dict       各静态段落文本 {server_remote, filter_remote,
+                                  rewrite_remote, task_local, http_backend,
+                                  server_local, filter_local, rewrite_local, mitm}
+    """
+    _BLOCK_KEYS = (
+        "server_remote", "filter_remote", "rewrite_remote", "task_local",
+        "http_backend", "server_local", "filter_local", "rewrite_local", "mitm",
+    )
+    _SECTION_MODE: dict[str, str] = {
+        "[policy]": "pg",
+        "[server_remote]": "server_remote",
+        "[filter_remote]": "filter_remote",
+        "[rewrite_remote]": "rewrite_remote",
+        "[task_local]": "task_local",
+        "[http_backend]": "http_backend",
+        "[server_local]": "server_local",
+        "[filter_local]": "filter_local",
+        "[rewrite_local]": "rewrite_local",
+        "[mitm]": "mitm",
+        "[MITM]": "mitm",
+    }
+
+    header_lines: list[str] = []
+    pg_lines: list[str] = []
+    block_lines: dict[str, list[str]] = {k: [] for k in _BLOCK_KEYS}
+    mode = "header"
+
+    for line in lines:
+        s = line.strip()
+        if s in _SECTION_MODE:
+            mode = _SECTION_MODE[s]
+            continue
+        if mode == "header":
+            header_lines.append(line)
+        elif mode == "pg":
+            pg_lines.append(line)
+        elif mode in block_lines:
+            block_lines[mode].append(line)
+
+    qx_header = "\n".join(l.rstrip() for l in header_lines).strip()
+
+    # [policy] 注入解析（与 _process_builtin_loon 相同逻辑）
+    pg_inject_qx: dict | None = None
+    if pg_lines:
+        anchor: str | None = None
+        pre_lines: list[str] = []
+        post_lines: list[str] = []
+        found_anchor = False
+        for line in pg_lines:
+            s = line.strip()
+            if not s:
+                continue
+            if s.startswith("#") and "//" in s and not found_anchor:
+                found_anchor = True
+                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    anchor = m.group(1).strip()
+                clean_s = re.sub(r"\s*//.*$", "", s).rstrip()
+                if clean_s and clean_s != "#":
+                    post_lines.append(clean_s)
+                continue
+            if found_anchor:
+                post_lines.append(s)
+            else:
+                pre_lines.append(s)
+
+        # QX format: "static=Name, ..." / "url-latency-benchmark=Name, ..."
+        # Name is the part AFTER the first "=", before the first ","
+        names: set[str] = set()
+        for line in pg_lines:
+            s = line.strip()
+            if s and not s.startswith("#") and "=" in s:
+                after_eq = s.split("=", 1)[1]
+                name = after_eq.split(",")[0].strip()
+                if name:
+                    names.add(name)
+
+        pg_inject_qx = {
+            "anchor": anchor,
+            "block": "\n".join(post_lines).strip(),
+            "names": names,
+            "prepend_block": "\n".join(pre_lines).strip() or None,
+        }
+
+    qx_blocks = {
+        k: "\n".join(l.rstrip() for l in v).strip()
+        for k, v in block_lines.items()
+    }
+    return qx_header, pg_inject_qx, qx_blocks
+
+
 def _empty_plat() -> dict:
     return {
         "output": None,
@@ -322,6 +416,9 @@ def _empty_plat() -> dict:
         "filter_defs": {},
         "pg_inject_loon": None,
         "loon_blocks": {},
+        "qx_header": "",
+        "qx_blocks": {},
+        "pg_inject_qx": None,
     }
 
 
@@ -367,6 +464,11 @@ def parse_sync_txt() -> dict:
                     "Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk,
                     "Host": host_blk, "Rewrite": rewrite_blk, "Script": script_blk,
                 }
+            elif current_platform == "Quantumult X":
+                qx_hdr, pg_inj_qx, qx_blks = _process_builtin_qx(builtin_buf)
+                plat["qx_header"] = qx_hdr
+                plat["pg_inject_qx"] = pg_inj_qx
+                plat["qx_blocks"] = qx_blks
             else:
                 pp, pg, ri = _process_builtin(builtin_buf)
                 plat["proxy_providers"] = pp
@@ -677,6 +779,33 @@ def _fmt_group(
     return lines
 
 
+class PendingHeaders:
+    """三级注释缓冲（# / # > / # >>），用于各 gen_* 函数中的注释懒刷逻辑。"""
+
+    __slots__ = ("_h",)
+
+    def __init__(self) -> None:
+        self._h: list[str | None] = [None, None, None]
+
+    def push(self, line: str, lvl: int) -> None:
+        idx = lvl - 1
+        self._h[idx] = line
+        for i in range(idx + 1, 3):
+            self._h[i] = None
+
+    def skip(self) -> None:
+        for i in range(2, -1, -1):
+            if self._h[i] is not None:
+                for j in range(i, 3):
+                    self._h[j] = None
+                return
+
+    def flush(self) -> list[str]:
+        out = [h for h in self._h if h is not None]
+        self._h = [None, None, None]
+        return out
+
+
 def gen_proxy_groups(
     group_lines: list[str],
     skips: list[str],
@@ -693,23 +822,7 @@ def gen_proxy_groups(
     out: list[str] = ["proxy-groups:"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
-    # 三级注释缓冲：h[0]=# h[1]=# > h[2]=# >>（与 gen_rules_and_providers 同逻辑）
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> list[str]:
-        result = []
-        for i in range(3):
-            if pending_h[i] is not None:
-                result.append(pending_h[i])
-                pending_h[i] = None
-        return result
+    ph = PendingHeaders()
 
     # prepend_block：Builtin 中无 // 锚点的分组 → 插到最前
     if pg_inject and pg_inject.get("prepend_block"):
@@ -719,26 +832,23 @@ def gen_proxy_groups(
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
-            idx = lvl - 1
-            pending_h[idx] = f"  {line}"
-            for i in range(idx + 1, 3):
-                pending_h[i] = None
+            ph.push(f"  {line}", lvl)
             continue
         g = parse_group_line(line)
         if g is None:
-            _h_skip()
+            ph.skip()
             continue
         name = g["name"]
 
         if name in inject_names:
-            _h_skip()
+            ph.skip()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP group] {name}")
-            _h_skip()
+            ph.skip()
             continue
 
-        out.extend(_h_flush())
+        out.extend(ph.flush())
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
@@ -818,27 +928,10 @@ def gen_rules_and_providers(
     rename_map: dict[str, str] | None = None,
 ) -> str:
     """生成 rule-providers + rules 的完整 YAML 文本。"""
-    providers: OrderedDict[str, dict] = OrderedDict()
+    providers: dict[str, dict] = {}
     seen: dict[str, str] = {}  # provider_name → url
     rules_out: list[str] = []
-    # 三级注释缓冲：h[0]=# h[1]=# > h[2]=# >>
-    # 规则跳过时，从最深非空层起向下清除；成功时全部刷出
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        """跳过/无映射时：从最深非空层起清除（保留更高层直到下一条规则出现）。"""
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> None:
-        """规则输出前：将所有待定注释刷入 rules_out。"""
-        for i in range(3):
-            if pending_h[i] is not None:
-                rules_out.append(pending_h[i])
-                pending_h[i] = None
+    ph = PendingHeaders()
 
     def register(clash_url: str, behavior: str) -> str:
         if clash_url in providers:
@@ -861,10 +954,7 @@ def gen_rules_and_providers(
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
                 lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
-                idx = lvl - 1
-                pending_h[idx] = f"  {s}"
-                for i in range(idx + 1, 3):  # 清除更深层的孤立注释
-                    pending_h[i] = None
+                ph.push(f"  {s}", lvl)
             continue
 
         parts = [p.strip() for p in s.split(",")]
@@ -873,7 +963,7 @@ def gen_rules_and_providers(
 
         if rule_type in CLASH_UNSUPPORTED_RULE_TYPES:
             print(f"  [SKIP rule] 不支持类型: {s}")
-            _h_skip()
+            ph.skip()
             continue
 
         if rule_type == "FINAL":
@@ -883,7 +973,7 @@ def gen_rules_and_providers(
         elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
-                _h_skip()
+                ph.skip()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
             emit.append("  - " + ",".join(keep))
@@ -896,7 +986,7 @@ def gen_rules_and_providers(
             # RULE-SET / DOMAIN-SET
             if len(parts) < 3:
                 print(f"  [WARN] 解析失败（字段不足）: {s}")
-                _h_skip()
+                ph.skip()
                 continue
 
             url_or_builtin, policy = parts[1], parts[2]
@@ -905,7 +995,7 @@ def gen_rules_and_providers(
                 # 内置规则集
                 if url_or_builtin not in builtin_maps:
                     print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
                 clash_url = builtin_maps[url_or_builtin]
                 pname = register(clash_url, _behavior_from_url(clash_url))
@@ -913,7 +1003,7 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    _h_skip()
+                    ph.skip()
                     continue
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
@@ -921,13 +1011,13 @@ def gen_rules_and_providers(
                 # 外部 URL
                 if skip := _should_skip([url_or_builtin, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 clash_url = map_surge_url(url_or_builtin, url_maps)
                 if clash_url is None:
                     print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 # cidr 文件名覆盖 > rule type > 文件名兜底
@@ -946,13 +1036,13 @@ def gen_rules_and_providers(
                     print(f"  [SKIP rule] skip={skip}: {clash_url}")
                     providers.pop(clash_url, None)
                     seen.pop(pname, None)
-                    _h_skip()
+                    ph.skip()
                     continue
 
                 emit.append(f"  - RULE-SET,{pname},{policy}")
 
         # 规则会被输出：先刷缓冲注释，再写规则行
-        _h_flush()
+        rules_out.extend(ph.flush())
         rules_out.extend(emit)
 
     # rule-providers
@@ -1075,22 +1165,7 @@ def gen_loon_proxy_groups(
     out: list[str] = ["[Proxy Group]"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> list[str]:
-        result_h = []
-        for i in range(3):
-            if pending_h[i] is not None:
-                result_h.append(pending_h[i])
-                pending_h[i] = None
-        return result_h
+    ph = PendingHeaders()
 
     # prepend_block（无 // 锚点的 Builtin 分组 → 插到最前）
     if pg_inject and pg_inject.get("prepend_block"):
@@ -1099,31 +1174,28 @@ def gen_loon_proxy_groups(
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
-            idx = lvl - 1
-            pending_h[idx] = line
-            for i in range(idx + 1, 3):
-                pending_h[i] = None
+            ph.push(line, lvl)
             continue
         g = parse_group_line(line)
         if g is None:
-            _h_skip()
+            ph.skip()
             continue
         name = g["name"]
 
         if name in inject_names:
-            _h_skip()
+            ph.skip()
             continue
         if _is_skipped(name, skips):
             print(f"  [SKIP Loon group] {name}")
-            _h_skip()
+            ph.skip()
             continue
 
         loon_line = _fmt_loon_group(name, g["type"], g["params"], g["proxies"], filter_map)
         if loon_line is None:
-            _h_skip()
+            ph.skip()
             continue
 
-        out.extend(_h_flush())
+        out.extend(ph.flush())
         out.append(loon_line)
 
         # 锚点注入
@@ -1161,20 +1233,7 @@ def gen_loon_remote_rules(
     Loon 原生支持 Surge .list 格式，URL 直接复用无需转换。
     """
     out: list[str] = ["[Remote Rule]"]
-    pending_h: list[str | None] = [None, None, None]
-
-    def _h_skip() -> None:
-        for i in range(2, -1, -1):
-            if pending_h[i] is not None:
-                for j in range(i, 3):
-                    pending_h[j] = None
-                return
-
-    def _h_flush() -> None:
-        for i in range(3):
-            if pending_h[i] is not None:
-                out.append(pending_h[i])
-                pending_h[i] = None
+    ph = PendingHeaders()
 
     for line in rule_lines:
         s = line.strip()
@@ -1184,37 +1243,231 @@ def gen_loon_remote_rules(
             inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
             if inner_type not in _COMMENT_DROP_TYPES:
                 lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
-                idx = lvl - 1
-                pending_h[idx] = s
-                for i in range(idx + 1, 3):
-                    pending_h[i] = None
+                ph.push(s, lvl)
             continue
 
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
 
         if rule_type not in ("RULE-SET", "DOMAIN-SET"):
-            _h_skip()
+            ph.skip()
             continue
         if len(parts) < 3:
-            _h_skip()
+            ph.skip()
             continue
 
         url, policy = parts[1], parts[2]
         if not url.startswith("http"):
-            _h_skip()
+            ph.skip()
             continue  # 内置规则集（LAN 等）跳过
 
         if _should_skip([url, policy], skips):
             print(f"  [SKIP Loon remote rule] {url}")
-            _h_skip()
+            ph.skip()
             continue
 
         tag = _derive_tag(url)
         if rename_map:
             tag = rename_map.get(tag, tag)
-        _h_flush()
+        out.extend(ph.flush())
         out.append(f"{url}, policy={policy}, tag={tag}, enabled=true")
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 QX [policy]
+# ---------------------------------------------------------------------------
+
+_QX_PROXY_MAP = {"🚫 REJECT": "reject", "🔘 DIRECT": "direct"}
+
+
+def _fmt_qx_policy(
+    name: str,
+    gtype: str,
+    params: dict[str, str],
+    proxies: list[str],
+) -> str | None:
+    """格式化为 QX policy 单行。返回 None 表示跳过该组。"""
+    icon_part = ""
+    if icon_url := params.get("icon-url", ""):
+        icon_part = f", img-url={icon_url}"
+
+    # smart + policy-regex-filter → url-latency-benchmark（必须先于 include-other-group 检查）
+    if gtype == "smart" and (regex := params.get("policy-regex-filter", "")):
+        return (
+            f"url-latency-benchmark={name}, server-tag-regex={regex}, "
+            f"check-url=http://cp.cloudflare.com/generate_204, "
+            f"tolerance=100, alive-checking=false{icon_part}"
+        )
+
+    # include-all-proxies / include-other-group / policy-path → 跳过
+    if (
+        params.get("include-all-proxies", "").lower() in ("true", "1")
+        or "include-other-group" in params
+        or "policy-path" in params
+    ):
+        return None
+
+    # select with explicit proxies → static
+    if proxies:
+        mapped = [_QX_PROXY_MAP.get(p, p) for p in proxies]
+        return f"static={name}, {', '.join(mapped)}{icon_part}"
+
+    return None
+
+
+def gen_qx_policies(
+    group_lines: list[str],
+    skips: list[str],
+    pg_inject: dict | None,
+) -> str:
+    """生成 QX [policy] 段落。"""
+    out: list[str] = ["[policy]"]
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
+    ph = PendingHeaders()
+
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+
+    for line in group_lines:
+        if line.startswith("#"):
+            lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
+            ph.push(line, lvl)
+            continue
+        g = parse_group_line(line)
+        if g is None:
+            ph.skip()
+            continue
+        name = g["name"]
+
+        if name in inject_names:
+            ph.skip()
+            continue
+        if _is_skipped(name, skips):
+            print(f"  [SKIP QX policy] {name}")
+            ph.skip()
+            continue
+
+        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"])
+        if qx_line is None:
+            ph.skip()
+            continue
+
+        out.extend(ph.flush())
+        out.append(qx_line)
+
+        if pg_inject and not injected and pg_inject.get("anchor") == name:
+            out.append(pg_inject["block"])
+            injected = True
+
+    if pg_inject and not injected and pg_inject.get("block"):
+        out.append(pg_inject["block"])
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 QX [filter_remote]
+# ---------------------------------------------------------------------------
+
+def gen_qx_filter_remote(
+    rule_lines: list[str],
+    skips: list[str],
+    rename_map: dict[str, str] | None = None,
+    static_fr: str = "",
+) -> str:
+    """生成 QX [filter_remote] 段落。
+
+    static_fr 为 qx.ini 中的静态条目（流媒体等），prepend 到动态生成内容之前。
+    """
+    out: list[str] = ["[filter_remote]"]
+    if static_fr:
+        for line in static_fr.splitlines():
+            out.append(line)
+        out.append("")
+    ph = PendingHeaders()
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _COMMENT_DROP_TYPES:
+                lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
+                ph.push(s, lvl)
+            continue
+
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+
+        if rule_type not in ("RULE-SET", "DOMAIN-SET"):
+            ph.skip()
+            continue
+        if len(parts) < 3:
+            ph.skip()
+            continue
+
+        url, policy = parts[1], parts[2]
+        if not url.startswith("http"):
+            ph.skip()
+            continue
+
+        tag = _derive_tag(url)
+        if _should_skip([url, policy, tag], skips):
+            print(f"  [SKIP QX filter_remote] {url}")
+            ph.skip()
+            continue
+
+        if rename_map:
+            tag = rename_map.get(tag, tag)
+        out.extend(ph.flush())
+        out.append(
+            f"{url}, tag={tag}, force-policy={policy}, "
+            f"update-interval=86400, opt-parser=true, enabled=true"
+        )
+
+    return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# 生成 QX [filter_local]
+# ---------------------------------------------------------------------------
+
+def gen_qx_filter_local(rule_lines: list[str], static_fl: str = "") -> str:
+    """生成 QX [filter_local] 段落。
+
+    static_fl 为 qx.ini 中的静态 LAN 规则（含 geoip, cn, direct），
+    再从 Surge rule_lines 提取 GEOIP（非 CN）和 FINAL。
+    """
+    out: list[str] = ["[filter_local]"]
+    if static_fl:
+        for line in static_fl.splitlines():
+            out.append(line)
+        out.append("")
+
+    final_line: str | None = None
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+        if rule_type == "GEOIP" and len(parts) >= 3:
+            geoip_val = parts[1].lower()
+            if geoip_val == "cn":
+                continue  # 已在 static_fl 中
+            policy = parts[2]
+            out.append(f"geoip, {geoip_val}, {policy}")
+        elif rule_type == "FINAL" and final_line is None:
+            policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
+            final_line = f"final, {policy}"
+
+    if final_line:
+        out.append(final_line)
 
     return "\n".join(out)
 
@@ -1354,6 +1607,47 @@ def main() -> None:
 
         changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
         print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
+
+    # ── Quantumult X ───────────────────────────────────────────────────────
+    qx = config.get("Quantumult X", {})
+    if qx.get("output"):
+        print("\n── sync-config: Surge Profile → QX Sample.conf ──")
+        qx_out_path = qx["output"]
+        qx_header = qx.get("qx_header", "")
+        qx_blocks = qx.get("qx_blocks", {})
+        qx_pg_inject = qx.get("pg_inject_qx")
+        qx_skips = config.get("global_skips", []) + qx.get("skips", [])
+        qx_rename_map = qx.get("rename_map", {})
+
+        print(f"  QX skip: {qx_skips}")
+        if qx_pg_inject:
+            print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
+
+        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject)
+        filter_remote = gen_qx_filter_remote(
+            rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", "")
+        )
+        filter_local = gen_qx_filter_local(rule_lines, qx_blocks.get("filter_local", ""))
+
+        def _qx_section(key: str, header: str) -> str:
+            content = qx_blocks.get(key, "")
+            return f"{header}\n{content}" if content else header
+
+        qx_parts = [qx_header, policies]
+        qx_parts.append(_qx_section("server_remote", "[server_remote]"))
+        qx_parts.append(filter_remote)
+        qx_parts.append(_qx_section("rewrite_remote", "[rewrite_remote]"))
+        qx_parts.append(_qx_section("task_local", "[task_local]"))
+        qx_parts.append(_qx_section("http_backend", "[http_backend]"))
+        qx_parts.append("[server_local]")
+        qx_parts.append(filter_local)
+        qx_parts.append("[rewrite_local]")
+        mitm_content = qx_blocks.get("mitm", "")
+        if mitm_content:
+            qx_parts.append(f"[mitm]\n{mitm_content}")
+
+        changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
+        print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
 
 
 if __name__ == "__main__":
