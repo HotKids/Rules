@@ -264,13 +264,13 @@ proxy-groups:
     type: select
     icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
     proxies:
+      - 🔰 Proxy
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
       - 🇸🇬 Singapore
       - 🇯🇵 Japan
       - 🇺🇸 America
       - 🇺🇳 Server
-      - 🔰 Proxy
 
   # CNTV APAC
   - name: "📺 CNTV"
@@ -365,6 +365,11 @@ proxy-groups:
     hidden: true
     proxies:
       - DIRECT
+
+  # Adblock
+  - name: "🚧 AdGuard"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
 
   # Nodes
   - name: "🇺🇳 Server"
