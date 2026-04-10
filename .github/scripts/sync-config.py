@@ -419,6 +419,7 @@ def _empty_plat() -> dict:
         "qx_header": "",
         "qx_blocks": {},
         "pg_inject_qx": None,
+        "emoji": False,
     }
 
 
@@ -569,6 +570,12 @@ def parse_sync_txt() -> dict:
             left, right = left.strip(), right.strip()
             if left:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
+        elif current_section == "Options" and current_platform and current_platform != "Surge":
+            if "=" in stripped:
+                key, _, val = stripped.partition("=")
+                key, val = key.strip(), val.strip().lower()
+                if key == "emoji":
+                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
 
     flush_builtin()
     return result
@@ -1282,24 +1289,57 @@ def gen_loon_remote_rules(
 _QX_PROXY_MAP = {"🚫 REJECT": "reject", "🔘 DIRECT": "direct"}
 
 
+def _qx_strip_emoji_text(text: str) -> str:
+    """Strip emoji from policy name references in QX config text blocks.
+
+    Handles:
+      static=🚧 AdGuard, reject, direct, img-url=...
+      force-policy=🚧 AdGuard  (within filter_remote lines)
+      final, 🔰 Proxy
+    """
+    result = []
+    for line in text.splitlines():
+        s = line.strip()
+        m = re.match(
+            r"^((?:static|url-latency-benchmark|available|round-robin|dest-hash)=)(.*)", s
+        )
+        if m:
+            kind, rest = m.group(1), m.group(2)
+            parts = [p.strip() for p in rest.split(",")]
+            # Strip emoji from all non-key=value tokens (policy name + proxy refs)
+            out_parts = [strip_emoji(p) if "=" not in p else p for p in parts]
+            result.append(kind + ", ".join(out_parts))
+        elif "force-policy=" in line:
+            new_line = re.sub(
+                r"(force-policy=)([^,]+)",
+                lambda m2: m2.group(1) + strip_emoji(m2.group(2).strip()),
+                line,
+            )
+            result.append(new_line)
+        elif s.startswith("final,"):
+            result.append("final, " + strip_emoji(s[6:].strip()))
+        else:
+            result.append(line)
+    return "\n".join(result)
+
+
 def _fmt_qx_policy(
     name: str,
     gtype: str,
     params: dict[str, str],
     proxies: list[str],
+    strip_names: bool = True,
 ) -> str | None:
     """格式化为 QX policy 单行。返回 None 表示跳过该组。"""
     icon_part = ""
     if icon_url := params.get("icon-url", ""):
         icon_part = f", img-url={icon_url}"
 
-    # smart + policy-regex-filter → url-latency-benchmark（必须先于 include-other-group 检查）
+    emit_name = strip_emoji(name) if strip_names else name
+
+    # smart + policy-regex-filter → static with server-tag-regex（必须先于 include-other-group 检查）
     if gtype == "smart" and (regex := params.get("policy-regex-filter", "")):
-        return (
-            f"url-latency-benchmark={name}, server-tag-regex={regex}, "
-            f"check-url=http://cp.cloudflare.com/generate_204, "
-            f"tolerance=100, alive-checking=false{icon_part}"
-        )
+        return f"static={emit_name}, server-tag-regex={regex}{icon_part}"
 
     # include-all-proxies / include-other-group / policy-path → 跳过
     if (
@@ -1312,7 +1352,9 @@ def _fmt_qx_policy(
     # select with explicit proxies → static
     if proxies:
         mapped = [_QX_PROXY_MAP.get(p, p) for p in proxies]
-        return f"static={name}, {', '.join(mapped)}{icon_part}"
+        if strip_names:
+            mapped = [strip_emoji(p) for p in mapped]
+        return f"static={emit_name}, {', '.join(mapped)}{icon_part}"
 
     return None
 
@@ -1321,6 +1363,7 @@ def gen_qx_policies(
     group_lines: list[str],
     skips: list[str],
     pg_inject: dict | None,
+    strip_names: bool = True,
 ) -> str:
     """生成 QX [policy] 段落。"""
     out: list[str] = ["[policy]"]
@@ -1329,7 +1372,8 @@ def gen_qx_policies(
     ph = PendingHeaders()
 
     if pg_inject and pg_inject.get("prepend_block"):
-        out.append(pg_inject["prepend_block"])
+        prepend = _qx_strip_emoji_text(pg_inject["prepend_block"]) if strip_names else pg_inject["prepend_block"]
+        out.append(prepend)
 
     for line in group_lines:
         if line.startswith("#"):
@@ -1350,7 +1394,7 @@ def gen_qx_policies(
             ph.skip()
             continue
 
-        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"])
+        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"], strip_names)
         if qx_line is None:
             ph.skip()
             continue
@@ -1358,12 +1402,15 @@ def gen_qx_policies(
         out.extend(ph.flush())
         out.append(qx_line)
 
+        # anchor 比较使用原始名称（inject_names 也用原始名称存储）
         if pg_inject and not injected and pg_inject.get("anchor") == name:
-            out.append(pg_inject["block"])
+            block = _qx_strip_emoji_text(pg_inject["block"]) if strip_names else pg_inject["block"]
+            out.append(block)
             injected = True
 
     if pg_inject and not injected and pg_inject.get("block"):
-        out.append(pg_inject["block"])
+        block = _qx_strip_emoji_text(pg_inject["block"]) if strip_names else pg_inject["block"]
+        out.append(block)
 
     return "\n".join(out)
 
@@ -1377,6 +1424,7 @@ def gen_qx_filter_remote(
     skips: list[str],
     rename_map: dict[str, str] | None = None,
     static_fr: str = "",
+    strip_names: bool = True,
 ) -> str:
     """生成 QX [filter_remote] 段落。
 
@@ -1384,7 +1432,8 @@ def gen_qx_filter_remote(
     """
     out: list[str] = ["[filter_remote]"]
     if static_fr:
-        for line in static_fr.splitlines():
+        fr_text = _qx_strip_emoji_text(static_fr) if strip_names else static_fr
+        for line in fr_text.splitlines():
             out.append(line)
         out.append("")
     ph = PendingHeaders()
@@ -1423,9 +1472,11 @@ def gen_qx_filter_remote(
 
         if rename_map:
             tag = rename_map.get(tag, tag)
+        # _QX_PROXY_MAP 优先（🔘 DIRECT→direct 等 QX 内建值），其余按 strip_names 处理
+        emit_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
         out.extend(ph.flush())
         out.append(
-            f"{url}, tag={tag}, force-policy={policy}, "
+            f"{url}, tag={tag}, force-policy={emit_policy}, "
             f"update-interval=86400, opt-parser=true, enabled=true"
         )
 
@@ -1436,7 +1487,11 @@ def gen_qx_filter_remote(
 # 生成 QX [filter_local]
 # ---------------------------------------------------------------------------
 
-def gen_qx_filter_local(rule_lines: list[str], static_fl: str = "") -> str:
+def gen_qx_filter_local(
+    rule_lines: list[str],
+    static_fl: str = "",
+    strip_names: bool = True,
+) -> str:
     """生成 QX [filter_local] 段落。
 
     static_fl 为 qx.ini 中的静态 LAN 规则（含 geoip, cn, direct），
@@ -1464,7 +1519,8 @@ def gen_qx_filter_local(rule_lines: list[str], static_fl: str = "") -> str:
             out.append(f"geoip, {geoip_val}, {policy}")
         elif rule_type == "FINAL" and final_line is None:
             policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
-            final_line = f"final, {policy}"
+            emit_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+            final_line = f"final, {emit_policy}"
 
     if final_line:
         out.append(final_line)
@@ -1618,16 +1674,19 @@ def main() -> None:
         qx_pg_inject = qx.get("pg_inject_qx")
         qx_skips = config.get("global_skips", []) + qx.get("skips", [])
         qx_rename_map = qx.get("rename_map", {})
+        qx_strip_names = not qx.get("emoji", False)  # emoji=False(default) → strip names
 
         print(f"  QX skip: {qx_skips}")
+        print(f"  QX emoji: {qx.get('emoji', False)} | strip_names: {qx_strip_names}")
         if qx_pg_inject:
             print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
 
-        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject)
+        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject, strip_names=qx_strip_names)
         filter_remote = gen_qx_filter_remote(
-            rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", "")
+            rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", ""),
+            strip_names=qx_strip_names,
         )
-        filter_local = gen_qx_filter_local(rule_lines, qx_blocks.get("filter_local", ""))
+        filter_local = gen_qx_filter_local(rule_lines, qx_blocks.get("filter_local", ""), strip_names=qx_strip_names)
 
         def _qx_section(key: str, header: str) -> str:
             content = qx_blocks.get(key, "")
