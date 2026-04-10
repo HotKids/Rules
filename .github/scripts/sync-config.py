@@ -31,6 +31,15 @@ _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
 _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
+# Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
+SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "IP-CIDR6"}
+# Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
+SURFBOARD_SKIP_GENERAL_KEYS = {
+    "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
+    "http-listen", "socks5-listen",
+    "external-controller-access", "http-api", "http-api-tls", "http-api-web-dashboard",
+}
+
 # ---------------------------------------------------------------------------
 # 通用工具
 # ---------------------------------------------------------------------------
@@ -666,8 +675,8 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
 # 解析 Surge Profile.conf
 # ---------------------------------------------------------------------------
 
-def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[str], list[str]]:
-    """读取 Surge Profile.conf，返回 proxy_lines, group_lines, rule_lines, mitm_lines。"""
+def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[str], list[str], list[str]]:
+    """读取 Surge Profile.conf，返回 proxy_lines, group_lines, rule_lines, mitm_lines, general_lines。"""
     text = profile_path.read_text(encoding="utf-8")
     sections: dict[str, list[str]] = {}
     current: str | None = None
@@ -696,6 +705,7 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         clean(sections.get("Proxy Group", [])),
         clean(sections.get("Rule", [])),
         clean(sections.get("MITM", [])),
+        sections.get("General", []),  # raw lines，含注释，不经 clean() 处理
     )
 
 # ---------------------------------------------------------------------------
@@ -1684,6 +1694,114 @@ def _sync_qx_mitm(mitm_block: str, surge_mitm_lines: list[str]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# 生成 Surfboard Profile
+# ---------------------------------------------------------------------------
+
+def _gen_surfboard_general(lines: list[str]) -> str:
+    """过滤 iOS/macOS 专属 key，输出 Surfboard 兼容的 [General] 内容。"""
+    out = []
+    for line in lines:
+        s = line.strip()
+        if s and not s.startswith("#") and "=" in s:
+            key = s.split("=")[0].strip()
+            if key in SURFBOARD_SKIP_GENERAL_KEYS:
+                continue
+        out.append(line.rstrip())
+    return "\n".join(out).strip()
+
+
+def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str:
+    """生成 Surfboard [Proxy Group] 段落，将 smart 类型转换为 url-test。"""
+    out: list[str] = ["[Proxy Group]"]
+    ph = PendingHeaders()
+    for line in group_lines:
+        if line.startswith("#"):
+            lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
+            ph.push(line, lvl)
+            continue
+        g = parse_group_line(line)
+        if g is None:
+            ph.skip()
+            continue
+        name = g["name"]
+        if _is_skipped(name, skips):
+            print(f"  [SKIP Surfboard group] {name}")
+            ph.skip()
+            continue
+
+        gtype = "url-test" if g["type"] == "smart" else g["type"]
+        tokens = [gtype] + g["proxies"]
+        for k, v in g["params"].items():
+            tokens.append(f"{k}={v}")
+
+        out.extend(ph.flush())
+        out.append(f"{name} = {', '.join(tokens)}")
+    return "\n".join(out)
+
+
+def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
+    """生成 Surfboard [Rule] 段落，过滤 URL-REGEX / USER-AGENT / IP-CIDR6，REJECT-TINYGIF → REJECT。"""
+    out: list[str] = ["[Rule]"]
+    ph = PendingHeaders()
+    _sb_drop = SURFBOARD_UNSUPPORTED_RULE_TYPES | _COMMENT_DROP_TYPES
+
+    for line in rule_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            inner_type = s.lstrip("#").strip().split(",")[0].strip().upper()
+            if inner_type not in _sb_drop:
+                lvl = 3 if s.startswith("# >>") else (2 if s.startswith("# >") else 1)
+                ph.push(s, lvl)
+            continue
+
+        parts = [p.strip() for p in s.split(",")]
+        rule_type = parts[0].upper()
+
+        if rule_type in SURFBOARD_UNSUPPORTED_RULE_TYPES:
+            ph.skip()
+            continue
+
+        if rule_type == "REJECT-TINYGIF":
+            parts[0] = "REJECT"
+
+        # skip 检查
+        if rule_type in ("RULE-SET", "DOMAIN-SET") and len(parts) >= 3:
+            if _should_skip([parts[1], parts[2]], skips):
+                ph.skip()
+                continue
+        elif len(parts) >= 2 and _should_skip([parts[1]], skips):
+            ph.skip()
+            continue
+
+        keep = [p for p in parts if p not in _SURGE_FLAGS]
+        out.extend(ph.flush())
+        out.append(", ".join(keep))
+    return "\n".join(out)
+
+
+def gen_surfboard_profile(
+    proxy_lines: list[str],
+    group_lines: list[str],
+    rule_lines: list[str],
+    skips: list[str],
+    general_lines: list[str] | None = None,
+) -> str:
+    """从 Surge 解析结果生成 Surfboard 兼容 Profile（Surge 精简版，无 MITM）。"""
+    parts = []
+    if general_lines:
+        gen_text = _gen_surfboard_general(general_lines)
+        if gen_text:
+            parts.append("[General]\n" + gen_text)
+    if proxy_lines:
+        parts.append("[Proxy]\n" + "\n".join(proxy_lines))
+    parts.append(_gen_surfboard_proxy_groups(group_lines, skips))
+    parts.append(_gen_surfboard_rules(rule_lines, skips))
+    return "\n\n".join(parts) + "\n"
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -1694,7 +1812,7 @@ def main() -> None:
     if not surge_src:
         raise ValueError("Surge 块缺少 >> 源文件路径指令")
 
-    _, group_lines, rule_lines, surge_mitm_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    proxy_lines, group_lines, rule_lines, surge_mitm_lines, general_lines = parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
     # ── Clash ──────────────────────────────────────────────────────────────
@@ -1871,6 +1989,17 @@ def main() -> None:
 
         changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
         print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
+
+    # ── Surfboard ──────────────────────────────────────────────────────────────
+    surfboard = config.get("Surfboard", {})
+    if surfboard.get("output"):
+        print("\n── sync-config: Surge Profile → Surfboard.conf ──")
+        sb_out = surfboard["output"]
+        sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
+        print(f"  Surfboard skip: {sb_skips}")
+        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines)
+        changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
+        print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 
 
 if __name__ == "__main__":
