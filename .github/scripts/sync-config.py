@@ -1416,7 +1416,12 @@ def gen_qx_policies(
             continue
         name = g["name"]
 
-        if name in inject_names:
+        # 计算最终输出名（strip + rename），用于 inject_names 和 anchor 比较
+        emit_name = strip_emoji(name) if strip_names else name
+        if policy_rename_map:
+            emit_name = policy_rename_map.get(emit_name, emit_name)
+
+        if emit_name in inject_names or name in inject_names:
             ph.skip()
             continue
         if _is_skipped(name, skips):
@@ -1432,8 +1437,8 @@ def gen_qx_policies(
         out.extend(ph.flush())
         out.append(qx_line)
 
-        # anchor 比较使用原始名称（inject_names 也用原始名称存储）
-        if pg_inject and not injected and pg_inject.get("anchor") == name:
+        # anchor 比较使用最终输出名（strip + rename 后）
+        if pg_inject and not injected and pg_inject.get("anchor") == emit_name:
             block = _qx_normalize_text(pg_inject["block"], policy_rename_map) if strip_names else pg_inject["block"]
             out.append(block)
             injected = True
@@ -1611,6 +1616,33 @@ def gen_qx_filter_local(
         out.append(final_line)
 
     return "\n".join(out)
+
+
+# ---------------------------------------------------------------------------
+# QX [mitm] 同步
+# ---------------------------------------------------------------------------
+
+def _sync_qx_mitm(mitm_block: str, surge_mitm_lines: list[str]) -> str:
+    """将 Surge [MITM] 的 ca-passphrase / ca-p12 同步到 QX [mitm] 块。"""
+    surge_passphrase = ""
+    surge_p12 = ""
+    for line in surge_mitm_lines:
+        s = line.strip()
+        if s.startswith("ca-passphrase") and "=" in s:
+            surge_passphrase = s.split("=", 1)[1].strip()
+        elif s.startswith("ca-p12") and "=" in s:
+            surge_p12 = s.split("=", 1)[1].strip()
+
+    result = []
+    for line in mitm_block.splitlines():
+        s = line.strip()
+        if s.startswith("passphrase") and "=" in s and surge_passphrase:
+            result.append(f"passphrase = {surge_passphrase}")
+        elif s.startswith("p12") and "=" in s and surge_p12:
+            result.append(f"p12 = {surge_p12}")
+        else:
+            result.append(line)
+    return "\n".join(result)
 
 
 # ---------------------------------------------------------------------------
@@ -1796,6 +1828,7 @@ def main() -> None:
         qx_parts.append("[rewrite_local]")
         mitm_content = qx_blocks.get("mitm", "")
         if mitm_content:
+            mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
             qx_parts.append(f"[mitm]\n{mitm_content}")
 
         changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")

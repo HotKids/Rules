@@ -58,6 +58,7 @@ Speedtest
 # > Rename
 [policy]
   Proxy => Outbound
+  AdGuard => AdBlock
 [filter_remote]
   AD => Adblock
   HTTPDNS.Block => HTTPDNS
