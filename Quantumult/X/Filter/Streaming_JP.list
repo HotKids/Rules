@@ -1,38 +1,35 @@
 # > AbemaTV
-USER-AGENT,AbemaTV*,Streaming_JP
-DOMAIN-SUFFIX,abema.io,Streaming_JP
-DOMAIN-SUFFIX,abema.tv,Streaming_JP
-DOMAIN-SUFFIX,ameba.jp,Streaming_JP
-DOMAIN-SUFFIX,hayabusa.io,Streaming_JP
-DOMAIN,abematv.akamaized.net,Streaming_JP
-DOMAIN,ds-vod-abematv.akamaized.net,Streaming_JP
-DOMAIN,linear-abematv.akamaized.net,Streaming_JP
-DOMAIN,ds-linear-abematv.akamaized.net,Streaming_JP
+host-suffix, abema.io, Streaming_JP
+host-suffix, abema.tv, Streaming_JP
+host-suffix, ameba.jp, Streaming_JP
+host-suffix, hayabusa.io, Streaming_JP
+host, abematv.akamaized.net, Streaming_JP
+host, ds-vod-abematv.akamaized.net, Streaming_JP
+host, linear-abematv.akamaized.net, Streaming_JP
+host, ds-linear-abematv.akamaized.net, Streaming_JP
 
 # > FOD
-USER-AGENT,FOD*,Streaming_JP
-DOMAIN-SUFFIX,fujitv.co.jp,Streaming_JP
-DOMAIN-SUFFIX,stream.ne.jp,Streaming_JP
-DOMAIN,measure.ic.tver.jp,Streaming_JP
+host-suffix, fujitv.co.jp, Streaming_JP
+host-suffix, stream.ne.jp, Streaming_JP
+host, measure.ic.tver.jp, Streaming_JP
 
 # > Hulu JP
-DOMAIN-SUFFIX,hulu.jp,Streaming_JP
-DOMAIN-SUFFIX,happyon.jp,Streaming_JP
-DOMAIN-SUFFIX,prod.hjholdings.tv,Streaming_JP
+host-suffix, hulu.jp, Streaming_JP
+host-suffix, happyon.jp, Streaming_JP
+host-suffix, prod.hjholdings.tv, Streaming_JP
 
 # > Paravi
-USER-AGENT,Paravi*,Streaming_JP
-DOMAIN-SUFFIX,paravi.jp,Streaming_JP
+host-suffix, paravi.jp, Streaming_JP
 
 # > TVer
-DOMAIN-SUFFIX,tver.jp,Streaming_JP
-DOMAIN-SUFFIX,interactive-circle.jp,Streaming_JP
-DOMAIN-SUFFIX,brightcove.com,Streaming_JP
-DOMAIN-SUFFIX,prod.boltdns.net,Streaming_JP
+host-suffix, tver.jp, Streaming_JP
+host-suffix, interactive-circle.jp, Streaming_JP
+host-suffix, brightcove.com, Streaming_JP
+host-suffix, prod.boltdns.net, Streaming_JP
 # DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
 # > U-NEXT
-DOMAIN-SUFFIX,unext.jp,Streaming_JP
-DOMAIN-SUFFIX,nxtv.jp,Streaming_JP
+host-suffix, unext.jp, Streaming_JP
+host-suffix, nxtv.jp, Streaming_JP
 # DOMAIN,streamd01ca-nxtv-jp.akamaized.net
-DOMAIN,us-central1-u-next-apps.cloudfunctions.net,Streaming_JP
+host, us-central1-u-next-apps.cloudfunctions.net, Streaming_JP

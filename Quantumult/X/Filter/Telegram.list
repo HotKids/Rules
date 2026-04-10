@@ -1,32 +1,32 @@
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Telegram.list
 # > Telegram
-DOMAIN-SUFFIX,cdn-telegram.org,Telegram
-DOMAIN-SUFFIX,comments.app,Telegram
-DOMAIN-SUFFIX,graph.org,Telegram
-DOMAIN-SUFFIX,legra.ph,Telegram
-DOMAIN-SUFFIX,quiz.directory,Telegram
-DOMAIN-SUFFIX,t.me,Telegram
-DOMAIN-SUFFIX,tdesktop.com,Telegram
-DOMAIN-SUFFIX,telegra.ph,Telegram
-DOMAIN-SUFFIX,telegram.dog,Telegram
-DOMAIN-SUFFIX,telegram.me,Telegram
-DOMAIN-SUFFIX,telegram.org,Telegram
-DOMAIN-SUFFIX,telegram.space,Telegram
-DOMAIN-SUFFIX,telegram-cdn.org,Telegram
-DOMAIN-SUFFIX,telesco.pe,Telegram
-DOMAIN-SUFFIX,tg.dev,Telegram
-DOMAIN-SUFFIX,tx.me,Telegram
-IP-CIDR,91.108.56.0/22,Telegram,no-resolve
-IP-CIDR,91.108.4.0/22,Telegram,no-resolve
-IP-CIDR,91.108.8.0/22,Telegram,no-resolve
-IP-CIDR,91.108.16.0/22,Telegram,no-resolve
-IP-CIDR,91.108.12.0/22,Telegram,no-resolve
-IP-CIDR,149.154.160.0/20,Telegram,no-resolve
-IP-CIDR,91.105.192.0/23,Telegram,no-resolve
-IP-CIDR,91.108.20.0/22,Telegram,no-resolve
-IP-CIDR,185.76.151.0/24,Telegram,no-resolve
-IP-CIDR6,2001:b28:f23d::/48,Telegram,no-resolve
-IP-CIDR6,2001:b28:f23f::/48,Telegram,no-resolve
-IP-CIDR6,2001:67c:4e8::/48,Telegram,no-resolve
-IP-CIDR6,2001:b28:f23c::/48,Telegram,no-resolve
-IP-CIDR6,2a0a:f280::/32,Telegram,no-resolve
+host-suffix, cdn-telegram.org, Telegram
+host-suffix, comments.app, Telegram
+host-suffix, graph.org, Telegram
+host-suffix, legra.ph, Telegram
+host-suffix, quiz.directory, Telegram
+host-suffix, t.me, Telegram
+host-suffix, tdesktop.com, Telegram
+host-suffix, telegra.ph, Telegram
+host-suffix, telegram.dog, Telegram
+host-suffix, telegram.me, Telegram
+host-suffix, telegram.org, Telegram
+host-suffix, telegram.space, Telegram
+host-suffix, telegram-cdn.org, Telegram
+host-suffix, telesco.pe, Telegram
+host-suffix, tg.dev, Telegram
+host-suffix, tx.me, Telegram
+ip-cidr, 91.108.56.0/22, Telegram
+ip-cidr, 91.108.4.0/22, Telegram
+ip-cidr, 91.108.8.0/22, Telegram
+ip-cidr, 91.108.16.0/22, Telegram
+ip-cidr, 91.108.12.0/22, Telegram
+ip-cidr, 149.154.160.0/20, Telegram
+ip-cidr, 91.105.192.0/23, Telegram
+ip-cidr, 91.108.20.0/22, Telegram
+ip-cidr, 185.76.151.0/24, Telegram
+ip6-cidr, 2001:b28:f23d::/48, Telegram
+ip6-cidr, 2001:b28:f23f::/48, Telegram
+ip6-cidr, 2001:67c:4e8::/48, Telegram
+ip6-cidr, 2001:b28:f23c::/48, Telegram
+ip6-cidr, 2a0a:f280::/32, Telegram

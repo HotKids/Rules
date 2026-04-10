@@ -1,5 +1,4 @@
 # > Britbox
-USER-AGENT,Britbox*,Britbox
-DOMAIN-SUFFIX,britbox.com,Britbox
-DOMAIN-SUFFIX,bbc.co.uk,Britbox
-DOMAIN,d2z3p34itxwaj7.cloudfront.net,Britbox
+host-suffix, britbox.com, Britbox
+host-suffix, bbc.co.uk, Britbox
+host, d2z3p34itxwaj7.cloudfront.net, Britbox

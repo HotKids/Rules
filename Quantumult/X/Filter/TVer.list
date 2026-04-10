@@ -1,6 +1,6 @@
 # > TVer
-DOMAIN-SUFFIX,tver.jp,TVer
-DOMAIN-SUFFIX,interactive-circle.jp,TVer
-DOMAIN-SUFFIX,brightcove.com,TVer
-DOMAIN-SUFFIX,prod.boltdns.net,TVer
+host-suffix, tver.jp, TVer
+host-suffix, interactive-circle.jp, TVer
+host-suffix, brightcove.com, TVer
+host-suffix, prod.boltdns.net, TVer
 # DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告

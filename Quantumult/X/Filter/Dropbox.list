@@ -1,19 +1,19 @@
 ### fork from https://raw.githubusercontent.com/LM-Firefly/Rules/master/PROXY/Dropbox.list
 # > Dropbox
-DOMAIN-SUFFIX,db.tt,Dropbox
-DOMAIN-SUFFIX,dropbox.com,Dropbox
-DOMAIN-SUFFIX,dropboxapi.com,Dropbox
-DOMAIN-SUFFIX,dropboxusercontent.com,Dropbox
-DOMAIN-SUFFIX,dropboxbusiness.com,Dropbox
-DOMAIN-SUFFIX,dropboxforums.com,Dropbox
-DOMAIN-SUFFIX,dropboxforum.com,Dropbox
-DOMAIN-SUFFIX,dropboxinsiders.com,Dropbox
-DOMAIN-SUFFIX,dropboxmail.com,Dropbox
-DOMAIN-SUFFIX,dropboxpartners.com,Dropbox
-DOMAIN-SUFFIX,dropboxstatic.com,Dropbox
-DOMAIN-SUFFIX,dropbox.zendesk.com,Dropbox
-DOMAIN-SUFFIX,getdropbox.com,Dropbox
-DOMAIN-SUFFIX,dropbox-dns.com,Dropbox
-DOMAIN-SUFFIX,dropbox.tech,Dropbox
-DOMAIN-SUFFIX,dropboxcaptcha.com,Dropbox
-DOMAIN-SUFFIX,paper-attachments.s3.amazonaws.com,Dropbox
+host-suffix, db.tt, Dropbox
+host-suffix, dropbox.com, Dropbox
+host-suffix, dropboxapi.com, Dropbox
+host-suffix, dropboxusercontent.com, Dropbox
+host-suffix, dropboxbusiness.com, Dropbox
+host-suffix, dropboxforums.com, Dropbox
+host-suffix, dropboxforum.com, Dropbox
+host-suffix, dropboxinsiders.com, Dropbox
+host-suffix, dropboxmail.com, Dropbox
+host-suffix, dropboxpartners.com, Dropbox
+host-suffix, dropboxstatic.com, Dropbox
+host-suffix, dropbox.zendesk.com, Dropbox
+host-suffix, getdropbox.com, Dropbox
+host-suffix, dropbox-dns.com, Dropbox
+host-suffix, dropbox.tech, Dropbox
+host-suffix, dropboxcaptcha.com, Dropbox
+host-suffix, paper-attachments.s3.amazonaws.com, Dropbox

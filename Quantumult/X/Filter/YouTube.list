@@ -1,7 +1,5 @@
 # > YouTube
-USER-AGENT,*YouTube*,YouTube
-USER-AGENT,*youtube*,YouTube
-DOMAIN-SUFFIX,youtu.be,YouTube
-DOMAIN-SUFFIX,googlevideo.com,YouTube
-DOMAIN,youtubei.googleapis.com,YouTube
-DOMAIN-KEYWORD,youtube,YouTube
+host-suffix, youtu.be, YouTube
+host-suffix, googlevideo.com, YouTube
+host, youtubei.googleapis.com, YouTube
+host-keyword, youtube, YouTube

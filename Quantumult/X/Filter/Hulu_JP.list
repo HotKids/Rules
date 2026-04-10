@@ -1,4 +1,4 @@
 # > Hulu JP
-DOMAIN-SUFFIX,hulu.jp,Hulu_JP
-DOMAIN-SUFFIX,happyon.jp,Hulu_JP
-DOMAIN-SUFFIX,prod.hjholdings.tv,Hulu_JP
+host-suffix, hulu.jp, Hulu_JP
+host-suffix, happyon.jp, Hulu_JP
+host-suffix, prod.hjholdings.tv, Hulu_JP

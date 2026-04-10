@@ -1,73 +1,65 @@
 # > Bilibili
-USER-AGENT,*bili*,CNTV
-DOMAIN-SUFFIX,bilibili.com,CNTV
-DOMAIN-SUFFIX,bilibili.tv,CNTV
-DOMAIN-SUFFIX,biliapi.net,CNTV
-DOMAIN-SUFFIX,biliapi.com,CNTV
-DOMAIN-SUFFIX,bilivideo.com,CNTV
-DOMAIN-SUFFIX,acgvideo.com,CNTV
-DOMAIN-SUFFIX,acg.tv,CNTV
-DOMAIN-SUFFIX,b23.tv,CNTV
-DOMAIN-SUFFIX,hdslb.com,CNTV
-DOMAIN,upos-hz-mirrorakam.akamaized.net,CNTV
-DOMAIN-KEYWORD,bilibili,CNTV
-DOMAIN-KEYWORD,cn-hk-eq-bcache-,CNTV
-IP-CIDR,203.107.1.65/32,CNTV,no-resolve
+host-suffix, bilibili.com, CNTV
+host-suffix, bilibili.tv, CNTV
+host-suffix, biliapi.net, CNTV
+host-suffix, biliapi.com, CNTV
+host-suffix, bilivideo.com, CNTV
+host-suffix, acgvideo.com, CNTV
+host-suffix, acg.tv, CNTV
+host-suffix, b23.tv, CNTV
+host-suffix, hdslb.com, CNTV
+host, upos-hz-mirrorakam.akamaized.net, CNTV
+host-keyword, bilibili, CNTV
+host-keyword, cn-hk-eq-bcache-, CNTV
+ip-cidr, 203.107.1.65/32, CNTV
 # 港台版 Bilibili App
-USER-AGENT,bili-inter*,CNTV
-DOMAIN,apiintl.biliapi.net,CNTV
+host, apiintl.biliapi.net, CNTV
 
 # > Bilibili SEA
 # USER-AGENT,bilibili
-DOMAIN-SUFFIX,biliintl.com,CNTV
-DOMAIN,apm-misaka.biliapi.net,CNTV
-DOMAIN,p-bstarstatic.akamaized.net,CNTV
-DOMAIN,upos-bstar-mirrorakam.akamaized.net,CNTV
-DOMAIN,upos-bstar1-mirrorakam.akamaized.net,CNTV
+host-suffix, biliintl.com, CNTV
+host, apm-misaka.biliapi.net, CNTV
+host, p-bstarstatic.akamaized.net, CNTV
+host, upos-bstar-mirrorakam.akamaized.net, CNTV
+host, upos-bstar1-mirrorakam.akamaized.net, CNTV
 
 # > iQIYI Intl
-USER-AGENT,iQIYI*,CNTV
-USER-AGENT,QIYIVideo*,CNTV
-USER-AGENT,QYPlayer*,CNTV
-USER-AGENT,QTP*,CNTV
-PROCESS-NAME,com.iqiyi.i18n,CNTV
-PROCESS-NAME,com.iqiyi.i18n.tv,CNTV
-DOMAIN-SUFFIX,iq.com,CNTV
+host-suffix, iq.com, CNTV
 # 首页
-DOMAIN-SUFFIX,intl.iqiyi.com,CNTV
+host-suffix, intl.iqiyi.com, CNTV
 # 历史
-DOMAIN,intl-rcd.iqiyi.com,CNTV
-DOMAIN,intl-im-hist-api.iqiyi.com,CNTV
+host, intl-rcd.iqiyi.com, CNTV
+host, intl-im-hist-api.iqiyi.com, CNTV
 # 收藏
-DOMAIN,intl-subscription.iqiyi.com,CNTV
+host, intl-subscription.iqiyi.com, CNTV
 # 播放
-DOMAIN,akmcdnoversea.inter.iqiyi.com,CNTV
-DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,CNTV
-DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,CNTV
-DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,CNTV
-DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,CNTV
-DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,CNTV
-DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,CNTV
-DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,CNTV
-DOMAIN-KEYWORD,akmcdnoverse,CNTV
-DOMAIN-KEYWORD,chuangcachecdnoversea,CNTV
-IP-CIDR,23.40.241.251/32,CNTV,no-resolve
-IP-CIDR,23.40.242.10/32,CNTV,no-resolve
-IP-CIDR,110.238.107.47/32,CNTV,no-resolve
-IP-CIDR,118.26.32.162/32,CNTV,no-resolve
-IP-CIDR,159.138.102.146/32,CNTV,no-resolve
-IP-CIDR,203.80.97.208/32,CNTV,no-resolve
-IP-CIDR,203.198.80.99/32,CNTV,no-resolve
+host, akmcdnoversea.inter.iqiyi.com, CNTV
+host, akmcdnoversea.inter.ptqy.gitv.tv, CNTV
+host, chuangcachecdnoversea.inter.iqiyi.com, CNTV
+host, chuangcachecdnoversea.inter.ptqy.gitv.tv, CNTV
+host, akmcdnoversea-tw.inter.iqiyi.com, CNTV
+host, akmcdnoversea-tw.inter.ptqy.gitv.tv, CNTV
+host, chuangcachecdnoversea-tw.inter.iqiyi.com, CNTV
+host, chuangcachecdnoversea-tw.inter.ptqy.gitv.tv, CNTV
+host-keyword, akmcdnoverse, CNTV
+host-keyword, chuangcachecdnoversea, CNTV
+ip-cidr, 23.40.241.251/32, CNTV
+ip-cidr, 23.40.242.10/32, CNTV
+ip-cidr, 110.238.107.47/32, CNTV
+ip-cidr, 118.26.32.162/32, CNTV
+ip-cidr, 159.138.102.146/32, CNTV
+ip-cidr, 203.80.97.208/32, CNTV
+ip-cidr, 203.198.80.99/32, CNTV
 
 # > WeTV
 # USER-AGENT,WeTV*
-DOMAIN-SUFFIX,wetv.vip,CNTV
-DOMAIN-SUFFIX,wetvinfo.com,CNTV
-DOMAIN,wetv.tv.qq.com,CNTV
-DOMAIN,wetv.acc.qq.com,CNTV
-DOMAIN,hwvip.video.qq.com,CNTV
-IP-CIDR,150.109.28.51/32,CNTV,no-resolve
+host-suffix, wetv.vip, CNTV
+host-suffix, wetvinfo.com, CNTV
+host, wetv.tv.qq.com, CNTV
+host, wetv.acc.qq.com, CNTV
+host, hwvip.video.qq.com, CNTV
+ip-cidr, 150.109.28.51/32, CNTV
 
 # > Youku Intl.
-DOMAIN,vod-interyk.youku.tv,CNTV
+host, vod-interyk.youku.tv, CNTV
 # DOMAIN-SUFFIX,youku.tv

@@ -1,7 +1,6 @@
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/PayPal.list
 # > PayPal
-USER-AGENT,PayPal*,PayPal
-DOMAIN-SUFFIX,paypal.com,PayPal
-DOMAIN-SUFFIX,paypal.me,PayPal
-DOMAIN-SUFFIX,paypal-mktg.com,PayPal
-DOMAIN-SUFFIX,paypalobjects.com,PayPal
+host-suffix, paypal.com, PayPal
+host-suffix, paypal.me, PayPal
+host-suffix, paypal-mktg.com, PayPal
+host-suffix, paypalobjects.com, PayPal

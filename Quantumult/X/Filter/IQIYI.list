@@ -1,11 +1,9 @@
 # > IQIYI
-USER-AGENT,*QIYI*,IQIYI
-USER-AGENT,iQiYi*,IQIYI
-DOMAIN-SUFFIX,iqiyi.com,IQIYI
-DOMAIN-SUFFIX,iqiyipic.com,IQIYI
-DOMAIN-SUFFIX,iq.com,IQIYI
-DOMAIN-SUFFIX,qy.net,IQIYI
-DOMAIN-SUFFIX,gitv.tv,IQIYI
-DOMAIN-SUFFIX,71.am,IQIYI
-DOMAIN-KEYWORD,qiyi,IQIYI
-DOMAIN,cache.video.iqiyi.com,IQIYI
+host-suffix, iqiyi.com, IQIYI
+host-suffix, iqiyipic.com, IQIYI
+host-suffix, iq.com, IQIYI
+host-suffix, qy.net, IQIYI
+host-suffix, gitv.tv, IQIYI
+host-suffix, 71.am, IQIYI
+host-keyword, qiyi, IQIYI
+host, cache.video.iqiyi.com, IQIYI
