@@ -12,6 +12,7 @@ sync-config.txt 格式（平台块 + 子分区）：
 """
 
 import re
+import urllib.request
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -568,6 +569,35 @@ def _empty_plat() -> dict:
     }
 
 
+_url_cache: dict[str, str] = {}
+
+
+def _fetch_remote_section(url: str, section: str) -> list[str]:
+    """获取远程 URL，提取指定 [section] 段落的内容行（不含段落标题行）。"""
+    if url not in _url_cache:
+        try:
+            with urllib.request.urlopen(url, timeout=15) as resp:  # noqa: S310
+                _url_cache[url] = resp.read().decode("utf-8")
+        except Exception as e:
+            print(f"  [WARN] 无法获取 {url}: {e}")
+            _url_cache[url] = ""
+    content = _url_cache[url]
+    if not content:
+        return []
+    result: list[str] = []
+    in_target = False
+    for line in content.splitlines():
+        s = line.strip()
+        if s == f"[{section}]":
+            in_target = True
+            continue
+        if s.startswith("[") and s.endswith("]") and in_target:
+            break
+        if in_target:
+            result.append(line)
+    return result
+
+
 def parse_sync_txt() -> dict:
     """解析 sync-config.txt（平台块格式），返回所有平台配置。
 
@@ -675,10 +705,20 @@ def parse_sync_txt() -> dict:
                 if path.endswith(".ini"):
                     ini_path = REPO_ROOT / path
                     if ini_path.exists():
+                        _cur_ini_sec = ""
                         for ini_line in ini_path.read_text(encoding="utf-8").splitlines():
                             ini_s = ini_line.strip()
+                            # 跟踪 ini 内当前段落
+                            if ini_s.startswith("[") and ini_s.endswith("]"):
+                                _cur_ini_sec = ini_s[1:-1]
                             if ini_s.startswith("<<"):
-                                result.setdefault(current_platform, _empty_plat())["include_file"] = ini_s[2:].strip()
+                                ref = ini_s[2:].strip().split()[0] if ini_s[2:].strip() else ""
+                                if ref.startswith("http") and _cur_ini_sec:
+                                    # 抓取远程文件，仅注入对应段落内容
+                                    fetched = _fetch_remote_section(ref, _cur_ini_sec)
+                                    builtin_buf.extend(fetched)
+                                elif ref and not ref.startswith("http"):
+                                    result.setdefault(current_platform, _empty_plat())["include_file"] = ref
                             else:
                                 builtin_buf.append(ini_line)
                 else:
