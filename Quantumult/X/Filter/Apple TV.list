@@ -3,8 +3,8 @@
 # USER-AGENT,AppleTV*
 # USER-AGENT,com.apple.tv*
 host-suffix, tv.apple.com, Apple TV
-host, hls.itunes.apple.com // Trailers, Apple TV
-host, hls-amt.itunes.apple.com // Trailers, Apple TV
+host, hls.itunes.apple.com, Apple TV  // Trailers
+host, hls-amt.itunes.apple.com, Apple TV  // Trailers
 host, uts-api.itunes.apple.com, Apple TV
-host, play-edge.itunes.apple.com // Unblock Region, Apple TV
+host, play-edge.itunes.apple.com, Apple TV  // Unblock Region
 host, tv.applemusic.com, Apple TV
