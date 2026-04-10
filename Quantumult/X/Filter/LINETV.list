@@ -1,5 +1,5 @@
 # > LINE TV
-user-agent, LINE%20TV*, LINETV
-host-suffix, linetv.tw, LINETV
-host, d17lx9ucc6k9fc.cloudfront.net, LINETV
-host, d3c7rimkq79yfu.cloudfront.net, LINETV
+USER-AGENT,LINE%20TV*,LINETV
+DOMAIN-SUFFIX,linetv.tw,LINETV
+DOMAIN,d17lx9ucc6k9fc.cloudfront.net,LINETV
+DOMAIN,d3c7rimkq79yfu.cloudfront.net,LINETV

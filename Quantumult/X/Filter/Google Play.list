@@ -1,18 +1,18 @@
 # > Goole Play
 # 解决国行设备 Google Play 无法正常下载的问题
-host-suffix, xn--ngstr-lra8j.com, Google Play
-host-suffix, xn--ngstr-cn-8za9o.com, Google Play
-host-suffix, services.googleapis.cn, Google Play
+DOMAIN-SUFFIX,xn--ngstr-lra8j.com,Google Play
+DOMAIN-SUFFIX,xn--ngstr-cn-8za9o.com,Google Play
+DOMAIN-SUFFIX,services.googleapis.cn,Google Play
 
 # Google Play Store
-host, play.google.com, Google Play
-host, play.googleapis.com, Google Play
-host, play-fe.googleapis.com, Google Play
-host, playatoms-pa.googleapis.com, Google Play
-host, playgateway-pa.googleapis.com, Google Play
-host, play-lh.googleusercontent.com, Google Play
-host-keyword, play.google, Google Play
-host-wildcard, *play*.google.com, Google Play
-host-wildcard, *play*.google.com, Google Play
-host-wildcard, *play*.googleapis.com, Google Play
-host-wildcard, *play*.googleusercontent.com, Google Play
+DOMAIN,play.google.com,Google Play
+DOMAIN,play.googleapis.com,Google Play
+DOMAIN,play-fe.googleapis.com,Google Play
+DOMAIN,playatoms-pa.googleapis.com,Google Play
+DOMAIN,playgateway-pa.googleapis.com,Google Play
+DOMAIN,play-lh.googleusercontent.com,Google Play
+DOMAIN-KEYWORD,play.google,Google Play
+DOMAIN-WILDCARD,*play*.google.com,Google Play
+DOMAIN-WILDCARD,*play*.google.com,Google Play
+DOMAIN-WILDCARD,*play*.googleapis.com,Google Play
+DOMAIN-WILDCARD,*play*.googleusercontent.com,Google Play

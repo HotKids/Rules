@@ -1,17 +1,17 @@
 # 一些无需验证地区的 HOST
 
 # > Disney+
-host-suffix, media.dssott.com, Streaming+
-host-suffix, prod.dssedge.com, Streaming+
-host, prod-ripcut-delivery.disney-plus.net, Streaming+
+DOMAIN-SUFFIX,media.dssott.com,Streaming+
+DOMAIN-SUFFIX,prod.dssedge.com,Streaming+
+DOMAIN,prod-ripcut-delivery.disney-plus.net,Streaming+
 
 # > Paramount+
-host-suffix, cbsaavideo.com, Streaming+
-host-suffix, mtvnservices.com, Streaming+
-host-suffix, cws.conviva.com, Streaming+
-host, thumbnails.cbsig.net, Streaming+
-host, cbsinteractive.hb.omtrdc.net, Streaming+
-host, cbsnews.akamaized.net, Streaming+
+DOMAIN-SUFFIX,cbsaavideo.com,Streaming+
+DOMAIN-SUFFIX,mtvnservices.com,Streaming+
+DOMAIN-SUFFIX,cws.conviva.com,Streaming+
+DOMAIN,thumbnails.cbsig.net,Streaming+
+DOMAIN,cbsinteractive.hb.omtrdc.net,Streaming+
+DOMAIN,cbsnews.akamaized.net,Streaming+
 
 # > Peacock TV
 # TV 端需走 US
@@ -19,5 +19,5 @@ host, cbsnews.akamaized.net, Streaming+
 
 
 # > SkyShowtime
-host-suffix, cssott.com, Streaming+
-host, g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com, Streaming+
+DOMAIN-SUFFIX,cssott.com,Streaming+
+DOMAIN,g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com,Streaming+

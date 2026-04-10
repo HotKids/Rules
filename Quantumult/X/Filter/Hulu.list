@@ -1,7 +1,7 @@
 # > Hulu
-host-suffix, hulu.com, Hulu
-host-suffix, hulu.tv, Hulu
-host-suffix, huluim.com, Hulu
-host-suffix, hulustream.com, Hulu
-host, cws-hulu.conviva.com, Hulu
+DOMAIN-SUFFIX,hulu.com,Hulu
+DOMAIN-SUFFIX,hulu.tv,Hulu
+DOMAIN-SUFFIX,huluim.com,Hulu
+DOMAIN-SUFFIX,hulustream.com,Hulu
+DOMAIN,cws-hulu.conviva.com,Hulu
 # DOMAIN,assetshuluimcom-a.akamaihd.net

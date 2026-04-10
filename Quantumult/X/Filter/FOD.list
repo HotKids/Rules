@@ -1,5 +1,5 @@
 # > FOD
-user-agent, FOD*, FOD
-host-suffix, fujitv.co.jp, FOD
-host-suffix, stream.ne.jp, FOD
-host, measure.ic.tver.jp, FOD
+USER-AGENT,FOD*,FOD
+DOMAIN-SUFFIX,fujitv.co.jp,FOD
+DOMAIN-SUFFIX,stream.ne.jp,FOD
+DOMAIN,measure.ic.tver.jp,FOD

@@ -1,6 +1,7 @@
 # > OneDrive
-host-suffix, 1drv.com, OneDrive
-host-suffix, onedrive.com, OneDrive
-host-suffix, storage.live.com, OneDrive
-host, oneclient.sfx.ms, OneDrive
-host, skydrive.wns.windows.com, OneDrive
+PROCESS-NAME,OneDrive*,OneDrive
+DOMAIN-SUFFIX,1drv.com,OneDrive
+DOMAIN-SUFFIX,onedrive.com,OneDrive
+DOMAIN-SUFFIX,storage.live.com,OneDrive
+DOMAIN,oneclient.sfx.ms,OneDrive
+DOMAIN,skydrive.wns.windows.com,OneDrive

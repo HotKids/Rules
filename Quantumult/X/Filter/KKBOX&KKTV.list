@@ -1,13 +1,13 @@
 # > KKBOX
-user-agent, *KKBOX, KKBOX&KKTV
-user-agent, KKTV*, KKBOX&KKTV
-user-agent, com.kktv*, KKBOX&KKTV
-host-suffix, kkbox.com, KKBOX&KKTV
-host-suffix, kkbox.com.tw, KKBOX&KKTV
-host-suffix, kfs.io, KKBOX&KKTV
+USER-AGENT,*KKBOX,KKBOX&KKTV
+DOMAIN-SUFFIX,kkbox.com,KKBOX&KKTV
+DOMAIN-SUFFIX,kkbox.com.tw,KKBOX&KKTV
+DOMAIN-SUFFIX,kfs.io,KKBOX&KKTV
 
 # > KKTV
-host-suffix, kktv.me, KKBOX&KKTV
-host-suffix, kktv.com.tw, KKBOX&KKTV
-host, kktv-theater.kk.stream, KKBOX&KKTV
-host, theater-kktv.cdn.hinet.net, KKBOX&KKTV
+USER-AGENT,KKTV*,KKBOX&KKTV
+USER-AGENT,com.kktv*,KKBOX&KKTV
+DOMAIN-SUFFIX,kktv.me,KKBOX&KKTV
+DOMAIN-SUFFIX,kktv.com.tw,KKBOX&KKTV
+DOMAIN,kktv-theater.kk.stream,KKBOX&KKTV
+DOMAIN,theater-kktv.cdn.hinet.net,KKBOX&KKTV

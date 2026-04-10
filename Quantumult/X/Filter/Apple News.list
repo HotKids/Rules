@@ -1,5 +1,5 @@
 ### fork from https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list
 # > News
-host, news-edge.apple.com, Apple News
-host, news-events.apple.com, Apple News
-host, apple.comscoreresearch.com, Apple News
+DOMAIN,news-edge.apple.com,Apple News
+DOMAIN,news-events.apple.com,Apple News
+DOMAIN,apple.comscoreresearch.com,Apple News

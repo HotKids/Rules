@@ -1,14 +1,14 @@
 ### fork from https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Twitter.list
 # > Twitter
-host-keyword, twitter, Twitter
-host-suffix, periscope.tv, Twitter
-host-suffix, pscp.tv, Twitter
-host-suffix, t.co, Twitter
-host-suffix, twimg.co, Twitter
-host-suffix, twimg.com, Twitter
-host-suffix, twimg.org, Twitter
-host-suffix, twitpic.com, Twitter
-host-suffix, twitter.com, Twitter
-host-suffix, twitter.jp, Twitter
-host-suffix, vine.co, Twitter
-host-suffix, x.com, Twitter
+DOMAIN-KEYWORD,twitter,Twitter
+DOMAIN-SUFFIX,periscope.tv,Twitter
+DOMAIN-SUFFIX,pscp.tv,Twitter
+DOMAIN-SUFFIX,t.co,Twitter
+DOMAIN-SUFFIX,twimg.co,Twitter
+DOMAIN-SUFFIX,twimg.com,Twitter
+DOMAIN-SUFFIX,twimg.org,Twitter
+DOMAIN-SUFFIX,twitpic.com,Twitter
+DOMAIN-SUFFIX,twitter.com,Twitter
+DOMAIN-SUFFIX,twitter.jp,Twitter
+DOMAIN-SUFFIX,vine.co,Twitter
+DOMAIN-SUFFIX,x.com,Twitter

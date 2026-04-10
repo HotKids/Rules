@@ -1,5 +1,5 @@
 # > JOOX
-user-agent, WeMusic*, JOOX
-user-agent, JOOX*, JOOX
-host-suffix, joox.com, JOOX
-host-keyword, joox, JOOX
+USER-AGENT,WeMusic*,JOOX
+USER-AGENT,JOOX*,JOOX
+DOMAIN-SUFFIX,joox.com,JOOX
+DOMAIN-KEYWORD,joox,JOOX

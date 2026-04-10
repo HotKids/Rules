@@ -2,116 +2,116 @@
 # Apple Intelligence
 # https://support.apple.com/zh-cn/101555
 # 搜索服务，包括 Siri、聚焦、查询、Safari 浏览器、新闻、信息和音乐
-host-suffix, smoot.apple.com, GenAI
+DOMAIN-SUFFIX,smoot.apple.com,GenAI
 # Apple 智能扩展
-host, apple-relay.apple.com, GenAI
+DOMAIN,apple-relay.apple.com,GenAI
 # 私有云计算
-host, apple-relay.cloudflare.com, GenAI
-host, apple-relay.fastly-edge.com, GenAI
-host, cp4.cloudflare.com, GenAI
+DOMAIN,apple-relay.cloudflare.com,GenAI
+DOMAIN,apple-relay.fastly-edge.com,GenAI
+DOMAIN,cp4.cloudflare.com,GenAI
 # Siri 和听写请求
-host, guzzoni.apple.com, GenAI
+DOMAIN,guzzoni.apple.com,GenAI
 # Apple 定位与系统服务域名
-host, gspe1-ssl.ls.apple.com, GenAI
+DOMAIN,gspe1-ssl.ls.apple.com,GenAI
 # CloudKit 内容，包括 XProtect 更新和语音控制资源
-host-suffix, gateway.icloud.com, GenAI
+DOMAIN-SUFFIX,gateway.icloud.com,GenAI
 
 # Anthropic
 # > Claude
-host-suffix, clau.de, GenAI
-host-suffix, claude.ai, GenAI
-host-suffix, claude.com, GenAI
-host-suffix, anthropic.com, GenAI
-host-suffix, claudeusercontent.com, GenAI
-ip-cidr, 160.79.104.0/23, GenAI
-ip6-cidr, 2607:6bc0::/48, GenAI
+DOMAIN-SUFFIX,clau.de,GenAI
+DOMAIN-SUFFIX,claude.ai,GenAI
+DOMAIN-SUFFIX,claude.com,GenAI
+DOMAIN-SUFFIX,anthropic.com,GenAI
+DOMAIN-SUFFIX,claudeusercontent.com,GenAI
+IP-CIDR,160.79.104.0/23,GenAI,no-resolve
+IP-CIDR6,2607:6bc0::/48,GenAI,no-resolve
 
 # OpenAI
 # > ChatGPT
-host, chatgpt.livekit.cloud, GenAI
-host, host.livekit.cloud, GenAI
-host, turn.livekit.cloud, GenAI
-host-suffix, chat.com, GenAI
-host-suffix, chatgpt.com, GenAI
-host-suffix, livekit.cloud, GenAI
-host-suffix, oaistatic.com, GenAI
-host-suffix, oaiusercontent.com, GenAI
-host-suffix, openai.com, GenAI
-host-suffix, sora.com, GenAI
-host, api.statsig.com, GenAI
-host, api-iam.intercom.io, GenAI
-host, o33249.ingest.sentry.io, GenAI
-host, openai.com.cdn.cloudflare.net, GenAI
-host, openaiapi-site.azureedge.net, GenAI
-host, production-openaicom-storage.azureedge.net, GenAI
-host, openaicomproductionae4b.blob.core.windows.net, GenAI
-host-keyword, openaiapi, GenAI
-host-keyword, openaicom, GenAI
+DOMAIN,chatgpt.livekit.cloud,GenAI
+DOMAIN,host.livekit.cloud,GenAI
+DOMAIN,turn.livekit.cloud,GenAI
+DOMAIN-SUFFIX,chat.com,GenAI
+DOMAIN-SUFFIX,chatgpt.com,GenAI
+DOMAIN-SUFFIX,livekit.cloud,GenAI
+DOMAIN-SUFFIX,oaistatic.com,GenAI
+DOMAIN-SUFFIX,oaiusercontent.com,GenAI
+DOMAIN-SUFFIX,openai.com,GenAI
+DOMAIN-SUFFIX,sora.com,GenAI
+DOMAIN,api.statsig.com,GenAI
+DOMAIN,api-iam.intercom.io,GenAI
+DOMAIN,o33249.ingest.sentry.io,GenAI
+DOMAIN,openai.com.cdn.cloudflare.net,GenAI
+DOMAIN,openaiapi-site.azureedge.net,GenAI
+DOMAIN,production-openaicom-storage.azureedge.net,GenAI
+DOMAIN,openaicomproductionae4b.blob.core.windows.net,GenAI
+DOMAIN-KEYWORD,openaiapi,GenAI
+DOMAIN-KEYWORD,openaicom,GenAI
 
 # Cloudflare
 # > AI Gateway
-host, gateway.ai.cloudflare.com, GenAI
+DOMAIN,gateway.ai.cloudflare.com,GenAI
 
 # Cursor
-host-suffix, cursor-cdn.com, GenAI
-host-suffix, cursor.com, GenAI
-host-suffix, cursor.sh, GenAI
-host-suffix, cursorapi.com, GenAI
+DOMAIN-SUFFIX,cursor-cdn.com,GenAI
+DOMAIN-SUFFIX,cursor.com,GenAI
+DOMAIN-SUFFIX,cursor.sh,GenAI
+DOMAIN-SUFFIX,cursorapi.com,GenAI
 
 # Google
 # > AI Studio
-host-suffix, generativeai.google, GenAI
-host-suffix, makersuite.google.com, GenAI
-host, aistudio.google.com, GenAI
-host, alkalicore-pa.clients6.google.com, GenAI
-host, alkalimakersuite-pa.clients6.google.com, GenAI
-host, aida.googleapis.com, GenAI
+DOMAIN-SUFFIX,generativeai.google,GenAI
+DOMAIN-SUFFIX,makersuite.google.com,GenAI
+DOMAIN,aistudio.google.com,GenAI
+DOMAIN,alkalicore-pa.clients6.google.com,GenAI
+DOMAIN,alkalimakersuite-pa.clients6.google.com,GenAI
+DOMAIN,aida.googleapis.com,GenAI
 # > DeepMind
-host-suffix, deepmind.com, GenAI
-host-suffix, deepmind.google, GenAI
+DOMAIN-SUFFIX,deepmind.com,GenAI
+DOMAIN-SUFFIX,deepmind.google,GenAI
 # > Gemini
-host-suffix, proactivebackend-pa.googleapis.com, GenAI
-host-suffix, geller-pa.googleapis.com, GenAI
-host-suffix, generativelanguage.googleapis.com, GenAI
-host, ai.google.dev, GenAI
-host, bard.google.com, GenAI
-host, gemini.google.com, GenAI
+DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,GenAI
+DOMAIN-SUFFIX,geller-pa.googleapis.com,GenAI
+DOMAIN-SUFFIX,generativelanguage.googleapis.com,GenAI
+DOMAIN,ai.google.dev,GenAI
+DOMAIN,bard.google.com,GenAI
+DOMAIN,gemini.google.com,GenAI
 # > NotebookLM
-host-keyword, notebooklm.google, GenAI
+DOMAIN-KEYWORD,notebooklm.google,GenAI
 # > Search Labs
-host-keyword, labs.google, GenAI
+DOMAIN-KEYWORD,labs.google,GenAI
 
 # JetBrains AI
-host-suffix, grazie.ai, GenAI
-host-suffix, jetbrains.ai, GenAI
-host-suffix, grazie.aws.intellij.net, GenAI
+DOMAIN-SUFFIX,grazie.ai,GenAI
+DOMAIN-SUFFIX,jetbrains.ai,GenAI
+DOMAIN-SUFFIX,grazie.aws.intellij.net,GenAI
 
 # Meta
-host-suffix, meta.ai, GenAI
-host, imagine.meta.com, GenAI
+DOMAIN-SUFFIX,meta.ai,GenAI
+DOMAIN,imagine.meta.com,GenAI
 
 # Microsoft
 # > Copilot
-host, copilot.microsoft.com, GenAI
-host, sydney.bing.com, GenAI
-host, www.bing.com, GenAI
-host, copilot-proxy.githubusercontent.com, GenAI
+DOMAIN,copilot.microsoft.com,GenAI
+DOMAIN,sydney.bing.com,GenAI
+DOMAIN,www.bing.com,GenAI
+DOMAIN,copilot-proxy.githubusercontent.com,GenAI
 # > GitHub Copilot
-host-suffix, githubcopilot.com, GenAI
+DOMAIN-SUFFIX,githubcopilot.com,GenAI
 
 # NVIDIA
 # > Groq
-host-suffix, groq.com, GenAI
+DOMAIN-SUFFIX,groq.com,GenAI
 
 # Perplexity
-host-suffix, perplexity.ai, GenAI
-host-suffix, pplx.ai, GenAI
-host, pplx-res.cloudinary.com, GenAI
+DOMAIN-SUFFIX,perplexity.ai,GenAI
+DOMAIN-SUFFIX,pplx.ai,GenAI
+DOMAIN,pplx-res.cloudinary.com,GenAI
 
 # xAI
-host-suffix, x.ai, GenAI
-host-suffix, grok.com, GenAI
-host-suffix, grokipedia.com, GenAI
+DOMAIN-SUFFIX,x.ai,GenAI
+DOMAIN-SUFFIX,grok.com,GenAI
+DOMAIN-SUFFIX,grokipedia.com,GenAI
 
 # # ByteDance
 # # > Doubao Dola
@@ -123,4 +123,4 @@ host-suffix, grokipedia.com, GenAI
 
 # Canva
 # > Affinity
-host, d3ssuo6fbvr.cloudfront.net, GenAI
+DOMAIN,d3ssuo6fbvr.cloudfront.net,GenAI

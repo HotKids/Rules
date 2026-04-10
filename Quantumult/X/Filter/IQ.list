@@ -1,39 +1,41 @@
 # > iQIYI Intl
-user-agent, iQIYI*, IQ
-user-agent, QIYIVideo*, IQ
-user-agent, QYPlayer*, IQ
-user-agent, QTP*, IQ
-host-suffix, iq.com, IQ
+USER-AGENT,iQIYI*,IQ
+USER-AGENT,QIYIVideo*,IQ
+USER-AGENT,QYPlayer*,IQ
+USER-AGENT,QTP*,IQ
+PROCESS-NAME,com.iqiyi.i18n,IQ
+PROCESS-NAME,com.iqiyi.i18n.tv,IQ
+DOMAIN-SUFFIX,iq.com,IQ
 # 首页
-host-suffix, intl.iqiyi.com, IQ
+DOMAIN-SUFFIX,intl.iqiyi.com,IQ
 # 历史
-host, intl-rcd.iqiyi.com, IQ
-host, intl-im-hist-api.iqiyi.com, IQ
+DOMAIN,intl-rcd.iqiyi.com,IQ
+DOMAIN,intl-im-hist-api.iqiyi.com,IQ
 # 收藏
-host, intl-subscription.iqiyi.com, IQ
+DOMAIN,intl-subscription.iqiyi.com,IQ
 # 播放
-host, msg-intl.qy.net, IQ
-host, ip.geo.iqiyi.com, IQ
-host, akcdnoversea.inter.71edge.com, IQ
-host, akmcdnoversea.inter.iqiyi.com, IQ
-host, akmcdnoversea.inter.ptqy.gitv.tv, IQ
-host, chuangcachecdnoversea.inter.iqiyi.com, IQ
-host, chuangcachecdnoversea.inter.ptqy.gitv.tv, IQ
-host, akmcdnoversea-tw.inter.iqiyi.com, IQ
-host, akmcdnoversea-tw.inter.ptqy.gitv.tv, IQ
-host, chuangcachecdnoversea-tw.inter.iqiyi.com, IQ
-host, chuangcachecdnoversea-tw.inter.ptqy.gitv.tv, IQ
-host-keyword, akmcdnoverse, IQ
-host-keyword, chuangcachecdnoversea, IQ
-ip-cidr, 2.21.22.17/32, IQ
-ip-cidr, 23.40.241.251/32, IQ
-ip-cidr, 23.40.242.10/32, IQ
-ip-cidr, 23.210.215.154/32, IQ
-ip-cidr, 110.238.107.47/32, IQ
-ip-cidr, 110.238.109.184/32, IQ
-ip-cidr, 114.119.175.88/32, IQ
-ip-cidr, 118.26.32.0/22, IQ
-ip-cidr, 159.138.102.146/32, IQ
-ip-cidr, 184.25.254.178/32, IQ
-ip-cidr, 203.80.97.208/32, IQ
-ip-cidr, 203.198.80.99/32, IQ
+DOMAIN,msg-intl.qy.net,IQ
+DOMAIN,ip.geo.iqiyi.com,IQ
+DOMAIN,akcdnoversea.inter.71edge.com,IQ
+DOMAIN,akmcdnoversea.inter.iqiyi.com,IQ
+DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv,IQ
+DOMAIN,chuangcachecdnoversea.inter.iqiyi.com,IQ
+DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv,IQ
+DOMAIN,akmcdnoversea-tw.inter.iqiyi.com,IQ
+DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv,IQ
+DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com,IQ
+DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv,IQ
+DOMAIN-KEYWORD,akmcdnoverse,IQ
+DOMAIN-KEYWORD,chuangcachecdnoversea,IQ
+IP-CIDR,2.21.22.17/32,IQ,no-resolve
+IP-CIDR,23.40.241.251/32,IQ,no-resolve
+IP-CIDR,23.40.242.10/32,IQ,no-resolve
+IP-CIDR,23.210.215.154/32,IQ,no-resolve
+IP-CIDR,110.238.107.47/32,IQ,no-resolve
+IP-CIDR,110.238.109.184/32,IQ,no-resolve
+IP-CIDR,114.119.175.88/32,IQ,no-resolve
+IP-CIDR,118.26.32.0/22,IQ,no-resolve
+IP-CIDR,159.138.102.146/32,IQ,no-resolve
+IP-CIDR,184.25.254.178/32,IQ,no-resolve
+IP-CIDR,203.80.97.208/32,IQ,no-resolve
+IP-CIDR,203.198.80.99/32,IQ,no-resolve

@@ -1,16 +1,16 @@
 # > Amazon Prime Video
 # USER-AGENT,InstantVideo.US*
 # USER-AGENT,Prime%20Video*
-host-suffix, primevideo.com, Prime Video
-host-suffix, amazonvideo.com, Prime Video
-host-suffix, media-amazon.com, Prime Video
-host-suffix, pv-cdn.net, Prime Video
-host-suffix, aiv-cdn.net, Prime Video
-host-suffix, aiv-delivery.net, Prime Video
+DOMAIN-SUFFIX,primevideo.com,Prime Video
+DOMAIN-SUFFIX,amazonvideo.com,Prime Video
+DOMAIN-SUFFIX,media-amazon.com,Prime Video
+DOMAIN-SUFFIX,pv-cdn.net,Prime Video
+DOMAIN-SUFFIX,aiv-cdn.net,Prime Video
+DOMAIN-SUFFIX,aiv-delivery.net,Prime Video
 # DOMAIN,www.amazon.com
-host, ktpx.amazon.com, Prime Video
-host, atv-ps.amazon.com, Prime Video
-host, avodmp4s3ww-a.akamaihd.net, Prime Video
+DOMAIN,ktpx.amazon.com,Prime Video
+DOMAIN,atv-ps.amazon.com,Prime Video
+DOMAIN,avodmp4s3ww-a.akamaihd.net,Prime Video
 # DOMAIN,d184dfn36gombl.cloudfront.net
 # DOMAIN,d1xfray82862hr.cloudfront.net
 # DOMAIN,d1v5ir2lpwr8os.cloudfront.net
@@ -19,7 +19,7 @@ host, avodmp4s3ww-a.akamaihd.net, Prime Video
 # DOMAIN,d27xxe7juh1us6.cloudfront.net
 # DOMAIN,d3196yreox78o9.cloudfront.net
 # DOMAIN,dmqdd6hw24ucf.cloudfront.net
-host-keyword, avoddashs, Prime Video
+DOMAIN-KEYWORD,avoddashs,Prime Video
 
 # 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
 # DOMAIN,www.amazon.com

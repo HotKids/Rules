@@ -1,4 +1,5 @@
 # > Chromecast with Google TV
-host, androidtvlauncherxfe-pa.googleapis.com, Google TV
-host, androidtvwatsonfe-pa.googleapis.com, Google TV
+PROCESS-NAME,com.google.android.videos,Google TV
+DOMAIN,androidtvlauncherxfe-pa.googleapis.com,Google TV
+DOMAIN,androidtvwatsonfe-pa.googleapis.com,Google TV
 # DOMAIN-KEYWORD,pa.google

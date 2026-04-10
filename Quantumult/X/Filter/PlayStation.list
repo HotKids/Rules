@@ -1,6 +1,6 @@
 # > PlayStation
-host-suffix, playstation.net, PlayStation
-host-suffix, playstation.com, PlayStation
-host-suffix, playstationnetwork.com, PlayStation
-host-suffix, sonyentertainmentnetwork.com, PlayStation
-host, psn.akadns.net, PlayStation
+DOMAIN-SUFFIX,playstation.net,PlayStation
+DOMAIN-SUFFIX,playstation.com,PlayStation
+DOMAIN-SUFFIX,playstationnetwork.com,PlayStation
+DOMAIN-SUFFIX,sonyentertainmentnetwork.com,PlayStation
+DOMAIN,psn.akadns.net,PlayStation

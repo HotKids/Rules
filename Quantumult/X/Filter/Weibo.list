@@ -1,19 +1,19 @@
 # > Weibo 境外势力
 # Domain rules
-host-suffix, weibo.com, Weibo
-host-suffix, weibo.cn, Weibo
-host-suffix, weico.cc, Weibo
+DOMAIN-SUFFIX,weibo.com,Weibo
+DOMAIN-SUFFIX,weibo.cn,Weibo
+DOMAIN-SUFFIX,weico.cc,Weibo
 # IP rules
 # weibo.com
-ip-cidr, 180.149.138.0/24, Weibo
+IP-CIDR,180.149.138.0/24,Weibo
 # weibo.cn, api.weibo.cn (The important one!)
-ip-cidr, 36.51.254.0/24, Weibo
-ip-cidr, 49.7.40.0/24, Weibo
-ip-cidr, 183.60.93.0/24, Weibo
+IP-CIDR,36.51.254.0/24,Weibo
+IP-CIDR,49.7.40.0/24,Weibo
+IP-CIDR,183.60.93.0/24,Weibo
 # dp.im.weibo.cn, *.biz.weibo.com
-ip-cidr, 49.7.36.0/24, Weibo
+IP-CIDR,49.7.36.0/24,Weibo
 # api.uve.weibo.com (Other *.uve.weibo.com are CNAME'd to here)
-ip-cidr, 180.149.138.39/32, Weibo
+IP-CIDR,180.149.138.39/32,Weibo
 # dns.weibo.com (uses AliDNS for Business service)
-ip-cidr, 39.97.130.0/24, Weibo
-ip-cidr, 39.97.128.0/24, Weibo
+IP-CIDR,39.97.130.0/24,Weibo
+IP-CIDR,39.97.128.0/24,Weibo

@@ -1,6 +1,6 @@
 # > MytvSUPER
-user-agent, mytv*, MytvSUPER
-host-keyword, nowtv100, MytvSUPER
-host-keyword, rthklive, MytvSUPER
-host-suffix, tvb.com, MytvSUPER
-host-suffix, mytvsuper.com, MytvSUPER
+USER-AGENT,mytv*,MytvSUPER
+DOMAIN-KEYWORD,nowtv100,MytvSUPER
+DOMAIN-KEYWORD,rthklive,MytvSUPER
+DOMAIN-SUFFIX,tvb.com,MytvSUPER
+DOMAIN-SUFFIX,mytvsuper.com,MytvSUPER

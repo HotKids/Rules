@@ -1,14 +1,14 @@
 # > WeTV
 # USER-AGENT,WeTV*
-host-suffix, wetv.vip, WeTV
-host-suffix, wetvinfo.com, WeTV
-host, wetv.tv.qq.com, WeTV
-host, wetv.acc.qq.com, WeTV
-host, hwvip.video.qq.com, WeTV
+DOMAIN-SUFFIX,wetv.vip,WeTV
+DOMAIN-SUFFIX,wetvinfo.com,WeTV
+DOMAIN,wetv.tv.qq.com,WeTV
+DOMAIN,wetv.acc.qq.com,WeTV
+DOMAIN,hwvip.video.qq.com,WeTV
 # DOMAIN,oth.eve.mdt.qq.com
 # DOMAIN,oth.str.mdt.qq.com
 # DOMAIN-SUFFIX,meovse.com
-ip-cidr, 150.109.28.51/32, WeTV
+IP-CIDR,150.109.28.51/32,WeTV,no-resolve
 # IP-CIDR,203.205.136.0/23,no-resolve #如直连，请加入代理
 
 # URL-REGEX,^https?:\/\/((25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\.){3}(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)\/varietyts\.tc\.qq\.com

@@ -1,28 +1,37 @@
 ### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_services.conf & https://raw.githubusercontent.com/SukkaW/Surge/master/Source/ip/apple_services.conf
 # > Apple
-host-suffix, aaplimg.com, Apple
-host-suffix, apple-dns.net, Apple
-host-suffix, apple.co, Apple
-host-suffix, apple.com, Apple
-host-suffix, appstore.com, Apple
-host-suffix, cdn-apple.com, Apple
-host-suffix, icloud.com, Apple
-host-suffix, icloud-content.com, Apple
-host-suffix, me.com, Apple
-host-suffix, organicfruitapps.com, Apple
-host-suffix, apple-cloudkit.com, Apple
-host-suffix, apple-mapkit.com, Apple
-host-suffix, appsto.re, Apple
-host-suffix, itunes.com, Apple
-host-suffix, apple.news, Apple
-host-suffix, push-apple.com.akadns.net, Apple
-ip-cidr, 17.0.0.0/8, Apple
-ip-cidr, 63.92.224.0/19, Apple
-ip-cidr, 65.199.22.0/23, Apple
-ip-cidr, 139.178.128.0/18, Apple
-ip-cidr, 144.178.0.0/19, Apple
-ip-cidr, 144.178.36.0/22, Apple
-ip-cidr, 144.178.48.0/20, Apple
-ip-cidr, 192.35.50.0/24, Apple
-ip-cidr, 198.183.17.0/24, Apple
-ip-cidr, 205.180.175.0/24, Apple
+DOMAIN-SUFFIX,aaplimg.com,Apple
+DOMAIN-SUFFIX,apple-dns.net,Apple
+DOMAIN-SUFFIX,apple.co,Apple
+DOMAIN-SUFFIX,apple.com,Apple
+DOMAIN-SUFFIX,appstore.com,Apple
+DOMAIN-SUFFIX,cdn-apple.com,Apple
+DOMAIN-SUFFIX,icloud.com,Apple
+DOMAIN-SUFFIX,icloud-content.com,Apple
+DOMAIN-SUFFIX,me.com,Apple
+DOMAIN-SUFFIX,organicfruitapps.com,Apple
+DOMAIN-SUFFIX,apple-cloudkit.com,Apple
+DOMAIN-SUFFIX,apple-mapkit.com,Apple
+DOMAIN-SUFFIX,appsto.re,Apple
+DOMAIN-SUFFIX,itunes.com,Apple
+DOMAIN-SUFFIX,apple.news,Apple
+PROCESS-NAME,netbiosd,Apple
+PROCESS-NAME,com.apple.geod,Apple
+PROCESS-NAME,mapspushd,Apple
+PROCESS-NAME,com.apple.Maps,Apple
+DOMAIN-SUFFIX,push-apple.com.akadns.net,Apple
+PROCESS-NAME,apsd,Apple
+PROCESS-NAME,fmfd,Apple
+PROCESS-NAME,findmydevice-user-agent,Apple
+PROCESS-NAME,CoreLocationAgent,Apple
+PROCESS-NAME,WeatherWidget,Apple
+IP-CIDR,17.0.0.0/8,Apple,no-resolve
+IP-CIDR,63.92.224.0/19,Apple,no-resolve
+IP-CIDR,65.199.22.0/23,Apple,no-resolve
+IP-CIDR,139.178.128.0/18,Apple,no-resolve
+IP-CIDR,144.178.0.0/19,Apple,no-resolve
+IP-CIDR,144.178.36.0/22,Apple,no-resolve
+IP-CIDR,144.178.48.0/20,Apple,no-resolve
+IP-CIDR,192.35.50.0/24,Apple,no-resolve
+IP-CIDR,198.183.17.0/24,Apple,no-resolve
+IP-CIDR,205.180.175.0/24,Apple,no-resolve
