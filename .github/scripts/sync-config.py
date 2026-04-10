@@ -769,8 +769,6 @@ def parse_sync_txt() -> dict:
             left, right = left.strip(), right.strip()
             if left:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
-        elif current_section == "Options" and current_platform and current_platform != "Surge":
-            pass  # reserved for future options
 
     flush_builtin()
     return result
@@ -2170,9 +2168,10 @@ def main() -> None:
         surge_mitm_block = "\n".join(surge_mitm_lines).strip()
 
         loon_proxy_section = _gen_loon_proxy_section(proxy_lines)
-        loon_parts = [loon_header, pg_loon]
+        loon_parts = [loon_header]
         if loon_proxy_section:
             loon_parts.append(loon_proxy_section)
+        loon_parts.append(pg_loon)
         if rule_section:
             loon_parts.append(rule_section)
         loon_parts.append(remote_rules)
