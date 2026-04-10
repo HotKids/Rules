@@ -34,11 +34,45 @@ RAW_PREFIX = "https://raw.githubusercontent.com/"
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
 SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
-# Loon 输出 [Proxy] 段落（script 生成，不依赖 loon.ini）
-# 🔘 DIRECT 用于 Surge 派生的 proxy-group 引用；DIRECT/REJECT 供 builtin inject 使用
-_LOON_BUILTIN_PROXY_SECTION = "[Proxy]\n🔘 DIRECT = DIRECT\nDIRECT = DIRECT\nREJECT = REJECT"
-# Surfboard 输出 [Proxy] 中额外追加的内建代理别名（补充 Surge Profile 的 🔘 DIRECT = direct）
-_SURFBOARD_EXTRA_PROXIES = ["DIRECT = direct", "REJECT = reject"]
+# Surge 内建动作名（proxy value 为这些时视为 action proxy）
+_SURGE_BUILTIN_ACTIONS = frozenset({"direct", "reject", "reject-tinygif", "reject-drop", "reject-no-drop"})
+# Surfboard 支持的内建动作（无 MITM，不支持 TINYGIF/DROP）
+_SURFBOARD_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+# Loon 支持的内建动作及其值映射（Surge lowercase → Loon format）
+_LOON_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+_LOON_ACTION_VALUE_MAP = {"direct": "DIRECT", "reject": "REJECT",
+                          "reject-tinygif": "REJECT", "reject-drop": "REJECT-DROP", "reject-no-drop": "REJECT"}
+
+
+def _filter_proxy_lines_for_platform(proxy_lines: list[str], supported_actions: frozenset) -> list[str]:
+    """过滤 proxy_lines，移除该平台不支持的 action proxy 行（保留所有非 action 行）。"""
+    result = []
+    for line in proxy_lines:
+        if "=" not in line:
+            result.append(line)
+            continue
+        _, _, val = line.partition("=")
+        surge_val = val.strip().lower()
+        if surge_val in _SURGE_BUILTIN_ACTIONS and surge_val not in supported_actions:
+            continue  # 该 action 不被支持，跳过
+        result.append(line)
+    return result
+
+
+def _gen_loon_proxy_section(proxy_lines: list[str]) -> str:
+    """从 Surge proxy_lines 生成 Loon [Proxy] 段落（仅 action proxies，值转换为 Loon 格式）。"""
+    entries: list[str] = []
+    for line in proxy_lines:
+        if "=" not in line:
+            continue
+        name, _, val = line.partition("=")
+        surge_val = val.strip().lower()
+        if surge_val not in _LOON_SUPPORTED_ACTIONS:
+            continue
+        loon_val = _LOON_ACTION_VALUE_MAP.get(surge_val, surge_val.upper())
+        entries.append(f"{name.strip()} = {loon_val}")
+    return "[Proxy]\n" + "\n".join(entries) if entries else ""
+
 
 SURFBOARD_SKIP_GENERAL_KEYS = {
     "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
@@ -1887,9 +1921,9 @@ def gen_surfboard_profile(
         gen_text = _gen_surfboard_general(general_lines)
         if gen_text:
             parts.append("[General]\n" + gen_text)
-    # [Proxy]：Surge 源代理 + 脚本注入的内建别名（DIRECT / REJECT）
-    all_proxy_lines = list(proxy_lines) + _SURFBOARD_EXTRA_PROXIES
-    parts.append("[Proxy]\n" + "\n".join(all_proxy_lines))
+    # [Proxy]：Surge 源代理，过滤掉 Surfboard 不支持的 action proxy（如 REJECT-TINYGIF）
+    sb_proxy_lines = _filter_proxy_lines_for_platform(proxy_lines, _SURFBOARD_SUPPORTED_ACTIONS)
+    parts.append("[Proxy]\n" + "\n".join(sb_proxy_lines))
     parts.append(_gen_surfboard_proxy_groups(group_lines, skips, pg_inject))
     parts.append(_gen_surfboard_rules(rule_lines, skips))
     return "\n\n".join(parts) + "\n"
@@ -2016,7 +2050,10 @@ def main() -> None:
         # [Mitm]：来自 Surge Profile [MITM] 段落
         surge_mitm_block = "\n".join(surge_mitm_lines).strip()
 
-        loon_parts = [loon_header, _LOON_BUILTIN_PROXY_SECTION, pg_loon]
+        loon_proxy_section = _gen_loon_proxy_section(proxy_lines)
+        loon_parts = [loon_header, pg_loon]
+        if loon_proxy_section:
+            loon_parts.append(loon_proxy_section)
         if rule_section:
             loon_parts.append(rule_section)
         loon_parts.append(remote_rules)
