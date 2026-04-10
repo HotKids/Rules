@@ -249,7 +249,7 @@ proxy-groups:
   # Proxy
   - name: "🔰 Proxy"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Outbound.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan

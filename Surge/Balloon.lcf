@@ -64,7 +64,7 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 
 [Proxy Group]
 # Proxy
-🔰 Proxy = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+🔰 Proxy = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Outbound.png
 # Streaming Global
 🎬 Streaming = select,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
 # CNTV APAC
