@@ -563,7 +563,6 @@ def _empty_plat() -> dict:
         "qx_header": "",
         "qx_blocks": {},
         "pg_inject_qx": None,
-        "emoji": False,
         "policy_rename_map": {},
         "pg_inject_surfboard": None,
     }
@@ -731,18 +730,7 @@ def parse_sync_txt() -> dict:
             if left:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
         elif current_section == "Options" and current_platform and current_platform != "Surge":
-            if "=" in stripped:
-                key, _, val = stripped.partition("=")
-                key, val = key.strip(), val.strip().lower()
-                if key == "emoji":
-                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
-        elif current_section == "" and current_platform and current_platform != "Surge":
-            # 裸平台选项（如 emoji=false，无需 # > Options 标题）
-            if "=" in stripped and not stripped.startswith("["):
-                key, _, val = stripped.partition("=")
-                key, val = key.strip(), val.strip().lower()
-                if key == "emoji":
-                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
+            pass  # reserved for future options
 
     flush_builtin()
     return result
@@ -2169,11 +2157,10 @@ def main() -> None:
         qx_pg_inject = qx.get("pg_inject_qx")
         qx_skips = config.get("global_skips", []) + qx.get("skips", [])
         qx_rename_map = qx.get("rename_map", {})
-        qx_strip_names = not qx.get("emoji", False)  # emoji=False(default) → strip names
+        qx_strip_names = True
         qx_policy_rename = qx.get("policy_rename_map") or None  # 空 dict → None
 
         print(f"  QX skip: {qx_skips}")
-        print(f"  QX emoji: {qx.get('emoji', False)} | strip_names: {qx_strip_names}")
         if qx_policy_rename:
             print(f"  QX policy_rename: {qx_policy_rename}")
         if qx_pg_inject:

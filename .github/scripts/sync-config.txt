@@ -48,7 +48,6 @@ rule-providers:
 
 # Quantumult X
 >> Quantumult/Sample.conf
-emoji=false
 # > Builtin
 << .github/scripts/sync-config/qx.ini
 # > Skip
