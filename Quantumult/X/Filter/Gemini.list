@@ -1,21 +1,21 @@
 # Google
 # > AI Studio
-DOMAIN-SUFFIX,generativeai.google,Gemini
-DOMAIN-SUFFIX,makersuite.google.com,Gemini
-DOMAIN,aistudio.google.com,Gemini
-DOMAIN,alkalicore-pa.clients6.google.com,Gemini
-DOMAIN,alkalimakersuite-pa.clients6.google.com,Gemini
+host-suffix, generativeai.google, Gemini
+host-suffix, makersuite.google.com, Gemini
+host, aistudio.google.com, Gemini
+host, alkalicore-pa.clients6.google.com, Gemini
+host, alkalimakersuite-pa.clients6.google.com, Gemini
 # > DeepMind
-DOMAIN-SUFFIX,deepmind.com,Gemini
-DOMAIN-SUFFIX,deepmind.google,Gemini
+host-suffix, deepmind.com, Gemini
+host-suffix, deepmind.google, Gemini
 # > Gemini
-DOMAIN-SUFFIX,proactivebackend-pa.googleapis.com,Gemini
-DOMAIN-SUFFIX,geller-pa.googleapis.com,Gemini
-DOMAIN-SUFFIX,generativelanguage.googleapis.com,Gemini
-DOMAIN,ai.google.dev,Gemini
-DOMAIN,bard.google.com,Gemini
-DOMAIN,gemini.google.com,Gemini
+host-suffix, proactivebackend-pa.googleapis.com, Gemini
+host-suffix, geller-pa.googleapis.com, Gemini
+host-suffix, generativelanguage.googleapis.com, Gemini
+host, ai.google.dev, Gemini
+host, bard.google.com, Gemini
+host, gemini.google.com, Gemini
 # > NotebookLM
-DOMAIN-KEYWORD,notebooklm.google,Gemini
+host-keyword, notebooklm.google, Gemini
 # > Search Labs
-DOMAIN-KEYWORD,labs.google,Gemini
+host-keyword, labs.google, Gemini

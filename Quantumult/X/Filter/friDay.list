@@ -1,8 +1,7 @@
 # > friDay
-USER-AGENT,friDay*,friDay
-DOMAIN-SUFFIX,friday.tw,friDay
-DOMAIN-SUFFIX,fridaylogger.com,friDay
-DOMAIN-SUFFIX,svc.litv.tv,friDay
-DOMAIN,aka01p.akamaized.net,friDay
-DOMAIN,aka02p.akamaized.net,friDay
-DOMAIN,aka36p.akamaized.net,friDay
+host-suffix, friday.tw, friDay
+host-suffix, fridaylogger.com, friDay
+host-suffix, svc.litv.tv, friDay
+host, aka01p.akamaized.net, friDay
+host, aka02p.akamaized.net, friDay
+host, aka36p.akamaized.net, friDay

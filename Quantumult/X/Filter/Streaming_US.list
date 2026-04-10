@@ -1,87 +1,77 @@
 # > Crunchyroll
-USER-AGENT,Crunchyroll*,Streaming_US
-DOMAIN-SUFFIX,crunchyroll.com,Streaming_US
+host-suffix, crunchyroll.com, Streaming_US
 # 如需使用 VRV，请将此条取消注释并走 US 代理
 # DOMAIN-SUFFIX,vrv.co
 
 # > Discovery+
-USER-AGENT,discovery+*,Streaming_US
-USER-AGENT,*DPlus*,Streaming_US
-DOMAIN-SUFFIX,discoveryplus.com,Streaming_US
-DOMAIN-SUFFIX,disco-api.com,Streaming_US
-DOMAIN-SUFFIX,dnitv.com,Streaming_US
-DOMAIN-SUFFIX,dplus.us.prd.media.max.com,Streaming_US
-DOMAIN-SUFFIX,dplus-amer.prd.api.discomax.com,Streaming_US
+host-suffix, discoveryplus.com, Streaming_US
+host-suffix, disco-api.com, Streaming_US
+host-suffix, dnitv.com, Streaming_US
+host-suffix, dplus.us.prd.media.max.com, Streaming_US
+host-suffix, dplus-amer.prd.api.discomax.com, Streaming_US
 # DOMAIN,default.any-any.prd.api.discomax.com // 会影响 HBO Max
-DOMAIN,us1-prod.disco-api.com,Streaming_US
-DOMAIN,us1-prod-images.disco-api.com,Streaming_US
-DOMAIN,kvinit-prod.api.kochava.com,Streaming_US
-DOMAIN,4unal8ngvngjm07lj2q2umlc4.litix.io,Streaming_US
-DOMAIN,content-ause1-ur-discovery1.uplynk.com,Streaming_US
-DOMAIN,content-ausw1-ur-discovery1.uplynk.com,Streaming_US
-DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
+host, us1-prod.disco-api.com, Streaming_US
+host, us1-prod-images.disco-api.com, Streaming_US
+host, kvinit-prod.api.kochava.com, Streaming_US
+host, 4unal8ngvngjm07lj2q2umlc4.litix.io, Streaming_US
+host, content-ause1-ur-discovery1.uplynk.com, Streaming_US
+host, content-ausw1-ur-discovery1.uplynk.com, Streaming_US
+host, content-ausw2-ur-discovery1.uplynk.com, Streaming_US
 # DOMAIN,go-prod-vz.akamaized.net
 
 # > HBO Max
-USER-AGENT,HBOMAX*,Streaming_US
-USER-AGENT,Max*,Streaming_US
-PROCESS-NAME,com.wbd.stream,Streaming_US
-DOMAIN-SUFFIX,max.com,Streaming_US
-DOMAIN-SUFFIX,hbomax.com,Streaming_US
-DOMAIN-SUFFIX,discomax.com,Streaming_US
+host-suffix, max.com, Streaming_US
+host-suffix, hbomax.com, Streaming_US
+host-suffix, discomax.com, Streaming_US
 
 # > Hulu
-DOMAIN-SUFFIX,hulu.com,Streaming_US
-DOMAIN-SUFFIX,hulu.tv,Streaming_US
-DOMAIN-SUFFIX,huluim.com,Streaming_US
-DOMAIN-SUFFIX,hulustream.com,Streaming_US
-DOMAIN,cws-hulu.conviva.com,Streaming_US
+host-suffix, hulu.com, Streaming_US
+host-suffix, hulu.tv, Streaming_US
+host-suffix, huluim.com, Streaming_US
+host-suffix, hulustream.com, Streaming_US
+host, cws-hulu.conviva.com, Streaming_US
 # DOMAIN,assetshuluimcom-a.akamaihd.net
 
 # > MGM+
-DOMAIN-SUFFIX,mgmplus.com,Streaming_US
-DOMAIN-SUFFIX,epix.com,Streaming_US
-DOMAIN-SUFFIX,epixnow.com,Streaming_US
-DOMAIN,epixhls.akamaized.net,Streaming_US
-DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com,Streaming_US
+host-suffix, mgmplus.com, Streaming_US
+host-suffix, epix.com, Streaming_US
+host-suffix, epixnow.com, Streaming_US
+host, epixhls.akamaized.net, Streaming_US
+host, us-ore-00001.s3.dualstack.us-west-2.amazonaws.com, Streaming_US
 
 # > PBS
-USER-AGENT,PBS*,Streaming_US
-DOMAIN-SUFFIX,pbs.org,Streaming_US
+host-suffix, pbs.org, Streaming_US
 
 # > Paramount+
 # US UA
-USER-AGENT,PPlus*,Streaming_US
 # Intl. UA
-USER-AGENT,ParamountPlus*,Streaming_US
-DOMAIN-SUFFIX,cbsi.com,Streaming_US
+host-suffix, cbsi.com, Streaming_US
 # DOMAIN-SUFFIX,cbsaavideo.com #播放
-DOMAIN-SUFFIX,cbsivideo.com,Streaming_US
-DOMAIN-SUFFIX,paramountplus.com,Streaming_US
-DOMAIN-SUFFIX,pplusstatic.com,Streaming_US
+host-suffix, cbsivideo.com, Streaming_US
+host-suffix, paramountplus.com, Streaming_US
+host-suffix, pplusstatic.com, Streaming_US
 # DOMAIN-SUFFIX,mtvnservices.com #MTV
 # DOMAIN-SUFFIX,cws.conviva.com
-DOMAIN,link.theplatform.com,Streaming_US
+host, link.theplatform.com, Streaming_US
 # US
 # Intl.
 # 播放验证，此条 Paramount+ 国际版与美国版共用，可使用 AND 语法区分。iOS 15 下 UA 不可用需 MITM 相关 HOST
-DOMAIN,cbsi.live.ott.irdeto.com,Streaming_US
+host, cbsi.live.ott.irdeto.com, Streaming_US
 # DOMAIN,thumbnails.cbsig.net #缩略图
 # DOMAIN,cbsinteractive.hb.omtrdc.net
 # DOMAIN,ads.play.cbsi.video #片头动画，可屏蔽
 # DOMAIN,pubads.g.doubleclick.net #不可屏蔽
 # DOMAIN,cbsnews.akamaized.net #CBSN Live
 # CBS live丨US
-DOMAIN,cbsservice.aws.syncbak.com,Streaming_US
-DOMAIN,cbsplaylistserver.aws.syncbak.com,Streaming_US
+host, cbsservice.aws.syncbak.com, Streaming_US
+host, cbsplaylistserver.aws.syncbak.com, Streaming_US
 
 # > Peacock
-USER-AGENT,peacock*,Streaming_US
-DOMAIN-SUFFIX,cdn.peacocktv.com,Streaming_US
-DOMAIN-SUFFIX,peacocktv.com,Streaming_US
+host-suffix, cdn.peacocktv.com, Streaming_US
+host-suffix, peacocktv.com, Streaming_US
 # 屏蔽广告
 # DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
 # > Roku
-DOMAIN-SUFFIX,roku.com,Streaming_US
-DOMAIN-SUFFIX,rokutime.com,Streaming_US
+host-suffix, roku.com, Streaming_US
+host-suffix, rokutime.com, Streaming_US

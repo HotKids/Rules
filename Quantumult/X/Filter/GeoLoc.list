@@ -1,7 +1,7 @@
 # SNS GeoLoc
 # > Douyin
-DOMAIN-SUFFIX,amemv.com,GeoLoc
-DOMAIN-SUFFIX,douyinvod.com,GeoLoc
+host-suffix, amemv.com, GeoLoc
+host-suffix, douyinvod.com, GeoLoc
 
 # > RedNote
-DOMAIN,edith.xiaohongshu.com,GeoLoc
+host, edith.xiaohongshu.com, GeoLoc

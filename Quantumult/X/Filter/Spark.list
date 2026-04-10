@@ -6,19 +6,15 @@
 # DEST-PORT,465
 # SMTP Submission (STARTTLS)
 # DEST-PORT,587
-USER-AGENT,*spark,Spark
-USER-AGENT,*Spark,Spark
-PROCESS-NAME,*spark,Spark
-PROCESS-NAME,com.readdle.spark,Spark
-DOMAIN-SUFFIX,gmail.com,Spark
-DOMAIN-SUFFIX,googlemail.com,Spark
-DOMAIN-SUFFIX,live.com,Spark
-DOMAIN-SUFFIX,outlook.com,Spark
-DOMAIN-SUFFIX,hotmail.com,Spark
-DOMAIN-SUFFIX,mail.me.com,Spark
-DOMAIN-SUFFIX,mail.yahoo.com,Spark
-DOMAIN-SUFFIX,fastmail.com,Spark
-DOMAIN-SUFFIX,mail.infomaniak.com,Spark
-DOMAIN-SUFFIX,vodafonemail.de,Spark
-DOMAIN,imap.vodafone.de,Spark
-DOMAIN,smtp.vodafone.de,Spark
+host-suffix, gmail.com, Spark
+host-suffix, googlemail.com, Spark
+host-suffix, live.com, Spark
+host-suffix, outlook.com, Spark
+host-suffix, hotmail.com, Spark
+host-suffix, mail.me.com, Spark
+host-suffix, mail.yahoo.com, Spark
+host-suffix, fastmail.com, Spark
+host-suffix, mail.infomaniak.com, Spark
+host-suffix, vodafonemail.de, Spark
+host, imap.vodafone.de, Spark
+host, smtp.vodafone.de, Spark

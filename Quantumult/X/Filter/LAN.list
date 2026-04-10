@@ -1,7 +1,7 @@
 # > Local Area Network
-DOMAIN-SUFFIX,local,LAN
-IP-CIDR,192.168.0.0/16,LAN
-IP-CIDR,10.0.0.0/8,LAN
-IP-CIDR,172.16.0.0/12,LAN
-IP-CIDR,127.0.0.0/8,LAN
-IP-CIDR,100.64.0.0/10,LAN
+host-suffix, local, LAN
+ip-cidr, 192.168.0.0/16, LAN
+ip-cidr, 10.0.0.0/8, LAN
+ip-cidr, 172.16.0.0/12, LAN
+ip-cidr, 127.0.0.0/8, LAN
+ip-cidr, 100.64.0.0/10, LAN

@@ -1,8 +1,7 @@
 # > CATCHPLAY+
-USER-AGENT,CATCHPLAY*,CATCHPLAY+
-DOMAIN-SUFFIX,catchplay.com,CATCHPLAY+
-DOMAIN,asiaplay-origin.s3.amazonaws.com,CATCHPLAY+
-DOMAIN,tra-ww000-cp.akamaized.net,CATCHPLAY+
-DOMAIN,ols-ww000-cp.akamaized.net,CATCHPLAY+
-DOMAIN,ols-ww100-cp.akamaized.net,CATCHPLAY+
-DOMAIN,dkfhw9rzsr80z.cloudfront.net,CATCHPLAY+
+host-suffix, catchplay.com, CATCHPLAY+
+host, asiaplay-origin.s3.amazonaws.com, CATCHPLAY+
+host, tra-ww000-cp.akamaized.net, CATCHPLAY+
+host, ols-ww000-cp.akamaized.net, CATCHPLAY+
+host, ols-ww100-cp.akamaized.net, CATCHPLAY+
+host, dkfhw9rzsr80z.cloudfront.net, CATCHPLAY+

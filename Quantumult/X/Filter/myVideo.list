@@ -1,6 +1,5 @@
 # > myVideo
-USER-AGENT,myVideo*,myVideo
-DOMAIN-SUFFIX,myvideo.net.tw,myVideo
-DOMAIN-SUFFIX,catch.net.tw,myVideo
-DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net,myVideo
-DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net,myVideo
+host-suffix, myvideo.net.tw, myVideo
+host-suffix, catch.net.tw, myVideo
+host, applemediaservice.keydelivery.southeastasia.media.azure.net, myVideo
+host, akamaiendpoint-applemediaservice-aase.streaming.media.azure.net, myVideo

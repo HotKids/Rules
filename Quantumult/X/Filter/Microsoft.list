@@ -1,89 +1,89 @@
 ### fork from https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/microsoft.conf
 # > Microsoft
-DOMAIN,officecdn-microsoft-com.akamaized.net,Microsoft
-DOMAIN-KEYWORD,1drv,Microsoft
-DOMAIN-KEYWORD,microsoft,Microsoft
-DOMAIN-SUFFIX,1drv.com,Microsoft
-DOMAIN-SUFFIX,aadrm.com,Microsoft
-DOMAIN-SUFFIX,acompli.com,Microsoft
-DOMAIN-SUFFIX,acompli.net,Microsoft
-DOMAIN-SUFFIX,aka.ms,Microsoft
-DOMAIN-SUFFIX,appcenter.ms,Microsoft
-DOMAIN-SUFFIX,aria.ms,Microsoft
-DOMAIN-SUFFIX,asp.net,Microsoft
-DOMAIN-SUFFIX,aspnetcdn.com,Microsoft
-DOMAIN-SUFFIX,assets-yammer.com,Microsoft
-DOMAIN-SUFFIX,azure.com,Microsoft
-DOMAIN-SUFFIX,azure.net,Microsoft
-DOMAIN-SUFFIX,azureedge.net,Microsoft
-DOMAIN-SUFFIX,azurerms.com,Microsoft
-DOMAIN-SUFFIX,bing.com,Microsoft
-DOMAIN-SUFFIX,clarity.ms,Microsoft
-DOMAIN-SUFFIX,cloudapp.net,Microsoft
-DOMAIN-SUFFIX,cloudappsecurity.com,Microsoft
-DOMAIN-SUFFIX,docs.com,Microsoft
-DOMAIN-SUFFIX,edgesuite.net,Microsoft
-DOMAIN-SUFFIX,gfx.ms,Microsoft
-DOMAIN-KEYWORD,hotmail,Microsoft
-DOMAIN-SUFFIX,hotmail.com,Microsoft
-DOMAIN-SUFFIX,live.com,Microsoft
-DOMAIN-SUFFIX,live.net,Microsoft
-DOMAIN-SUFFIX,lync.com,Microsoft
-DOMAIN-SUFFIX,microsoft.com,Microsoft
-DOMAIN-SUFFIX,microsoftonline.com,Microsoft
-DOMAIN-SUFFIX,msappproxy.net,Microsoft
-DOMAIN-SUFFIX,msauth.net,Microsoft
-DOMAIN-SUFFIX,msauthimages.net,Microsoft
-DOMAIN-SUFFIX,msecnd.net,Microsoft
-DOMAIN-SUFFIX,msedge.net,Microsoft
-DOMAIN-SUFFIX,msft.net,Microsoft
-DOMAIN-SUFFIX,msftauth.net,Microsoft
-DOMAIN-SUFFIX,msftauthimages.net,Microsoft
-DOMAIN-SUFFIX,msftidentity.com,Microsoft
-DOMAIN-SUFFIX,msidentity.com,Microsoft
-DOMAIN-SUFFIX,msn.com,Microsoft
-DOMAIN-SUFFIX,msocdn.com,Microsoft
-DOMAIN-SUFFIX,msocsp.com,Microsoft
-DOMAIN-SUFFIX,mstea.ms,Microsoft
-DOMAIN-SUFFIX,o365weve.com,Microsoft
-DOMAIN-SUFFIX,oaspapps.com,Microsoft
-DOMAIN-SUFFIX,office.com,Microsoft
-DOMAIN-SUFFIX,office.net,Microsoft
-DOMAIN-SUFFIX,office365.com,Microsoft
-DOMAIN-SUFFIX,officeppe.net,Microsoft
-DOMAIN-SUFFIX,omniroot.com,Microsoft
-DOMAIN-SUFFIX,onedrive.com,Microsoft
-DOMAIN-SUFFIX,onenote.com,Microsoft
-DOMAIN-SUFFIX,onenote.net,Microsoft
-DOMAIN-SUFFIX,onestore.ms,Microsoft
-DOMAIN-SUFFIX,outlook.com,Microsoft
-DOMAIN-SUFFIX,outlookmobile.com,Microsoft
-DOMAIN-SUFFIX,phonefactor.net,Microsoft
-DOMAIN-SUFFIX,public-trust.com,Microsoft
-DOMAIN-SUFFIX,sfbassets.com,Microsoft
-DOMAIN-SUFFIX,sfx.ms,Microsoft
-DOMAIN-SUFFIX,sharepoint.com,Microsoft
-DOMAIN-SUFFIX,sharepointonline.com,Microsoft
-DOMAIN-SUFFIX,skype.com,Microsoft
-DOMAIN-SUFFIX,skypeassets.com,Microsoft
-DOMAIN-SUFFIX,skypeforbusiness.com,Microsoft
-DOMAIN-SUFFIX,staffhub.ms,Microsoft
-DOMAIN-SUFFIX,svc.ms,Microsoft
-DOMAIN-SUFFIX,sway-cdn.com,Microsoft
-DOMAIN-SUFFIX,sway-extensions.com,Microsoft
-DOMAIN-SUFFIX,sway.com,Microsoft
-DOMAIN-SUFFIX,trafficmanager.net,Microsoft
-DOMAIN-SUFFIX,uservoice.com,Microsoft
-DOMAIN-SUFFIX,virtualearth.net,Microsoft
-DOMAIN-SUFFIX,visualstudio.com,Microsoft
-DOMAIN-SUFFIX,windows-ppe.net,Microsoft
-DOMAIN-SUFFIX,windows.com,Microsoft
-DOMAIN-SUFFIX,windows.net,Microsoft
-DOMAIN-SUFFIX,windowsazure.com,Microsoft
-DOMAIN-SUFFIX,windowsupdate.com,Microsoft
-DOMAIN-SUFFIX,wunderlist.com,Microsoft
-DOMAIN-SUFFIX,xbox.com,Microsoft
-DOMAIN-SUFFIX,xboxlive.com,Microsoft
-DOMAIN-SUFFIX,xboxservices.com,Microsoft
-DOMAIN-SUFFIX,yammer.com,Microsoft
-DOMAIN-SUFFIX,yammerusercontent.com,Microsoft
+host, officecdn-microsoft-com.akamaized.net, Microsoft
+host-keyword, 1drv, Microsoft
+host-keyword, microsoft, Microsoft
+host-suffix, 1drv.com, Microsoft
+host-suffix, aadrm.com, Microsoft
+host-suffix, acompli.com, Microsoft
+host-suffix, acompli.net, Microsoft
+host-suffix, aka.ms, Microsoft
+host-suffix, appcenter.ms, Microsoft
+host-suffix, aria.ms, Microsoft
+host-suffix, asp.net, Microsoft
+host-suffix, aspnetcdn.com, Microsoft
+host-suffix, assets-yammer.com, Microsoft
+host-suffix, azure.com, Microsoft
+host-suffix, azure.net, Microsoft
+host-suffix, azureedge.net, Microsoft
+host-suffix, azurerms.com, Microsoft
+host-suffix, bing.com, Microsoft
+host-suffix, clarity.ms, Microsoft
+host-suffix, cloudapp.net, Microsoft
+host-suffix, cloudappsecurity.com, Microsoft
+host-suffix, docs.com, Microsoft
+host-suffix, edgesuite.net, Microsoft
+host-suffix, gfx.ms, Microsoft
+host-keyword, hotmail, Microsoft
+host-suffix, hotmail.com, Microsoft
+host-suffix, live.com, Microsoft
+host-suffix, live.net, Microsoft
+host-suffix, lync.com, Microsoft
+host-suffix, microsoft.com, Microsoft
+host-suffix, microsoftonline.com, Microsoft
+host-suffix, msappproxy.net, Microsoft
+host-suffix, msauth.net, Microsoft
+host-suffix, msauthimages.net, Microsoft
+host-suffix, msecnd.net, Microsoft
+host-suffix, msedge.net, Microsoft
+host-suffix, msft.net, Microsoft
+host-suffix, msftauth.net, Microsoft
+host-suffix, msftauthimages.net, Microsoft
+host-suffix, msftidentity.com, Microsoft
+host-suffix, msidentity.com, Microsoft
+host-suffix, msn.com, Microsoft
+host-suffix, msocdn.com, Microsoft
+host-suffix, msocsp.com, Microsoft
+host-suffix, mstea.ms, Microsoft
+host-suffix, o365weve.com, Microsoft
+host-suffix, oaspapps.com, Microsoft
+host-suffix, office.com, Microsoft
+host-suffix, office.net, Microsoft
+host-suffix, office365.com, Microsoft
+host-suffix, officeppe.net, Microsoft
+host-suffix, omniroot.com, Microsoft
+host-suffix, onedrive.com, Microsoft
+host-suffix, onenote.com, Microsoft
+host-suffix, onenote.net, Microsoft
+host-suffix, onestore.ms, Microsoft
+host-suffix, outlook.com, Microsoft
+host-suffix, outlookmobile.com, Microsoft
+host-suffix, phonefactor.net, Microsoft
+host-suffix, public-trust.com, Microsoft
+host-suffix, sfbassets.com, Microsoft
+host-suffix, sfx.ms, Microsoft
+host-suffix, sharepoint.com, Microsoft
+host-suffix, sharepointonline.com, Microsoft
+host-suffix, skype.com, Microsoft
+host-suffix, skypeassets.com, Microsoft
+host-suffix, skypeforbusiness.com, Microsoft
+host-suffix, staffhub.ms, Microsoft
+host-suffix, svc.ms, Microsoft
+host-suffix, sway-cdn.com, Microsoft
+host-suffix, sway-extensions.com, Microsoft
+host-suffix, sway.com, Microsoft
+host-suffix, trafficmanager.net, Microsoft
+host-suffix, uservoice.com, Microsoft
+host-suffix, virtualearth.net, Microsoft
+host-suffix, visualstudio.com, Microsoft
+host-suffix, windows-ppe.net, Microsoft
+host-suffix, windows.com, Microsoft
+host-suffix, windows.net, Microsoft
+host-suffix, windowsazure.com, Microsoft
+host-suffix, windowsupdate.com, Microsoft
+host-suffix, wunderlist.com, Microsoft
+host-suffix, xbox.com, Microsoft
+host-suffix, xboxlive.com, Microsoft
+host-suffix, xboxservices.com, Microsoft
+host-suffix, yammer.com, Microsoft
+host-suffix, yammerusercontent.com, Microsoft

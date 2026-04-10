@@ -1,25 +1,25 @@
 # > American Express
-DOMAIN-SUFFIX,americanexpress.com,Credit
-DOMAIN-SUFFIX,amextravel.com,Credit
-DOMAIN-SUFFIX,membershiprewards.com,Credit
-DOMAIN-SUFFIX,aexp.com,Credit
-DOMAIN-SUFFIX,aexp-static.com,Credit
+host-suffix, americanexpress.com, Credit
+host-suffix, amextravel.com, Credit
+host-suffix, membershiprewards.com, Credit
+host-suffix, aexp.com, Credit
+host-suffix, aexp-static.com, Credit
 
 # > Chase
-DOMAIN-SUFFIX,chase.com,Credit
-DOMAIN-SUFFIX,chasecdn.com,Credit
-DOMAIN-SUFFIX,chasepay.com,Credit
-DOMAIN-SUFFIX,jpmorganchase.com,Credit
-DOMAIN-SUFFIX,jpmorgan.com,Credit
+host-suffix, chase.com, Credit
+host-suffix, chasecdn.com, Credit
+host-suffix, chasepay.com, Credit
+host-suffix, jpmorganchase.com, Credit
+host-suffix, jpmorgan.com, Credit
 
 # > IBKR
-DOMAIN-SUFFIX,interactivebrokers.com,Credit
-DOMAIN-SUFFIX,ibkr.com,Credit
-DOMAIN-SUFFIX,ibllc.com,Credit
+host-suffix, interactivebrokers.com, Credit
+host-suffix, ibkr.com, Credit
+host-suffix, ibllc.com, Credit
 
 # > N26
-DOMAIN-SUFFIX,n26.com,Credit
-DOMAIN-SUFFIX,tech26.de,Credit
+host-suffix, n26.com, Credit
+host-suffix, tech26.de, Credit
 
 # > bonify
-DOMAIN-SUFFIX,bonify.de,Credit
+host-suffix, bonify.de, Credit
