@@ -42,6 +42,7 @@ _SURFBOARD_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 _LOON_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 _LOON_ACTION_VALUE_MAP = {"direct": "DIRECT", "reject": "REJECT",
                           "reject-tinygif": "REJECT", "reject-drop": "REJECT-DROP", "reject-no-drop": "REJECT"}
+_CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 
 
 def _filter_proxy_lines_for_platform(proxy_lines: list[str], supported_actions: frozenset) -> list[str]:
@@ -72,6 +73,37 @@ def _gen_loon_proxy_section(proxy_lines: list[str]) -> str:
         loon_val = _LOON_ACTION_VALUE_MAP.get(surge_val, surge_val.upper())
         entries.append(f"{name.strip()} = {loon_val}")
     return "[Proxy]\n" + "\n".join(entries) if entries else ""
+
+
+def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str], str]:
+    """从 Surge proxy_lines 生成 Clash hidden action wrapper groups（无 icon）。
+
+    返回：
+      proxy_names  list[str]  按 proxy_lines 顺序的 emoji 名称
+      wrapper_yaml str        追加到 pg_inject["block"] 的 YAML 文本
+    """
+    proxy_names: list[str] = []
+    wrapper_blocks: list[str] = []
+    for line in proxy_lines:
+        if "=" not in line:
+            continue
+        name, _, val = line.partition("=")
+        name = name.strip()
+        surge_val = val.strip().lower()
+        if surge_val not in _CLASH_SUPPORTED_ACTIONS:
+            continue
+        clash_val = surge_val.upper()       # reject → REJECT, direct → DIRECT
+        comment = strip_emoji(name)         # ⛔️ REJECT → REJECT, 🔘 DIRECT → DIRECT
+        proxy_names.append(name)
+        wrapper_blocks.append(
+            f"  # {comment}\n"
+            f'  - name: "{name}"\n'
+            f"    type: select\n"
+            f"    hidden: true\n"
+            f"    proxies:\n"
+            f"      - {clash_val}"
+        )
+    return proxy_names, "\n\n".join(wrapper_blocks)
 
 
 SURFBOARD_SKIP_GENERAL_KEYS = {
@@ -1959,6 +1991,17 @@ def main() -> None:
         inc = clash.get("include_file")
 
         print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
+        # 动态生成 Clash action wrapper groups（来自 Surge proxy_lines）
+        clash_action_names, clash_action_yaml = _gen_clash_action_wrapper_groups(proxy_lines)
+        if pg_inject and clash_action_names:
+            proxy_list = "\n".join(f"      - {n}" for n in clash_action_names)
+            pg_inject["block"] = pg_inject["block"].replace(
+                "    proxies: []",
+                f"    proxies:\n{proxy_list}",
+            )
+            if clash_action_yaml:
+                pg_inject["block"] = pg_inject["block"].rstrip() + "\n\n" + clash_action_yaml
+
         if pg_inject:
             print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
         if rules_inject:
@@ -2025,6 +2068,20 @@ def main() -> None:
         print(f"  Loon skip: {loon_skips}")
         if loon_pg_inject:
             print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")
+
+        # 动态填充 Loon AdGuard 组的 proxy 列表（来自 Surge proxy_lines）
+        loon_action_names = [
+            line.partition("=")[0].strip()
+            for line in proxy_lines
+            if "=" in line and line.partition("=")[2].strip().lower() in _LOON_SUPPORTED_ACTIONS
+        ]
+        if loon_pg_inject and loon_action_names:
+            proxy_csv = ",".join(loon_action_names)
+            loon_pg_inject["block"] = loon_pg_inject["block"].replace(
+                "= select,img-url",
+                f"= select,{proxy_csv},img-url",
+                1,
+            )
 
         # 从 Surge rule_lines 提取 FINAL 规则
         surge_final = ""
@@ -2128,6 +2185,19 @@ def main() -> None:
         sb_out = surfboard["output"]
         sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
         sb_pg_inject = surfboard.get("pg_inject_surfboard")
+        # 动态填充 Surfboard AdGuard 组的 proxy 列表（来自 Surge proxy_lines）
+        sb_action_names = [
+            line.partition("=")[0].strip()
+            for line in proxy_lines
+            if "=" in line and line.partition("=")[2].strip().lower() in _SURFBOARD_SUPPORTED_ACTIONS
+        ]
+        if sb_pg_inject and sb_action_names:
+            proxy_csv = ", ".join(sb_action_names)
+            sb_pg_inject["block"] = sb_pg_inject["block"].replace(
+                "= select, icon-url",
+                f"= select, {proxy_csv}, icon-url",
+                1,
+            )
         print(f"  Surfboard skip: {sb_skips}")
         if sb_pg_inject:
             print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")

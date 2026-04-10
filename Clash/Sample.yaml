@@ -352,19 +352,17 @@ proxy-groups:
       - ⛔️ REJECT
       - 🔘 DIRECT
 
-  # Reject
+  # REJECT
   - name: "⛔️ REJECT"
     type: select
     hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
     proxies:
       - REJECT
 
-  # Direct
+  # DIRECT
   - name: "🔘 DIRECT"
     type: select
     hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - DIRECT
 
