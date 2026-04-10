@@ -1347,6 +1347,28 @@ def _qx_normalize_text(text: str, policy_rename: dict[str, str] | None = None) -
     return "\n".join(result)
 
 
+def _normalize_qx_comment(
+    comment: str,
+    strip_names: bool = True,
+    policy_rename_map: dict[str, str] | None = None,
+) -> str:
+    """Apply strip_emoji and policy_rename_map to a QX policy group comment line."""
+    if comment.startswith("# >> "):
+        prefix, name = "# >> ", comment[5:]
+    elif comment.startswith("# > "):
+        prefix, name = "# > ", comment[4:]
+    elif comment.startswith("# "):
+        prefix, name = "# ", comment[2:]
+    else:
+        return comment
+    name = name.rstrip()
+    if strip_names:
+        name = strip_emoji(name)
+    if policy_rename_map:
+        name = policy_rename_map.get(name, name)
+    return prefix + name
+
+
 def _fmt_qx_policy(
     name: str,
     gtype: str,
@@ -1354,6 +1376,7 @@ def _fmt_qx_policy(
     proxies: list[str],
     strip_names: bool = True,
     policy_rename_map: dict[str, str] | None = None,
+    all_proxy_names: set[str] | None = None,
 ) -> str | None:
     """格式化为 QX policy 单行。返回 None 表示跳过该组。"""
     icon_part = ""
@@ -1383,6 +1406,9 @@ def _fmt_qx_policy(
             mapped = [strip_emoji(p) for p in mapped]
         if policy_rename_map:
             mapped = [policy_rename_map.get(p, p) for p in mapped]
+        # include-all-proxies 组（如 Server）→ QX 内建 'proxy' 关键字
+        if all_proxy_names:
+            mapped = ["proxy" if p in all_proxy_names else p for p in mapped]
         return f"static={emit_name}, {', '.join(mapped)}{icon_part}"
 
     return None
@@ -1401,6 +1427,17 @@ def gen_qx_policies(
     injected = False
     ph = PendingHeaders()
 
+    # 预扫描：识别 include-all-proxies 组（在 QX 中替换为内建 'proxy' 关键字）
+    all_proxy_names: set[str] = set()
+    for _line in group_lines:
+        _g = parse_group_line(_line)
+        if _g and _g["params"].get("include-all-proxies", "").lower() in ("true", "1"):
+            _n = strip_emoji(_g["name"]) if strip_names else _g["name"]
+            if policy_rename_map:
+                _n = policy_rename_map.get(_n, _n)
+            all_proxy_names.add(_n)
+    all_proxy_names_arg = all_proxy_names or None
+
     if pg_inject and pg_inject.get("prepend_block"):
         prepend = _qx_normalize_text(pg_inject["prepend_block"], policy_rename_map) if strip_names else pg_inject["prepend_block"]
         out.append(prepend)
@@ -1408,7 +1445,8 @@ def gen_qx_policies(
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
-            ph.push(line, lvl)
+            normalized = _normalize_qx_comment(line, strip_names, policy_rename_map)
+            ph.push(normalized, lvl)
             continue
         g = parse_group_line(line)
         if g is None:
@@ -1429,7 +1467,7 @@ def gen_qx_policies(
             ph.skip()
             continue
 
-        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"], strip_names, policy_rename_map)
+        qx_line = _fmt_qx_policy(name, g["type"], g["params"], g["proxies"], strip_names, policy_rename_map, all_proxy_names_arg)
         if qx_line is None:
             ph.skip()
             continue
