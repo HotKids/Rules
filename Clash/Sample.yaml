@@ -344,19 +344,25 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
-  # Reject
+  # Adblock
+  - name: "🚧 AdGuard"
+    type: select
+    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+    proxies:
+      - ⛔️ REJECT
+      - 🔘 DIRECT
+
+  # REJECT
   - name: "⛔️ REJECT"
     type: select
     hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
     proxies:
       - REJECT
 
-  # Direct
+  # DIRECT
   - name: "🔘 DIRECT"
     type: select
     hidden: true
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
     proxies:
       - DIRECT
 

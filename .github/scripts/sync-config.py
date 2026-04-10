@@ -34,6 +34,78 @@ RAW_PREFIX = "https://raw.githubusercontent.com/"
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
 SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
+# Surge 内建动作名（proxy value 为这些时视为 action proxy）
+_SURGE_BUILTIN_ACTIONS = frozenset({"direct", "reject", "reject-tinygif", "reject-drop", "reject-no-drop"})
+# Surfboard 支持的内建动作（无 MITM，不支持 TINYGIF/DROP）
+_SURFBOARD_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+# Loon 支持的内建动作及其值映射（Surge lowercase → Loon format）
+_LOON_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+_LOON_ACTION_VALUE_MAP = {"direct": "DIRECT", "reject": "REJECT",
+                          "reject-tinygif": "REJECT", "reject-drop": "REJECT-DROP", "reject-no-drop": "REJECT"}
+_CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+
+
+def _filter_proxy_lines_for_platform(proxy_lines: list[str], supported_actions: frozenset) -> list[str]:
+    """过滤 proxy_lines，移除该平台不支持的 action proxy 行（保留所有非 action 行）。"""
+    result = []
+    for line in proxy_lines:
+        if "=" not in line:
+            result.append(line)
+            continue
+        _, _, val = line.partition("=")
+        surge_val = val.strip().lower()
+        if surge_val in _SURGE_BUILTIN_ACTIONS and surge_val not in supported_actions:
+            continue  # 该 action 不被支持，跳过
+        result.append(line)
+    return result
+
+
+def _gen_loon_proxy_section(proxy_lines: list[str]) -> str:
+    """从 Surge proxy_lines 生成 Loon [Proxy] 段落（仅 action proxies，值转换为 Loon 格式）。"""
+    entries: list[str] = []
+    for line in proxy_lines:
+        if "=" not in line:
+            continue
+        name, _, val = line.partition("=")
+        surge_val = val.strip().lower()
+        if surge_val not in _LOON_SUPPORTED_ACTIONS:
+            continue
+        loon_val = _LOON_ACTION_VALUE_MAP.get(surge_val, surge_val.upper())
+        entries.append(f"{name.strip()} = {loon_val}")
+    return "[Proxy]\n" + "\n".join(entries) if entries else ""
+
+
+def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str], str]:
+    """从 Surge proxy_lines 生成 Clash hidden action wrapper groups（无 icon）。
+
+    返回：
+      proxy_names  list[str]  按 proxy_lines 顺序的 emoji 名称
+      wrapper_yaml str        追加到 pg_inject["block"] 的 YAML 文本
+    """
+    proxy_names: list[str] = []
+    wrapper_blocks: list[str] = []
+    for line in proxy_lines:
+        if "=" not in line:
+            continue
+        name, _, val = line.partition("=")
+        name = name.strip()
+        surge_val = val.strip().lower()
+        if surge_val not in _CLASH_SUPPORTED_ACTIONS:
+            continue
+        clash_val = surge_val.upper()       # reject → REJECT, direct → DIRECT
+        comment = strip_emoji(name)         # ⛔️ REJECT → REJECT, 🔘 DIRECT → DIRECT
+        proxy_names.append(name)
+        wrapper_blocks.append(
+            f"  # {comment}\n"
+            f'  - name: "{name}"\n'
+            f"    type: select\n"
+            f"    hidden: true\n"
+            f"    proxies:\n"
+            f"      - {clash_val}"
+        )
+    return proxy_names, "\n\n".join(wrapper_blocks)
+
+
 SURFBOARD_SKIP_GENERAL_KEYS = {
     "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
     "http-listen", "socks5-listen",
@@ -411,6 +483,68 @@ def _process_builtin_qx(lines: list[str]) -> tuple[str, dict | None, dict]:
     return qx_header, pg_inject_qx, qx_blocks
 
 
+def _process_builtin_surfboard(lines: list[str]) -> dict | None:
+    """从 Surfboard builtin INI（Surge 格式）解析 [Proxy Group] 注入配置。
+
+    返回 pg_inject 字典 {anchor, block, names, prepend_block}，或 None。
+    """
+    pg_lines: list[str] = []
+    in_pg = False
+
+    for line in lines:
+        s = line.strip()
+        if s == "[Proxy Group]":
+            in_pg = True
+            continue
+        if s.startswith("[") and s.endswith("]"):
+            in_pg = False
+            continue
+        if in_pg:
+            pg_lines.append(line)
+
+    if not pg_lines:
+        return None
+
+    anchor: str | None = None
+    pre_lines: list[str] = []
+    post_lines: list[str] = []
+    found_anchor = False
+
+    for line in pg_lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#") and "//" in s and not found_anchor:
+            found_anchor = True
+            m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+            if m:
+                anchor = m.group(1).strip()
+            clean_s = re.sub(r"\s*//.*$", "", s).rstrip()
+            if clean_s and clean_s != "#":
+                post_lines.append(clean_s)
+            continue
+        if found_anchor:
+            post_lines.append(s)
+        else:
+            pre_lines.append(s)
+
+    # 从 Surge 格式行（Name = type, ...）提取 names
+    names: set[str] = set()
+    for line in pg_lines:
+        s = line.strip()
+        if s and not s.startswith("#") and "=" in s:
+            name = s.split("=")[0].strip()
+            if name:
+                names.add(name)
+
+    return {
+        "anchor": anchor,
+        "block": "\n".join(post_lines).strip(),
+        "names": names,
+        "prepend_block": "\n".join(pre_lines).strip() or None,
+    }
+
+
 def _empty_plat() -> dict:
     return {
         "output": None,
@@ -429,8 +563,8 @@ def _empty_plat() -> dict:
         "qx_header": "",
         "qx_blocks": {},
         "pg_inject_qx": None,
-        "emoji": False,
         "policy_rename_map": {},
+        "pg_inject_surfboard": None,
     }
 
 
@@ -482,6 +616,8 @@ def parse_sync_txt() -> dict:
                 plat["qx_header"] = qx_hdr
                 plat["pg_inject_qx"] = pg_inj_qx
                 plat["qx_blocks"] = qx_blks
+            elif current_platform == "Surfboard":
+                plat["pg_inject_surfboard"] = _process_builtin_surfboard(builtin_buf)
             else:
                 pp, pg, ri = _process_builtin(builtin_buf)
                 plat["proxy_providers"] = pp
@@ -594,18 +730,7 @@ def parse_sync_txt() -> dict:
             if left:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
         elif current_section == "Options" and current_platform and current_platform != "Surge":
-            if "=" in stripped:
-                key, _, val = stripped.partition("=")
-                key, val = key.strip(), val.strip().lower()
-                if key == "emoji":
-                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
-        elif current_section == "" and current_platform and current_platform != "Surge":
-            # 裸平台选项（如 emoji=false，无需 # > Options 标题）
-            if "=" in stripped and not stripped.startswith("["):
-                key, _, val = stripped.partition("=")
-                key, val = key.strip(), val.strip().lower()
-                if key == "emoji":
-                    result.setdefault(current_platform, _empty_plat())["emoji"] = val in ("true", "1", "yes", "on")
+            pass  # reserved for future options
 
     flush_builtin()
     return result
@@ -849,6 +974,7 @@ def gen_proxy_groups(
     skips: list[str],
     pg_inject: dict | None,
     provider_urls: dict[str, str] | None = None,
+    adblock_proxy_lines: list[str] | None = None,
 ) -> str:
     """生成 proxy-groups 段落。
 
@@ -886,6 +1012,28 @@ def gen_proxy_groups(
             ph.skip()
             continue
 
+        # select + policy-path + no explicit proxies → adblock group
+        if (g["type"] == "select" and "policy-path" in g["params"]
+                and not g["proxies"] and adblock_proxy_lines is not None):
+            clash_action_names, wrapper_yaml = _gen_clash_action_wrapper_groups(adblock_proxy_lines)
+            if clash_action_names:
+                icon = g["params"].get("icon-url", "")
+                icon_line = f"\n    icon: {icon}" if icon else ""
+                proxy_list = "\n".join(f"      - {n}" for n in clash_action_names)
+                out.extend(ph.flush())
+                out.append(
+                    f'  - name: "{name}"\n'
+                    f"    type: select{icon_line}\n"
+                    f"    proxies:\n{proxy_list}"
+                )
+                out.append("")
+                if wrapper_yaml:
+                    out.append(wrapper_yaml)
+                    out.append("")
+            else:
+                ph.skip()
+            continue
+
         out.extend(ph.flush())
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
@@ -895,7 +1043,7 @@ def gen_proxy_groups(
             out.append("")
             injected = True
 
-    if pg_inject and not injected:
+    if pg_inject and not injected and pg_inject.get("block"):
         out.append(pg_inject["block"])
         out.append("")
 
@@ -1198,6 +1346,7 @@ def gen_loon_proxy_groups(
     skips: list[str],
     pg_inject: dict | None,
     filter_map: dict[str, str],
+    adblock_proxy_lines: list[str] | None = None,
 ) -> str:
     """生成 Loon [Proxy Group] 段落。"""
     out: list[str] = ["[Proxy Group]"]
@@ -1226,6 +1375,23 @@ def gen_loon_proxy_groups(
         if _is_skipped(name, skips):
             print(f"  [SKIP Loon group] {name}")
             ph.skip()
+            continue
+
+        # select + policy-path + no explicit proxies → adblock group
+        if (g["type"] == "select" and "policy-path" in g["params"]
+                and not g["proxies"] and adblock_proxy_lines is not None):
+            loon_names = [
+                pl.partition("=")[0].strip()
+                for pl in adblock_proxy_lines
+                if "=" in pl and pl.partition("=")[2].strip().lower() in _LOON_SUPPORTED_ACTIONS
+            ]
+            if loon_names:
+                icon = g["params"].get("icon-url", "")
+                icon_part = f",img-url = {icon}" if icon else ""
+                out.extend(ph.flush())
+                out.append(f"{name} = select,{','.join(loon_names)}{icon_part}")
+            else:
+                ph.skip()
             continue
 
         loon_line = _fmt_loon_group(name, g["type"], g["params"], g["proxies"], filter_map)
@@ -1710,10 +1876,21 @@ def _gen_surfboard_general(lines: list[str]) -> str:
     return "\n".join(out).strip()
 
 
-def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str:
+def _gen_surfboard_proxy_groups(
+    group_lines: list[str],
+    skips: list[str],
+    pg_inject: dict | None = None,
+    adblock_proxy_lines: list[str] | None = None,
+) -> str:
     """生成 Surfboard [Proxy Group] 段落，将 smart 类型转换为 url-test。"""
     out: list[str] = ["[Proxy Group]"]
+    inject_names: set[str] = pg_inject["names"] if pg_inject else set()
+    injected = False
     ph = PendingHeaders()
+
+    if pg_inject and pg_inject.get("prepend_block"):
+        out.append(pg_inject["prepend_block"])
+
     for line in group_lines:
         if line.startswith("#"):
             lvl = 3 if line.startswith("# >>") else (2 if line.startswith("# >") else 1)
@@ -1724,9 +1901,29 @@ def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str
             ph.skip()
             continue
         name = g["name"]
+        if name in inject_names:
+            ph.skip()
+            continue
         if _is_skipped(name, skips):
             print(f"  [SKIP Surfboard group] {name}")
             ph.skip()
+            continue
+
+        # select + policy-path + no explicit proxies → adblock group
+        if (g["type"] == "select" and "policy-path" in g["params"]
+                and not g["proxies"] and adblock_proxy_lines is not None):
+            sb_names = [
+                pl.partition("=")[0].strip()
+                for pl in adblock_proxy_lines
+                if "=" in pl and pl.partition("=")[2].strip().lower() in _SURFBOARD_SUPPORTED_ACTIONS
+            ]
+            if sb_names:
+                icon = g["params"].get("icon-url", "")
+                icon_part = f", icon-url={icon}" if icon else ""
+                out.extend(ph.flush())
+                out.append(f"{name} = select, {', '.join(sb_names)}{icon_part}")
+            else:
+                ph.skip()
             continue
 
         gtype = "url-test" if g["type"] == "smart" else g["type"]
@@ -1736,6 +1933,14 @@ def _gen_surfboard_proxy_groups(group_lines: list[str], skips: list[str]) -> str
 
         out.extend(ph.flush())
         out.append(f"{name} = {', '.join(tokens)}")
+
+        if pg_inject and not injected and pg_inject.get("anchor") == name:
+            out.append(pg_inject["block"])
+            injected = True
+
+    if pg_inject and not injected and pg_inject.get("block"):
+        out.append(pg_inject["block"])
+
     return "\n".join(out)
 
 
@@ -1787,6 +1992,7 @@ def gen_surfboard_profile(
     rule_lines: list[str],
     skips: list[str],
     general_lines: list[str] | None = None,
+    pg_inject: dict | None = None,
 ) -> str:
     """从 Surge 解析结果生成 Surfboard 兼容 Profile（Surge 精简版，无 MITM）。"""
     parts = []
@@ -1794,9 +2000,10 @@ def gen_surfboard_profile(
         gen_text = _gen_surfboard_general(general_lines)
         if gen_text:
             parts.append("[General]\n" + gen_text)
-    if proxy_lines:
-        parts.append("[Proxy]\n" + "\n".join(proxy_lines))
-    parts.append(_gen_surfboard_proxy_groups(group_lines, skips))
+    # [Proxy]：Surge 源代理，过滤掉 Surfboard 不支持的 action proxy（如 REJECT-TINYGIF）
+    sb_proxy_lines = _filter_proxy_lines_for_platform(proxy_lines, _SURFBOARD_SUPPORTED_ACTIONS)
+    parts.append("[Proxy]\n" + "\n".join(sb_proxy_lines))
+    parts.append(_gen_surfboard_proxy_groups(group_lines, skips, pg_inject, adblock_proxy_lines=proxy_lines))
     parts.append(_gen_surfboard_rules(rule_lines, skips))
     return "\n\n".join(parts) + "\n"
 
@@ -1836,7 +2043,7 @@ def main() -> None:
         if rules_inject:
             print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
 
-        groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls)
+        groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls, adblock_proxy_lines=proxy_lines)
         rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
 
         parts = []
@@ -1908,7 +2115,7 @@ def main() -> None:
                 break
 
         loon_rename_map = loon.get("rename_map", {})
-        pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map)
+        pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map, adblock_proxy_lines=proxy_lines)
         remote_rules = gen_loon_remote_rules(rule_lines, loon_skips, loon_rename_map)
 
         # [Rule]：静态规则 + FINAL（来自 Surge）
@@ -1922,7 +2129,10 @@ def main() -> None:
         # [Mitm]：来自 Surge Profile [MITM] 段落
         surge_mitm_block = "\n".join(surge_mitm_lines).strip()
 
+        loon_proxy_section = _gen_loon_proxy_section(proxy_lines)
         loon_parts = [loon_header, pg_loon]
+        if loon_proxy_section:
+            loon_parts.append(loon_proxy_section)
         if rule_section:
             loon_parts.append(rule_section)
         loon_parts.append(remote_rules)
@@ -1947,11 +2157,10 @@ def main() -> None:
         qx_pg_inject = qx.get("pg_inject_qx")
         qx_skips = config.get("global_skips", []) + qx.get("skips", [])
         qx_rename_map = qx.get("rename_map", {})
-        qx_strip_names = not qx.get("emoji", False)  # emoji=False(default) → strip names
+        qx_strip_names = True
         qx_policy_rename = qx.get("policy_rename_map") or None  # 空 dict → None
 
         print(f"  QX skip: {qx_skips}")
-        print(f"  QX emoji: {qx.get('emoji', False)} | strip_names: {qx_strip_names}")
         if qx_policy_rename:
             print(f"  QX policy_rename: {qx_policy_rename}")
         if qx_pg_inject:
@@ -1996,8 +2205,11 @@ def main() -> None:
         print("\n── sync-config: Surge Profile → Surfboard.conf ──")
         sb_out = surfboard["output"]
         sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
+        sb_pg_inject = surfboard.get("pg_inject_surfboard")
         print(f"  Surfboard skip: {sb_skips}")
-        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines)
+        if sb_pg_inject:
+            print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
+        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject)
         changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
         print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 
