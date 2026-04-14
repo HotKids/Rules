@@ -1,0 +1,40 @@
+# 核心域名（DOMAIN-SUFFIX 已覆盖所有 *.anthropic.com 子域名）
+DOMAIN-SUFFIX,anthropic.com,Anthropic
+DOMAIN-SUFFIX,claude.ai,Anthropic
+DOMAIN-SUFFIX,claude.com,Anthropic
+DOMAIN-SUFFIX,clau.de,Anthropic
+DOMAIN-SUFFIX,claudemcpclient.com,Anthropic
+DOMAIN-SUFFIX,claudeusercontent.com,Anthropic
+
+# CDN 和静态资源
+DOMAIN,servd-anthropic-website.b-cdn.net,Anthropic
+DOMAIN,anthropic.com.cdn.cloudflare.net,Anthropic
+
+# 认证 / 内容
+DOMAIN,anthropic.auth0.com,Anthropic
+DOMAIN,anthropic-com.ghost.io,Anthropic
+
+# 监控和遥测
+DOMAIN-SUFFIX,sentry.io,Anthropic
+DOMAIN-SUFFIX,statsigapi.net,Anthropic
+DOMAIN,browser-intake-us5-datadoghq.com,Anthropic
+DOMAIN-KEYWORD,datadog,Anthropic
+DOMAIN-KEYWORD,sift,Anthropic
+
+# 客服 / 第三方 widget
+DOMAIN-SUFFIX,intercom.io,Anthropic
+DOMAIN-SUFFIX,intercomcdn.com,Anthropic
+DOMAIN,cdn.usefathom.com,Anthropic
+
+# IP 段 / ASN 兜底
+IP-CIDR,160.79.104.0/21,Anthropic,no-resolve
+IP-CIDR6,2607:6bc0::/32,Anthropic,no-resolve
+IP-ASN,399358,Anthropic,no-resolve
+
+# 兜底规则（geosite + keyword 通配）
+# 除了上面的具体规则，还可以加上以下基于分类和关键词的通配兜底规则，进一步提高漏配域名时的覆盖率：
+# geosite:anthropic
+# keyword:datadog
+# keyword:sentry
+# keyword:sift
+# geosite:category-ntp

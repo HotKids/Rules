@@ -1,0 +1,41 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "anthropic-com.ghost.io",
+        "anthropic.auth0.com",
+        "anthropic.com.cdn.cloudflare.net",
+        "browser-intake-us5-datadoghq.com",
+        "cdn.usefathom.com",
+        "servd-anthropic-website.b-cdn.net"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "anthropic.com",
+        "clau.de",
+        "claude.ai",
+        "claude.com",
+        "claudemcpclient.com",
+        "claudeusercontent.com",
+        "intercom.io",
+        "intercomcdn.com",
+        "sentry.io",
+        "statsigapi.net"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "datadog",
+        "sift"
+      ]
+    },
+    {
+      "ip_cidr": [
+        "160.79.104.0/21",
+        "2607:6bc0::/32"
+      ]
+    }
+  ]
+}
