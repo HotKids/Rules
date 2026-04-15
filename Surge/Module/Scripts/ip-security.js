@@ -29,6 +29,7 @@
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
+ * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送
  *
  * 配置示例：
  * [Panel]
@@ -39,7 +40,7 @@
  * ip-security-panel = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
  *
  * # 网络变化自动触发
- * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2
+ * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
  *
  * @author HotKids&Claude
  * @version 6.0.0
@@ -114,6 +115,10 @@ function parseArguments() {
 
   console.log("参数解析: risk_api=" + JSON.stringify(arg.risk_api) + " ipqs_key=" + (arg.ipqs_key ? "已设置" : "未设置"));
 
+  // notify 参数：默认 true，仅当明确设为 "false" 时关闭通知
+  const notifyVal = clean(arg.notify).toLowerCase();
+  const notify = notifyVal !== "false";
+
   return {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: clean(arg.ipqs_key),
@@ -122,12 +127,13 @@ function parseArguments() {
     remoteGeoApi: clean(arg.remote_geoapi) || "ipinfo",
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
     twFlag: clean(arg.tw_flag) || "cn",
-    eventDelay: parseFloat(arg.event_delay) || 2
+    eventDelay: parseFloat(arg.event_delay) || 2,
+    notify: notify
   };
 }
 
 const args = parseArguments();
-console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi);
+console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi + ", 通知: " + args.notify);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
@@ -602,6 +608,11 @@ function buildPanelContent({ useBilibili, maskMode, riskInfo, riskResult, ipType
 
 // ==================== 通知内容构建 ====================
 function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, maskMode, dnsLeak }) {
+  if (!args.notify) {
+    console.log("通知已禁用 (notify=false)，跳过推送");
+    return;
+  }
+
   const m = (ip) => maskIP(ip, maskMode);
   const title = "🔄 网络已切换 | " + policy;
   const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
@@ -740,7 +751,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     const remainder = elapsed % interval;
     const isAutoRefresh = lastRun > 0 && elapsed > tolerance
       && (remainder <= tolerance || remainder >= interval - tolerance);
-    if (!isAutoRefresh) {
+    if (lastRun > 0 && !isAutoRefresh) {
       maskMode = maskMode === 1 ? 0 : 1;
       $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
     }
