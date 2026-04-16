@@ -29,11 +29,11 @@ HOTKIDS_QX_FILTER_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/mast
 CLASH_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
 _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
-_SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
+_SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert", "enhanced-mode"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
-SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
+SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "GEOSITE"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
 # Surge 内建动作名（proxy value 为这些时视为 action proxy）
 _SURGE_BUILTIN_ACTIONS = frozenset({"direct", "reject", "reject-tinygif", "reject-drop", "reject-no-drop"})
@@ -131,11 +131,12 @@ def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str],
     return proxy_names, "\n\n".join(wrapper_blocks)
 
 
-SURFBOARD_SKIP_GENERAL_KEYS = {
-    "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
-    "http-listen", "socks5-listen",
-    "external-controller-access", "http-api", "http-api-tls", "http-api-web-dashboard",
-}
+# Surfboard [General] 白名单：仅保留这些 key
+_SURFBOARD_KEEP_GENERAL_KEYS = frozenset({
+    "dns-server", "doh-server", "skip-proxy", "proxy-test-url", "always-real-ip",
+})
+# Surge key → Surfboard 等价 key（重命名）
+_SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 
 # ---------------------------------------------------------------------------
 # 通用工具
@@ -895,9 +896,25 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         sections.get("General", []),  # raw lines，含注释，不经 clean() 处理
     )
 
-# ---------------------------------------------------------------------------
-# 解析 Proxy Group 行
-# ---------------------------------------------------------------------------
+
+def _parse_surge_alt_groups(profile_path: Path) -> dict[str, dict]:
+    """解析 Surge [Proxy Group] 中以 // 注释的备选定义，返回 {group_name: parsed_group}。
+
+    这些行不被 parse_surge_profile 采纳，但可作为 Surfboard 等平台的替换规则使用。
+    """
+    text = profile_path.read_text(encoding="utf-8")
+    in_pg = False
+    result: dict[str, dict] = {}
+    for line in text.splitlines():
+        s = line.strip()
+        if re.match(r"^\[(.+)\]$", s):
+            in_pg = (s == "[Proxy Group]")
+            continue
+        if in_pg and s.startswith("//"):
+            g = parse_group_line(s[2:].strip())
+            if g:
+                result[g["name"]] = g
+    return result
 
 def parse_group_line(line: str) -> dict | None:
     """解析一行 Surge Proxy Group 定义。
@@ -1950,16 +1967,21 @@ def _sync_qx_mitm(mitm_block: str, surge_mitm_lines: list[str]) -> str:
 # ---------------------------------------------------------------------------
 
 def _gen_surfboard_general(lines: list[str]) -> str:
-    """过滤 iOS/macOS 专属 key，输出 Surfboard 兼容的 [General] 内容。"""
+    """白名单过滤，仅输出 Surfboard 支持的 [General] key，并重命名 Surge 专属 key。"""
     out = []
     for line in lines:
         s = line.strip()
-        if s and not s.startswith("#") and "=" in s:
-            key = s.split("=")[0].strip()
-            if key in SURFBOARD_SKIP_GENERAL_KEYS:
-                continue
-        out.append(line.rstrip())
-    return "\n".join(out).strip()
+        if not s or s.startswith("#") or "=" not in s:
+            continue
+        key, _, val = s.partition("=")
+        key = key.strip()
+        renamed = _SURFBOARD_GENERAL_KEY_RENAMES.get(key, key)
+        if renamed in _SURFBOARD_KEEP_GENERAL_KEYS:
+            out.append(f"{renamed} = {val.strip()}")
+    return "\n".join(out)
+
+
+_SURFBOARD_SKIP_PARAMS = {"icon-url", "evaluate-before-use", "no-alert"}
 
 
 def _gen_surfboard_proxy_groups(
@@ -1967,8 +1989,13 @@ def _gen_surfboard_proxy_groups(
     skips: list[str],
     pg_inject: dict | None = None,
     adblock_proxy_lines: list[str] | None = None,
+    alt_groups: dict[str, dict] | None = None,
 ) -> str:
-    """生成 Surfboard [Proxy Group] 段落，将 smart 类型转换为 url-test。"""
+    """生成 Surfboard [Proxy Group] 段落，将 smart 类型转换为 url-test。
+
+    alt_groups: 从 Surge // 注释行解析的备选组定义，用于替换 include-all-proxies 等 Surfboard
+    不支持的形式（如 🇺🇳 Server 用 policy-path 替代）。icon-url 在所有组中被剥离。
+    """
     out: list[str] = ["[Proxy Group]"]
     inject_names: set[str] = pg_inject["names"] if pg_inject else set()
     injected = False
@@ -2004,10 +2031,19 @@ def _gen_surfboard_proxy_groups(
                 if "=" in pl and pl.partition("=")[2].strip().lower() in _SURFBOARD_SUPPORTED_ACTIONS
             ]
             if sb_names:
-                icon = g["params"].get("icon-url", "")
-                icon_part = f", icon-url={icon}" if icon else ""
                 out.extend(ph.flush())
-                out.append(f"{name} = select, {', '.join(sb_names)}{icon_part}")
+                out.append(f"{name} = select, {', '.join(sb_names)}")
+            else:
+                ph.skip()
+            continue
+
+        # include-all-proxies=true → 用 // 备选定义中的 policy-path 替代
+        if g["params"].get("include-all-proxies", "").lower() in ("true", "1"):
+            alt = (alt_groups or {}).get(name)
+            if alt and "policy-path" in alt["params"]:
+                pp = alt["params"]["policy-path"]
+                out.extend(ph.flush())
+                out.append(f"{name} = select, policy-path={pp}")
             else:
                 ph.skip()
             continue
@@ -2015,6 +2051,8 @@ def _gen_surfboard_proxy_groups(
         gtype = "url-test" if g["type"] == "smart" else g["type"]
         tokens = [gtype] + g["proxies"]
         for k, v in g["params"].items():
+            if k in _SURFBOARD_SKIP_PARAMS:
+                continue
             tokens.append(f"{k}={v}")
 
         out.extend(ph.flush())
@@ -2054,8 +2092,10 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             ph.skip()
             continue
 
-        if rule_type == "REJECT-TINYGIF":
+        # Surge-specific rule types → REJECT
+        if rule_type in ("REJECT-TINYGIF", "REJECT-DROP", "REJECT-NO-DROP"):
             parts[0] = "REJECT"
+            rule_type = "REJECT"
 
         # skip 检查
         if rule_type in ("RULE-SET", "DOMAIN-SET") and len(parts) >= 3:
@@ -2067,6 +2107,10 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             continue
 
         keep = [p for p in parts if p not in _SURGE_FLAGS]
+        # Surge-specific actions in policy position → REJECT
+        if keep:
+            keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT",
+                        "REJECT-TINYGIF": "REJECT"}.get(keep[-1].upper(), keep[-1])
         out.extend(ph.flush())
         out.append(", ".join(keep))
     return "\n".join(out)
@@ -2079,6 +2123,7 @@ def gen_surfboard_profile(
     skips: list[str],
     general_lines: list[str] | None = None,
     pg_inject: dict | None = None,
+    alt_groups: dict[str, dict] | None = None,
 ) -> str:
     """从 Surge 解析结果生成 Surfboard 兼容 Profile（Surge 精简版，无 MITM）。"""
     parts = []
@@ -2089,7 +2134,8 @@ def gen_surfboard_profile(
     # [Proxy]：Surge 源代理，过滤掉 Surfboard 不支持的 action proxy（如 REJECT-TINYGIF）
     sb_proxy_lines = _filter_proxy_lines_for_platform(proxy_lines, _SURFBOARD_SUPPORTED_ACTIONS)
     parts.append("[Proxy]\n" + "\n".join(sb_proxy_lines))
-    parts.append(_gen_surfboard_proxy_groups(group_lines, skips, pg_inject, adblock_proxy_lines=proxy_lines))
+    parts.append(_gen_surfboard_proxy_groups(
+        group_lines, skips, pg_inject, adblock_proxy_lines=proxy_lines, alt_groups=alt_groups))
     parts.append(_gen_surfboard_rules(rule_lines, skips))
     return "\n\n".join(parts) + "\n"
 
@@ -2296,7 +2342,10 @@ def main() -> None:
         print(f"  Surfboard skip: {sb_skips}")
         if sb_pg_inject:
             print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
-        sb_content = gen_surfboard_profile(proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject)
+        sb_alt_groups = _parse_surge_alt_groups(REPO_ROOT / surge_src)
+        sb_content = gen_surfboard_profile(
+            proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
+            alt_groups=sb_alt_groups)
         changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
         print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 
