@@ -32,8 +32,8 @@ _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
 _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert", "enhanced-mode"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
-# Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
-SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "GEOSITE"}
+# Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现；DOMAIN-REGEX 未记录）
+SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "GEOSITE", "IP-CIDR6", "DOMAIN-REGEX"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
 # Surge 内建动作名（proxy value 为这些时视为 action proxy）
 _SURGE_BUILTIN_ACTIONS = frozenset({"direct", "reject", "reject-tinygif", "reject-drop", "reject-no-drop"})
@@ -2069,7 +2069,7 @@ def _gen_surfboard_proxy_groups(
 
 
 def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
-    """生成 Surfboard [Rule] 段落，过滤 URL-REGEX / USER-AGENT / IP-CIDR6，REJECT-TINYGIF → REJECT。"""
+    """生成 Surfboard [Rule] 段落，过滤不支持的规则类型，REJECT-DROP/NO-DROP → REJECT。"""
     out: list[str] = ["[Rule]"]
     ph = PendingHeaders()
     _sb_drop = SURFBOARD_UNSUPPORTED_RULE_TYPES | _COMMENT_DROP_TYPES
@@ -2092,8 +2092,8 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             ph.skip()
             continue
 
-        # Surge-specific rule types → REJECT
-        if rule_type in ("REJECT-TINYGIF", "REJECT-DROP", "REJECT-NO-DROP"):
+        # Surge-specific rule types → REJECT（REJECT-TINYGIF 为 Surfboard 原生支持，保留）
+        if rule_type in ("REJECT-DROP", "REJECT-NO-DROP"):
             parts[0] = "REJECT"
             rule_type = "REJECT"
 
@@ -2109,8 +2109,7 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
         keep = [p for p in parts if p not in _SURGE_FLAGS]
         # Surge-specific actions in policy position → REJECT
         if keep:
-            keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT",
-                        "REJECT-TINYGIF": "REJECT"}.get(keep[-1].upper(), keep[-1])
+            keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT"}.get(keep[-1].upper(), keep[-1])
         out.extend(ph.flush())
         out.append(", ".join(keep))
     return "\n".join(out)
