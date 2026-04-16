@@ -26,7 +26,7 @@ HOTKIDS_SURGE_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/S
 HOTKIDS_CLASH_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/"
 HOTKIDS_QX_FILTER_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Filter/"
 
-CLASH_UNSUPPORTED_RULE_TYPES = {"PROTOCOL", "URL-REGEX", "USER-AGENT"}
+CLASH_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
 _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
 _SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
@@ -44,6 +44,30 @@ _LOON_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 _LOON_ACTION_VALUE_MAP = {"direct": "DIRECT", "reject": "REJECT",
                           "reject-tinygif": "REJECT", "reject-drop": "REJECT-DROP", "reject-no-drop": "REJECT"}
 _CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+# Surge → Clash 规则类型重命名（含 AND 子规则）
+_CLASH_TYPE_RENAMES = {"DEST-PORT": "DST-PORT", "PROTOCOL": "NETWORK"}
+# Surge PROTOCOL 值 → Clash NETWORK 值（不支持的值 → 跳过该规则）
+_SURGE_PROTOCOL_TO_NETWORK = {"TCP": "tcp", "UDP": "udp"}
+
+
+def _convert_and_clash(s: str) -> str | None:
+    """将 Surge AND rule 字符串转换为 Clash 格式，返回 None 表示无法转换（应跳过）。
+
+    子规则类型按 _CLASH_TYPE_RENAMES 重命名；PROTOCOL 值按 _SURGE_PROTOCOL_TO_NETWORK
+    映射为小写（QUIC 等无对应值时返回 None）。
+    """
+    def convert_sub(m: re.Match) -> str:
+        t, v = m.group(1).upper(), m.group(2)
+        if t == "PROTOCOL":
+            new_v = _SURGE_PROTOCOL_TO_NETWORK.get(v.strip().upper())
+            if new_v is None:
+                raise ValueError(v)
+            return f"(NETWORK,{new_v})"
+        return f"({_CLASH_TYPE_RENAMES.get(t, t)},{v})"
+    try:
+        return re.sub(r"\(([A-Z][A-Z0-9-]*),([^)]+)\)", convert_sub, s)
+    except ValueError:
+        return None
 
 
 def _filter_proxy_lines_for_platform(proxy_lines: list[str], supported_actions: frozenset) -> list[str]:
@@ -1165,7 +1189,7 @@ def gen_rules_and_providers(
         seen[name] = clash_url
         return name
 
-    # 直通规则类型（原样输出，去掉 Surge 专属 flag）
+    # 直通规则类型（原样输出，去掉 Surge 专属 flag，再按 _CLASH_TYPE_RENAMES 重命名）
     PASSTHROUGH = {"DEST-PORT", "IP-CIDR", "IP-CIDR6", "GEOIP", "GEOSITE",
                    "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
 
@@ -1194,12 +1218,31 @@ def gen_rules_and_providers(
             policy = parts[1] if len(parts) > 1 else "🔰 Proxy"
             emit.append(f"  - MATCH,{policy}")
 
+        elif rule_type == "PROTOCOL":
+            # Surge PROTOCOL → Clash NETWORK；QUIC 无对应值，跳过
+            clash_val = _SURGE_PROTOCOL_TO_NETWORK.get(parts[1].upper() if len(parts) > 1 else "")
+            if clash_val is None:
+                print(f"  [SKIP rule] PROTOCOL 无 Clash 等价: {s}")
+                ph.skip()
+                continue
+            policy = parts[2] if len(parts) > 2 else ""
+            emit.append(f"  - NETWORK,{clash_val},{policy}")
+
+        elif rule_type == "AND":
+            converted = _convert_and_clash(s)
+            if converted is None:
+                print(f"  [SKIP rule] AND 子规则无 Clash 等价: {s}")
+                ph.skip()
+                continue
+            emit.append(f"  - {converted}")
+
         elif rule_type in PASSTHROUGH:
             # Surge 专用丢包保护（0.0.0.0/32），Clash 无对应机制
             if rule_type in ("IP-CIDR", "IP-CIDR6") and len(parts) > 1 and parts[1] == "0.0.0.0/32":
                 ph.skip()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
+            keep[0] = _CLASH_TYPE_RENAMES.get(keep[0].upper(), keep[0])
             emit.append("  - " + ",".join(keep))
 
         elif rule_type not in ("RULE-SET", "DOMAIN-SET"):
@@ -1852,7 +1895,12 @@ def gen_qx_filter_local(
             continue
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
-        if rule_type == "GEOIP" and len(parts) >= 3:
+        if rule_type == "DEST-PORT" and len(parts) >= 3:
+            policy = parts[2]
+            stripped_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+            emit_policy = policy_rename_map.get(stripped_policy, stripped_policy) if policy_rename_map else stripped_policy
+            out.append(f"dest-port, {parts[1]}, {emit_policy}")
+        elif rule_type == "GEOIP" and len(parts) >= 3:
             geoip_val = parts[1].lower()
             if geoip_val == "cn":
                 continue  # 已在 static_fl 中
