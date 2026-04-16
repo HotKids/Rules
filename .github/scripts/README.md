@@ -133,3 +133,80 @@ python .github/scripts/sync-config.py
 ```
 
 依赖：Python 3.12+，仅用标准库，无需额外安装。
+
+---
+
+## 各平台同步内容详解
+
+### Clash
+
+| Surge 段 | Clash 输出 |
+|---|---|
+| `[Proxy]` | 动态生成 hidden action wrapper groups（`DIRECT` / `REJECT`） |
+| `[Proxy Group]` | `proxy-groups:` |
+| `[Rule]` | `rule-providers:` + `rules:` |
+
+规则类型转换：`DEST-PORT` → `DST-PORT`，`PROTOCOL,TCP/UDP` → `NETWORK,tcp/udp`，`AND` 内子规则同步转换。
+
+**跳过**：`URL-REGEX`、`USER-AGENT`；`PROTOCOL,QUIC`（无等价）；skip 关键词匹配的 group / rule；`direct` / `reject` 以外的 action proxy。
+
+---
+
+### Loon
+
+| Surge 段 | Loon 输出 |
+|---|---|
+| `[Proxy]` | `[Proxy]`（仅 action proxy，`direct` → `DIRECT`，`reject-drop` → `REJECT-DROP`，其余 reject 变体 → `REJECT`） |
+| `[Proxy Group]` | `[Proxy Group]`，smart 组映射为 FilterKey |
+| `[Rule]` RULE-SET / DOMAIN-SET | `[Remote Rule]` |
+| `[Rule]` FINAL 行 | `[Rule]` 末尾 |
+| `[MITM]` | `[Mitm]`（ca-passphrase、ca-p12） |
+| `loon.ini` 各段 | `[Host]` / `[Rewrite]` / `[Script]` / `[Plugin]` |
+
+**跳过**：无 FilterMap 匹配的 smart 组（整组丢弃）；`include-other-group`、`policy-path` 参数（替换为 FilterMap / Builtin）；本地规则（非 HTTP URL 的 RULE-SET）。
+
+---
+
+### Quantumult X
+
+| Surge 段 | QX 输出 |
+|---|---|
+| `[Proxy Group]` | `[policy]` |
+| `[Rule]` RULE-SET / DOMAIN-SET | `[filter_remote]`，`Surge/RULE-SET/` 自动重映射为 `Quantumult/X/Filter/` |
+| `[Rule]` GEOIP 非 CN、DEST-PORT、FINAL | `[filter_local]` |
+| `[MITM]` | `[mitm]`（ca-passphrase、ca-p12） |
+| `qx.ini` 各段 | `[server_remote]` / `[rewrite_remote]` / `[task_local]` 等 |
+
+**跳过**：`include-all-proxies=true` 类 group（QX 不支持）；GEOIP CN（已在静态 filter_local）；skip 关键词匹配的 group / rule。
+
+---
+
+### Surfboard
+
+| Surge 段 | Surfboard 输出 |
+|---|---|
+| `[General]`（白名单过滤） | `[General]`，仅保留 `dns-server`、`doh-server`、`skip-proxy`、`proxy-test-url`、`always-real-ip` |
+| `[Proxy]` | `[Proxy]`（仅 action proxy） |
+| `[Proxy Group]` | `[Proxy Group]`，`icon-url` 全部剥除 |
+| `[Rule]` | `[Rule]`，不支持的类型过滤后直接输出 |
+
+`include-all-proxies=true` 的组从 Profile.conf `//` 注释行读取替代定义（`policy-path=https://hotkids.me`）；无替代则丢弃。无 `[MITM]` 输出。
+
+**跳过规则类型**：`URL-REGEX`、`USER-AGENT`、`GEOSITE`；`REJECT-TINYGIF` / `REJECT-DROP` / `REJECT-NO-DROP` 统一归并为 `REJECT`。
+
+---
+
+### 对比速览
+
+| | Clash | Loon | QX | Surfboard |
+|---|:---:|:---:|:---:|:---:|
+| General | — | — | — | ✓（白名单） |
+| Proxy（action） | wrapper group | ✓ | — | ✓ |
+| Proxy Group | ✓ | ✓ | ✓ | ✓ |
+| Rule → remote | rule-providers | Remote Rule | filter_remote | — |
+| Rule → local | rules | Rule / FINAL | filter_local | Rule |
+| MITM | — | ✓ | ✓ | — |
+| URL-REGEX | ✗ | ✗ | ✗ | ✗ |
+| USER-AGENT | ✗ | ✗ | ✓ | ✗ |
+| GEOSITE | ✓ | ✓ | ✓ | ✗ |
+| icon-url | ✓ | ✓（img-url） | ✓ | ✗ |
