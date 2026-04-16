@@ -2141,6 +2141,234 @@ def gen_surfboard_profile(
 
 
 # ---------------------------------------------------------------------------
+# 平台同步函数
+# ---------------------------------------------------------------------------
+
+def _sync_clash(
+    config: dict,
+    proxy_lines: list[str],
+    group_lines: list[str],
+    rule_lines: list[str],
+) -> None:
+    clash = config.get("Clash", {})
+    if not clash.get("output"):
+        return
+    print("\n── sync-config: Surge Profile → Clash Sample.yaml ──")
+    clash_out = clash["output"]
+    skips = config.get("global_skips", []) + clash.get("skips", [])
+    url_maps = clash.get("url_maps", [])
+    builtin_maps = clash.get("builtin_rule_maps", {})
+    pp_block = clash.get("proxy_providers", "")
+    pg_inject = clash.get("pg_inject")
+    rules_inject = clash.get("rules_inject")
+    rename_map = clash.get("rename_map", {})
+    provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
+    inc = clash.get("include_file")
+
+    print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
+    if pg_inject:
+        print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
+    if rules_inject:
+        print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
+
+    groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls, adblock_proxy_lines=proxy_lines)
+    rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
+
+    parts = []
+    if inc:
+        parts.append((REPO_ROOT / inc).read_text(encoding="utf-8").rstrip())
+    if pp_block:
+        parts.append(pp_block)
+    parts += [groups_yaml, rp_rules_yaml]
+
+    changed = write_if_changed(REPO_ROOT / clash_out, "\n\n".join(parts) + "\n")
+    print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
+
+
+def _sync_loon(
+    config: dict,
+    proxy_lines: list[str],
+    group_lines: list[str],
+    rule_lines: list[str],
+    surge_mitm_lines: list[str],
+) -> None:
+    loon = config.get("Loon", {})
+    if not loon.get("output"):
+        return
+    print("\n── sync-config: Surge Profile → Loon Balloon.lcf ──")
+    loon_out_path = loon["output"]
+    loon_inc = loon.get("include_file")
+    loon_header = (REPO_ROOT / loon_inc).read_text(encoding="utf-8").rstrip() if loon_inc else loon.get("loon_header", "")
+    loon_pg_inject = loon.get("pg_inject_loon")
+    loon_blocks = loon.get("loon_blocks", {})
+    loon_rule_block = loon_blocks.get("Rule", "")
+    loon_plugin_block = loon_blocks.get("Plugin", "")
+    loon_host_block = loon_blocks.get("Host", "")
+    loon_rewrite_block = loon_blocks.get("Rewrite", "")
+    loon_script_block = loon_blocks.get("Script", "")
+    explicit_filter_map = loon.get("filter_map", {})
+    filter_defs = loon.get("filter_defs", {})
+    loon_skips = config.get("global_skips", []) + loon.get("skips", [])
+
+    # 若无手动 FilterMap，从 loon.ini [Remote Filter] regex 自动推导
+    if explicit_filter_map:
+        filter_map = explicit_filter_map
+    elif filter_defs:
+        auto_map: dict[str, str] = {}
+        for grp_line in group_lines:
+            g = parse_group_line(grp_line)
+            if g and g["type"] == "smart":
+                name = g["name"]
+                for filter_name, pattern in filter_defs.items():
+                    try:
+                        # Loon FilterKey 中 (?i) 可出现在非开头位置；
+                        # Python re 不允许，将其剥离后以 IGNORECASE 标志替代
+                        clean_pat = pattern.replace("(?i)", "")
+                        if re.search(clean_pat, name, re.IGNORECASE):
+                            auto_map[name] = filter_name
+                            break
+                    except re.error:
+                        pass
+        filter_map = auto_map
+    else:
+        filter_map = {}
+
+    print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
+    print(f"  Loon skip: {loon_skips}")
+    if loon_pg_inject:
+        print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")
+
+    # 从 Surge rule_lines 提取 FINAL 规则
+    surge_final = ""
+    for _rl in rule_lines:
+        _parts = [p.strip() for p in _rl.split(",")]
+        if _parts[0].upper() == "FINAL":
+            _policy = _parts[1] if len(_parts) > 1 else "🔰 Proxy"
+            surge_final = f"# Final\nFINAL,{_policy}"
+            break
+
+    loon_rename_map = loon.get("rename_map", {})
+    pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map, adblock_proxy_lines=proxy_lines)
+    remote_rules = gen_loon_remote_rules(rule_lines, loon_skips, loon_rename_map)
+
+    # [Rule]：静态规则 + FINAL（来自 Surge）
+    rule_section_parts = []
+    if loon_rule_block:
+        rule_section_parts.append(loon_rule_block)
+    if surge_final:
+        rule_section_parts.append(surge_final)
+    rule_section = "[Rule]\n" + "\n".join(rule_section_parts) if rule_section_parts else ""
+
+    # [Mitm]：来自 Surge Profile [MITM] 段落
+    surge_mitm_block = "\n".join(surge_mitm_lines).strip()
+
+    loon_proxy_section = _gen_loon_proxy_section(proxy_lines)
+    loon_parts = [loon_header]
+    if loon_proxy_section:
+        loon_parts.append(loon_proxy_section)
+    loon_parts.append(pg_loon)
+    if rule_section:
+        loon_parts.append(rule_section)
+    loon_parts.append(remote_rules)
+    loon_parts.append("[Host]\n" + loon_host_block if loon_host_block else "[Host]")
+    loon_parts.append("[Rewrite]\n" + loon_rewrite_block if loon_rewrite_block else "[Rewrite]")
+    loon_parts.append("[Script]\n" + loon_script_block if loon_script_block else "[Script]")
+    if loon_plugin_block:
+        loon_parts.append("[Plugin]\n" + loon_plugin_block)
+    if surge_mitm_block:
+        loon_parts.append("[Mitm]\n" + surge_mitm_block)
+
+    changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
+    print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
+
+
+def _sync_qx(
+    config: dict,
+    proxy_lines: list[str],
+    group_lines: list[str],
+    rule_lines: list[str],
+    surge_mitm_lines: list[str],
+) -> None:
+    qx = config.get("Quantumult X", {})
+    if not qx.get("output"):
+        return
+    print("\n── sync-config: Surge Profile → QX Sample.conf ──")
+    qx_out_path = qx["output"]
+    qx_header = qx.get("qx_header", "")
+    qx_blocks = qx.get("qx_blocks", {})
+    qx_pg_inject = qx.get("pg_inject_qx")
+    qx_skips = config.get("global_skips", []) + qx.get("skips", [])
+    qx_rename_map = qx.get("rename_map", {})
+    qx_strip_names = True
+    qx_policy_rename = qx.get("policy_rename_map") or None  # 空 dict → None
+
+    print(f"  QX skip: {qx_skips}")
+    if qx_policy_rename:
+        print(f"  QX policy_rename: {qx_policy_rename}")
+    if qx_pg_inject:
+        print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
+
+    policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject, strip_names=qx_strip_names, policy_rename_map=qx_policy_rename)
+    qx_url_maps = qx.get("url_maps") or None
+    filter_remote = gen_qx_filter_remote(
+        rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", ""),
+        strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
+        url_maps=qx_url_maps,
+    )
+    filter_local = gen_qx_filter_local(
+        rule_lines, qx_blocks.get("filter_local", ""),
+        strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
+    )
+
+    def _qx_section(key: str, header: str) -> str:
+        content = qx_blocks.get(key, "")
+        return f"{header}\n{content}" if content else header
+
+    qx_parts = [qx_header, policies]
+    qx_parts.append(_qx_section("server_remote", "[server_remote]"))
+    qx_parts.append(filter_remote)
+    qx_parts.append(_qx_section("rewrite_remote", "[rewrite_remote]"))
+    qx_parts.append(_qx_section("task_local", "[task_local]"))
+    qx_parts.append(_qx_section("http_backend", "[http_backend]"))
+    qx_parts.append("[server_local]")
+    qx_parts.append(filter_local)
+    qx_parts.append("[rewrite_local]")
+    mitm_content = qx_blocks.get("mitm", "")
+    if mitm_content:
+        mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
+        qx_parts.append(f"[mitm]\n{mitm_content}")
+
+    changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
+    print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
+
+
+def _sync_surfboard(
+    config: dict,
+    proxy_lines: list[str],
+    group_lines: list[str],
+    rule_lines: list[str],
+    general_lines: list[str],
+    surge_src: str,
+) -> None:
+    surfboard = config.get("Surfboard", {})
+    if not surfboard.get("output"):
+        return
+    print("\n── sync-config: Surge Profile → Surfboard.conf ──")
+    sb_out = surfboard["output"]
+    sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
+    sb_pg_inject = surfboard.get("pg_inject_surfboard")
+    print(f"  Surfboard skip: {sb_skips}")
+    if sb_pg_inject:
+        print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
+    sb_alt_groups = _parse_surge_alt_groups(REPO_ROOT / surge_src)
+    sb_content = gen_surfboard_profile(
+        proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
+        alt_groups=sb_alt_groups)
+    changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
+    print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -2151,203 +2379,14 @@ def main() -> None:
     if not surge_src:
         raise ValueError("Surge 块缺少 >> 源文件路径指令")
 
-    proxy_lines, group_lines, rule_lines, surge_mitm_lines, general_lines = parse_surge_profile(REPO_ROOT / surge_src)
+    proxy_lines, group_lines, rule_lines, surge_mitm_lines, general_lines = \
+        parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
 
-    # ── Clash ──────────────────────────────────────────────────────────────
-    clash = config.get("Clash", {})
-    if clash.get("output"):
-        print("\n── sync-config: Surge Profile → Clash Sample.yaml ──")
-        clash_out = clash["output"]
-        skips = config.get("global_skips", []) + clash.get("skips", [])
-        url_maps = clash.get("url_maps", [])
-        builtin_maps = clash.get("builtin_rule_maps", {})
-        pp_block = clash.get("proxy_providers", "")
-        pg_inject = clash.get("pg_inject")
-        rules_inject = clash.get("rules_inject")
-        rename_map = clash.get("rename_map", {})
-        provider_urls = _parse_provider_urls(pp_block) if pp_block else {}
-        inc = clash.get("include_file")
-
-        print(f"  映射: {len(url_maps)} 条 URL 规则 | skip: {skips}")
-        if pg_inject:
-            print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
-        if rules_inject:
-            print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
-
-        groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls, adblock_proxy_lines=proxy_lines)
-        rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
-
-        parts = []
-        if inc:
-            parts.append((REPO_ROOT / inc).read_text(encoding="utf-8").rstrip())
-        if pp_block:
-            parts.append(pp_block)
-        parts += [groups_yaml, rp_rules_yaml]
-
-        changed = write_if_changed(REPO_ROOT / clash_out, "\n\n".join(parts) + "\n")
-        print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
-
-    # ── Loon ───────────────────────────────────────────────────────────────
-    loon = config.get("Loon", {})
-    if loon.get("output"):
-        print("\n── sync-config: Surge Profile → Loon Balloon.lcf ──")
-        loon_out_path = loon["output"]
-        loon_inc = loon.get("include_file")
-        if loon_inc:
-            loon_header = (REPO_ROOT / loon_inc).read_text(encoding="utf-8").rstrip()
-        else:
-            loon_header = loon.get("loon_header", "")
-        loon_pg_inject = loon.get("pg_inject_loon")
-        loon_blocks = loon.get("loon_blocks", {})
-        loon_rule_block = loon_blocks.get("Rule", "")
-        loon_plugin_block = loon_blocks.get("Plugin", "")
-        loon_host_block = loon_blocks.get("Host", "")
-        loon_rewrite_block = loon_blocks.get("Rewrite", "")
-        loon_script_block = loon_blocks.get("Script", "")
-        explicit_filter_map = loon.get("filter_map", {})
-        filter_defs = loon.get("filter_defs", {})
-        loon_skips = config.get("global_skips", []) + loon.get("skips", [])
-
-        # 若无手动 FilterMap，从 loon.ini [Remote Filter] regex 自动推导
-        if explicit_filter_map:
-            filter_map = explicit_filter_map
-        elif filter_defs:
-            auto_map: dict[str, str] = {}
-            for grp_line in group_lines:
-                g = parse_group_line(grp_line)
-                if g and g["type"] == "smart":
-                    name = g["name"]
-                    for filter_name, pattern in filter_defs.items():
-                        try:
-                            # Loon FilterKey 中 (?i) 可出现在非开头位置；
-                            # Python re 不允许，将其剥离后以 IGNORECASE 标志替代
-                            clean_pat = pattern.replace("(?i)", "")
-                            if re.search(clean_pat, name, re.IGNORECASE):
-                                auto_map[name] = filter_name
-                                break
-                        except re.error:
-                            pass
-            filter_map = auto_map
-        else:
-            filter_map = {}
-
-        print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
-        print(f"  Loon skip: {loon_skips}")
-        if loon_pg_inject:
-            print(f"  loon pg_inject: anchor={loon_pg_inject.get('anchor')} | names={loon_pg_inject.get('names')}")
-
-        # 从 Surge rule_lines 提取 FINAL 规则
-        surge_final = ""
-        for _rl in rule_lines:
-            _parts = [p.strip() for p in _rl.split(",")]
-            if _parts[0].upper() == "FINAL":
-                _policy = _parts[1] if len(_parts) > 1 else "🔰 Proxy"
-                surge_final = f"# Final\nFINAL,{_policy}"
-                break
-
-        loon_rename_map = loon.get("rename_map", {})
-        pg_loon = gen_loon_proxy_groups(group_lines, loon_skips, loon_pg_inject, filter_map, adblock_proxy_lines=proxy_lines)
-        remote_rules = gen_loon_remote_rules(rule_lines, loon_skips, loon_rename_map)
-
-        # [Rule]：静态规则 + FINAL（来自 Surge）
-        rule_section_parts = []
-        if loon_rule_block:
-            rule_section_parts.append(loon_rule_block)
-        if surge_final:
-            rule_section_parts.append(surge_final)
-        rule_section = "[Rule]\n" + "\n".join(rule_section_parts) if rule_section_parts else ""
-
-        # [Mitm]：来自 Surge Profile [MITM] 段落
-        surge_mitm_block = "\n".join(surge_mitm_lines).strip()
-
-        loon_proxy_section = _gen_loon_proxy_section(proxy_lines)
-        loon_parts = [loon_header]
-        if loon_proxy_section:
-            loon_parts.append(loon_proxy_section)
-        loon_parts.append(pg_loon)
-        if rule_section:
-            loon_parts.append(rule_section)
-        loon_parts.append(remote_rules)
-        loon_parts.append("[Host]\n" + loon_host_block if loon_host_block else "[Host]")
-        loon_parts.append("[Rewrite]\n" + loon_rewrite_block if loon_rewrite_block else "[Rewrite]")
-        loon_parts.append("[Script]\n" + loon_script_block if loon_script_block else "[Script]")
-        if loon_plugin_block:
-            loon_parts.append("[Plugin]\n" + loon_plugin_block)
-        if surge_mitm_block:
-            loon_parts.append("[Mitm]\n" + surge_mitm_block)
-
-        changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
-        print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
-
-    # ── Quantumult X ───────────────────────────────────────────────────────
-    qx = config.get("Quantumult X", {})
-    if qx.get("output"):
-        print("\n── sync-config: Surge Profile → QX Sample.conf ──")
-        qx_out_path = qx["output"]
-        qx_header = qx.get("qx_header", "")
-        qx_blocks = qx.get("qx_blocks", {})
-        qx_pg_inject = qx.get("pg_inject_qx")
-        qx_skips = config.get("global_skips", []) + qx.get("skips", [])
-        qx_rename_map = qx.get("rename_map", {})
-        qx_strip_names = True
-        qx_policy_rename = qx.get("policy_rename_map") or None  # 空 dict → None
-
-        print(f"  QX skip: {qx_skips}")
-        if qx_policy_rename:
-            print(f"  QX policy_rename: {qx_policy_rename}")
-        if qx_pg_inject:
-            print(f"  QX pg_inject: anchor={qx_pg_inject.get('anchor')} | names={qx_pg_inject.get('names')}")
-
-        policies = gen_qx_policies(group_lines, qx_skips, qx_pg_inject, strip_names=qx_strip_names, policy_rename_map=qx_policy_rename)
-        qx_url_maps = qx.get("url_maps") or None
-        filter_remote = gen_qx_filter_remote(
-            rule_lines, qx_skips, qx_rename_map, qx_blocks.get("filter_remote", ""),
-            strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
-            url_maps=qx_url_maps,
-        )
-        filter_local = gen_qx_filter_local(
-            rule_lines, qx_blocks.get("filter_local", ""),
-            strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
-        )
-
-        def _qx_section(key: str, header: str) -> str:
-            content = qx_blocks.get(key, "")
-            return f"{header}\n{content}" if content else header
-
-        qx_parts = [qx_header, policies]
-        qx_parts.append(_qx_section("server_remote", "[server_remote]"))
-        qx_parts.append(filter_remote)
-        qx_parts.append(_qx_section("rewrite_remote", "[rewrite_remote]"))
-        qx_parts.append(_qx_section("task_local", "[task_local]"))
-        qx_parts.append(_qx_section("http_backend", "[http_backend]"))
-        qx_parts.append("[server_local]")
-        qx_parts.append(filter_local)
-        qx_parts.append("[rewrite_local]")
-        mitm_content = qx_blocks.get("mitm", "")
-        if mitm_content:
-            mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
-            qx_parts.append(f"[mitm]\n{mitm_content}")
-
-        changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
-        print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
-
-    # ── Surfboard ──────────────────────────────────────────────────────────────
-    surfboard = config.get("Surfboard", {})
-    if surfboard.get("output"):
-        print("\n── sync-config: Surge Profile → Surfboard.conf ──")
-        sb_out = surfboard["output"]
-        sb_skips = config.get("global_skips", []) + surfboard.get("skips", [])
-        sb_pg_inject = surfboard.get("pg_inject_surfboard")
-        print(f"  Surfboard skip: {sb_skips}")
-        if sb_pg_inject:
-            print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
-        sb_alt_groups = _parse_surge_alt_groups(REPO_ROOT / surge_src)
-        sb_content = gen_surfboard_profile(
-            proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
-            alt_groups=sb_alt_groups)
-        changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
-        print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
+    _sync_clash(config, proxy_lines, group_lines, rule_lines)
+    _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
+    _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
+    _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
 
 
 if __name__ == "__main__":
