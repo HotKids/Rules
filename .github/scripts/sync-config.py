@@ -1168,6 +1168,8 @@ def gen_rules_and_providers(
     # 直通规则类型（原样输出，去掉 Surge 专属 flag）
     PASSTHROUGH = {"DEST-PORT", "IP-CIDR", "IP-CIDR6", "GEOIP", "GEOSITE",
                    "DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
+    # Surge → Clash 规则类型重命名
+    _CLASH_TYPE_RENAMES = {"DEST-PORT": "DST-PORT"}
 
     for line in rule_lines:
         s = line.strip()
@@ -1200,6 +1202,7 @@ def gen_rules_and_providers(
                 ph.skip()
                 continue
             keep = [p for p in parts if p not in _SURGE_FLAGS]
+            keep[0] = _CLASH_TYPE_RENAMES.get(keep[0].upper(), keep[0])
             emit.append("  - " + ",".join(keep))
 
         elif rule_type not in ("RULE-SET", "DOMAIN-SET"):
@@ -1852,7 +1855,12 @@ def gen_qx_filter_local(
             continue
         parts = [p.strip() for p in s.split(",")]
         rule_type = parts[0].upper()
-        if rule_type == "GEOIP" and len(parts) >= 3:
+        if rule_type == "DEST-PORT" and len(parts) >= 3:
+            policy = parts[2]
+            stripped_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
+            emit_policy = policy_rename_map.get(stripped_policy, stripped_policy) if policy_rename_map else stripped_policy
+            out.append(f"dest-port, {parts[1]}, {emit_policy}")
+        elif rule_type == "GEOIP" and len(parts) >= 3:
             geoip_val = parts[1].lower()
             if geoip_val == "cn":
                 continue  # 已在 static_fl 中
