@@ -29,11 +29,11 @@ HOTKIDS_QX_FILTER_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/mast
 CLASH_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
 _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
-_SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert"}
+_SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert", "enhanced-mode"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现）
-SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
+SURFBOARD_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT", "GEOSITE"}
 # Surfboard（Android）不适用的 Surge iOS/macOS 专属 General key
 # Surge 内建动作名（proxy value 为这些时视为 action proxy）
 _SURGE_BUILTIN_ACTIONS = frozenset({"direct", "reject", "reject-tinygif", "reject-drop", "reject-no-drop"})
@@ -131,11 +131,12 @@ def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str],
     return proxy_names, "\n\n".join(wrapper_blocks)
 
 
-SURFBOARD_SKIP_GENERAL_KEYS = {
-    "wifi-assist", "allow-wifi-access", "wifi-access-http-port", "wifi-access-socks5-port",
-    "http-listen", "socks5-listen",
-    "external-controller-access", "http-api", "http-api-tls", "http-api-web-dashboard",
-}
+# Surfboard [General] 白名单：仅保留这些 key
+_SURFBOARD_KEEP_GENERAL_KEYS = frozenset({
+    "dns-server", "doh-server", "skip-proxy", "proxy-test-url", "always-real-ip",
+})
+# Surge key → Surfboard 等价 key（重命名）
+_SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 
 # ---------------------------------------------------------------------------
 # 通用工具
@@ -1966,19 +1967,21 @@ def _sync_qx_mitm(mitm_block: str, surge_mitm_lines: list[str]) -> str:
 # ---------------------------------------------------------------------------
 
 def _gen_surfboard_general(lines: list[str]) -> str:
-    """过滤 iOS/macOS 专属 key，输出 Surfboard 兼容的 [General] 内容。"""
+    """白名单过滤，仅输出 Surfboard 支持的 [General] key，并重命名 Surge 专属 key。"""
     out = []
     for line in lines:
         s = line.strip()
-        if s and not s.startswith("#") and "=" in s:
-            key = s.split("=")[0].strip()
-            if key in SURFBOARD_SKIP_GENERAL_KEYS:
-                continue
-        out.append(line.rstrip())
-    return "\n".join(out).strip()
+        if not s or s.startswith("#") or "=" not in s:
+            continue
+        key, _, val = s.partition("=")
+        key = key.strip()
+        renamed = _SURFBOARD_GENERAL_KEY_RENAMES.get(key, key)
+        if renamed in _SURFBOARD_KEEP_GENERAL_KEYS:
+            out.append(f"{renamed} = {val.strip()}")
+    return "\n".join(out)
 
 
-_SURFBOARD_SKIP_PARAMS = {"icon-url"}
+_SURFBOARD_SKIP_PARAMS = {"icon-url", "evaluate-before-use", "no-alert"}
 
 
 def _gen_surfboard_proxy_groups(
@@ -2089,8 +2092,10 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             ph.skip()
             continue
 
-        if rule_type == "REJECT-TINYGIF":
+        # Surge-specific rule types → REJECT
+        if rule_type in ("REJECT-TINYGIF", "REJECT-DROP", "REJECT-NO-DROP"):
             parts[0] = "REJECT"
+            rule_type = "REJECT"
 
         # skip 检查
         if rule_type in ("RULE-SET", "DOMAIN-SET") and len(parts) >= 3:
@@ -2102,6 +2107,10 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             continue
 
         keep = [p for p in parts if p not in _SURGE_FLAGS]
+        # Surge-specific actions in policy position → REJECT
+        if keep:
+            keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT",
+                        "REJECT-TINYGIF": "REJECT"}.get(keep[-1].upper(), keep[-1])
         out.extend(ph.flush())
         out.append(", ".join(keep))
     return "\n".join(out)
