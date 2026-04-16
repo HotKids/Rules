@@ -609,7 +609,7 @@ rules:
   - RULE-SET,Adblock,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
-  # # Global Area Network
+  # Global Area Network
   # > 一些无需验证地区的分流 HOST
   - RULE-SET,Streaming+,🔰 Proxy
 
