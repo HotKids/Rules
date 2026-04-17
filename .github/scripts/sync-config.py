@@ -1205,47 +1205,16 @@ def _derive_provider_name(
 HOTKIDS_RAW_BASE = "https://raw.githubusercontent.com/HotKids/Rules/master/"
 
 
-def _infer_behavior_from_clash_yaml(path: Path) -> str:
-    """解析本地 Clash RuleSet YAML，按规则类型推断 provider behavior。
-
-    全 IP-CIDR/IP-CIDR6 → ipcidr；全 DOMAIN/DOMAIN-SUFFIX/DOMAIN-KEYWORD → domain；否则 classical。
-    忽略行内 `#` 注释与尾逗号。
-    """
-    types: set[str] = set()
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
-        return "classical"
-    for line in text.splitlines():
-        s = line.strip()
-        if not s.startswith("- "):
-            continue
-        body = s[2:].strip()
-        hash_idx = body.find("#")
-        if hash_idx >= 0:
-            body = body[:hash_idx].strip().rstrip(",")
-        rt = body.split(",", 1)[0].strip().upper()
-        if rt:
-            types.add(rt)
-    ip_types = {"IP-CIDR", "IP-CIDR6", "IP6-CIDR"}
-    domain_types = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
-    if types and types <= ip_types:
-        return "ipcidr"
-    if types and types <= domain_types:
-        return "domain"
-    return "classical"
-
-
 def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | None:
     """按平台自动探测仓库本地 rule-set 文件，返回 (HotKids raw URL, behavior)。
 
-    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 由内容推断
+    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 固定为 classical（兼容所有规则类型）
     platform == "loon"  → 检查 Surge/RULE-SET/<name>.list；behavior 返回空串
     """
     if platform == "clash":
         local = REPO_ROOT / "Clash" / "RuleSet" / f"{name}.yaml"
         if local.exists():
-            return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", _infer_behavior_from_clash_yaml(local)
+            return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", "classical"
     elif platform == "loon":
         local = REPO_ROOT / "Surge" / "RULE-SET" / f"{name}.list"
         if local.exists():

@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 18:00:01
+# Date: 2026-04-17 19:31:28
 # Author: @HotKids
 
 # 通用设置
@@ -601,7 +601,7 @@ rule-providers:
 
   LAN:
     type: http
-    behavior: ipcidr
+    behavior: classical
     path: ./Provider/RuleSet/LAN.yaml
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/LAN.yaml
     interval: 86400
