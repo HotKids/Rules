@@ -25,7 +25,6 @@ DOMAIN,content-ausw2-ur-discovery1.uplynk.com,Streaming_US
 # > HBO Max
 USER-AGENT,HBOMAX*,Streaming_US
 USER-AGENT,Max*,Streaming_US
-PROCESS-NAME,com.wbd.stream,Streaming_US
 DOMAIN-SUFFIX,max.com,Streaming_US
 DOMAIN-SUFFIX,hbomax.com,Streaming_US
 DOMAIN-SUFFIX,discomax.com,Streaming_US

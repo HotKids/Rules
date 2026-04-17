@@ -28,8 +28,6 @@ USER-AGENT,iQIYI*,Streaming_TW
 USER-AGENT,QIYIVideo*,Streaming_TW
 USER-AGENT,QYPlayer*,Streaming_TW
 USER-AGENT,QTP*,Streaming_TW
-PROCESS-NAME,com.iqiyi.i18n,Streaming_TW
-PROCESS-NAME,com.iqiyi.i18n.tv,Streaming_TW
 DOMAIN-SUFFIX,iq.com,Streaming_TW
 # 首页
 DOMAIN-SUFFIX,intl.iqiyi.com,Streaming_TW

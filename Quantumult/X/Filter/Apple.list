@@ -15,16 +15,7 @@ DOMAIN-SUFFIX,apple-mapkit.com,Apple
 DOMAIN-SUFFIX,appsto.re,Apple
 DOMAIN-SUFFIX,itunes.com,Apple
 DOMAIN-SUFFIX,apple.news,Apple
-PROCESS-NAME,netbiosd,Apple
-PROCESS-NAME,com.apple.geod,Apple
-PROCESS-NAME,mapspushd,Apple
-PROCESS-NAME,com.apple.Maps,Apple
 DOMAIN-SUFFIX,push-apple.com.akadns.net,Apple
-PROCESS-NAME,apsd,Apple
-PROCESS-NAME,fmfd,Apple
-PROCESS-NAME,findmydevice-user-agent,Apple
-PROCESS-NAME,CoreLocationAgent,Apple
-PROCESS-NAME,WeatherWidget,Apple
 IP-CIDR,17.0.0.0/8,Apple,no-resolve
 IP-CIDR,63.92.224.0/19,Apple,no-resolve
 IP-CIDR,65.199.22.0/23,Apple,no-resolve

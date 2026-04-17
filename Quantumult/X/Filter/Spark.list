@@ -8,8 +8,6 @@
 # DEST-PORT,587
 USER-AGENT,*spark,Spark
 USER-AGENT,*Spark,Spark
-PROCESS-NAME,*spark,Spark
-PROCESS-NAME,com.readdle.spark,Spark
 DOMAIN-SUFFIX,gmail.com,Spark
 DOMAIN-SUFFIX,googlemail.com,Spark
 DOMAIN-SUFFIX,live.com,Spark
