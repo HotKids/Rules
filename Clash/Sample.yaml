@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 17:26:43
+# Date: 2026-04-17 17:31:38
 # Author: @HotKids
 
 # 通用设置
@@ -248,7 +248,8 @@ proxy-groups:
   - name: "GLOBAL"
     type: select
     icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Inbound.png
-    include-all: true
+    use:
+      - Server
 
   # Proxy
   - name: "🔰 Proxy"
