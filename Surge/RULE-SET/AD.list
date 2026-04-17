@@ -1,13 +1,11 @@
 # > 广告联盟
 DOMAIN,i.snssdk.com
 DOMAIN,is.snssdk.com
-DOMAIN,mi.gdt.qq.com
 DOMAIN,open.e.kuaishou.com
 DOMAIN-SUFFIX,miaozhen.com
 DOMAIN-KEYWORD,adservice
 DOMAIN-KEYWORD,pglstatp-toutiao
 DOMAIN-KEYWORD,pangolin-sdk-toutiao
-DOMAIN-KEYWORD,pangolin.snssdk.com
 DOMAIN-KEYWORD,pangolin.snssdk.com
 DOMAIN-KEYWORD,video-cn.snssdk.com
 
@@ -50,7 +48,6 @@ DOMAIN,httpdns.baidubce.com
 DOMAIN,lc.map.baidu.com
 DOMAIN,mobads-logs.baidu.com
 DOMAIN,mobads.baidu.com
-DOMAIN,wn.pos.baidu.com
 DOMAIN-SUFFIX,pos.baidu.com
 DOMAIN-SUFFIX,union.baidu.cn
 DOMAIN-SUFFIX,union.baidu.com
@@ -87,7 +84,6 @@ DOMAIN,googleads.g.doubleclick.net
 DOMAIN,pagead2.googlesyndication.com
 DOMAIN,pubads.g.doubleclick.net
 DOMAIN,www.googleadservices.com
-DOMAIN-KEYWORD,adservice.google.com.
 
 # > HeyTap(OPPO)
 DOMAIN,event.dc.oppomobile.com
@@ -115,7 +111,6 @@ IP-CIDR,101.124.19.122/32
 IP-CIDR6,2402:db40:5100:1011::5/128
 
 # > Keep
-DOMAIN,httpdns.n.netease.com
 DOMAIN,httpdns.calorietech.com
 DOMAIN,hc-ssp.sm.cn
 
@@ -180,14 +175,10 @@ DOMAIN,btrace.video.qq.com
 DOMAIN,info4.video.qq.com
 DOMAIN,info6.video.qq.com
 DOMAIN,ios.video.mpush.qq.com
-DOMAIN,gdt.qq.com
 DOMAIN,mtrace.qq.com
 DOMAIN,monitor.music.qq.com
-DOMAIN,otheve.beacon.qq.com
 DOMAIN,p.l.qq.com
 DOMAIN,pgdt.gtimg.cn
-DOMAIN,rpt.gdt.qq.com
-DOMAIN,tytx.m.cn.miaozhen.com
 DOMAIN,wxsmsdy.video.qq.com
 DOMAIN,wxsnsdy.wxs.qq.com
 DOMAIN,wxsnsdythumb.wxs.qq.com
@@ -216,17 +207,10 @@ DOMAIN-SUFFIX,adcolony.com
 DOMAIN,r2---sn-j5o76n7e.gvt1.com
 
 # > WeChat
-DOMAIN,wxsnsdy.wxs.qq.com
-DOMAIN,wxsnsdythumb.wxs.qq.com
 DOMAIN,badjs.weixinbridge.com
 
 # > Weibo
 DOMAIN,huodong.weibo.cn
-DOMAIN,adstrategy.biz.weibo.com
-DOMAIN,kadmimage.biz.weibo.com
-DOMAIN,sdkaction.biz.weibo.com
-DOMAIN,sdkclick.biz.weibo.com
-DOMAIN,sdkmonitor.biz.weibo.com
 DOMAIN-SUFFIX,biz.weibo.com
 IP-CIDR,39.97.130.51/32
 IP-CIDR,39.97.128.148/32

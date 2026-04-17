@@ -37,12 +37,9 @@ payload:
 
   # > BBC iPlayer
   - DOMAIN-KEYWORD,bbcfmt
-  - DOMAIN-KEYWORD,co.uk
   - DOMAIN-KEYWORD,uk-live
   - DOMAIN-SUFFIX,bbc.com
-  - DOMAIN-SUFFIX,bbc.co
   - DOMAIN-SUFFIX,bbc.co.uk
-  - DOMAIN-SUFFIX,bbci.co
   - DOMAIN-SUFFIX,bbci.co.uk
   - DOMAIN,ssl-bbcsmarttv.2cnt.net
   - DOMAIN,vod-dash-uk-live.akamaized.net

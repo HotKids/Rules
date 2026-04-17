@@ -1,13 +1,11 @@
 # > 广告联盟
 DOMAIN,i.snssdk.com,AD
 DOMAIN,is.snssdk.com,AD
-DOMAIN,mi.gdt.qq.com,AD
 DOMAIN,open.e.kuaishou.com,AD
 DOMAIN-SUFFIX,miaozhen.com,AD
 DOMAIN-KEYWORD,adservice,AD
 DOMAIN-KEYWORD,pglstatp-toutiao,AD
 DOMAIN-KEYWORD,pangolin-sdk-toutiao,AD
-DOMAIN-KEYWORD,pangolin.snssdk.com,AD
 DOMAIN-KEYWORD,pangolin.snssdk.com,AD
 DOMAIN-KEYWORD,video-cn.snssdk.com,AD
 
@@ -50,7 +48,6 @@ DOMAIN,httpdns.baidubce.com,AD
 DOMAIN,lc.map.baidu.com,AD
 DOMAIN,mobads-logs.baidu.com,AD
 DOMAIN,mobads.baidu.com,AD
-DOMAIN,wn.pos.baidu.com,AD
 DOMAIN-SUFFIX,pos.baidu.com,AD
 DOMAIN-SUFFIX,union.baidu.cn,AD
 DOMAIN-SUFFIX,union.baidu.com,AD
@@ -87,7 +84,6 @@ DOMAIN,googleads.g.doubleclick.net,AD
 DOMAIN,pagead2.googlesyndication.com,AD
 DOMAIN,pubads.g.doubleclick.net,AD
 DOMAIN,www.googleadservices.com,AD
-DOMAIN-KEYWORD,adservice.google.com.,AD
 
 # > HeyTap(OPPO)
 DOMAIN,event.dc.oppomobile.com,AD
@@ -115,7 +111,6 @@ IP-CIDR,101.124.19.122/32,AD
 IP-CIDR6,2402:db40:5100:1011::5/128,AD
 
 # > Keep
-DOMAIN,httpdns.n.netease.com,AD
 DOMAIN,httpdns.calorietech.com,AD
 DOMAIN,hc-ssp.sm.cn,AD
 
@@ -180,14 +175,10 @@ DOMAIN,btrace.video.qq.com,AD
 DOMAIN,info4.video.qq.com,AD
 DOMAIN,info6.video.qq.com,AD
 DOMAIN,ios.video.mpush.qq.com,AD
-DOMAIN,gdt.qq.com,AD
 DOMAIN,mtrace.qq.com,AD
 DOMAIN,monitor.music.qq.com,AD
-DOMAIN,otheve.beacon.qq.com,AD
 DOMAIN,p.l.qq.com,AD
 DOMAIN,pgdt.gtimg.cn,AD
-DOMAIN,rpt.gdt.qq.com,AD
-DOMAIN,tytx.m.cn.miaozhen.com,AD
 DOMAIN,wxsmsdy.video.qq.com,AD
 DOMAIN,wxsnsdy.wxs.qq.com,AD
 DOMAIN,wxsnsdythumb.wxs.qq.com,AD
@@ -216,17 +207,10 @@ DOMAIN-SUFFIX,adcolony.com,AD
 DOMAIN,r2---sn-j5o76n7e.gvt1.com,AD
 
 # > WeChat
-DOMAIN,wxsnsdy.wxs.qq.com,AD
-DOMAIN,wxsnsdythumb.wxs.qq.com,AD
 DOMAIN,badjs.weixinbridge.com,AD
 
 # > Weibo
 DOMAIN,huodong.weibo.cn,AD
-DOMAIN,adstrategy.biz.weibo.com,AD
-DOMAIN,kadmimage.biz.weibo.com,AD
-DOMAIN,sdkaction.biz.weibo.com,AD
-DOMAIN,sdkclick.biz.weibo.com,AD
-DOMAIN,sdkmonitor.biz.weibo.com,AD
 DOMAIN-SUFFIX,biz.weibo.com,AD
 IP-CIDR,39.97.130.51/32,AD
 IP-CIDR,39.97.128.148/32,AD
