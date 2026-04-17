@@ -17,7 +17,6 @@ DOMAIN,cbsnews.akamaized.net,Streaming+
 # TV 端需走 US
 # DOMAIN-SUFFIX,cdn.peacocktv.com
 
-
 # > SkyShowtime
 DOMAIN-SUFFIX,cssott.com,Streaming+
 DOMAIN,g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com,Streaming+

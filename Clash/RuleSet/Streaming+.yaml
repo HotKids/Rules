@@ -18,7 +18,6 @@ payload:
   # TV 端需走 US
   # DOMAIN-SUFFIX,cdn.peacocktv.com
 
-
   # > SkyShowtime
   - DOMAIN-SUFFIX,cssott.com
   - DOMAIN,g002-vod-eu-cmaf-prd-cf.pcdn01.cssott.com

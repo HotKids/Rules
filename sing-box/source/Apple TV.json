@@ -3,9 +3,9 @@
   "rules": [
     {
       "domain": [
-        "hls-amt.itunes.apple.com // Trailers",
-        "hls.itunes.apple.com // Trailers",
-        "play-edge.itunes.apple.com // Unblock Region",
+        "hls-amt.itunes.apple.com",
+        "hls.itunes.apple.com",
+        "play-edge.itunes.apple.com",
         "tv.applemusic.com",
         "uts-api.itunes.apple.com"
       ]

@@ -320,37 +320,110 @@ def wildcard_to_regex(pattern: str) -> str:
 #  Step 3: Surge → QX / Clash / sing-box
 # ═══════════════════════════════════════════════════════════════════════
 
+class PendingSection:
+    """缓冲 '# > Section' 与 '# >> Sub' 头部，等到真的有规则 emit 才刷出。
+
+    push_section('# > X') 会清空 pending sub（新 section 重置子结构）。
+    push_sub('# >> Y') 只替换 pending sub。
+    flush() 返回当前持有行并清空。规则/普通 # 注释被 skip 时不做任何事 ——
+    pending 自然保留到下一次 emit 或被新同级 header 覆盖，整节全 skip 时自然丢弃。
+    """
+
+    __slots__ = ("section", "sub")
+
+    def __init__(self) -> None:
+        self.section: str | None = None
+        self.sub: str | None = None
+
+    def push_section(self, line: str) -> None:
+        self.section = line
+        self.sub = None
+
+    def push_sub(self, line: str) -> None:
+        self.sub = line
+
+    def flush(self) -> list[str]:
+        out = [x for x in (self.section, self.sub) if x is not None]
+        self.section = None
+        self.sub = None
+        return out
+
+
+def _split_inline_comment(rule: str) -> tuple[str, str]:
+    """拆出 Surge 行内 // 注释。返回 (规则体, 注释文本)；无注释则注释为空串。"""
+    idx = rule.find("//")
+    if idx == -1:
+        return rule.rstrip(), ""
+    return rule[:idx].rstrip().rstrip(","), rule[idx + 2:].strip()
+
+
+def _emit_with_prelude(
+    out: list[str],
+    line: str,
+    ps: PendingSection,
+    pending_blank: bool,
+    head_guard: int = 0,
+) -> bool:
+    """真正 emit 时统一处理：空行分隔 + flush pending section/sub + 追加 line。
+    返回新的 pending_blank (总是 False)。head_guard 指 out 初始非空内容行数
+    （Clash 的 'payload:' 为 1，QX 为 0），用于避免紧跟头插入空行。
+    """
+    if pending_blank and len(out) > head_guard:
+        out.append("")
+    out.extend(ps.flush())
+    out.append(line)
+    return False
+
+
 def convert_qx(lines: list[str], policy: str) -> str:
-    out = []
+    out: list[str] = []
+    ps = PendingSection()
+    pending_blank = False
+
     for line in lines:
         stripped = line.strip()
 
         if is_blank(line):
-            out.append("")
+            pending_blank = True
             continue
-        if stripped.startswith("#"):
-            out.append(stripped)
+        if stripped.startswith("# >>"):
+            ps.push_sub(stripped)
+            continue
+        if stripped.startswith("# >"):
+            ps.push_section(stripped)
             continue
         if stripped.startswith("//"):
-            out.append(f"# {stripped[2:].strip()}")
+            pending_blank = _emit_with_prelude(out, f"# {stripped[2:].strip()}", ps, pending_blank)
+            continue
+        if stripped.startswith("#"):
+            pending_blank = _emit_with_prelude(out, stripped, ps, pending_blank)
             continue
 
-        parts = [p.strip() for p in stripped.split(",")]
+        body, inline = _split_inline_comment(stripped)
+        parts = [p.strip() for p in body.split(",")]
         rule_type = parts[0] if parts else ""
         if rule_type in QX_SKIP:
             continue
 
         value = parts[1] if len(parts) > 1 else ""
         no_resolve = len(parts) > 2 and parts[2].lower() == "no-resolve"
+
         if rule_type in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR", "GEOIP", "IP-ASN"):
             # QX uses IP6-CIDR instead of Surge/Clash's IP-CIDR6
             qx_type = "IP6-CIDR" if rule_type == "IP-CIDR6" else rule_type
             suffix = ",no-resolve" if no_resolve else ""
-            out.append(f"{qx_type},{value},{policy}{suffix}")
+            rule_line = f"{qx_type},{value},{policy}{suffix}"
         elif rule_type in ("DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"):
-            out.append(f"{rule_type},{value},{policy}")
+            rule_line = f"{rule_type},{value},{policy}"
         elif value:
-            out.append(f"{rule_type},{value},{policy}")
+            rule_line = f"{rule_type},{value},{policy}"
+        else:
+            continue
+
+        if inline:
+            rule_line = f"{rule_line}  // {inline}"
+
+        pending_blank = _emit_with_prelude(out, rule_line, ps, pending_blank)
 
     while out and not out[-1].strip():
         out.pop()
@@ -358,33 +431,45 @@ def convert_qx(lines: list[str], policy: str) -> str:
 
 
 def convert_clash(lines: list[str]) -> str:
-    out = ["payload:"]
+    out: list[str] = ["payload:"]
+    ps = PendingSection()
+    pending_blank = False
+
     for line in lines:
         stripped = line.strip()
 
-        # 保留空行
         if is_blank(line):
-            out.append("")
+            pending_blank = True
             continue
-        if stripped.startswith("#"):
-            out.append(f"  {stripped}")
+        if stripped.startswith("# >>"):
+            ps.push_sub(f"  {stripped}")
+            continue
+        if stripped.startswith("# >"):
+            ps.push_section(f"  {stripped}")
             continue
         if stripped.startswith("//"):
-            out.append(f"  # {stripped[2:].strip()}")
+            pending_blank = _emit_with_prelude(out, f"  # {stripped[2:].strip()}", ps, pending_blank, head_guard=1)
+            continue
+        if stripped.startswith("#"):
+            pending_blank = _emit_with_prelude(out, f"  {stripped}", ps, pending_blank, head_guard=1)
             continue
 
-        parts = [p.strip() for p in stripped.split(",")]
+        body, inline = _split_inline_comment(stripped)
+        parts = [p.strip() for p in body.split(",")]
         rule_type = parts[0] if parts else ""
         if rule_type in CLASH_SKIP:
             continue
 
         if rule_type == "AND":
-            sub_rules = parse_and_rule(stripped) or []
+            sub_rules = parse_and_rule(body) or []
             if any(st in CLASH_SKIP for st, sv in sub_rules):
                 continue
 
-        rule_line = ",".join(parts)
-        out.append(f"  - {rule_line}")
+        rule_line = f"  - {','.join(parts)}"
+        if inline:
+            rule_line = f"{rule_line}  # {inline}"
+
+        pending_blank = _emit_with_prelude(out, rule_line, ps, pending_blank, head_guard=1)
 
     while out and not out[-1].strip():
         out.pop()
@@ -790,6 +875,10 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
     for line in lines:
         if line.startswith("#") or line.startswith("//"):
             continue
+        # 剥掉 YAML 行内注释（`  # ...`），避免 "domain  # comment" 混入值
+        hash_idx = line.find("#")
+        if hash_idx > 0:
+            line = line[:hash_idx].rstrip().rstrip(",")
         parts = [p.strip() for p in line.split(",")]
         sb_type = SINGBOX_MAP.get(parts[0])
         if sb_type and len(parts) > 1:
