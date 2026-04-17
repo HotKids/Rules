@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 19:40:54
+# Date: 2026-04-17 19:56:45
 # Author: @HotKids
 
 # 通用设置
@@ -448,7 +448,7 @@ rule-providers:
   Adblock:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Adblock.yaml
+    path: ./Provider/RuleSet/Adblock.txt
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
     interval: 86400
 
@@ -574,14 +574,14 @@ rule-providers:
   Global:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Global.yaml
+    path: ./Provider/RuleSet/Global.txt
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
     interval: 86400
 
   China:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/China.yaml
+    path: ./Provider/RuleSet/China.txt
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
     interval: 86400
 
@@ -595,15 +595,15 @@ rule-providers:
   CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.yaml
+    path: ./Provider/RuleSet/CNCIDR.txt
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
 
   LAN:
     type: http
-    behavior: classical
-    path: ./Provider/RuleSet/LAN.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/LAN.yaml
+    behavior: ipcidr
+    path: ./Provider/RuleSet/LAN.txt
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt
     interval: 86400
 
 # 规则
