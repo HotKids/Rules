@@ -152,12 +152,33 @@ def write_if_changed(filepath: Path, content: str) -> bool:
 
 
 _CST = timezone(timedelta(hours=8))
+_DATE_LINE_RE = re.compile(r"^# Date: .*$", re.MULTILINE)
 
 
 def _stamp_date(text: str) -> str:
     """将首个 `# Date: ...` 行替换为当前北京时间（YYYY-MM-DD HH:MM:SS）。"""
     now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
-    return re.sub(r"^# Date: .*$", f"# Date: {now}", text, count=1, flags=re.MULTILINE)
+    return _DATE_LINE_RE.sub(f"# Date: {now}", text, count=1)
+
+
+def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
+    """按需写入 content（Date 行替换为当前北京时间），避免仅 Date 行差异导致的无意义刷新。
+
+    - 文件不存在 → 写入（当前时间）
+    - 文件存在且内容（忽略 Date 行）与 content 相同 → 不写（保留既有 Date），返回 False
+    - 否则 → 写入（当前时间）
+    """
+    now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
+    stamped = _DATE_LINE_RE.sub(f"# Date: {now}", content, count=1)
+    if filepath.exists():
+        existing = filepath.read_text(encoding="utf-8")
+        placeholder = "# Date: __NORM__"
+        if (_DATE_LINE_RE.sub(placeholder, existing, count=1)
+                == _DATE_LINE_RE.sub(placeholder, content, count=1)):
+            return False
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(stamped, encoding="utf-8")
+    return True
 
 
 _GIST_RAW_RE = re.compile(r"https://raw\.githubusercontent\.com/([^/\s]+)/([^/\s]+)/([^/\s]+)/")
@@ -1204,9 +1225,10 @@ def _derive_provider_name(
 
 HOTKIDS_RAW_BASE = "https://raw.githubusercontent.com/HotKids/Rules/master/"
 
-# Clash 内置 rule-set 首选文件：stem → 仓库内首选文件名
-# 用于某些 rule-set 有多个格式时指定首选版本（如 LAN 默认走 ipcidr 格式 lancidr.txt）
-_CLASH_BUILTIN_PREFERRED = {"LAN": "lancidr.txt"}
+# Clash 内置 rule-set 首选配置：stem → (repo 内首选远程文件, 本地 path 生成的文件名)
+# 用于某些 rule-set 有多个格式时指定首选远程文件并自定义本地缓存文件名
+# （如 LAN 远程走 ipcidr 格式 lancidr.txt，本地落盘命名为 LANCIDR.yaml）
+_CLASH_BUILTIN_PREFERRED = {"LAN": ("lancidr.txt", "LANCIDR.yaml")}
 
 
 def _infer_behavior_from_clash_yaml(path: Path) -> str:
@@ -1262,9 +1284,10 @@ def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | No
     if platform == "clash":
         preferred = _CLASH_BUILTIN_PREFERRED.get(name)
         if preferred:
-            local = REPO_ROOT / "Clash" / "RuleSet" / preferred
+            remote_file, _local_path = preferred
+            local = REPO_ROOT / "Clash" / "RuleSet" / remote_file
             if local.exists():
-                return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{preferred}", _infer_behavior_from_clash_yaml(local)
+                return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{remote_file}", _infer_behavior_from_clash_yaml(local)
         local = REPO_ROOT / "Clash" / "RuleSet" / f"{name}.yaml"
         if local.exists():
             return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", _infer_behavior_from_clash_yaml(local)
@@ -1498,15 +1521,25 @@ def gen_rules_and_providers(
         "#   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。",
         "#   interval: # 自动更新间隔，仅在类型为 HTTP 时可用",
     ]
+    # path 覆盖：URL 命中 _CLASH_BUILTIN_PREFERRED 首选文件时，用自定义 path 文件名
+    _preferred_path_by_url = {
+        f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{remote}": local_path
+        for remote, local_path in _CLASH_BUILTIN_PREFERRED.values()
+    }
     for clash_url, info in providers.items():
         pname, behavior = info["name"], info["behavior"]
-        # 本地缓存扩展名与远程文件一致：`.txt` URL → `.txt` 缓存，否则统一 `.yaml`
-        ext = ".txt" if clash_url.lower().endswith(".txt") else ".yaml"
+        path_override = _preferred_path_by_url.get(clash_url)
+        if path_override:
+            path_file = path_override
+        else:
+            # 本地缓存扩展名与远程文件一致：`.txt` URL → `.txt` 缓存，否则统一 `.yaml`
+            ext = ".txt" if clash_url.lower().endswith(".txt") else ".yaml"
+            path_file = f"{pname.replace(' ', '_')}{ext}"
         rp_lines += [
             f"  {pname}:",
             "    type: http",
             f"    behavior: {behavior}",
-            f"    path: ./Provider/RuleSet/{pname.replace(' ', '_')}{ext}",
+            f"    path: ./Provider/RuleSet/{path_file}",
             f"    url: {clash_url}",
             "    interval: 86400",
             "",
@@ -2344,7 +2377,7 @@ def _sync_clash(
 
     gist_host = clash.get("gist_reverse_proxy") or config.get("gist_reverse_proxy", "")
     body = _apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host)
-    changed = write_if_changed(REPO_ROOT / clash_out, _stamp_date(body))
+    changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
 
@@ -2441,7 +2474,7 @@ def _sync_loon(
     if surge_mitm_block:
         loon_parts.append("[Mitm]\n" + surge_mitm_block)
 
-    changed = write_if_changed(REPO_ROOT / loon_out_path, _stamp_date("\n\n".join(loon_parts) + "\n"))
+    changed = _write_stamped_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
     print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
 
 
@@ -2501,7 +2534,7 @@ def _sync_qx(
         mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
         qx_parts.append(f"[mitm]\n{mitm_content}")
 
-    changed = write_if_changed(REPO_ROOT / qx_out_path, _stamp_date("\n\n".join(qx_parts) + "\n"))
+    changed = _write_stamped_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
     print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
 
 
@@ -2527,7 +2560,7 @@ def _sync_surfboard(
     sb_content = gen_surfboard_profile(
         proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
         alt_groups=sb_alt_groups)
-    changed = write_if_changed(REPO_ROOT / sb_out, _stamp_date(sb_content))
+    changed = _write_stamped_if_changed(REPO_ROOT / sb_out, sb_content)
     print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 
 
