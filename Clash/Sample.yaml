@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 21:24:43
+# Date: 2026-04-17 21:33:52
 # Author: @HotKids
 
 # 通用设置
@@ -438,6 +438,13 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
+  private:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/private.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    interval: 86400
+
   HTTPDNS:
     type: http
     behavior: classical
@@ -613,6 +620,9 @@ rules:
 
   # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
+
+  # Private 私有网络
+  - RULE-SET,private,🔘 DIRECT
 
   # HTTPDNS 请求/流量阻止
   - RULE-SET,HTTPDNS,🚧 AdGuard
