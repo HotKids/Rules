@@ -166,6 +166,8 @@ https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, po
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=China, enabled=true
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=ASN China, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=CNCIDR, enabled=true
+# Local Area Network
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/LAN.list, policy=🔘 DIRECT, tag=LAN, enabled=true
 
 [Host]
 

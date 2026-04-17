@@ -587,6 +587,13 @@ rule-providers:
     url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
     interval: 86400
 
+  LAN:
+    type: http
+    behavior: ipcidr
+    path: ./Provider/RuleSet/LAN.yaml
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LAN.yaml
+    interval: 86400
+
 # 规则
 rules:
   # 标准 SSH 端口

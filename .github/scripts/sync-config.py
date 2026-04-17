@@ -1164,6 +1164,57 @@ def _derive_provider_name(
     return name
 
 
+HOTKIDS_RAW_BASE = "https://raw.githubusercontent.com/HotKids/Rules/master/"
+
+
+def _infer_behavior_from_clash_yaml(path: Path) -> str:
+    """解析本地 Clash RuleSet YAML，按规则类型推断 provider behavior。
+
+    全 IP-CIDR/IP-CIDR6 → ipcidr；全 DOMAIN/DOMAIN-SUFFIX/DOMAIN-KEYWORD → domain；否则 classical。
+    忽略行内 `#` 注释与尾逗号。
+    """
+    types: set[str] = set()
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return "classical"
+    for line in text.splitlines():
+        s = line.strip()
+        if not s.startswith("- "):
+            continue
+        body = s[2:].strip()
+        hash_idx = body.find("#")
+        if hash_idx >= 0:
+            body = body[:hash_idx].strip().rstrip(",")
+        rt = body.split(",", 1)[0].strip().upper()
+        if rt:
+            types.add(rt)
+    ip_types = {"IP-CIDR", "IP-CIDR6", "IP6-CIDR"}
+    domain_types = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD"}
+    if types and types <= ip_types:
+        return "ipcidr"
+    if types and types <= domain_types:
+        return "domain"
+    return "classical"
+
+
+def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | None:
+    """按平台自动探测仓库本地 rule-set 文件，返回 (HotKids raw URL, behavior)。
+
+    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 由内容推断
+    platform == "loon"  → 检查 Surge/RULE-SET/<name>.list；behavior 返回空串
+    """
+    if platform == "clash":
+        local = REPO_ROOT / "Clash" / "RuleSet" / f"{name}.yaml"
+        if local.exists():
+            return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", _infer_behavior_from_clash_yaml(local)
+    elif platform == "loon":
+        local = REPO_ROOT / "Surge" / "RULE-SET" / f"{name}.list"
+        if local.exists():
+            return f"{HOTKIDS_RAW_BASE}Surge/RULE-SET/{name}.list", ""
+    return None
+
+
 def _behavior_from_url(url: str) -> str:
     """从 URL 文件名推断 rule-provider behavior（兜底检测）。
 
@@ -1277,13 +1328,18 @@ def gen_rules_and_providers(
             url_or_builtin, policy = parts[1], parts[2]
 
             if not url_or_builtin.startswith("http"):
-                # 内置规则集
-                if url_or_builtin not in builtin_maps:
-                    print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
-                    ph.skip()
-                    continue
-                clash_url = builtin_maps[url_or_builtin]
-                pname = register(clash_url, _behavior_from_url(clash_url))
+                # 内置规则集：显式 mapping > 仓库自动探测
+                if url_or_builtin in builtin_maps:
+                    clash_url = builtin_maps[url_or_builtin]
+                    behavior = _behavior_from_url(clash_url)
+                else:
+                    resolved = _resolve_builtin_from_repo(url_or_builtin, "clash")
+                    if resolved is None:
+                        print(f"  [SKIP rule] 内置规则集无映射: {url_or_builtin}")
+                        ph.skip()
+                        continue
+                    clash_url, behavior = resolved
+                pname = register(clash_url, behavior)
                 if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                     providers.pop(clash_url, None)
@@ -1561,8 +1617,11 @@ def gen_loon_remote_rules(
 
         url, policy = parts[1], parts[2]
         if not url.startswith("http"):
-            ph.skip()
-            continue  # 内置规则集（LAN 等）跳过
+            resolved = _resolve_builtin_from_repo(url, "loon")
+            if resolved is None:
+                ph.skip()
+                continue
+            url = resolved[0]
 
         if _should_skip([url, policy], skips):
             print(f"  [SKIP Loon remote rule] {url}")
