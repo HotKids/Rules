@@ -108,7 +108,7 @@ DOMAIN,dsp-x.jd.com,AD
 DOMAIN,janapi.jd.com,AD
 DOMAIN,xlog.jd.com,AD
 IP-CIDR,101.124.19.122/32,AD
-IP-CIDR6,2402:db40:5100:1011::5/128,AD
+IP6-CIDR,2402:db40:5100:1011::5/128,AD
 
 # > Keep
 DOMAIN,httpdns.calorietech.com,AD
@@ -245,7 +245,7 @@ DOMAIN,sugar.zhihu.com,AD
 DOMAIN,zxid-m.mobileservice.cn,AD
 IP-CIDR,103.41.167.237/32,AD
 IP-CIDR,118.89.204.198/32,AD
-IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,AD
+IP6-CIDR,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,AD
 
 # > 10000
 DOMAIN,ad.21cn.com,AD

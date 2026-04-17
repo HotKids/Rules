@@ -60,4 +60,3 @@ DOMAIN,portal.linkbroad.com,Unbreak
 DOMAIN-SUFFIX,bochk.com,Unbreak
 
 # > ziniao
-PROCESS-NAME,*ziniao*,Unbreak

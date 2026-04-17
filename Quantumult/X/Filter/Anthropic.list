@@ -28,7 +28,7 @@ DOMAIN,cdn.usefathom.com,Anthropic
 
 # IP 段 / ASN 兜底
 IP-CIDR,160.79.104.0/21,Anthropic,no-resolve
-IP-CIDR6,2607:6bc0::/32,Anthropic,no-resolve
+IP6-CIDR,2607:6bc0::/32,Anthropic,no-resolve
 IP-ASN,399358,Anthropic,no-resolve
 
 # 兜底规则（geosite + keyword 通配）

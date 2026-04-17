@@ -24,7 +24,7 @@ DOMAIN-SUFFIX,claude.com,GenAI
 DOMAIN-SUFFIX,anthropic.com,GenAI
 DOMAIN-SUFFIX,claudeusercontent.com,GenAI
 IP-CIDR,160.79.104.0/23,GenAI,no-resolve
-IP-CIDR6,2607:6bc0::/48,GenAI,no-resolve
+IP6-CIDR,2607:6bc0::/48,GenAI,no-resolve
 
 # OpenAI
 # > ChatGPT

@@ -113,7 +113,6 @@ DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com,Streaming
 # > HBO Max
 USER-AGENT,HBOMAX*,Streaming
 USER-AGENT,Max*,Streaming
-PROCESS-NAME,com.wbd.stream,Streaming
 DOMAIN-SUFFIX,max.com,Streaming
 DOMAIN-SUFFIX,hbomax.com,Streaming
 DOMAIN-SUFFIX,discomax.com,Streaming
