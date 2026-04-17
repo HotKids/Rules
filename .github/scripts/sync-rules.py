@@ -45,6 +45,10 @@ SINGBOX_MAP = {
 # ─── Clash 专属规则类型（Surge 不支持，手动维护后同步到 sing-box）────────
 CLASH_PRESERVE_TYPES = {"PROCESS-NAME", "PROCESS-NAME-REGEX"}
 
+# ─── Clash CIDR 伴生文件：stem → 伴生文件名 ──────────────────────────
+# 生成与 Loyalsoldier lancidr.txt 同格式的纯 CIDR ipcidr payload（扩展名为 .txt）
+CLASH_CIDR_COMPANION = {"LAN": "lancidr.txt"}
+
 # ─── Streaming 配置 ──────────────────────────────────────────────────
 
 # section 名 → 文件名 stem（只列特殊映射，其余 section 名即文件名）
@@ -536,7 +540,8 @@ def convert_singbox(lines: list[str]) -> str | None:
 
 
 def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
-    lines = surge_file.read_text(encoding="utf-8").splitlines()
+    text = surge_file.read_text(encoding="utf-8")
+    lines = text.splitlines()
     stem = surge_file.stem                                           # 文件名，用作输出文件名及 QX policy
     rel  = str(surge_file.relative_to(SURGE_DIR).with_suffix(""))  # 含子目录，用于 clash_override 匹配
     updated = 0
@@ -565,6 +570,14 @@ def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
         if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
+
+        # Clash CIDR 伴生文件（如 LAN → lancidr.txt）：仅提取 IP-CIDR，输出 ipcidr payload
+        companion = CLASH_CIDR_COMPANION.get(stem)
+        if companion:
+            cidr_body = convert_ipcidr_to_clash(text)
+            if cidr_body and write_if_changed(CLASH_DIR / companion, cidr_body):
+                print(f"    ✓ Clash:   {companion}")
+                updated += 1
 
         # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
         sb_content = convert_classical_payload_to_singbox(clash_body)

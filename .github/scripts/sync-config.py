@@ -1204,6 +1204,10 @@ def _derive_provider_name(
 
 HOTKIDS_RAW_BASE = "https://raw.githubusercontent.com/HotKids/Rules/master/"
 
+# Clash 内置 rule-set 首选文件：stem → 仓库内首选文件名
+# 用于某些 rule-set 有多个格式时指定首选版本（如 LAN 默认走 ipcidr 格式 lancidr.txt）
+_CLASH_BUILTIN_PREFERRED = {"LAN": "lancidr.txt"}
+
 
 def _infer_behavior_from_clash_yaml(path: Path) -> str:
     """解析本地 Clash RuleSet YAML，按 payload 条目**格式**推断 provider behavior。
@@ -1251,10 +1255,16 @@ def _infer_behavior_from_clash_yaml(path: Path) -> str:
 def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | None:
     """按平台自动探测仓库本地 rule-set 文件，返回 (HotKids raw URL, behavior)。
 
-    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 由 payload 条目格式推断
+    platform == "clash" → 若 _CLASH_BUILTIN_PREFERRED 命中则用首选文件，否则 Clash/RuleSet/<name>.yaml；
+                         behavior 由 payload 条目格式推断
     platform == "loon"  → 检查 Surge/RULE-SET/<name>.list；behavior 返回空串
     """
     if platform == "clash":
+        preferred = _CLASH_BUILTIN_PREFERRED.get(name)
+        if preferred:
+            local = REPO_ROOT / "Clash" / "RuleSet" / preferred
+            if local.exists():
+                return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{preferred}", _infer_behavior_from_clash_yaml(local)
         local = REPO_ROOT / "Clash" / "RuleSet" / f"{name}.yaml"
         if local.exists():
             return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", _infer_behavior_from_clash_yaml(local)
@@ -1332,10 +1342,18 @@ def gen_rules_and_providers(
     rules_out: list[str] = []
     ph = PendingHeaders()
 
-    def register(clash_url: str, behavior: str) -> str:
+    def register(clash_url: str, behavior: str, prefer_name: str | None = None) -> str:
         if clash_url in providers:
             return providers[clash_url]["name"]
-        name = _derive_provider_name(clash_url, seen, rename_map)
+        if prefer_name:
+            # 强制使用原始 Surge 令牌作为 provider 名（如 `RULE-SET,LAN,...` 对应 URL 文件名
+            # 是 `lancidr.txt` 时，provider 名仍保留为 LAN）；冲突时追加 _N 后缀
+            name, counter = prefer_name, 2
+            while name in seen and seen[name] != clash_url:
+                name = f"{prefer_name}_{counter}"
+                counter += 1
+        else:
+            name = _derive_provider_name(clash_url, seen, rename_map)
         providers[clash_url] = {"name": name, "behavior": behavior}
         seen[name] = clash_url
         return name
@@ -1421,7 +1439,7 @@ def gen_rules_and_providers(
                         ph.skip()
                         continue
                     clash_url, behavior = resolved
-                pname = register(clash_url, behavior)
+                pname = register(clash_url, behavior, prefer_name=url_or_builtin)
                 if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
                     providers.pop(clash_url, None)
@@ -1482,11 +1500,13 @@ def gen_rules_and_providers(
     ]
     for clash_url, info in providers.items():
         pname, behavior = info["name"], info["behavior"]
+        # 本地缓存扩展名与远程文件一致：`.txt` URL → `.txt` 缓存，否则统一 `.yaml`
+        ext = ".txt" if clash_url.lower().endswith(".txt") else ".yaml"
         rp_lines += [
             f"  {pname}:",
             "    type: http",
             f"    behavior: {behavior}",
-            f"    path: ./Provider/RuleSet/{pname.replace(' ', '_')}.yaml",
+            f"    path: ./Provider/RuleSet/{pname.replace(' ', '_')}{ext}",
             f"    url: {clash_url}",
             "    interval: 86400",
             "",
