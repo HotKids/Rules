@@ -663,10 +663,14 @@ rules:
   - RULE-SET,CNASN,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
 
-  # Final
+  # Local Area Network
+  - RULE-SET,LAN,🔘 DIRECT
+
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
+
+  # Final
   - MATCH,🔰 Proxy
 
