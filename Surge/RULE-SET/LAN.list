@@ -1,7 +1,7 @@
 # > Local Area Network
 # 通过 ChatGPT 收集整理
 # mDNS 域名后缀（用于局域网设备发现，如打印机、NAS）
-# DOMAIN-SUFFIX,local
+DOMAIN-SUFFIX,local
 # 私有内网地址段（Class A）
 IP-CIDR,10.0.0.0/8,no-resolve
 # 私有内网地址段（Class B）
