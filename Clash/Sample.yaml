@@ -589,9 +589,9 @@ rule-providers:
 
   LAN:
     type: http
-    behavior: ipcidr
+    behavior: classical
     path: ./Provider/RuleSet/LAN.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LAN.yaml
     interval: 86400
 
 # 规则

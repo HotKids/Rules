@@ -30,7 +30,6 @@ iCloud
 Apple News
 Apple TV
 # > Mapping
-LAN => https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/lancidr.txt
 VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
 # > Rename
@@ -44,7 +43,6 @@ rule-providers:
   direct => China
   reject => Adblock
   cncidr => CNCIDR
-  lancidr => LAN
 
 # Quantumult X
 >> Quantumult/Sample.conf
@@ -68,7 +66,6 @@ Speedtest
   direct => China
   reject => Reject
   cncidr => CNCIDR
-  lancidr => LAN
 
 # Loon
 >> Surge/Balloon.lcf
@@ -85,7 +82,6 @@ Speedtest
   direct => China
   reject => Reject
   cncidr => CNCIDR
-  lancidr => LAN
 
 # Surfboard
 >> Surge/Surfboard.conf
