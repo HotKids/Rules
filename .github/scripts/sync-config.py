@@ -2243,7 +2243,7 @@ def _sync_clash(
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls, adblock_proxy_lines=proxy_lines)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
 
-    parts = []
+    parts = ["# Clash\n# Date: \n# Author: @HotKids"]
     if inc:
         parts.append((REPO_ROOT / inc).read_text(encoding="utf-8").rstrip())
     if pp_block:
