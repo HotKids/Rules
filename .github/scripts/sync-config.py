@@ -819,12 +819,13 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     4. 仓库简写（非 http 左侧）匹配
     返回 None 表示无法映射。
     """
-    # 1. HotKids 自动映射
+    # 1. HotKids 自动映射（摊平子目录，与 sync-rules.py 输出一致）
     if HOTKIDS_SURGE_PREFIX in url:
         rest = url[url.index(HOTKIDS_SURGE_PREFIX) + len(HOTKIDS_SURGE_PREFIX):]
-        if rest.endswith(".list"):
-            rest = rest[:-5] + ".yaml"
-        return HOTKIDS_CLASH_PREFIX + rest
+        basename = rest.rsplit("/", 1)[-1] if "/" in rest else rest
+        if basename.endswith(".list"):
+            basename = basename[:-5] + ".yaml"
+        return HOTKIDS_CLASH_PREFIX + basename
 
     # 2 & 3. 精确 URL 或前缀匹配
     best_len = 0
