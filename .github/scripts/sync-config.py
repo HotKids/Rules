@@ -1205,16 +1205,59 @@ def _derive_provider_name(
 HOTKIDS_RAW_BASE = "https://raw.githubusercontent.com/HotKids/Rules/master/"
 
 
+def _infer_behavior_from_clash_yaml(path: Path) -> str:
+    """解析本地 Clash RuleSet YAML，按 payload 条目**格式**推断 provider behavior。
+
+    - 任一条目含规则类型前缀（形如 `IP-CIDR,10.0.0.0/8,no-resolve` / `DOMAIN-SUFFIX,example.com`）→ `classical`
+    - 所有条目为裸 CIDR（含 `/` 的字面 IP 段，如 `10.0.0.0/8`）→ `ipcidr`
+    - 所有条目为裸域名 → `domain`
+    - 混合或空 → `classical`（最宽松，安全兜底）
+    """
+    try:
+        text = path.read_text(encoding="utf-8")
+    except OSError:
+        return "classical"
+    has_classical = False
+    has_ipcidr = False
+    has_domain = False
+    prefix_re = re.compile(r"^[A-Z][A-Z0-9-]+,")
+    for line in text.splitlines():
+        s = line.strip()
+        if not s.startswith("- "):
+            continue
+        body = s[2:].strip()
+        hash_idx = body.find("#")
+        if hash_idx >= 0:
+            body = body[:hash_idx].strip()
+        if len(body) >= 2 and body[0] in "\"'" and body[-1] == body[0]:
+            body = body[1:-1].strip()
+        if not body:
+            continue
+        if prefix_re.match(body):
+            has_classical = True
+        elif "/" in body:
+            has_ipcidr = True
+        else:
+            has_domain = True
+    if has_classical:
+        return "classical"
+    if has_ipcidr and not has_domain:
+        return "ipcidr"
+    if has_domain and not has_ipcidr:
+        return "domain"
+    return "classical"
+
+
 def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | None:
     """按平台自动探测仓库本地 rule-set 文件，返回 (HotKids raw URL, behavior)。
 
-    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 固定为 classical（兼容所有规则类型）
+    platform == "clash" → 检查 Clash/RuleSet/<name>.yaml；behavior 由 payload 条目格式推断
     platform == "loon"  → 检查 Surge/RULE-SET/<name>.list；behavior 返回空串
     """
     if platform == "clash":
         local = REPO_ROOT / "Clash" / "RuleSet" / f"{name}.yaml"
         if local.exists():
-            return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", "classical"
+            return f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{name}.yaml", _infer_behavior_from_clash_yaml(local)
     elif platform == "loon":
         local = REPO_ROOT / "Surge" / "RULE-SET" / f"{name}.list"
         if local.exists():
