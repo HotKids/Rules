@@ -48,7 +48,7 @@
 ### 各平台跳过 / 转换
 
 **Clash**
-- 规则类型重命名：`DEST-PORT` → `DST-PORT`，`PROTOCOL,TCP/UDP` → `NETWORK,tcp/udp`
+- 规则类型重命名：`DEST-PORT` → `DST-PORT`，`PROTOCOL,TCP/UDP` → `NETWORK,TCP/UDP`
 - 跳过：`URL-REGEX`、`USER-AGENT`、`PROTOCOL,QUIC`（无等价）
 
 **Loon**

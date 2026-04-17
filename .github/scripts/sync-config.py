@@ -47,14 +47,14 @@ _CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 # Surge → Clash 规则类型重命名（含 AND 子规则）
 _CLASH_TYPE_RENAMES = {"DEST-PORT": "DST-PORT", "PROTOCOL": "NETWORK"}
 # Surge PROTOCOL 值 → Clash NETWORK 值（不支持的值 → 跳过该规则）
-_SURGE_PROTOCOL_TO_NETWORK = {"TCP": "tcp", "UDP": "udp"}
+_SURGE_PROTOCOL_TO_NETWORK = {"TCP": "TCP", "UDP": "UDP"}
 
 
 def _convert_and_clash(s: str) -> str | None:
     """将 Surge AND rule 字符串转换为 Clash 格式，返回 None 表示无法转换（应跳过）。
 
     子规则类型按 _CLASH_TYPE_RENAMES 重命名；PROTOCOL 值按 _SURGE_PROTOCOL_TO_NETWORK
-    映射为小写（QUIC 等无对应值时返回 None）。
+    映射为大写（QUIC 等无对应值时返回 None）。
     """
     def convert_sub(m: re.Match) -> str:
         t, v = m.group(1).upper(), m.group(2)
