@@ -53,10 +53,8 @@
         "amazonvideo.com",
         "ameba.jp",
         "bahamut.com.tw",
-        "bbc.co",
         "bbc.co.uk",
         "bbc.com",
-        "bbci.co",
         "bbci.co.uk",
         "brightcove.com",
         "britbox.com",
@@ -136,7 +134,6 @@
       "domain_keyword": [
         "avoddashs",
         "bbcfmt",
-        "co.uk",
         "dualstack.apiproxy-",
         "dualstack.ichnaea-web-",
         "netflixdnstest",
