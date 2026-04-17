@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 17:10:13
+# Date: 2026-04-17 17:11:21
 # Author: @HotKids
 
 # 通用设置
@@ -667,10 +667,14 @@ rules:
   - RULE-SET,CNASN,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
 
-  # Final
+  # Local Area Network
+  - RULE-SET,LAN,🔘 DIRECT
+
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT
   - GEOSITE,geolocation-!cn,🔰 Proxy
+
+  # Final
   - MATCH,🔰 Proxy
 
