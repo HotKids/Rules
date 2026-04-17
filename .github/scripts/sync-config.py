@@ -44,7 +44,7 @@ _SURFBOARD_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 _LOON_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
 _LOON_ACTION_VALUE_MAP = {"direct": "DIRECT", "reject": "REJECT",
                           "reject-tinygif": "REJECT", "reject-drop": "REJECT-DROP", "reject-no-drop": "REJECT"}
-_CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject"})
+_CLASH_SUPPORTED_ACTIONS = frozenset({"direct", "reject", "reject-drop"})
 # Surge → Clash 规则类型重命名（含 AND 子规则）
 _CLASH_TYPE_RENAMES = {"DEST-PORT": "DST-PORT", "PROTOCOL": "NETWORK"}
 # Surge PROTOCOL 值 → Clash NETWORK 值（不支持的值 → 跳过该规则）
@@ -1105,7 +1105,9 @@ def gen_proxy_groups(
         # select + policy-path + no explicit proxies → adblock group
         if (g["type"] == "select" and "policy-path" in g["params"]
                 and not g["proxies"] and adblock_proxy_lines is not None):
-            clash_action_names, wrapper_yaml = _gen_clash_action_wrapper_groups(adblock_proxy_lines)
+            extra_lines = _load_policy_path_proxy_lines(g["params"]["policy-path"]) or []
+            action_lines = _merge_action_lines(adblock_proxy_lines, extra_lines)
+            clash_action_names, wrapper_yaml = _gen_clash_action_wrapper_groups(action_lines)
             if clash_action_names:
                 icon = g["params"].get("icon-url", "")
                 icon_line = f"\n    icon: {icon}" if icon else ""
@@ -1223,6 +1225,38 @@ def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | No
         if local.exists():
             return f"{HOTKIDS_RAW_BASE}Surge/RULE-SET/{name}.list", ""
     return None
+
+
+def _load_policy_path_proxy_lines(url: str) -> list[str] | None:
+    """解析 Surge policy-path URL，读取本地文件提取 `NAME = VALUE` action 行。
+
+    仅处理 HotKids raw URL（可映射到仓库内文件）。其他来源返回 None，调用方走默认回退。
+    """
+    if not url.startswith(HOTKIDS_RAW_BASE):
+        return None
+    local = REPO_ROOT / url[len(HOTKIDS_RAW_BASE):]
+    if not local.exists():
+        return None
+    out: list[str] = []
+    for line in local.read_text(encoding="utf-8").splitlines():
+        s = line.strip()
+        if s and not s.startswith("#") and "=" in s:
+            out.append(s)
+    return out
+
+
+def _merge_action_lines(base: list[str], extra: list[str]) -> list[str]:
+    """合并两组 `NAME = VALUE` 行，保留 base 顺序；extra 中 name 未出现的追加到尾部。"""
+    def _name(s: str) -> str:
+        return s.partition("=")[0].strip() if "=" in s else ""
+    seen = {_name(ln) for ln in base if _name(ln)}
+    merged = list(base)
+    for ln in extra:
+        n = _name(ln)
+        if n and n not in seen:
+            merged.append(ln)
+            seen.add(n)
+    return merged
 
 
 def _behavior_from_url(url: str) -> str:
