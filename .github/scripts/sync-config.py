@@ -13,6 +13,7 @@ sync-config.txt 格式（平台块 + 子分区）：
 
 import re
 import urllib.request
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 # ---------------------------------------------------------------------------
@@ -148,6 +149,15 @@ def write_if_changed(filepath: Path, content: str) -> bool:
         return False
     filepath.write_text(content, encoding="utf-8")
     return True
+
+
+_CST = timezone(timedelta(hours=8))
+
+
+def _stamp_date(text: str) -> str:
+    """将首个 `# Date: ...` 行替换为当前北京时间（YYYY-MM-DD HH:MM:SS）。"""
+    now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
+    return re.sub(r"^# Date: .*$", f"# Date: {now}", text, count=1, flags=re.MULTILINE)
 
 
 def strip_emoji(name: str) -> str:
@@ -2240,7 +2250,7 @@ def _sync_clash(
         parts.append(pp_block)
     parts += [groups_yaml, rp_rules_yaml]
 
-    changed = write_if_changed(REPO_ROOT / clash_out, "\n\n".join(parts) + "\n")
+    changed = write_if_changed(REPO_ROOT / clash_out, _stamp_date("\n\n".join(parts) + "\n"))
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
 
@@ -2337,7 +2347,7 @@ def _sync_loon(
     if surge_mitm_block:
         loon_parts.append("[Mitm]\n" + surge_mitm_block)
 
-    changed = write_if_changed(REPO_ROOT / loon_out_path, "\n\n".join(loon_parts) + "\n")
+    changed = write_if_changed(REPO_ROOT / loon_out_path, _stamp_date("\n\n".join(loon_parts) + "\n"))
     print(f"  {'✓ ' + loon_out_path + ' 已更新' if changed else '✓ ' + loon_out_path + ' 无变化'}")
 
 
@@ -2397,7 +2407,7 @@ def _sync_qx(
         mitm_content = _sync_qx_mitm(mitm_content, surge_mitm_lines)
         qx_parts.append(f"[mitm]\n{mitm_content}")
 
-    changed = write_if_changed(REPO_ROOT / qx_out_path, "\n\n".join(qx_parts) + "\n")
+    changed = write_if_changed(REPO_ROOT / qx_out_path, _stamp_date("\n\n".join(qx_parts) + "\n"))
     print(f"  {'✓ ' + qx_out_path + ' 已更新' if changed else '✓ ' + qx_out_path + ' 无变化'}")
 
 
@@ -2423,7 +2433,7 @@ def _sync_surfboard(
     sb_content = gen_surfboard_profile(
         proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
         alt_groups=sb_alt_groups)
-    changed = write_if_changed(REPO_ROOT / sb_out, sb_content)
+    changed = write_if_changed(REPO_ROOT / sb_out, _stamp_date(sb_content))
     print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")
 
 
