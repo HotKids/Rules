@@ -12,6 +12,7 @@
 #                       指定插入锚点（插入到匹配行之后）
 #   # > Mapping         URL 映射（X => Y）；右侧留空表示路径不变仅规范扩展名
 #   # > Rename          Provider 名称映射（stem => 自定义名称）
+#   # > Gist            URL 反代（ReverseProxy => host）；平台块=局部，Surge 块=全局
 # ════════════════════════════════════════════════════════════════
 
 # Surge
@@ -24,6 +25,8 @@ Speedtest
 >> Clash/Sample.yaml
 # > Builtin
 << .github/scripts/sync-config/clash.ini
+# > Gist
+ReverseProxy => testingcf.jsdelivr.net
 # > Skip
 ConnersHua
 iCloud

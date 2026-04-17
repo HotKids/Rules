@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-17 17:23:35
+# Date: 2026-04-17 18:00:01
 # Author: @HotKids
 
 # 通用设置
@@ -61,9 +61,9 @@ geo-update-interval: 24
 
 # 自定义 geodata url
 geox-url:
-  geoip: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geoip.dat"
-  geosite: "https://raw.githubusercontent.com/Loyalsoldier/v2ray-rules-dat/release/geosite.dat"
-  mmdb: "https://raw.githubusercontent.com/Loyalsoldier/geoip/release/Country.mmdb"
+  geoip: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
+  geosite: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
+  mmdb: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb"
 
 # Hosts 设置
 
@@ -247,13 +247,13 @@ proxy-groups:
   # Global
   - name: "GLOBAL"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Inbound.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Inbound.png
     include-all: true
 
   # Proxy
   - name: "🔰 Proxy"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Outbound.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png
     proxies:
       - 🇭🇰 Hong Kong
       - 🇨🇳 Taiwan
@@ -266,7 +266,7 @@ proxy-groups:
   # Streaming Global
   - name: "🎬 Streaming"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Streaming.png
     proxies:
       - 🔰 Proxy
       - 🇭🇰 Hong Kong
@@ -279,7 +279,7 @@ proxy-groups:
   # CNTV APAC
   - name: "📺 CNTV"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/StreamingCN.png
     proxies:
       - 🔘 DIRECT
       - 🇨🇳 Taiwan
@@ -289,7 +289,7 @@ proxy-groups:
   # > Apple Services
   - name: "🍎 Apple"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -299,7 +299,7 @@ proxy-groups:
   # Google
   - name: "🔍 Google"
     type: select
-    icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Google.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
@@ -307,7 +307,7 @@ proxy-groups:
   # AIGC
   - name: "🤖 AIGC"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
     proxies:
       - 🇺🇸 America
       - 🇸🇬 Singapore
@@ -316,7 +316,7 @@ proxy-groups:
   # Crypto
   - name: "🪙 Crypto"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
@@ -325,7 +325,7 @@ proxy-groups:
   # Finance
   - name: "💳 Credit"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/PayPal.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
@@ -334,7 +334,7 @@ proxy-groups:
   # Telegram
   - name: "📬 Telegram"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
     proxies:
       - 🔰 Proxy
       - 🇸🇬 Singapore
@@ -343,7 +343,7 @@ proxy-groups:
   # Mail
   - name: "📧 Mail"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Mail.png
     proxies:
       - 🔰 Proxy
       - 🔘 DIRECT
@@ -351,7 +351,7 @@ proxy-groups:
   # Adblock
   - name: "🚧 AdGuard"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_2.png
     proxies:
       - 🔘 DIRECT
       - ⛔️ REJECT
@@ -381,42 +381,42 @@ proxy-groups:
   # Nodes
   - name: "🇺🇳 Server"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_1.png
     use:
       - Server
 
   # Area
   - name: "🇭🇰 Hong Kong"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png
     use:
       - Server
     filter: '🇭🇰|HK|Hong Kong|香港'
 
   - name: "🇨🇳 Taiwan"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png
     use:
       - Server
     filter: '🇨🇳|🇹🇼|TW|Taiwan|台湾'
 
   - name: "🇸🇬 Singapore"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png
     use:
       - Server
     filter: '🇸🇬|SG|Singapore|新加坡'
 
   - name: "🇯🇵 Japan"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png
     use:
       - Server
     filter: '🇯🇵|JP|Japan|日本'
 
   - name: "🇺🇸 America"
     type: select
-    icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png
     use:
       - Server
     filter: '🇺🇸|US|United States|美国'
@@ -435,175 +435,175 @@ rule-providers:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Unbreak.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Unbreak.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
   HTTPDNS:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/HTTPDNS.yaml
-    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.yaml
+    url: https://testingcf.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
   Adblock:
     type: http
     behavior: domain
     path: ./Provider/RuleSet/Adblock.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/reject.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
     interval: 86400
 
   Advertising:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Advertising.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/AD.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
     interval: 86400
 
   Streaming+:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming+.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming+.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming+.yaml
     interval: 86400
 
   Streaming_TW:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming_TW.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_TW.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml
     interval: 86400
 
   Streaming_JP:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming_JP.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_JP.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml
     interval: 86400
 
   Streaming_US:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming_US.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming_US.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml
     interval: 86400
 
   Streaming:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Streaming.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Streaming.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml
     interval: 86400
 
   CNTV:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/CNTV.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/CNTV.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml
     interval: 86400
 
   Google AI Studio:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Google_AI_Studio.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Gemini.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml
     interval: 86400
 
   AIGC:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/AIGC.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml
     interval: 86400
 
   Apple CN:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Apple_CN.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple%20CN.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml
     interval: 86400
 
   Apple:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Apple.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Apple.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml
     interval: 86400
 
   Crypto:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Crypto.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Crypto.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml
     interval: 86400
 
   Google:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Google.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Google.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
     interval: 86400
 
   Credit:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Credit.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Credit.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Credit.yaml
     interval: 86400
 
   PayPal:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/PayPal.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/PayPal.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/PayPal.yaml
     interval: 86400
 
   Telegram:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Telegram.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Telegram.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml
     interval: 86400
 
   Spark:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Spark.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/Spark.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
   Global:
     type: http
     behavior: domain
     path: ./Provider/RuleSet/Global.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/proxy.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
     interval: 86400
 
   China:
     type: http
     behavior: domain
     path: ./Provider/RuleSet/China.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/direct.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
     interval: 86400
 
   CNASN:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/CNASN.yaml
-    url: https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.yaml
+    url: https://testingcf.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
     interval: 86400
 
   CNCIDR:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/CNCIDR.yaml
-    url: https://raw.githubusercontent.com/Loyalsoldier/clash-rules/release/cncidr.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
 
   LAN:
     type: http
     behavior: ipcidr
     path: ./Provider/RuleSet/LAN.yaml
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/LAN.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/LAN.yaml
     interval: 86400
 
 # 规则

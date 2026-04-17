@@ -160,6 +160,20 @@ def _stamp_date(text: str) -> str:
     return re.sub(r"^# Date: .*$", f"# Date: {now}", text, count=1, flags=re.MULTILINE)
 
 
+_GIST_RAW_RE = re.compile(r"https://raw\.githubusercontent\.com/([^/\s]+)/([^/\s]+)/([^/\s]+)/")
+
+
+def _apply_gist_reverse_proxy(text: str, host: str) -> str:
+    """把 `https://raw.githubusercontent.com/<user>/<repo>/<ref>/` 改写为 jsDelivr 风格
+    `https://<host>/gh/<user>/<repo>@<ref>/`。`host` 为空串则原样返回。"""
+    if not host:
+        return text
+    return _GIST_RAW_RE.sub(
+        lambda m: f"https://{host}/gh/{m.group(1)}/{m.group(2)}@{m.group(3)}/",
+        text,
+    )
+
+
 def strip_emoji(name: str) -> str:
     """去除字符串开头的 emoji 及空白，返回剩余文字部分。
 
@@ -601,6 +615,7 @@ def _empty_plat() -> dict:
         "pg_inject_qx": None,
         "policy_rename_map": {},
         "pg_inject_surfboard": None,
+        "gist_reverse_proxy": "",
     }
 
 
@@ -804,6 +819,17 @@ def parse_sync_txt() -> dict:
             left, right = left.strip(), right.strip()
             if left:
                 result.setdefault(current_platform, _empty_plat())["filter_map"][left] = right
+        elif current_section == "Gist":
+            if "=>" not in stripped:
+                continue
+            left, _, right = stripped.partition("=>")
+            left, right = left.strip(), right.strip()
+            if left != "ReverseProxy" or not right:
+                continue
+            if current_platform == "Surge":
+                result["gist_reverse_proxy"] = right
+            elif current_platform:
+                result.setdefault(current_platform, _empty_plat())["gist_reverse_proxy"] = right
 
     flush_builtin()
     return result
@@ -2284,7 +2310,9 @@ def _sync_clash(
         parts.append(pp_block)
     parts += [groups_yaml, rp_rules_yaml]
 
-    changed = write_if_changed(REPO_ROOT / clash_out, _stamp_date("\n\n".join(parts) + "\n"))
+    gist_host = clash.get("gist_reverse_proxy") or config.get("gist_reverse_proxy", "")
+    body = _apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host)
+    changed = write_if_changed(REPO_ROOT / clash_out, _stamp_date(body))
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
 
