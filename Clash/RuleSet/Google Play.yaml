@@ -14,6 +14,5 @@ payload:
   - DOMAIN,play-lh.googleusercontent.com
   - DOMAIN-KEYWORD,play.google
   - DOMAIN-WILDCARD,*play*.google.com
-  - DOMAIN-WILDCARD,*play*.google.com
   - DOMAIN-WILDCARD,*play*.googleapis.com
   - DOMAIN-WILDCARD,*play*.googleusercontent.com

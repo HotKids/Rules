@@ -38,12 +38,9 @@ DOMAIN-KEYWORD,avoddashs,Streaming
 # > BBC iPlayer
 USER-AGENT,BBCiPlayer*,Streaming
 DOMAIN-KEYWORD,bbcfmt,Streaming
-DOMAIN-KEYWORD,co.uk,Streaming
 DOMAIN-KEYWORD,uk-live,Streaming
 DOMAIN-SUFFIX,bbc.com,Streaming
-DOMAIN-SUFFIX,bbc.co,Streaming
 DOMAIN-SUFFIX,bbc.co.uk,Streaming
-DOMAIN-SUFFIX,bbci.co,Streaming
 DOMAIN-SUFFIX,bbci.co.uk,Streaming
 DOMAIN,ssl-bbcsmarttv.2cnt.net,Streaming
 DOMAIN,vod-dash-uk-live.akamaized.net,Streaming
