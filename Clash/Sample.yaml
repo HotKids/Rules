@@ -1,3 +1,7 @@
+# Clash
+# Date: 2026-04-17 17:23:35
+# Author: @HotKids
+
 # 通用设置
 
 # port: 7890 # HTTP(S) 代理服务器端口
@@ -351,6 +355,7 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - ⛔️ REJECT
+      - 📛 REJECT-DROP
 
   # DIRECT
   - name: "🔘 DIRECT"
@@ -365,6 +370,13 @@ proxy-groups:
     hidden: true
     proxies:
       - REJECT
+
+  # REJECT-DROP
+  - name: "📛 REJECT-DROP"
+    type: select
+    hidden: true
+    proxies:
+      - REJECT-DROP
 
   # Nodes
   - name: "🇺🇳 Server"
