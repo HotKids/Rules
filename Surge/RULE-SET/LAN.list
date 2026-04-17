@@ -1,7 +1,36 @@
 # > Local Area Network
+# 通过 ChatGPT 收集整理
+# mDNS 域名后缀（用于局域网设备发现，如打印机、NAS）
 DOMAIN-SUFFIX,local
-IP-CIDR,192.168.0.0/16
-IP-CIDR,10.0.0.0/8
-IP-CIDR,172.16.0.0/12
-IP-CIDR,127.0.0.0/8
-IP-CIDR,100.64.0.0/10
+# 私有内网地址段（Class A）
+IP-CIDR,10.0.0.0/8,no-resolve
+# 私有内网地址段（Class B）
+IP-CIDR,172.16.0.0/12,no-resolve
+# 私有内网地址段（Class C）
+IP-CIDR,192.168.0.0/16,no-resolve
+# 本地回环地址（localhost）
+IP-CIDR,127.0.0.0/8,no-resolve
+# 链路本地地址（APIPA）
+IP-CIDR,169.254.0.0/16,no-resolve
+# 多播地址段
+IP-CIDR,224.0.0.0/4,no-resolve
+# 保留地址段
+IP-CIDR,240.0.0.0/4,no-resolve
+# 特殊地址：本网络段
+IP-CIDR,0.0.0.0/8,no-resolve
+# 运营商大内网（Carrier-Grade NAT）
+IP-CIDR,100.64.0.0/10,no-resolve
+# 代理工具常用的虚假 IP 段 (Fake-IP Range)
+IP-CIDR,198.18.0.0/15,no-resolve
+# IPv6 回环地址
+IP-CIDR6,::1/128,no-resolve
+# IPv6 本地唯一地址（类似内网）
+IP-CIDR6,fc00::/7,no-resolve
+# IPv6 链路本地地址（Link-Local）
+IP-CIDR6,fe80::/10,no-resolve
+# IPv4 映射到 IPv6 的地址段
+IP-CIDR6,::ffff:0:0/96,no-resolve
+# IPv6 未指定地址（默认路由起始）
+IP-CIDR6,::/128,no-resolve
+# IPv6 多播地址段
+IP-CIDR6,ff00::/8,no-resolve
