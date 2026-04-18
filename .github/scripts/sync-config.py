@@ -2082,21 +2082,75 @@ def gen_qx_filter_remote(
 # 生成 QX [filter_local]
 # ---------------------------------------------------------------------------
 
+_QX_LAN_PLACEHOLDER = "# <<< LAN >>>"
+_LAN_TITLE_HEADER_RE = re.compile(r"^#\s*>\s*.+$")
+
+
+def _qx_expand_lan_list(list_path: Path, title: str) -> list[str]:
+    """把 Surge 格式 rule-set 展开为 QX [filter_local] 行（策略统一为 `direct`）。
+
+    - 首个 `# > ...` section header 替换为 `# {title}`
+    - 其它注释行原样保留
+    - 规则行按类型转换（`no-resolve` 丢弃）：
+        DOMAIN-SUFFIX,host        → host-suffix, host, direct
+        DOMAIN,host               → host, host, direct
+        IP-CIDR,cidr              → ip-cidr, cidr, direct
+        IP-CIDR6,cidr             → ip6-cidr, cidr, direct
+    - 其它规则类型 → 抛 ValueError（显式失败，避免静默吞规则）
+    - 移除尾部空白行
+    """
+    out: list[str] = []
+    header_replaced = False
+    for raw in list_path.read_text(encoding="utf-8").splitlines():
+        s = raw.rstrip()
+        if not s:
+            out.append("")
+            continue
+        if s.startswith("#"):
+            if not header_replaced and _LAN_TITLE_HEADER_RE.match(s):
+                out.append(f"# {title}")
+                header_replaced = True
+            else:
+                out.append(s)
+            continue
+        parts = [p.strip() for p in s.split(",")]
+        rt = parts[0].upper()
+        target = parts[1]
+        if rt == "DOMAIN-SUFFIX":
+            out.append(f"host-suffix, {target}, direct")
+        elif rt == "DOMAIN":
+            out.append(f"host, {target}, direct")
+        elif rt == "IP-CIDR":
+            out.append(f"ip-cidr, {target}, direct")
+        elif rt == "IP-CIDR6":
+            out.append(f"ip6-cidr, {target}, direct")
+        else:
+            raise ValueError(f"_qx_expand_lan_list: unsupported rule {rt!r} in {list_path}")
+    while out and not out[-1]:
+        out.pop()
+    return out
+
+
 def gen_qx_filter_local(
     rule_lines: list[str],
     static_fl: str = "",
     strip_names: bool = True,
     policy_rename_map: dict[str, str] | None = None,
+    lan_expand: list[str] | None = None,
 ) -> str:
     """生成 QX [filter_local] 段落。
 
-    static_fl 为 qx.ini 中的静态 LAN 规则（含 geoip, cn, direct），
+    static_fl 为 qx.ini 中的静态块（Unbreak / LAN 占位符 / geoip, cn, direct），
+    `lan_expand` 提供时会替换 static_fl 中的 `# <<< LAN >>>` 占位符行。
     再从 Surge rule_lines 提取 GEOIP（非 CN）和 FINAL。
     """
     out: list[str] = ["[filter_local]"]
     if static_fl:
         for line in static_fl.splitlines():
-            out.append(line)
+            if lan_expand is not None and line.strip() == _QX_LAN_PLACEHOLDER:
+                out.extend(lan_expand)
+            else:
+                out.append(line)
         out.append("")
 
     final_line: str | None = None
@@ -2514,6 +2568,10 @@ def _sync_qx(
     filter_local = gen_qx_filter_local(
         rule_lines, qx_blocks.get("filter_local", ""),
         strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
+        lan_expand=_qx_expand_lan_list(
+            REPO_ROOT / "Surge/RULE-SET/LAN.list",
+            title="Local Area Network 局域网",
+        ),
     )
 
     def _qx_section(key: str, header: str) -> str:
