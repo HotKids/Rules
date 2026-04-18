@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-04-17 19:56:45
+# Date: 2026-04-17 21:39:36
 # Author: @HotKids
 
 [General]
@@ -110,6 +110,8 @@ FINAL,🔰 Proxy
 [Remote Rule]
 # Unbreak 后续规则修正
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list, policy=🔘 DIRECT, tag=Unbreak, enabled=true
+# Private 私有网络
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt, policy=🔘 DIRECT, tag=Private, enabled=true
 # HTTPDNS 请求/流量阻止
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=HTTPDNS, enabled=true
 # Advertising 广告

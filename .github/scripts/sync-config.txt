@@ -44,7 +44,8 @@ rule-providers:
   GenAI => AIGC
   proxy => Global
   direct => China
-  reject => Adblock
+  private => Private
+  reject => Reject
   cncidr => CNCIDR
 
 # Quantumult X
@@ -67,6 +68,7 @@ Speedtest
   iCloud.PrivateRelay => iCloud Private Relay
   proxy => Global
   direct => China
+  private => Private
   reject => Reject
   cncidr => CNCIDR
 
@@ -83,6 +85,7 @@ Speedtest
   iCloud.PrivateRelay => iCloud Private Relay
   proxy => Global
   direct => China
+  private => Private
   reject => Reject
   cncidr => CNCIDR
 

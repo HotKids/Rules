@@ -438,6 +438,13 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Unbreak.yaml
     interval: 86400
 
+  Private:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Private.txt
+    url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    interval: 86400
+
   HTTPDNS:
     type: http
     behavior: classical
@@ -445,10 +452,10 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
 
-  Adblock:
+  Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Adblock.txt
+    path: ./Provider/RuleSet/Reject.txt
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
     interval: 86400
 
@@ -614,11 +621,14 @@ rules:
   # Unbreak 后续规则修正
   - RULE-SET,Unbreak,🔘 DIRECT
 
+  # Private 私有网络
+  - RULE-SET,Private,🔘 DIRECT
+
   # HTTPDNS 请求/流量阻止
   - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Advertising 广告
-  - RULE-SET,Adblock,🚧 AdGuard
+  - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
   # Global Area Network
