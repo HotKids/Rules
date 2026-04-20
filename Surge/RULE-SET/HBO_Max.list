@@ -1,4 +1,5 @@
 # > HBO Max
+### Streaming US
 USER-AGENT,HBOMAX*
 USER-AGENT,Max*
 PROCESS-NAME,com.wbd.stream
