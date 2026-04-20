@@ -165,14 +165,6 @@ DOMAIN-SUFFIX,kkbox.com,Streaming
 DOMAIN-SUFFIX,kkbox.com.tw,Streaming
 DOMAIN-SUFFIX,kfs.io,Streaming
 
-# > KKTV
-USER-AGENT,KKTV*,Streaming
-USER-AGENT,com.kktv*,Streaming
-DOMAIN-SUFFIX,kktv.me,Streaming
-DOMAIN-SUFFIX,kktv.com.tw,Streaming
-DOMAIN,kktv-theater.kk.stream,Streaming
-DOMAIN,theater-kktv.cdn.hinet.net,Streaming
-
 # > LINE TV
 USER-AGENT,LINE%20TV*,Streaming
 DOMAIN-SUFFIX,linetv.tw,Streaming
