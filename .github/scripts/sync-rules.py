@@ -51,21 +51,12 @@ CLASH_CIDR_COMPANION = {"LAN": "lancidr.txt"}
 
 # ─── Streaming 配置 ──────────────────────────────────────────────────
 
-# section 名 → 文件名 stem（只列特殊映射，其余 section 名即文件名）
+# section 名 → 文件名 stem（只列无法通过空格→下划线自动推断的映射）
 SECTION_TO_FILE = {
-    "Hulu JP":            "Hulu_JP",
     "iQIYI Intl":         "IQ",
-    "LINE TV":            "LINETV",
-    "HBO Max":            "HBO_Max",
-    "Amazon Prime Video": "Prime Video",
-    "BBC iPlayer":        "BBC",
+    "Amazon Prime Video": "Prime_Video",
     "SBS On Demand":      "SBS",
 }
-
-# 反向映射（自动生成）
-FILE_TO_SECTIONS = {}
-for _sec, _file in SECTION_TO_FILE.items():
-    FILE_TO_SECTIONS.setdefault(_file, []).append(_sec)
 
 # 地区合集与 Streaming.list 成员由独立文件内的占位符动态扫描得出（见 scan_streaming_placeholders）
 # 占位符格式：### Streaming [REGION]
@@ -177,19 +168,15 @@ def parse_sections(text: str) -> dict:
 
 
 def section_name_to_file(name: str) -> str:
-    """section 名 → 文件名 stem。"""
+    """section 名 → 文件名 stem。空格与下划线等价（先查显式映射，再尝试空格→下划线）。"""
     if name in MERGE_SECTION_TO_FILE:
         return MERGE_SECTION_TO_FILE[name]
-    return SECTION_TO_FILE.get(name, name)
-
-
-def file_to_section_names(stem: str) -> list[str]:
-    """文件名 stem → 该文件包含的 section 名列表。"""
-    if stem in MERGE_GROUPS:
-        return MERGE_GROUPS[stem]
-    if stem in FILE_TO_SECTIONS:
-        return FILE_TO_SECTIONS[stem]
-    return [stem]
+    if name in SECTION_TO_FILE:
+        return SECTION_TO_FILE[name]
+    normalized = name.replace(" ", "_")
+    if (SURGE_DIR / f"{normalized}.list").exists():
+        return normalized
+    return name
 
 
 def read_standalone(stem: str) -> str | None:

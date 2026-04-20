@@ -151,16 +151,16 @@ payload:
   - DOMAIN-SUFFIX,kkbox.com.tw
   - DOMAIN-SUFFIX,kfs.io
 
+  # > LINE TV
+  - DOMAIN-SUFFIX,linetv.tw
+  - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
+  - DOMAIN,d3c7rimkq79yfu.cloudfront.net
+
   # > KKTV
   - DOMAIN-SUFFIX,kktv.me
   - DOMAIN-SUFFIX,kktv.com.tw
   - DOMAIN,kktv-theater.kk.stream
   - DOMAIN,theater-kktv.cdn.hinet.net
-
-  # > LINE TV
-  - DOMAIN-SUFFIX,linetv.tw
-  - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
-  - DOMAIN,d3c7rimkq79yfu.cloudfront.net
 
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
