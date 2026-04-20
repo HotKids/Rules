@@ -12,7 +12,6 @@ Surge RULE-SET 同步脚本
 
 import json
 import re
-import sys
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
@@ -63,9 +62,8 @@ STREAMING_PLACEHOLDER_RE = re.compile(r"^###\s+Streaming(?:\s+([A-Z]+))?\s*$")
 
 # 合并组：含 ### Streaming 占位符且含多个 '# > Name' 节的文件视为合并组
 # 只扫描 streaming 服务文件，排除 AD.list / Unbreak.list 等多节非 streaming 文件
-def _build_merge_maps() -> tuple[dict[str, list[str]], dict[str, str]]:
-    """扫描根目录各 streaming .list 文件，将含多个 '# > Name' 节的文件识别为合并组。"""
-    groups: dict[str, list[str]] = {}
+def _build_merge_maps() -> dict[str, str]:
+    """扫描根目录各 streaming .list 文件，将含多个 '# > Name' 节的 section 名映射到其文件 stem。"""
     reverse: dict[str, str] = {}
     for p in sorted(SURGE_DIR.glob("*.list")):
         if p.stem.startswith("Streaming"):
@@ -78,12 +76,11 @@ def _build_merge_maps() -> tuple[dict[str, list[str]], dict[str, str]]:
                 for line in lines
                 if (m := re.match(r"^#\s*>\s*(.+)$", line.strip()))]
         if len(secs) > 1:
-            groups[p.stem] = secs
             for s in secs:
                 reverse[s] = p.stem
-    return groups, reverse
+    return reverse
 
-MERGE_GROUPS, MERGE_SECTION_TO_FILE = _build_merge_maps()
+MERGE_SECTION_TO_FILE = _build_merge_maps()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -202,17 +199,7 @@ def sync_regional():
         sections = parse_sections(text)
         regional_stems = {section_name_to_file(s) for s in sections}
 
-        # 检测独立文件是否被删除
         existing = [m for m in members if (SURGE_DIR / f"{m}.list").exists()]
-        deleted = [m for m in members
-                   if m in regional_stems and not (SURGE_DIR / f"{m}.list").exists()]
-
-        if deleted and existing:
-            # 有独立文件被删除 → 从地区合集中移除对应段落
-            for d in deleted:
-                print(f"  ✗ {d}.list 已删除 → 从 {regional_name} 移除")
-            _rebuild_regional(regional_path, regional_name, members)
-            continue
 
         if not existing:
             # 首次运行，全部从地区合集提取
@@ -830,41 +817,6 @@ def convert_clash_payload_to_surge(text: str) -> str | None:
     return ("\n".join(out) + "\n") if out else None
 
 
-# ── domain behavior ──────────────────────────────────────────────────
-
-def _extract_domains(text: str) -> list[str]:
-    """从 Surge DOMAIN-SET 文本提取域名（去掉 +. 前缀）。"""
-    domains = []
-    for line in text.splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or line.startswith("//"):
-            continue
-        if line.startswith("+."):
-            line = line[2:]
-        domains.append(line)
-    return domains
-
-
-def convert_domain_to_clash(text: str) -> str | None:
-    """Surge DOMAIN-SET（+.domain 格式）→ Clash domain YAML。"""
-    domains = _extract_domains(text)
-    if not domains:
-        return None
-    out = ["payload:"]
-    for d in sorted(set(domains)):
-        out.append(f"  - '{d}'")
-    return "\n".join(out) + "\n"
-
-
-def convert_domain_to_singbox(text: str) -> str | None:
-    """Surge DOMAIN-SET（+.domain 格式）→ sing-box JSON。"""
-    domains = _extract_domains(text)
-    if not domains:
-        return None
-    result = {"version": 2, "rules": [{"domain_suffix": sorted(set(domains))}]}
-    return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
-
-
 # ── ipcidr behavior ──────────────────────────────────────────────────
 
 def _extract_cidrs(text: str) -> list[str]:
@@ -892,15 +844,6 @@ def convert_ipcidr_to_clash(text: str) -> str | None:
     for c in sorted(set(cidrs)):
         out.append(f"  - '{c}'")
     return "\n".join(out) + "\n"
-
-
-def convert_ipcidr_to_singbox(text: str) -> str | None:
-    """Surge IP-CIDR 规则列表 → sing-box JSON。"""
-    cidrs = _extract_cidrs(text)
-    if not cidrs:
-        return None
-    result = {"version": 2, "rules": [{"ip_cidr": sorted(set(cidrs))}]}
-    return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
 
 
 # ── classical behavior ───────────────────────────────────────────────
