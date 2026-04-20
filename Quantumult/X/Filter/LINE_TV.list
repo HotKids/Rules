@@ -3,11 +3,3 @@ USER-AGENT,LINE%20TV*,LINE_TV
 DOMAIN-SUFFIX,linetv.tw,LINE_TV
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,LINE_TV
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,LINE_TV
-
-# > KKTV
-USER-AGENT,KKTV*,LINE_TV
-USER-AGENT,com.kktv*,LINE_TV
-DOMAIN-SUFFIX,kktv.me,LINE_TV
-DOMAIN-SUFFIX,kktv.com.tw,LINE_TV
-DOMAIN,kktv-theater.kk.stream,LINE_TV
-DOMAIN,theater-kktv.cdn.hinet.net,LINE_TV

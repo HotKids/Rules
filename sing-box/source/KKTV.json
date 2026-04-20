@@ -3,13 +3,14 @@
   "rules": [
     {
       "domain": [
-        "d17lx9ucc6k9fc.cloudfront.net",
-        "d3c7rimkq79yfu.cloudfront.net"
+        "kktv-theater.kk.stream",
+        "theater-kktv.cdn.hinet.net"
       ]
     },
     {
       "domain_suffix": [
-        "linetv.tw"
+        "kktv.com.tw",
+        "kktv.me"
       ]
     }
   ]
