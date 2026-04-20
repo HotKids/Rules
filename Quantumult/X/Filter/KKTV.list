@@ -1,0 +1,7 @@
+# > KKTV
+USER-AGENT,KKTV*,KKTV
+USER-AGENT,com.kktv*,KKTV
+DOMAIN-SUFFIX,kktv.me,KKTV
+DOMAIN-SUFFIX,kktv.com.tw,KKTV
+DOMAIN,kktv-theater.kk.stream,KKTV
+DOMAIN,theater-kktv.cdn.hinet.net,KKTV
