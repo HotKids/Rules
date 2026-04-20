@@ -60,14 +60,6 @@ DOMAIN-SUFFIX,kkbox.com,Streaming_TW
 DOMAIN-SUFFIX,kkbox.com.tw,Streaming_TW
 DOMAIN-SUFFIX,kfs.io,Streaming_TW
 
-# > KKTV
-USER-AGENT,KKTV*,Streaming_TW
-USER-AGENT,com.kktv*,Streaming_TW
-DOMAIN-SUFFIX,kktv.me,Streaming_TW
-DOMAIN-SUFFIX,kktv.com.tw,Streaming_TW
-DOMAIN,kktv-theater.kk.stream,Streaming_TW
-DOMAIN,theater-kktv.cdn.hinet.net,Streaming_TW
-
 # > LINE TV
 USER-AGENT,LINE%20TV*,Streaming_TW
 DOMAIN-SUFFIX,linetv.tw,Streaming_TW
