@@ -219,6 +219,11 @@ def sync_regional():
             _extract_regional(regional_path, regional_name, members, region)
             continue
 
+        # 合集成员与当前占位符不一致（如某文件刚被移出该地区）→ 直接重建
+        if regional_stems != set(existing):
+            _rebuild_regional(regional_path, regional_name, members)
+            continue
+
         # 正常 mtime 比较
         regional_mtime = regional_path.stat().st_mtime
         max_member_mtime = max(
