@@ -74,9 +74,6 @@ DOMAIN-SUFFIX,linetv.tw,Streaming_TW
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming_TW
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming_TW
 
-# > Readmoo
-DOMAIN-SUFFIX,readmoo.com,Streaming_TW
-
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*,Streaming_TW

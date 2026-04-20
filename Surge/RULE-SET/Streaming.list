@@ -289,9 +289,6 @@ DOMAIN-KEYWORD,avoddashs
 // DOMAIN,www.amazon.com
 URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 
-# > Readmoo
-DOMAIN-SUFFIX,readmoo.com
-
 # > Roku
 DOMAIN-SUFFIX,roku.com
 DOMAIN-SUFFIX,rokutime.com

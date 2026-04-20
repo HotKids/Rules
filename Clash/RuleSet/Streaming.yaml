@@ -259,9 +259,6 @@ payload:
   # 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
   # DOMAIN,www.amazon.com
 
-  # > Readmoo
-  - DOMAIN-SUFFIX,readmoo.com
-
   # > Roku
   - DOMAIN-SUFFIX,roku.com
   - DOMAIN-SUFFIX,rokutime.com
