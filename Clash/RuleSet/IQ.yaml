@@ -1,5 +1,5 @@
 payload:
-  # > iQIYI Intl
+  # > IQ
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com

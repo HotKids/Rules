@@ -13,7 +13,7 @@ payload:
   - DOMAIN,ols-ww100-cp.akamaized.net
   - DOMAIN,dkfhw9rzsr80z.cloudfront.net
 
-  # > iQIYI Intl
+  # > IQ
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
