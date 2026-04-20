@@ -289,7 +289,6 @@ DOMAIN-SUFFIX,sbs.com.au,Streaming
 # DOMAIN,sbsvoddai-vh.akamaihd.net
 
 # > Spotify
-# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*,Streaming
 DOMAIN-SUFFIX,pscdn.co,Streaming
 DOMAIN-SUFFIX,scdn.co,Streaming
