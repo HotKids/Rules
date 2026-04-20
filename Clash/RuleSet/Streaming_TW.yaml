@@ -13,14 +13,6 @@ payload:
   - DOMAIN,ols-ww100-cp.akamaized.net
   - DOMAIN,dkfhw9rzsr80z.cloudfront.net
 
-  # > friDay
-  - DOMAIN-SUFFIX,friday.tw
-  - DOMAIN-SUFFIX,fridaylogger.com
-  - DOMAIN-SUFFIX,svc.litv.tv
-  - DOMAIN,aka01p.akamaized.net
-  - DOMAIN,aka02p.akamaized.net
-  - DOMAIN,aka36p.akamaized.net
-
   # > iQIYI Intl
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
@@ -75,12 +67,6 @@ payload:
   - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
   - DOMAIN,d3c7rimkq79yfu.cloudfront.net
 
-  # > myVideo
-  - DOMAIN-SUFFIX,myvideo.net.tw
-  - DOMAIN-SUFFIX,catch.net.tw
-  - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
-  - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
-
   # > Readmoo
   - DOMAIN-SUFFIX,readmoo.com
 
@@ -98,3 +84,17 @@ payload:
   - DOMAIN-SUFFIX,spotifynewsroom.jp
   - DOMAIN-SUFFIX,spotilocal.com
   - DOMAIN-SUFFIX,tospotify.com
+
+  # > friDay
+  - DOMAIN-SUFFIX,friday.tw
+  - DOMAIN-SUFFIX,fridaylogger.com
+  - DOMAIN-SUFFIX,svc.litv.tv
+  - DOMAIN,aka01p.akamaized.net
+  - DOMAIN,aka02p.akamaized.net
+  - DOMAIN,aka36p.akamaized.net
+
+  # > myVideo
+  - DOMAIN-SUFFIX,myvideo.net.tw
+  - DOMAIN-SUFFIX,catch.net.tw
+  - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
+  - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net

@@ -1,4 +1,5 @@
 # > Amazon Prime Video
+### Streaming
 // USER-AGENT,InstantVideo.US*
 // USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com

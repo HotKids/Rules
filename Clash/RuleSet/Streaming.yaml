@@ -9,32 +9,6 @@ payload:
   - DOMAIN,linear-abematv.akamaized.net
   - DOMAIN,ds-linear-abematv.akamaized.net
 
-  # > Amazon Prime Video
-  # USER-AGENT,InstantVideo.US*
-  # USER-AGENT,Prime%20Video*
-  - DOMAIN-SUFFIX,primevideo.com
-  - DOMAIN-SUFFIX,amazonvideo.com
-  - DOMAIN-SUFFIX,media-amazon.com
-  - DOMAIN-SUFFIX,pv-cdn.net
-  - DOMAIN-SUFFIX,aiv-cdn.net
-  - DOMAIN-SUFFIX,aiv-delivery.net
-  # DOMAIN,www.amazon.com
-  - DOMAIN,ktpx.amazon.com
-  - DOMAIN,atv-ps.amazon.com
-  - DOMAIN,avodmp4s3ww-a.akamaihd.net
-  # DOMAIN,d184dfn36gombl.cloudfront.net
-  # DOMAIN,d1xfray82862hr.cloudfront.net
-  # DOMAIN,d1v5ir2lpwr8os.cloudfront.net
-  # DOMAIN,d22qjgkvxw22r6.cloudfront.net
-  # DOMAIN,d25xi40x97liuc.cloudfront.net
-  # DOMAIN,d27xxe7juh1us6.cloudfront.net
-  # DOMAIN,d3196yreox78o9.cloudfront.net
-  # DOMAIN,dmqdd6hw24ucf.cloudfront.net
-  - DOMAIN-KEYWORD,avoddashs
-
-  # 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
-  # DOMAIN,www.amazon.com
-
   # > BBC iPlayer
   - DOMAIN-KEYWORD,bbcfmt
   - DOMAIN-KEYWORD,uk-live
@@ -57,6 +31,14 @@ payload:
   - DOMAIN-SUFFIX,britbox.com
   - DOMAIN-SUFFIX,bbc.co.uk
   - DOMAIN,d2z3p34itxwaj7.cloudfront.net
+
+  # > CATCHPLAY+
+  - DOMAIN-SUFFIX,catchplay.com
+  - DOMAIN,asiaplay-origin.s3.amazonaws.com
+  - DOMAIN,tra-ww000-cp.akamaized.net
+  - DOMAIN,ols-ww000-cp.akamaized.net
+  - DOMAIN,ols-ww100-cp.akamaized.net
+  - DOMAIN,dkfhw9rzsr80z.cloudfront.net
 
   # > Crunchyroll
   - DOMAIN-SUFFIX,crunchyroll.com
@@ -102,6 +84,11 @@ payload:
   - DOMAIN,cdn.registerdisney.go.com
   - DOMAIN-SUFFIX,execute-api.us-east-1.amazonaws.com
 
+  # > FOD
+  - DOMAIN-SUFFIX,fujitv.co.jp
+  - DOMAIN-SUFFIX,stream.ne.jp
+  - DOMAIN,measure.ic.tver.jp
+
   # > HBO Max
   - PROCESS-NAME,com.wbd.stream
   - DOMAIN-SUFFIX,max.com
@@ -116,15 +103,71 @@ payload:
   - DOMAIN,cws-hulu.conviva.com
   # DOMAIN,assetshuluimcom-a.akamaihd.net
 
+  # > Hulu JP
+  - DOMAIN-SUFFIX,hulu.jp
+  - DOMAIN-SUFFIX,happyon.jp
+  - DOMAIN-SUFFIX,prod.hjholdings.tv
+
+  # > iQIYI Intl
+  - PROCESS-NAME,com.iqiyi.i18n
+  - PROCESS-NAME,com.iqiyi.i18n.tv
+  - DOMAIN-SUFFIX,iq.com
+  # 首页
+  - DOMAIN-SUFFIX,intl.iqiyi.com
+  # 历史
+  - DOMAIN,intl-rcd.iqiyi.com
+  - DOMAIN,intl-im-hist-api.iqiyi.com
+  # 收藏
+  - DOMAIN,intl-subscription.iqiyi.com
+  # 播放
+  - DOMAIN,msg-intl.qy.net
+  - DOMAIN,ip.geo.iqiyi.com
+  - DOMAIN,akcdnoversea.inter.71edge.com
+  - DOMAIN,akmcdnoversea.inter.iqiyi.com
+  - DOMAIN,akmcdnoversea.inter.ptqy.gitv.tv
+  - DOMAIN,chuangcachecdnoversea.inter.iqiyi.com
+  - DOMAIN,chuangcachecdnoversea.inter.ptqy.gitv.tv
+  - DOMAIN,akmcdnoversea-tw.inter.iqiyi.com
+  - DOMAIN,akmcdnoversea-tw.inter.ptqy.gitv.tv
+  - DOMAIN,chuangcachecdnoversea-tw.inter.iqiyi.com
+  - DOMAIN,chuangcachecdnoversea-tw.inter.ptqy.gitv.tv
+  - DOMAIN-KEYWORD,akmcdnoverse
+  - DOMAIN-KEYWORD,chuangcachecdnoversea
+  - IP-CIDR,2.21.22.17/32,no-resolve
+  - IP-CIDR,23.40.241.251/32,no-resolve
+  - IP-CIDR,23.40.242.10/32,no-resolve
+  - IP-CIDR,23.210.215.154/32,no-resolve
+  - IP-CIDR,110.238.107.47/32,no-resolve
+  - IP-CIDR,110.238.109.184/32,no-resolve
+  - IP-CIDR,114.119.175.88/32,no-resolve
+  - IP-CIDR,118.26.32.0/22,no-resolve
+  - IP-CIDR,159.138.102.146/32,no-resolve
+  - IP-CIDR,184.25.254.178/32,no-resolve
+  - IP-CIDR,203.80.97.208/32,no-resolve
+  - IP-CIDR,203.198.80.99/32,no-resolve
+
+  # > KKBOX
+  - DOMAIN-SUFFIX,kkbox.com
+  - DOMAIN-SUFFIX,kkbox.com.tw
+  - DOMAIN-SUFFIX,kfs.io
+
+  # > KKTV
+  - DOMAIN-SUFFIX,kktv.me
+  - DOMAIN-SUFFIX,kktv.com.tw
+  - DOMAIN,kktv-theater.kk.stream
+  - DOMAIN,theater-kktv.cdn.hinet.net
+
+  # > LINE TV
+  - DOMAIN-SUFFIX,linetv.tw
+  - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
+  - DOMAIN,d3c7rimkq79yfu.cloudfront.net
+
   # > MGM+
   - DOMAIN-SUFFIX,mgmplus.com
   - DOMAIN-SUFFIX,epix.com
   - DOMAIN-SUFFIX,epixnow.com
   - DOMAIN,epixhls.akamaized.net
   - DOMAIN,us-ore-00001.s3.dualstack.us-west-2.amazonaws.com
-
-  # > Movies Anywhere
-  - DOMAIN-SUFFIX,moviesanywhere.com
 
   # > MUBI
   - DOMAIN-SUFFIX,mubi.com
@@ -154,6 +197,9 @@ payload:
   - IP-CIDR,198.38.96.0/19,no-resolve
   - IP-CIDR,198.45.48.0/20,no-resolve
 
+  # > PBS
+  - DOMAIN-SUFFIX,pbs.org
+
   # > Paramount+
   # US UA
   # Intl. UA
@@ -178,11 +224,47 @@ payload:
   - DOMAIN,cbsservice.aws.syncbak.com
   - DOMAIN,cbsplaylistserver.aws.syncbak.com
 
+  # > Paravi
+  - DOMAIN-SUFFIX,paravi.jp
+
   # > Peacock
   - DOMAIN-SUFFIX,cdn.peacocktv.com
   - DOMAIN-SUFFIX,peacocktv.com
   # 屏蔽广告
   # DOMAIN,video-ads-module.ad-tech.nbcuni.com
+
+  # > Amazon Prime Video
+  # USER-AGENT,InstantVideo.US*
+  # USER-AGENT,Prime%20Video*
+  - DOMAIN-SUFFIX,primevideo.com
+  - DOMAIN-SUFFIX,amazonvideo.com
+  - DOMAIN-SUFFIX,media-amazon.com
+  - DOMAIN-SUFFIX,pv-cdn.net
+  - DOMAIN-SUFFIX,aiv-cdn.net
+  - DOMAIN-SUFFIX,aiv-delivery.net
+  # DOMAIN,www.amazon.com
+  - DOMAIN,ktpx.amazon.com
+  - DOMAIN,atv-ps.amazon.com
+  - DOMAIN,avodmp4s3ww-a.akamaihd.net
+  # DOMAIN,d184dfn36gombl.cloudfront.net
+  # DOMAIN,d1xfray82862hr.cloudfront.net
+  # DOMAIN,d1v5ir2lpwr8os.cloudfront.net
+  # DOMAIN,d22qjgkvxw22r6.cloudfront.net
+  # DOMAIN,d25xi40x97liuc.cloudfront.net
+  # DOMAIN,d27xxe7juh1us6.cloudfront.net
+  # DOMAIN,d3196yreox78o9.cloudfront.net
+  # DOMAIN,dmqdd6hw24ucf.cloudfront.net
+  - DOMAIN-KEYWORD,avoddashs
+
+  # 美区网页版需二选一走代理,如 URL-REGEX 则需 MITM www.amazon.com
+  # DOMAIN,www.amazon.com
+
+  # > Readmoo
+  - DOMAIN-SUFFIX,readmoo.com
+
+  # > Roku
+  - DOMAIN-SUFFIX,roku.com
+  - DOMAIN-SUFFIX,rokutime.com
 
   # > SBS On Demand
   - DOMAIN-SUFFIX,sbsod.com
@@ -231,3 +313,17 @@ payload:
   - DOMAIN-SUFFIX,googlevideo.com
   - DOMAIN,youtubei.googleapis.com
   - DOMAIN-KEYWORD,youtube
+
+  # > friDay
+  - DOMAIN-SUFFIX,friday.tw
+  - DOMAIN-SUFFIX,fridaylogger.com
+  - DOMAIN-SUFFIX,svc.litv.tv
+  - DOMAIN,aka01p.akamaized.net
+  - DOMAIN,aka02p.akamaized.net
+  - DOMAIN,aka36p.akamaized.net
+
+  # > myVideo
+  - DOMAIN-SUFFIX,myvideo.net.tw
+  - DOMAIN-SUFFIX,catch.net.tw
+  - DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net
+  - DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net
