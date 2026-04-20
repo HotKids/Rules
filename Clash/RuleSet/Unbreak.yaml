@@ -61,5 +61,4 @@ payload:
   - DOMAIN-SUFFIX,bochk.com
 
   # > ziniao
-  - PROCESS-NAME,*ziniao*
-  - PROCESS-NAME-REGEX,*ziniao*
+  - PROCESS-NAME-REGEX,.*ziniao.*
