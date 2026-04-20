@@ -119,7 +119,7 @@ DOMAIN-SUFFIX,hulu.jp,Streaming
 DOMAIN-SUFFIX,happyon.jp,Streaming
 DOMAIN-SUFFIX,prod.hjholdings.tv,Streaming
 
-# > iQIYI Intl
+# > IQ
 USER-AGENT,iQIYI*,Streaming
 USER-AGENT,QIYIVideo*,Streaming
 USER-AGENT,QYPlayer*,Streaming
@@ -252,7 +252,7 @@ DOMAIN-SUFFIX,peacocktv.com,Streaming
 # 屏蔽广告
 # DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
-# > Amazon Prime Video
+# > Prime Video
 # USER-AGENT,InstantVideo.US*
 # USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com,Streaming
@@ -282,7 +282,7 @@ DOMAIN-KEYWORD,avoddashs,Streaming
 DOMAIN-SUFFIX,roku.com,Streaming
 DOMAIN-SUFFIX,rokutime.com,Streaming
 
-# > SBS On Demand
+# > SBS
 USER-AGENT,SBS*,Streaming
 DOMAIN-SUFFIX,sbsod.com,Streaming
 DOMAIN-SUFFIX,sbs.com.au,Streaming
