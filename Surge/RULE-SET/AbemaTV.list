@@ -1,4 +1,5 @@
 # > AbemaTV
+### Streaming JP
 USER-AGENT,AbemaTV*
 DOMAIN-SUFFIX,abema.io
 DOMAIN-SUFFIX,abema.tv

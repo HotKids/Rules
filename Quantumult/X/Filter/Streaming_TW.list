@@ -14,15 +14,6 @@ DOMAIN,ols-ww000-cp.akamaized.net,Streaming_TW
 DOMAIN,ols-ww100-cp.akamaized.net,Streaming_TW
 DOMAIN,dkfhw9rzsr80z.cloudfront.net,Streaming_TW
 
-# > friDay
-USER-AGENT,friDay*,Streaming_TW
-DOMAIN-SUFFIX,friday.tw,Streaming_TW
-DOMAIN-SUFFIX,fridaylogger.com,Streaming_TW
-DOMAIN-SUFFIX,svc.litv.tv,Streaming_TW
-DOMAIN,aka01p.akamaized.net,Streaming_TW
-DOMAIN,aka02p.akamaized.net,Streaming_TW
-DOMAIN,aka36p.akamaized.net,Streaming_TW
-
 # > iQIYI Intl
 USER-AGENT,iQIYI*,Streaming_TW
 USER-AGENT,QIYIVideo*,Streaming_TW
@@ -83,16 +74,6 @@ DOMAIN-SUFFIX,linetv.tw,Streaming_TW
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming_TW
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming_TW
 
-# > myVideo
-USER-AGENT,myVideo*,Streaming_TW
-DOMAIN-SUFFIX,myvideo.net.tw,Streaming_TW
-DOMAIN-SUFFIX,catch.net.tw,Streaming_TW
-DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net,Streaming_TW
-DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net,Streaming_TW
-
-# > Readmoo
-DOMAIN-SUFFIX,readmoo.com,Streaming_TW
-
 # > Spotify
 # 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
 USER-AGENT,*Spotify*,Streaming_TW
@@ -108,3 +89,19 @@ DOMAIN-SUFFIX,spotifyjobs.com,Streaming_TW
 DOMAIN-SUFFIX,spotifynewsroom.jp,Streaming_TW
 DOMAIN-SUFFIX,spotilocal.com,Streaming_TW
 DOMAIN-SUFFIX,tospotify.com,Streaming_TW
+
+# > friDay
+USER-AGENT,friDay*,Streaming_TW
+DOMAIN-SUFFIX,friday.tw,Streaming_TW
+DOMAIN-SUFFIX,fridaylogger.com,Streaming_TW
+DOMAIN-SUFFIX,svc.litv.tv,Streaming_TW
+DOMAIN,aka01p.akamaized.net,Streaming_TW
+DOMAIN,aka02p.akamaized.net,Streaming_TW
+DOMAIN,aka36p.akamaized.net,Streaming_TW
+
+# > myVideo
+USER-AGENT,myVideo*,Streaming_TW
+DOMAIN-SUFFIX,myvideo.net.tw,Streaming_TW
+DOMAIN-SUFFIX,catch.net.tw,Streaming_TW
+DOMAIN,applemediaservice.keydelivery.southeastasia.media.azure.net,Streaming_TW
+DOMAIN,akamaiendpoint-applemediaservice-aase.streaming.media.azure.net,Streaming_TW
