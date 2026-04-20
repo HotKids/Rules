@@ -51,12 +51,6 @@ CLASH_CIDR_COMPANION = {"LAN": "lancidr.txt"}
 
 # ─── Streaming 配置 ──────────────────────────────────────────────────
 
-# section 名 → 文件名 stem（只列无法通过空格→下划线自动推断的映射）
-SECTION_TO_FILE = {
-    "iQIYI Intl":         "IQ",
-    "Amazon Prime Video": "Prime_Video",
-    "SBS On Demand":      "SBS",
-}
 
 # 地区合集与 Streaming.list 成员由独立文件内的占位符动态扫描得出（见 scan_streaming_placeholders）
 # 占位符格式：### Streaming [REGION]
@@ -171,8 +165,6 @@ def section_name_to_file(name: str) -> str:
     """section 名 → 文件名 stem。空格与下划线等价（先查显式映射，再尝试空格→下划线）。"""
     if name in MERGE_SECTION_TO_FILE:
         return MERGE_SECTION_TO_FILE[name]
-    if name in SECTION_TO_FILE:
-        return SECTION_TO_FILE[name]
     normalized = name.replace(" ", "_")
     if (SURGE_DIR / f"{normalized}.list").exists():
         return normalized
@@ -225,6 +217,11 @@ def sync_regional():
         if not existing:
             # 首次运行，全部从地区合集提取
             _extract_regional(regional_path, regional_name, members, region)
+            continue
+
+        # 合集成员与当前占位符不一致（如某文件刚被移出该地区）→ 直接重建
+        if regional_stems != set(existing):
+            _rebuild_regional(regional_path, regional_name, members)
             continue
 
         # 正常 mtime 比较
@@ -310,12 +307,7 @@ def rebuild_streaming():
     print("\n── Step 3: 重建 Streaming.list ──")
 
     placeholders = scan_streaming_placeholders()
-    all_stems = sorted(
-        set(placeholders.get("", []))
-        | set(placeholders.get("JP", []))
-        | set(placeholders.get("TW", []))
-        | set(placeholders.get("US", []))
-    )
+    all_stems = sorted(set().union(*placeholders.values()))
 
     parts = []
     for stem in all_stems:

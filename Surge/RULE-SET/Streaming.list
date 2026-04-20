@@ -121,7 +121,7 @@ DOMAIN-SUFFIX,hulu.jp
 DOMAIN-SUFFIX,happyon.jp
 DOMAIN-SUFFIX,prod.hjholdings.tv
 
-# > iQIYI Intl
+# > IQ
 USER-AGENT,iQIYI*
 USER-AGENT,QIYIVideo*
 USER-AGENT,QYPlayer*
@@ -258,7 +258,7 @@ DOMAIN-SUFFIX,peacocktv.com
 // 屏蔽广告
 // DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
-# > Amazon Prime Video
+# > Prime Video
 // USER-AGENT,InstantVideo.US*
 // USER-AGENT,Prime%20Video*
 DOMAIN-SUFFIX,primevideo.com
@@ -289,7 +289,7 @@ URL-REGEX,^https?:\/\/www\.amazon\.com\/(Amazon-Video|gp\/video)\/
 DOMAIN-SUFFIX,roku.com
 DOMAIN-SUFFIX,rokutime.com
 
-# > SBS On Demand
+# > SBS
 USER-AGENT,SBS*
 DOMAIN-SUFFIX,sbsod.com
 DOMAIN-SUFFIX,sbs.com.au
