@@ -14,7 +14,7 @@ DOMAIN,ols-ww000-cp.akamaized.net,Streaming_TW
 DOMAIN,ols-ww100-cp.akamaized.net,Streaming_TW
 DOMAIN,dkfhw9rzsr80z.cloudfront.net,Streaming_TW
 
-# > iQIYI Intl
+# > IQ
 USER-AGENT,iQIYI*,Streaming_TW
 USER-AGENT,QIYIVideo*,Streaming_TW
 USER-AGENT,QYPlayer*,Streaming_TW

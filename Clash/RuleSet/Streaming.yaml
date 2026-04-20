@@ -108,7 +108,7 @@ payload:
   - DOMAIN-SUFFIX,happyon.jp
   - DOMAIN-SUFFIX,prod.hjholdings.tv
 
-  # > iQIYI Intl
+  # > IQ
   - PROCESS-NAME,com.iqiyi.i18n
   - PROCESS-NAME,com.iqiyi.i18n.tv
   - DOMAIN-SUFFIX,iq.com
@@ -233,7 +233,7 @@ payload:
   # 屏蔽广告
   # DOMAIN,video-ads-module.ad-tech.nbcuni.com
 
-  # > Amazon Prime Video
+  # > Prime Video
   # USER-AGENT,InstantVideo.US*
   # USER-AGENT,Prime%20Video*
   - DOMAIN-SUFFIX,primevideo.com
@@ -263,7 +263,7 @@ payload:
   - DOMAIN-SUFFIX,roku.com
   - DOMAIN-SUFFIX,rokutime.com
 
-  # > SBS On Demand
+  # > SBS
   - DOMAIN-SUFFIX,sbsod.com
   - DOMAIN-SUFFIX,sbs.com.au
   # DOMAIN,sbsvoddai-vh.akamaihd.net
