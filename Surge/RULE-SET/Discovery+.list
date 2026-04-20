@@ -1,4 +1,5 @@
 # > Discovery+
+### Streaming
 USER-AGENT,discovery+*
 USER-AGENT,*DPlus*
 DOMAIN-SUFFIX,discoveryplus.com

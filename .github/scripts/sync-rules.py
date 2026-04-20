@@ -78,26 +78,13 @@ for _file, _secs in MERGE_GROUPS.items():
     for _s in _secs:
         MERGE_SECTION_TO_FILE[_s] = _file
 
-# 地区合集成员（值为文件名 stem）
-REGIONAL_MEMBERS = {
-    "Streaming_JP": ["AbemaTV", "FOD", "Hulu_JP", "Paravi", "TVer", "U-NEXT"],
-    "Streaming_TW": ["Bahamut", "CATCHPLAY+", "friDay", "IQ",
-                      "KKBOX&KKTV", "LINETV", "myVideo", "Readmoo", "Spotify"],
-    "Streaming_US": ["Crunchyroll", "Discovery+", "HBO_Max", "Hulu",
-                      "MGM+", "PBS", "Paramount+", "Peacock", "Roku", "T-Mobile"],
-}
-
-# Streaming.list 成员（按固定顺序，文件名 stem）
-# Movies Anywhere 不在此列，内联保留
-STREAMING_MEMBERS = [
-    "AbemaTV", "Prime Video", "BBC", "Bahamut", "Britbox", "Crunchyroll",
-    "DAZN", "Discovery+", "Disney+", "HBO_Max", "Hulu", "MGM+",
-    "MUBI", "Netflix", "Paramount+", "Peacock", "SBS", "Spotify",
-    "Stan", "TVBAnywhere", "TVer", "U-NEXT", "YouTube",
-]
-
-MOVIES_ANYWHERE_SECTION = "# > Movies Anywhere\nDOMAIN-SUFFIX,moviesanywhere.com"
-MOVIES_ANYWHERE_AFTER = "MGM+"  # 插入在此成员之后
+# 地区合集与 Streaming.list 成员由独立文件内的占位符动态扫描得出（见 scan_streaming_placeholders）
+# 占位符格式：### Streaming [REGION]
+#   ### Streaming TW  → 拼入 Streaming_TW.list 及 Streaming.list
+#   ### Streaming US  → 拼入 Streaming_US.list 及 Streaming.list
+#   ### Streaming JP  → 拼入 Streaming_JP.list 及 Streaming.list
+#   ### Streaming     → 仅拼入 Streaming.list
+STREAMING_PLACEHOLDER_RE = re.compile(r"^###\s+Streaming(?:\s+([A-Z]+))?\s*$")
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -120,6 +107,32 @@ def write_if_changed(filepath: Path, content: str) -> bool:
             return False
     filepath.write_text(content, encoding="utf-8")
     return True
+
+
+def strip_streaming_placeholders(text: str) -> str:
+    """从文件内容中去除 ### Streaming * 占位符行。"""
+    lines = [l for l in text.splitlines()
+             if not STREAMING_PLACEHOLDER_RE.match(l.strip())]
+    return "\n".join(lines)
+
+
+def scan_streaming_placeholders() -> dict[str, list[str]]:
+    """扫描各独立 .list 文件，收集 ### Streaming [REGION] 占位符。
+
+    返回 {"": [仅总表 stems], "JP": [...], "TW": [...], "US": [...]}。
+    聚合文件（Streaming*.list）跳过。
+    """
+    result: dict[str, list[str]] = {}
+    for p in sorted(SURGE_DIR.glob("*.list")):
+        if p.stem.startswith("Streaming"):
+            continue
+        for line in p.read_text(encoding="utf-8").splitlines():
+            m = STREAMING_PLACEHOLDER_RE.match(line.strip())
+            if m:
+                region = m.group(1) or ""
+                result.setdefault(region, []).append(p.stem)
+                break
+    return result
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -177,7 +190,15 @@ def sync_regional():
     """地区合集 ↔ 独立子项双向同步。"""
     print("\n── Step 2: 地区合集 ↔ 独立子项同步 ──")
 
-    for regional_name, members in REGIONAL_MEMBERS.items():
+    placeholders = scan_streaming_placeholders()
+    regional_members = {
+        "Streaming_JP": placeholders.get("JP", []),
+        "Streaming_TW": placeholders.get("TW", []),
+        "Streaming_US": placeholders.get("US", []),
+    }
+
+    for regional_name, members in regional_members.items():
+        region = regional_name.split("_", 1)[1]  # "JP" / "TW" / "US"
         regional_path = SURGE_DIR / f"{regional_name}.list"
         if not regional_path.exists():
             print(f"  [SKIP] {regional_name}.list 不存在")
@@ -202,7 +223,7 @@ def sync_regional():
 
         if not existing:
             # 首次运行，全部从地区合集提取
-            _extract_regional(regional_path, regional_name, members)
+            _extract_regional(regional_path, regional_name, members, region)
             continue
 
         # 正常 mtime 比较
@@ -212,12 +233,27 @@ def sync_regional():
         )
 
         if regional_mtime >= max_member_mtime:
-            _extract_regional(regional_path, regional_name, members)
+            _extract_regional(regional_path, regional_name, members, region)
         else:
             _rebuild_regional(regional_path, regional_name, members)
 
 
-def _extract_regional(regional_path: Path, regional_name: str, members: list[str]):
+def _inject_placeholder(lines: list[str], region: str) -> list[str]:
+    """在 lines 的第一个 '# > Name' 行之后插入 '### Streaming REGION'（若尚不存在）。"""
+    placeholder = f"### Streaming {region}"
+    if any(STREAMING_PLACEHOLDER_RE.match(l.strip()) for l in lines):
+        return lines
+    result = []
+    inserted = False
+    for line in lines:
+        result.append(line)
+        if not inserted and re.match(r"^#\s*>\s*(.+)$", line.strip()):
+            result.append(placeholder)
+            inserted = True
+    return result
+
+
+def _extract_regional(regional_path: Path, regional_name: str, members: list[str], region: str):
     """地区合集 → 独立子项。"""
     text = regional_path.read_text(encoding="utf-8")
     sections = parse_sections(text)
@@ -236,6 +272,7 @@ def _extract_regional(regional_path: Path, regional_name: str, members: list[str
         file_contents[stem].extend(lines)
 
     for stem, lines in file_contents.items():
+        lines = _inject_placeholder(lines, region)
         content = "\n".join(lines) + "\n"
         path = SURGE_DIR / f"{stem}.list"
         if write_if_changed(path, content):
@@ -257,7 +294,7 @@ def _rebuild_regional(regional_path: Path, regional_name: str, members: list[str
         content = read_standalone(m)
         if content is None:
             continue
-        text = content.strip()
+        text = strip_streaming_placeholders(content).strip()
         if text:
             parts.append(text)
 
@@ -271,18 +308,22 @@ def rebuild_streaming():
     """独立子项 → 重建 Streaming.list。"""
     print("\n── Step 3: 重建 Streaming.list ──")
 
+    placeholders = scan_streaming_placeholders()
+    all_stems = sorted(
+        set(placeholders.get("", []))
+        | set(placeholders.get("JP", []))
+        | set(placeholders.get("TW", []))
+        | set(placeholders.get("US", []))
+    )
+
     parts = []
-    for stem in STREAMING_MEMBERS:
+    for stem in all_stems:
         content = read_standalone(stem)
         if content is None:
             continue
-        text = content.strip()
+        text = strip_streaming_placeholders(content).strip()
         if text:
             parts.append(text)
-
-        # Movies Anywhere 插入位置
-        if stem == MOVIES_ANYWHERE_AFTER:
-            parts.append(MOVIES_ANYWHERE_SECTION)
 
     if not parts:
         print("  [WARN] 无成员文件，跳过")
@@ -399,6 +440,8 @@ def convert_qx(lines: list[str], policy: str) -> str:
         if stripped.startswith("//"):
             pending_blank = _emit_with_prelude(out, f"# {stripped[2:].strip()}", ps, pending_blank)
             continue
+        if STREAMING_PLACEHOLDER_RE.match(stripped):
+            continue
         if stripped.startswith("#"):
             pending_blank = _emit_with_prelude(out, stripped, ps, pending_blank)
             continue
@@ -453,6 +496,8 @@ def convert_clash(lines: list[str]) -> str:
             continue
         if stripped.startswith("//"):
             pending_blank = _emit_with_prelude(out, f"  # {stripped[2:].strip()}", ps, pending_blank, head_guard=1)
+            continue
+        if STREAMING_PLACEHOLDER_RE.match(stripped):
             continue
         if stripped.startswith("#"):
             pending_blank = _emit_with_prelude(out, f"  {stripped}", ps, pending_blank, head_guard=1)
