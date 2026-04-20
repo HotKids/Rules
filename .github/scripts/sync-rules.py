@@ -798,11 +798,9 @@ def normalize_clash_payload(text: str) -> str | None:
     return "\n".join(out) + "\n"
 
 
-def _clash_body_rules(text: str, is_ipcidr: bool) -> list[str]:
+def _clash_body_rules(text: str) -> list[str]:
     """将原始下载文本转换为规则字符串列表（去掉 '  - ' 前缀），供同名条目合并使用。"""
-    if is_ipcidr:
-        body = convert_ipcidr_to_clash(text) or ""
-    elif _is_clash_payload(text):
+    if _is_clash_payload(text):
         body = normalize_clash_payload(text) or ""
     else:
         body = convert_clash(text.splitlines())
@@ -1014,7 +1012,6 @@ def fetch_external_rules():
         clash_groups[e["name"]].append(e["url"])
 
     for name, urls in clash_groups.items():
-        is_ipcidr = "cidr" in name.lower()
         fork_urls = []
         all_rules: list[str] = []
         seen_rules = set()
@@ -1025,7 +1022,7 @@ def fetch_external_rules():
             if text is None:
                 continue
             fork_urls.append(url)
-            for rule in _clash_body_rules(text, is_ipcidr):
+            for rule in _clash_body_rules(text):
                 if rule not in seen_rules:
                     seen_rules.add(rule)
                     all_rules.append(rule)
