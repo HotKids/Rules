@@ -70,22 +70,6 @@ DOMAIN,theater-kktv.cdn.hinet.net,Streaming_TW
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming_TW
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming_TW
 
-# > Spotify
-# 因个人使用习惯加入，如需分流至其他地区请自行添加独立分流前置
-USER-AGENT,*Spotify*,Streaming_TW
-DOMAIN-SUFFIX,pscdn.co,Streaming_TW
-DOMAIN-SUFFIX,scdn.co,Streaming_TW
-DOMAIN-SUFFIX,spoti.fi,Streaming_TW
-DOMAIN-SUFFIX,spotify.com,Streaming_TW
-DOMAIN-SUFFIX,spotifycdn.com,Streaming_TW
-DOMAIN-SUFFIX,spotifycdn.net,Streaming_TW
-DOMAIN-SUFFIX,spotifycharts.com,Streaming_TW
-DOMAIN-SUFFIX,spotifycodes.com,Streaming_TW
-DOMAIN-SUFFIX,spotifyjobs.com,Streaming_TW
-DOMAIN-SUFFIX,spotifynewsroom.jp,Streaming_TW
-DOMAIN-SUFFIX,spotilocal.com,Streaming_TW
-DOMAIN-SUFFIX,tospotify.com,Streaming_TW
-
 # > friDay
 USER-AGENT,friDay*,Streaming_TW
 DOMAIN-SUFFIX,friday.tw,Streaming_TW
