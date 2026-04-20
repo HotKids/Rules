@@ -73,6 +73,10 @@ DOMAIN,theater-kktv.cdn.hinet.net
 # > LINE TV
 USER-AGENT,LINE%20TV*
 DOMAIN-SUFFIX,linetv.tw
+DOMAIN-SUFFIX,kktv.me
+DOMAIN-SUFFIX,kktv.com.tw
+DOMAIN,kktv-theater.kk.stream
+DOMAIN,theater-kktv.cdn.hinet.net
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net
 DOMAIN,d3c7rimkq79yfu.cloudfront.net
 
