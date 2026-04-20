@@ -53,7 +53,7 @@
     },
     {
       "process_name_regex": [
-        "*ziniao*"
+        ".*ziniao.*"
       ]
     }
   ]
