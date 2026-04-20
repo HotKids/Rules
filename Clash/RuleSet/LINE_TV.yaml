@@ -1,8 +1,8 @@
 payload:
-  # > KKBOX
-  - DOMAIN-SUFFIX,kkbox.com
-  - DOMAIN-SUFFIX,kkbox.com.tw
-  - DOMAIN-SUFFIX,kfs.io
+  # > LINE TV
+  - DOMAIN-SUFFIX,linetv.tw
+  - DOMAIN,d17lx9ucc6k9fc.cloudfront.net
+  - DOMAIN,d3c7rimkq79yfu.cloudfront.net
 
   # > KKTV
   - DOMAIN-SUFFIX,kktv.me
