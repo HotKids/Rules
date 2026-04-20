@@ -67,17 +67,6 @@ FILE_TO_SECTIONS = {}
 for _sec, _file in SECTION_TO_FILE.items():
     FILE_TO_SECTIONS.setdefault(_file, []).append(_sec)
 
-# 合并组：多个 section 合到一个文件
-MERGE_GROUPS = {
-    "KKBOX&KKTV": ["KKBOX", "KKTV"],
-}
-
-# 反向：section → 所属合并文件
-MERGE_SECTION_TO_FILE = {}
-for _file, _secs in MERGE_GROUPS.items():
-    for _s in _secs:
-        MERGE_SECTION_TO_FILE[_s] = _file
-
 # 地区合集与 Streaming.list 成员由独立文件内的占位符动态扫描得出（见 scan_streaming_placeholders）
 # 占位符格式：### Streaming [REGION]
 #   ### Streaming TW  → 拼入 Streaming_TW.list 及 Streaming.list
@@ -85,6 +74,31 @@ for _file, _secs in MERGE_GROUPS.items():
 #   ### Streaming JP  → 拼入 Streaming_JP.list 及 Streaming.list
 #   ### Streaming     → 仅拼入 Streaming.list
 STREAMING_PLACEHOLDER_RE = re.compile(r"^###\s+Streaming(?:\s+([A-Z]+))?\s*$")
+
+
+# 合并组：含 ### Streaming 占位符且含多个 '# > Name' 节的文件视为合并组
+# 只扫描 streaming 服务文件，排除 AD.list / Unbreak.list 等多节非 streaming 文件
+def _build_merge_maps() -> tuple[dict[str, list[str]], dict[str, str]]:
+    """扫描根目录各 streaming .list 文件，将含多个 '# > Name' 节的文件识别为合并组。"""
+    groups: dict[str, list[str]] = {}
+    reverse: dict[str, str] = {}
+    for p in sorted(SURGE_DIR.glob("*.list")):
+        if p.stem.startswith("Streaming"):
+            continue
+        text = p.read_text(encoding="utf-8")
+        lines = text.splitlines()
+        if not any(STREAMING_PLACEHOLDER_RE.match(line.strip()) for line in lines):
+            continue  # 非 streaming 服务文件，跳过
+        secs = [m.group(1).strip()
+                for line in lines
+                if (m := re.match(r"^#\s*>\s*(.+)$", line.strip()))]
+        if len(secs) > 1:
+            groups[p.stem] = secs
+            for s in secs:
+                reverse[s] = p.stem
+    return groups, reverse
+
+MERGE_GROUPS, MERGE_SECTION_TO_FILE = _build_merge_maps()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -192,13 +206,13 @@ def sync_regional():
 
     placeholders = scan_streaming_placeholders()
     regional_members = {
-        "Streaming_JP": placeholders.get("JP", []),
-        "Streaming_TW": placeholders.get("TW", []),
-        "Streaming_US": placeholders.get("US", []),
+        f"Streaming_{region}": stems
+        for region, stems in placeholders.items()
+        if region  # 跳过 "" (仅总表)
     }
 
     for regional_name, members in regional_members.items():
-        region = regional_name.split("_", 1)[1]  # "JP" / "TW" / "US"
+        region = regional_name.split("_", 1)[1]
         regional_path = SURGE_DIR / f"{regional_name}.list"
         if not regional_path.exists():
             print(f"  [SKIP] {regional_name}.list 不存在")
