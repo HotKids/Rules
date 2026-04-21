@@ -4,13 +4,6 @@ DOMAIN-SUFFIX,crunchyroll.com,Streaming_US
 # 如需使用 VRV，请将此条取消注释并走 US 代理
 # DOMAIN-SUFFIX,vrv.co
 
-# > HBO Max
-USER-AGENT,HBOMAX*,Streaming_US
-USER-AGENT,Max*,Streaming_US
-DOMAIN-SUFFIX,max.com,Streaming_US
-DOMAIN-SUFFIX,hbomax.com,Streaming_US
-DOMAIN-SUFFIX,discomax.com,Streaming_US
-
 # > Hulu
 DOMAIN-SUFFIX,hulu.com,Streaming_US
 DOMAIN-SUFFIX,hulu.tv,Streaming_US
