@@ -4,12 +4,6 @@ payload:
   # 如需使用 VRV，请将此条取消注释并走 US 代理
   # DOMAIN-SUFFIX,vrv.co
 
-  # > HBO Max
-  - PROCESS-NAME,com.wbd.stream
-  - DOMAIN-SUFFIX,max.com
-  - DOMAIN-SUFFIX,hbomax.com
-  - DOMAIN-SUFFIX,discomax.com
-
   # > Hulu
   - DOMAIN-SUFFIX,hulu.com
   - DOMAIN-SUFFIX,hulu.tv
@@ -61,3 +55,4 @@ payload:
   # > Roku
   - DOMAIN-SUFFIX,roku.com
   - DOMAIN-SUFFIX,rokutime.com
+  - PROCESS-NAME,com.wbd.stream
