@@ -17,14 +17,11 @@ jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
+      - name: Checkout
+        run: git clone --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
 
       - name: Run sync script
-        run: python .github/scripts/sync-config.py
+        run: python3 .github/scripts/sync-config.py
 
       - name: Commit & push
         run: |
