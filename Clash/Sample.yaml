@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-22 11:50:30
+# Date: 2026-04-22 12:11:01
 # Author: @HotKids
 
 # 通用设置
@@ -253,6 +253,7 @@ tun:
 
 # 本地节点配置（订阅为空）
 proxies: []
+
 
 # 服务器订阅配置
 proxy-providers:
@@ -713,10 +714,10 @@ rules:
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
+  - RULE-SET,CNCIDR,🔘 DIRECT,no-resolve
 
   # Local Area Network
-  - RULE-SET,LAN,🔘 DIRECT
+  - RULE-SET,LAN,🔘 DIRECT,no-resolve
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
