@@ -168,12 +168,14 @@ DOMAIN-SUFFIX,kfs.io,Streaming
 # > LINE TV
 USER-AGENT,LINE%20TV*,Streaming
 DOMAIN-SUFFIX,linetv.tw,Streaming
+DOMAIN-SUFFIX,chocotv.com.tw,Streaming
 DOMAIN-SUFFIX,kktv.me,Streaming
 DOMAIN-SUFFIX,kktv.com.tw,Streaming
 DOMAIN,kktv-theater.kk.stream,Streaming
 DOMAIN,theater-kktv.cdn.hinet.net,Streaming
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming
+DOMAIN,d36dgdk71xuzzg.cloudfront.net,Streaming
 
 # > MGM+
 DOMAIN-SUFFIX,mgmplus.com,Streaming
