@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-22 12:11:01
+# Date: 2026-04-22 12:33:16
 # Author: @HotKids
 
 # 通用设置
@@ -472,7 +472,7 @@ rule-providers:
   Private:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Private.txt
+    path: ./Provider/RuleSet/Private.yaml
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
     interval: 86400
 
@@ -486,7 +486,7 @@ rule-providers:
   Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Reject.txt
+    path: ./Provider/RuleSet/Reject.yaml
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
     interval: 86400
 
@@ -612,14 +612,14 @@ rule-providers:
   Global:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Global.txt
+    path: ./Provider/RuleSet/Global.yaml
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
     interval: 86400
 
   China:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/China.txt
+    path: ./Provider/RuleSet/China.yaml
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
     interval: 86400
 
@@ -633,7 +633,7 @@ rule-providers:
   CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.txt
+    path: ./Provider/RuleSet/CNCIDR.yaml
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
     interval: 86400
 
