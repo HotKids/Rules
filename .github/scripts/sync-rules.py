@@ -26,18 +26,16 @@ SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
 
 
-def _git_mtime(path: Path) -> float:
-    """Return last-commit Unix timestamp for path; fall back to st_mtime."""
+def _head_changed_files() -> set[str]:
+    """Return repo-relative paths of files changed in HEAD commit."""
     try:
         out = subprocess.run(
-            ["git", "log", "--format=%at", "-1", "--", str(path)],
+            ["git", "diff-tree", "--no-commit-id", "-r", "--name-only", "HEAD"],
             capture_output=True, text=True, cwd=REPO_ROOT,
         ).stdout.strip()
-        if out:
-            return float(out)
+        return set(out.splitlines()) if out else set()
     except Exception:
-        pass
-    return path.stat().st_mtime
+        return set()
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT", "PROCESS-NAME", "PROCESS-NAME-REGEX"}
@@ -226,16 +224,20 @@ def sync_regional():
             _rebuild_regional(regional_path, regional_name, members)
             continue
 
-        # 正常 mtime 比较
-        regional_mtime = _git_mtime(regional_path)
-        max_member_mtime = max(
-            _git_mtime(SURGE_DIR / f"{m}.list") for m in existing
+        # 以 HEAD commit 改动的文件集合判断同步方向：
+        # 仅成员文件有改动 → 成员为准，重建合集；否则合集为准（提取到成员）
+        changed = _head_changed_files()
+        regional_rel = regional_path.relative_to(REPO_ROOT).as_posix()
+        member_changed = any(
+            (SURGE_DIR / f"{m}.list").relative_to(REPO_ROOT).as_posix() in changed
+            for m in existing
         )
+        regional_changed = regional_rel in changed
 
-        if regional_mtime >= max_member_mtime:
-            _extract_regional(regional_path, regional_name, members, region)
-        else:
+        if member_changed and not regional_changed:
             _rebuild_regional(regional_path, regional_name, members)
+        else:
+            _extract_regional(regional_path, regional_name, members, region)
 
 
 def _inject_placeholder(lines: list[str], region: str) -> list[str]:
