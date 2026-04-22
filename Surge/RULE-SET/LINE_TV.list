@@ -2,6 +2,7 @@
 ### Streaming TW
 USER-AGENT,LINE%20TV*
 DOMAIN-SUFFIX,linetv.tw
+DOMAIN-SUFFIX,chocotv.com.tw
 DOMAIN-SUFFIX,kktv.me
 DOMAIN-SUFFIX,kktv.com.tw
 DOMAIN,kktv-theater.kk.stream
