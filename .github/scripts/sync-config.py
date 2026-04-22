@@ -1534,9 +1534,7 @@ def gen_rules_and_providers(
         if path_override:
             path_file = path_override
         else:
-            # 本地缓存扩展名与远程文件一致：`.txt` URL → `.txt` 缓存，否则统一 `.yaml`
-            ext = ".txt" if clash_url.lower().endswith(".txt") else ".yaml"
-            path_file = f"{pname.replace(' ', '_')}{ext}"
+            path_file = f"{pname.replace(' ', '_')}.yaml"
         rp_lines += [
             f"  {pname}:",
             "    type: http",
