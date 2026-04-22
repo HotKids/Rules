@@ -63,12 +63,14 @@ DOMAIN-SUFFIX,kfs.io,Streaming_TW
 # > LINE TV
 USER-AGENT,LINE%20TV*,Streaming_TW
 DOMAIN-SUFFIX,linetv.tw,Streaming_TW
+DOMAIN-SUFFIX,chocotv.com.tw,Streaming_TW
 DOMAIN-SUFFIX,kktv.me,Streaming_TW
 DOMAIN-SUFFIX,kktv.com.tw,Streaming_TW
 DOMAIN,kktv-theater.kk.stream,Streaming_TW
 DOMAIN,theater-kktv.cdn.hinet.net,Streaming_TW
 DOMAIN,d17lx9ucc6k9fc.cloudfront.net,Streaming_TW
 DOMAIN,d3c7rimkq79yfu.cloudfront.net,Streaming_TW
+DOMAIN,d36dgdk71xuzzg.cloudfront.net,Streaming_TW
 
 # > friDay
 USER-AGENT,friDay*,Streaming_TW
