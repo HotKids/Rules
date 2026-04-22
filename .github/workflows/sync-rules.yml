@@ -31,6 +31,9 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: sync RULE-SET → QX / Clash / sing-box [auto]"
+            FILES=$(git diff --cached --name-only | grep 'Surge/RULE-SET/' | sed 's|Surge/RULE-SET/||;s|\.list||' | head -3 | paste -sd ', ')
+            [ -z "$FILES" ] && FILES="RULE-SET"
+            case "${{ github.event_name }}" in schedule) TAG=cron;; push) TAG=push;; *) TAG=manual;; esac
+            git commit -m "sync: $FILES [$TAG]"
             git push
           fi
