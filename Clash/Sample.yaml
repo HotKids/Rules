@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-22 11:49:56
+# Date: 2026-04-22 11:50:30
 # Author: @HotKids
 
 # 通用设置
@@ -274,10 +274,8 @@ proxy-providers:
 
 proxy-groups:
   # Global
-  - name: "GLOBAL"
-    type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Inbound.png
-    include-all: true
+  # name: "GLOBAL"
+  # type: select
 
   # Proxy
   - name: "🔰 Proxy"
@@ -449,6 +447,9 @@ proxy-groups:
     use:
       - Server
     filter: '🇺🇸|US|United States|美国'
+
+  # icon: https:
+  # include-all: true
 
 
 # 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/
