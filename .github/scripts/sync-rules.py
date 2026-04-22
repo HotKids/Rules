@@ -26,16 +26,27 @@ SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
 
 
-def _head_changed_files() -> set[str]:
-    """Return repo-relative paths of files changed in HEAD commit."""
+def _recently_changed_files() -> set[str]:
+    """Return repo-relative paths of recently changed files.
+
+    Checks both the HEAD commit (for CI shallow clones) and the working tree
+    (for local runs with uncommitted edits), so direction detection works in
+    both environments.
+    """
+    result: set[str] = set()
     try:
-        out = subprocess.run(
+        for cmd in (
             ["git", "diff-tree", "--no-commit-id", "-r", "--name-only", "HEAD"],
-            capture_output=True, text=True, cwd=REPO_ROOT,
-        ).stdout.strip()
-        return set(out.splitlines()) if out else set()
+            ["git", "diff", "--name-only", "HEAD"],
+        ):
+            out = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=REPO_ROOT,
+            ).stdout.strip()
+            if out:
+                result.update(out.splitlines())
     except Exception:
-        return set()
+        pass
+    return result
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT", "PROCESS-NAME", "PROCESS-NAME-REGEX"}
@@ -189,55 +200,100 @@ def read_standalone(stem: str) -> str | None:
     return None
 
 
-def sync_regional():
-    """地区合集 ↔ 独立子项双向同步。"""
-    print("\n── Step 2: 地区合集 ↔ 独立子项同步 ──")
-
-    placeholders = scan_streaming_placeholders()
-    regional_members = {
-        f"Streaming_{region}": stems
+def _extract_streaming(streaming_path: Path, placeholders: dict[str, list[str]]) -> None:
+    """总合集 → 独立子项（保留各文件的 ### Streaming 占位符）。"""
+    text = streaming_path.read_text(encoding="utf-8")
+    sections = parse_sections(text)
+    stem_to_region = {
+        stem: region
         for region, stems in placeholders.items()
-        if region  # 跳过 "" (仅总表)
+        for stem in stems
     }
-
-    for regional_name, members in regional_members.items():
-        region = regional_name.split("_", 1)[1]
-        regional_path = SURGE_DIR / f"{regional_name}.list"
-        if not regional_path.exists():
-            print(f"  [SKIP] {regional_name}.list 不存在")
+    for sec_name, lines in sections.items():
+        stem = section_name_to_file(sec_name)
+        if stem not in stem_to_region:
+            print(f"  [SKIP] 无法确定 region，跳过: {sec_name}")
             continue
+        region = stem_to_region[stem]
+        out_lines = _inject_placeholder(lines, region) if region else lines
+        if write_if_changed(SURGE_DIR / f"{stem}.list", "\n".join(out_lines) + "\n"):
+            print(f"  ✓ Streaming.list → {stem}.list")
 
-        # 解析地区合集当前包含的 section
-        text = regional_path.read_text(encoding="utf-8")
-        sections = parse_sections(text)
-        regional_stems = {section_name_to_file(s) for s in sections}
 
-        existing = [m for m in members if (SURGE_DIR / f"{m}.list").exists()]
+def sync_streaming() -> None:
+    """Streaming 三层双向同步：总合集 ↔ 地区合集 ↔ 独立子项，以独立子项为枢纽。
 
-        if not existing:
-            # 首次运行，全部从地区合集提取
-            _extract_regional(regional_path, regional_name, members, region)
+    同步方向由近期有改动的文件决定（HEAD commit + 工作区未提交改动）：
+    - 仅总合集有改动       → 提取到独立子项，再重建各地区合集和总合集
+    - 仅某地区合集有改动   → 提取到对应独立子项，再重建所有合集
+    - 独立子项有改动       → 直接重建各地区合集和总合集
+    - 无改动（cron/首次）  → 从独立子项重建所有合集（或从地区合集提取首次建档）
+    """
+    print("\n── Step 2/3: Streaming 三层同步 ──")
+
+    changed = _recently_changed_files()
+    placeholders = scan_streaming_placeholders()
+    streaming_path = SURGE_DIR / "Streaming.list"
+
+    def rel(p: Path) -> str:
+        return p.relative_to(REPO_ROOT).as_posix()
+
+    all_stems = sorted(set().union(*placeholders.values()))
+
+    # 各地区合集元信息
+    regionals: dict[str, tuple[Path, list[str], str]] = {}
+    for region_key, stems in placeholders.items():
+        if not region_key:
             continue
+        name = f"Streaming_{region_key}"
+        path = SURGE_DIR / f"{name}.list"
+        if path.exists():
+            regionals[name] = (path, stems, region_key)
 
-        # 合集成员与当前占位符不一致（如某文件刚被移出该地区）→ 直接重建
-        if regional_stems != set(existing):
-            _rebuild_regional(regional_path, regional_name, members)
+    member_changed     = any(rel(SURGE_DIR / f"{s}.list") in changed for s in all_stems)
+    streaming_changed  = rel(streaming_path) in changed
+    any_reg_changed    = any(rel(p) in changed for p, _, _ in regionals.values())
+
+    # ── 阶段一：将"被直接编辑的上层合集"落实到独立子项 ──────────────────
+    if streaming_changed and not member_changed and not any_reg_changed:
+        print("  [方向] 总合集 → 独立子项")
+        _extract_streaming(streaming_path, placeholders)
+    else:
+        for name, (path, stems, region) in regionals.items():
+            existing = [s for s in stems if (SURGE_DIR / f"{s}.list").exists()]
+            regional_changed     = rel(path) in changed
+            this_member_changed  = any(rel(SURGE_DIR / f"{s}.list") in changed for s in existing)
+            if not existing:
+                # 首次运行：从地区合集提取独立子项
+                print(f"  [首次] {name} → 独立子项")
+                _extract_regional(path, name, stems, region)
+            elif regional_changed and not this_member_changed:
+                print(f"  [方向] {name} → 独立子项")
+                _extract_regional(path, name, existing, region)
+
+    # ── 阶段二：从独立子项重建所有地区合集 ──────────────────────────────
+    for name, (path, stems, _region) in regionals.items():
+        existing = [s for s in stems if (SURGE_DIR / f"{s}.list").exists()]
+        if existing:
+            _rebuild_regional(path, name, existing)
+
+    # ── 阶段三：从独立子项重建总合集 ────────────────────────────────────
+    parts = []
+    for stem in all_stems:
+        content = read_standalone(stem)
+        if content is None:
             continue
-
-        # 以 HEAD commit 改动的文件集合判断同步方向：
-        # 仅成员文件有改动 → 成员为准，重建合集；否则合集为准（提取到成员）
-        changed = _head_changed_files()
-        regional_rel = regional_path.relative_to(REPO_ROOT).as_posix()
-        member_changed = any(
-            (SURGE_DIR / f"{m}.list").relative_to(REPO_ROOT).as_posix() in changed
-            for m in existing
-        )
-        regional_changed = regional_rel in changed
-
-        if member_changed and not regional_changed:
-            _rebuild_regional(regional_path, regional_name, members)
-        else:
-            _extract_regional(regional_path, regional_name, members, region)
+        text = strip_streaming_placeholders(content).strip()
+        if text:
+            parts.append(text)
+    if not parts:
+        print("  [WARN] 无成员文件，跳过总合集重建")
+        return
+    result = "\n\n".join(parts) + "\n"
+    if write_if_changed(streaming_path, result):
+        print("  ✓ Streaming.list 已重建")
+    else:
+        print("  ✓ Streaming.list 无变化")
 
 
 def _inject_placeholder(lines: list[str], region: str) -> list[str]:
@@ -304,33 +360,6 @@ def _rebuild_regional(regional_path: Path, regional_name: str, members: list[str
         result = "\n\n".join(parts) + "\n"
         if write_if_changed(regional_path, result):
             print(f"  ✓ 独立子项 → {regional_name}.list")
-
-
-def rebuild_streaming():
-    """独立子项 → 重建 Streaming.list。"""
-    print("\n── Step 3: 重建 Streaming.list ──")
-
-    placeholders = scan_streaming_placeholders()
-    all_stems = sorted(set().union(*placeholders.values()))
-
-    parts = []
-    for stem in all_stems:
-        content = read_standalone(stem)
-        if content is None:
-            continue
-        text = strip_streaming_placeholders(content).strip()
-        if text:
-            parts.append(text)
-
-    if not parts:
-        print("  [WARN] 无成员文件，跳过")
-        return
-
-    result = "\n\n".join(parts) + "\n"
-    if write_if_changed(SURGE_DIR / "Streaming.list", result):
-        print("  ✓ Streaming.list 已重建")
-    else:
-        print("  ✓ Streaming.list 无变化")
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1020,11 +1049,8 @@ def main():
     # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
     fetch_external_rules()
 
-    # Step 2: 地区合集 ↔ 独立子项
-    sync_regional()
-
-    # Step 3: 独立子项 → Streaming.list
-    rebuild_streaming()
+    # Step 2/3: Streaming 三层双向同步
+    sync_streaming()
 
     # Step 4: Surge → QX / Clash / sing-box
     convert_all()
