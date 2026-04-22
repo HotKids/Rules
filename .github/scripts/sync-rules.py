@@ -12,6 +12,7 @@ Surge RULE-SET 同步脚本
 
 import json
 import re
+import subprocess
 import urllib.request
 from collections import defaultdict
 from pathlib import Path
@@ -23,6 +24,20 @@ QX_DIR = REPO_ROOT / "Quantumult" / "X" / "Filter"
 CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
+
+
+def _git_mtime(path: Path) -> float:
+    """Return last-commit Unix timestamp for path; fall back to st_mtime."""
+    try:
+        out = subprocess.run(
+            ["git", "log", "--format=%at", "-1", "--", str(path)],
+            capture_output=True, text=True, cwd=REPO_ROOT,
+        ).stdout.strip()
+        if out:
+            return float(out)
+    except Exception:
+        pass
+    return path.stat().st_mtime
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT", "PROCESS-NAME", "PROCESS-NAME-REGEX"}
@@ -212,9 +227,9 @@ def sync_regional():
             continue
 
         # 正常 mtime 比较
-        regional_mtime = regional_path.stat().st_mtime
+        regional_mtime = _git_mtime(regional_path)
         max_member_mtime = max(
-            (SURGE_DIR / f"{m}.list").stat().st_mtime for m in existing
+            _git_mtime(SURGE_DIR / f"{m}.list") for m in existing
         )
 
         if regional_mtime >= max_member_mtime:
