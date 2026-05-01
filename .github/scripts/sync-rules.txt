@@ -9,5 +9,6 @@ https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_servic
 https://raw.githubusercontent.com/SukkaW/Surge/master/Source/ip/apple_services.conf,Apple/Apple
 https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.conf,Apple/Apple CN
 https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list,Apple/Apple News
+https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list Apple/APNS
 
 # >> Clash
