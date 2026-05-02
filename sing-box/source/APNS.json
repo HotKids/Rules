@@ -8,7 +8,13 @@
     },
     {
       "domain_suffix": [
+        "akadns.net",
         "push.apple.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "apple.com.edgekey.net"
       ]
     },
     {
