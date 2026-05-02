@@ -1,7 +1,9 @@
 ### fork from https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list
 # > APNS
 DOMAIN,identity.apple.com
+DOMAIN-SUFFIX,akadns.net
 DOMAIN-SUFFIX,push.apple.com
+DOMAIN-KEYWORD,apple.com.edgekey.net
 IP-CIDR,17.188.128.0/18,no-resolve
 IP-CIDR,17.188.20.0/23,no-resolve
 IP-CIDR,17.249.0.0/16,no-resolve
