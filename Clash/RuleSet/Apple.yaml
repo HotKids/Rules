@@ -16,7 +16,7 @@ payload:
   - DOMAIN-SUFFIX,appsto.re
   - DOMAIN-SUFFIX,itunes.com
   - DOMAIN-SUFFIX,apple.news
-  - PROCESS-NAME,netbiosd
+  - IP-CIDR,17.0.0.0/8,no-resolve
   - PROCESS-NAME,com.apple.geod
   - PROCESS-NAME,mapspushd
   - PROCESS-NAME,com.apple.Maps
@@ -26,7 +26,6 @@ payload:
   - PROCESS-NAME,findmydevice-user-agent
   - PROCESS-NAME,CoreLocationAgent
   - PROCESS-NAME,WeatherWidget
-  - IP-CIDR,17.0.0.0/8,no-resolve
   - IP-CIDR,63.92.224.0/19,no-resolve
   - IP-CIDR,65.199.22.0/23,no-resolve
   - IP-CIDR,139.178.128.0/18,no-resolve
@@ -36,3 +35,4 @@ payload:
   - IP-CIDR,192.35.50.0/24,no-resolve
   - IP-CIDR,198.183.17.0/24,no-resolve
   - IP-CIDR,205.180.175.0/24,no-resolve
+  - PROCESS-NAME,netbiosd
