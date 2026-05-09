@@ -15,7 +15,7 @@ DOMAIN-SUFFIX,apple-mapkit.com
 DOMAIN-SUFFIX,appsto.re
 DOMAIN-SUFFIX,itunes.com
 DOMAIN-SUFFIX,apple.news
-PROCESS-NAME,netbiosd
+IP-CIDR,17.0.0.0/8,no-resolve
 PROCESS-NAME,com.apple.geod
 PROCESS-NAME,mapspushd
 PROCESS-NAME,com.apple.Maps
@@ -25,7 +25,6 @@ PROCESS-NAME,fmfd
 PROCESS-NAME,findmydevice-user-agent
 PROCESS-NAME,CoreLocationAgent
 PROCESS-NAME,WeatherWidget
-IP-CIDR,17.0.0.0/8,no-resolve
 IP-CIDR,63.92.224.0/19,no-resolve
 IP-CIDR,65.199.22.0/23,no-resolve
 IP-CIDR,139.178.128.0/18,no-resolve
