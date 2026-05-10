@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-04-22 12:33:16
+# Date: 2026-05-10 23:01:37
 # Author: @HotKids
 
 # 通用设置
@@ -497,13 +497,6 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
     interval: 86400
 
-  Streaming+:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Streaming+.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming+.yaml
-    interval: 86400
-
   Streaming_TW:
     type: http
     behavior: classical
@@ -662,10 +655,7 @@ rules:
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
-  # Global Area Network
-  # > 一些无需验证地区的分流 HOST
-  - RULE-SET,Streaming+,🔰 Proxy
-
+  # RULE-SET,https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Surge/RULE-SET/Streaming+.list,🔰 Proxy,extended-matching
   # > Streaming by Region
   # >> Streaming TW
   - RULE-SET,Streaming_TW,🇨🇳 Taiwan

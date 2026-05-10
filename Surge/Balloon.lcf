@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-04-17 21:39:36
+# Date: 2026-05-10 23:01:37
 # Author: @HotKids
 
 [General]
@@ -122,9 +122,7 @@ https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/R
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Tracking, enabled=true
 # Hijacking 运营商劫持或恶意网站
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list, policy=🚧 AdGuard, tag=Malicious, enabled=true
-# Global Area Network
-# > 一些无需验证地区的分流 HOST
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming+.list, policy=🔰 Proxy, tag=Streaming+, enabled=true
+# RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming+.list,🔰 Proxy,extended-matching
 # > Streaming by Region
 # >> Streaming TW
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Streaming_TW.list, policy=🇨🇳 Taiwan, tag=Streaming_TW, enabled=true
