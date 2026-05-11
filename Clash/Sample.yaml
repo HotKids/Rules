@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-05-10 23:01:37
+# Date: 2026-05-11 17:53:36
 # Author: @HotKids
 
 # 通用设置
@@ -655,7 +655,7 @@ rules:
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,Advertising,🚧 AdGuard
 
-  # RULE-SET,https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Surge/RULE-SET/Streaming+.list,🔰 Proxy,extended-matching
+  # Global Area Network
   # > Streaming by Region
   # >> Streaming TW
   - RULE-SET,Streaming_TW,🇨🇳 Taiwan
