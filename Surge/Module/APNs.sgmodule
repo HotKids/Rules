@@ -1,0 +1,11 @@
+#!name=APNs Fix
+#!desc=改善中国大陆网络环境下部分境外应用的推送连接稳定性
+#!arguments=APNs:🔰 Proxy
+
+[General]
+include-all-networks=true
+include-apns=true
+
+[Rule]
+# APNs
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/APNS.list,{{{APNs}}},force-remote-dns,extended-matching
