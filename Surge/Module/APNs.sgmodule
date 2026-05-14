@@ -1,6 +1,6 @@
 #!name=APNs Fix
 #!desc=改善中国大陆网络环境下部分境外应用的推送连接稳定性
-#!arguments=APNs:🔰 Proxy
+#!arguments=APNs:🍎 Apple
 
 [General]
 include-all-networks=true
