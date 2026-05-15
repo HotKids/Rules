@@ -1,5 +1,5 @@
 #!name=APNs Fix
-#!desc=改善中国大陆网络环境下部分境外应用的推送连接稳定性
+#!desc=改善中国大陆网络环境下部分境外应用的推送连接稳定性；移动网络下需开启“包含所有网络请求”，仅建议临时使用，部分功能如 AirDrop、Xcode 调试可能会受影响
 #!system=ios
 #!arguments=APNs:🍎 Apple
 
