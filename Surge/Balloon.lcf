@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-05-11 17:53:36
+# Date: 2026-06-01 14:22:54
 # Author: @HotKids
 
 [General]
@@ -161,6 +161,7 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Telegram.l
 # > Mail
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Mail, enabled=true
 # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Proxy.list, policy=🔰 Proxy, tag=Proxy, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=Global, enabled=true
 # China Area Network
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=China, enabled=true

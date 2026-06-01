@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-05-11 17:53:36
+# Date: 2026-06-01 14:22:54
 # Author: @HotKids
 
 # 通用设置
@@ -602,6 +602,13 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
+  Proxy:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Proxy.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Proxy.yaml
+    interval: 86400
+
   Global:
     type: http
     behavior: domain
@@ -699,6 +706,7 @@ rules:
   - RULE-SET,Spark,📧 Mail
 
   # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
+  - RULE-SET,Proxy,🔰 Proxy
   - RULE-SET,Global,🔰 Proxy
 
   # China Area Network
