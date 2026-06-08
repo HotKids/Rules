@@ -32,10 +32,6 @@ unified-delay: true
 # TCP 并发连接所有 IP，将使用最快握手的 TCP
 tcp-concurrent: true
 
-# 全局 TLS 指纹，优先级低于 proxy 内的 client-fingerprint
-# 可选：chrome/firefox/safari/ios/random/none
-global-client-fingerprint: chrome
-
 # 进程匹配模式
 # always - 开启，强制匹配所有进程
 # strict - 默认，由 mihomo 判断是否开启
