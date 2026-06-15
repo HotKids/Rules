@@ -1,0 +1,12 @@
+#!name=VoWiFi Proxy
+#!desc=Proxy rules for Wi-Fi Calling / VoWiFi with remote DNS.
+
+[Rule]
+# HK
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/HK-wifi-call.list,🇭🇰 Hong Kong,force-remote-dns,extended-matching
+# US
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇺🇸 America,force-remote-dns,extended-matching
+# UK
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇬🇧 England,force-remote-dns,extended-matching
+# DE
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇩🇪 Germany,force-remote-dns,extended-matching
