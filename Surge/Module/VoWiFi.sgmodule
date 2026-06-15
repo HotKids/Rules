@@ -7,6 +7,6 @@ RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/HK-wifi-call
 # US
 RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇺🇸 America,force-remote-dns,extended-matching
 # UK
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇬🇧 England,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/UK-wifi-call.list,🇬🇧 England,force-remote-dns,extended-matching
 # DE
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇩🇪 Germany,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/DE-wifi-call.list,🇩🇪 Germany,force-remote-dns,extended-matching
