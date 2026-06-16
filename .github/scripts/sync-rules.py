@@ -15,6 +15,7 @@ import re
 import subprocess
 import urllib.request
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
@@ -551,6 +552,26 @@ def convert_clash(lines: list[str]) -> str:
     return "\n".join(out) + "\n"
 
 
+_SINGBOX_TYPE_ORDER = [
+    "domain", "domain_suffix", "domain_keyword", "domain_regex",
+    "ip_cidr", "process_name", "process_name_regex",
+]
+
+
+def _groups_to_singbox_rules(
+    groups: dict[str, list[str]],
+    logical_rules: list[dict] | None = None,
+) -> list[dict]:
+    """将 {sb_type: [values]} 分组 + logical_rules 列表转换为 sing-box rules 数组。"""
+    rules: list[dict] = []
+    for key in _SINGBOX_TYPE_ORDER:
+        if key in groups:
+            rules.append({key: sorted(set(groups[key]))})
+    if logical_rules:
+        rules.extend(logical_rules)
+    return rules
+
+
 def convert_singbox(lines: list[str]) -> str | None:
     groups: dict[str, list[str]] = {}
     logical_rules: list[dict] = []
@@ -595,19 +616,11 @@ def convert_singbox(lines: list[str]) -> str | None:
     if not groups and not logical_rules:
         return None
 
-    rules: list[dict] = []
-    type_order = ["domain", "domain_suffix", "domain_keyword", "domain_regex",
-                  "ip_cidr", "process_name", "process_name_regex"]
-    for key in type_order:
-        if key in groups:
-            rules.append({key: sorted(set(groups[key]))})
-
-    rules.extend(logical_rules)
+    rules = _groups_to_singbox_rules(groups, logical_rules)
     if not rules:
         return None
 
-    result = {"version": 2, "rules": rules}
-    return json.dumps(result, indent=2, ensure_ascii=False) + "\n"
+    return json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
 
 
 def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
@@ -808,9 +821,8 @@ def _extract_preserved_clash_rules(path: Path) -> list[tuple[str, str]]:
     return result
 
 
-def normalize_clash_payload(text: str) -> str | None:
-    """规范化 Clash payload 格式：提取规则行，剥掉内嵌元数据注释，重新格式化输出。"""
-    rules = []
+def _iter_clash_payload_rules(text: str):
+    """从 Clash payload: 文本中逐行 yield 规则字符串（去掉 '  - ' 前缀和引号）。"""
     in_payload = False
     for raw in text.splitlines():
         stripped = raw.strip()
@@ -822,12 +834,15 @@ def normalize_clash_payload(text: str) -> str | None:
         if stripped.startswith("- "):
             rule = stripped[2:].strip().strip("'\"")
             if rule and not rule.startswith("#"):
-                rules.append(rule)
+                yield rule
+
+
+def normalize_clash_payload(text: str) -> str | None:
+    """规范化 Clash payload 格式：提取规则行，剥掉内嵌元数据注释，重新格式化输出。"""
+    rules = list(_iter_clash_payload_rules(text))
     if not rules:
         return None
-    out = ["payload:"]
-    for r in rules:
-        out.append(f"  - {r}")
+    out = ["payload:"] + [f"  - {r}" for r in rules]
     return "\n".join(out) + "\n"
 
 
@@ -847,19 +862,7 @@ def _clash_body_rules(text: str) -> list[str]:
 
 def convert_clash_payload_to_surge(text: str) -> str | None:
     """Clash classical payload: → Surge RULE-SET .list 格式（仅规则行，无注释）。"""
-    out = []
-    in_payload = False
-    for raw in text.splitlines():
-        stripped = raw.strip()
-        if stripped == "payload:":
-            in_payload = True
-            continue
-        if not in_payload:
-            continue
-        if stripped.startswith("- "):
-            rule = stripped[2:].strip().strip("'\"")
-            if rule and not rule.startswith("#"):
-                out.append(rule)
+    out = list(_iter_clash_payload_rules(text))
     return ("\n".join(out) + "\n") if out else None
 
 
@@ -896,21 +899,8 @@ def convert_ipcidr_to_clash(text: str) -> str | None:
 
 def convert_classical_payload_to_singbox(text: str) -> str | None:
     """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。"""
-    lines = []
-    in_payload = False
-    for raw in text.splitlines():
-        stripped = raw.strip()
-        if stripped == "payload:":
-            in_payload = True
-            continue
-        if in_payload and stripped.startswith("- "):
-            lines.append(stripped[2:].strip())
-
-    if not lines:
-        return None
-
     groups: dict[str, list[str]] = {}
-    for line in lines:
+    for line in _iter_clash_payload_rules(text):
         if line.startswith("#") or line.startswith("//"):
             continue
         # 剥掉 YAML 行内注释（`  # ...`），避免 "domain  # comment" 混入值
@@ -925,14 +915,19 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
     if not groups:
         return None
 
-    rules: list[dict] = []
-    for key in ["domain", "domain_suffix", "domain_keyword", "ip_cidr",
-                "process_name", "process_name_regex"]:
-        if key in groups:
-            rules.append({key: sorted(set(groups[key]))})
-
+    rules = _groups_to_singbox_rules(groups)
     return (json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
             if rules else None)
+
+
+def _prefetch_urls(urls: list[str], max_workers: int = 8) -> dict[str, str | None]:
+    """并发下载 urls，返回 {url: text_or_None}，保证顺序无关（结果按 url 键）。"""
+    results: dict[str, str | None] = {}
+    with ThreadPoolExecutor(max_workers=min(max_workers, len(urls) or 1)) as pool:
+        future_to_url = {pool.submit(fetch_url, url): url for url in urls}
+        for future in as_completed(future_to_url):
+            results[future_to_url[future]] = future.result()
+    return results
 
 
 def fetch_external_rules():
@@ -949,6 +944,12 @@ def fetch_external_rules():
         print("  sync-rules.txt 无规则条目")
         return
 
+    # 预先并发拉取所有 URL（去重后并发，避免同 URL 重复下载）
+    all_urls = list({e["url"] for e in rules["surge"] + rules["clash"]})
+    if all_urls:
+        print(f"  并发下载 {len(all_urls)} 个 URL …")
+    prefetched = _prefetch_urls(all_urls) if all_urls else {}
+
     # ── # >> Surge section（同名多 URL 合并去重）──────────────────────
     surge_groups: dict[str, list[str]] = defaultdict(list)
     for e in rules["surge"]:
@@ -962,7 +963,7 @@ def fetch_external_rules():
 
         for url in urls:
             print(f"  [Surge] {name} ← {url}")
-            text = fetch_url(url)
+            text = prefetched.get(url)
             if text is None:
                 continue
             if _is_clash_payload(text):
@@ -1007,7 +1008,7 @@ def fetch_external_rules():
 
         for url in urls:
             print(f"  [Clash] {name} ← {url}")
-            text = fetch_url(url)
+            text = prefetched.get(url)
             if text is None:
                 continue
             fork_urls.append(url)
