@@ -9,7 +9,7 @@
 **源**：`Surge/RULE-SET/**/*.list`  
 **目标**：`Quantumult/X/Filter/*.list`、`Clash/RuleSet/*.yaml`、`sing-box/source/*.json`
 
-执行顺序：① 拉取 `sync-rules.txt` 中的外部 URL → ② 地区流媒体合集双向同步（按 mtime 决定方向） → ③ 重建 `Streaming.list` → ④ 格式转换 → ⑤ 清理孤立文件
+执行顺序：① 拉取 `sync-rules.txt` 中的外部 URL → ② 地区流媒体合集双向同步（按 git diff 决定方向：HEAD commit + 工作区变更） → ③ 重建 `Streaming.list` → ④ 格式转换 → ⑤ 清理孤立文件
 
 **规则类型兼容性**
 
@@ -21,7 +21,7 @@
 | AND / PROCESS-NAME | — | ✓ | ✓ |
 | URL-REGEX | — | — | — |
 
-**触发**：`Surge/RULE-SET/**` 或 `sync-rules.txt` 变动（push to master）；每天 UTC 16:00 定时
+**触发**：`Surge/RULE-SET/**`、`sync-rules.txt` 或 `sync-rules.py` 变动（push to master）；每天 UTC 16:00 定时
 
 ---
 
