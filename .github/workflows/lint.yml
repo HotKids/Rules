@@ -1,0 +1,52 @@
+name: Lint & Validate
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - '.github/scripts/*.py'
+      - 'Surge/RULE-SET/**'
+  pull_request:
+    paths:
+      - '.github/scripts/*.py'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Syntax check Python
+        run: python3 -m py_compile .github/scripts/sync-rules.py .github/scripts/sync-config.py
+
+      - name: Validate generated Clash YAML parseable
+        run: |
+          python3 -c "
+import yaml, pathlib, sys
+errors = []
+for f in sorted(pathlib.Path('Clash/RuleSet').rglob('*.yaml')):
+    try:
+        yaml.safe_load(f.read_text())
+    except yaml.YAMLError as e:
+        errors.append(f'{f}: {e}')
+if errors:
+    print('FAIL:', *errors, sep='\n')
+    sys.exit(1)
+print(f'All {len(list(pathlib.Path(\"Clash/RuleSet\").rglob(\"*.yaml\")))} Clash YAML files OK')
+"
+
+      - name: Validate generated sing-box JSON parseable
+        run: |
+          python3 -c "
+import json, pathlib, sys
+errors = []
+for f in sorted(pathlib.Path('sing-box/source').rglob('*.json')):
+    try:
+        json.loads(f.read_text())
+    except json.JSONDecodeError as e:
+        errors.append(f'{f}: {e}')
+if errors:
+    print('FAIL:', *errors, sep='\n')
+    sys.exit(1)
+print(f'All {len(list(pathlib.Path(\"sing-box/source\").rglob(\"*.json\")))} sing-box JSON files OK')
+"
