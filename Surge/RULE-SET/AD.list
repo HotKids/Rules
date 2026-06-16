@@ -194,14 +194,6 @@ DOMAIN,adstvb.akamaized.net
 # > TVer
 DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp
 
-# > UnionPay
-DOMAIN,ads.95516.com
-DOMAIN,tysdk.95516.com
-DOMAIN,cm-10-138.getui.com
-DOMAIN,sdk-conf.getui.com
-DOMAIN,sdk.open.talk.getui.net
-DOMAIN,switch.cup.com.cn
-
 # > Viu
 DOMAIN-SUFFIX,adcolony.com
 DOMAIN,r2---sn-j5o76n7e.gvt1.com
