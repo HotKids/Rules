@@ -155,30 +155,61 @@ dns:
   fake-ip-filter:
     # 本地域名
     - "*.lan"
+    - "+.lan"
     - "*.local"
-    - "*.localhost"
+    - "*.localdomain"
     - "*.home.arpa"
+    - "*.localhost"
+    - "WORKGROUP"
     # NTP 时间同步
     - "time.*.com"
     - "time.*.gov"
     - "time.*.apple.com"
     - "ntp.*.com"
-    - "*.pool.ntp.org"
+    - "+.pool.ntp.org"
     - "*.ntp.org.cn"
     # STUN / TURN（WebRTC / 游戏打洞）
-    - "stun.*"
+    - "+.stun.*"
     - "*.stun.*.*"
     - "*.turn.twilio.com"
     - "*.stun.twilio.com"
     - "stun.syncthing.net"
-    # Windows / Apple 网络连通性探测
+    # 游戏平台
+    - "*.srv.nintendo.net"
+    - "xbox.*.microsoft.com"
+    - "xbox.*.*.microsoft.com"
+    - "*.xboxlive.com"
+    # Steam
+    - "*.cm.steampowered.com"
+    - "*.steamcontent.com"
+    # Battle.net / Blizzard
+    - "*.battlenet.com.cn"
+    - "*.battlenet.com"
+    - "*.blzstatic.cn"
+    - "*.battle.net"
+    # 网络连通性探测（多平台）
     - "*.msftncsi.com"
     - "*.msftconnecttest.com"
     - "connectivitycheck.gstatic.com"
+    - "connectivitycheck.android.com"
+    - "connectivitycheck.platform.hicloud.com"
+    - "connect.rom.miui.com"
     - "captive.apple.com"
-    # 需要真实 IP 解析的域名
-    - "localhost.*.qq.com"
+    - "network-test.debian.org"
+    - "detectportal.firefox.com"
+    - "lens.l.google.com"
+    # 推送通知
+    - "+.push.apple.com"
+    - "+.market.xiaomi.com"
+    # VPN 覆盖网络
+    - "*.tailscale.com"
+    - "*.zerotier.com"
+    # 媒体服务
+    - "*.spotify.com"
+    - "+.music.126.net"
     - "*.mcdn.bilivideo.cn"
+    # 其他需要真实 IP 解析的域名
+    - "localhost.*.qq.com"
 
   # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
   # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
