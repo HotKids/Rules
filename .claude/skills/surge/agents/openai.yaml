@@ -1,0 +1,6 @@
+interface:
+  display_name: "Surge"
+  short_description: "Run and automate Surge workflows"
+  default_prompt: "Use this skill to operate Surge with surge-cli safely. Prefer --raw output, inspect baseline state first, apply minimal set key-path changes, and verify post-change state."
+  icon_large: "./assets/logo.png"
+  icon_small: "./assets/logo.png"
