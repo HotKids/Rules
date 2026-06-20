@@ -39,7 +39,7 @@ tcp-concurrent: true
 find-process-mode: strict
 
 # GeoData 加载模式，memconservative 低内存，适合路由器/嵌入式设备
-geodata-loader: memconservative
+geodata-loader: standard
 
 # 显式声明 HTTP 请求 UA，避免默认值随版本漂移
 global-ua: clash.meta
@@ -68,7 +68,6 @@ geox-url:
 # 类似于 /etc/hosts，仅支持配置单个 IP
 hosts:
   '*.clash.dev': 127.0.0.1
-  '.dev': 127.0.0.1
   'localhost': 127.0.0.1
 
 # 配置持久化
@@ -162,6 +161,8 @@ dns:
   fallback-filter:
     geoip: true
     geoip-code: CN
+    ipcidr:
+      - 240.0.0.0/4
 
   # 代理节点域名解析：国内 DoH，节点 IP 不会被污染，解析更快
   proxy-server-nameserver:
@@ -202,6 +203,9 @@ tun:
 
   # 将所有连接路由到 tun 来防止泄漏，但你的设备将无法被其他设备访问
   strict-route: true
+
+  # Full Cone NAT，改善游戏/VOIP/WebRTC 的 UDP 打洞成功率
+  endpoint-independent-nat: true
 
   # 启用 auto-route 时使用自定义路由而不是默认路由
   # route-address:
