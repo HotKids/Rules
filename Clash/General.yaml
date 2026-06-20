@@ -122,96 +122,55 @@ dns:
   # 让系统 hosts 及自定义 hosts 生效（如局域网 NAS、Pi-hole）
   use-system-hosts: true
 
-  # 用于解析 nameserver，fallback 以及其他 DNS 服务器配置的 DNS 服务域名
-  # 只能使用纯 IP 地址，可使用加密 DNS
-  default-nameserver:
-    - 223.5.5.5
-    - 119.29.29.29
-
-  enhanced-mode: fake-ip
-  # fake-ip 池设置
-  fake-ip-range: 198.18.0.1/16
-
   # DNS 缓存算法
   cache-algorithm: arc
 
   # 是否开启 DoH 支持 HTTP/3，将并发尝试
   prefer-h3: false
 
-  # 配置后面的 nameserver、fallback 和 nameserver-policy 向 DNS 服务器的连接过程是否遵守 rules 规则
-  # 如果为 false（默认值）则这三部分的 DNS 服务器在未特别指定的情况下会直连
-  # 如果为 true，将会按照 rules 的规则匹配链接方式（走代理或直连）
-  # 启用 true 时必须同时配置 proxy-server-nameserver
-  respect-rules: true
+  # nameserver / fallback 连接不遵守 rules，始终直连
+  # 各条目可通过 #proxy 后缀单独指定走代理
+  respect-rules: false
 
-  # 配置 fake-ip-filter 的匹配模式，默认为 blacklist，即如果匹配成功不返回 fake-ip
-  # 可设置为 whitelist，即只有匹配成功才返回 fake-ip
-  fake-ip-filter-mode: blacklist
+  # 用于解析 nameserver、fallback 等 DNS 服务器域名的引导 DNS
+  # 只能使用纯 IP 地址
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
 
-  # 配置不使用 fake-ip 的域名
+  enhanced-mode: fake-ip
+  fake-ip-range: 198.18.0.1/16
+  # 显式禁用 IPv6 fake-ip 池，与 ipv6: false 对齐
+  fake-ip-range6: ""
+  # fake-ip 条目 TTL，1 秒让连接断开后快速失效
+  fake-ip-ttl: 1
+
+  # rule 模式 + ["*"]：所有域名均走 fake-ip，无手工排除列表
+  fake-ip-filter-mode: rule
   fake-ip-filter:
-    # 局域网与本地服务
-    - '*.lan'
-    - '+.lan'
-    - '*.local'
-    - '*.localdomain'
-    - '*.home.arpa'
-    - '*.localhost'
-    - 'localhost.ptlogin2.qq.com'
-    - 'WORKGROUP'
-    # STUN 服务
-    - '+.stun.*'
-    - '*.srv.nintendo.net'
-    - 'xbox.*.microsoft.com'
-    - 'xbox.*.*.microsoft.com'
-    - '*.xboxlive.com'
-    # 网络检测
-    - '*.msftconnecttest.com'
-    - '*.msftncsi.com'
-    - 'connectivitycheck.gstatic.com'
-    - 'connectivitycheck.android.com'
-    - 'connectivitycheck.platform.hicloud.com'
-    - 'connect.rom.miui.com'
-    - 'captive.apple.com'
-    - 'network-test.debian.org'
-    - 'detectportal.firefox.com'
-    # 特殊服务
-    - 'lens.l.google.com'
-    - '*.mcdn.bilivideo.cn'
-    - '*.battlenet.com.cn'
-    - '*.battlenet.com'
-    - '*.blzstatic.cn'
-    - '*.battle.net'
-    # Steam
-    - '*.cm.steampowered.com'
-    - '*.steamcontent.com'
-    # Tailscale / ZeroTier
-    - '*.tailscale.com'
-    - '*.zerotier.com'
-    # Spotify
-    - '*.spotify.com'
-    # 推送服务
-    - '+.push.apple.com'
-    - '+.market.xiaomi.com'
-    # NTP 时间服务
-    - 'time.*.com'
-    - 'ntp.*.com'
-    - '+.pool.ntp.org'
-    # 音乐服务
-    - '+.music.126.net'
+    - "*"
 
-  # DNS 主要域名配置
-  # 支持 UDP、TCP、DoT、DoH、DoQ
-  # 这部分为主要 DNS 配置，影响所有直连，确保使用对大陆解析精准的 DNS
+  # 主 DNS：经由代理查询，防止境外域名泄露给国内 DNS 服务商
+  # ECS 附带国内 IP，让 Google DNS 返回 CDN 最优节点
   nameserver:
-    - https://dns.alidns.com/dns-query
+    - "https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
+
+  # 兜底 DNS：nameserver 返回非 CN IP 时触发，同样走代理
+  fallback:
+    - "https://1.1.1.1/dns-query#proxy"
+
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+
+  # 代理节点域名解析：国内 DoH，节点 IP 不会被污染，解析更快
+  proxy-server-nameserver:
     - https://doh.pub/dns-query
 
-  # 用于解析机场/代理服务器域名（respect-rules: true 时必须配置）
-  # 走加密通道，避免 DNS 污染导致节点连接失败
-  proxy-server-nameserver:
-    - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query
+  # DIRECT 流量专用 DNS，与代理流量语义分离
+  direct-nameserver:
+    - https://doh.pub/dns-query
+  direct-nameserver-follow-policy: false
 
 # TUN 设置
 
