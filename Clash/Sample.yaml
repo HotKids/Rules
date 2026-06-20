@@ -712,10 +712,10 @@ rules:
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT,no-resolve
+  - RULE-SET,CNCIDR,🔘 DIRECT
 
   # Local Area Network
-  - RULE-SET,LAN,🔘 DIRECT,no-resolve
+  - RULE-SET,LAN,🔘 DIRECT
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
