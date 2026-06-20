@@ -99,6 +99,16 @@ sniffer:
       ports: [443, 8443]
     QUIC:
       ports: [443, 8443]
+  # 跳过嗅探的域名
+  skip-domain:
+    - "+.push.apple.com"
+    - "Mijia Cloud"
+  # 跳过嗅探的目标 IP 段（避免对纯 IP 直连产生无效嗅探警告）
+  skip-dst-address:
+    - "2001:4860::/32"   # Google IPv6
+    - "2404:6800::/32"   # Google IPv6 APAC
+    - "2a00:1450::/32"   # Google IPv6 EU
+    - "240.0.0.0/4"      # 保留地址
 
 # DNS 设置
 
