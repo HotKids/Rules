@@ -150,10 +150,35 @@ dns:
   # fake-ip 记录 TTL（秒），短 TTL 让断连后快速失效
   fake-ip-ttl: 1
 
-  # rule 模式 + ["*"]：所有域名均走 fake-ip，无需手工维护排除列表
-  fake-ip-filter-mode: rule
+  # blacklist 模式：列表内域名返回真实 IP，其余全部走 fake-ip
+  fake-ip-filter-mode: blacklist
   fake-ip-filter:
-    - "*"
+    # 本地域名
+    - "*.lan"
+    - "*.local"
+    - "*.localhost"
+    - "*.home.arpa"
+    # NTP 时间同步
+    - "time.*.com"
+    - "time.*.gov"
+    - "time.*.apple.com"
+    - "ntp.*.com"
+    - "*.pool.ntp.org"
+    - "*.ntp.org.cn"
+    # STUN / TURN（WebRTC / 游戏打洞）
+    - "stun.*"
+    - "*.stun.*.*"
+    - "*.turn.twilio.com"
+    - "*.stun.twilio.com"
+    - "stun.syncthing.net"
+    # Windows / Apple 网络连通性探测
+    - "*.msftncsi.com"
+    - "*.msftconnecttest.com"
+    - "connectivitycheck.gstatic.com"
+    - "captive.apple.com"
+    # 需要真实 IP 解析的域名
+    - "localhost.*.qq.com"
+    - "*.mcdn.bilivideo.cn"
 
   # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
   # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
