@@ -93,7 +93,7 @@ show-error-page-for-reject = true
 # > Always Real IP Hosts
 # 要求 Surge 返回真正的 IP 地址，而不是 Fake-IP
 # DNS 数据包将被转发到上游 DNS 服务器
-always-real-ip = *.lan, *.local, *.localhost, *.home.arpa, dns.msftncsi.com, *.msftncsi.com, *.msftconnecttest.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, *.turn.twilio.com, *.stun.twilio.com, stun.syncthing.net, stun.*, *.stun.*.*, 127.*.*.*.sslip.io, 127-*-*-*.sslip.io, *.127.*.*.*.sslip.io, *-127-*-*-*.sslip.io, 127.*.*.*.nip.io, 127-*-*-*.nip.io, *.127.*.*.*.nip.io, *-127-*-*-*.nip.io, time.*.com, time.*.gov, time.*.apple.com, ntp.*.com, *.mcdn.bilivideo.cn, localhost.*.qq.com, connectivitycheck.gstatic.com, captive.apple.com, *.spotify.com, *.battlenet.com.cn, *.blizzard.com
+always-real-ip = *.lan, *.local, *.localhost, *.home.arpa, *.msftncsi.com, *.msftconnecttest.com, *.turn.twilio.com, *.stun.twilio.com, stun.syncthing.net, stun.*, *.stun.*.*, 127.*.*.*.sslip.io, 127-*-*-*.sslip.io, *.127.*.*.*.sslip.io, *-127-*-*-*.sslip.io, 127.*.*.*.nip.io, 127-*-*-*.nip.io, *.127.*.*.*.nip.io, *-127-*-*-*.nip.io, time.*.com, time.*.gov, time.*.apple.com, ntp.*.com, *.mcdn.bilivideo.cn, localhost.*.qq.com, connectivitycheck.gstatic.com, captive.apple.com, *.spotify.com, *.battlenet.com.cn, *.blizzard.com
 
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理
