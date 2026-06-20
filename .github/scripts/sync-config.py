@@ -1469,8 +1469,7 @@ def gen_rules_and_providers(
                     seen.pop(pname, None)
                     ph.skip()
                     continue
-                no_resolve = ",no-resolve" if behavior == "ipcidr" else ""
-                emit.append(f"  - RULE-SET,{pname},{policy}{no_resolve}")
+                emit.append(f"  - RULE-SET,{pname},{policy}")
 
             else:
                 # 外部 URL
@@ -1504,8 +1503,7 @@ def gen_rules_and_providers(
                     ph.skip()
                     continue
 
-                no_resolve = ",no-resolve" if behavior == "ipcidr" else ""
-                emit.append(f"  - RULE-SET,{pname},{policy}{no_resolve}")
+                emit.append(f"  - RULE-SET,{pname},{policy}")
 
         # 规则会被输出：先刷缓冲注释，再写规则行
         rules_out.extend(ph.flush())
