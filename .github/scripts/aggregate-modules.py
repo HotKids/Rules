@@ -25,7 +25,7 @@ _META_FIELD_RE = re.compile(r"^#!(\w+)=(.*)$")
 
 _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 
-_SECTION_ORDER = ["Rule", "Script", "Map Local", "URL Rewrite", "Header Rewrite", "MITM"]
+_SECTION_ORDER = ["MITM", "Rule", "Map Local", "Script", "URL Rewrite", "Header Rewrite"]
 
 
 def _sort_key(name: str) -> str:
