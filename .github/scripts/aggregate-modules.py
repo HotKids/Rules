@@ -221,7 +221,7 @@ def aggregate():
                 if not first:
                     out.append("")
                 out.append(f"# > {name}")
-                if name in module_hostnames:
+                if sec == "Script" and name in module_hostnames:
                     out.append(f"# hostname = {module_hostnames[name]}")
                 out.extend(lines)
                 first = False
