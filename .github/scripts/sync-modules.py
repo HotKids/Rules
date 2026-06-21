@@ -203,9 +203,9 @@ def aggregate():
     out.append(f"#!name={existing_meta.get('name', 'LoonKissSurge 合集')}")
     out.append(f"#!desc={existing_meta.get('desc', '自动聚合，每日更新')}")
     out.append(f"#!category={existing_meta.get('category', '去广告')}")
-    out.append(f"#!date={now}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
+    out.append(f"#!date={now}")
     out.append("")
 
     written_sections: set[str] = set()
