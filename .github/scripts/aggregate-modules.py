@@ -15,7 +15,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 AGGREGATE_TXT = Path(__file__).resolve().parent / "aggregate-modules.txt"
-OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "ThirdParty.sgmodule"
+OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "LoonKissSurge.sgmodule"
 
 # 从 txt 文件头注释中读取输出元信息
 _META_RE = re.compile(r"^#\s*(#!(?:name|desc)=.+)$")
