@@ -26,7 +26,8 @@ ipv6 = false
 ipv6-vif = auto
 
 # > 阻止 QUIC / HTTP3
-# 禁用基于 UDP 443 的 QUIC 协议，强制回退 HTTP/2 / HTTP/1.1
+# block-quic 设为 false，改由 [Rule] 中 PROTOCOL,QUIC,REJECT-NO-DROP 规则处理
+# 每次返回 ICMP Port Unreachable，应用立刻回退 HTTP/2 / HTTP/1.1 而不是等超时
 block-quic = false
 
 # > 允许 Wi-Fi 访问（iOS）
@@ -64,7 +65,7 @@ exclude-simple-hostnames = true
 # 兜底 DNS，加密 DNS 失败时使用
 dns-server = 119.29.29.29, 223.5.5.5
 
-# > 加密 DNS（DoH）
+# > 加密 DNS
 # 查询代理域名时跟随出站策略走代理，防止 DNS 泄露
 encrypted-dns-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-query
 encrypted-dns-follow-outbound-mode = true
