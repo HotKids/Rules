@@ -1,247 +1,290 @@
 # 通用设置
 
-# port: 7890 # HTTP(S) 代理服务器端口
-# socks-port: 7891 # SOCKS5 代理端口
-mixed-port: 7892 # HTTP(S) 和 SOCKS 代理混合端口
-# redir-port: 7893 # 透明代理端口，用于 Linux 和 MacOS
-# tproxy-port: 7894 # 透明代理端口，用于 Linux (TProxy TCP and TProxy UDP)
+# 混合代理端口（HTTP 和 SOCKS5 共用）
+mixed-port: 7892
+# HTTP(S) 独立端口（与 mixed-port 二选一）
+# port: 7890
+# SOCKS5 独立端口（与 mixed-port 二选一）
+# socks-port: 7891
+# 透明代理端口，用于 Linux 和 macOS
+# redir-port: 7893
+# TProxy 透明代理端口，用于 Linux（支持 TCP + UDP）
+# tproxy-port: 7894
 
-allow-lan: true # 允许局域网连接
-bind-address: '*' # 绑定 IP 地址，仅作用于 allow-lan 为 true，'*' 表示所有地址
+# 允许局域网设备通过本机代理
+allow-lan: true
+# 监听地址，'*' 表示所有网卡
+bind-address: '*'
 
+# 代理模式：rule（规则）/ global（全局）/ direct（直连）
 mode: rule
 
-# 日志等级 silent/error/warning/info/debug
+# 日志等级：silent / error / warning / info / debug
 log-level: info
 
-# 开启 IPv6 总开关，关闭阻断所有 IPv6 链接和屏蔽 DNS 请求 AAAA 记录
+# 关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录
 ipv6: false
 
-# RESTful API 监听地址
+# RESTful API 监听地址（供 Dashboard 及外部控制器使用）
 external-controller: 127.0.0.1:9090
 
-# 设置出口网卡
+# 出口网卡（留空由系统自动选择）
 # interface-name: eth0
 
-# 性能设置
+# ── 性能设置 ──
 
-# 统一延迟
-# 去除握手等额外延迟，更准确反映节点延迟
+# 统一延迟：去除 TCP 握手耗时，使延迟测试结果更准确
 unified-delay: true
 
-# TCP 并发连接所有 IP，将使用最快握手的 TCP
+# TCP 并发：同时向所有解析 IP 发起连接，取最快握手
 tcp-concurrent: true
 
 # 进程匹配模式
-# always - 开启，强制匹配所有进程
-# strict - 默认，由 mihomo 判断是否开启
-# off - 不匹配进程，推荐在路由器上使用此模式
+# always - 强制匹配所有进程
+# strict - 由 mihomo 自动判断（默认）
+# off   - 不匹配进程，适合路由器
 find-process-mode: strict
 
-# GeoData 加载模式，memconservative 低内存，适合路由器/嵌入式设备
-geodata-loader: memconservative
+# GeoData 加载模式
+# standard      - 性能更好，适合普通设备（当前）
+# memconservative - 低内存占用，适合路由器/嵌入式设备
+geodata-loader: standard
 
-# 显式声明 HTTP 请求 UA，避免默认值随版本漂移
+# HTTP 请求 UA（显式声明，避免随版本漂移）
 global-ua: clash.meta
 
-# 连接设置
-
-# TCP Keep-Alive 间隔
+# TCP Keep-Alive 探测间隔（秒）
 keep-alive-interval: 30
 
-# GeoData 设置
+# ── GeoData 设置 ──
 
-# 是否自动更新 geodata
+# 自动更新 GeoData 数据库
 geo-auto-update: true
 
-# 更新间隔，单位：小时
+# 更新间隔（小时）
 geo-update-interval: 24
 
-# 自定义 geodata url
+# GeoData 数据库 URL
 geox-url:
   geoip: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
   geosite: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
   mmdb: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb"
 
-# Hosts 设置
+# ── Hosts ──
 
-# 类似于 /etc/hosts，仅支持配置单个 IP
+# 静态域名映射，优先级高于 DNS 解析
 hosts:
   '*.clash.dev': 127.0.0.1
-  '.dev': 127.0.0.1
   'localhost': 127.0.0.1
 
-# 配置持久化
+# ── 配置持久化 ──
 
 profile:
-  # 存储 select 选择记录
+  # 持久化策略组选择（重启后恢复上次选择）
   store-selected: true
-  # 持久化 fake-ip
+  # 持久化 fake-ip 映射（重启后 IP 不变）
   store-fake-ip: true
 
-# 嗅探域名
+# ── 域名嗅探 ──
 
 sniffer:
   enable: true
-  # 是否使用嗅探结果作为实际访问，默认 true
-  # 全局配置，优先级低于 sniffer.sniff 实际配置
+  # 嗅探结果仅用于规则匹配，不替换目标地址
+  # fake-ip 模式下设为 false；HTTP 协议单独开启 override-destination
   override-destination: false
-  # fake-ip 下改善 QUIC/HTTPS 直连 IP 场景的规则命中
+  # redir-host 模式下也强制嗅探，改善直连 IP 的规则命中
   force-dns-mapping: true
+  # 对无域名信息的纯 IP 连接也尝试嗅探
   parse-pure-ip: true
   sniff:
     HTTP:
-      # 需要嗅探的端口
       ports: [80, 8080-8880]
-      # 可覆盖 sniffer.override-destination
+      # HTTP 覆盖全局设置，用嗅探到的 Host 替换目标地址
       override-destination: true
     TLS:
       ports: [443, 8443]
     QUIC:
       ports: [443, 8443]
+  # 跳过嗅探的域名
+  skip-domain:
+    - "+.push.apple.com"
+    - "Mijia Cloud"
+  # 跳过嗅探的目标 IP 段（避免对纯 IP 直连产生无效嗅探警告）
+  skip-dst-address:
+    - "2001:4860::/32"   # Google IPv6
+    - "2404:6800::/32"   # Google IPv6 APAC
+    - "2a00:1450::/32"   # Google IPv6 EU
+    - "240.0.0.0/4"      # 保留地址
 
-# DNS 设置
+# ── DNS ──
 
 dns:
   enable: true
-  # 开启 DNS 服务器监听
+  # DNS 服务监听地址
   listen: 0.0.0.0:1053
-  # false 将返回 AAAA 的空结果
+  # 关闭 IPv6 解析，AAAA 查询返回空结果
   ipv6: false
-
-  # 让系统 hosts 及自定义 hosts 生效（如局域网 NAS、Pi-hole）
+  # 读取系统 /etc/hosts
   use-system-hosts: true
+  # DNS 缓存淘汰算法（arc 兼顾命中率与性能）
+  cache-algorithm: arc
+  # DoH 是否启用 HTTP/3 并发尝试
+  prefer-h3: false
 
-  # 用于解析 nameserver，fallback 以及其他 DNS 服务器配置的 DNS 服务域名
-  # 只能使用纯 IP 地址，可使用加密 DNS
+  # nameserver / fallback 连接始终直连，不遵守路由规则
+  # 各条目通过 #proxy 后缀单独指定走代理
+  respect-rules: false
+
+  # 引导 DNS：仅用于解析 nameserver / fallback 服务器的域名
+  # 只能填纯 IP 地址
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
 
+  # 增强模式：fake-ip 返回虚假 IP，Clash 内部完成真实解析
   enhanced-mode: fake-ip
-  # fake-ip 池设置
+  # fake-ip 地址池（RFC 6598 保留段）
   fake-ip-range: 198.18.0.1/16
+  # 禁用 IPv6 fake-ip 池，与 ipv6: false 对齐
+  fake-ip-range6: ""
+  # fake-ip 记录 TTL（秒），短 TTL 让断连后快速失效
+  fake-ip-ttl: 1
 
-  # DNS 缓存算法
-  cache-algorithm: arc
-
-  # 是否开启 DoH 支持 HTTP/3，将并发尝试
-  prefer-h3: false
-
-  # 配置后面的 nameserver、fallback 和 nameserver-policy 向 DNS 服务器的连接过程是否遵守 rules 规则
-  # 如果为 false（默认值）则这三部分的 DNS 服务器在未特别指定的情况下会直连
-  # 如果为 true，将会按照 rules 的规则匹配链接方式（走代理或直连）
-  # 启用 true 时必须同时配置 proxy-server-nameserver
-  respect-rules: true
-
-  # 配置 fake-ip-filter 的匹配模式，默认为 blacklist，即如果匹配成功不返回 fake-ip
-  # 可设置为 whitelist，即只有匹配成功才返回 fake-ip
+  # blacklist 模式：列表内域名返回真实 IP，其余全部走 fake-ip
   fake-ip-filter-mode: blacklist
-
-  # 配置不使用 fake-ip 的域名
   fake-ip-filter:
-    # 局域网与本地服务
-    - '*.lan'
-    - '+.lan'
-    - '*.local'
-    - '*.localdomain'
-    - '*.home.arpa'
-    - '*.localhost'
-    - 'localhost.ptlogin2.qq.com'
-    - 'WORKGROUP'
-    # STUN 服务
-    - '+.stun.*'
-    - '*.srv.nintendo.net'
-    - 'xbox.*.microsoft.com'
-    - 'xbox.*.*.microsoft.com'
-    - '*.xboxlive.com'
-    # 网络检测
-    - '*.msftconnecttest.com'
-    - '*.msftncsi.com'
-    - 'connectivitycheck.gstatic.com'
-    - 'connectivitycheck.android.com'
-    - 'connectivitycheck.platform.hicloud.com'
-    - 'connect.rom.miui.com'
-    - 'captive.apple.com'
-    - 'network-test.debian.org'
-    - 'detectportal.firefox.com'
-    # 特殊服务
-    - 'lens.l.google.com'
-    - '*.mcdn.bilivideo.cn'
-    - '*.battlenet.com.cn'
-    - '*.battlenet.com'
-    - '*.blzstatic.cn'
-    - '*.battle.net'
+    # 本地域名
+    - "*.lan"
+    - "+.lan"
+    - "*.local"
+    - "*.localdomain"
+    - "*.home.arpa"
+    - "*.localhost"
+    - "WORKGROUP"
+    # NTP 时间同步
+    - "time.*.com"
+    - "time.*.gov"
+    - "time.*.apple.com"
+    - "ntp.*.com"
+    - "+.pool.ntp.org"
+    - "*.ntp.org.cn"
+    # STUN / TURN（WebRTC / 游戏打洞）
+    - "+.stun.*"
+    - "*.stun.*.*"
+    - "*.turn.twilio.com"
+    - "*.stun.twilio.com"
+    - "stun.syncthing.net"
+    # 游戏平台
+    - "*.srv.nintendo.net"
+    - "xbox.*.microsoft.com"
+    - "xbox.*.*.microsoft.com"
+    - "*.xboxlive.com"
     # Steam
-    - '*.cm.steampowered.com'
-    - '*.steamcontent.com'
-    # Tailscale / ZeroTier
-    - '*.tailscale.com'
-    - '*.zerotier.com'
-    # Spotify
-    - '*.spotify.com'
-    # 推送服务
-    - '+.push.apple.com'
-    - '+.market.xiaomi.com'
-    # NTP 时间服务
-    - 'time.*.com'
-    - 'ntp.*.com'
-    - '+.pool.ntp.org'
-    # 音乐服务
-    - '+.music.126.net'
+    - "*.cm.steampowered.com"
+    - "*.steamcontent.com"
+    # Battle.net / Blizzard
+    - "*.battlenet.com.cn"
+    - "*.battlenet.com"
+    - "*.blzstatic.cn"
+    - "*.battle.net"
+    # 网络连通性探测（多平台）
+    - "*.msftncsi.com"
+    - "*.msftconnecttest.com"
+    - "connectivitycheck.gstatic.com"
+    - "connectivitycheck.android.com"
+    - "connectivitycheck.platform.hicloud.com"
+    - "connect.rom.miui.com"
+    - "captive.apple.com"
+    - "network-test.debian.org"
+    - "detectportal.firefox.com"
+    - "lens.l.google.com"
+    # 推送通知
+    - "+.push.apple.com"
+    - "+.market.xiaomi.com"
+    # VPN 覆盖网络
+    - "*.tailscale.com"
+    - "*.zerotier.com"
+    # 媒体服务
+    - "*.spotify.com"
+    - "+.music.126.net"
+    - "*.mcdn.bilivideo.cn"
+    # 其他需要真实 IP 解析的域名
+    - "localhost.*.qq.com"
 
-  # DNS 主要域名配置
-  # 支持 UDP、TCP、DoT、DoH、DoQ
-  # 这部分为主要 DNS 配置，影响所有直连，确保使用对大陆解析精准的 DNS
+  # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
+  # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
   nameserver:
-    - https://dns.alidns.com/dns-query
+    - "https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
+
+  # 兜底 DNS：nameserver 返回非 CN IP 或保留地址段时触发，同样走代理
+  fallback:
+    - "https://1.1.1.1/dns-query#proxy"
+
+  # 污染检测规则：符合以下任一条件时使用 fallback 结果
+  fallback-filter:
+    # 返回 IP 的 GeoIP 归属地非 CN
+    geoip: true
+    geoip-code: CN
+    # 返回 IP 落在保留地址段（明显污染）
+    ipcidr:
+      - 240.0.0.0/4
+
+  # 代理节点域名解析：国内 DoH，节点 IP 不会被 CN DNS 污染，速度更快
+  proxy-server-nameserver:
     - https://doh.pub/dns-query
 
-  # 用于解析机场/代理服务器域名（respect-rules: true 时必须配置）
-  # 走加密通道，避免 DNS 污染导致节点连接失败
-  proxy-server-nameserver:
-    - https://dns.cloudflare.com/dns-query
-    - https://dns.google/dns-query
+  # DIRECT 流量专用 DNS，与代理流量语义分离
+  direct-nameserver:
+    - https://doh.pub/dns-query
+  # DIRECT DNS 连接本身不走路由规则，始终直连
+  direct-nameserver-follow-policy: false
 
-# TUN 设置
+# ── TUN ──
 
 tun:
+  # 启用 TUN 网卡，接管系统全量流量
   enable: true
 
   # 网络栈模式
   # system - 性能最高，兼容性一般
   # gvisor - 兼容性好，性能较低
-  # mixed - TCP 走系统栈，UDP 走 gvisor（推荐）
+  # mixed  - TCP 走系统栈，UDP 走 gvisor（推荐）
   stack: mixed
 
-  # 需要劫持的 DNS
+  # 劫持所有 DNS 请求，防止应用绕过 Clash DNS
   dns-hijack:
     - any:53
 
-  # 配置路由表
+  # 自动配置路由表，将全局流量引入 TUN
   auto-route: true
 
   # 自动识别出口网卡
   auto-detect-interface: true
 
-  # Linux 下自动透明代理 TCP，替代手工 iptables/nftables（非 Linux 平台自动忽略）
+  # 自动配置 iptables/nftables 透明代理（仅 Linux 生效，其他平台忽略）
   auto-redirect: true
 
-  # 启用 GSO（Generic Segmentation Offload）提升 TUN 吞吐
+  # GSO（Generic Segmentation Offload），提升 TUN 吞吐（仅 Linux）
   gso: true
+  # GSO 单次最大数据块长度（字节）
   gso-max-size: 65536
 
-  # 将所有连接路由到 tun 来防止泄漏，但你的设备将无法被其他设备访问
+  # 严格路由：强制所有连接经过 TUN，防止 IP 泄漏
+  # 注意：开启后本设备无法被同网段其他设备主动访问
   strict-route: true
 
-  # 启用 auto-route 时使用自定义路由而不是默认路由
+  # EIM NAT（Endpoint-Independent Mapping）
+  # 改善游戏、VOIP、WebRTC 的 UDP 打洞成功率
+  endpoint-independent-nat: true
+
+  # 自定义路由（留空则使用默认全局路由）
   # route-address:
   #   - 0.0.0.0/1
   #   - 128.0.0.0/1
 
-  # 排除路由，这些网段不经过 TUN
+  # 排除路由（这些网段不经过 TUN）
   # route-exclude-address:
   #   - 192.168.31.0/24
 
-# 本地节点配置（订阅为空）
+# 本地节点（订阅覆盖此处）
 proxies: []
