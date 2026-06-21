@@ -1,6 +1,6 @@
 # Surge sgmodule 聚合列表
 # 每行一个 URL，以 # 开头的行为注释
-# 输出文件: Surge/Module/LoonKissSurge.sgmodule
+# 输出文件: Surge/Module/BlockAds.sgmodule
 # name/desc 在输出文件中手动维护，脚本不覆盖
 
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/12306%E5%8E%BB%E5%B9%BF%E5%91%8A.sgmodule

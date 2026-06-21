@@ -19,7 +19,7 @@ from pypinyin import lazy_pinyin
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SYNC_TXT = Path(__file__).resolve().parent / "sync-modules.txt"
-OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "LoonKissSurge.sgmodule"
+OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "BlockAds.sgmodule"
 
 _SECTION_RE = re.compile(r"^\[(.+)\]$")
 _META_FIELD_RE = re.compile(r"^#!(\w+)=(.*)$")
