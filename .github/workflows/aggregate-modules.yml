@@ -1,0 +1,37 @@
+name: Aggregate Modules
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - 'Surge/Module/**'
+      - '.github/scripts/aggregate-modules.txt'
+      - '.github/scripts/aggregate-modules.py'
+  schedule:
+    - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  aggregate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        run: git clone --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
+
+      - name: Run aggregate script
+        run: python3 .github/scripts/aggregate-modules.py
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Surge/Module/LoonKissSurge.sgmodule
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: aggregate third-party sgmodules [auto]"
+            git push
+          fi
