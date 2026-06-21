@@ -17,8 +17,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 AGGREGATE_TXT = Path(__file__).resolve().parent / "aggregate-modules.txt"
 OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "LoonKissSurge.sgmodule"
 
-# 从 txt 文件头注释中读取输出元信息
-_META_RE = re.compile(r"^#\s*(#!(?:name|desc)=.+)$")
 _SECTION_RE = re.compile(r"^\[(.+)\]$")
 _META_FIELD_RE = re.compile(r"^#!(\w+)=(.*)$")
 
@@ -110,26 +108,26 @@ def _merge_mitm(all_mitm_lines: list[str]) -> list[str]:
     return result
 
 
-def load_config() -> tuple[dict[str, str], list[str]]:
-    """从 aggregate-modules.txt 读取元信息注释和 URL 列表。"""
-    meta: dict[str, str] = {}
+def load_urls() -> list[str]:
+    """从 aggregate-modules.txt 读取 URL 列表（忽略注释行）。"""
     urls: list[str] = []
-
     for line in AGGREGATE_TXT.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
-        if not stripped:
-            continue
-        m = _META_RE.match(stripped)
-        if m:
-            field = _META_FIELD_RE.match(m.group(1))
-            if field:
-                meta[field.group(1)] = field.group(2).strip()
-            continue
-        if stripped.startswith("#"):
-            continue
-        urls.append(stripped)
+        if stripped and not stripped.startswith("#"):
+            urls.append(stripped)
+    return urls
 
-    return meta, urls
+
+def read_output_meta() -> dict[str, str]:
+    """读取输出文件现有的 #!name / #!desc，供重生成时保留。"""
+    meta: dict[str, str] = {}
+    if not OUTPUT_FILE.exists():
+        return meta
+    for line in OUTPUT_FILE.read_text(encoding="utf-8").splitlines():
+        m = _META_FIELD_RE.match(line.strip())
+        if m:
+            meta[m.group(1)] = m.group(2).strip()
+    return meta
 
 
 def write_if_changed(path: Path, content: str) -> bool:
@@ -141,10 +139,13 @@ def write_if_changed(path: Path, content: str) -> bool:
 
 
 def aggregate():
-    meta, urls = load_config()
+    urls = load_urls()
     if not urls:
         print("[WARN] aggregate-modules.txt 中无 URL 条目")
         return
+
+    # 保留输出文件中用户手动维护的 name / desc
+    existing_meta = read_output_meta()
 
     print(f"并发拉取 {len(urls)} 个 sgmodule …")
     results: dict[str, str | None] = {}
@@ -176,10 +177,10 @@ def aggregate():
     if "MITM" in section_lines:
         section_lines["MITM"] = _merge_mitm(section_lines["MITM"])
 
-    # 构建输出
+    # 构建输出（name/desc 优先用输出文件中已有的值）
     out: list[str] = []
-    out.append(f"#!name={meta.get('name', '第三方 sgmodule 合集')}")
-    out.append(f"#!desc={meta.get('desc', '自动聚合，每日更新')}")
+    out.append(f"#!name={existing_meta.get('name', 'LoonKissSurge 合集')}")
+    out.append(f"#!desc={existing_meta.get('desc', '自动聚合，每日更新')}")
     out.append("")
 
     written_sections: set[str] = set()
