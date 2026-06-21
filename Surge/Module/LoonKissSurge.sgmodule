@@ -1,21 +1,21 @@
 #!name=第三方 sgmodule 合集
 #!desc=自动聚合，每日更新
 
+[MITM]
+hostname = ad.12306.cn, mobile.12306.cn, www.123pan.com
+
 [Rule]
 # > 12306去广告
 # hostname = ad.12306.cn, mobile.12306.cn
 DOMAIN,ad.12306.cn,DIRECT,extended-matching
-
-[Script]
-# > 12306去广告
-# hostname = ad.12306.cn, mobile.12306.cn
-移除12306开屏广告 = type=http-request, pattern=^https:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_splashscreen_ads.js, requires-body=true
-移除12306应用内广告 = type=http-request, pattern=^https:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
 
 [Map Local]
 # > 123云盘去广告
 # hostname = www.123pan.com
 ^https:\/\/www\.123pan\.com\/api\/config\/get data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-[MITM]
-hostname = ad.12306.cn, mobile.12306.cn, www.123pan.com
+[Script]
+# > 12306去广告
+# hostname = ad.12306.cn, mobile.12306.cn
+移除12306开屏广告 = type=http-request, pattern=^https:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_splashscreen_ads.js, requires-body=true
+移除12306应用内广告 = type=http-request, pattern=^https:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
