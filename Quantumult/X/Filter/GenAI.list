@@ -23,8 +23,8 @@ DOMAIN-SUFFIX,claude.ai,GenAI
 DOMAIN-SUFFIX,claude.com,GenAI
 DOMAIN-SUFFIX,anthropic.com,GenAI
 DOMAIN-SUFFIX,claudeusercontent.com,GenAI
-IP-CIDR,160.79.104.0/23,GenAI,no-resolve
-IP6-CIDR,2607:6bc0::/48,GenAI,no-resolve
+IP-CIDR,160.79.104.0/21,GenAI,no-resolve
+IP6-CIDR,2607:6bc0::/32,GenAI,no-resolve
 
 # OpenAI
 # > ChatGPT
@@ -112,14 +112,6 @@ DOMAIN,pplx-res.cloudinary.com,GenAI
 DOMAIN-SUFFIX,x.ai,GenAI
 DOMAIN-SUFFIX,grok.com,GenAI
 DOMAIN-SUFFIX,grokipedia.com,GenAI
-
-# # ByteDance
-# # > Doubao Dola
-# DOMAIN-SUFFIX,dola.com
-# DOMAIN-SUFFIX,cici.com
-# DOMAIN-SUFFIX,ciciai.com
-# DOMAIN,abtestvm-sg.bytedance.com
-# DOMAIN-WILDCARD,abtest*.byteoversea.com
 
 # Canva
 # > Affinity

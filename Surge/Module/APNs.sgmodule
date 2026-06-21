@@ -9,4 +9,4 @@ include-apns=true
 
 [Rule]
 # APNs
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/APNS.list,{{{APNs}}},force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/APNS.list,{{{APNs}}},extended-matching
