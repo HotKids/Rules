@@ -1,12 +1,12 @@
-name: Aggregate Modules
+name: Sync Modules
 
 on:
   push:
     branches: [master]
     paths:
       - 'Surge/Module/**'
-      - '.github/scripts/aggregate-modules.txt'
-      - '.github/scripts/aggregate-modules.py'
+      - '.github/scripts/sync-modules.txt'
+      - '.github/scripts/sync-modules.py'
   schedule:
     - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:
@@ -15,14 +15,14 @@ permissions:
   contents: write
 
 jobs:
-  aggregate:
+  sync:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         run: git clone --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
 
       - name: Run aggregate script
-        run: python3 .github/scripts/aggregate-modules.py
+        run: pip install pypinyin -q && python3 .github/scripts/sync-modules.py
 
       - name: Commit & push
         run: |
