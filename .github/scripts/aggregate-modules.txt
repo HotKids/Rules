@@ -1,6 +1,6 @@
 # Surge sgmodule 聚合列表
 # 每行一个 URL，以 # 开头的行为注释
-# 输出文件: Surge/Module/ThirdParty.sgmodule
+# 输出文件: Surge/Module/LoonKissSurge.sgmodule
 # 聚合名称: #!name=第三方去广告合集
 # 聚合描述: #!desc=聚合第三方 sgmodule，自动抓取合并，每日更新
 
