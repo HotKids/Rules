@@ -3,10 +3,10 @@
 
 [Rule]
 # HK
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/HK-wifi-call.list,🇭🇰 Hong Kong,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/HK-wifi-call.list,🇭🇰 Hong Kong,extended-matching
 # US
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇺🇸 America,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/US-wifi-call.list,🇺🇸 America,extended-matching
 # UK
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/UK-wifi-call.list,🇬🇧 England,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/UK-wifi-call.list,🇬🇧 England,extended-matching
 # DE
-RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/DE-wifi-call.list,🇩🇪 Germany,force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/iniwex5/tools/main/rules/DE-wifi-call.list,🇩🇪 Germany,extended-matching
