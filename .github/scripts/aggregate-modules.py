@@ -10,6 +10,7 @@ import re
 import sys
 import urllib.request
 import urllib.parse
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -196,10 +197,13 @@ def aggregate():
         if sec != "MITM":
             section_entries[sec].sort(key=lambda x: _sort_key(x[0]))
 
-    # 构建输出
+    # 构建输出（name/desc/category 保留手动维护值，date 取当前同步时间）
+    now = datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
     out: list[str] = []
     out.append(f"#!name={existing_meta.get('name', 'LoonKissSurge 合集')}")
     out.append(f"#!desc={existing_meta.get('desc', '自动聚合，每日更新')}")
+    out.append(f"#!category={existing_meta.get('category', '去广告')}")
+    out.append(f"#!date={now}")
     out.append("")
 
     written_sections: set[str] = set()

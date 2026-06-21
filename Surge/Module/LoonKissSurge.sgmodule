@@ -1,5 +1,7 @@
 #!name=第三方 sgmodule 合集
 #!desc=自动聚合，每日更新
+#!category=去广告
+#!date=2026-06-22 00:30:47
 
 [MITM]
 hostname = %APPEND% ad.12306.cn, mobile.12306.cn, www.123pan.com
