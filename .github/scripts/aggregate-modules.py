@@ -116,7 +116,7 @@ def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
     for k, v in bool_flags.items():
         result.append(f"{k} = {v}")
     if hostnames:
-        result.append(f"hostname = {', '.join(hostnames)}")
+        result.append(f"hostname = %APPEND% {', '.join(hostnames)}")
     return result
 
 

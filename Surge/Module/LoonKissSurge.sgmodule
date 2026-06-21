@@ -2,7 +2,7 @@
 #!desc=自动聚合，每日更新
 
 [MITM]
-hostname = ad.12306.cn, mobile.12306.cn, www.123pan.com
+hostname = %APPEND% ad.12306.cn, mobile.12306.cn, www.123pan.com
 
 [Rule]
 # > 12306去广告
