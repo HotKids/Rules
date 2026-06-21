@@ -70,7 +70,7 @@ encrypted-dns-server = https://doh.pub/dns-query, https://dns.alidns.com/dns-que
 encrypted-dns-follow-outbound-mode = true
 
 # > 加密 DNS 证书验证
-doh-skip-cert-verification = false
+encrypted-dns-skip-cert-verification = false
 
 # > 从 /etc/hosts 读取 DNS 记录
 read-etc-hosts = true
