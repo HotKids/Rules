@@ -1,7 +1,8 @@
 #!name=去广告合集
 #!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护
 #!category=去广告
-#!date=2026-06-22 00:58:00
+#!remark=广告平台拦截器是去广告基础，需置顶并搭配本合集使用: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule
+#!date=2026-06-22 01:08:20
 
 [MITM]
 hostname = %APPEND% ad.12306.cn, mobile.12306.cn, www.123pan.com
