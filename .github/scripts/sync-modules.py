@@ -2,7 +2,7 @@
 """
 Surge sgmodule 聚合脚本
 
-读取 aggregate-modules.txt 中的 URL 列表，拉取并合并为单个 sgmodule。
+读取 sync-modules.txt 中的 URL 列表，拉取并合并为单个 sgmodule。
 每个来源模块以 # > NAME 分组，按名称首字符排序：数字 → 英文 → 汉字拼音。
 """
 
@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from pypinyin import lazy_pinyin
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
-AGGREGATE_TXT = Path(__file__).resolve().parent / "aggregate-modules.txt"
+SYNC_TXT = Path(__file__).resolve().parent / "sync-modules.txt"
 OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "LoonKissSurge.sgmodule"
 
 _SECTION_RE = re.compile(r"^\[(.+)\]$")
@@ -50,7 +50,7 @@ def _encode_url(url: str) -> str:
 def fetch_url(url: str) -> tuple[str, str | None]:
     try:
         encoded = _encode_url(url)
-        req = urllib.request.Request(encoded, headers={"User-Agent": "aggregate-modules/1.0"})
+        req = urllib.request.Request(encoded, headers={"User-Agent": "sync-modules/1.0"})
         with urllib.request.urlopen(req, timeout=30) as resp:
             return url, resp.read().decode("utf-8")
     except Exception as e:
@@ -123,7 +123,7 @@ def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
 
 def load_urls() -> list[str]:
     urls: list[str] = []
-    for line in AGGREGATE_TXT.read_text(encoding="utf-8").splitlines():
+    for line in SYNC_TXT.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if stripped and not stripped.startswith("#"):
             urls.append(stripped)
@@ -152,7 +152,7 @@ def write_if_changed(path: Path, content: str) -> bool:
 def aggregate():
     urls = load_urls()
     if not urls:
-        print("[WARN] aggregate-modules.txt 中无 URL 条目")
+        print("[WARN] sync-modules.txt 中无 URL 条目")
         return
 
     existing_meta = read_output_meta()
