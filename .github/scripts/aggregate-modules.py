@@ -166,6 +166,8 @@ def aggregate():
 
     # {section: [(name, [lines]), ...]}  按原顺序收集
     section_entries: dict[str, list[tuple[str, list[str]]]] = defaultdict(list)
+    # name -> hostname 注释字符串（用于各 section 内的 # hostname = ... 提示行）
+    module_hostnames: dict[str, str] = {}
 
     for url in urls:
         text = results.get(url)
@@ -173,6 +175,16 @@ def aggregate():
             continue
         parsed = parse_sgmodule(text)
         name = parsed["meta"].get("name", url)
+        # 提取该模块自身的 hostname
+        mitm_lines = parsed["sections"].get("MITM", [])
+        for line in mitm_lines:
+            if "=" in line:
+                k, _, v = line.partition("=")
+                if k.strip() == "hostname":
+                    v = re.sub(r"^%APPEND%\s*", "", v.strip())
+                    if v:
+                        module_hostnames[name] = v
+                    break
         for section, lines in parsed["sections"].items():
             non_empty = [l for l in lines if l.strip()]
             if non_empty:
@@ -205,6 +217,8 @@ def aggregate():
                 if not first:
                     out.append("")
                 out.append(f"# > {name}")
+                if name in module_hostnames:
+                    out.append(f"# hostname = {module_hostnames[name]}")
                 out.extend(lines)
                 first = False
         out.append("")
