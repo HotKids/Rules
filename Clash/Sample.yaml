@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-21 11:07:25
+# Date: 2026-06-21 11:14:30
 # Author: @HotKids
 
 # 通用设置
@@ -753,6 +753,7 @@ rules:
   - RULE-SET,China,🔘 DIRECT
   - RULE-SET,CNASN,🔘 DIRECT
   - RULE-SET,CNCIDR,🔘 DIRECT
+  - GEOIP,CN,🔘 DIRECT
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
