@@ -1,6 +1,7 @@
 #!name=Client Module
 #!desc=macOS Client Rule
 #!author=HotKids
+#!category=HotKids
 #!system=mac
 
 [Rule]
