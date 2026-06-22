@@ -2,7 +2,7 @@
 #!desc=修改常见社群 IP 归属地显示
 #!category=HotKids
 #!arguments=SNS:DIRECT,Twitter:DIRECT,Bilibili:bilibili,Douyin:amemv,Toutiao:snssdk,Kuwo:kuwo,Xiaohongshu:xiaohongshu,Weibo:weibo,Zhihu:zhihu,Twitter/X:RULE-SET
-#!arguments-desc=Twitter/X：输入 # 禁用，其他输入 NO 禁用
+#!arguments-desc=Twitter/X:输入 # 表示禁用；其他平台如需禁用，请输入任意非常见域名值（e.g. NO）
 
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
