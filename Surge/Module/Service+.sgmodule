@@ -4,20 +4,20 @@
 
 [Rule]
 # > ChatGPT
-{{{ChatGPT 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 分流}}},extended-matching
+%ChatGPT 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,%ChatGPT 分流%,extended-matching
 # > Claude
-{{{Claude 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 分流}}},extended-matching
+%Claude 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,%Claude 分流%,extended-matching
 # > Discovery+
-{{{Discovery+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 分流}}},extended-matching
+%Discovery+ 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,%Discovery+ 分流%,extended-matching
 # > Disney+
-{{{Disney+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 分流}}},extended-matching
+%Disney+ 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,%Disney+ 分流%,extended-matching
 # > HBO Max
-{{{HBO Max 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 分流}}},extended-matching
+%HBO Max 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,%HBO Max 分流%,extended-matching
 # > Netflix
-{{{Netflix 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 分流}}},extended-matching
+%Netflix 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,%Netflix 分流%,extended-matching
 # > Spotify
-{{{Spotify 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 分流}}},extended-matching
+%Spotify 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,%Spotify 分流%,extended-matching
 # > Viu｜HK IN SEA
-{{{Viu 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 分流}}},extended-matching
+%Viu 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,%Viu 分流%,extended-matching
 # > YouTube
-{{{YouTube 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 分流}}},extended-matching
+%YouTube 禁用%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,%YouTube 分流%,extended-matching
