@@ -82,20 +82,24 @@ def parse_sgmodule(text: str) -> dict:
     return {"meta": meta, "sections": sections}
 
 
-def _sub_alias(text: str, alias: str) -> str:
-    """将 text 中作为域名标签出现的 alias 替换为 {{{alias}}}。
+def _sub_alias(text: str, keyword: str, display: str) -> str:
+    """将 text 中作为域名标签出现的 keyword 替换为占位符 {{{display}}}。
 
+    keyword 为域名关键字（如 ithome），display 为参数键名（如 IT之家）。
     仅在紧邻点号（`.` 或转义的 `\\.`）时替换，从而命中域名部分
-    （如 ad.12306.cn → ad.{{{12306}}}.cn），而不会误伤脚本名
+    （如 napi.ithome.com → napi.{{{IT之家}}}.com），而不会误伤脚本名
     （移除12306开屏广告）或 script-path 路径（.../12306/12306_remove.js）。
     """
-    esc = re.escape(alias)
-    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.)").sub(
-        f"{{{{{{{alias}}}}}}}", text
-    )
+    esc = re.escape(keyword)
+    repl = "{{{" + display + "}}}"
+    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.)").sub(lambda _m: repl, text)
 
 
-def _merge_mitm(entries: list[tuple[str, list[str]]], name_to_alias: dict[str, str]) -> list[str]:
+def _merge_mitm(
+    entries: list[tuple[str, list[str]]],
+    name_to_alias: dict[str, str],
+    name_to_display: dict[str, str],
+) -> list[str]:
     """合并多个来源的 [MITM] 块：hostname 去重合并，布尔键取 true 优先。
 
     每条 hostname 按其所属模块的 alias 做域名替换。
@@ -106,6 +110,7 @@ def _merge_mitm(entries: list[tuple[str, list[str]]], name_to_alias: dict[str, s
 
     for name, lines in entries:
         alias = name_to_alias.get(name)
+        display = name_to_display.get(name, alias or "")
         for line in lines:
             if not line.strip():
                 continue
@@ -121,7 +126,7 @@ def _merge_mitm(entries: list[tuple[str, list[str]]], name_to_alias: dict[str, s
                 for h in val.split(","):
                     h = h.strip()
                     if h and h not in host_map:
-                        host_map[h] = _sub_alias(h, alias) if alias else h
+                        host_map[h] = _sub_alias(h, alias, display) if alias else h
             elif key in _MITM_BOOL_KEYS:
                 if bool_flags.get(key) != "true":
                     bool_flags[key] = val
@@ -198,14 +203,16 @@ def aggregate():
     module_dates: dict[str, str] = {}
     # name -> 上游模块描述
     module_descs: dict[str, str] = {}
-    # 合并后的 upstream arguments：key -> default（保序去重）
-    merged_args: dict[str, str] = {}
+    # 模块名 -> 该模块自带 arguments 列表 [(key, "key:default"), ...]
+    module_args: dict[str, list[tuple[str, str]]] = {}
+    # 按 url 顺序记录成功解析的模块名（用于 #!arguments 排序与分组）
+    ordered_modules: list[str] = []
     # 合并后的 upstream arguments-desc：key -> desc（保序去重）
     merged_args_desc: dict[str, str] = {}
-    # alias 有序集合（默认值即 alias 本身），用于生成 #!arguments，保留 url_alias_list 顺序
-    alias_args: dict[str, None] = {}
-    # 模块名 -> alias，用于在各 section 内做域名替换
+    # 模块名 -> alias（域名关键字），用于在各 section 内做域名替换
     name_to_alias: dict[str, str] = {}
+    # 模块名 -> display（参数键名 = 模块名去掉“去广告”）
+    name_to_display: dict[str, str] = {}
 
     for url, alias in url_alias_list:
         text = results.get(url)
@@ -213,9 +220,12 @@ def aggregate():
             continue
         parsed = parse_sgmodule(text)
         name = parsed["meta"].get("name", url)
+        if name not in ordered_modules:
+            ordered_modules.append(name)
         if alias:
-            alias_args[alias] = None
+            display = name.replace("去广告", "").strip() or alias
             name_to_alias[name] = alias
+            name_to_display[name] = display
         # 提取上游 date（只保留年月日）
         raw_date = parsed["meta"].get("date", "")
         if raw_date:
@@ -224,14 +234,17 @@ def aggregate():
         desc = parsed["meta"].get("desc", "")
         if desc:
             module_descs[name] = desc
-        # 收集 arguments / arguments-desc（保序去重，先到先得）
+        # 收集该模块自带 arguments（保序），输出时紧跟在该模块的域名开关之后
+        mod_arg_list: list[tuple[str, str]] = []
         for arg_entry in parsed["meta"].get("arguments", "").split(","):
             arg_entry = arg_entry.strip()
             if not arg_entry:
                 continue
             key = arg_entry.split(":")[0].strip()
-            if key and key not in merged_args:
-                merged_args[key] = arg_entry
+            if key:
+                mod_arg_list.append((key, arg_entry))
+        if mod_arg_list:
+            module_args[name] = mod_arg_list
         for desc_entry in parsed["meta"].get("arguments-desc", "").split("\n"):
             desc_entry = desc_entry.strip()
             if not desc_entry:
@@ -270,11 +283,16 @@ def aggregate():
     out.append(f"#!category={existing_meta.get('category', 'HotKids')}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
-    # 写入合并后的 arguments：模块域名开关（alias:alias，默认值即 alias 本身=启用）
-    # 在前，上游自带 arguments 在后。
-    all_args: dict[str, str] = {alias: f"{alias}:{alias}" for alias in alias_args}
-    for k, v in merged_args.items():
-        all_args.setdefault(k, v)
+    # 写入合并后的 arguments：按模块顺序，每个模块先写其域名开关（display:keyword，
+    # 默认值=域名关键字=启用），紧跟该模块自带的 arguments，便于辨识归属。
+    all_args: dict[str, str] = {}
+    for name in ordered_modules:
+        alias = name_to_alias.get(name)
+        display = name_to_display.get(name)
+        if alias and display not in all_args:
+            all_args[display] = f"{display}:{alias}"
+        for key, entry in module_args.get(name, []):
+            all_args.setdefault(key, entry)
     if all_args:
         out.append(f"#!arguments={','.join(all_args.values())}")
     if merged_args_desc:
@@ -290,13 +308,14 @@ def aggregate():
             return
         out.append(f"[{sec}]")
         if sec == "MITM":
-            out.extend(_merge_mitm(entries, name_to_alias))
+            out.extend(_merge_mitm(entries, name_to_alias, name_to_display))
         else:
             first = True
             for name, lines in entries:
                 if not first:
                     out.append("")
                 alias = name_to_alias.get(name)
+                display = name_to_display.get(name, alias or "")
                 date_suffix = f" · {module_dates[name]}" if name in module_dates else ""
                 out.append(f"# > {name}{date_suffix}")
                 if name in module_descs:
@@ -304,9 +323,9 @@ def aggregate():
                 if sec == "Script" and name in module_hostnames:
                     hint = module_hostnames[name]
                     if alias:
-                        hint = _sub_alias(hint, alias)
+                        hint = _sub_alias(hint, alias, display)
                     out.append(f"# hostname = {hint}")
-                out.extend(_sub_alias(line, alias) if alias else line for line in lines)
+                out.extend(_sub_alias(line, alias, display) if alias else line for line in lines)
                 first = False
         out.append("")
         written_sections.add(sec)
