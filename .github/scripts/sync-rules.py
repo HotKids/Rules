@@ -1069,7 +1069,13 @@ def fetch_external_modules():
         if text is None:
             continue
         out = module_dir / f"{name}.sgmodule"
-        content = f"### fork from {orig_url}\n{text}"
+        lines = text.splitlines()
+        last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
+        if last_meta >= 0:
+            lines.insert(last_meta + 1, f"### fork from {orig_url}")
+            content = "\n".join(lines) + "\n"
+        else:
+            content = f"### fork from {orig_url}\n{text}"
         if write_if_changed(out, content):
             print(f"  ✓ {name}.sgmodule 已更新")
         else:
