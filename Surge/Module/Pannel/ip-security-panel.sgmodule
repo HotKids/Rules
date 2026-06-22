@@ -10,7 +10,7 @@ ip-security-panel = script-name=ip-security-panel,update-interval=600
 
 [Script]
 # 面板手动触发
-ip-security-panel = type=generic,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key=%ipqs_key%&risk_api=%risk_api%&local_geoapi=%local_geoapi%&remote_geoapi=%remote_geoapi%&mask_ip=%mask_ip%&tw_flag=%tw_flag%
+ip-security-panel = type=generic,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=ipqs_key={{{ipqs_key}}}&risk_api={{{risk_api}}}&local_geoapi={{{local_geoapi}}}&remote_geoapi={{{remote_geoapi}}}&mask_ip={{{mask_ip}}}&tw_flag={{{tw_flag}}}
 
 # 网络变化自动触发
-ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=TYPE=EVENT&ipqs_key=%ipqs_key%&risk_api=%risk_api%&local_geoapi=%local_geoapi%&remote_geoapi=%remote_geoapi%&mask_ip=%mask_ip%&tw_flag=%tw_flag%&event_delay=%event_delay%&notify=%notify%
+ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js,argument=TYPE=EVENT&ipqs_key={{{ipqs_key}}}&risk_api={{{risk_api}}}&local_geoapi={{{local_geoapi}}}&remote_geoapi={{{remote_geoapi}}}&mask_ip={{{mask_ip}}}&tw_flag={{{tw_flag}}}&event_delay={{{event_delay}}}&notify={{{notify}}}
