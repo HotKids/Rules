@@ -2,21 +2,24 @@
 #!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护
 #!category=去广告
 #!remark=广告平台拦截器是去广告基础，需置顶并搭配本合集使用: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule
-#!date=2026-06-22 11:14:36
+#!date=2026-06-22 11:29:56
 
 [MITM]
 hostname = %APPEND% ad.12306.cn, mobile.12306.cn, www.123pan.com
 
 [Rule]
 # > 12306去广告 · 2025-05-13
+# desc = 过滤12306应用内广告及开屏广告
 DOMAIN,ad.12306.cn,DIRECT,extended-matching
 
 [Map Local]
 # > 123云盘去广告 · 2025-05-13
+# desc = 移除开屏广告、应用内横幅广告。
 ^https:\/\/www\.123pan\.com\/api\/config\/get data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 [Script]
 # > 12306去广告 · 2025-05-13
+# desc = 过滤12306应用内广告及开屏广告
 # hostname = ad.12306.cn, mobile.12306.cn
 移除12306开屏广告 = type=http-request, pattern=^https:\/\/ad\.12306\.cn\/ad\/ser\/getAdList$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_splashscreen_ads.js, requires-body=true
 移除12306应用内广告 = type=http-request, pattern=^https:\/\/mobile\.12306\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
