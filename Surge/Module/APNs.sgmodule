@@ -6,11 +6,11 @@
 
 [General]
 # > 包含所有网络,默认情况下，某些请求可能不会被 Surge 接管。例如，应用程序可以绑定到物理网络接口以绕过浪涌 VIF。启用“包括所有网络”选项，以确保所有请求都由 Surge 处理而不会泄漏。当您使用 Surge 作为防火墙时，此选项很有用。（需要 iOS 14.0 或以上版本）,启用此选项可能会导致 AirDrop 和 Xcode 调试问题、通过 USB 的 Surge Dashboard 无法正常工作以及其他意外的副作用。请谨慎使用。
-include-all-networks={{{Tunnel}}}
+include-all-networks = {{{Tunnel}}}
 # > 包含本地网络,启用此选项可使 Surge VIF 处理发送到 LAN 的请求。（需要 iOS 14.2 或更高版本）启用此选项可能会导致 AirDrop 和 Xcode 调试问题、通过 USB 的 Surge Dashboard 无法正常工作以及其他意外的副作用。请谨慎使用。必须与 include-all-networks=true 结合使用。
 # include-local-networks = false
 # > 启用此选项可使 Surge VIF 处理 Apple 推送通知服务 （APNs） 的网络流量。必须与 include-all-networks=true 结合使用。
-include-apns={{{Tunnel}}}
+include-apns = {{{Tunnel}}}
 
 [Rule]
 # APNs
