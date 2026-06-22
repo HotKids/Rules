@@ -7,6 +7,7 @@
 #!loon_version=3.2.4(787)
 #!homepage=https://hub.kelee.one
 #!date=2026-03-03 10:07:10
+
 ### fork from https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule
 
 [Rule]
