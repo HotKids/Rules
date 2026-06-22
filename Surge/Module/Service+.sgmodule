@@ -1,0 +1,23 @@
+#!name=Service Rules+
+#!desc=Streaming、AI 与区域服务分流细分，指定服务输入 # 即可禁用
+#!arguments=ChatGPT 分流:🤖 AIGC,ChatGPT 禁用:RULE-SET,Claude 分流:🤖 AIGC,Claude 禁用:RULE-SET,Discovery+ 分流:🇺🇸 America,Discovery+ 禁用:RULE-SET,Disney+ 分流:🔵 Disney+,Disney+ 禁用:RULE-SET,HBO Max 分流:🟣 HBO Max,HBO Max 禁用:RULE-SET,Netflix 分流:⚫️ Netflix,Netflix 禁用:RULE-SET,Spotify 分流:🇨🇳 Taiwan,Spotify 禁用:RULE-SET,Viu 分流:🇺🇳 Server,Viu 禁用:RULE-SET,YouTube 分流:🔴 YouTube,YouTube 禁用:RULE-SET
+
+[Rule]
+# > ChatGPT
+{{{ChatGPT 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 分流}}},extended-matching
+# > Claude
+{{{Claude 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 分流}}},extended-matching
+# > Discovery+
+{{{Discovery+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 分流}}},extended-matching
+# > Disney+
+{{{Disney+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 分流}}},extended-matching
+# > HBO Max
+{{{HBO Max 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 分流}}},extended-matching
+# > Netflix
+{{{Netflix 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 分流}}},extended-matching
+# > Spotify
+{{{Spotify 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 分流}}},extended-matching
+# > Viu｜HK IN SEA
+{{{Viu 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 分流}}},extended-matching
+# > YouTube
+{{{YouTube 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 分流}}},extended-matching
