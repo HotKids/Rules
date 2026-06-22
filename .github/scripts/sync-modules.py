@@ -82,14 +82,30 @@ def parse_sgmodule(text: str) -> dict:
     return {"meta": meta, "sections": sections}
 
 
-def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
-    """合并多个来源的 [MITM] 块：hostname 去重合并，布尔键取 true 优先。"""
-    hostnames: list[str] = []
-    seen_hosts: set[str] = set()
+def _sub_alias(text: str, alias: str) -> str:
+    """将 text 中作为域名标签出现的 alias 替换为 {{{alias}}}。
+
+    仅在紧邻点号（`.` 或转义的 `\\.`）时替换，从而命中域名部分
+    （如 ad.12306.cn → ad.{{{12306}}}.cn），而不会误伤脚本名
+    （移除12306开屏广告）或 script-path 路径（.../12306/12306_remove.js）。
+    """
+    esc = re.escape(alias)
+    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.)").sub(
+        f"{{{{{{{alias}}}}}}}", text
+    )
+
+
+def _merge_mitm(entries: list[tuple[str, list[str]]], name_to_alias: dict[str, str]) -> list[str]:
+    """合并多个来源的 [MITM] 块：hostname 去重合并，布尔键取 true 优先。
+
+    每条 hostname 按其所属模块的 alias 做域名替换。
+    """
+    host_map: dict[str, str] = {}  # 原始 hostname -> 替换后 hostname（按原始去重/排序）
     bool_flags: dict[str, str] = {}
     other: list[str] = []
 
-    for _name, lines in entries:
+    for name, lines in entries:
+        alias = name_to_alias.get(name)
         for line in lines:
             if not line.strip():
                 continue
@@ -104,9 +120,8 @@ def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
                 val = re.sub(r"^%APPEND%\s*", "", val)
                 for h in val.split(","):
                     h = h.strip()
-                    if h and h not in seen_hosts:
-                        seen_hosts.add(h)
-                        hostnames.append(h)
+                    if h and h not in host_map:
+                        host_map[h] = _sub_alias(h, alias) if alias else h
             elif key in _MITM_BOOL_KEYS:
                 if bool_flags.get(key) != "true":
                     bool_flags[key] = val
@@ -116,8 +131,9 @@ def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
     result = list(other)
     for k, v in bool_flags.items():
         result.append(f"{k} = {v}")
-    if hostnames:
-        result.append(f"hostname = %APPEND% {', '.join(sorted(hostnames))}")
+    if host_map:
+        merged = ", ".join(host_map[k] for k in sorted(host_map))
+        result.append(f"hostname = %APPEND% {merged}")
     return result
 
 
@@ -186,9 +202,9 @@ def aggregate():
     merged_args: dict[str, str] = {}
     # 合并后的 upstream arguments-desc：key -> desc（保序去重）
     merged_args_desc: dict[str, str] = {}
-    # alias -> 模块名（默认值），用于生成 #!arguments，保留 url_alias_list 顺序
-    alias_args: dict[str, str] = {}
-    # 模块名 -> alias，用于 Script section 替换 key
+    # alias 有序集合（默认值即 alias 本身），用于生成 #!arguments，保留 url_alias_list 顺序
+    alias_args: dict[str, None] = {}
+    # 模块名 -> alias，用于在各 section 内做域名替换
     name_to_alias: dict[str, str] = {}
 
     for url, alias in url_alias_list:
@@ -198,7 +214,7 @@ def aggregate():
         parsed = parse_sgmodule(text)
         name = parsed["meta"].get("name", url)
         if alias:
-            alias_args[alias] = name
+            alias_args[alias] = None
             name_to_alias[name] = alias
         # 提取上游 date（只保留年月日）
         raw_date = parsed["meta"].get("date", "")
@@ -254,18 +270,15 @@ def aggregate():
     out.append(f"#!category={existing_meta.get('category', 'HotKids')}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
-    # 写入合并后的 arguments
-    # 优先级：existing_meta 手动值 > alias_args（模块开关）> upstream merged_args
-    if "arguments" in existing_meta:
-        out.append(f"#!arguments={existing_meta['arguments']}")
-        if "arguments-desc" in existing_meta:
-            out.append(f"#!arguments-desc={existing_meta['arguments-desc']}")
-    else:
-        all_args = {**{k: f"{k}:{v}" for k, v in alias_args.items()}, **merged_args}
-        if all_args:
-            out.append(f"#!arguments={','.join(all_args.values())}")
-        if merged_args_desc:
-            out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
+    # 写入合并后的 arguments：模块域名开关（alias:alias，默认值即 alias 本身=启用）
+    # 在前，上游自带 arguments 在后。
+    all_args: dict[str, str] = {alias: f"{alias}:{alias}" for alias in alias_args}
+    for k, v in merged_args.items():
+        all_args.setdefault(k, v)
+    if all_args:
+        out.append(f"#!arguments={','.join(all_args.values())}")
+    if merged_args_desc:
+        out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
     out.append(f"#!date={now}")
     out.append("")
 
@@ -277,28 +290,23 @@ def aggregate():
             return
         out.append(f"[{sec}]")
         if sec == "MITM":
-            out.extend(_merge_mitm(entries))
+            out.extend(_merge_mitm(entries, name_to_alias))
         else:
             first = True
             for name, lines in entries:
                 if not first:
                     out.append("")
+                alias = name_to_alias.get(name)
                 date_suffix = f" · {module_dates[name]}" if name in module_dates else ""
                 out.append(f"# > {name}{date_suffix}")
                 if name in module_descs:
                     out.append(f"# desc = {module_descs[name]}")
                 if sec == "Script" and name in module_hostnames:
-                    out.append(f"# hostname = {module_hostnames[name]}")
-                if sec == "Script" and name in name_to_alias:
-                    alias = name_to_alias[name]
-                    out.extend(
-                        re.sub(r'^([^=]+?)(\s*=)', f'{{{{{{{alias}}}}}}}\\2', line, count=1)
-                        if "=" in line and not line.startswith("#")
-                        else line
-                        for line in lines
-                    )
-                else:
-                    out.extend(lines)
+                    hint = module_hostnames[name]
+                    if alias:
+                        hint = _sub_alias(hint, alias)
+                    out.append(f"# hostname = {hint}")
+                out.extend(_sub_alias(line, alias) if alias else line for line in lines)
                 first = False
         out.append("")
         written_sections.add(sec)
