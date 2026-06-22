@@ -1,38 +1,38 @@
 #!name=SNS GeoLoc
 #!desc=修改常见社群 IP 归属地显示
-#!arguments=Proxy:SNS,Twitter:Twitter
+#!arguments=SNS:Direct,Twitter:Proxy
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
 # bilibili
-URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{Proxy}}}
+URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{SNS}}}
 
 # ByteDance
 # (Amemv)
 AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
-DOMAIN-KEYWORD,-core-hl.amemv.com,{{{Proxy}}},extended-matching
-DOMAIN-KEYWORD,-core-lf.amemv.com,{{{Proxy}}},extended-matching
+DOMAIN-KEYWORD,-core-hl.amemv.com,{{{SNS}}},extended-matching
+DOMAIN-KEYWORD,-core-lf.amemv.com,{{{SNS}}},extended-matching
 
 # (TouTiao)
-DOMAIN,ib.snssdk.com,{{{Proxy}}}
+DOMAIN,ib.snssdk.com,{{{SNS}}}
 
 # Kuwo
-DOMAIN,ip.i.kuwo.cn,{{{Proxy}}}
+DOMAIN,ip.i.kuwo.cn,{{{SNS}}}
 
 # Xiaohongshu
-DOMAIN,edith.xiaohongshu.com,{{{Proxy}}},extended-matching
+DOMAIN,edith.xiaohongshu.com,{{{SNS}}},extended-matching
 
 # Weibo
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),{{{Proxy}}}
-URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,{{{Proxy}}}
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,{{{Proxy}}}
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),{{{SNS}}}
+URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,{{{SNS}}}
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,{{{SNS}}}
 # (Web)
-DOMAIN,www.weibo.com,{{{Proxy}}}
-DOMAIN,s.weibo.com,{{{Proxy}}}
+DOMAIN,www.weibo.com,{{{SNS}}}
+DOMAIN,s.weibo.com,{{{SNS}}}
 
 # Zhihu
-URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{Proxy}}}
-URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{Proxy}}}
+URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{SNS}}}
+URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
