@@ -1,5 +1,6 @@
 #!name=GetCookie Module
 #!desc=Cookie 获取成功后可禁用此模块
+#!author=HotKids
 #!system=ios
 
 [MITM]
