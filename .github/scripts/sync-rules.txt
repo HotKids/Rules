@@ -16,3 +16,6 @@ https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list,
 # >> Module
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule,BlockAdsBase #!desc=此插件是所有去广告插件的基础，只针对广告平台处理。你依然需要安装其他去广告插件来搭配使用，并确保此插件始终排序在顶部。 #!category=去广告
 https://raw.githubusercontent.com/kokoryh/Sparkle/master/release/surge/module/bilibili.sgmodule,Bilibili #!name=哔哩哔哩去广告 #!desc=哔哩哔哩去广告，部分 App 需清除缓存或重新安装后才会生效。 #!author=kokoryh #!category=去广告
+https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule,CloudMusic #!name=网易云音乐去广告 #!desc=网易云音乐去广告，部分 App 需清除缓存或重新安装后才会生效。 #!author=Keywos #!category=去广告
+https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/split/partX/Xiaohongshu.sgmodule,RedNote #!name=小红书去广告 #!desc=小红书去广告，部分 App 需清除缓存或重新安装后才会生效。 #!author=fmz200 #!category=去广告
+https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/weibo.module,Weibo #!name=微博去广告 #!desc=微博去广告，部分 App 需清除缓存或重新安装后才会生效。 #!author=fmz200 #!category=去广告
