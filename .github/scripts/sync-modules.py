@@ -169,6 +169,8 @@ def aggregate():
     section_entries: dict[str, list[tuple[str, list[str]]]] = defaultdict(list)
     # name -> hostname 注释字符串（用于各 section 内的 # hostname = ... 提示行）
     module_hostnames: dict[str, str] = {}
+    # name -> 上游模块日期（仅年月日，用于判断是否仍在维护）
+    module_dates: dict[str, str] = {}
 
     for url in urls:
         text = results.get(url)
@@ -176,6 +178,10 @@ def aggregate():
             continue
         parsed = parse_sgmodule(text)
         name = parsed["meta"].get("name", url)
+        # 提取上游 date（只保留年月日）
+        raw_date = parsed["meta"].get("date", "")
+        if raw_date:
+            module_dates[name] = raw_date.split()[0]
         # 提取该模块自身的 hostname
         mitm_lines = parsed["sections"].get("MITM", [])
         for line in mitm_lines:
@@ -222,7 +228,8 @@ def aggregate():
             for name, lines in entries:
                 if not first:
                     out.append("")
-                out.append(f"# > {name}")
+                date_suffix = f" · {module_dates[name]}" if name in module_dates else ""
+                out.append(f"# > {name}{date_suffix}")
                 if sec == "Script" and name in module_hostnames:
                     out.append(f"# hostname = {module_hostnames[name]}")
                 out.extend(lines)
