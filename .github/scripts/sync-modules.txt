@@ -49,7 +49,7 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/淘票票去广告.sgmodule,taobao
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/网易有道词典去广告.sgmodule,youdao
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/网易邮箱大师去广告.sgmodule,163
-https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/网易云音乐去广告.sgmodule,163
+# https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/网易云音乐去广告.sgmodule,163
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/微博去广告.sgmodule,weibo
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/微信公众号去广告.sgmodule,qq
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/喜马拉雅去广告.sgmodule,ximalaya
