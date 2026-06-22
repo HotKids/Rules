@@ -1,43 +1,44 @@
 #!name=SNS GeoLoc
 #!desc=修改常见社群 IP 归属地显示
 #!category=HotKids
-#!arguments=SNS:DIRECT,可选 Twitter:RULE-SET,Twitter:DIRECT
-#!arguments-desc=可选 Twitter：输入 # 可禁用
+#!arguments=SNS:DIRECT,Twitter:DIRECT,Bilibili:bilibili,Douyin:amemv,Toutiao:snssdk,Kuwo:kuwo,Xiaohongshu:xiaohongshu,Weibo:weibo,Twitter/X:RULE-SET
+#!arguments-desc=Twitter/X：输入 # 禁用，其他输入 NO 禁用
+
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
 # bilibili
-URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{SNS}}}
+URL-REGEX,https:\/\/api\.{{{Bilibili}}}\.com\/x\/v\d\/reply\/add,{{{SNS}}}
 
 # ByteDance
 # (Amemv)
-AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
-DOMAIN-KEYWORD,-core-hl.amemv.com,{{{SNS}}},extended-matching
-DOMAIN-KEYWORD,-core-lf.amemv.com,{{{SNS}}},extended-matching
+AND,((DOMAIN-KEYWORD,{{{Douyin}}}.com,extended-matching),(PROTOCOL,UDP)),REJECT
+DOMAIN-KEYWORD,-core-hl.{{{Douyin}}}.com,{{{SNS}}},extended-matching
+DOMAIN-KEYWORD,-core-lf.{{{Douyin}}}.com,{{{SNS}}},extended-matching
 
-# (TouTiao)
-DOMAIN,ib.snssdk.com,{{{SNS}}}
+# (Toutiao)
+DOMAIN,ib.{{{Toutiao}}}.com,{{{SNS}}}
 
 # Kuwo
-DOMAIN,ip.i.kuwo.cn,{{{SNS}}}
+DOMAIN,ip.i.{{{Kuwo}}}.cn,{{{SNS}}}
 
 # Xiaohongshu
-DOMAIN,edith.xiaohongshu.com,{{{SNS}}},extended-matching
+DOMAIN,edith.{{{Xiaohongshu}}}.com,{{{SNS}}},extended-matching
 
 # Weibo
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),{{{SNS}}}
-URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,{{{SNS}}}
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,{{{SNS}}}
+URL-REGEX,https:\/\/api\.{{{Weibo}}}\.cn\/\d\/comments\/(create|reply),{{{SNS}}}
+URL-REGEX,https:\/\/{{{Weibo}}}\.com\/ajax\/comments\/create,{{{SNS}}}
+URL-REGEX,https:\/\/api\.{{{Weibo}}}\.cn\/\d\/statuses\/send,{{{SNS}}}
 # (Web)
-DOMAIN,www.weibo.com,{{{SNS}}}
-DOMAIN,s.weibo.com,{{{SNS}}}
+DOMAIN,www.{{{Weibo}}}.com,{{{SNS}}}
+DOMAIN,s.{{{Weibo}}}.com,{{{SNS}}}
 
 # Zhihu
-URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{SNS}}}
-URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
+URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/answers,{{{SNS}}}
+URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
-{{{可选 Twitter}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
+{{{Twitter/X}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
 
 [MITM]
-hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, api.zhihu.com
+hostname = %APPEND% api.{{{Bilibili}}}.com, api.{{{Weibo}}}.cn, {{{Weibo}}}.com, api.{{{Zhihu}}}.com
