@@ -236,10 +236,8 @@ def aggregate():
     out.append(f"#!category={existing_meta.get('category', '去广告')}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
-    out.append(f"#!date={now}")
     # 写入合并后的 arguments（existing_meta 中手动指定的优先覆盖上游值）
     if "arguments" in existing_meta:
-        # 手动维护值完全覆盖
         out.append(f"#!arguments={existing_meta['arguments']}")
         if "arguments-desc" in existing_meta:
             out.append(f"#!arguments-desc={existing_meta['arguments-desc']}")
@@ -247,6 +245,7 @@ def aggregate():
         out.append(f"#!arguments={','.join(merged_args.values())}")
         if merged_args_desc:
             out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
+    out.append(f"#!date={now}")
     out.append("")
 
     written_sections: set[str] = set()
