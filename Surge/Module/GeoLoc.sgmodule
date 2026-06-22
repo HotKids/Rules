@@ -1,6 +1,5 @@
 #!name=SNS GeoLoc
 #!desc=修改常见社群 IP 归属地显示
-#!author=HotKids
 #!category=HotKids
 #!arguments=SNS:DIRECT,可选 Twitter:RULE-SET,Twitter:DIRECT
 #!arguments-desc=可选 Twitter：输入 # 可禁用
