@@ -1,0 +1,59 @@
+#!name=网易云音乐去广告
+#!desc=网易云音乐去广告，部分 App 需清除缓存或重新安装后才会生效。
+#!author=Keywos
+#!system= ios
+#!category=去广告
+#!arguments= 隐藏底部标签开关↓:--,发现:0,漫游:1,笔记:0,隐藏首页卡片开关↓:--,问候语:1,每日推荐:0,推荐歌单:0,最近常听:0,音乐合伙人:0,雷达歌单:1,排行榜:0,推荐专属歌单:1,你的专属歌单:1,脚本伪vip:#
+#!arguments-desc= 将 # 改成任意名称即可开启对应脚本\n\n隐藏为:1/true  不隐藏为:0/false
+#!date= 2025-02-17 02:24:16
+#!icon= https://raw.githubusercontent.com/Keywos/rule/main/tv/app/144px/Netease.png
+
+### fork from https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule
+#Thank RuCu6, kokoryh 
+
+[Script]
+# mian | 热推、有话想说、分享一下、歌曲下的祝福等小提示去除 ｜ 评论区 乐迷、星评等级 关注 等 图标去除
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(batch|v\d\/resource\/comment\/floor\/get),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+# 伪vip
+{{{脚本伪vip}}} = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(music-vip-membership\/client\/vip\/info|vipnewcenter\/app\/resource\/newaccountpage),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+# tab
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"MY":"{{{漫游}}}","DT":"{{{笔记}}}","FX":"{{{发现}}}"}"
+
+# 推荐 | home | 主页
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(homepage\/block\/page|link\/page\/rcmd\/(resource\/show|block\/resource\/multi\/refresh)),requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js, argument="{"PRGG":"{{{问候语}}}","PRDRD":"{{{每日推荐}}}","PRSCVPT":"{{{推荐歌单}}}","PRST":"{{{最近常听}}}","HMPR":"{{{音乐合伙人}}}","PRRR":"{{{雷达歌单}}}","PRRK":"{{{排行榜}}}","PRMST":"{{{推荐专属歌单}}}","PRCN":"{{{你的专属歌单}}}"}"
+
+# 发现
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/page\/discovery\/resource\/show,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+# effect
+# 网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/song\/play\/more\/list\/v\d,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+# 我的 MyPageBar ad
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/position\/show\/resource,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+# 显示未关注你
+网易云音乐 = type=http-response,pattern=^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/user\/follow\/users\/mixed\/get,requires-body=1,max-size=0,timeout=20,binary-body-mode=1,script-path=https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
+
+
+[Rule]
+DOMAIN,iadmusicmat.music.126.net,REJECT-NO-DROP
+DOMAIN,iadmat.nosdn.127.net,REJECT-NO-DROP
+DOMAIN,iadmatapk.nosdn.127.net,REJECT-NO-DROP
+DOMAIN,httpdns.n.netease.com,REJECT-NO-DROP
+DOMAIN,httpdns.music.163.com,REJECT-NO-DROP
+[Map Local]
+^https?:\/\/(ipv4|interface\d?)\.music\.163.com\/e?api\/ad data-type=text data="{}"
+# 今日运势 商城 Beat专区 音乐收藏家 | type:ACTIVITY | 低至5.2折
+^https?:\/\/interface\d?\.music\.163\.com\/w?e?api\/(?:side-bar\/mini-program\/music-service\/account|delivery\/(batch-deliver|deliver)|moment\/tab\/info\/get|yunbei\/account\/entrance\/get) data-type=text data="{}"
+# 播放页歌名下方∶乐迷团｜关注｜播放页提示｜音乐应用红点｜播放提示?
+^https?:\/\/interface\d?\.music\.163\.com\/eapi\/(?:resource\/comments?\/musiciansaid|community\/friends\/fans-group\/artist\/group\/get|user\/sub\/artist|music\/songshare\/text\/recommend\/get|mine\/applet\/redpoint|resniche\/position\/play\/new\/get) data-type=text data="{}"
+# 搜索词
+^https?:\/\/interface\d?\.music\.163.com\/w?e?api\/search\/default data-type=text data="{}"
+# 搜索页热搜卡片｜猜你喜欢｜我的应用下方提醒
+^https?:\/\/interface\d?\.music\.163.com\/w?e?api\/(?:search\/(chart|rcmd\/keyword|specialkeyword)|resource-exposure\/|activity\/bonus\/playpage\/time\/query) data-type=text data="{}"
+^https?:\/\/interface\d?\.music\.163.com\/eapi\/(?:mlivestream\/entrance\/playpage|link\/(position\/show\/strategy|scene\/show)|ios\/version|v\d\/content\/exposure\/comment\/banner) data-type=text data="{}"
+
+[MITM]
+hostname = %APPEND% interface.music.163.com, interface3.music.163.com, interface9.music.163.com,httpdns.n.netease.com, ipv4.music.163.com
