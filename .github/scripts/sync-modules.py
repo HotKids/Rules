@@ -92,13 +92,17 @@ def _sub_alias(text: str, keyword: str, display: str) -> str:
     """将 text 中作为域名标签出现的 keyword 替换为占位符 {{{display}}}。
 
     keyword 为域名关键字（如 ithome），display 为参数键名（如 IT之家）。
-    仅在紧邻点号（`.` 或转义的 `\\.`）时替换，从而命中域名部分
-    （如 napi.ithome.com → napi.{{{IT之家}}}.com），而不会误伤脚本名
-    （移除12306开屏广告）或 script-path 路径（.../12306/12306_remove.js）。
+    替换条件（任一即可）：
+      - 紧跟在点号后（`.` 或转义的 `\\.`），命中域名前/中段标签；
+      - 紧邻竖线/右括号前（`|` `)`），命中 `\\.(mgtv|hunantv)\\.` 这类域名
+        候选组里作为标签后缀的关键字。
+    由此命中域名部分（napi.ithome.com → napi.{{{IT之家}}}.com），而不会误伤
+    脚本名（移除12306开屏广告）、script-path 路径（.../12306/12306_remove.js）
+    或路径候选组（(caixinapp|...) 里的 caixin 因前面是 `(` 而不会被替换）。
     """
     esc = re.escape(keyword)
     repl = "{{{" + display + "}}}"
-    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.)").sub(lambda _m: repl, text)
+    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.|[|)])").sub(lambda _m: repl, text)
 
 
 def _merge_mitm(
