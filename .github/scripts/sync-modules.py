@@ -22,7 +22,7 @@ SYNC_TXT = Path(__file__).resolve().parent / "sync-modules.txt"
 OUTPUT_FILE = REPO_ROOT / "Surge" / "Module" / "BlockAds.sgmodule"
 
 _SECTION_RE = re.compile(r"^\[(.+)\]$")
-_META_FIELD_RE = re.compile(r"^#!(\w+)=(.*)$")
+_META_FIELD_RE = re.compile(r"^#!([\w-]+)=(.*)$")
 
 _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 
@@ -173,6 +173,10 @@ def aggregate():
     module_dates: dict[str, str] = {}
     # name -> 上游模块描述
     module_descs: dict[str, str] = {}
+    # 合并后的 arguments：key -> default（保序去重）
+    merged_args: dict[str, str] = {}
+    # 合并后的 arguments-desc：key -> desc（保序去重）
+    merged_args_desc: dict[str, str] = {}
 
     for url in urls:
         text = results.get(url)
@@ -188,6 +192,21 @@ def aggregate():
         desc = parsed["meta"].get("desc", "")
         if desc:
             module_descs[name] = desc
+        # 收集 arguments / arguments-desc（保序去重，先到先得）
+        for arg_entry in parsed["meta"].get("arguments", "").split(","):
+            arg_entry = arg_entry.strip()
+            if not arg_entry:
+                continue
+            key = arg_entry.split(":")[0].strip()
+            if key and key not in merged_args:
+                merged_args[key] = arg_entry
+        for desc_entry in parsed["meta"].get("arguments-desc", "").split("\n"):
+            desc_entry = desc_entry.strip()
+            if not desc_entry:
+                continue
+            key = desc_entry.split(":")[0].strip()
+            if key and key not in merged_args_desc:
+                merged_args_desc[key] = desc_entry
         # 提取该模块自身的 hostname
         mitm_lines = parsed["sections"].get("MITM", [])
         for line in mitm_lines:
@@ -218,6 +237,16 @@ def aggregate():
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
     out.append(f"#!date={now}")
+    # 写入合并后的 arguments（existing_meta 中手动指定的优先覆盖上游值）
+    if "arguments" in existing_meta:
+        # 手动维护值完全覆盖
+        out.append(f"#!arguments={existing_meta['arguments']}")
+        if "arguments-desc" in existing_meta:
+            out.append(f"#!arguments-desc={existing_meta['arguments-desc']}")
+    elif merged_args:
+        out.append(f"#!arguments={','.join(merged_args.values())}")
+        if merged_args_desc:
+            out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
     out.append("")
 
     written_sections: set[str] = set()
