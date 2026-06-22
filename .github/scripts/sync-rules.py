@@ -1063,12 +1063,19 @@ def fetch_external_modules():
     prefetched = _prefetch_urls(urls)
 
     for e in entries:
-        url, name = _encode(e["url"]), e["name"]
-        text = prefetched.get(url)
+        orig_url, name = e["url"], e["name"]
+        enc_url = _encode(orig_url)
+        text = prefetched.get(enc_url)
         if text is None:
             continue
         out = module_dir / f"{name}.sgmodule"
-        content = f"### fork from {url}\n{text}"
+        lines = text.splitlines()
+        last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
+        if last_meta >= 0:
+            lines.insert(last_meta + 1, f"### fork from {orig_url}")
+            content = "\n".join(lines) + "\n"
+        else:
+            content = f"### fork from {orig_url}\n{text}"
         if write_if_changed(out, content):
             print(f"  ✓ {name}.sgmodule 已更新")
         else:
