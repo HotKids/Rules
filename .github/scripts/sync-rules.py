@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import urllib.request
+import urllib.parse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -747,8 +748,8 @@ def cleanup_stale():
 # ═══════════════════════════════════════════════════════════════════════
 
 def parse_sync_rules() -> dict:
-    """解析 sync-rules.txt，返回 {"surge": [{url, name}], "clash": [{url, name}]}。"""
-    result: dict[str, list[dict]] = {"surge": [], "clash": []}
+    """解析 sync-rules.txt，返回 {"surge": [{url, name}], "clash": [{url, name}], "module": [{url, name}]}。"""
+    result: dict[str, list[dict]] = {"surge": [], "clash": [], "module": []}
     if not SYNC_RULES_TXT.exists():
         return result
     section = None
@@ -758,6 +759,8 @@ def parse_sync_rules() -> dict:
             section = "surge"
         elif s == "# >> Clash":
             section = "clash"
+        elif s == "# >> Module":
+            section = "module"
         elif section and s and not s.startswith("#") and "," in s:
             url, name = s.split(",", 1)
             result[section].append({"url": url.strip(), "name": name.strip()})
@@ -1040,6 +1043,37 @@ def fetch_external_rules():
 
 # ═══════════════════════════════════════════════════════════════════════
 #  Main
+def fetch_external_modules():
+    """拉取 sync-rules.txt # >> Module 节，写入 Surge/Module/<name>.sgmodule。"""
+    print("\n── Step 1b: 拉取外部 sgmodule ──")
+    rules = parse_sync_rules()
+    entries = rules.get("module", [])
+    if not entries:
+        print("  sync-rules.txt 无 Module 条目")
+        return
+
+    module_dir = REPO_ROOT / "Surge" / "Module"
+    module_dir.mkdir(parents=True, exist_ok=True)
+
+    def _encode(url: str) -> str:
+        p = urllib.parse.urlparse(url)
+        return urllib.parse.urlunparse(p._replace(path=urllib.parse.quote(p.path, safe="/-_.~!$&'()*+,;=:@%")))
+
+    urls = [_encode(e["url"]) for e in entries]
+    prefetched = _prefetch_urls(urls)
+
+    for e in entries:
+        url, name = _encode(e["url"]), e["name"]
+        text = prefetched.get(url)
+        if text is None:
+            continue
+        out = module_dir / f"{name}.sgmodule"
+        if write_if_changed(out, text):
+            print(f"  ✓ {name}.sgmodule 已更新")
+        else:
+            print(f"  · {name}.sgmodule 无变化")
+
+
 # ═══════════════════════════════════════════════════════════════════════
 
 def main():
@@ -1049,6 +1083,9 @@ def main():
 
     # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
     fetch_external_rules()
+
+    # Step 1b: 拉取外部 sgmodule
+    fetch_external_modules()
 
     # Step 2/3: Streaming 三层双向同步
     sync_streaming()
