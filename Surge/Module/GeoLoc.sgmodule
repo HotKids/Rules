@@ -1,6 +1,7 @@
 #!name=SNS GeoLoc
 #!desc=修改常见社群 IP 归属地显示
-#!arguments=SNS:DIRECT,Twitter:DIRECT
+#!arguments=SNS:DIRECT,可选 Twitter:RULE-SET,Twitter:DIRECT
+#!arguments-desc=可选 Twitter：输入 # 可禁用
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
@@ -35,7 +36,7 @@ URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{SNS}}}
 URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
+{{{可选 Twitter}}} ,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
 
 [MITM]
 hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, api.zhihu.com
