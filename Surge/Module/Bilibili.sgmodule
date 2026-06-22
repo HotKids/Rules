@@ -1,11 +1,11 @@
 #!name=哔哩哔哩去广告
+#!author=kokoryh
 #!desc=拜托，没有广告的哔哩哔哩真的超酷的
 #!category=去广告
 #!arguments=动态最常访问:auto,创作中心:0,过滤置顶评论广告:1,优化评论区加载:bilibili.request,空降助手:bilibili.airborne,空降助手策略:DIRECT,日志等级:4
 #!arguments-desc=动态最常访问\n- auto: 仅当列表中存在直播状态时显示\n- show: 始终显示\n- hide: 始终隐藏\n\n创作中心\n- 0: 隐藏\n- 1: 显示\n\n过滤置顶评论广告\n- 0: 关闭\n- 1: 开启\n\n优化评论区加载: 默认开启，配置为"#"时关闭\n\n空降助手: 默认开启，配置为"#"时关闭\n\n空降助手策略: 默认直连，建议配置为代理策略\n\n日志等级\n- 1: DEBUG\n- 2: INFO\n- 3: WARN\n- 4: ERROR\n- 5: OFF
-
-#!author=kokoryh
 ### fork from https://raw.githubusercontent.com/kokoryh/Sparkle/master/release/surge/module/bilibili.sgmodule
+
 [Rule]
 DOMAIN,bsbsb.top,{{{空降助手策略}}}
 DOMAIN,api.biliapi.com,REJECT,pre-matching,extended-matching

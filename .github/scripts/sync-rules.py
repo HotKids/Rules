@@ -1080,25 +1080,42 @@ def fetch_external_modules():
         lines = text.splitlines()
         # 应用 overrides：替换匹配的 #!key= 行
         if overrides:
-            replaced: set[str] = set()
+            key_positions: dict[str, int] = {}  # override key → 在 new_lines 中的行号
             new_lines = []
             for line in lines:
                 if line.startswith("#!") and "=" in line:
                     key = line[2:].split("=", 1)[0]
                     if key in overrides:
+                        key_positions[key] = len(new_lines)
                         new_lines.append(f"#!{key}={overrides[key]}")
-                        replaced.add(key)
                         continue
                 new_lines.append(line)
-            # 追加上游文件中不存在的 override 键：插入到第一个 [Section] 行之前
-            missing = [(k, v) for k, v in overrides.items() if k not in replaced]
-            if missing:
-                first_sec = next(
-                    (i for i, l in enumerate(new_lines) if re.match(r"^\[.+\]$", l.strip())),
-                    len(new_lines),
-                )
-                for offset, (k, v) in enumerate(missing):
-                    new_lines.insert(first_sec + offset, f"#!{k}={v}")
+            # 缺失的 override 键：按 override 列表顺序，插到前一个已放置 key 的正下方
+            override_keys = list(overrides.keys())
+            for i, key in enumerate(override_keys):
+                if key in key_positions:
+                    continue
+                val = overrides[key]
+                # 找前面最近的已放置 override key
+                predecessor_pos = None
+                for prev_key in reversed(override_keys[:i]):
+                    if prev_key in key_positions:
+                        predecessor_pos = key_positions[prev_key]
+                        break
+                if predecessor_pos is not None:
+                    insert_at = predecessor_pos + 1
+                else:
+                    # 无前驱，插到第一个 [Section] 之前
+                    insert_at = next(
+                        (j for j, l in enumerate(new_lines) if re.match(r"^\[.+\]$", l.strip())),
+                        len(new_lines),
+                    )
+                new_lines.insert(insert_at, f"#!{key}={val}")
+                # 插入后，更新所有受影响的行号
+                for k in key_positions:
+                    if key_positions[k] >= insert_at:
+                        key_positions[k] += 1
+                key_positions[key] = insert_at
             lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
