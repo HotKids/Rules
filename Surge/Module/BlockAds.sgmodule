@@ -1,6 +1,5 @@
 #!name=去广告合集
 #!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护，部分 App 需清除缓存或重新安装后才会生效。
-#!author=HotKids
 #!category=去广告
 #!remark=广告平台拦截器是去广告基础，优先级需置于本模块之前: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 #!arguments=removePinnedArticles:false,removeAllBanners:false
