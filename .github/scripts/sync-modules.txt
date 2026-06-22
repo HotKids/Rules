@@ -19,8 +19,8 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度地图去广告.sgmodule,baidu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度搜索网页去广告.sgmodule,baidu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度网盘去广告.sgmodule,baidu
+# https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩去广告.sgmodule,bili
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩漫画去广告.sgmodule,bilibili
-https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩去广告.sgmodule,bili
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/波点音乐去广告.sgmodule,kuwo
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/菜鸟去广告.sgmodule,cainiao
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/彩云天气去广告.sgmodule,caiyun
