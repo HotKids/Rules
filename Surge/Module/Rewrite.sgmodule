@@ -2,7 +2,7 @@
 #!desc=AdBlock Rewrite Enhancement
 
 [MITM]
-hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobi,api.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,lens.leoao.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com
+hostname = %APPEND% gab.122.gov.cn,res.kfc.com.cn,app.dewu.com,api.mcd.cn,gw.aihuishou.com,p0.pipi.cn,apimobile.meituan.com,npay.meituan.com,web.meituan.com,static.95508.com,client.app.coc.10086.cn,*gateway.tuhu.cn,maicai.api.ddxq.mobi,api.petkit.cn,api-sams.walmartmobile.cn,api.xiaoyuzhoufm.com,lens.leoao.com,se-api.djiits.com,apis.alenable.com,ecard.shenzhentong.com,i.weread.qq.com
 
 [Rule]
 # > 交管12123
@@ -64,4 +64,8 @@ URL-REGEX,^https??:\/\/gw\.aihuishou\.com\/app-portal\/home\/getadvertisement,RE
 
 [Script]
 # > 美团小程序去广告 by ZenmoFeiShi
-Meituan.js = type=http-response,requires-body=1,max-size=0,pattern=^https?::\/\/web\.meituan\.com\/api\/miniprogram\/(tabbar\/all\/query|index\/aggregate),script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MeiTuanNoAd.js
+Meituan.js = type=http-response,requires-body=1,max-size=0,pattern=^https?:\/\/web\.meituan\.com\/api\/miniprogram\/(tabbar\/all\/query|index\/aggregate),script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MeiTuanNoAd.js
+
+# > 微信读书去广告 by Maasea
+### fork from https://raw.githubusercontent.com/Maasea/sgmodule/master/WeRead.sgmodule
+WeRead.js = type=http-response,requires-body=1,max-size=0,pattern=https?:\/\/i\.weread\.qq\.com\/(book\/(reading[sS]tat|chapterReview)|user\/profile|groups\/readerEntrance|review\/list|mobileSync),script-path=https://raw.githubusercontent.com/Maasea/sgmodule/master/Script/WeRead/weread.js
