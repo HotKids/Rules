@@ -94,8 +94,8 @@ sniffer:
   override-destination: false
   # redir-host 模式下也强制嗅探，改善直连 IP 的规则命中
   force-dns-mapping: true
-  # 对无域名信息的纯 IP 连接也尝试嗅探
-  parse-pure-ip: true
+  # fake-ip 模式下域名已由映射得知，无需对纯 IP 连接嗅探（开启会导致大量 "may not have any sent data" 警告）
+  parse-pure-ip: false
   sniff:
     HTTP:
       ports: [80, 8080-8880]
