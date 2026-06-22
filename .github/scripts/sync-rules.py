@@ -1090,10 +1090,15 @@ def fetch_external_modules():
                         replaced.add(key)
                         continue
                 new_lines.append(line)
-            # 追加上游文件中不存在的 override 键
-            for key, val in overrides.items():
-                if key not in replaced:
-                    new_lines.append(f"#!{key}={val}")
+            # 追加上游文件中不存在的 override 键：插入到第一个 [Section] 行之前
+            missing = [(k, v) for k, v in overrides.items() if k not in replaced]
+            if missing:
+                first_sec = next(
+                    (i for i, l in enumerate(new_lines) if re.match(r"^\[.+\]$", l.strip())),
+                    len(new_lines),
+                )
+                for offset, (k, v) in enumerate(missing):
+                    new_lines.insert(first_sec + offset, f"#!{k}={v}")
             lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
