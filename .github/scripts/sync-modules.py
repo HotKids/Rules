@@ -121,13 +121,19 @@ def _merge_mitm(entries: list[tuple[str, list[str]]]) -> list[str]:
     return result
 
 
-def load_urls() -> list[str]:
-    urls: list[str] = []
+def load_urls() -> list[tuple[str, str]]:
+    """返回 (url, alias) 列表；alias 为空字符串表示无别名。"""
+    result: list[tuple[str, str]] = []
     for line in SYNC_TXT.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
-        if stripped and not stripped.startswith("#"):
-            urls.append(stripped)
-    return urls
+        if not stripped or stripped.startswith("#"):
+            continue
+        if "," in stripped:
+            url, alias = stripped.split(",", 1)
+            result.append((url.strip(), alias.strip()))
+        else:
+            result.append((stripped, ""))
+    return result
 
 
 def read_output_meta() -> dict[str, str]:
@@ -150,17 +156,20 @@ def write_if_changed(path: Path, content: str) -> bool:
 
 
 def aggregate():
-    urls = load_urls()
-    if not urls:
+    url_alias_list = load_urls()
+    if not url_alias_list:
         print("[WARN] sync-modules.txt 中无 URL 条目")
         return
 
     existing_meta = read_output_meta()
 
-    print(f"并发拉取 {len(urls)} 个 sgmodule …")
+    url_list = [url for url, _ in url_alias_list]
+    url_to_alias = {url: alias for url, alias in url_alias_list if alias}
+
+    print(f"并发拉取 {len(url_list)} 个 sgmodule …")
     results: dict[str, str | None] = {}
-    with ThreadPoolExecutor(max_workers=min(8, len(urls))) as pool:
-        futures = {pool.submit(fetch_url, u): u for u in urls}
+    with ThreadPoolExecutor(max_workers=min(8, len(url_list))) as pool:
+        futures = {pool.submit(fetch_url, u): u for u in url_list}
         for fut in as_completed(futures):
             url, text = fut.result()
             results[url] = text
@@ -173,17 +182,24 @@ def aggregate():
     module_dates: dict[str, str] = {}
     # name -> 上游模块描述
     module_descs: dict[str, str] = {}
-    # 合并后的 arguments：key -> default（保序去重）
+    # 合并后的 upstream arguments：key -> default（保序去重）
     merged_args: dict[str, str] = {}
-    # 合并后的 arguments-desc：key -> desc（保序去重）
+    # 合并后的 upstream arguments-desc：key -> desc（保序去重）
     merged_args_desc: dict[str, str] = {}
+    # alias -> 模块名（默认值），用于生成 #!arguments，保留 url_alias_list 顺序
+    alias_args: dict[str, str] = {}
+    # 模块名 -> alias，用于 Script section 替换 key
+    name_to_alias: dict[str, str] = {}
 
-    for url in urls:
+    for url, alias in url_alias_list:
         text = results.get(url)
         if not text:
             continue
         parsed = parse_sgmodule(text)
         name = parsed["meta"].get("name", url)
+        if alias:
+            alias_args[alias] = name
+            name_to_alias[name] = alias
         # 提取上游 date（只保留年月日）
         raw_date = parsed["meta"].get("date", "")
         if raw_date:
@@ -238,13 +254,16 @@ def aggregate():
     out.append(f"#!category={existing_meta.get('category', 'HotKids')}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
-    # 写入合并后的 arguments（existing_meta 中手动指定的优先覆盖上游值）
+    # 写入合并后的 arguments
+    # 优先级：existing_meta 手动值 > alias_args（模块开关）> upstream merged_args
     if "arguments" in existing_meta:
         out.append(f"#!arguments={existing_meta['arguments']}")
         if "arguments-desc" in existing_meta:
             out.append(f"#!arguments-desc={existing_meta['arguments-desc']}")
-    elif merged_args:
-        out.append(f"#!arguments={','.join(merged_args.values())}")
+    else:
+        all_args = {**{k: f"{k}:{v}" for k, v in alias_args.items()}, **merged_args}
+        if all_args:
+            out.append(f"#!arguments={','.join(all_args.values())}")
         if merged_args_desc:
             out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
     out.append(f"#!date={now}")
@@ -270,7 +289,16 @@ def aggregate():
                     out.append(f"# desc = {module_descs[name]}")
                 if sec == "Script" and name in module_hostnames:
                     out.append(f"# hostname = {module_hostnames[name]}")
-                out.extend(lines)
+                if sec == "Script" and name in name_to_alias:
+                    alias = name_to_alias[name]
+                    out.extend(
+                        re.sub(r'^([^=]+)(=)', f'{{{{{{{alias}}}}}}}\\2', line, count=1)
+                        if "=" in line and not line.startswith("#")
+                        else line
+                        for line in lines
+                    )
+                else:
+                    out.extend(lines)
                 first = False
         out.append("")
         written_sections.add(sec)
