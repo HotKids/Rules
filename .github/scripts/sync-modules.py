@@ -234,7 +234,7 @@ def aggregate():
     out.append(f"#!name={existing_meta.get('name', 'LoonKissSurge 合集')}")
     out.append(f"#!desc={existing_meta.get('desc', '自动聚合，每日更新')}")
     out.append(f"#!author={existing_meta.get('author', 'HotKids')}")
-    out.append(f"#!category={existing_meta.get('category', '去广告')}")
+    out.append(f"#!category={existing_meta.get('category', 'HotKids')}")
     if "remark" in existing_meta:
         out.append(f"#!remark={existing_meta['remark']}")
     # 写入合并后的 arguments（existing_meta 中手动指定的优先覆盖上游值）
