@@ -1,7 +1,6 @@
 #!name=SNS GeoLoc
-#!desc=修改中国大陆常见社群 IP 归属地显示
-#!system=ios
-#!arguments=Proxy:SNS
+#!desc=修改常见社群 IP 归属地显示
+#!arguments=Proxy:SNS,Twitter:Twitter
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
 [Rule]
@@ -34,6 +33,9 @@ DOMAIN,s.weibo.com,{{{Proxy}}}
 # Zhihu
 URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{Proxy}}}
 URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{Proxy}}}
+
+# Twitter/X
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
 
 [MITM]
 hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, api.zhihu.com
