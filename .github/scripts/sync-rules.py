@@ -15,6 +15,7 @@ import re
 import subprocess
 import urllib.request
 import urllib.parse
+from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -129,6 +130,23 @@ def write_if_changed(filepath: Path, content: str) -> bool:
             return False
     filepath.write_text(content, encoding="utf-8")
     return True
+
+
+def _mark_upstream_deleted(filepath: Path) -> None:
+    """在 ### fork from 行后插入 ### upstream 404 · DATE 标记（幂等）。"""
+    if not filepath.exists():
+        return
+    lines = filepath.read_text(encoding="utf-8").splitlines()
+    if any(l.startswith("### upstream 404") for l in lines):
+        return  # 已标记，不重复写
+    today = datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
+    new_lines = []
+    for line in lines:
+        new_lines.append(line)
+        if line.startswith("### fork from "):
+            new_lines.append(f"### upstream 404 · {today}")
+    if write_if_changed(filepath, "\n".join(new_lines) + "\n"):
+        print(f"  ⚠ {filepath.name} 上游已删除，已标记")
 
 
 def strip_streaming_placeholders(text: str) -> str:
@@ -997,6 +1015,7 @@ def fetch_external_rules():
 
         if not rule_lines:
             print(f"    [WARN] {name} 全部来源为空，跳过")
+            _mark_upstream_deleted(SURGE_DIR / f"{name}.list")
             continue
         header = " & ".join(section_names) if section_names else name.rsplit("/", 1)[-1]
         rule_lines.insert(0, f"# > {header}")
@@ -1075,6 +1094,7 @@ def fetch_external_modules():
         overrides: dict = e["overrides"]
         text = prefetched.get(enc_url)
         if text is None:
+            _mark_upstream_deleted(module_dir / f"{name}.sgmodule")
             continue
         out = module_dir / f"{name}.sgmodule"
         lines = text.splitlines()
@@ -1119,7 +1139,7 @@ def fetch_external_modules():
             lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
-            lines.insert(last_meta + 1, f"### fork from {orig_url}")
+            lines[last_meta + 1:last_meta + 1] = ["", f"### fork from {orig_url}"]
         else:
             lines.insert(0, f"### fork from {orig_url}")
         content = "\n".join(lines) + "\n"
