@@ -6,37 +6,37 @@
 
 [Rule]
 # bilibili
-URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,%SNS%
+URL-REGEX,https:\/\/api\.bilibili\.com\/x\/v\d\/reply\/add,{{{SNS}}}
 
 # ByteDance
 # (Amemv)
 AND,((DOMAIN-KEYWORD,amemv.com,extended-matching),(PROTOCOL,UDP)),REJECT
-DOMAIN-KEYWORD,-core-hl.amemv.com,%SNS%,extended-matching
-DOMAIN-KEYWORD,-core-lf.amemv.com,%SNS%,extended-matching
+DOMAIN-KEYWORD,-core-hl.amemv.com,{{{SNS}}},extended-matching
+DOMAIN-KEYWORD,-core-lf.amemv.com,{{{SNS}}},extended-matching
 
 # (TouTiao)
-DOMAIN,ib.snssdk.com,%SNS%
+DOMAIN,ib.snssdk.com,{{{SNS}}}
 
 # Kuwo
-DOMAIN,ip.i.kuwo.cn,%SNS%
+DOMAIN,ip.i.kuwo.cn,{{{SNS}}}
 
 # Xiaohongshu
-DOMAIN,edith.xiaohongshu.com,%SNS%,extended-matching
+DOMAIN,edith.xiaohongshu.com,{{{SNS}}},extended-matching
 
 # Weibo
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),%SNS%
-URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,%SNS%
-URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,%SNS%
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/comments\/(create|reply),{{{SNS}}}
+URL-REGEX,https:\/\/weibo\.com\/ajax\/comments\/create,{{{SNS}}}
+URL-REGEX,https:\/\/api\.weibo\.cn\/\d\/statuses\/send,{{{SNS}}}
 # (Web)
-DOMAIN,www.weibo.com,%SNS%
-DOMAIN,s.weibo.com,%SNS%
+DOMAIN,www.weibo.com,{{{SNS}}}
+DOMAIN,s.weibo.com,{{{SNS}}}
 
 # Zhihu
-URL-REGEX,https:\/\/api\.zhihu\.com\/answers,%SNS%
-URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,%SNS%
+URL-REGEX,https:\/\/api\.zhihu\.com\/answers,{{{SNS}}}
+URL-REGEX,https:\/\/api\.zhihu\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
-%可选 Twitter%,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,%Twitter%,extended-matching
+{{{可选 Twitter}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
 
 [MITM]
 hostname = %APPEND% api.bilibili.com, api.weibo.cn, weibo.com, api.zhihu.com
