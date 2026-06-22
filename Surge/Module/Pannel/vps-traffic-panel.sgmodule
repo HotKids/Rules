@@ -9,4 +9,4 @@
 vps-traffic-panel = type=generic,script-name=vps-traffic,update-interval=300,icon=server.rack
 
 [Script]
-vps-traffic = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/vps-traffic.js,argument="title=%title%&ip=%ip%&quota=%quota%&resetday=%resetday%&mode=%mode%&expire=%expire%"
+vps-traffic = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/vps-traffic.js,argument="title={{{title}}}&ip={{{ip}}}&quota={{{quota}}}&resetday={{{resetday}}}&mode={{{mode}}}&expire={{{expire}}}"
