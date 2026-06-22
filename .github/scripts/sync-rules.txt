@@ -12,3 +12,6 @@ https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list,Apple/App
 https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list,Apple/APNS
 
 # >> Clash
+
+# >> Module
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule,BlockAdsBase
