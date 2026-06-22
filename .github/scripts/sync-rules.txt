@@ -14,3 +14,4 @@ https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list,
 # >> Clash
 
 # >> Module
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule,BlockAdsBase

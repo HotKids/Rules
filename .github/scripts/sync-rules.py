@@ -14,6 +14,7 @@ import json
 import re
 import subprocess
 import urllib.request
+import urllib.parse
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
@@ -1054,11 +1055,15 @@ def fetch_external_modules():
     module_dir = REPO_ROOT / "Surge" / "Module"
     module_dir.mkdir(parents=True, exist_ok=True)
 
-    urls = [e["url"] for e in entries]
+    def _encode(url: str) -> str:
+        p = urllib.parse.urlparse(url)
+        return urllib.parse.urlunparse(p._replace(path=urllib.parse.quote(p.path, safe="/-_.~!$&'()*+,;=:@%")))
+
+    urls = [_encode(e["url"]) for e in entries]
     prefetched = _prefetch_urls(urls)
 
     for e in entries:
-        url, name = e["url"], e["name"]
+        url, name = _encode(e["url"]), e["name"]
         text = prefetched.get(url)
         if text is None:
             continue
