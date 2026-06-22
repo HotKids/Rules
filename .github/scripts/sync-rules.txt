@@ -15,4 +15,4 @@ https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list,
 
 # >> Module
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule,BlockAdsBase #!desc=此插件是所有去广告插件的基础，只针对广告平台处理。你依然需要安装其他去广告插件来搭配使用，并确保此插件始终排序在顶部。 #!category=去广告
-https://raw.githubusercontent.com/kokoryh/Sparkle/master/release/surge/module/bilibili.sgmodule,Bilibili #!name=哔哩哔哩去广告 #!author=kokoryh #!category=去广告
+https://raw.githubusercontent.com/kokoryh/Sparkle/master/release/surge/module/bilibili.sgmodule,Bilibili #!name=哔哩哔哩去广告 #!desc=哔哩哔哩去广告，部分 App 需清除缓存或重新安装后才会生效。#!author=kokoryh #!category=去广告
