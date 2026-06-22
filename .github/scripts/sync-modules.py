@@ -28,6 +28,12 @@ _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 
 _SECTION_ORDER = ["MITM", "Rule", "Map Local", "Script", "URL Rewrite", "Header Rewrite"]
 
+# arguments-desc 顶部的总说明，始终输出
+_ARGS_DESC_GENERAL = (
+    "各参数值为对应 App 的域名关键字，默认启用；如需禁用某 App 去广告，"
+    "将其改为任意非常见域名值即可（e.g. NO）。"
+)
+
 
 def _sort_key(name: str) -> str:
     """数字 → 英文字母 → 汉字拼音 排序键。"""
@@ -295,8 +301,8 @@ def aggregate():
             all_args.setdefault(key, entry)
     if all_args:
         out.append(f"#!arguments={','.join(all_args.values())}")
-    if merged_args_desc:
-        out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
+    desc_parts = [_ARGS_DESC_GENERAL, *merged_args_desc.values()]
+    out.append("#!arguments-desc=" + "\\n".join(desc_parts))
     out.append(f"#!date={now}")
     out.append("")
 
