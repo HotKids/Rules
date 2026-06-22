@@ -13,8 +13,8 @@ hostname = %APPEND% default.any-any.prd.api.discomax.com
 #   Discovery+ UA 识别：*DPlus*
 #   HBO Max   UA 识别：*Max*
 # 以下注释示例按需启用：
-# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*DPlus*)),{{{DPlus}}}
-# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*Max*)),{{{Max}}}
+# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*DPlus*)),%DPlus%
+# AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*Max*)),%Max%
 
 # Discovery+ 服务域名分流
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,%DPlus%,force-remote-dns,extended-matching
