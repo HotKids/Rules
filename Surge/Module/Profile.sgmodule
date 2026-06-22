@@ -99,7 +99,7 @@ always-real-ip = *.lan, *.local, *.localhost, *.home.arpa, *.msftncsi.com, *.msf
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理
 # Surge HTTP 引擎将处理这些请求，所有的高级功能如捕获、重写和脚本等都可以使用
-force-http-engine-hosts = *.alicdn.com, *.ott.cibntv.net, *.tc.qq.com, *.douyinvod.com, *.douyin.com, api*.amemv.com, *.xhscdn.com, *.xiaohongshu.com, *.bilibili.com, *.kuaishou.com, *.jd.com, *.pinduoduo.com, *.music.163.com, wmapi.meituan.com
+force-http-engine-hosts = *.ott.cibntv.net, *.tc.qq.com, *.douyinvod.com, *.douyin.com, api*.amemv.com, *.xhscdn.com, *.xiaohongshu.com, *.bilibili.com, *.kuaishou.com, *.jd.com, *.pinduoduo.com, *.music.163.com, wmapi.meituan.com
 
 # > VIF Included Routes
 # 默认情况下，Surge VIF 接口会声明自己是默认路由
@@ -108,7 +108,8 @@ force-http-engine-hosts = *.alicdn.com, *.ott.cibntv.net, *.tc.qq.com, *.douyinv
 
 # > 路由防火墙
 # include-all-networks = false
-# include-local-networks = false
+# 允许 Surge VIF 接管局域网转发流量，使旁路由设备的 DNS 查询可被 hijack-dns 捕获
+# include-local-networks = true #!MACOS-ONLY
 
 # > UDP 优先级
 udp-priority = true
@@ -149,16 +150,16 @@ PROTOCOL,QUIC,REJECT-NO-DROP
 AND,((DEST-PORT,22),(PROTOCOL,TCP)),DIRECT
 
 # Unbreak 后续规则修正
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list,DIRECT,extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list,DIRECT
 # Private 私有网络
-DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt,DIRECT,extended-matching
+DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt,DIRECT
 # HTTPDNS 请求/流量阻止 
-RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,REJECT,extended-matching
+RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,REJECT
 # Advertising 广告
-DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,REJECT-TINYGIF,extended-matching
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF,extended-matching
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,REJECT-TINYGIF,extended-matching
+DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,REJECT-TINYGIF
 # Privacy 隐私
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,REJECT-TINYGIF,extended-matching
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,REJECT-TINYGIF
 # Hijacking 运营商劫持或恶意网站
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,REJECT-TINYGIF,extended-matching
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,REJECT-TINYGIF
