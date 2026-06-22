@@ -26,7 +26,7 @@ _META_FIELD_RE = re.compile(r"^#!([\w-]+)=(.*)$")
 
 _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 
-_SECTION_ORDER = ["MITM", "Rule", "Map Local", "Script", "URL Rewrite", "Header Rewrite"]
+_SECTION_ORDER = ["MITM", "General", "Rule", "Map Local", "Script", "URL Rewrite", "Header Rewrite"]
 
 # arguments-desc 顶部的总说明，始终输出
 _ARGS_DESC_GENERAL = (
