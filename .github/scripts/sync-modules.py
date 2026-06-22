@@ -26,7 +26,22 @@ _META_FIELD_RE = re.compile(r"^#!([\w-]+)=(.*)$")
 
 _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 
-_SECTION_ORDER = ["MITM", "Rule", "Map Local", "Script", "URL Rewrite", "Header Rewrite"]
+_SECTION_ORDER = [
+    "MITM",
+    "General",
+    "Rule",
+    "Map Local",
+    "URL Rewrite",
+    "Header Rewrite",
+    "Body Rewrite",
+    "Script",
+]
+
+# arguments-desc 顶部的总说明，始终输出
+_ARGS_DESC_GENERAL = (
+    "各参数值为对应 App 的域名关键字，默认启用；如需禁用某 App 去广告，"
+    "将其改为任意非常见域名值即可（e.g. NO）。"
+)
 
 
 def _sort_key(name: str) -> str:
@@ -86,13 +101,17 @@ def _sub_alias(text: str, keyword: str, display: str) -> str:
     """将 text 中作为域名标签出现的 keyword 替换为占位符 {{{display}}}。
 
     keyword 为域名关键字（如 ithome），display 为参数键名（如 IT之家）。
-    仅在紧邻点号（`.` 或转义的 `\\.`）时替换，从而命中域名部分
-    （如 napi.ithome.com → napi.{{{IT之家}}}.com），而不会误伤脚本名
-    （移除12306开屏广告）或 script-path 路径（.../12306/12306_remove.js）。
+    替换条件（任一即可）：
+      - 紧跟在点号后（`.` 或转义的 `\\.`），命中域名前/中段标签；
+      - 紧邻竖线/右括号前（`|` `)`），命中 `\\.(mgtv|hunantv)\\.` 这类域名
+        候选组里作为标签后缀的关键字。
+    由此命中域名部分（napi.ithome.com → napi.{{{IT之家}}}.com），而不会误伤
+    脚本名（移除12306开屏广告）、script-path 路径（.../12306/12306_remove.js）
+    或路径候选组（(caixinapp|...) 里的 caixin 因前面是 `(` 而不会被替换）。
     """
     esc = re.escape(keyword)
     repl = "{{{" + display + "}}}"
-    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.)").sub(lambda _m: repl, text)
+    return re.compile(rf"(?<=\.){esc}|{esc}(?=\\?\.|[|)])").sub(lambda _m: repl, text)
 
 
 def _merge_mitm(
@@ -295,8 +314,8 @@ def aggregate():
             all_args.setdefault(key, entry)
     if all_args:
         out.append(f"#!arguments={','.join(all_args.values())}")
-    if merged_args_desc:
-        out.append(f"#!arguments-desc={chr(10).join(merged_args_desc.values())}")
+    desc_parts = [_ARGS_DESC_GENERAL, *merged_args_desc.values()]
+    out.append("#!arguments-desc=" + "\\n".join(desc_parts))
     out.append(f"#!date={now}")
     out.append("")
 
