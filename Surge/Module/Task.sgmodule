@@ -1,5 +1,6 @@
 #!name=Tasks Module
 #!desc=Cron Task Pack
+#!author=HotKids
 #!system=ios
 
 [Script]

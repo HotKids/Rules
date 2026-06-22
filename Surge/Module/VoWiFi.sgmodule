@@ -1,5 +1,6 @@
 #!name=VoWiFi Proxy
 #!desc=Proxy rules for Wi-Fi Calling / VoWiFi with remote DNS.
+#!author=HotKids
 #!system=ios
 
 [Rule]
