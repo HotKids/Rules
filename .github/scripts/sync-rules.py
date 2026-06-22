@@ -1068,7 +1068,8 @@ def fetch_external_modules():
         if text is None:
             continue
         out = module_dir / f"{name}.sgmodule"
-        if write_if_changed(out, text):
+        content = f"### fork from {url}\n{text}"
+        if write_if_changed(out, content):
             print(f"  ✓ {name}.sgmodule 已更新")
         else:
             print(f"  · {name}.sgmodule 无变化")
