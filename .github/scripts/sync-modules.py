@@ -38,7 +38,7 @@ def _sort_key(name: str) -> str:
         return "0" + name
     if first.isascii() and first.isalpha():
         return "1" + name.lower()
-    return "2" + "".join(lazy_pinyin(name))
+    return "2" + " ".join(lazy_pinyin(name))
 
 
 def _encode_url(url: str) -> str:
