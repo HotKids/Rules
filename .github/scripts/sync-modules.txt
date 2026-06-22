@@ -55,3 +55,4 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 # https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小宇宙去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/优酷视频去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/知乎去广告.sgmodule
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Official/中国联通去广告.sgmodule
