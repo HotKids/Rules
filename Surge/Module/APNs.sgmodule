@@ -1,6 +1,7 @@
 #!name=APNs Fix
 #!desc=改善中国大陆网络环境下部分境外应用的 APNs 推送连接稳定性。移动网络下可能需要开启“包含所有网络请求”，以接管 APNs 及相关网络请求；该选项可能影响 AirDrop、Xcode 调试、USB Dashboard 等功能，仅建议临时使用。
 #!author=HotKids
+#!category=HotKids
 #!system=ios
 #!arguments=APNs:🍎 Apple,Tunnel:true
 #!arguments-desc=Tunnel:移动网络下可能需要开启“包含所有网络请求”，可选 true / false

@@ -1,6 +1,7 @@
 #!name=DIRECT MODE
 #!desc=私人使用，一些需要直连的场景
 #!author=HotKids
+#!category=HotKids
 
 [Rule]
 # CARRIER 匹配

@@ -1,6 +1,7 @@
 #!name=Streaming & AI Service Monitor
 #!desc=检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
 #!author=HotKids&ChatGPT&Claude
+#!category=HotKids
 #!system=ios
 #!arguments=geminiapikey:null,nfprice:true
 #!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，无 Key 时通过网页检测，有 Key 时增加 API 检测作为 fallback）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）
