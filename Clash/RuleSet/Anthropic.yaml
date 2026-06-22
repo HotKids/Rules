@@ -1,4 +1,5 @@
 payload:
+  # > Anthropic
   # 核心域名（DOMAIN-SUFFIX 已覆盖所有 *.anthropic.com 子域名）
   - DOMAIN-SUFFIX,anthropic.com
   - DOMAIN-SUFFIX,claude.ai
