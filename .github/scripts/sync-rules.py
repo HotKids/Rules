@@ -1070,10 +1070,9 @@ def fetch_external_modules():
     urls = [_encode(e["url"]) for e in entries]
     prefetched = _prefetch_urls(urls)
 
-    for e in entries:
+    for e, enc_url in zip(entries, urls):
         orig_url, name = e["url"], e["name"]
-        overrides: dict = e.get("overrides", {})
-        enc_url = _encode(orig_url)
+        overrides: dict = e["overrides"]
         text = prefetched.get(enc_url)
         if text is None:
             continue
@@ -1091,13 +1090,17 @@ def fetch_external_modules():
                         replaced.add(key)
                         continue
                 new_lines.append(line)
+            # 追加上游文件中不存在的 override 键
+            for key, val in overrides.items():
+                if key not in replaced:
+                    new_lines.append(f"#!{key}={val}")
             lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
             lines.insert(last_meta + 1, f"### fork from {orig_url}")
-            content = "\n".join(lines) + "\n"
         else:
-            content = f"### fork from {orig_url}\n{text}"
+            lines.insert(0, f"### fork from {orig_url}")
+        content = "\n".join(lines) + "\n"
         if write_if_changed(out, content):
             print(f"  ✓ {name}.sgmodule 已更新")
         else:
