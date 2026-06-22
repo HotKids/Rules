@@ -1,8 +1,8 @@
-# Surge sgmodule, 聚合列表
+# Surge sgmodule 聚合列表
 # 每行一个 URL，以 # 开头的行为注释
-# 输出文件: Surge/Module/BlockAds.sgmodule,
+# 输出文件: Surge/Module/BlockAds.sgmodule
 # name/desc 在输出文件中手动维护，脚本不覆盖
-# 需搭配使用: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule,
+# 需搭配使用: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/12306去广告.sgmodule,12306
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/123云盘去广告.sgmodule,123pan
