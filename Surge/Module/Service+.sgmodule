@@ -1,6 +1,7 @@
 #!name=Service Rules+
 #!desc=Streaming、AI 与区域服务分流细分，指定服务输入 # 即可禁用
 #!author=HotKids
+#!category=HotKids
 #!arguments=ChatGPT 分流:🤖 AIGC,ChatGPT 禁用:RULE-SET,Claude 分流:🤖 AIGC,Claude 禁用:RULE-SET,Discovery+ 分流:🇺🇸 America,Discovery+ 禁用:RULE-SET,Disney+ 分流:🔵 Disney+,Disney+ 禁用:RULE-SET,HBO Max 分流:🟣 HBO Max,HBO Max 禁用:RULE-SET,Netflix 分流:⚫️ Netflix,Netflix 禁用:RULE-SET,Spotify 分流:🇨🇳 Taiwan,Spotify 禁用:RULE-SET,Viu 分流:🇺🇳 Server,Viu 禁用:RULE-SET,YouTube 分流:🔴 YouTube,YouTube 禁用:RULE-SET
 
 [Rule]
