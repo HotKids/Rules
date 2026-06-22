@@ -292,7 +292,7 @@ def aggregate():
                 if sec == "Script" and name in name_to_alias:
                     alias = name_to_alias[name]
                     out.extend(
-                        re.sub(r'^([^=]+)(=)', f'{{{{{{{alias}}}}}}}\\2', line, count=1)
+                        re.sub(r'^([^=]+?)(\s*=)', f'{{{{{{{alias}}}}}}}\\2', line, count=1)
                         if "=" in line and not line.startswith("#")
                         else line
                         for line in lines
