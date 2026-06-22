@@ -1119,7 +1119,7 @@ def fetch_external_modules():
             lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
-            lines.insert(last_meta + 1, f"### fork from {orig_url}")
+            lines[last_meta + 1:last_meta + 1] = ["", f"### fork from {orig_url}"]
         else:
             lines.insert(0, f"### fork from {orig_url}")
         content = "\n".join(lines) + "\n"
