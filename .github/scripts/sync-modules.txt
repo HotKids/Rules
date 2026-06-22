@@ -6,9 +6,11 @@
 
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/12306去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/123云盘去广告.sgmodule
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/ECOVACS%20HOME去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/IT之家去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Keep去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Line去广告.sgmodule
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/QQ音乐去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Reddit去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/阿里云盘去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/爱奇艺视频去广告.sgmodule
@@ -22,6 +24,7 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/财新去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/大麦去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/得物去广告.sgmodule
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/叮咚买菜去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/飞客去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/飞猪旅行去广告.sgmodule
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/高德地图去广告.sgmodule
