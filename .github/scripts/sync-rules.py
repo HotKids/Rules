@@ -762,8 +762,16 @@ def parse_sync_rules() -> dict:
         elif s == "# >> Module":
             section = "module"
         elif section and s and not s.startswith("#") and "," in s:
-            url, name = s.split(",", 1)
-            result[section].append({"url": url.strip(), "name": name.strip()})
+            url, rest = s.split(",", 1)
+            # rest = "name" 或 "name #!key=value #!key=value ..."（空格+#! 分隔）
+            parts = rest.split(" #!")
+            name = parts[0].strip()
+            overrides = {}
+            for part in parts[1:]:
+                if "=" in part:
+                    k, v = part.split("=", 1)
+                    overrides[k.strip()] = v.strip()
+            result[section].append({"url": url.strip(), "name": name, "overrides": overrides})
     return result
 
 
@@ -1064,12 +1072,26 @@ def fetch_external_modules():
 
     for e in entries:
         orig_url, name = e["url"], e["name"]
+        overrides: dict = e.get("overrides", {})
         enc_url = _encode(orig_url)
         text = prefetched.get(enc_url)
         if text is None:
             continue
         out = module_dir / f"{name}.sgmodule"
         lines = text.splitlines()
+        # 应用 overrides：替换匹配的 #!key= 行
+        if overrides:
+            replaced: set[str] = set()
+            new_lines = []
+            for line in lines:
+                if line.startswith("#!") and "=" in line:
+                    key = line[2:].split("=", 1)[0]
+                    if key in overrides:
+                        new_lines.append(f"#!{key}={overrides[key]}")
+                        replaced.add(key)
+                        continue
+                new_lines.append(line)
+            lines = new_lines
         last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
         if last_meta >= 0:
             lines.insert(last_meta + 1, f"### fork from {orig_url}")
