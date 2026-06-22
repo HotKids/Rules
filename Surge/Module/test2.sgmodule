@@ -1,7 +1,0 @@
-#!name=测试用
-#!desc=Streaming、AI 与区域服务分流细分，指定服务输入 # 即可禁用
-#!arguments=XHS: ,XHS 分流:DIRECT
-
-[Rule]
-# > ChatGPT
-{{{XHS}}}RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GeoLoc.list,{{{XHS 分流}}},extended-matching
