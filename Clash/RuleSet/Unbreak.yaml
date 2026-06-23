@@ -54,9 +54,6 @@ payload:
   ### 金融风控与设备指纹服务，阻止可能导致部分银行及支付页面功能异常（如银联商务网页支付控件无法加载）
   - DOMAIN-SUFFIX,online-metrix.net
 
-  - 阻止此条会影响银联商务网页支付加载支付控件
-  - DOMAIN-SUFFIX,online-metrix.net
-
   # > Windows NTP
   - DOMAIN,time.windows.com
 
