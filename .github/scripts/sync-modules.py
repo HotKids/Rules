@@ -97,6 +97,13 @@ def parse_sgmodule(text: str) -> dict:
     return {"meta": meta, "sections": sections}
 
 
+def _apply_key_renames(text: str, renames: dict[str, str]) -> str:
+    """将 text 中 {{{old_key}}} 占位符替换为 {{{new_key}}}（upstream args 前缀重命名）。"""
+    for old_key, new_key in renames.items():
+        text = text.replace("{{{" + old_key + "}}}", "{{{" + new_key + "}}}")
+    return text
+
+
 def _sub_alias(text: str, keyword: str, display: str) -> str:
     """将 text 中作为域名标签出现的 keyword 替换为占位符 {{{display}}}。
 
@@ -230,8 +237,10 @@ def aggregate():
     merged_args_desc: dict[str, str] = {}
     # 模块名 -> alias（域名关键字），用于在各 section 内做域名替换
     name_to_alias: dict[str, str] = {}
-    # 模块名 -> display（参数键名 = 模块名去掉“去广告”）
+    # 模块名 -> display（参数键名 = 模块名去掉”去广告”）
     name_to_display: dict[str, str] = {}
+    # 模块名 -> {原始 key -> 带前缀 key}，用于将上游 {{{key}}} 占位符同步改名
+    module_arg_key_renames: dict[str, dict[str, str]] = {}
 
     for url, alias in url_alias_list:
         text = results.get(url)
@@ -263,6 +272,14 @@ def aggregate():
             if key:
                 mod_arg_list.append((key, arg_entry))
         if mod_arg_list:
+            if alias:
+                # 有 alias 的模块：给每个 upstream arg key 加上 "{display}-" 前缀，
+                # 并记录 old_key -> new_key 映射，以便后续替换内容中的 {{{key}}} 占位符
+                disp = name_to_display.get(name, alias)
+                prefix = disp + "-"
+                renames = {key: prefix + key for key, _ in mod_arg_list}
+                module_arg_key_renames[name] = renames
+                mod_arg_list = [(prefix + k, prefix + entry) for k, entry in mod_arg_list]
             module_args[name] = mod_arg_list
         for desc_entry in parsed["meta"].get("arguments-desc", "").split("\n"):
             desc_entry = desc_entry.strip()
@@ -344,7 +361,13 @@ def aggregate():
                     if alias:
                         hint = _sub_alias(hint, alias, display)
                     out.append(f"# hostname = {hint}")
-                out.extend(_sub_alias(line, alias, display) if alias else line for line in lines)
+                renames = module_arg_key_renames.get(name, {})
+                for line in lines:
+                    if alias:
+                        line = _sub_alias(line, alias, display)
+                    if renames:
+                        line = _apply_key_renames(line, renames)
+                    out.append(line)
                 first = False
         out.append("")
         written_sections.add(sec)
