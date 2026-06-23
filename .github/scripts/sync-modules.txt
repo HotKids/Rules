@@ -1,12 +1,14 @@
-# Surge sgmodule, 聚合列表
+# Surge sgmodule 聚合列表
 # 每行一个 URL，以 # 开头的行为注释
-# 输出文件: Surge/Module/BlockAds.sgmodule,
+# 输出文件: Surge/Module/BlockAds.sgmodule
 # name/desc 在输出文件中手动维护，脚本不覆盖
-# 需搭配使用: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule,
+# 需搭配使用: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/12306去广告.sgmodule,12306
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/123云盘去广告.sgmodule,123pan
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/B612咔叽去广告.sgmodule,kaji
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/ECOVACS%20HOME去广告.sgmodule,eco
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Foodie去广告.sgmodule,kaji
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/IT之家去广告.sgmodule,ithome
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Keep去广告.sgmodule,gotokeep
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Line去广告.sgmodule,line
@@ -17,26 +19,31 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度地图去广告.sgmodule,baidu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度搜索网页去广告.sgmodule,baidu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/百度网盘去广告.sgmodule,baidu
-https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩漫画去广告.sgmodule,bilibili
 # https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩去广告.sgmodule,bili
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/哔哩哔哩漫画去广告.sgmodule,bilibili
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/波点音乐去广告.sgmodule,kuwo
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/菜鸟去广告.sgmodule,cainiao
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/彩云天气去广告.sgmodule,caiyun
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/财新去广告.sgmodule,caixin
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/大麦去广告.sgmodule,taobao
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/得物去广告.sgmodule,dewu
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/滴滴出行去广告.sgmodule,didi
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/叮咚买菜去广告.sgmodule,ddxq
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/飞客去广告.sgmodule,flyert
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/飞猪旅行去广告.sgmodule,taobao
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/高德地图去广告.sgmodule,amap
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/航旅纵横去广告.sgmodule,umetrip
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/金山文档去广告.sgmodule,kdocs
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/京东去广告.sgmodule,jd
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/京东外卖去广告.sgmodule,jd
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/酷安去广告.sgmodule,coolapk
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/快递100去广告.sgmodule,kuaidi100
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/芒果TV去广告.sgmodule,tv
-# https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/美图秀秀去广告.sgmodule,meitu
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/美图秀秀去广告.sgmodule,meitu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/墨迹天气去广告.sgmodule,moji
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/拼多多去广告.sgmodule,pinduoduo
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/起点读书去广告.sgmodule,qidian
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/瑞幸咖啡去广告.sgmodule,lkcoffee
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/什么值得买去广告.sgmodule,smzdm
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/顺丰速运去广告.sgmodule,sf-express
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/淘票票去广告.sgmodule,taobao
@@ -52,7 +59,9 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小黑盒去广告.sgmodule,xiaoheihe
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小红书去广告.sgmodule,xiaohongshu
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小象超市去广告.sgmodule,meituan
-# https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小宇宙去广告.sgmodule,xiaoyuzhoufm
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/小宇宙去广告.sgmodule,xiaoyuzhoufm
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/萤石云视频去广告.sgmodule,ys7
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/优酷视频去广告.sgmodule,youku
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/知乎去广告.sgmodule,zhihu
+https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/转转去广告.sgmodule,zhuanzhuan
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/Official/中国联通去广告.sgmodule,10010
