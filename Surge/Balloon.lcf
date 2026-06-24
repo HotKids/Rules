@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-06-24 15:06:46
+# Date: 2026-06-24 15:10:44
 # Author: @HotKids
 
 [General]
@@ -117,7 +117,7 @@ https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt, 
 https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=HTTPDNS, enabled=true
 # Advertising 广告
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Reject, enabled=true
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list, policy=🚧 AdGuard, tag=Block, enabled=true
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list, policy=🚧 AdGuard, tag=Adblock, enabled=true
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
 # Privacy 隐私
 https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Tracking, enabled=true
