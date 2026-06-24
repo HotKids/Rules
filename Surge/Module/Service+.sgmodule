@@ -1,7 +1,7 @@
 #!name=Service Rules+
-#!desc=Streaming、AI 与区域服务分流细分；各服务「开关」填 # 可禁用
+#!desc=细分 Streaming、AI、云服务及区域服务规则；开关填 # 可禁用
 #!category=HotKids
-#!arguments=ChatGPT 代理:🤖 AIGC,ChatGPT 开关:RULE-SET,ChatGPT 条件:#,Claude 代理:🤖 AIGC,Claude 开关:RULE-SET,Claude 条件:#,Dropbox 代理:🔰 Proxy,Dropbox 开关:RULE-SET,Dropbox 条件:#,OneDrive 代理:🔰 Proxy,OneDrive 开关:RULE-SET,OneDrive 条件:#,Microsoft 代理:🔘 DIRECT,Microsoft 开关:RULE-SET,Microsoft 条件:#,Discovery+ 代理:🇺🇸 America,Discovery+ 开关:RULE-SET,Discovery+ 条件:#,Disney+ 代理:🔵 Disney+,Disney+ 开关:RULE-SET,Disney+ 条件:#,HBO Max 代理:🟣 HBO Max,HBO Max 开关:RULE-SET,HBO Max 条件:#,Netflix 代理:⚫️ Netflix,Netflix 开关:RULE-SET,Netflix 条件:#,Prime Video 代理:🎬 Streaming,Prime Video 开关:RULE-SET,Prime Video 条件:#,Spotify 代理:🇨🇳 Taiwan,Spotify 开关:RULE-SET,Spotify 条件:#,Viu 代理:🇺🇳 Server,Viu 开关:RULE-SET,Viu 条件:#,YouTube 代理:🔴 YouTube,YouTube 开关:RULE-SET,YouTube 条件:#
+#!arguments=ChatGPT 开关:RULE-SET,ChatGPT 代理:🤖 AIGC,ChatGPT 条件:#,Claude 开关:RULE-SET,Claude 代理:🤖 AIGC,Claude 条件:#,Dropbox 开关:RULE-SET,Dropbox 代理:🔰 Proxy,Dropbox 条件:#,OneDrive 开关:RULE-SET,OneDrive 代理:🔰 Proxy,OneDrive 条件:#,Microsoft 开关:RULE-SET,Microsoft 代理:🔘 DIRECT,Microsoft 条件:#,Discovery+ 开关:RULE-SET,Discovery+ 代理:🇺🇸 America,Discovery+ 条件:#,Disney+ 开关:RULE-SET,Disney+ 代理:🔵 Disney+,Disney+ 条件:#,HBO Max 开关:RULE-SET,HBO Max 代理:🟣 HBO Max,HBO Max 条件:#,Netflix 开关:RULE-SET,Netflix 代理:⚫️ Netflix,Netflix 条件:#,Prime Video 开关:RULE-SET,Prime Video 代理:🎬 Streaming,Prime Video 条件:#,Spotify 开关:RULE-SET,Spotify 代理:🇨🇳 Taiwan,Spotify 条件:#,Viu 开关:RULE-SET,Viu 代理:🇺🇳 Server,Viu 条件:#,YouTube 开关:RULE-SET,YouTube 代理:🔴 YouTube,YouTube 条件:#
 #!arguments-desc=开关：保持 RULE-SET；输入 # 可禁用该服务。\n代理：填写已有策略或策略组名称。\n条件：默认填 # 视为行末注释，表示不限制；需要限制时改为 #!IOS-ONLY、#!MACOS-ONLY、#!TVOS-ONLY，或填写完整 REQUIREMENT，例如 #!REQUIREMENT SYSTEM=='iOS'。
 
 [Rule]
