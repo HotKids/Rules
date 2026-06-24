@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-21 15:02:58
+# Date: 2026-06-24 15:01:28
 # Author: @HotKids
 
 # 通用设置
@@ -496,11 +496,18 @@ rule-providers:
 #   path: # 文件路径
 #   url: # 只有当类型为 HTTP 时才可用，您不需要在本地空间中创建新文件。
 #   interval: # 自动更新间隔，仅在类型为 HTTP 时可用
-  Unbreak:
+  Bypass:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Unbreak.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Unbreak.yaml
+    path: ./Provider/RuleSet/Bypass.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml
+    interval: 86400
+
+  Reroute:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Reroute.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml
     interval: 86400
 
   Private:
@@ -636,13 +643,6 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
-  Proxy:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Proxy.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Proxy.yaml
-    interval: 86400
-
   Global:
     type: http
     behavior: domain
@@ -683,8 +683,9 @@ rules:
   # 标准 SSH 端口
   - AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT
 
-  # Unbreak 后续规则修正
-  - RULE-SET,Unbreak,🔘 DIRECT
+  # Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
+  - RULE-SET,Bypass,🔘 DIRECT
+  - RULE-SET,Reroute,🔰 Proxy
 
   # Private 私有网络
   - RULE-SET,Private,🔘 DIRECT
@@ -740,7 +741,6 @@ rules:
   - RULE-SET,Spark,📧 Mail
 
   # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
-  - RULE-SET,Proxy,🔰 Proxy
   - RULE-SET,Global,🔰 Proxy
 
   # China Area Network
