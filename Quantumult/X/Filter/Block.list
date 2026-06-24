@@ -1,0 +1,249 @@
+# > 广告联盟
+DOMAIN,i.snssdk.com,Block
+DOMAIN,is.snssdk.com,Block
+DOMAIN,open.e.kuaishou.com,Block
+DOMAIN-SUFFIX,miaozhen.com,Block
+DOMAIN-KEYWORD,adservice,Block
+DOMAIN-KEYWORD,pglstatp-toutiao,Block
+DOMAIN-KEYWORD,pangolin-sdk-toutiao,Block
+DOMAIN-KEYWORD,pangolin.snssdk.com,Block
+DOMAIN-KEYWORD,video-cn.snssdk.com,Block
+
+# > 安全浏览限制解除
+DOMAIN,lookup.api.bsb.baidu.com,Block
+DOMAIN-SUFFIX,u3.ucweb.com,Block
+# DOMAIN-KEYWORD,safebrowsing. 会影响 Pixel VPN
+
+# > 农行防代理检测
+DOMAIN,msmp.abchina.com.cn,Block
+
+# > Amap
+DOMAIN,amap-aos-info-nogw.amap.com,Block
+DOMAIN,free-aos-cdn-image.amap.com,Block
+DOMAIN-SUFFIX,v.smtcdns.com,Block
+
+# > Apple
+DOMAIN,advertising.apple.com,Block
+DOMAIN,api-adservices.apple.com,Block
+DOMAIN,apple.comscoreresearch.com,Block
+DOMAIN,banners.itunes.apple.com,Block
+DOMAIN,iad.apple.com,Block
+DOMAIN,iadcontent.apple.com,Block
+DOMAIN,iadctest.qwapi.com,Block
+DOMAIN,iadmoo.apple.com,Block
+DOMAIN,iadworkbench.apple.com,Block
+DOMAIN,launch.apple.com,Block
+DOMAIN,qwapi.apple.com,Block
+DOMAIN-SUFFIX,advp.apple.com,Block
+DOMAIN-SUFFIX,iadsdk.apple.com,Block
+DOMAIN-KEYWORD,.iad-apple.com,Block
+
+# > Baidu
+DOMAIN,afd.baidu.com,Block
+DOMAIN,afdconf.baidu.com,Block
+DOMAIN,als.baidu.com,Block
+DOMAIN,bgg.baidu.com,Block
+DOMAIN,feed-image.baidu.com,Block
+DOMAIN,httpdns.baidubce.com,Block
+DOMAIN,lc.map.baidu.com,Block
+DOMAIN,mobads-logs.baidu.com,Block
+DOMAIN,mobads.baidu.com,Block
+DOMAIN-SUFFIX,pos.baidu.com,Block
+DOMAIN-SUFFIX,union.baidu.cn,Block
+DOMAIN-SUFFIX,union.baidu.com,Block
+IP-CIDR,180.76.76.200/32,Block
+
+# > Bilibili
+DOMAIN,mall.bilibili.com,Block
+
+# > ByteDance
+DOMAIN,ad.zijieapi.com,Block
+DOMAIN,lf-cdn-tos.bytescm.com,Block
+DOMAIN-KEYWORD,-ad-sign.byteimg.com,Block
+DOMAIN-KEYWORD,-be-pack-sign.pglstatp-toutiao.com,Block
+DOMAIN-KEYWORD,-be-pack.pglstatp-toutiao.com,Block
+DOMAIN-KEYWORD,-fe-tos.pglstatp-toutiao.com,Block
+DOMAIN-KEYWORD,api-access.pangolin-sdk-toutiao,Block
+DOMAIN-KEYWORD,asiad.byteactivity,Block
+DOMAIN-KEYWORD,log-api.pangolin-sdk-toutiao,Block
+
+# > Caiyun Weather
+DOMAIN,ad.cyapi.cn,Block
+
+# > Disney+ with Hulu
+DOMAIN-SUFFIX,disneyadvertising.com,Block
+# DOMAIN-SUFFIX,ads.digital.disneyadvertising.com
+
+# > ChatGPT
+DOMAIN,o33249.ingest.sentry.io,Block
+
+# > Google
+DOMAIN,adservice.google.com,Block
+DOMAIN,googleads.g.doubleclick-cn.net,Block
+DOMAIN,googleads.g.doubleclick.net,Block
+DOMAIN,pagead2.googlesyndication.com,Block
+DOMAIN,pubads.g.doubleclick.net,Block
+DOMAIN,www.googleadservices.com,Block
+
+# > HeyTap(OPPO)
+DOMAIN,event.dc.oppomobile.com,Block
+DOMAIN,adx.ads.heytapmobi.com,Block
+DOMAIN,ibrowser.feeds.heytapmobi.com,Block
+DOMAIN,adsfs.heytapimage.com,Block
+DOMAIN,cc-algo-cn.heytapimage.com,Block
+DOMAIN,cc-img-cn.heytapimage.com,Block
+
+# > ICBC
+DOMAIN,oisc.icbc.com.cn,Block
+DOMAIN,pageviewp.icbc.com.cn,Block
+
+# > iQIYI
+DOMAIN,api.iqiyi.com,Block
+DOMAIN-SUFFIX,cupid.iqiyi.com,Block
+DOMAIN-SUFFIX,cupid.ptqy.gitv.tv,Block
+
+# > JD
+DOMAIN,dns.jd.com,Block
+DOMAIN,dsp-x.jd.com,Block
+DOMAIN,janapi.jd.com,Block
+DOMAIN,xlog.jd.com,Block
+IP-CIDR,101.124.19.122/32,Block
+IP6-CIDR,2402:db40:5100:1011::5/128,Block
+
+# > Keep
+DOMAIN,httpdns.calorietech.com,Block
+DOMAIN,hc-ssp.sm.cn,Block
+
+# > Meituan
+DOMAIN,al-log.d.meituan.net,Block
+DOMAIN,babel-statistics-android.d.meituan.net,Block
+DOMAIN,maplocatesdksnapshot.d.meituan.net,Block
+DOMAIN,metrics-picture.d.meituan.net,Block
+DOMAIN,route-stats.d.meituan.net,Block
+
+# > MGTV
+DOMAIN,credits.bz.mgtv.com,Block
+DOMAIN,credits2.bz.mgtv.com,Block
+DOMAIN,credits3.bz.mgtv.com,Block
+DOMAIN,dflow.bz.mgtv.com,Block
+DOMAIN,encounter.bz.mgtv.com,Block
+DOMAIN,floor.bz.mgtv.com,Block
+DOMAIN,layer.bz.mgtv.com,Block
+DOMAIN,mob.bz.mgtv.com,Block
+DOMAIN,rc-topic-api.bz.mgtv.com,Block
+DOMAIN,rprain.bz.mgtv.com,Block
+DOMAIN,rprain.log.mgtv.com,Block
+DOMAIN,vip.bz.mgtv.com,Block
+DOMAIN-SUFFIX,da.mgtv.com,Block
+
+# > NetEase
+DOMAIN,adx-bj.anythinktech.com,Block
+DOMAIN,api.anythinktech.com,Block
+DOMAIN,da.anythinktech.com,Block
+DOMAIN,httpdns.music.163.com,Block
+DOMAIN,httpdns.n.netease.com,Block
+DOMAIN,iad.g.163.com,Block
+DOMAIN,iadmat.nosdn.127.net,Block
+DOMAIN,iadmatapk.nosdn.127.net,Block
+DOMAIN,iadmusicmat.music.126.net,Block
+DOMAIN,iadmusicmatvideo.music.126.net,Block
+DOMAIN,nex.163.com,Block
+DOMAIN,tk.anythinktech.com,Block
+DOMAIN-SUFFIX,163jiasu.com,Block
+
+# > Outlook
+DOMAIN,acdn.adnxs.com,Block
+DOMAIN,mediation.adnxs.com,Block
+DOMAIN,sin3-ib.adnxs.com,Block
+
+# > PeacockTV
+DOMAIN,video-ads-module.ad-tech.nbcuni.com,Block
+
+# > SMZDM
+DOMAIN,api.zuihuimai.com,Block
+
+# > Tencent
+DOMAIN-KEYWORD,adstats,Block
+DOMAIN,adcdn.tencentmusic.com,Block
+DOMAIN,adclick.tencentmusic.com,Block
+DOMAIN,adexpo.tencentmusic.com,Block
+DOMAIN,adsmind.gdtimg.com,Block
+DOMAIN,adstats.tencentmusic.com,Block
+DOMAIN,ad.tencentmusic.com,Block
+DOMAIN,btrace.qq.com,Block
+DOMAIN,btrace.video.qq.com,Block
+DOMAIN,info4.video.qq.com,Block
+DOMAIN,info6.video.qq.com,Block
+DOMAIN,ios.video.mpush.qq.com,Block
+DOMAIN,mtrace.qq.com,Block
+DOMAIN,monitor.music.qq.com,Block
+DOMAIN,p.l.qq.com,Block
+DOMAIN,pgdt.gtimg.cn,Block
+DOMAIN,wxsmsdy.video.qq.com,Block
+DOMAIN,wxsnsdy.wxs.qq.com,Block
+DOMAIN,wxsnsdythumb.wxs.qq.com,Block
+DOMAIN-SUFFIX,beacon.qq.com,Block
+DOMAIN-SUFFIX,gdt.qq.com,Block
+DOMAIN-SUFFIX,imtmp.net,Block
+DOMAIN-SUFFIX,tpns.qq.com,Block
+DOMAIN-SUFFIX,trace.qq.com,Block
+
+# > TVB
+DOMAIN,adstvb.akamaized.net,Block
+
+# > TVer
+DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp,Block
+
+# > Viu
+DOMAIN-SUFFIX,adcolony.com,Block
+DOMAIN,r2---sn-j5o76n7e.gvt1.com,Block
+
+# > WeChat
+DOMAIN,badjs.weixinbridge.com,Block
+
+# > Weibo
+DOMAIN,huodong.weibo.cn,Block
+DOMAIN-SUFFIX,biz.weibo.com,Block
+IP-CIDR,39.97.130.51/32,Block
+IP-CIDR,39.97.128.148/32,Block
+
+# > WeTV
+DOMAIN,btrace.wetvinfo.com,Block
+DOMAIN,mtrace.wetvinfo.com,Block
+
+# > Xiaomi
+DOMAIN,sdkconfig.ad.xiaomi.com,Block
+
+# > Youku
+DOMAIN,adsmind.ugdtimg.com,Block
+DOMAIN,huichuan-mc.sm.cn,Block
+DOMAIN,amdc.m.youku.com,Block
+DOMAIN,apiv4-iyes.youku.com,Block
+DOMAIN,huichuan.sm.cn,Block
+DOMAIN,iyes.youku.com,Block
+DOMAIN,mc.atm.youku.com,Block
+DOMAIN,yk-ssp.ad.youku.com,Block
+DOMAIN,ykad-data.youku.com,Block
+DOMAIN,m-vali.cp31.ott.cibntv.net,Block
+DOMAIN,vali-g1.cp31.ott.cibntv.net,Block
+DOMAIN,vali-ugc.cp31.ott.cibntv.net,Block
+
+# > Zhihu
+DOMAIN,appcloud2.in.zhihu.com,Block
+DOMAIN,appcloud.zhihu.com,Block
+DOMAIN,crash2.zhihu.com,Block
+DOMAIN,mqtt.zhihu.com,Block
+DOMAIN,sugar.zhihu.com,Block
+DOMAIN,zxid-m.mobileservice.cn,Block
+IP-CIDR,103.41.167.237/32,Block
+IP-CIDR,118.89.204.198/32,Block
+IP6-CIDR,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,Block
+
+# > 10000
+DOMAIN,ad.21cn.com,Block
+DOMAIN,ad.k.21cn.com,Block
+DOMAIN,admarket.21cn.com,Block
+DOMAIN,adshows.21cn.com,Block
+
+# > 10010
+DOMAIN-SUFFIX,m1.ad.10010.com,Block
