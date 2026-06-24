@@ -1,36 +1,50 @@
 #!name=Service Rules+
-#!desc=Streaming、AI 与区域服务分流细分，指定服务输入 # 即可禁用
+#!desc=Streaming、AI 与区域服务分流细分；各服务「开关」填 # 即可禁用
 #!category=HotKids
-#!arguments=ChatGPT 代理:🤖 AIGC,ChatGPT 开关:RULE-SET,Claude 代理:🤖 AIGC,Claude 开关:RULE-SET,Dropbox 代理:🔰 Proxy,Dropbox 开关:RULE-SET,OneDrive 代理:🔰 Proxy,OneDrive 开关:RULE-SET,Microsoft 代理:🔘 DIRECT,OneDrive 开关:RULE-SET,Discovery+ 代理:🇺🇸 America,Discovery+ 开关:RULE-SET,Disney+ 代理:🔵 Disney+,Disney+ 开关:RULE-SET,HBO Max 代理:🟣 HBO Max,HBO Max 开关:RULE-SET,Netflix 代理:⚫️ Netflix,Netflix 开关:RULE-SET,Prime Video 代理:🎬 Streaming,Prime Video 开关:RULE-SET,Spotify 代理:🇨🇳 Taiwan,Spotify 开关:RULE-SET,Viu 代理:🇺🇳 Server,Viu 开关:RULE-SET,YouTube 代理:🔴 YouTube,YouTube 开关:RULE-SET
-#!arguments-desc=开关组输入 # 即可禁用，代理组自行修改
+#!arguments=ChatGPT 代理:🤖 AIGC,ChatGPT 开关:RULE-SET,ChatGPT 条件:,Claude 代理:🤖 AIGC,Claude 开关:RULE-SET,Claude 条件:,Dropbox 代理:🔰 Proxy,Dropbox 开关:RULE-SET,Dropbox 条件:,OneDrive 代理:🔰 Proxy,OneDrive 开关:RULE-SET,OneDrive 条件:,Microsoft 代理:🔘 DIRECT,Microsoft 开关:RULE-SET,Microsoft 条件:,Discovery+ 代理:🇺🇸 America,Discovery+ 开关:RULE-SET,Discovery+ 条件:,Disney+ 代理:🔵 Disney+,Disney+ 开关:RULE-SET,Disney+ 条件:,HBO Max 代理:🟣 HBO Max,HBO Max 开关:RULE-SET,HBO Max 条件:,Netflix 代理:⚫️ Netflix,Netflix 开关:RULE-SET,Netflix 条件:,Prime Video 代理:🎬 Streaming,Prime Video 开关:RULE-SET,Prime Video 条件:,Spotify 代理:🇨🇳 Taiwan,Spotify 开关:RULE-SET,Spotify 条件:,Viu 代理:🇺🇳 Server,Viu 开关:RULE-SET,Viu 条件:,YouTube 代理:🔴 YouTube,YouTube 开关:RULE-SET,YouTube 条件:
+#!arguments-desc=开关：保持 RULE-SET；输入 # 可禁用该服务。\n代理：填写已有策略或策略组名称。\n条件：留空表示不限制；可填写 #!IOS-ONLY、#!MACOS-ONLY、#!TVOS-ONLY 或 #!REQUIREMENT SYSTEM=='iOS'；复杂表达式可写作 #!REQUIREMENT "CORE_VERSION>=22 AND SYSTEM=='iOS'"。
 
 [Rule]
-# Service
+# AI
 # > ChatGPT
-{{{ChatGPT 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 代理}}},extended-matching
+{{{ChatGPT 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 代理}}},extended-matching {{{ChatGPT 条件}}}
+
 # > Claude
-{{{Claude 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 代理}}},extended-matching
+{{{Claude 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 代理}}},extended-matching {{{Claude 条件}}}
+
+
+# Cloud & Productivity
 # > Dropbox
-{{{Dropbox 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OneDrive.list,{{{Dropbox 代理}}},extended-matching
+{{{Dropbox 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Dropbox.list,{{{Dropbox 代理}}},extended-matching {{{Dropbox 条件}}}
+
 # > OneDrive
-{{{OneDrive 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OneDrive.list,{{{OneDrive 代理}}},extended-matching
+{{{OneDrive 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OneDrive.list,{{{OneDrive 代理}}},extended-matching {{{OneDrive 条件}}}
+
 # > Microsoft
-{{{OneDrive 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Microsoft.list,{{{Microsoft 代理}}},extended-matching
+{{{Microsoft 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Microsoft.list,{{{Microsoft 代理}}},extended-matching {{{Microsoft 条件}}}
+
 
 # Streaming
 # > Discovery+
-{{{Discovery+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 代理}}},extended-matching
+{{{Discovery+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 代理}}},extended-matching {{{Discovery+ 条件}}}
+
 # > Disney+
-{{{Disney+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 代理}}},extended-matching
+{{{Disney+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 代理}}},extended-matching {{{Disney+ 条件}}}
+
 # > HBO Max
-{{{HBO Max 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 代理}}},extended-matching
+{{{HBO Max 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 代理}}},extended-matching {{{HBO Max 条件}}}
+
 # > Netflix
-{{{Netflix 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 代理}}},extended-matching
+{{{Netflix 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 代理}}},extended-matching {{{Netflix 条件}}}
+
 # > Prime Video
-{{{Prime Video 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Prime_Video.list,{{{Prime Video 代理}}},extended-matching
+{{{Prime Video 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Prime_Video.list,{{{Prime Video 代理}}},extended-matching {{{Prime Video 条件}}}
+
 # > Spotify
-{{{Spotify 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 代理}}},extended-matching
+{{{Spotify 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 代理}}},extended-matching {{{Spotify 条件}}}
+
 # > Viu｜HK IN SEA
-{{{Viu 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 代理}}},extended-matching
+{{{Viu 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 代理}}},extended-matching {{{Viu 条件}}}
+
 # > YouTube
-{{{YouTube 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 代理}}},extended-matching
+{{{YouTube 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 代理}}},extended-matching {{{YouTube 条件}}}
