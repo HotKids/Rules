@@ -3,6 +3,7 @@
   "rules": [
     {
       "domain_suffix": [
+        "googletagmanager.com",
         "updf.com"
       ]
     }

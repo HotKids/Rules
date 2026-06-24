@@ -1,0 +1,10 @@
+payload:
+  # > Reroute
+  ### 强制代理，修复因规则拦截或分流不当导致的功能异常
+
+  # > GTM（Google Tag Manager）
+  ### 阻止可能导致部分网站功能异常，如登录、按钮交互、表单提交、支付流程及单页应用（SPA）无法正常运行
+  - DOMAIN-SUFFIX,googletagmanager.com
+
+  # > UPDF
+  - DOMAIN-SUFFIX,updf.com
