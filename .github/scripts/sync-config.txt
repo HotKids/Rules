@@ -37,7 +37,7 @@ VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
 # > Rename
 rule-providers:
-  AD => Advertising
+  Block => Advertising
   HTTPDNS.Block => HTTPDNS
   ASN.China => CNASN
   Gemini => Google AI Studio
@@ -61,7 +61,7 @@ Speedtest
   Proxy => Outbound
   AdGuard => AdBlock
 [filter_remote]
-  AD => Adblock
+  Block => Adblock
   HTTPDNS.Block => HTTPDNS
   Spark => Mail
   ASN.China => ASN China
@@ -78,7 +78,7 @@ Speedtest
 << .github/scripts/sync-config/loon.ini
 # > Rename
 [Remote Rule]
-  AD => Adblock
+  Block => Adblock
   HTTPDNS.Block => HTTPDNS
   Spark => Mail
   ASN.China => ASN China
