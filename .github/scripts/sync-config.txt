@@ -37,7 +37,7 @@ VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
 # > Rename
 rule-providers:
-  Block => Advertising
+  Block => AdBlock
   HTTPDNS.Block => HTTPDNS
   ASN.China => CNASN
   Gemini => Google AI Studio
