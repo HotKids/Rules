@@ -1,0 +1,65 @@
+# > Bypass
+### 强制直连，修复因规则拦截或分流不当导致的功能异常
+DOMAIN,app.adjust.com,Bypass
+DOMAIN,app.appsflyer.com,Bypass
+DOMAIN,bdtj.tagtic.cn,Bypass
+
+# > CNTV
+DOMAIN-SUFFIX,cupid.iqiyi.com,Bypass
+DOMAIN,push.m.youku.com,Bypass
+DOMAIN,un-acs.youku.com,Bypass
+DOMAIN,dorangesource.alicdn.com,Bypass
+
+# > Alibaba
+DOMAIN,log.mmstat.com,Bypass
+DOMAIN,sycm.mmstat.com,Bypass
+
+# > Tencent
+DOMAIN,fairplay.l.qq.com,Bypass
+DOMAIN,livew.l.qq.com,Bypass
+DOMAIN,vd.l.qq.com,Bypass
+DOMAIN,vi.l.qq.com,Bypass
+
+# > Strava
+DOMAIN,analytics.strava.com,Bypass
+
+# > Umeng
+DOMAIN,msg.umeng.com,Bypass
+DOMAIN,msg.umengcloud.com,Bypass
+
+# > Google
+DOMAIN-SUFFIX,blog.google,Bypass
+DOMAIN-SUFFIX,googletraveladservices.com,Bypass
+DOMAIN,clientservices.googleapis.com,Bypass
+DOMAIN,dl.google.com,Bypass
+DOMAIN,dl.l.google.com,Bypass
+DOMAIN,update.googleapis.com,Bypass
+# >> Firebase Cloud Messaging
+DOMAIN,mtalk.google.com,Bypass
+DOMAIN-WILDCARD,*mtalk*.google.com,Bypass
+DOMAIN,alt1-mtalk.google.com,Bypass
+DOMAIN,alt2-mtalk.google.com,Bypass
+DOMAIN,alt3-mtalk.google.com,Bypass
+DOMAIN,alt4-mtalk.google.com,Bypass
+DOMAIN,alt5-mtalk.google.com,Bypass
+DOMAIN,alt6-mtalk.google.com,Bypass
+DOMAIN,alt7-mtalk.google.com,Bypass
+DOMAIN,alt8-mtalk.google.com,Bypass
+
+# > Samsung Galaxy App Store
+DOMAIN-SUFFIX,galaxyappstore.com,Bypass
+DOMAIN-SUFFIX,samsungapps.com,Bypass
+
+# > ThreatMetrix
+### 金融风控与设备指纹服务，阻止可能导致部分银行及支付页面功能异常（如银联商务网页支付控件无法加载）
+DOMAIN-SUFFIX,online-metrix.net,Bypass
+
+# > Windows NTP
+DOMAIN,time.windows.com,Bypass
+
+# > Marriott
+DOMAIN-SUFFIX,marriottwifi.com,Bypass
+DOMAIN,portal.linkbroad.com,Bypass
+
+# > BOC HK
+DOMAIN-SUFFIX,bochk.com,Bypass
