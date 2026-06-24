@@ -143,14 +143,6 @@ _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 # 通用工具
 # ---------------------------------------------------------------------------
 
-def write_if_changed(filepath: Path, content: str) -> bool:
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    if filepath.exists() and filepath.read_text(encoding="utf-8") == content:
-        return False
-    filepath.write_text(content, encoding="utf-8")
-    return True
-
-
 _CST = timezone(timedelta(hours=8))
 _DATE_LINE_RE = re.compile(r"^# Date: .*$", re.MULTILINE)
 
@@ -2563,13 +2555,16 @@ def _sync_qx(
         strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
         url_maps=qx_url_maps,
     )
+    lan_list_path = REPO_ROOT / "Surge/RULE-SET/LAN.list"
+    lan_expand = (
+        _qx_expand_lan_list(lan_list_path, title="Local Area Network 局域网")
+        if lan_list_path.exists()
+        else None
+    )
     filter_local = gen_qx_filter_local(
         rule_lines, qx_blocks.get("filter_local", ""),
         strip_names=qx_strip_names, policy_rename_map=qx_policy_rename,
-        lan_expand=_qx_expand_lan_list(
-            REPO_ROOT / "Surge/RULE-SET/LAN.list",
-            title="Local Area Network 局域网",
-        ),
+        lan_expand=lan_expand,
     )
 
     def _qx_section(key: str, header: str) -> str:

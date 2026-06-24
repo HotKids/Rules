@@ -7,15 +7,15 @@ Surge sgmodule 聚合脚本
 """
 
 import re
-import sys
-import urllib.request
-import urllib.parse
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from pypinyin import lazy_pinyin
+
+from _common import write_if_changed, prefetch_urls
+
+_UA = "sync-modules/1.0"
 
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 SYNC_TXT = Path(__file__).resolve().parent / "sync-modules.txt"
@@ -54,23 +54,6 @@ def _sort_key(name: str) -> str:
     if first.isascii() and first.isalpha():
         return "1" + name.lower()
     return "2" + " ".join(lazy_pinyin(name))
-
-
-def _encode_url(url: str) -> str:
-    parsed = urllib.parse.urlparse(url)
-    encoded_path = urllib.parse.quote(parsed.path, safe="/-_.~!$&'()*+,;=:@%")
-    return urllib.parse.urlunparse(parsed._replace(path=encoded_path))
-
-
-def fetch_url(url: str) -> tuple[str, str | None]:
-    try:
-        encoded = _encode_url(url)
-        req = urllib.request.Request(encoded, headers={"User-Agent": "sync-modules/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return url, resp.read().decode("utf-8")
-    except Exception as e:
-        print(f"  [ERR] 下载失败: {url}\n        {e}", file=sys.stderr)
-        return url, None
 
 
 def parse_sgmodule(text: str) -> dict:
@@ -194,14 +177,6 @@ def read_output_meta() -> dict[str, str]:
     return meta
 
 
-def write_if_changed(path: Path, content: str) -> bool:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    if path.exists() and path.read_text(encoding="utf-8") == content:
-        return False
-    path.write_text(content, encoding="utf-8")
-    return True
-
-
 def aggregate():
     url_alias_list = load_urls()
     if not url_alias_list:
@@ -214,12 +189,7 @@ def aggregate():
     url_to_alias = {url: alias for url, alias in url_alias_list if alias}
 
     print(f"并发拉取 {len(url_list)} 个 sgmodule …")
-    results: dict[str, str | None] = {}
-    with ThreadPoolExecutor(max_workers=min(8, len(url_list))) as pool:
-        futures = {pool.submit(fetch_url, u): u for u in url_list}
-        for fut in as_completed(futures):
-            url, text = fut.result()
-            results[url] = text
+    results = prefetch_urls(url_list, _UA, encode=True)
 
     # {section: [(name, [lines]), ...]}  按原顺序收集
     section_entries: dict[str, list[tuple[str, list[str]]]] = defaultdict(list)

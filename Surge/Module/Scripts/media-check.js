@@ -244,7 +244,7 @@ class ServiceChecker {
       try {
         const res = await Utils.request({ url: "https://www.disneyplus.com/" });
         if (res.status !== 200 || res.body.includes('Sorry, Disney+ is not available')) return { valid: false };
-        const match = res.body.match(/Region: ([A-Za-z]{2})[\s\S]*?CNBL: ([12])/);
+        const match = res.body.match(/Region: ([A-Za-z]{2})[\s\S]*?CNBL: [12]/);
         return match ? { valid: true, region: match[1] } : { valid: true, region: "" };
       } catch { return { valid: false }; }
     };
