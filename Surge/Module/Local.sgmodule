@@ -1,0 +1,28 @@
+#!name=LOCAL NETWORK
+#!desc=个人向直连规则，适用于本地网络、局域网设备及文件传输等需要绕过代理的场景
+#!category=HotKids
+#!arguments=SSID:JOEY,HotspotSSID:HotspotSSID
+#!arguments-desc=SSID:家庭 Wi-Fi 名称,HotspotSSID:可自定义设备热点名称
+
+[Rule]
+# CARRIER 匹配：由于 iOS 限制，该参数现已废弃
+// 3HK
+// CELLULAR-CARRIER,454-03,DIRECT
+
+# Home Wi-Fi
+SUBNET,SSID:{{{SSID}}},DIRECT
+
+[SSID Setting]
+# 连接部分设备热点传输照片或文件时，临时挂起 Surge 以确保直连
+
+// SONY A7R5
+"DIRECT-31U1:ILCE-7RM5" suspend=true
+
+// FUJIFILM X100VI
+"FUJIFILM-X100VI" suspend=true
+
+// RICOH GR IIIx
+"GR_517CCF" suspend=true
+
+// Custom Hotspot SSID
+"{{{HotspotSSID}}}" suspend=true
