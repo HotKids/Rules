@@ -1,24 +1,36 @@
 #!name=Service Rules+
 #!desc=Streaming、AI 与区域服务分流细分，指定服务输入 # 即可禁用
 #!category=HotKids
-#!arguments=ChatGPT 分流:🤖 AIGC,ChatGPT 禁用:RULE-SET,Claude 分流:🤖 AIGC,Claude 禁用:RULE-SET,Discovery+ 分流:🇺🇸 America,Discovery+ 禁用:RULE-SET,Disney+ 分流:🔵 Disney+,Disney+ 禁用:RULE-SET,HBO Max 分流:🟣 HBO Max,HBO Max 禁用:RULE-SET,Netflix 分流:⚫️ Netflix,Netflix 禁用:RULE-SET,Spotify 分流:🇨🇳 Taiwan,Spotify 禁用:RULE-SET,Viu 分流:🇺🇳 Server,Viu 禁用:RULE-SET,YouTube 分流:🔴 YouTube,YouTube 禁用:RULE-SET
+#!arguments=ChatGPT 代理:🤖 AIGC,ChatGPT 开关:RULE-SET,Claude 代理:🤖 AIGC,Claude 开关:RULE-SET,Dropbox 代理:🔰 Proxy,Dropbox 开关:RULE-SET,OneDrive 代理:🔰 Proxy,OneDrive 开关:RULE-SET,Microsoft 代理:🔘 DIRECT,OneDrive 开关:RULE-SET,Discovery+ 代理:🇺🇸 America,Discovery+ 开关:RULE-SET,Disney+ 代理:🔵 Disney+,Disney+ 开关:RULE-SET,HBO Max 代理:🟣 HBO Max,HBO Max 开关:RULE-SET,Netflix 代理:⚫️ Netflix,Netflix 开关:RULE-SET,Prime Video 代理:🎬 Streaming,Prime Video 开关:RULE-SET,Spotify 代理:🇨🇳 Taiwan,Spotify 开关:RULE-SET,Viu 代理:🇺🇳 Server,Viu 开关:RULE-SET,YouTube 代理:🔴 YouTube,YouTube 开关:RULE-SET
+#!arguments-desc=开关组输入 # 即可禁用，代理组自行修改
 
 [Rule]
+# Service
 # > ChatGPT
-{{{ChatGPT 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 分流}}},extended-matching
+{{{ChatGPT 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OpenAI.list,{{{ChatGPT 代理}}},extended-matching
 # > Claude
-{{{Claude 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 分流}}},extended-matching
+{{{Claude 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Anthropic.list,{{{Claude 代理}}},extended-matching
+# > Dropbox
+{{{Dropbox 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OneDrive.list,{{{Dropbox 代理}}},extended-matching
+# > OneDrive
+{{{OneDrive 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/OneDrive.list,{{{OneDrive 代理}}},extended-matching
+# > Microsoft
+{{{OneDrive 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Microsoft.list,{{{Microsoft 代理}}},extended-matching
+
+# Streaming
 # > Discovery+
-{{{Discovery+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 分流}}},extended-matching
+{{{Discovery+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{Discovery+ 代理}}},extended-matching
 # > Disney+
-{{{Disney+ 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 分流}}},extended-matching
+{{{Disney+ 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Disney+.list,{{{Disney+ 代理}}},extended-matching
 # > HBO Max
-{{{HBO Max 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 分流}}},extended-matching
+{{{HBO Max 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/HBO_Max.list,{{{HBO Max 代理}}},extended-matching
 # > Netflix
-{{{Netflix 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 分流}}},extended-matching
+{{{Netflix 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Netflix.list,{{{Netflix 代理}}},extended-matching
+# > Prime Video
+{{{Prime Video 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Prime_Video.list,{{{Prime Video 代理}}},extended-matching
 # > Spotify
-{{{Spotify 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 分流}}},extended-matching
+{{{Spotify 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spotify.list,{{{Spotify 代理}}},extended-matching
 # > Viu｜HK IN SEA
-{{{Viu 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 分流}}},extended-matching
+{{{Viu 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Viu.list,{{{Viu 代理}}},extended-matching
 # > YouTube
-{{{YouTube 禁用}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 分流}}},extended-matching
+{{{YouTube 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/YouTube.list,{{{YouTube 代理}}},extended-matching
