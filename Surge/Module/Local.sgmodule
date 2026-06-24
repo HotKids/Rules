@@ -31,4 +31,4 @@ SSID:DJI* suspend=true
 SSID:Insta360* suspend=true
 
 // Custom Hotspot SSID
-"{{{HotspotSSID}}}" suspend=true
+SSID:{{{HotspotSSID}}} suspend=true
