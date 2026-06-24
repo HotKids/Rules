@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-24 15:01:28
+# Date: 2026-06-24 15:06:46
 # Author: @HotKids
 
 # 通用设置
@@ -531,11 +531,11 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
     interval: 86400
 
-  Advertising:
+  Block:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Advertising.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/AD.yaml
+    path: ./Provider/RuleSet/Block.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml
     interval: 86400
 
   Streaming_TW:
@@ -695,7 +695,7 @@ rules:
 
   # Advertising 广告
   - RULE-SET,Reject,🚧 AdGuard
-  - RULE-SET,Advertising,🚧 AdGuard
+  - RULE-SET,Block,🚧 AdGuard
 
   # Global Area Network
   # > Streaming by Region
