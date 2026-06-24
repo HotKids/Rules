@@ -14,6 +14,11 @@ on:
 permissions:
   contents: write
 
+# 与 sync-modules / sync-config 共用同一组，串行化对 master 的 push，避免并发 push 冲突
+concurrency:
+  group: push-master
+  cancel-in-progress: false
+
 jobs:
   sync:
     runs-on: ubuntu-latest
