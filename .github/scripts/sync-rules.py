@@ -13,12 +13,11 @@ Surge RULE-SET 同步脚本
 import json
 import re
 import subprocess
-import urllib.request
-import urllib.parse
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
+
+from _common import write_if_changed, prefetch_urls
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -114,22 +113,8 @@ MERGE_SECTION_TO_FILE = _build_merge_maps()
 #  通用工具
 # ═══════════════════════════════════════════════════════════════════════
 
-def is_comment(line: str) -> bool:
-    s = line.strip()
-    return s.startswith("#") or s.startswith("//")
-
-
 def is_blank(line: str) -> bool:
     return not line.strip()
-
-
-def write_if_changed(filepath: Path, content: str) -> bool:
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    if filepath.exists():
-        if filepath.read_text(encoding="utf-8") == content:
-            return False
-    filepath.write_text(content, encoding="utf-8")
-    return True
 
 
 def _mark_upstream_deleted(filepath: Path) -> None:
@@ -401,12 +386,6 @@ def parse_and_rule(raw: str):
     return sub_rules if sub_rules else None
 
 
-def wildcard_to_regex(pattern: str) -> str:
-    escaped = re.escape(pattern)
-    escaped = escaped.replace(r"\*", ".*").replace(r"\?", ".")
-    return f"^{escaped}$"
-
-
 # ═══════════════════════════════════════════════════════════════════════
 #  Step 3: Surge → QX / Clash / sing-box
 # ═══════════════════════════════════════════════════════════════════════
@@ -591,58 +570,7 @@ def _groups_to_singbox_rules(
     return rules
 
 
-def convert_singbox(lines: list[str]) -> str | None:
-    groups: dict[str, list[str]] = {}
-    logical_rules: list[dict] = []
-
-    for line in lines:
-        stripped = line.strip()
-        if is_blank(line) or is_comment(line):
-            continue
-
-        parts = [p.strip() for p in stripped.split(",")]
-        rule_type = parts[0]
-
-        if rule_type == "AND":
-            sub_rules = parse_and_rule(stripped)
-            if sub_rules:
-                nested = []
-                for st, sv in sub_rules:
-                    sb_type = SINGBOX_MAP.get(st)
-                    if sb_type:
-                        nested.append({sb_type: [sv]})
-                if len(nested) >= 2:
-                    logical_rules.append({
-                        "type": "logical",
-                        "mode": "and",
-                        "rules": nested,
-                    })
-            continue
-
-        if rule_type == "DOMAIN-WILDCARD" and len(parts) > 1:
-            groups.setdefault("domain_regex", []).append(
-                wildcard_to_regex(parts[1])
-            )
-            continue
-
-        sb_type = SINGBOX_MAP.get(rule_type)
-        if not sb_type:
-            continue
-        value = parts[1] if len(parts) > 1 else ""
-        if value:
-            groups.setdefault(sb_type, []).append(value)
-
-    if not groups and not logical_rules:
-        return None
-
-    rules = _groups_to_singbox_rules(groups, logical_rules)
-    if not rules:
-        return None
-
-    return json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
-
-
-def process_file(surge_file: Path, clash_override: set[str] = None) -> int:
+def process_file(surge_file: Path, clash_override: set[str] | None = None) -> int:
     text = surge_file.read_text(encoding="utf-8")
     lines = text.splitlines()
     stem = surge_file.stem                                           # 文件名，用作输出文件名及 QX policy
@@ -793,14 +721,7 @@ def parse_sync_rules() -> dict:
     return result
 
 
-def fetch_url(url: str) -> str | None:
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "sync-rules/1.0"})
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            return resp.read().decode("utf-8")
-    except Exception as e:
-        print(f"    [ERR] 下载失败: {url} ({e})")
-        return None
+_UA = "sync-rules/1.0"
 
 
 def _is_clash_payload(text: str) -> bool:
@@ -949,16 +870,6 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
             if rules else None)
 
 
-def _prefetch_urls(urls: list[str], max_workers: int = 8) -> dict[str, str | None]:
-    """并发下载 urls，返回 {url: text_or_None}，保证顺序无关（结果按 url 键）。"""
-    results: dict[str, str | None] = {}
-    with ThreadPoolExecutor(max_workers=min(max_workers, len(urls) or 1)) as pool:
-        future_to_url = {pool.submit(fetch_url, url): url for url in urls}
-        for future in as_completed(future_to_url):
-            results[future_to_url[future]] = future.result()
-    return results
-
-
 def fetch_external_rules():
     """拉取 sync-rules.txt 外部规则。
 
@@ -977,7 +888,7 @@ def fetch_external_rules():
     all_urls = list({e["url"] for e in rules["surge"] + rules["clash"]})
     if all_urls:
         print(f"  并发下载 {len(all_urls)} 个 URL …")
-    prefetched = _prefetch_urls(all_urls) if all_urls else {}
+    prefetched = prefetch_urls(all_urls, _UA) if all_urls else {}
 
     # ── # >> Surge section（同名多 URL 合并去重）──────────────────────
     surge_groups: dict[str, list[str]] = defaultdict(list)
@@ -1082,17 +993,13 @@ def fetch_external_modules():
     module_dir = REPO_ROOT / "Surge" / "Module"
     module_dir.mkdir(parents=True, exist_ok=True)
 
-    def _encode(url: str) -> str:
-        p = urllib.parse.urlparse(url)
-        return urllib.parse.urlunparse(p._replace(path=urllib.parse.quote(p.path, safe="/-_.~!$&'()*+,;=:@%")))
+    module_urls = [e["url"] for e in entries]
+    prefetched = prefetch_urls(module_urls, _UA, encode=True)
 
-    urls = [_encode(e["url"]) for e in entries]
-    prefetched = _prefetch_urls(urls)
-
-    for e, enc_url in zip(entries, urls):
+    for e in entries:
         orig_url, name = e["url"], e["name"]
         overrides: dict = e["overrides"]
-        text = prefetched.get(enc_url)
+        text = prefetched.get(orig_url)
         if text is None:
             _mark_upstream_deleted(module_dir / f"{name}.sgmodule")
             continue
