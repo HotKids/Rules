@@ -1,8 +1,8 @@
 #!name=SNS GeoLoc
 #!desc=修改常见社群 IP 归属地显示
 #!category=HotKids
-#!arguments=SNS:DIRECT,Twitter:DIRECT,Bilibili:bilibili,Douyin:amemv,Toutiao:snssdk,Kuwo:kuwo,Xiaohongshu:xiaohongshu,Weibo:weibo,Zhihu:zhihu,Twitter/X:RULE-SET
-#!arguments-desc=Twitter/X 输入 # 表示禁用；其他平台如需禁用，请输入任意非常见域名值（e.g. NO）
+#!arguments=SNS:DIRECT,Twitter 代理:DIRECT,Twitter 开关:RULE-SET,Bilibili:bilibili,Douyin:amemv,Toutiao:snssdk,Kuwo:kuwo,Xiaohongshu:xiaohongshu,Weibo:weibo,Zhihu:zhihu
+#!arguments-desc=Twitter 开关输入 # 表示禁用；其他平台如需禁用，请输入任意非常见域名值（e.g. NO）
 
 ### fork from https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Module/GeoLoc.sgmodule
 
@@ -38,7 +38,7 @@ URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/answers,{{{SNS}}}
 URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
-{{{Twitter/X}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter}}},extended-matching
+{{{Twitter 开关 }}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter 代理}}},extended-matching
 
 [MITM]
 hostname = %APPEND% api.{{{Bilibili}}}.com, api.{{{Weibo}}}.cn, {{{Weibo}}}.com, api.{{{Zhihu}}}.com
