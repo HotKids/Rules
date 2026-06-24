@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain_suffix": [
+        "byteoversea.com",
+        "cici.com",
+        "ciciai.com",
+        "dola.com"
+      ]
+    }
+  ]
+}
