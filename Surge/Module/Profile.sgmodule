@@ -1,6 +1,7 @@
 #!name=Profile Module
 #!desc=General Settings Enhanced
 #!category=HotKids
+#!arguments=PROXY:🔰 Proxy,DIRECT:🔘 DIRECT,REJECT:⛔️ REJECT
 
 [General]
 # 通用设置
@@ -148,19 +149,20 @@ PROTOCOL,QUIC,REJECT-NO-DROP
 # AND,((PROTOCOL,UDP),(DEST-PORT,443)),REJECT-NO-DROP
 
 # 标准 SSH 端口
-AND,((DEST-PORT,22),(PROTOCOL,TCP)),DIRECT
+AND,((DEST-PORT,22),(PROTOCOL,TCP)),{{{DIRECT}}}
 
-# Unbreak 后续规则修正
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Unbreak.list,DIRECT
+# Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bypass.list,{{{DIRECT}}}
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Reroute.list,{{{PROXY}}}
 # Private 私有网络
-DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt,DIRECT
+DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt,{{{DIRECT}}}
 # HTTPDNS 请求/流量阻止 
 RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,REJECT
 # Advertising 广告
-DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,REJECT-TINYGIF
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/AD.list,REJECT-TINYGIF
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,REJECT-TINYGIF
+DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,{{{REJECT}}}
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list,{{{REJECT}}}
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,{{{REJECT}}}
 # Privacy 隐私
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,{{{REJECT}}}
 # Hijacking 运营商劫持或恶意网站
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,REJECT-TINYGIF
+RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,{{{REJECT}}}
