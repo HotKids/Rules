@@ -15,14 +15,20 @@ SUBNET,SSID:{{{SSID}}},DIRECT
 [SSID Setting]
 # 连接部分设备热点传输照片或文件时，临时挂起 Surge 以确保直连
 
-// SONY A7R5
-"DIRECT-31U1:ILCE-7RM5" suspend=true
+// SONY Alpha
+SSID:*:ILCE-* suspend=true
 
-// FUJIFILM X100VI
-"FUJIFILM-X100VI" suspend=true
+// FUJIFILM
+SSID:FUJIFILM-* suspend=true
 
-// RICOH GR IIIx
-"GR_517CCF" suspend=true
+// RICOH GR
+SSID:GR_* suspend=true
+
+// DJI
+SSID:DJI* suspend=true
+
+// Insta360
+SSID:Insta360* suspend=true
 
 // Custom Hotspot SSID
 "{{{HotspotSSID}}}" suspend=true
