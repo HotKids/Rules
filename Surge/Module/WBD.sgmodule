@@ -4,7 +4,7 @@
 #!arguments=DPlus:🇺🇸 America,Max:🎬 Streaming
 
 [MITM]
-# iOS 15+ 起 UA 会被系统隐藏，需对该 HOST 启用 MITM 才能正确识别 Max / Discovery+ 客户端类型
+# iOS 15+ 起 UA 会被系统隐藏，需对该 HOST 启用 MITM 才能正确识别 HBO Max / Discovery+ 客户端类型
 hostname = %APPEND% default.any-any.prd.api.discomax.com
 
 [Rule]
@@ -18,4 +18,4 @@ hostname = %APPEND% default.any-any.prd.api.discomax.com
 # AND,((DOMAIN,default.any-any.prd.api.discomax.com),(USER-AGENT,*Max*)),{{{Max}}}
 
 # Discovery+ 服务域名分流
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},force-remote-dns,extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Discovery+.list,{{{DPlus}}},extended-matching
