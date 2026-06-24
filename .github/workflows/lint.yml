@@ -17,14 +17,15 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Syntax check Python
-        run: python3 -m py_compile .github/scripts/sync-rules.py .github/scripts/sync-config.py
+        run: python3 -m py_compile .github/scripts/sync-rules.py .github/scripts/sync-config.py .github/scripts/sync-modules.py
 
       - name: Validate generated Clash YAML parseable
         run: |
           python3 -c "
 import yaml, pathlib, sys
+files = sorted(pathlib.Path('Clash/RuleSet').rglob('*.yaml'))
 errors = []
-for f in sorted(pathlib.Path('Clash/RuleSet').rglob('*.yaml')):
+for f in files:
     try:
         yaml.safe_load(f.read_text())
     except yaml.YAMLError as e:
@@ -32,15 +33,16 @@ for f in sorted(pathlib.Path('Clash/RuleSet').rglob('*.yaml')):
 if errors:
     print('FAIL:', *errors, sep='\n')
     sys.exit(1)
-print(f'All {len(list(pathlib.Path(\"Clash/RuleSet\").rglob(\"*.yaml\")))} Clash YAML files OK')
+print(f'All {len(files)} Clash YAML files OK')
 "
 
       - name: Validate generated sing-box JSON parseable
         run: |
           python3 -c "
 import json, pathlib, sys
+files = sorted(pathlib.Path('sing-box/source').rglob('*.json'))
 errors = []
-for f in sorted(pathlib.Path('sing-box/source').rglob('*.json')):
+for f in files:
     try:
         json.loads(f.read_text())
     except json.JSONDecodeError as e:
@@ -48,5 +50,5 @@ for f in sorted(pathlib.Path('sing-box/source').rglob('*.json')):
 if errors:
     print('FAIL:', *errors, sep='\n')
     sys.exit(1)
-print(f'All {len(list(pathlib.Path(\"sing-box/source\").rglob(\"*.json\")))} sing-box JSON files OK')
+print(f'All {len(files)} sing-box JSON files OK')
 "
