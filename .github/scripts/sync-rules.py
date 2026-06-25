@@ -26,6 +26,7 @@ QX_DIR = REPO_ROOT / "Quantumult" / "X" / "Filter"
 CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
+_UA = "sync-rules/1.0"
 
 
 def _recently_changed_files() -> set[str]:
@@ -87,7 +88,7 @@ STREAMING_PLACEHOLDER_RE = re.compile(r"^###\s+Streaming(?:\s+([A-Z]+))?\s*$")
 
 
 # 合并组：含 ### Streaming 占位符且含多个 '# > Name' 节的文件视为合并组
-# 只扫描 streaming 服务文件，排除 AD.list / Unbreak.list 等多节非 streaming 文件
+# 只扫描 streaming 服务文件，排除 Block.list / Unbreak.list 等多节非 streaming 文件
 def _build_merge_maps() -> dict[str, str]:
     """扫描根目录各 streaming .list 文件，将含多个 '# > Name' 节的 section 名映射到其文件 stem。"""
     reverse: dict[str, str] = {}
@@ -719,9 +720,6 @@ def parse_sync_rules() -> dict:
                     overrides[k.strip()] = v.strip()
             result[section].append({"url": url.strip(), "name": name, "overrides": overrides})
     return result
-
-
-_UA = "sync-rules/1.0"
 
 
 def _is_clash_payload(text: str) -> bool:
