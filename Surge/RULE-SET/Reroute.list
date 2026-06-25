@@ -6,4 +6,5 @@
 DOMAIN-SUFFIX,googletagmanager.com
 
 # > UPDF
+###  UPDF 国际版域名无法在中国大陆访问
 DOMAIN-SUFFIX,updf.com
