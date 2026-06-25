@@ -186,7 +186,6 @@ def aggregate():
     existing_meta = read_output_meta()
 
     url_list = [url for url, _ in url_alias_list]
-    url_to_alias = {url: alias for url, alias in url_alias_list if alias}
 
     print(f"并发拉取 {len(url_list)} 个 sgmodule …")
     results = prefetch_urls(url_list, _UA, encode=True)
