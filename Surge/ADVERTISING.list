@@ -1,7 +1,12 @@
 💢 REJECT-TINYGIF = reject-tinygif
-📛 REJECT-DROP = reject-drop  
+📛 REJECT-DROP = reject-drop
 ⛔️ REJECT = reject
-🔘 DIRECT = direct  
+🔘 DIRECT = direct
+
+# Clash 隐藏包装组图标（sync-config 读取并套用到对应 wrapper group，Surge 忽略以下注释）
+# icon: 🔘 DIRECT = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Direct.png
+# icon: ⛔️ REJECT = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
+# icon: 📛 REJECT-DROP = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Reject.png
 
 # DIRECT：将该请求直接发往目标服务器
 # REJECT：拒绝该请求，当连接类型为 HTTP 时，会返回一个错误页面。（该行为可被 show-error-page-for-reject 参数控制）
