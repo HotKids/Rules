@@ -12,6 +12,13 @@ DOMAIN-SUFFIX,chasepay.com,Finance
 DOMAIN-SUFFIX,jpmorganchase.com,Finance
 DOMAIN-SUFFIX,jpmorgan.com,Finance
 
+# > PayPal
+USER-AGENT,PayPal*,Finance
+DOMAIN-SUFFIX,paypal.com,Finance
+DOMAIN-SUFFIX,paypal.me,Finance
+DOMAIN-SUFFIX,paypal-mktg.com,Finance
+DOMAIN-SUFFIX,paypalobjects.com,Finance
+
 # > IBKR
 DOMAIN-SUFFIX,interactivebrokers.com,Finance
 DOMAIN-SUFFIX,ibkr.com,Finance
