@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 15:10:38
+# Date: 2026-06-29 15:24:51
 # Author: @HotKids
 
 # 通用设置
@@ -433,7 +433,7 @@ proxy-groups:
   # Adblock
   - name: "🚧 AdGuard"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_2.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png
     proxies:
       - 🔘 DIRECT
       - ⛔️ REJECT

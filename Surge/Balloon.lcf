@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-06-29 15:10:38
+# Date: 2026-06-29 15:24:51
 # Author: @HotKids
 
 [General]
@@ -87,7 +87,7 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Mail
 📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Mail.png
 # Adblock
-🚧 AdGuard = select,🔘 DIRECT,⛔️ REJECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
+🚧 AdGuard = select,🔘 DIRECT,⛔️ REJECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Block.png
 # Nodes
 🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Club.png
 # Area
