@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 12:16:25
+# Date: 2026-06-29 12:41:03
 # Author: @HotKids
 
 # 通用设置
@@ -749,6 +749,10 @@ rules:
   # > Google
   - RULE-SET,Google,🔍 Google
 
+  # Microsoft
+  - RULE-SET,OneDrive,☁️ OneDrive
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
+
   # > Telegram
   - RULE-SET,Telegram,📬 Telegram
 
@@ -771,10 +775,6 @@ rules:
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
-
-  # Microsoft
-  - RULE-SET,OneDrive,☁️ OneDrive
-  - RULE-SET,Microsoft,Ⓜ️ Microsoft
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
