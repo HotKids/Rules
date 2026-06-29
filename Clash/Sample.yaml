@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 15:24:51
+# Date: 2026-06-29 15:38:41
 # Author: @HotKids
 
 # 通用设置
@@ -442,7 +442,7 @@ proxy-groups:
   # DIRECT
   - name: "🔘 DIRECT"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Direct.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png
     hidden: true
     proxies:
       - DIRECT
@@ -450,7 +450,7 @@ proxy-groups:
   # REJECT
   - name: "⛔️ REJECT"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Reject.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png
     hidden: true
     proxies:
       - REJECT
@@ -458,7 +458,7 @@ proxy-groups:
   # REJECT-DROP
   - name: "📛 REJECT-DROP"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Reject.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png
     hidden: true
     proxies:
       - REJECT-DROP
