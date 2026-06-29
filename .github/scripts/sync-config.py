@@ -101,13 +101,18 @@ def _gen_loon_proxy_section(proxy_lines: list[str]) -> str:
     return "[Proxy]\n" + "\n".join(entries) if entries else ""
 
 
-def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str], str]:
-    """从 Surge proxy_lines 生成 Clash hidden action wrapper groups（无 icon）。
+def _gen_clash_action_wrapper_groups(
+    proxy_lines: list[str], icon_map: dict[str, str] | None = None
+) -> tuple[list[str], str]:
+    """从 Surge proxy_lines 生成 Clash hidden action wrapper groups。
+
+    icon_map（来自 policy-path 文件的 `# icon:` 注释）按名称提供 icon，缺省则不带 icon。
 
     返回：
       proxy_names  list[str]  按 proxy_lines 顺序的 emoji 名称
       wrapper_yaml str        追加到 pg_inject["block"] 的 YAML 文本
     """
+    icon_map = icon_map or {}
     proxy_names: list[str] = []
     wrapper_blocks: list[str] = []
     for line in proxy_lines:
@@ -121,10 +126,13 @@ def _gen_clash_action_wrapper_groups(proxy_lines: list[str]) -> tuple[list[str],
         clash_val = surge_val.upper()       # reject → REJECT, direct → DIRECT
         comment = strip_emoji(name)         # ⛔️ REJECT → REJECT, 🔘 DIRECT → DIRECT
         proxy_names.append(name)
+        icon = icon_map.get(name, "")
+        icon_line = f"    icon: {icon}\n" if icon else ""
         wrapper_blocks.append(
             f"  # {comment}\n"
             f'  - name: "{name}"\n'
             f"    type: select\n"
+            f"{icon_line}"
             f"    hidden: true\n"
             f"    proxies:\n"
             f"      - {clash_val}"
@@ -1148,9 +1156,10 @@ def gen_proxy_groups(
         # select + policy-path + no explicit proxies → adblock group
         if (g["type"] == "select" and "policy-path" in g["params"]
                 and not g["proxies"] and adblock_proxy_lines is not None):
-            extra_lines = _load_policy_path_proxy_lines(g["params"]["policy-path"]) or []
+            loaded = _load_policy_path_proxy_lines(g["params"]["policy-path"])
+            extra_lines, action_icons = loaded if loaded else ([], {})
             action_lines = _merge_action_lines(adblock_proxy_lines, extra_lines)
-            clash_action_names, wrapper_yaml = _gen_clash_action_wrapper_groups(action_lines)
+            clash_action_names, wrapper_yaml = _gen_clash_action_wrapper_groups(action_lines, action_icons)
             if clash_action_names:
                 icon = g["params"].get("icon-url", "")
                 icon_line = f"\n    icon: {icon}" if icon else ""
@@ -1308,9 +1317,12 @@ def _resolve_builtin_from_repo(name: str, platform: str) -> tuple[str, str] | No
     return None
 
 
-def _load_policy_path_proxy_lines(url: str) -> list[str] | None:
-    """解析 Surge policy-path URL，读取本地文件提取 `NAME = VALUE` action 行。
+def _load_policy_path_proxy_lines(url: str) -> tuple[list[str], dict[str, str]] | None:
+    """解析 Surge policy-path URL，读取本地文件提取 `NAME = VALUE` action 行及图标。
 
+    返回 (action_lines, icon_map)：
+      action_lines  list[str]       `NAME = VALUE` 行（供生成 wrapper group）
+      icon_map      dict[name,url]  `# icon: NAME = URL` 注释行解析的图标（Surge 忽略）
     仅处理 HotKids raw URL（可映射到仓库内文件）。其他来源返回 None，调用方走默认回退。
     """
     if not url.startswith(HOTKIDS_RAW_BASE):
@@ -1319,11 +1331,18 @@ def _load_policy_path_proxy_lines(url: str) -> list[str] | None:
     if not local.exists():
         return None
     out: list[str] = []
+    icons: dict[str, str] = {}
     for line in local.read_text(encoding="utf-8").splitlines():
         s = line.strip()
-        if s and not s.startswith("#") and "=" in s:
+        if not s:
+            continue
+        m = re.match(r"#\s*icon:\s*(.+?)\s*=\s*(\S+)$", s)
+        if m:
+            icons[m.group(1).strip()] = m.group(2).strip()
+            continue
+        if not s.startswith("#") and "=" in s:
             out.append(s)
-    return out
+    return out, icons
 
 
 def _merge_action_lines(base: list[str], extra: list[str]) -> list[str]:
