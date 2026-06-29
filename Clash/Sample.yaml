@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 11:51:24
+# Date: 2026-06-29 11:54:58
 # Author: @HotKids
 
 # 通用设置
@@ -602,13 +602,6 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml
     interval: 86400
 
-  Crypto:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Crypto.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml
-    interval: 86400
-
   Google:
     type: http
     behavior: classical
@@ -616,25 +609,25 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
     interval: 86400
 
-  Finance:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Finance.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml
-    interval: 86400
-
-  PayPal:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/PayPal.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/PayPal.yaml
-    interval: 86400
-
   Telegram:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Telegram.yaml
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml
+    interval: 86400
+
+  Crypto:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Crypto.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml
+    interval: 86400
+
+  Finance:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Finance.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml
     interval: 86400
 
   Spark:
@@ -723,20 +716,17 @@ rules:
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
-  # > Crypto
-  - RULE-SET,Crypto,🪙 Crypto
-
   # > Google
   - RULE-SET,Google,🔍 Google
 
-  # > Finance
-  - RULE-SET,Finance,💳 Finance
-
-  # > PayPal
-  - RULE-SET,PayPal,💳 Finance
-
   # > Telegram
   - RULE-SET,Telegram,📬 Telegram
+
+  # > Crypto
+  - RULE-SET,Crypto,🪙 Crypto
+
+  # > Finance
+  - RULE-SET,Finance,💳 Finance
 
   # > Mail
   - RULE-SET,Spark,📧 Mail
