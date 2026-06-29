@@ -253,14 +253,14 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
         found_anchor = False
         for line in pg_lines:
             s = line.strip()
-            if s.startswith("#") and "//" in s and not found_anchor:
+            if s.startswith("#") and re.search(r"(?<!:)//", s) and not found_anchor:
                 found_anchor = True
-                m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                m = re.search(r"(?<!:)//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
                 if m:
                     anchor = m.group(1).strip()
-                clean_comment = re.sub(r"\s*//.*$", "", s).rstrip()
+                clean_comment = re.sub(r"\s*(?<!:)//.*$", "", s).rstrip()
                 if clean_comment and clean_comment != "#":
-                    post_lines.append(re.sub(r"\s*//.*$", "", line).rstrip())
+                    post_lines.append(re.sub(r"\s*(?<!:)//.*$", "", line).rstrip())
                 continue
             if found_anchor:
                 post_lines.append(line.rstrip())
@@ -285,11 +285,11 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
             if not s:
                 continue
             if s.startswith("#"):
-                if "//" in s and anchor_r is None:
-                    m = re.search(r"//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if re.search(r"(?<!:)//", s) and anchor_r is None:
+                    m = re.search(r"(?<!:)//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
                     if m:
                         anchor_r = m.group(1).strip()
-                comment_text = re.sub(r"\s*//.*$", "", s).strip()
+                comment_text = re.sub(r"\s*(?<!:)//.*$", "", s).strip()
                 if comment_text and comment_text != "#":
                     rules.append(comment_text)
                 continue
@@ -1501,6 +1501,34 @@ def gen_rules_and_providers(
         rules_out.extend(ph.flush())
         rules_out.extend(emit)
 
+    # Builtin 注入 rules 预处理：为其中的 RULE-SET / DOMAIN-SET 注册 provider，
+    # 使 Clash 专属注入（clash.ini）也能自动生成对应 rule-providers，与 Profile.conf 规则一致。
+    # 注释行原样保留；GEOSITE/GEOIP 等无需 provider 的类型原样输出。
+    inject_lines: list[str] = []
+    if rules_inject and rules_inject.get("rules"):
+        for r in rules_inject["rules"]:
+            if r.startswith("#"):
+                inject_lines.append(f"  {r}")
+                continue
+            ip = [p.strip() for p in r.split(",")]
+            if ip[0].upper() in ("RULE-SET", "DOMAIN-SET") and len(ip) >= 3:
+                token, ipolicy = ip[1], ip[2]
+                if token.startswith("http"):
+                    iurl = map_surge_url(token, url_maps) or token
+                    ibeh = "domain" if ip[0].upper() == "DOMAIN-SET" else "classical"
+                    inject_lines.append(f"  - RULE-SET,{register(iurl, ibeh)},{ipolicy}")
+                elif token in builtin_maps:
+                    iurl = builtin_maps[token]
+                    inject_lines.append(f"  - RULE-SET,{register(iurl, _behavior_from_url(iurl), prefer_name=token)},{ipolicy}")
+                elif (resolved := _resolve_builtin_from_repo(token, "clash")) is not None:
+                    iurl, ibeh = resolved
+                    inject_lines.append(f"  - RULE-SET,{register(iurl, ibeh, prefer_name=token)},{ipolicy}")
+                else:
+                    print(f"  [WARN] Builtin 注入规则集无映射，原样输出: {token}")
+                    inject_lines.append(f"  - {r}")
+            else:
+                inject_lines.append(f"  - {r}")
+
     # rule-providers
     rp_lines = [
         "# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/",
@@ -1536,11 +1564,7 @@ def gen_rules_and_providers(
         ]
 
     # 注入 Builtin rules（按锚点插入，否则追加到 MATCH 之前）
-    if rules_inject and rules_inject.get("rules"):
-        inject_lines = [
-            f"  {r}" if r.startswith("#") else f"  - {r}"
-            for r in rules_inject["rules"]
-        ]
+    if inject_lines:
         anchor_r = (rules_inject.get("anchor") or "").lower()
         inserted = False
         if anchor_r:
