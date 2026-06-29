@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 12:16:25
+# Date: 2026-06-29 12:35:05
 # Author: @HotKids
 
 # 通用设置
@@ -73,8 +73,7 @@ geox-url:
   geoip: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat"
   geosite: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat"
   mmdb: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb"
-  asn: "https://testingcf.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb"
-  
+
 # ── Hosts ──
 
 # 静态域名映射，优先级高于 DNS 解析
@@ -618,20 +617,6 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml
     interval: 86400
 
-  Google:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Google.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
-    interval: 86400
-
-  Telegram:
-    type: http
-    behavior: classical
-    path: ./Provider/RuleSet/Telegram.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml
-    interval: 86400
-
   Crypto:
     type: http
     behavior: classical
@@ -639,11 +624,32 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml
     interval: 86400
 
+  Google:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Google.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
+    interval: 86400
+
   Finance:
     type: http
     behavior: classical
     path: ./Provider/RuleSet/Finance.yaml
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml
+    interval: 86400
+
+  PayPal:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/PayPal.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/PayPal.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Telegram.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml
     interval: 86400
 
   Spark:
@@ -746,17 +752,24 @@ rules:
   - RULE-SET,Apple CN,🔘 DIRECT
   - RULE-SET,Apple,🍎 Apple
 
-  # > Google
-  - RULE-SET,Google,🔍 Google
-
-  # > Telegram
-  - RULE-SET,Telegram,📬 Telegram
-
   # > Crypto
   - RULE-SET,Crypto,🪙 Crypto
 
+  # > Google
+  - RULE-SET,Google,🔍 Google
+
+  # Microsoft
+  - RULE-SET,OneDrive,☁️ OneDrive
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
+
   # > Finance
   - RULE-SET,Finance,💳 Finance
+
+  # > PayPal
+  - RULE-SET,PayPal,💳 Finance
+
+  # > Telegram
+  - RULE-SET,Telegram,📬 Telegram
 
   # > Mail
   - RULE-SET,Spark,📧 Mail
@@ -771,10 +784,6 @@ rules:
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
-
-  # Microsoft
-  - RULE-SET,OneDrive,☁️ OneDrive
-  - RULE-SET,Microsoft,Ⓜ️ Microsoft
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
