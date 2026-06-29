@@ -13,6 +13,12 @@ payload:
   - DOMAIN-SUFFIX,jpmorganchase.com
   - DOMAIN-SUFFIX,jpmorgan.com
 
+  # > PayPal
+  - DOMAIN-SUFFIX,paypal.com
+  - DOMAIN-SUFFIX,paypal.me
+  - DOMAIN-SUFFIX,paypal-mktg.com
+  - DOMAIN-SUFFIX,paypalobjects.com
+
   # > IBKR
   - DOMAIN-SUFFIX,interactivebrokers.com
   - DOMAIN-SUFFIX,ibkr.com
