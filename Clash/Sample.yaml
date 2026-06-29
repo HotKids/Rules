@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 14:59:15
+# Date: 2026-06-29 15:10:38
 # Author: @HotKids
 
 # 通用设置
@@ -344,7 +344,7 @@ proxy-groups:
   # CNTV APAC
   - name: "📺 CNTV"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/StreamingCN.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png
     proxies:
       - 🔘 DIRECT
       - 🇨🇳 Taiwan
@@ -466,7 +466,7 @@ proxy-groups:
   # Nodes
   - name: "🇺🇳 Server"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_1.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png
     use:
       - Server
 
