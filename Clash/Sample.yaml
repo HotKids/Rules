@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 12:59:29
+# Date: 2026-06-29 14:37:54
 # Author: @HotKids
 
 # 通用设置
@@ -407,7 +407,7 @@ proxy-groups:
   # Finance
   - name: "💳 Finance"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
