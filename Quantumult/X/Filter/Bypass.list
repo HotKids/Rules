@@ -5,36 +5,44 @@ DOMAIN,app.appsflyer.com,Bypass
 DOMAIN,bdtj.tagtic.cn,Bypass
 
 # > CNTV
+### 国内流媒体相关服务
 DOMAIN-SUFFIX,cupid.iqiyi.com,Bypass
 DOMAIN,push.m.youku.com,Bypass
 DOMAIN,un-acs.youku.com,Bypass
 DOMAIN,dorangesource.alicdn.com,Bypass
 
 # > Alibaba
+### 阿里系统计与生意参谋相关服务
 DOMAIN,log.mmstat.com,Bypass
 DOMAIN,sycm.mmstat.com,Bypass
 
 # > Tencent
+### 腾讯视频与直播相关服务
 DOMAIN,fairplay.l.qq.com,Bypass
 DOMAIN,livew.l.qq.com,Bypass
 DOMAIN,vd.l.qq.com,Bypass
 DOMAIN,vi.l.qq.com,Bypass
 
 # > Strava
+### Strava 分析服务
 DOMAIN,analytics.strava.com,Bypass
 
 # > Umeng
+### 友盟消息推送服务
 DOMAIN,msg.umeng.com,Bypass
 DOMAIN,msg.umengcloud.com,Bypass
 
-# > Google
+# > Google Services
+### Google 下载、更新及基础服务
 DOMAIN-SUFFIX,blog.google,Bypass
 DOMAIN-SUFFIX,googletraveladservices.com,Bypass
 DOMAIN,clientservices.googleapis.com,Bypass
 DOMAIN,dl.google.com,Bypass
 DOMAIN,dl.l.google.com,Bypass
 DOMAIN,update.googleapis.com,Bypass
+
 # >> Firebase Cloud Messaging
+### Android 推送服务
 DOMAIN,mtalk.google.com,Bypass
 DOMAIN-WILDCARD,*mtalk*.google.com,Bypass
 DOMAIN,alt1-mtalk.google.com,Bypass
@@ -47,6 +55,7 @@ DOMAIN,alt7-mtalk.google.com,Bypass
 DOMAIN,alt8-mtalk.google.com,Bypass
 
 # > Samsung Galaxy App Store
+### 三星应用商店相关服务
 DOMAIN-SUFFIX,galaxyappstore.com,Bypass
 DOMAIN-SUFFIX,samsungapps.com,Bypass
 
@@ -54,12 +63,22 @@ DOMAIN-SUFFIX,samsungapps.com,Bypass
 ### 金融风控与设备指纹服务，阻止可能导致部分银行及支付页面功能异常（如银联商务网页支付控件无法加载）
 DOMAIN-SUFFIX,online-metrix.net,Bypass
 
+# > Windows NCSI
+### Windows 网络连通性检测
+DOMAIN-SUFFIX,msftconnecttest.com,Bypass
+
 # > Windows NTP
+### Windows 时间同步服务
 DOMAIN,time.windows.com,Bypass
 
 # > Marriott
+### 万豪酒店 Wi-Fi 认证服务
 DOMAIN-SUFFIX,marriottwifi.com,Bypass
 DOMAIN,portal.linkbroad.com,Bypass
 
 # > BOC HK
+### 中银香港服务
 DOMAIN-SUFFIX,bochk.com,Bypass
+
+# > ziniao
+### 紫鸟浏览器
