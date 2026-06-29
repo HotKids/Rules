@@ -6,36 +6,44 @@ payload:
   - DOMAIN,bdtj.tagtic.cn
 
   # > CNTV
+  ### 国内流媒体相关服务
   - DOMAIN-SUFFIX,cupid.iqiyi.com
   - DOMAIN,push.m.youku.com
   - DOMAIN,un-acs.youku.com
   - DOMAIN,dorangesource.alicdn.com
 
   # > Alibaba
+  ### 阿里系统计与生意参谋相关服务
   - DOMAIN,log.mmstat.com
   - DOMAIN,sycm.mmstat.com
 
   # > Tencent
+  ### 腾讯视频与直播相关服务
   - DOMAIN,fairplay.l.qq.com
   - DOMAIN,livew.l.qq.com
   - DOMAIN,vd.l.qq.com
   - DOMAIN,vi.l.qq.com
 
   # > Strava
+  ### Strava 分析服务
   - DOMAIN,analytics.strava.com
 
   # > Umeng
+  ### 友盟消息推送服务
   - DOMAIN,msg.umeng.com
   - DOMAIN,msg.umengcloud.com
 
-  # > Google
+  # > Google Services
+  ### Google 下载、更新及基础服务
   - DOMAIN-SUFFIX,blog.google
   - DOMAIN-SUFFIX,googletraveladservices.com
   - DOMAIN,clientservices.googleapis.com
   - DOMAIN,dl.google.com
   - DOMAIN,dl.l.google.com
   - DOMAIN,update.googleapis.com
+
   # >> Firebase Cloud Messaging
+  ### Android 推送服务
   - DOMAIN,mtalk.google.com
   - DOMAIN-WILDCARD,*mtalk*.google.com
   - DOMAIN,alt1-mtalk.google.com
@@ -48,6 +56,7 @@ payload:
   - DOMAIN,alt8-mtalk.google.com
 
   # > Samsung Galaxy App Store
+  ### 三星应用商店相关服务
   - DOMAIN-SUFFIX,galaxyappstore.com
   - DOMAIN-SUFFIX,samsungapps.com
 
@@ -55,15 +64,23 @@ payload:
   ### 金融风控与设备指纹服务，阻止可能导致部分银行及支付页面功能异常（如银联商务网页支付控件无法加载）
   - DOMAIN-SUFFIX,online-metrix.net
 
+  # > Windows NCSI
+  ### Windows 网络连通性检测
+  - DOMAIN-SUFFIX,msftconnecttest.com
+
   # > Windows NTP
+  ### Windows 时间同步服务
   - DOMAIN,time.windows.com
 
   # > Marriott
+  ### 万豪酒店 Wi-Fi 认证服务
   - DOMAIN-SUFFIX,marriottwifi.com
   - DOMAIN,portal.linkbroad.com
 
   # > BOC HK
+  ### 中银香港服务
   - DOMAIN-SUFFIX,bochk.com
 
   # > ziniao
+  ### 紫鸟浏览器
   - PROCESS-NAME,*ziniao*

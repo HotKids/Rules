@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-06-24 15:10:44
+# Date: 2026-06-29 11:54:58
 # Author: @HotKids
 
 [General]
@@ -149,16 +149,14 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Appl
 # >> Apple Services
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Apple%20CN.list, policy=🔘 DIRECT, tag=Apple CN, enabled=true
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Apple/Apple.list, policy=🍎 Apple, tag=Apple, enabled=true
-# > Crypto
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Crypto.list, policy=🪙 Crypto, tag=Crypto, enabled=true
 # > Google
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Google.list, policy=🔍 Google, tag=Google, enabled=true
-# > Finance
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Finance.list, policy=💳 Finance, tag=Finance, enabled=true
-# > PayPal
-https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/PayPal.list, policy=💳 Finance, tag=PayPal, enabled=true
 # > Telegram
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Telegram.list, policy=📬 Telegram, tag=Telegram, enabled=true
+# > Crypto
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Crypto.list, policy=🪙 Crypto, tag=Crypto, enabled=true
+# > Finance
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Finance.list, policy=💳 Finance, tag=Finance, enabled=true
 # > Mail
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Mail, enabled=true
 # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
