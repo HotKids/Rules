@@ -752,7 +752,7 @@ rules:
   # > Google
   - RULE-SET,Google,🔍 Google
 
-  # Microsoft
+  # > Microsoft
   - RULE-SET,OneDrive,☁️ OneDrive
   - RULE-SET,Microsoft,Ⓜ️ Microsoft
 
