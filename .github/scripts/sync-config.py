@@ -275,28 +275,32 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
             "prepend_block": prepend_block,
         }
 
-    # rules 注入
+    # rules 注入：按「# 说明 // 锚点」拆成多段，每段携带各自锚点；
+    # 首个锚点前的内容归入 anchor=None 段（统一插到 MATCH 之前）。
     rules_inject: dict | None = None
     if rules_lines:
-        anchor_r: str | None = None
-        rules: list[str] = []
+        segments: list[dict] = []
+        cur: dict = {"anchor": None, "rules": []}
         for line in rules_lines:
             s = line.strip()
             if not s:
                 continue
             if s.startswith("#"):
-                if re.search(r"(?<!:)//", s) and anchor_r is None:
-                    m = re.search(r"(?<!:)//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
-                    if m:
-                        anchor_r = m.group(1).strip()
+                m = re.search(r"(?<!:)//\s*(.+?)(?=\s+[\u4e00-\u9fff]|\s*$)", s)
+                if m:
+                    if cur["rules"]:
+                        segments.append(cur)
+                    cur = {"anchor": m.group(1).strip(), "rules": []}
                 comment_text = re.sub(r"\s*(?<!:)//.*$", "", s).strip()
                 if comment_text and comment_text != "#":
-                    rules.append(comment_text)
+                    cur["rules"].append(comment_text)
                 continue
             # "  - RULE,..." → extract rule string
             if s.startswith("-"):
-                rules.append(s[1:].strip())
-        rules_inject = {"anchor": anchor_r, "rules": rules}
+                cur["rules"].append(s[1:].strip())
+        if cur["rules"]:
+            segments.append(cur)
+        rules_inject = {"segments": segments}
 
     return proxy_providers, pg_inject, rules_inject
 
@@ -1165,11 +1169,16 @@ def gen_proxy_groups(
                 ph.skip()
             continue
 
-        out.extend(ph.flush())
+        flushed = ph.flush()
+        out.extend(flushed)
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
-        if pg_inject and not injected and _anchor_matches(pg_inject["anchor"], name):
+        # 锚点优先匹配「段落开头注释」（如 # Google），兼容匹配组名；命中则注入到该组之后。
+        if pg_inject and not injected and pg_inject.get("anchor") and (
+            any(_anchor_matches(pg_inject["anchor"], c) for c in flushed)
+            or _anchor_matches(pg_inject["anchor"], name)
+        ):
             out.append(pg_inject["block"])
             out.append("")
             injected = True
@@ -1510,14 +1519,15 @@ def gen_rules_and_providers(
         rules_out.extend(ph.flush())
         rules_out.extend(emit)
 
-    # Builtin 注入 rules 预处理：为其中的 RULE-SET / DOMAIN-SET 注册 provider，
+    # Builtin 注入 rules 预处理：逐段为其中的 RULE-SET / DOMAIN-SET 注册 provider，
     # 使 Clash 专属注入（clash.ini）也能自动生成对应 rule-providers，与 Profile.conf 规则一致。
-    # 注释行原样保留；GEOSITE/GEOIP 等无需 provider 的类型原样输出。
-    inject_lines: list[str] = []
-    if rules_inject and rules_inject.get("rules"):
-        for r in rules_inject["rules"]:
+    # 注释行原样保留；GEOSITE/GEOIP 等无需 provider 的类型原样输出。每段携带各自锚点。
+    inject_segments: list[dict] = []
+    for seg in (rules_inject or {}).get("segments", []):
+        seg_lines: list[str] = []
+        for r in seg["rules"]:
             if r.startswith("#"):
-                inject_lines.append(f"  {r}")
+                seg_lines.append(f"  {r}")
                 continue
             ip = [p.strip() for p in r.split(",")]
             if ip[0].upper() in ("RULE-SET", "DOMAIN-SET") and len(ip) >= 3:
@@ -1525,18 +1535,19 @@ def gen_rules_and_providers(
                 if token.startswith("http"):
                     iurl = map_surge_url(token, url_maps) or token
                     ibeh = "domain" if ip[0].upper() == "DOMAIN-SET" else "classical"
-                    inject_lines.append(f"  - RULE-SET,{register(iurl, ibeh)},{ipolicy}")
+                    seg_lines.append(f"  - RULE-SET,{register(iurl, ibeh)},{ipolicy}")
                 elif token in builtin_maps:
                     iurl = builtin_maps[token]
-                    inject_lines.append(f"  - RULE-SET,{register(iurl, _behavior_from_url(iurl), prefer_name=token)},{ipolicy}")
+                    seg_lines.append(f"  - RULE-SET,{register(iurl, _behavior_from_url(iurl), prefer_name=token)},{ipolicy}")
                 elif (resolved := _resolve_builtin_from_repo(token, "clash")) is not None:
                     iurl, ibeh = resolved
-                    inject_lines.append(f"  - RULE-SET,{register(iurl, ibeh, prefer_name=token)},{ipolicy}")
+                    seg_lines.append(f"  - RULE-SET,{register(iurl, ibeh, prefer_name=token)},{ipolicy}")
                 else:
                     print(f"  [WARN] Builtin 注入规则集无映射，原样输出: {token}")
-                    inject_lines.append(f"  - {r}")
+                    seg_lines.append(f"  - {r}")
             else:
-                inject_lines.append(f"  - {r}")
+                seg_lines.append(f"  - {r}")
+        inject_segments.append({"anchor": seg.get("anchor"), "lines": seg_lines})
 
     # rule-providers
     rp_lines = [
@@ -1572,26 +1583,35 @@ def gen_rules_and_providers(
             "",
         ]
 
-    # 注入 Builtin rules（按锚点插入，否则追加到 MATCH 之前）
-    if inject_lines:
-        anchor_r = (rules_inject.get("anchor") or "").lower()
+    # 注入 Builtin rules：每段按其锚点插入到首个匹配行之后；
+    # 锚点为空或未命中的段统一收集，插到 MATCH 之前（无 MATCH 则追加）。
+    leftover: list[str] = []
+    for seg in inject_segments:
+        lines = seg["lines"]
+        if not lines:
+            continue
+        anchor = seg["anchor"]
         inserted = False
-        if anchor_r:
-            new_out: list[str] = []
-            for rule in rules_out:
-                new_out.append(rule)
-                if not inserted and _anchor_matches(anchor_r, rule):
-                    new_out.extend(inject_lines)
-                    inserted = True
-            rules_out = new_out
-        if not inserted:
-            # 锚点未命中或无锚点：插到 MATCH 之前，没有 MATCH 则追加
+        if anchor:
+            # 锚点只匹配「段落开头注释行」，插入到该段落之后（下一注释行之前）；
+            # 不匹配规则行本身，避免关键词撞到策略名（如 🔍 Google）或同名规则。
             for i, rule in enumerate(rules_out):
-                if "MATCH," in rule:
-                    rules_out[i:i] = inject_lines
+                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
+                    j = i + 1
+                    while j < len(rules_out) and not rules_out[j].strip().startswith("#"):
+                        j += 1
+                    rules_out[j:j] = lines
+                    inserted = True
                     break
-            else:
-                rules_out.extend(inject_lines)
+        if not inserted:
+            leftover.extend(lines)
+    if leftover:
+        for i, rule in enumerate(rules_out):
+            if "MATCH," in rule:
+                rules_out[i:i] = leftover
+                break
+        else:
+            rules_out.extend(leftover)
 
     # 在 # / # > 注释行前插入空行（# >> 子项不加），改善可读性
     formatted: list[str] = []
@@ -2440,7 +2460,8 @@ def _sync_clash(
     if pg_inject:
         print(f"  pg_inject: anchor={pg_inject['anchor']} | names={pg_inject['names']}")
     if rules_inject:
-        print(f"  rules_inject: anchor={rules_inject['anchor']} | {len(rules_inject['rules'])} rules")
+        _segs = rules_inject.get("segments", [])
+        print(f"  rules_inject: {len(_segs)} 段 | 锚点={[s['anchor'] for s in _segs]}")
 
     groups_yaml = gen_proxy_groups(group_lines, skips, pg_inject, provider_urls, adblock_proxy_lines=proxy_lines)
     rp_rules_yaml = gen_rules_and_providers(rule_lines, skips, url_maps, builtin_maps, rules_inject, rename_map)
