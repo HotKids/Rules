@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 11:54:58
+# Date: 2026-06-29 12:16:25
 # Author: @HotKids
 
 # 通用设置
@@ -312,6 +312,8 @@ proxy-groups:
   # Global
   # name: "GLOBAL"
   # type: select
+  # icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Inbound.png
+  # include-all: true
 
   # Proxy
   - name: "🔰 Proxy"
@@ -365,6 +367,23 @@ proxy-groups:
     icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png
     proxies:
       - 🇺🇸 America
+      - 🔰 Proxy
+
+  # Microsoft
+  # > OneDrive
+  - name: "☁️ OneDrive"
+    type: select
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/OneDrive.png
+    proxies:
+      - 🔘 DIRECT
+      - 🔰 Proxy
+
+  # > Microsoft Services
+  - name: "Ⓜ️ Microsoft"
+    type: select
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
+    proxies:
+      - 🔘 DIRECT
       - 🔰 Proxy
 
   # AIGC
@@ -483,9 +502,6 @@ proxy-groups:
     use:
       - Server
     filter: '🇺🇸|US|United States|美国'
-
-  # icon: https:
-  # include-all: true
 
 
 # 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/
@@ -672,6 +688,20 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt
     interval: 86400
 
+  OneDrive:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/OneDrive.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml
+    interval: 86400
+
+  Microsoft:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Microsoft.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml
+    interval: 86400
+
 # 规则
 rules:
   # 标准 SSH 端口
@@ -741,6 +771,10 @@ rules:
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT
+
+  # Microsoft
+  - RULE-SET,OneDrive,☁️ OneDrive
+  - RULE-SET,Microsoft,Ⓜ️ Microsoft
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
