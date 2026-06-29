@@ -1169,11 +1169,16 @@ def gen_proxy_groups(
                 ph.skip()
             continue
 
-        out.extend(ph.flush())
+        flushed = ph.flush()
+        out.extend(flushed)
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
-        if pg_inject and not injected and _anchor_matches(pg_inject["anchor"], name):
+        # 锚点优先匹配「段落开头注释」（如 # Google），兼容匹配组名；命中则注入到该组之后。
+        if pg_inject and not injected and pg_inject.get("anchor") and (
+            any(_anchor_matches(pg_inject["anchor"], c) for c in flushed)
+            or _anchor_matches(pg_inject["anchor"], name)
+        ):
             out.append(pg_inject["block"])
             out.append("")
             injected = True
@@ -1588,13 +1593,16 @@ def gen_rules_and_providers(
         anchor = seg["anchor"]
         inserted = False
         if anchor:
-            new_out: list[str] = []
-            for rule in rules_out:
-                new_out.append(rule)
-                if not inserted and _anchor_matches(anchor, rule):
-                    new_out.extend(lines)
+            # 锚点只匹配「段落开头注释行」，插入到该段落之后（下一注释行之前）；
+            # 不匹配规则行本身，避免关键词撞到策略名（如 🔍 Google）或同名规则。
+            for i, rule in enumerate(rules_out):
+                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
+                    j = i + 1
+                    while j < len(rules_out) and not rules_out[j].strip().startswith("#"):
+                        j += 1
+                    rules_out[j:j] = lines
                     inserted = True
-            rules_out = new_out
+                    break
         if not inserted:
             leftover.extend(lines)
     if leftover:
