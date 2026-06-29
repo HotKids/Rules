@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 15:38:41
+# Date: 2026-06-29 17:08:17
 # Author: @HotKids
 
 # 通用设置
@@ -331,7 +331,7 @@ proxy-groups:
   # Streaming Global
   - name: "🎬 Streaming"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Streaming.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png
     proxies:
       - 🔰 Proxy
       - 🇭🇰 Hong Kong
