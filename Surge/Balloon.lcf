@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-06-29 14:59:15
+# Date: 2026-06-29 15:10:38
 # Author: @HotKids
 
 [General]
@@ -68,7 +68,7 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Streaming Global
 🎬 Streaming = select,🔰 Proxy,🇭🇰 Hong Kong,🇨🇳 Taiwan,🇸🇬 Singapore,🇯🇵 Japan,🇺🇸 America,🇺🇳 Server,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Streaming.png
 # CNTV APAC
-📺 CNTV = select,🔘 DIRECT,🇨🇳 Taiwan,🇭🇰 Hong Kong,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/StreamingCN.png
+📺 CNTV = select,🔘 DIRECT,🇨🇳 Taiwan,🇭🇰 Hong Kong,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/StreamingCN.png
 # Apple
 # > Apple TV
 🍏 Apple TV = select,🔘 DIRECT,🔰 Proxy,🇺🇸 America,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Apple_2.png
@@ -89,7 +89,7 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Adblock
 🚧 AdGuard = select,🔘 DIRECT,⛔️ REJECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_2.png
 # Nodes
-🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Clubhouse_1.png
+🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Club.png
 # Area
 🇭🇰 Hong Kong = url-test,Sub-HK,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
 🇨🇳 Taiwan = url-test,Sub-TW,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
