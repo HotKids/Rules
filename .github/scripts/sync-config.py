@@ -1169,7 +1169,7 @@ def gen_proxy_groups(
         out.extend(_fmt_group(name, g["type"], g["params"], g["proxies"], provider_urls))
         out.append("")
 
-        if pg_inject and not injected and pg_inject["anchor"] == name:
+        if pg_inject and not injected and _anchor_matches(pg_inject["anchor"], name):
             out.append(pg_inject["block"])
             out.append("")
             injected = True
@@ -1191,6 +1191,15 @@ def _should_skip(candidates: list[str], skips: list[str]) -> str | None:
             if kw in cand:
                 return kw
     return None
+
+
+def _anchor_matches(anchor: str | None, target: str) -> bool:
+    """注入锚点匹配：关键词（子串、忽略大小写）。anchor 为空则不匹配。
+
+    例：锚点 `Google` 命中组名 `🔍 Google`；锚点 `RULE-SET,LAN` 命中规则行
+    `- RULE-SET,LAN,🔘 DIRECT`。proxy-groups 与 rules 注入共用同一套语义。
+    """
+    return bool(anchor) and anchor.lower() in target.lower()
 
 # ---------------------------------------------------------------------------
 # Provider 命名
@@ -1571,7 +1580,7 @@ def gen_rules_and_providers(
             new_out: list[str] = []
             for rule in rules_out:
                 new_out.append(rule)
-                if not inserted and anchor_r in rule.lower():
+                if not inserted and _anchor_matches(anchor_r, rule):
                     new_out.extend(inject_lines)
                     inserted = True
             rules_out = new_out
@@ -1707,7 +1716,7 @@ def gen_loon_proxy_groups(
         out.append(loon_line)
 
         # 锚点注入
-        if pg_inject and not injected and pg_inject.get("anchor") == name:
+        if pg_inject and not injected and _anchor_matches(pg_inject.get("anchor"), name):
             out.append(pg_inject["block"])
             injected = True
 
@@ -1959,7 +1968,7 @@ def gen_qx_policies(
         out.append(qx_line)
 
         # anchor 比较使用最终输出名（strip + rename 后）
-        if pg_inject and not injected and pg_inject.get("anchor") == emit_name:
+        if pg_inject and not injected and _anchor_matches(pg_inject.get("anchor"), emit_name):
             block = _qx_normalize_text(pg_inject["block"], policy_rename_map) if strip_names else pg_inject["block"]
             out.append(block)
             injected = True
@@ -2321,7 +2330,7 @@ def _gen_surfboard_proxy_groups(
         out.extend(ph.flush())
         out.append(f"{name} = {', '.join(tokens)}")
 
-        if pg_inject and not injected and pg_inject.get("anchor") == name:
+        if pg_inject and not injected and _anchor_matches(pg_inject.get("anchor"), name):
             out.append(pg_inject["block"])
             injected = True
 
