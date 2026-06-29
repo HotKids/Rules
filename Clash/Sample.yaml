@@ -385,7 +385,7 @@ proxy-groups:
       - 🔘 DIRECT
 
   # Finance
-  - name: "💳 Credit"
+  - name: "💳 Finance"
     type: select
     icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
     proxies:
@@ -615,11 +615,11 @@ rule-providers:
     url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
     interval: 86400
 
-  Credit:
+  Finance:
     type: http
     behavior: classical
-    path: ./Provider/RuleSet/Credit.yaml
-    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Credit.yaml
+    path: ./Provider/RuleSet/Finance.yaml
+    url: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml
     interval: 86400
 
   PayPal:
@@ -729,10 +729,10 @@ rules:
   - RULE-SET,Google,🔍 Google
 
   # > Finance
-  - RULE-SET,Credit,💳 Credit
+  - RULE-SET,Finance,💳 Finance
 
   # > PayPal
-  - RULE-SET,PayPal,💳 Credit
+  - RULE-SET,PayPal,💳 Finance
 
   # > Telegram
   - RULE-SET,Telegram,📬 Telegram
