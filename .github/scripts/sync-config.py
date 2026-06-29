@@ -1568,7 +1568,66 @@ def gen_rules_and_providers(
                 seg_lines.append(f"  - {r}")
         inject_segments.append({"anchor": seg.get("anchor"), "lines": seg_lines})
 
-    # rule-providers
+    # 注入 Builtin rules：每段按其锚点（匹配段落开头注释）插入到该段落之后；
+    # 锚点为空或未命中的段统一收集，插到 MATCH 之前（无 MATCH 则追加）。
+    # 注：先做注入再生成 rule-providers，使后者能按最终 rules 顺序排序。
+    def _comment_level(line: str) -> int:
+        s = line.strip().lstrip("#").strip()
+        n = 0
+        while n < len(s) and s[n] == ">":
+            n += 1
+        return n
+
+    leftover: list[str] = []
+    for seg in inject_segments:
+        lines = seg["lines"]
+        if not lines:
+            continue
+        anchor = seg["anchor"]
+        inserted = False
+        if anchor:
+            # 锚点只匹配「段落开头注释行」，不匹配规则行本身（避免撞策略名/同名规则）；
+            # 插入到该段落之后——跳过其下更深层级子段，遇同级/更高级注释才停。
+            for i, rule in enumerate(rules_out):
+                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
+                    lvl = _comment_level(rule)
+                    j = i + 1
+                    while j < len(rules_out):
+                        nxt = rules_out[j].strip()
+                        if nxt.startswith("#") and _comment_level(rules_out[j]) <= lvl:
+                            break
+                        j += 1
+                    rules_out[j:j] = lines
+                    inserted = True
+                    break
+        if not inserted:
+            leftover.extend(lines)
+    if leftover:
+        for i, rule in enumerate(rules_out):
+            if "MATCH," in rule:
+                rules_out[i:i] = leftover
+                break
+        else:
+            rules_out.extend(leftover)
+
+    # rule-providers：按 provider 名在最终 rules 中首次出现的顺序排列，
+    # 使注入的 provider（如 OneDrive/Microsoft）随规则归位，而非堆在末尾。
+    name_to_url = {info["name"]: url for url, info in providers.items()}
+    ordered_urls: list[str] = []
+    seen_urls: set[str] = set()
+    for line in rules_out:
+        s = line.strip()
+        if s.startswith("- RULE-SET,"):
+            nm = s.split(",", 2)[1].strip()
+            url = name_to_url.get(nm)
+            if url and url not in seen_urls:
+                ordered_urls.append(url)
+                seen_urls.add(url)
+    for url in providers:                      # 未被引用的 provider 按原顺序补到末尾
+        if url not in seen_urls:
+            ordered_urls.append(url)
+            seen_urls.add(url)
+
     rp_lines = [
         "# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/",
         "",
@@ -1585,7 +1644,8 @@ def gen_rules_and_providers(
         f"{HOTKIDS_RAW_BASE}Clash/RuleSet/{remote}": local_path
         for remote, local_path in _CLASH_BUILTIN_PREFERRED.values()
     }
-    for clash_url, info in providers.items():
+    for clash_url in ordered_urls:
+        info = providers[clash_url]
         pname, behavior = info["name"], info["behavior"]
         path_override = _preferred_path_by_url.get(clash_url)
         if path_override:
@@ -1601,36 +1661,6 @@ def gen_rules_and_providers(
             "    interval: 86400",
             "",
         ]
-
-    # 注入 Builtin rules：每段按其锚点插入到首个匹配行之后；
-    # 锚点为空或未命中的段统一收集，插到 MATCH 之前（无 MATCH 则追加）。
-    leftover: list[str] = []
-    for seg in inject_segments:
-        lines = seg["lines"]
-        if not lines:
-            continue
-        anchor = seg["anchor"]
-        inserted = False
-        if anchor:
-            # 锚点只匹配「段落开头注释行」，插入到该段落之后（下一注释行之前）；
-            # 不匹配规则行本身，避免关键词撞到策略名（如 🔍 Google）或同名规则。
-            for i, rule in enumerate(rules_out):
-                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
-                    j = i + 1
-                    while j < len(rules_out) and not rules_out[j].strip().startswith("#"):
-                        j += 1
-                    rules_out[j:j] = lines
-                    inserted = True
-                    break
-        if not inserted:
-            leftover.extend(lines)
-    if leftover:
-        for i, rule in enumerate(rules_out):
-            if "MATCH," in rule:
-                rules_out[i:i] = leftover
-                break
-        else:
-            rules_out.extend(leftover)
 
     # 在 # / # > 注释行前插入空行（# >> 子项不加），改善可读性
     formatted: list[str] = []
