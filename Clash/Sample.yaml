@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 14:37:54
+# Date: 2026-06-29 14:59:15
 # Author: @HotKids
 
 # 通用设置
@@ -386,6 +386,15 @@ proxy-groups:
       - 🔘 DIRECT
       - 🔰 Proxy
 
+  # Telegram
+  - name: "📬 Telegram"
+    type: select
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
+    proxies:
+      - 🔰 Proxy
+      - 🇸🇬 Singapore
+      - 🔘 DIRECT
+
   # AIGC
   - name: "🤖 AIGC"
     type: select
@@ -411,15 +420,6 @@ proxy-groups:
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
-      - 🔘 DIRECT
-
-  # Telegram
-  - name: "📬 Telegram"
-    type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
-    proxies:
-      - 🔰 Proxy
-      - 🇸🇬 Singapore
       - 🔘 DIRECT
 
   # Mail
