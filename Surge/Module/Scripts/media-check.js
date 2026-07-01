@@ -646,14 +646,18 @@ class ServiceChecker {
 
   /**
    * Claude AI 解锁检测
+   * 可用性判断后，通过 cdn-cgi/trace 提取 Cloudflare 边缘节点的地区码
    * @returns {Promise<Object>} 检测结果
    */
   static async checkClaude() {
     try {
       const res = await Utils.request({ url: "https://claude.ai/login" });
-      return (res.body && !res.body.includes("app-unavailable-in-region"))
-        ? Utils.createResult(STATUS.OK, "OK")
-        : Utils.createResult(STATUS.FAIL, "No");
+      if (!res.body || res.body.includes("app-unavailable-in-region")) {
+        return Utils.createResult(STATUS.FAIL, "No");
+      }
+      const traceRes = await Utils.request({ url: "https://claude.ai/cdn-cgi/trace" });
+      const region = traceRes.body.match(/loc=([A-Z]{2})/)?.[1] || "";
+      return Utils.createResult(STATUS.OK, region || "OK");
     } catch { return Utils.createResult(STATUS.FAIL, "No"); }
   }
 
