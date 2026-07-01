@@ -702,13 +702,16 @@ class ServiceChecker {
 
   /**
    * Reddit 解锁检测
+   * 参考 lmc999/RegionRestrictionCheck：请求主站 www.reddit.com（而非 oauth.reddit.com
+   * API 网关，该域名反爬策略更激进，会对无 OAuth token 的请求普遍返回 403 造成误判）
    * @returns {Promise<Object>} 检测结果
    */
   static async checkReddit() {
     try {
-      const res = await Utils.request({ url: "https://oauth.reddit.com", headers: { "Accept": "application/json" } });
-      if (res.status === 200 || res.status === 401) return Utils.createResult(STATUS.OK, "OK");
-      return Utils.createResult(STATUS.FAIL, res.status === 403 ? "IP Blocked" : "No");
+      const res = await Utils.request({ url: "https://www.reddit.com/" });
+      return res.status === 200
+        ? Utils.createResult(STATUS.OK, "OK")
+        : Utils.createResult(STATUS.FAIL, "No");
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
 
