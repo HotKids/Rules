@@ -7,7 +7,7 @@
  * @author       HotKids & ChatGPT & Claude
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 📋 支持的服务（9 项）
+ * 📋 支持的服务（10 项）
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * 🎬 流媒体
@@ -20,7 +20,8 @@
  * 🤖 AI 服务
  *    ├─ ChatGPT       区分 OK / Web Only / Mobile Only
  *    ├─ Gemini        网页检测 + API Key fallback
- *    └─ Claude        地区可用性检测
+ *    ├─ Claude        地区可用性检测（cdn-cgi/trace 提取地区码）
+ *    └─ Meta AI       地区可用性检测
  *
  * 🌐 社交 & 其他
  *    └─ Reddit        地区访问检测
@@ -660,6 +661,25 @@ class ServiceChecker {
   }
 
   /**
+   * Meta AI 解锁检测
+   * 参考 lmc999/RegionRestrictionCheck：正文含 KadabraRootContainer 表示可用，
+   * AbraGeoBlockedErrorRoot 表示地区受限；地区码取自 "code":"xx_YY" 的 YY 段
+   * @returns {Promise<Object>} 检测结果
+   */
+  static async checkMetaAI() {
+    try {
+      const res = await Utils.request({ url: "https://www.meta.ai/" });
+      const body = res.body || "";
+      if (body.includes("AbraGeoBlockedErrorRoot")) return Utils.createResult(STATUS.FAIL, "No");
+      if (body.includes("KadabraRootContainer")) {
+        const region = body.match(/"code"\s*:\s*"[^"_]+_([^"]+)"/)?.[1] || "";
+        return Utils.createResult(STATUS.OK, region || "OK");
+      }
+      return Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.ERROR, "Error"); }
+  }
+
+  /**
    * Gemini 解锁检测
    * 网页检测（参考 lmc999/RegionRestrictionCheck）+ API Key fallback
    * @returns {Promise<Object>} 检测结果
@@ -731,10 +751,11 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
+      ServiceChecker.checkMetaAI(),
       ServiceChecker.checkReddit()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, metaai, reddit] = results;
     const args = Utils.parseArgs($argument);
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
@@ -749,6 +770,7 @@ class ServiceChecker {
       { name: "ChatGPT", result: chatgpt },
       { name: "Gemini", result: gemini },
       { name: "Claude", result: claude },
+      { name: "Meta AI", result: metaai },
       { name: "Reddit", result: reddit }
     ];
 
