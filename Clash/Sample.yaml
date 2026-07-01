@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 17:08:17
+# Date: 2026-07-01 12:41:18
 # Author: @HotKids
 
 # 通用设置
@@ -373,7 +373,7 @@ proxy-groups:
   # > OneDrive
   - name: "☁️ OneDrive"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/OneDrive.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
