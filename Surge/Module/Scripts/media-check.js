@@ -387,7 +387,7 @@ class ServiceChecker {
       const tmpresult = await Utils.request({
         url: "https://cc.unext.jp/",
         method: "POST",
-        headers: { "Content-Type": "application/json", "User-Agent": CONFIG.UA },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
       
@@ -419,7 +419,7 @@ class ServiceChecker {
       // Step 1: 从主页提取可用地区列表
       let availableRegions = [];
       try {
-        const homeRes = await Utils.request({ url: `https://www.hbomax.com/?t=${Date.now()}`, timeout: 8000 });
+        const homeRes = await Utils.request({ url: `https://www.hbomax.com/?t=${Date.now()}` });
         if (homeRes.body) {
           // 提取所有 "url":"/xx/xx" 格式的地区链接
           const regex = /"url":"\/([a-z]{2})\/[a-z]{2}"/gi;
@@ -550,20 +550,16 @@ class ServiceChecker {
       // 第一次请求：带 Cookie
       const tmpresult1 = await Utils.request({
         url: "https://www.youtube.com/premium",
-        headers: { 
+        headers: {
           "Cookie": "YSC=BiCUU3-5Gdk; CONSENT=YES+cb.20220301-11-p0.en+FX+700; GPS=1; VISITOR_INFO1_LIVE=4VwPMkB7W5A; PREF=tz=Asia.Shanghai; _gcl_au=1.1.1809531354.1646633279",
-          "Accept-Language": "en",
-          "User-Agent": CONFIG.UA 
+          "Accept-Language": "en"
         }
       });
-      
+
       // 第二次请求：不带 Cookie
       const tmpresult2 = await Utils.request({
         url: "https://www.youtube.com/premium",
-        headers: {
-          "Accept-Language": "en",
-          "User-Agent": CONFIG.UA
-        }
+        headers: { "Accept-Language": "en" }
       });
       
       // 合并两次结果
@@ -646,14 +642,20 @@ class ServiceChecker {
 
   /**
    * Claude AI 解锁检测
+   * login 可用性判断与 cdn-cgi/trace 地区码提取并发请求，仅在可用时采用地区码
    * @returns {Promise<Object>} 检测结果
    */
   static async checkClaude() {
     try {
-      const res = await Utils.request({ url: "https://claude.ai/login" });
-      return (res.body && !res.body.includes("app-unavailable-in-region"))
-        ? Utils.createResult(STATUS.OK, "OK")
-        : Utils.createResult(STATUS.FAIL, "No");
+      const [loginRes, traceRes] = await Promise.all([
+        Utils.request({ url: "https://claude.ai/login" }),
+        Utils.request({ url: "https://claude.ai/cdn-cgi/trace" }).catch(() => null)
+      ]);
+      if (!loginRes.body || loginRes.body.includes("app-unavailable-in-region")) {
+        return Utils.createResult(STATUS.FAIL, "No");
+      }
+      const region = traceRes?.body.match(/loc=([A-Z]{2})/)?.[1] || "";
+      return Utils.createResult(STATUS.OK, region || "OK");
     } catch { return Utils.createResult(STATUS.FAIL, "No"); }
   }
 
@@ -700,13 +702,16 @@ class ServiceChecker {
 
   /**
    * Reddit 解锁检测
+   * 参考 lmc999/RegionRestrictionCheck：请求主站 www.reddit.com（而非 oauth.reddit.com
+   * API 网关，该域名反爬策略更激进，会对无 OAuth token 的请求普遍返回 403 造成误判）
    * @returns {Promise<Object>} 检测结果
    */
   static async checkReddit() {
     try {
-      const res = await Utils.request({ url: "https://oauth.reddit.com", headers: { "Accept": "application/json" } });
-      if (res.status === 200 || res.status === 401) return Utils.createResult(STATUS.OK, "OK");
-      return Utils.createResult(STATUS.FAIL, res.status === 403 ? "IP Blocked" : "No");
+      const res = await Utils.request({ url: "https://www.reddit.com/" });
+      return res.status === 200
+        ? Utils.createResult(STATUS.OK, "OK")
+        : Utils.createResult(STATUS.FAIL, "No");
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
 
@@ -745,7 +750,7 @@ class ServiceChecker {
       { name: "Gemini", result: gemini },
       { name: "Claude", result: claude },
       { name: "Reddit", result: reddit }
-    ].filter(Boolean);
+    ];
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
     const totalCount = services.length;
