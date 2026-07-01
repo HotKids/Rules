@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-06-29 12:59:29
+# Date: 2026-07-01 12:41:18
 # Author: @HotKids
 
 # 通用设置
@@ -331,7 +331,7 @@ proxy-groups:
   # Streaming Global
   - name: "🎬 Streaming"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Streaming.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png
     proxies:
       - 🔰 Proxy
       - 🇭🇰 Hong Kong
@@ -344,7 +344,7 @@ proxy-groups:
   # CNTV APAC
   - name: "📺 CNTV"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/StreamingCN.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png
     proxies:
       - 🔘 DIRECT
       - 🇨🇳 Taiwan
@@ -373,7 +373,7 @@ proxy-groups:
   # > OneDrive
   - name: "☁️ OneDrive"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/OneDrive.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -385,6 +385,15 @@ proxy-groups:
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
+
+  # Telegram
+  - name: "📬 Telegram"
+    type: select
+    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
+    proxies:
+      - 🔰 Proxy
+      - 🇸🇬 Singapore
+      - 🔘 DIRECT
 
   # AIGC
   - name: "🤖 AIGC"
@@ -407,19 +416,10 @@ proxy-groups:
   # Finance
   - name: "💳 Finance"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/PayPal.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png
     proxies:
       - 🇺🇸 America
       - 🔰 Proxy
-      - 🔘 DIRECT
-
-  # Telegram
-  - name: "📬 Telegram"
-    type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png
-    proxies:
-      - 🔰 Proxy
-      - 🇸🇬 Singapore
       - 🔘 DIRECT
 
   # Mail
@@ -433,7 +433,7 @@ proxy-groups:
   # Adblock
   - name: "🚧 AdGuard"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_2.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png
     proxies:
       - 🔘 DIRECT
       - ⛔️ REJECT
@@ -442,7 +442,7 @@ proxy-groups:
   # DIRECT
   - name: "🔘 DIRECT"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Direct.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png
     hidden: true
     proxies:
       - DIRECT
@@ -450,7 +450,7 @@ proxy-groups:
   # REJECT
   - name: "⛔️ REJECT"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Reject.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png
     hidden: true
     proxies:
       - REJECT
@@ -458,7 +458,7 @@ proxy-groups:
   # REJECT-DROP
   - name: "📛 REJECT-DROP"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Reject.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png
     hidden: true
     proxies:
       - REJECT-DROP
@@ -466,7 +466,7 @@ proxy-groups:
   # Nodes
   - name: "🇺🇳 Server"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Clubhouse_1.png
+    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png
     use:
       - Server
 
