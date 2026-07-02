@@ -396,7 +396,10 @@ async function getRiskScore(ip) {
     if (r) return r;
   }
 
-  return saveAndReturn(50, "Default");
+  // 所有数据源均失败：仅为本次展示返回默认值，不写入缓存，
+  // 避免一次性的临时故障被 24h TTL 放大成长期错误风控值
+  console.log("风险评分：所有数据源均失败，使用默认值（不缓存）");
+  return { score: 50, source: "Default" };
 }
 
 // ==================== IP 类型检测（二级回落） ====================
