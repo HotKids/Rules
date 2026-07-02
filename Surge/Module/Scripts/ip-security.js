@@ -13,6 +13,7 @@
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
+ *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API
  * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / local_geoapi=ipsb ip.sb | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / remote_geoapi=ipapi ip-api.com(en) / remote_geoapi=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
@@ -51,6 +52,8 @@
 const CONFIG = {
   name: "ip-security",
   timeout: 10000,
+  riskCacheTTL: 86400, // 风险评分缓存有效期（秒）：出口 IP 未变化时，此时长内复用缓存，
+                       // 避免面板自动刷新（update-interval，默认 600s）反复消耗 IPQS 等按次计费额度
   storeKeys: {
     lastEvent: "lastNetworkInfoEvent",
     lastPolicy: "lastProxyPolicy",
@@ -313,28 +316,26 @@ async function getPolicyAndEntrance() {
 // ==================== 风险评分获取 ====================
 // risk_api 参数：ipqs / proxycheck / ippure / scamalytics → 指定单一数据源
 // 不填或其他值 → 四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）
+// 缓存策略：出口 IP、risk_api、是否带 Key 均未变化，且缓存未超过 riskCacheTTL
+// （默认 24 小时）时直接复用，不再重新请求；IP 变化或缓存过期才会重新查询
 async function getRiskScore(ip) {
   const api = args.riskApi;
   const hasKey = !!args.ipqsKey;
 
-  // 手动刷新（非 EVENT）→ 强制跳过缓存，始终获取最新数据
-  if (!args.isEvent) {
-    console.log("手动刷新，跳过风险评分缓存");
-  } else {
-    const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
-    if (cached) {
-      try {
-        const c = JSON.parse(cached);
-        if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey) {
-          console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")");
-          return { score: c.score, source: c.source };
-        }
-      } catch (e) {}
-    }
+  const cached = $persistentStore.read(CONFIG.storeKeys.riskCache);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
+      if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey && age < CONFIG.riskCacheTTL) {
+        console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")，已缓存 " + age + "s");
+        return { score: c.score, source: c.source };
+      }
+    } catch (e) {}
   }
 
   function saveAndReturn(score, source) {
-    $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey }), CONFIG.storeKeys.riskCache);
+    $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.riskCache);
     console.log("风险评分已缓存: " + score + "% (" + source + ")");
     return { score, source };
   }
