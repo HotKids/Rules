@@ -14,7 +14,7 @@
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
- * ⑥ IP 类型: IPPure API
+ * ⑥ IP 类型: IPPure API（与风险评分同样按出口 IP 24 小时缓存）
  * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / local_geoapi=ipsb ip.sb | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / remote_geoapi=ipapi ip-api.com(en) / remote_geoapi=ipapi-zh ip-api.com(zh)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
@@ -50,7 +50,6 @@
 
 // ==================== 全局配置 ====================
 const CONFIG = {
-  name: "ip-security",
   timeout: 10000,
   riskCacheTTL: 86400, // 风险评分缓存有效期（秒）：出口 IP 未变化时，此时长内复用缓存，
                        // 避免面板自动刷新（update-interval，默认 600s）反复消耗 IPQS 等按次计费额度
@@ -58,6 +57,7 @@ const CONFIG = {
     lastEvent: "lastNetworkInfoEvent",
     lastPolicy: "lastProxyPolicy",
     riskCache: "riskScoreCache",
+    ipTypeCache: "ipTypeCache",
     maskToggle: "ipMaskToggle",
     lastRun: "ipLastRunTime"
   },
@@ -97,11 +97,6 @@ function parseArguments() {
       const idx = i.indexOf("=");
       return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decodeURIComponent(i.slice(idx + 1)).trim()];
     }));
-  }
-
-  const storedArg = $persistentStore.read(CONFIG.name);
-  if (storedArg) {
-    try { arg = { ...JSON.parse(storedArg), ...arg }; } catch (e) {}
   }
 
   const isPanel = typeof $input !== "undefined" && $input.purpose === "panel";
@@ -199,6 +194,17 @@ function maskIP(ip, mode) {
   if (!ip || !mode) return ip;
   if (mode === 2) return "[IP 已隐藏]";
   if (ip.includes(":")) {
+    if (ip.includes("::")) {
+      // :: 压缩记法（如 2001:db8::1）：真实分段数不固定，无法按未压缩地址逐段打码，
+      // 仅显示首尾各一段，中间（含被压缩的隐藏段）统一用 ** 代替
+      const [left = "", right = ""] = ip.split("::");
+      const leftGroups = left ? left.split(":") : [];
+      const rightGroups = right ? right.split(":") : [];
+      const first = leftGroups[0] || rightGroups[0];
+      const last = rightGroups.at(-1) || leftGroups.at(-1);
+      if (!first || !last) return ip;
+      return first === last ? "::" + first : first + "::**:" + last;
+    }
     const parts = ip.split(":");
     if (parts.length <= 2) return ip;
     return parts[0] + ":" + parts.slice(1, -1).map(() => "**").join(":") + ":" + parts.at(-1);
@@ -394,14 +400,33 @@ async function getRiskScore(ip) {
 }
 
 // ==================== IP 类型检测（二级回落） ====================
-async function getIPType() {
+// IP 类型（住宅/机房）是出口 IP 的静态属性，与风险评分同样按出口 IP + 24h TTL 缓存，
+// 避免面板自动刷新反复消耗 IPPure 额度
+async function getIPType(ip) {
+  const cached = $persistentStore.read(CONFIG.storeKeys.ipTypeCache);
+  if (cached) {
+    try {
+      const c = JSON.parse(cached);
+      const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
+      if (c.ip === ip && age < CONFIG.riskCacheTTL) {
+        console.log("IP 类型命中缓存: " + c.ipType + " | " + c.ipSrc + "，已缓存 " + age + "s");
+        return { ipType: c.ipType, ipSrc: c.ipSrc };
+      }
+    } catch (e) {}
+  }
+
+  function saveAndReturn(ipType, ipSrc) {
+    $persistentStore.write(JSON.stringify({ ip, ipType, ipSrc, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.ipTypeCache);
+    return { ipType, ipSrc };
+  }
+
   const info = await getIPPureInfo();
   if (info && info.isResidential !== undefined) {
     console.log("IPPure /v1/info 返回 IP 类型数据");
-    return {
-      ipType: info.isResidential ? "住宅 IP" : "机房 IP",
-      ipSrc: info.isBroadcast ? "广播 IP" : "原生 IP"
-    };
+    return saveAndReturn(
+      info.isResidential ? "住宅 IP" : "机房 IP",
+      info.isBroadcast ? "广播 IP" : "原生 IP"
+    );
   }
   console.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
@@ -410,7 +435,7 @@ async function getIPType() {
     const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
     const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
     console.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
-    return { ipType, ipSrc };
+    return saveAndReturn(ipType, ipSrc);
   }
 
   console.log("IPPure 所有接口均失败");
@@ -678,7 +703,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
   // DNS 泄露检测需要走代理策略，必须等拿到 policy 后再执行
   const [riskInfo, ipTypeResult, localSbRaw, outGeoRaw, outOrgRaw, trafficResult] = await Promise.all([
     getRiskScore(outIP),                     // 0
-    getIPType(),                             // 1
+    getIPType(outIP),                        // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
     httpJSON(geoUrl(outIP)),                 // 3: 出口地理
     useIpApi ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（仅 ip-api 模式）+ hostname
