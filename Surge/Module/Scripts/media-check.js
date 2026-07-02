@@ -412,6 +412,19 @@ class ServiceChecker {
    * HBO Max 解锁检测
    * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
    * 参考 RegionRestrictionCheck 项目逻辑
+   *
+   * 已知问题（2026-07 排查）：Step 2 token 接口现在会返回
+   * 400 {"errors":[{"code":"invalid.headers","detail":"disco_params is missing"}]}，
+   * 导致 Step 2 之后必现失败、所有节点一律显示 No，与账号/地区/节点无关。
+   * 这是 HBO Max 后端近期加的未公开参数，非本文件改动引入。已核实：
+   * - Step 1（www.hbomax.com 首页 + 可用地区列表正则）本身仍正常，问题只在
+   *   token 接口
+   * - lmc999/RegionRestrictionCheck 已弃用整条深层 API 链，改用单次首页
+   *   请求（能判可用性，但拿不到具体地区，也就没有 JP/CA/KR/VPN 细分）
+   * - 1-stream/RegionRestrictionCheck 的实现与本文件此前逻辑一致（同一
+   *   token 请求、同一批 header），同样会命中这个 400，说明目前没有任何
+   *   公开参考项目跟进修复
+   * 待上述任一参考项目更新 disco_params 或新流程后，再考虑移植过来。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkHBOMax() {
