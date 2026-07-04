@@ -13,7 +13,7 @@
  * 🎬 流媒体
  *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
  *    ├─ Disney+       支持 Hotstar 地区识别（ID/MY/TH/PH/VN）
- *    ├─ HBO Max       支持第三方平台识别（JP/KR/CA）、VPN 检测
+ *    ├─ HBO Max       单请求方案（max.com 响应头取地区码）、第三方平台识别（JP/KR/CA）
  *    ├─ YouTube       双重请求机制（带/不带 Cookie）
  *    └─ Spotify       标准地区检测
  *
@@ -411,143 +411,45 @@ class ServiceChecker {
   /**
    * HBO Max 解锁检测
    * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
-   * 参考 RegionRestrictionCheck 项目逻辑
    *
-   * 已知问题（2026-07 排查）：Step 2 token 接口现在会返回
-   * 400 {"errors":[{"code":"invalid.headers","detail":"disco_params is missing"}]}，
-   * 导致 Step 2 之后必现失败、所有节点一律显示 No，与账号/地区/节点无关。
-   * 这是 HBO Max 后端近期加的未公开参数，非本文件改动引入。已核实：
-   * - Step 1（www.hbomax.com 首页 + 可用地区列表正则）本身仍正常，问题只在
-   *   token 接口
-   * - lmc999/RegionRestrictionCheck 已弃用整条深层 API 链，改用单次首页
-   *   请求（能判可用性，但拿不到具体地区，也就没有 JP/CA/KR/VPN 细分）
-   * - 1-stream/RegionRestrictionCheck 的实现与本文件此前逻辑一致（同一
-   *   token 请求、同一批 header），同样会命中这个 400，说明目前没有任何
-   *   公开参考项目跟进修复
-   * 待上述任一参考项目更新 disco_params 或新流程后，再考虑移植过来。
+   * 2026-07 重写（参考 lmc999/RegionRestrictionCheck 单请求方案）：
+   * 原实现走 token → bootstrap → users/me 深层 API 链，该链的 token 接口
+   * 已被后端加上未公开的 disco_params 必需参数（400 invalid.headers），
+   * 导致所有节点必现 No。现改为单次请求 www.max.com（301 至 hbomax.com）：
+   * - 地区码取自最终响应头中的 countryCode=XX（Set-Cookie，已实测可得）
+   * - 可用地区列表取自正文 "url":"/xx/xx" 正则（与旧 Step 1 相同），补 US
+   * 代价：原依赖 token 的 VPN 检测（playbackInfo）随 API 链一并移除。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkHBOMax() {
     try {
-      // Step 1: 从主页提取可用地区列表
-      let availableRegions = [];
-      try {
-        const homeRes = await Utils.request({ url: `https://www.hbomax.com/?t=${Date.now()}` });
-        if (homeRes.body) {
-          // 提取所有 "url":"/xx/xx" 格式的地区链接
-          const regex = /"url":"\/([a-z]{2})\/[a-z]{2}"/gi;
-          let match;
-          const regions = new Set();
-          while ((match = regex.exec(homeRes.body)) !== null) {
-            regions.add(match[1].toUpperCase());
-          }
-          availableRegions = Array.from(regions);
-        }
-      } catch {}
+      const res = await Utils.request({ url: "https://www.max.com/" });
+      const body = res.body || "";
 
-      // Step 2: Token 获取
-      const tokenRes = await Utils.request({
-        url: "https://default.any-any.prd.api.hbomax.com/token?realm=bolt&deviceId=afbb5daa-c327-461d-9460-d8e4b3ee4a1f",
-        headers: {
-          "x-device-info": "beam/5.0.0 (desktop/desktop; Windows/10; afbb5daa-c327-461d-9460-d8e4b3ee4a1f/da0cdd94-5a39-42ef-aa68-54cbc1b852c3)",
-          "x-disco-client": "WEB:10:beam:5.2.1",
-          "Accept": "application/json, text/plain, */*"
-        }
-      });
-      if (tokenRes.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
-      
-      let tokenData;
-      try {
-        tokenData = JSON.parse(tokenRes.body);
-      } catch {
-        return Utils.createResult(STATUS.FAIL, "No");
-      }
-      
-      const token = tokenData?.data?.attributes?.token;
-      if (!token) return Utils.createResult(STATUS.FAIL, "No");
-      
-      const commonHeaders = { "Cookie": `st=${token}`, "Accept": "application/json, text/plain, */*" };
+      // 地区码：重定向链最终响应头（如 Set-Cookie）中的 countryCode=XX
+      const headerStr = JSON.stringify(res.headers || {});
+      const region = headerStr.match(/countryCode=([A-Za-z]{2})/)?.[1]?.toUpperCase() || "";
+      if (!region) return Utils.createResult(STATUS.FAIL, "No");
 
-      // Step 3: Bootstrap
-      const bootstrapRes = await Utils.request({
-        url: "https://default.any-any.prd.api.hbomax.com/session-context/headwaiter/v1/bootstrap",
-        method: "POST",
-        headers: commonHeaders
-      });
-      
-      let bootstrapData;
-      try {
-        bootstrapData = JSON.parse(bootstrapRes.body);
-      } catch {
-        return Utils.createResult(STATUS.FAIL, "No");
-      }
-      
-      const route = bootstrapData?.routing;
-      if (!route?.domain) return Utils.createResult(STATUS.FAIL, "No");
-
-      // Step 4: User Region
-      const userRes = await Utils.request({
-        url: `https://default.${route.tenant}-${route.homeMarket}.${route.env}.${route.domain}/users/me`,
-        headers: commonHeaders
-      });
-      
-      if (userRes.status === 401 || userRes.status === 403) {
-        return Utils.createResult(STATUS.FAIL, "No");
-      }
-      
-      let region = "";
-      try {
-        const userData = JSON.parse(userRes.body);
-        region = userData?.data?.attributes?.currentLocationTerritory || "";
-      } catch {}
-      
-      if (!region || region.length !== 2) {
-        return Utils.createResult(STATUS.FAIL, "No");
-      }
-
-      // Step 5: JP 特殊处理 - 优先验证 U-NEXT
+      // JP / CA / KR：经由第三方平台提供服务
       if (region === "JP") {
         const unextResult = await ServiceChecker.checkUNext();
-        if (unextResult.status === STATUS.OK) {
-          return Utils.createResult(STATUS.COMING, "JP (U-NEXT)");
-        } else {
-          return Utils.createResult(STATUS.FAIL, "JP (No)");
-        }
+        return unextResult.status === STATUS.OK
+          ? Utils.createResult(STATUS.COMING, "JP (U-NEXT)")
+          : Utils.createResult(STATUS.FAIL, "JP (No)");
       }
-      
-      // Step 5.5: CA 和 KR 特殊处理 - 通过第三方平台提供
-      if (region === "CA") {
-        return Utils.createResult(STATUS.COMING, "CA (Crave)");
-      }
-      if (region === "KR") {
-        return Utils.createResult(STATUS.COMING, "KR (Coupang Play)");
-      }
-      
-      // Step 6: 判断 region 是否在可用地区列表中
-      const isAvailable = availableRegions.includes(region);
-      if (!isAvailable) {
-        return Utils.createResult(STATUS.FAIL, `${region} (No)`);
-      }
-      
-      // Step 7: VPN 检测
-      let isVPN = false;
-      try {
-        const vpnRes = await Utils.request({
-          url: "https://default.any-any.prd.api.hbomax.com/any/playback/v1/playbackInfo",
-          headers: commonHeaders,
-          timeout: 5000
-        });
-        if (vpnRes.body && /VPN/i.test(vpnRes.body)) {
-          isVPN = true;
-        }
-      } catch {}
+      if (region === "CA") return Utils.createResult(STATUS.COMING, "CA (Crave)");
+      if (region === "KR") return Utils.createResult(STATUS.COMING, "KR (Coupang Play)");
 
-      if (isVPN) {
-        return Utils.createResult(STATUS.FAIL, `${region} (VPN)`);
+      // 可用地区列表：正文 "url":"/xx/xx" 地区链接；US 主站首页不含自身，手动补
+      const availableRegions = new Set(["US"]);
+      for (const m of body.matchAll(/"url":"\/([a-z]{2})\/[a-z]{2}"/gi)) {
+        availableRegions.add(m[1].toUpperCase());
       }
-      
-      return Utils.createResult(STATUS.OK, region);
-      
+
+      return availableRegions.has(region)
+        ? Utils.createResult(STATUS.OK, region)
+        : Utils.createResult(STATUS.FAIL, `${region} (No)`);
     } catch {
       return Utils.createResult(STATUS.FAIL, "No");
     }
