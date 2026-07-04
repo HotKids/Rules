@@ -304,111 +304,6 @@ class ServiceChecker {
   }
 
   /**
-   * U-NEXT 解锁检测（内部辅助函数）
-   * 用于 HBO Max JP 地区验证，不单独显示
-   * @returns {Promise<Object>} 检测结果
-   */
-  static async checkUNext() {
-    try {
-      const payload = {
-        "operationName": "cosmo_getPlaylistUrl",
-        "variables": {
-          "code": "ED00467205",
-          "playMode": "caption",
-          "bitrateLow": 192,
-          "bitrateHigh": null,
-          "validationOnly": false
-        },
-        "query": `query cosmo_getPlaylistUrl($code: String, $playMode: String, $bitrateLow: Int, $bitrateHigh: Int, $validationOnly: Boolean) {
-  webfront_playlistUrl(
-    code: $code
-    playMode: $playMode
-    bitrateLow: $bitrateLow
-    bitrateHigh: $bitrateHigh
-    validationOnly: $validationOnly
-  ) {
-    subTitle
-    playToken
-    playTokenHash
-    beaconSpan
-    result {
-      errorCode
-      errorMessage
-      __typename
-    }
-    resultStatus
-    licenseExpireDate
-    urlInfo {
-      code
-      startPoint
-      resumePoint
-      endPoint
-      endrollStartPosition
-      holderId
-      saleTypeCode
-      sceneSearchList {
-        IMS_AD1
-        IMS_L
-        IMS_M
-        IMS_S
-        __typename
-      }
-      movieProfile {
-        cdnId
-        type
-        playlistUrl
-        movieAudioList {
-          audioType
-          __typename
-        }
-        licenseUrlList {
-          type
-          licenseUrl
-          __typename
-        }
-        __typename
-      }
-      umcContentId
-      movieSecurityLevelCode
-      captionFlg
-      dubFlg
-      commodityCode
-      movieAudioList {
-        audioType
-        __typename
-      }
-      __typename
-    }
-    __typename
-  }
-}`
-      };
-      
-      const tmpresult = await Utils.request({
-        url: "https://cc.unext.jp/",
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      
-      if (!tmpresult.body) return Utils.createResult(STATUS.ERROR, "Error");
-      
-      const result = JSON.parse(tmpresult.body)?.data?.webfront_playlistUrl?.resultStatus;
-      
-      // 475/200 表示可用
-      if (result === 475 || result === "475" || result === 200 || result === "200") {
-        return Utils.createResult(STATUS.OK, "OK");
-      } else if (result === 467 || result === "467") {
-        return Utils.createResult(STATUS.FAIL, "No");
-      } else {
-        return Utils.createResult(STATUS.ERROR, `Code: ${result}`);
-      }
-    } catch {
-      return Utils.createResult(STATUS.ERROR, "Error");
-    }
-  }
-
-  /**
    * HBO Max 解锁检测
    * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
    *
@@ -431,13 +326,11 @@ class ServiceChecker {
       const region = headerStr.match(/countryCode=([A-Za-z]{2})/)?.[1]?.toUpperCase() || "";
       if (!region) return Utils.createResult(STATUS.FAIL, "No");
 
-      // JP / CA / KR：经由第三方平台提供服务
-      if (region === "JP") {
-        const unextResult = await ServiceChecker.checkUNext();
-        return unextResult.status === STATUS.OK
-          ? Utils.createResult(STATUS.COMING, "JP (U-NEXT)")
-          : Utils.createResult(STATUS.FAIL, "JP (No)");
-      }
+      // JP / CA / KR：经由第三方平台提供服务，直接标注不做二次校验
+      // （JP 原经 checkUNext() 校验 U-NEXT 可达性，但 U-NEXT 的 GraphQL 网关已启用
+      //   persisted query 白名单，自由查询一律 403 QUERY_NOT_IN_SAFELIST（2026-07
+      //   实测，完整/精简 query 均被拒），公开脚本的该检测全部失效，故移除校验）
+      if (region === "JP") return Utils.createResult(STATUS.COMING, "JP (U-NEXT)");
       if (region === "CA") return Utils.createResult(STATUS.COMING, "CA (Crave)");
       if (region === "KR") return Utils.createResult(STATUS.COMING, "KR (Coupang Play)");
 
