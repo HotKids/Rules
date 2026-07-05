@@ -86,6 +86,17 @@ profile:
   # 持久化 fake-ip 映射（重启后 IP 不变）
   store-fake-ip: true
 
+# ── NTP 校时 ──
+
+# mihomo 内置 NTP 同步：部分协议（如 VMess）对本机时间偏差敏感，
+# 校时失败会导致握手异常；不写入系统时间，仅供内核内部使用
+ntp:
+  enable: true
+  write-to-system: false
+  server: ntp.aliyun.com
+  port: 123
+  interval: 60
+
 # ── 域名嗅探 ──
 
 sniffer:
