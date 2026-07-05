@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-01 12:41:18
+# Date: 2026-07-05 20:44:14
 # Author: @HotKids
 
 # 通用设置
@@ -89,6 +89,17 @@ profile:
   store-selected: true
   # 持久化 fake-ip 映射（重启后 IP 不变）
   store-fake-ip: true
+
+# ── NTP 校时 ──
+
+# mihomo 内置 NTP 同步：部分协议（如 VMess）对本机时间偏差敏感，
+# 校时失败会导致握手异常；不写入系统时间，仅供内核内部使用
+ntp:
+  enable: true
+  write-to-system: false
+  server: ntp.aliyun.com
+  port: 123
+  interval: 60
 
 # ── 域名嗅探 ──
 
@@ -709,6 +720,10 @@ rule-providers:
 rules:
   # 标准 SSH 端口
   - AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT
+
+  # 禁用国外 QUIC（UDP 443），强制回退 TCP；国内放行
+  # 对应 Surge 的 PROTOCOL,QUIC 拦截（该规则转 Clash 无直接等价，借 mihomo 逻辑规则补齐）
+  - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT
 
   # Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
   - RULE-SET,Bypass,🔘 DIRECT
