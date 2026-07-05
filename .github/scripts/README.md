@@ -1,6 +1,7 @@
 # .github/scripts
 
-两个 Python 脚本（Python 3.12+，仅标准库），将 Surge 格式规则/配置自动同步到其他平台。
+三个同步脚本 + 共用模块 `_common.py`（Python 3.12+），将 Surge 格式规则/配置/模块自动同步到其他平台。
+`sync-rules.py` / `sync-config.py` 仅标准库；`sync-modules.py` 额外依赖 `pypinyin`（排序用）。
 
 ---
 
@@ -21,7 +22,16 @@
 | AND / PROCESS-NAME | — | ✓ | ✓ |
 | URL-REGEX | — | — | — |
 
-**触发**：`Surge/RULE-SET/**`、`sync-rules.txt` 或 `sync-rules.py` 变动（push to master）；每天 UTC 16:00 定时
+**触发**：`Surge/RULE-SET/**`、`sync-rules.txt`、`sync-rules.py` 或 `_common.py` 变动（push to master）；每天 UTC 16:00 定时
+
+---
+
+## `sync-modules.py` — sgmodule 聚合
+
+**源**：`sync-modules.txt` 中的上游 sgmodule URL 列表（可带 `#!name` 等元数据覆盖）
+**目标**：`Surge/Module/BlockAds.sgmodule`（按 section 聚合、拼音排序、生成 `#!arguments` 开关）
+
+**触发**：`Surge/Module/**`、`sync-modules.txt`、`sync-modules.py` 或 `_common.py` 变动（push to master）；每天 UTC 16:00 定时
 
 ---
 
