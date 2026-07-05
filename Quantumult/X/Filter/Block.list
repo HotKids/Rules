@@ -68,7 +68,9 @@ DOMAIN-KEYWORD,asiad.byteactivity,Block
 DOMAIN-KEYWORD,log-api.pangolin-sdk-toutiao,Block
 
 # > Caiyun Weather
+DOMAIN,abyss.cyapi.cn,Block
 DOMAIN,ad.cyapi.cn,Block
+DOMAIN,gather.colorfulclouds.net,Block
 
 # > Disney+ with Hulu
 DOMAIN-SUFFIX,disneyadvertising.com,Block
