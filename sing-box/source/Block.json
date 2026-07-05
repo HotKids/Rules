@@ -3,6 +3,7 @@
   "rules": [
     {
       "domain": [
+        "abyss.cyapi.cn",
         "acdn.adnxs.com",
         "ad.21cn.com",
         "ad.cyapi.cn",
@@ -60,6 +61,7 @@
         "floor.bz.mgtv.com",
         "fod-cm-ad-v.webcdn.stream.ne.jp",
         "free-aos-cdn-image.amap.com",
+        "gather.colorfulclouds.net",
         "googleads.g.doubleclick-cn.net",
         "googleads.g.doubleclick.net",
         "hc-ssp.sm.cn",
