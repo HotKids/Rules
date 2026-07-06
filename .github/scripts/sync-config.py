@@ -298,7 +298,8 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
         }
 
     # rules 注入：按「# 说明 // 锚点」拆成多段，每段携带各自锚点；
-    # 首个锚点前的内容归入 anchor=None 段（统一插到 MATCH 之前）。
+    # 首个锚点前的内容归入 anchor=None 段——与 pg_inject 的 prepend_block 语义一致，
+    # 插到 rules 列表最前面（而非跟"锚点声明了但没匹配上"的情况一样堆到 MATCH 之前）。
     rules_inject: dict | None = None
     if rules_lines:
         segments: list[dict] = []
@@ -1583,7 +1584,10 @@ def gen_rules_and_providers(
         inject_segments.append({"anchor": seg.get("anchor"), "lines": seg_lines})
 
     # 注入 Builtin rules：每段按其锚点（匹配段落开头注释）插入到该段落之后；
-    # 锚点为空或未命中的段统一收集，插到 MATCH 之前（无 MATCH 则追加）。
+    # anchor=None（ini 里第一个 // 锚点之前声明的内容）插到 rules 列表最前面，
+    # 与 pg_inject 的 prepend_block 语义一致；锚点声明了但没匹配上（真正的异常，
+    # 通常是锚点文字打错，或对应 Surge 规则在本平台被 skip 掉了）才收集到
+    # leftover，插到 MATCH 之前（无 MATCH 则追加），并打印警告便于发现。
     # 注：先做注入再生成 rule-providers，使后者能按最终 rules 顺序排序。
     def _comment_level(line: str) -> int:
         s = line.strip().lstrip("#").strip()
@@ -1592,30 +1596,36 @@ def gen_rules_and_providers(
             n += 1
         return n
 
+    prepend: list[str] = []
     leftover: list[str] = []
     for seg in inject_segments:
         lines = seg["lines"]
         if not lines:
             continue
         anchor = seg["anchor"]
+        if anchor is None:
+            prepend.extend(lines)
+            continue
         inserted = False
-        if anchor:
-            # 锚点只匹配「段落开头注释行」，不匹配规则行本身（避免撞策略名/同名规则）；
-            # 插入到该段落之后——跳过其下更深层级子段，遇同级/更高级注释才停。
-            for i, rule in enumerate(rules_out):
-                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
-                    lvl = _comment_level(rule)
-                    j = i + 1
-                    while j < len(rules_out):
-                        nxt = rules_out[j].strip()
-                        if nxt.startswith("#") and _comment_level(rules_out[j]) <= lvl:
-                            break
-                        j += 1
-                    rules_out[j:j] = lines
-                    inserted = True
-                    break
+        # 锚点只匹配「段落开头注释行」，不匹配规则行本身（避免撞策略名/同名规则）；
+        # 插入到该段落之后——跳过其下更深层级子段，遇同级/更高级注释才停。
+        for i, rule in enumerate(rules_out):
+            if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
+                lvl = _comment_level(rule)
+                j = i + 1
+                while j < len(rules_out):
+                    nxt = rules_out[j].strip()
+                    if nxt.startswith("#") and _comment_level(rules_out[j]) <= lvl:
+                        break
+                    j += 1
+                rules_out[j:j] = lines
+                inserted = True
+                break
         if not inserted:
+            print(f"  [WARN] rules_inject 锚点未命中: {anchor!r}，注入内容改为堆到 MATCH 之前")
             leftover.extend(lines)
+    if prepend:
+        rules_out[0:0] = prepend
     if leftover:
         for i, rule in enumerate(rules_out):
             if "MATCH," in rule:
