@@ -41,14 +41,23 @@
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Script.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Script.js`、`Clash/MyScript.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
 `Clash/Script.js` 是 `Clash/Sample.yaml` 生成完毕后再解析出来的等效 mihomo 覆写脚本
 （Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 / 规则 /
 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Sample.yaml 的解析结果、不重新
-实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。
+实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。地区组 / `🇺🇳 Server`
+组不用 mihomo 的 `include-all`（它对候选节点做隐式字母序排序，无开关可关，见
+`_gen_clash_script_js` 注释），改为运行时按 `poolGroupFilters` 手动过滤
+`config.proxies` 并保持订阅原始顺序。
+
+`Clash/MyScript.js` 是 `Script.js` 的私人定制版：在同一套自动生成基座上，叠加
+`sync-config/myscript.overlay.json` 声明的差异（额外分组、分组类型覆盖、候选节点
+插入位置），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
+分组）随 `Profile.conf` 自动同步，私人差异集中改 `myscript.overlay.json` 一处即可，
+禁止手改 `MyScript.js` 本体。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
