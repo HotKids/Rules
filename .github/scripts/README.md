@@ -41,7 +41,7 @@
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/ClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
@@ -53,11 +53,13 @@
 `_gen_clash_script_js` 注释），改为运行时按 `poolGroupFilters` 手动过滤
 `config.proxies` 并保持订阅原始顺序。
 
-`Clash/Script/MyScript.js` 是 `Script.js` 的私人定制版：在同一套自动生成基座上，叠加
-`sync-config/Enhanced/myscript.overlay.json` 声明的差异（额外分组、分组类型覆盖、
-候选节点插入位置），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay
-覆盖的分组）随 `Profile.conf` 自动同步，私人差异集中改
-`sync-config/Enhanced/myscript.overlay.json` 一处即可，禁止手改 `MyScript.js` 本体。
+`Clash/Script/MyScript.js`、`Clash/Script/ClashBox.js` 都是 `Script.js` 的私人定制版：
+在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
+声明的差异（分组改名/换图标、类型覆盖、候选节点插入位置、额外分组、部分分组默认关闭
+`disabled_by_default`），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay
+覆盖的分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可，
+禁止手改这两个生成产物本体。`Enhanced/` 下每多一份 `<name>.overlay.json` 就会多生成一份
+`Clash/Script/<Name>.js`（见 `sync-config.py` 的 `_sync_clash`），互不影响。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
