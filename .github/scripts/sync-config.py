@@ -2559,14 +2559,29 @@ def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> d
     return {k: v for k, v in g.items() if k not in ("use", "filter")}
 
 
+def _rule_policy_index(parts: list[str]) -> int:
+    """Surge/Clash 规则行里策略字段的下标。`MATCH,POLICY` 策略在 index 1；
+    `AND/OR/NOT,(...),POLICY` 策略永远是最后一个逗号分段（拆括号里的逗号
+    也没关系，反正策略本身不含逗号，取 -1 仍然对）；其余类型固定是
+    `TYPE,VALUE,POLICY[,no-resolve]` 形式，策略在 index 2。
+    """
+    if parts[0] == "MATCH":
+        return 1
+    if parts[0] in ("AND", "OR", "NOT"):
+        return len(parts) - 1
+    return 2
+
+
 def _apply_myscript_overlay(
-    groups: list[dict], pool_filters: dict[str, str | None], overlay: dict
+    groups: list[dict], pool_filters: dict[str, str | None], rules: list[str], overlay: dict
 ) -> None:
     """把私人差异（.github/scripts/sync-config/Enhanced/myscript.overlay.json）叠加到自动生成的
-    基座上，就地修改 groups / pool_filters。三类差异，对应 overlay 里的三个字段：
+    基座上，就地修改 groups / pool_filters / rules。三类差异，对应 overlay 里的三个字段：
 
-    - group_overrides：改写已有分组的字段（如地区组 select→fallback）+ pool_filters 的
-      filter（换成带排除条件的正则）。
+    - group_overrides：改写已有分组的字段（如地区组 select→fallback，或改名/换图标）+
+      pool_filters 的 filter（换成带排除条件的正则）。若 patch 带 name（改名），
+      同步更新其余分组 proxies 候选里的旧名引用、pool_filters 的 key、以及
+      rules 里以该分组为策略目标的行，避免残留指向旧名字的悬空引用。
     - group_proxies_insert：在已有分组的静态 proxies 候选列表里，紧邻某个已有条目
       之前/之后插入新地区（如 🔰 Proxy 的候选里插入 🇬🇧 England / 🇩🇪 Germany）。
     - extra_pool_groups：整个新增的池分组（Relay 中转链、新地区），插入到指定锚点
@@ -2587,6 +2602,22 @@ def _apply_myscript_overlay(
         group.update({k: v for k, v in patch.items() if k != "filter"})
         if "filter" in patch:
             pool_filters[name] = patch["filter"]
+
+        new_name = patch.get("name")
+        if new_name and new_name != name:
+            for g in groups:
+                if isinstance(g.get("proxies"), list):
+                    g["proxies"] = [new_name if p == name else p for p in g["proxies"]]
+            if name in pool_filters:
+                pool_filters[new_name] = pool_filters.pop(name)
+            for i, r in enumerate(rules):
+                parts = r.split(",")
+                idx = _rule_policy_index(parts)
+                if idx < len(parts) and parts[idx] == name:
+                    parts[idx] = new_name
+                    rules[i] = ",".join(parts)
+            del by_name[name]
+            by_name[new_name] = group
 
     for name, spec in overlay.get("group_proxies_insert", {}).items():
         group = _get_group(name, f"group_proxies_insert.{name!r}")
@@ -2657,7 +2688,7 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
     structural_pool_names = set(pool_filters)
 
     if overlay:
-        _apply_myscript_overlay(groups, pool_filters, overlay)
+        _apply_myscript_overlay(groups, pool_filters, rules, overlay)
         structural_pool_names.update(spec["name"] for spec in overlay.get("extra_pool_groups", []))
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
@@ -2667,6 +2698,16 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
         g["name"] for g in groups
         if not g.get("hidden") and g["name"] not in structural_pool_names and g["name"] != main_group_name
     ]
+
+    # overlay 可声明 disabled_by_default，让某些可选分组默认关闭（仍可随时手动改回 true），
+    # 而不是像其余分组一样默认全部启用。
+    disabled_by_default = set((overlay or {}).get("disabled_by_default", []))
+    unknown_disabled = disabled_by_default - set(optional_group_names)
+    if unknown_disabled:
+        raise ValueError(
+            f"myscript.overlay.json 的 disabled_by_default 引用了不存在或不可开关的分组 "
+            f"{sorted(unknown_disabled)}；当前可开关的分组有：{optional_group_names}"
+        )
 
     if overlay:
         header_source = [
@@ -2696,7 +2737,7 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
         "",
         "// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组",
         "// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）",
-        f"const ruleOptionsEnable = {_to_js({name: True for name in optional_group_names}, 0)};",
+        f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0)};",
         "",
         "function main(config) {",
         "  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {",
