@@ -375,44 +375,53 @@ function main(config) {
       name: '🇺🇳 Server',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png',
-      'include-all': true,
     },
     {
       name: '🇭🇰 Hong Kong',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png',
-      'include-all': true,
-      filter: '🇭🇰|HK|Hong Kong|香港',
     },
     {
       name: '🇨🇳 Taiwan',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png',
-      'include-all': true,
-      filter: '🇨🇳|🇹🇼|TW|Taiwan|台湾',
     },
     {
       name: '🇸🇬 Singapore',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png',
-      'include-all': true,
-      filter: '🇸🇬|SG|Singapore|新加坡',
     },
     {
       name: '🇯🇵 Japan',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png',
-      'include-all': true,
-      filter: '🇯🇵|JP|Japan|日本',
     },
     {
       name: '🇺🇸 America',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png',
-      'include-all': true,
-      filter: '🇺🇸|US|United States|美国',
     },
   ];
+
+  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤
+  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选
+  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），
+  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
+  const allProxyNames = config.proxies.map((p) => p.name);
+  const poolGroupFilters = {
+    '🇺🇳 Server': null,
+    '🇭🇰 Hong Kong': '🇭🇰|HK|Hong Kong|香港',
+    '🇨🇳 Taiwan': '🇨🇳|🇹🇼|TW|Taiwan|台湾',
+    '🇸🇬 Singapore': '🇸🇬|SG|Singapore|新加坡',
+    '🇯🇵 Japan': '🇯🇵|JP|Japan|日本',
+    '🇺🇸 America': '🇺🇸|US|United States|美国',
+  };
+  for (const g of proxyGroups) {
+    if (!(g.name in poolGroupFilters)) continue;
+    const filter = poolGroupFilters[g.name];
+    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;
+    g.proxies = matched.length > 0 ? matched : ['COMPATIBLE'];
+  }
 
   const ruleProviders = {
     Bypass: {
