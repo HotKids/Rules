@@ -51,7 +51,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*HK)(?=.*GoMaMi)"
+      "filter": "^(?=.*HK)(?=.*(?:GoMaMi|Pro))"
     },
     {
       "name": "🇨🇳 TW Relay",
@@ -75,7 +75,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*US)(?=.*Pro)"
+      "filter": "^(?=.*US)(?=.*(?:GoMaMi|Pro))"
     }
   ]
 }
