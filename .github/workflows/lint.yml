@@ -6,9 +6,11 @@ on:
     paths:
       - '.github/scripts/*.py'
       - 'Surge/RULE-SET/**'
+      - 'sing-box/config.json'
   pull_request:
     paths:
       - '.github/scripts/*.py'
+      - 'sing-box/config.json'
 
 jobs:
   lint:
@@ -56,3 +58,19 @@ jobs:
               sys.exit(1)
           print(f'All {len(files)} sing-box JSON files OK')
           "
+
+      # 完整配置模板用 sing-box 官方 check 校验结构（含 1.12+ 新格式字段）。
+      # check 只做结构校验、不下载 remote rule-set，故离线可跑。版本须与
+      # sync-rules.yml 的编译版本一致。
+      - name: Validate sing-box full config (sing-box check)
+        env:
+          SING_BOX_VERSION: "1.12.0"
+        run: |
+          set -euo pipefail
+          url="https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/sing-box-${SING_BOX_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL "$url" -o /tmp/sing-box.tgz
+          tar -xzf /tmp/sing-box.tgz -C /tmp
+          SB="/tmp/sing-box-${SING_BOX_VERSION}-linux-amd64/sing-box"
+          "$SB" version
+          "$SB" check -c sing-box/config.json
+          echo "✓ sing-box/config.json 通过 sing-box check"
