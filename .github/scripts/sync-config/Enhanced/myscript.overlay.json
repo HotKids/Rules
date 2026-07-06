@@ -5,10 +5,10 @@
 
   "group_overrides": {
     "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
-    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)" },
-    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
+    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)(?!.*Pro)" },
+    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)(?!.*Neburst)(?!.*Pro)" },
     "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
-    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" },
+    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*GoMaMi)(?!.*Pro)" },
     "📧 Mail": { "filter": null }
   },
 
