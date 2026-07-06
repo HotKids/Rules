@@ -2562,6 +2562,10 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
 
     本函数只读 Sample.yaml 的解析结果，不重新实现转换逻辑，因此天然随
     Surge/Profile.conf 的改动同步更新，无需手动维护。
+
+    可选分流分组（非隐藏、非 include-all、非兜底策略组）会额外生成一份
+    `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
+    某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
     """
     data = yaml.safe_load(sample_yaml_text) or {}
 
@@ -2569,18 +2573,31 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     rule_providers = data.get("rule-providers") or {}
     rules = data.get("rules") or []
 
+    # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
+    # include-all 的节点池 / 地区组同样视为核心组，均不纳入可选开关。
+    main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
+    optional_group_names = [
+        g["name"] for g in groups
+        if not g.get("hidden") and not g.get("include-all") and g["name"] != main_group_name
+    ]
+
     lines = [
         "/**",
         " * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）",
         " *",
         " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，",
-        " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件。",
+        " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；",
+        " * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。",
         " *",
         " * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的",
         " * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）",
         " * 导入时，动态生成与本仓库 Surge/Profile.conf 等效的策略组、规则与基础设置。",
         " * 仓库：https://github.com/HotKids/Rules",
         " */",
+        "",
+        "// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组",
+        "// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）",
+        f"const ruleOptionsEnable = {_to_js({name: True for name in optional_group_names}, 0)};",
         "",
         "function main(config) {",
         "  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {",
@@ -2594,15 +2611,40 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
         lines.append(f"  config[{_js_string(key)}] = {_to_js(data[key])};")
         if isinstance(data[key], (dict, list)):
             lines.append("")
-    lines.append(f"  config['proxy-groups'] = {_to_js(groups)};")
+
+    lines.append(f"  const proxyGroups = {_to_js(groups)};")
     lines.append("")
-    lines.append(f"  config['rule-providers'] = {_to_js(rule_providers)};")
+    lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
     lines.append("")
-    lines.append(f"  config['rules'] = {_to_js(rules)};")
+    lines.append(f"  const rules = {_to_js(rules)};")
     lines.append("")
-    lines.append("  return config;")
-    lines.append("}")
-    lines.append("")
+    lines += [
+        "  const disabledGroups = new Set(",
+        "    Object.keys(ruleOptionsEnable).filter((name) => !ruleOptionsEnable[name]),",
+        "  );",
+        "",
+        "  config['proxy-groups'] = proxyGroups.filter((g) => !disabledGroups.has(g.name));",
+        "",
+        "  const enabledRules = rules.filter((r) => {",
+        "    const parts = r.split(',');",
+        "    return !(parts[0] === 'RULE-SET' && parts.length >= 3 && disabledGroups.has(parts[2]));",
+        "  });",
+        "",
+        "  const usedProviders = new Set();",
+        "  for (const r of enabledRules) {",
+        "    const parts = r.split(',');",
+        "    if (parts[0] === 'RULE-SET' && parts.length >= 2) usedProviders.add(parts[1]);",
+        "  }",
+        "  config['rule-providers'] = Object.fromEntries(",
+        "    Object.entries(ruleProviders).filter(([name]) => usedProviders.has(name)),",
+        "  );",
+        "",
+        "  config['rules'] = enabledRules;",
+        "",
+        "  return config;",
+        "}",
+        "",
+    ]
     return "\n".join(lines)
 
 
