@@ -26,6 +26,7 @@ const ruleOptionsEnable = {
   '🤖 AIGC': true,
   '🪙 Crypto': true,
   '💳 Finance': true,
+  '📧 Mail': true,
   '🚧 AdGuard': true,
 };
 
