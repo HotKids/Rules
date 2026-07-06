@@ -11,10 +11,13 @@ sync-config.txt 格式（平台块 + 子分区）：
   # > Mapping   URL 映射（X => Y）与内置规则集映射
 """
 
+import json
 import re
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+
+import yaml
 
 # ---------------------------------------------------------------------------
 # 路径配置
@@ -178,6 +181,15 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
             return False
     filepath.parent.mkdir(parents=True, exist_ok=True)
     filepath.write_text(stamped, encoding="utf-8")
+    return True
+
+
+def _write_if_changed(filepath: Path, content: str) -> bool:
+    """无 Date 行场景下的按需写入：内容相同则不写，避免无意义的 mtime/commit 刷新。"""
+    if filepath.exists() and filepath.read_text(encoding="utf-8") == content:
+        return False
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(content, encoding="utf-8")
     return True
 
 
@@ -2481,6 +2493,162 @@ def gen_surfboard_profile(
 
 
 # ---------------------------------------------------------------------------
+# Clash 覆写脚本（Script.js）：解析生成后的 Sample.yaml，转译为等效 JS
+# ---------------------------------------------------------------------------
+
+_JS_IDENT_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
+
+# main(config) 中按此顺序透传的基础设置 key（proxies / proxy-providers /
+# proxy-groups / rule-providers / rules 单独处理，不在此列）
+_CLASH_SCRIPT_BASE_KEYS = [
+    "mixed-port", "allow-lan", "bind-address", "mode", "log-level", "ipv6",
+    "external-controller", "unified-delay", "tcp-concurrent", "find-process-mode",
+    "geodata-loader", "global-ua", "keep-alive-interval",
+    "geo-auto-update", "geo-update-interval", "geox-url",
+    "hosts", "profile", "ntp", "sniffer", "dns", "tun",
+]
+
+
+def _js_string(s: str) -> str:
+    escaped = s.replace("\\", "\\\\").replace("'", "\\'")
+    return f"'{escaped}'"
+
+
+def _js_key(k: str) -> str:
+    return k if _JS_IDENT_RE.match(k) else _js_string(k)
+
+
+def _to_js(value, indent: int = 2) -> str:
+    pad, pad_in = " " * indent, " " * (indent + 2)
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        items = [f"{pad_in}{_js_key(str(k))}: {_to_js(v, indent + 2)}," for k, v in value.items()]
+        return "{\n" + "\n".join(items) + f"\n{pad}}}"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        items = [f"{pad_in}{_to_js(v, indent + 2)}," for v in value]
+        return "[\n" + "\n".join(items) + f"\n{pad}]"
+    if isinstance(value, bool):
+        return "true" if value else "false"
+    if value is None:
+        return "null"
+    if isinstance(value, (int, float)):
+        return json.dumps(value)
+    return _js_string(str(value))
+
+
+def _convert_group_for_script(g: dict) -> dict:
+    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider）→ Script.js 场景下
+    没有 provider，改用 mihomo 原生 `include-all: true` 对 config.proxies 生效，效果等价。"""
+    if g.get("use") != ["Server"]:
+        return dict(g)
+    new_g = {}
+    for k, v in g.items():
+        if k == "use":
+            new_g["include-all"] = True
+        else:
+            new_g[k] = v
+    return new_g
+
+
+def _gen_clash_script_js(sample_yaml_text: str) -> str:
+    """由最终生成的 Clash/Sample.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
+
+    用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
+    sub.hotkids.me）生成与本仓库 Surge/Profile.conf 等效的策略组 / 规则 / 基础设置，
+    不依赖本仓库自身的 proxy-providers 静态生成流程。
+
+    本函数只读 Sample.yaml 的解析结果，不重新实现转换逻辑，因此天然随
+    Surge/Profile.conf 的改动同步更新，无需手动维护。
+
+    可选分流分组（非隐藏、非 include-all、非兜底策略组）会额外生成一份
+    `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
+    某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
+    """
+    data = yaml.safe_load(sample_yaml_text) or {}
+
+    groups = [_convert_group_for_script(g) for g in (data.get("proxy-groups") or [])]
+    rule_providers = data.get("rule-providers") or {}
+    rules = data.get("rules") or []
+
+    # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
+    # include-all 的节点池 / 地区组同样视为核心组，均不纳入可选开关。
+    main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
+    optional_group_names = [
+        g["name"] for g in groups
+        if not g.get("hidden") and not g.get("include-all") and g["name"] != main_group_name
+    ]
+
+    lines = [
+        "/**",
+        " * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）",
+        " *",
+        " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，",
+        " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；",
+        " * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。",
+        " *",
+        " * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的",
+        " * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）",
+        " * 导入时，动态生成与本仓库 Surge/Profile.conf 等效的策略组、规则与基础设置。",
+        " * 仓库：https://github.com/HotKids/Rules",
+        " */",
+        "",
+        "// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组",
+        "// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）",
+        f"const ruleOptionsEnable = {_to_js({name: True for name in optional_group_names}, 0)};",
+        "",
+        "function main(config) {",
+        "  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {",
+        "    throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');",
+        "  }",
+        "",
+    ]
+    for key in _CLASH_SCRIPT_BASE_KEYS:
+        if key not in data:
+            continue
+        lines.append(f"  config[{_js_string(key)}] = {_to_js(data[key])};")
+        if isinstance(data[key], (dict, list)):
+            lines.append("")
+
+    lines.append(f"  const proxyGroups = {_to_js(groups)};")
+    lines.append("")
+    lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
+    lines.append("")
+    lines.append(f"  const rules = {_to_js(rules)};")
+    lines.append("")
+    lines += [
+        "  const disabledGroups = new Set(",
+        "    Object.keys(ruleOptionsEnable).filter((name) => !ruleOptionsEnable[name]),",
+        "  );",
+        "",
+        "  config['proxy-groups'] = proxyGroups.filter((g) => !disabledGroups.has(g.name));",
+        "",
+        "  const enabledRules = rules.filter((r) => {",
+        "    const parts = r.split(',');",
+        "    return !(parts[0] === 'RULE-SET' && parts.length >= 3 && disabledGroups.has(parts[2]));",
+        "  });",
+        "",
+        "  const usedProviders = new Set();",
+        "  for (const r of enabledRules) {",
+        "    const parts = r.split(',');",
+        "    if (parts[0] === 'RULE-SET' && parts.length >= 2) usedProviders.add(parts[1]);",
+        "  }",
+        "  config['rule-providers'] = Object.fromEntries(",
+        "    Object.entries(ruleProviders).filter(([name]) => usedProviders.has(name)),",
+        "  );",
+        "",
+        "  config['rules'] = enabledRules;",
+        "",
+        "  return config;",
+        "}",
+        "",
+    ]
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # 平台同步函数
 # ---------------------------------------------------------------------------
 
@@ -2526,6 +2694,11 @@ def _sync_clash(
     body = _apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host)
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
+
+    script_path = Path(clash_out).with_name("Script.js")
+    script_body = _gen_clash_script_js(body)
+    script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
+    print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
 
 def _sync_loon(
