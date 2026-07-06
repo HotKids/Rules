@@ -709,7 +709,6 @@ function main(config) {
     'GEOSITE,cn,Direct',
     'GEOIP,CN,Direct,no-resolve',
     'GEOSITE,geolocation-!cn,Proxy',
-    'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT',
     'MATCH,Proxy',
   ];
 
