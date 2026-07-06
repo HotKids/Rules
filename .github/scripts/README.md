@@ -63,8 +63,11 @@
 这两个生成产物本体。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
 已生成的 overlay 结果继续叠加（`clashbox.overlay.json` extends `myscript.overlay.json`），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
-`Enhanced/` 下每多一份 `<name>.overlay.json` 就会多生成一份 `Clash/Script/<Name>.js`
-（对应关系见 `sync-config.py` 的 `_sync_clash` 里的 `overlay_specs`）。
+
+`_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
+`output` 字段声明（仓库根相对，如 `"Clash/Script/ClashBox.js"`），`extends` 依赖顺序自动
+拓扑解析——因此**新增一份个人配置只需在 `Enhanced/` 下放一个带 `output` 的 `*.overlay.json`
+即可自动生成对应脚本，无需改动 `sync-config.py`**。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
