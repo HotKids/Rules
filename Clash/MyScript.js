@@ -1,5 +1,5 @@
 /**
- * mihomo 私人用配置覆写脚本
+ * mihomo 私人用配置覆写脚本，根据 Clash/Script.js 手动维护
  *
  * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的
  * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）
