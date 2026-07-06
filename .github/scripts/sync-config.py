@@ -2939,10 +2939,14 @@ def _sync_clash(
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
-    script_path = Path(clash_out).parent / "Script" / "Script.js"
+    script_dir = Path(clash_out).parent / "Script"
+    script_path = script_dir / "Script.js"
     script_body, _ = _gen_clash_script_js(body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
+
+    # 本脚本产出的全部脚本文件（绝对路径），用于事后清理失效残留（见下方 prune）
+    expected_scripts = {(REPO_ROOT / script_path).resolve()}
 
     # 个人差异声明（Enhanced/ 下）：自动扫描所有 *.overlay.json，每份生成一份派生
     # 脚本，输出路径由 overlay 自己的 output 字段声明（仓库根相对路径，如
@@ -2986,11 +2990,28 @@ def _sync_clash(
         )
         resolved_states[label] = state
         out_rel = overlay["output"]
+        expected_scripts.add((REPO_ROOT / out_rel).resolve())
         out_changed = _write_if_changed(REPO_ROOT / out_rel, out_body)
         print(f"  {'✓ ' + out_rel + ' 已更新' if out_changed else '✓ ' + out_rel + ' 无变化'}")
 
     for label in overlays:
         _resolve_overlay(label, [])
+
+    # 清理失效残留：Script 目录里由本脚本生成过、但现在已不在 expected_scripts 里的
+    # 脚本（例如某个 overlay 改了 output 后遗留的旧文件）。只删带 sync-config.py 生成
+    # 标记的文件，不碰用户可能手放在此目录的其它 .js。
+    _gen_marker = "由 sync-config.py 从 Surge/Profile.conf"
+    for existing in sorted((REPO_ROOT / script_dir).glob("*.js")):
+        if existing.resolve() in expected_scripts:
+            continue
+        try:
+            head = existing.read_text(encoding="utf-8")[:400]
+        except OSError:
+            continue
+        if _gen_marker not in head:
+            continue
+        existing.unlink()
+        print(f"  ✓ {existing.relative_to(REPO_ROOT)} 已删除（失效残留）")
 
 
 def _sync_loon(
