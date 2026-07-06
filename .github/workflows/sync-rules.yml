@@ -30,11 +30,38 @@ jobs:
       - name: Run sync script
         run: python3 .github/scripts/sync-rules.py
 
+      - name: Compile sing-box binary rule-sets (.srs)
+        env:
+          # sing-box 官方 CLI 版本（用于 rule-set compile）。source .json 声明
+          # version:2（需 sing-box ≥1.10），此处固定版本以保证 .srs 产物可复现，
+          # 升级内核时手动 bump 即可（与 lint.yml 的 sing-box check 保持同版本）。
+          SING_BOX_VERSION: "1.12.0"
+        run: |
+          set -euo pipefail
+          url="https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/sing-box-${SING_BOX_VERSION}-linux-amd64.tar.gz"
+          curl -fsSL "$url" -o /tmp/sing-box.tgz
+          tar -xzf /tmp/sing-box.tgz -C /tmp
+          SB="/tmp/sing-box-${SING_BOX_VERSION}-linux-amd64/sing-box"
+          "$SB" version
+
+          mkdir -p sing-box/rule-set
+          # 源 .json → 二进制 .srs（compile 保留 source 声明的 version）；
+          # 任一文件编译失败即让整步失败（while 在管道子 shell 内，需显式 exit）
+          find sing-box/source -maxdepth 1 -name '*.json' -print0 | while IFS= read -r -d '' f; do
+            stem="$(basename "$f" .json)"
+            "$SB" rule-set compile --output "sing-box/rule-set/${stem}.srs" "$f" || exit 1
+          done
+          # 清理孤儿 .srs（对应 source .json 已删除）
+          find sing-box/rule-set -maxdepth 1 -name '*.srs' -print0 | while IFS= read -r -d '' s; do
+            stem="$(basename "$s" .srs)"
+            [ -f "sing-box/source/${stem}.json" ] || rm -f "$s"
+          done
+
       - name: Commit & push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Surge/RULE-SET/ Surge/Module/ Quantumult/X/Filter/ Clash/RuleSet/ sing-box/source/
+          git add Surge/RULE-SET/ Surge/Module/ Quantumult/X/Filter/ Clash/RuleSet/ sing-box/source/ sing-box/rule-set/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
