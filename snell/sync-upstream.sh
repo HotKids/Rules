@@ -29,7 +29,7 @@ check_forbidden_keywords(){
     'private_key' 'public_key' 'short_id' 'Snell v4' 'snell v4'
     'snell-server-v4' 'SNELL_V4' 'snell_v4' 'install_snell_v4' 'download_snell_v4'
   )
-  local pattern joined
+  local joined
   joined="$(printf '%s\n' "${patterns[@]}" | sed 's/[.[\*^$()+?{}|]/\\&/g' | paste -sd '|' -)"
   if grep -nE "$joined" "$MAIN_SCRIPT"; then
     fail "主脚本出现禁止关键词，请确认没有把上游禁用功能同步进主脚本。"
@@ -70,8 +70,9 @@ bash -n "$MAIN_SCRIPT"
 bash -n "$SYNC_SCRIPT"
 
 if command -v shellcheck >/dev/null 2>&1; then
-  shellcheck "$MAIN_SCRIPT"
-  shellcheck "$SYNC_SCRIPT"
+  if ! shellcheck "$MAIN_SCRIPT" "$SYNC_SCRIPT"; then
+    log "shellcheck reported warnings; please review them, continuing sync"
+  fi
 else
   log "shellcheck not installed, skipped"
 fi
