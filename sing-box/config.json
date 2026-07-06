@@ -154,6 +154,13 @@
       ]
     },
     {
+      "type": "selector",
+      "tag": "🇺🇳 Server",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ]
+    },
+    {
       "type": "urltest",
       "tag": "🇭🇰 Hong Kong",
       "outbounds": [
@@ -197,13 +204,6 @@
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
-    },
-    {
-      "type": "selector",
-      "tag": "🇺🇳 Server",
-      "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
-      ]
     },
     {
       "type": "direct",
@@ -305,6 +305,10 @@
         "outbound": "📧 Mail"
       },
       {
+        "rule_set": "LAN",
+        "outbound": "direct"
+      },
+      {
         "rule_set": "geolocation-!cn",
         "outbound": "🔰 Proxy"
       },
@@ -314,10 +318,6 @@
       },
       {
         "rule_set": "geoip-cn",
-        "outbound": "direct"
-      },
-      {
-        "rule_set": "LAN",
         "outbound": "direct"
       }
     ],
@@ -348,14 +348,6 @@
       },
       {
         "type": "remote",
-        "tag": "Streaming",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
-      },
-      {
-        "type": "remote",
         "tag": "Streaming_TW",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_TW.srs",
@@ -375,6 +367,14 @@
         "tag": "Streaming_US",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_US.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Streaming",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming.srs",
         "download_detour": "direct",
         "update_interval": "1d"
       },
@@ -404,17 +404,17 @@
       },
       {
         "type": "remote",
-        "tag": "Apple",
+        "tag": "Apple CN",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple.srs",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple%20CN.srs",
         "download_detour": "direct",
         "update_interval": "1d"
       },
       {
         "type": "remote",
-        "tag": "Apple CN",
+        "tag": "Apple",
         "format": "binary",
-        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple%20CN.srs",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple.srs",
         "download_detour": "direct",
         "update_interval": "1d"
       },
