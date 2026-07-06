@@ -298,7 +298,8 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
         }
 
     # rules 注入：按「# 说明 // 锚点」拆成多段，每段携带各自锚点；
-    # 首个锚点前的内容归入 anchor=None 段（统一插到 MATCH 之前）。
+    # 首个锚点前的内容归入 anchor=None 段——与 pg_inject 的 prepend_block 语义一致，
+    # 插到 rules 列表最前面（而非跟"锚点声明了但没匹配上"的情况一样堆到 MATCH 之前）。
     rules_inject: dict | None = None
     if rules_lines:
         segments: list[dict] = []
@@ -1583,7 +1584,10 @@ def gen_rules_and_providers(
         inject_segments.append({"anchor": seg.get("anchor"), "lines": seg_lines})
 
     # 注入 Builtin rules：每段按其锚点（匹配段落开头注释）插入到该段落之后；
-    # 锚点为空或未命中的段统一收集，插到 MATCH 之前（无 MATCH 则追加）。
+    # anchor=None（ini 里第一个 // 锚点之前声明的内容）插到 rules 列表最前面，
+    # 与 pg_inject 的 prepend_block 语义一致；锚点声明了但没匹配上（真正的异常，
+    # 通常是锚点文字打错，或对应 Surge 规则在本平台被 skip 掉了）才收集到
+    # leftover，插到 MATCH 之前（无 MATCH 则追加），并打印警告便于发现。
     # 注：先做注入再生成 rule-providers，使后者能按最终 rules 顺序排序。
     def _comment_level(line: str) -> int:
         s = line.strip().lstrip("#").strip()
@@ -1592,30 +1596,36 @@ def gen_rules_and_providers(
             n += 1
         return n
 
+    prepend: list[str] = []
     leftover: list[str] = []
     for seg in inject_segments:
         lines = seg["lines"]
         if not lines:
             continue
         anchor = seg["anchor"]
+        if anchor is None:
+            prepend.extend(lines)
+            continue
         inserted = False
-        if anchor:
-            # 锚点只匹配「段落开头注释行」，不匹配规则行本身（避免撞策略名/同名规则）；
-            # 插入到该段落之后——跳过其下更深层级子段，遇同级/更高级注释才停。
-            for i, rule in enumerate(rules_out):
-                if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
-                    lvl = _comment_level(rule)
-                    j = i + 1
-                    while j < len(rules_out):
-                        nxt = rules_out[j].strip()
-                        if nxt.startswith("#") and _comment_level(rules_out[j]) <= lvl:
-                            break
-                        j += 1
-                    rules_out[j:j] = lines
-                    inserted = True
-                    break
+        # 锚点只匹配「段落开头注释行」，不匹配规则行本身（避免撞策略名/同名规则）；
+        # 插入到该段落之后——跳过其下更深层级子段，遇同级/更高级注释才停。
+        for i, rule in enumerate(rules_out):
+            if rule.strip().startswith("#") and _anchor_matches(anchor, rule):
+                lvl = _comment_level(rule)
+                j = i + 1
+                while j < len(rules_out):
+                    nxt = rules_out[j].strip()
+                    if nxt.startswith("#") and _comment_level(rules_out[j]) <= lvl:
+                        break
+                    j += 1
+                rules_out[j:j] = lines
+                inserted = True
+                break
         if not inserted:
+            print(f"  [WARN] rules_inject 锚点未命中: {anchor!r}，注入内容改为堆到 MATCH 之前")
             leftover.extend(lines)
+    if prepend:
+        rules_out[0:0] = prepend
     if leftover:
         for i, rule in enumerate(rules_out):
             if "MATCH," in rule:
@@ -2939,10 +2949,14 @@ def _sync_clash(
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
-    script_path = Path(clash_out).parent / "Script" / "Script.js"
+    script_dir = Path(clash_out).parent / "Script"
+    script_path = script_dir / "Script.js"
     script_body, _ = _gen_clash_script_js(body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
+
+    # 本脚本产出的全部脚本文件（绝对路径），用于事后清理失效残留（见下方 prune）
+    expected_scripts = {(REPO_ROOT / script_path).resolve()}
 
     # 个人差异声明（Enhanced/ 下）：自动扫描所有 *.overlay.json，每份生成一份派生
     # 脚本，输出路径由 overlay 自己的 output 字段声明（仓库根相对路径，如
@@ -2952,6 +2966,7 @@ def _sync_clash(
     # 声明同样的地区/Relay 链差异，依赖顺序按 extends 自动拓扑解析。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
     overlays: dict[str, dict] = {}
+    output_owner: dict[str, str] = {}  # 归一化 output 路径 → 声明它的 overlay 文件名
     for overlay_path in sorted(enhanced_dir.glob("*.overlay.json")):
         overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
         if not overlay.get("output"):
@@ -2959,6 +2974,14 @@ def _sync_clash(
                 f"{overlay_path.name} 缺少必填字段 output（派生脚本的输出路径，"
                 f"仓库根相对，如 \"Clash/Script/{overlay_path.name.split('.')[0].capitalize()}.js\"）"
             )
+        # 防止两份 overlay 声明同一个 output 互相覆盖（复制 overlay 后忘了改 output 的典型误操作）
+        out_key = str((REPO_ROOT / overlay["output"]).resolve())
+        if out_key in output_owner:
+            raise ValueError(
+                f"{overlay_path.name} 和 {output_owner[out_key]} 的 output 都指向 "
+                f"{overlay['output']!r}，会互相覆盖；请给每份 overlay 用不同的 output"
+            )
+        output_owner[out_key] = overlay_path.name
         overlays[overlay_path.name] = overlay
 
     resolved_states: dict[str, tuple] = {}
@@ -2986,11 +3009,28 @@ def _sync_clash(
         )
         resolved_states[label] = state
         out_rel = overlay["output"]
+        expected_scripts.add((REPO_ROOT / out_rel).resolve())
         out_changed = _write_if_changed(REPO_ROOT / out_rel, out_body)
         print(f"  {'✓ ' + out_rel + ' 已更新' if out_changed else '✓ ' + out_rel + ' 无变化'}")
 
     for label in overlays:
         _resolve_overlay(label, [])
+
+    # 清理失效残留：Script 目录里由本脚本生成过、但现在已不在 expected_scripts 里的
+    # 脚本（例如某个 overlay 改了 output 后遗留的旧文件）。只删带 sync-config.py 生成
+    # 标记的文件，不碰用户可能手放在此目录的其它 .js。
+    _gen_marker = "由 sync-config.py 从 Surge/Profile.conf"
+    for existing in sorted((REPO_ROOT / script_dir).glob("*.js")):
+        if existing.resolve() in expected_scripts:
+            continue
+        try:
+            head = existing.read_text(encoding="utf-8")[:400]
+        except OSError:
+            continue
+        if _gen_marker not in head:
+            continue
+        existing.unlink()
+        print(f"  ✓ {existing.relative_to(REPO_ROOT)} 已删除（失效残留）")
 
 
 def _sync_loon(

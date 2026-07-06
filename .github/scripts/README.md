@@ -67,7 +67,8 @@
 `_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
 `output` 字段声明（仓库根相对，如 `"Clash/Script/ClashBox.js"`），`extends` 依赖顺序自动
 拓扑解析——因此**新增一份个人配置只需在 `Enhanced/` 下放一个带 `output` 的 `*.overlay.json`
-即可自动生成对应脚本，无需改动 `sync-config.py`**。
+即可自动生成对应脚本，无需改动 `sync-config.py`**。改某份 overlay 的 `output` 后，旧路径上
+遗留的脚本会在下次同步时自动清理（仅删带生成标记的产物，不碰手放的其它 `.js`）。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
