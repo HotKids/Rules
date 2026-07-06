@@ -1,7 +1,8 @@
 # .github/scripts
 
 三个同步脚本 + 共用模块 `_common.py`（Python 3.12+），将 Surge 格式规则/配置/模块自动同步到其他平台。
-`sync-rules.py` / `sync-config.py` 仅标准库；`sync-modules.py` 额外依赖 `pypinyin`（排序用）。
+`sync-rules.py` 仅标准库；`sync-modules.py` 额外依赖 `pypinyin`（排序用）；
+`sync-config.py` 额外依赖 `pyyaml`（解析 Sample.yaml 以生成 Script.js）。
 
 ---
 
@@ -38,9 +39,14 @@
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`
+**目标**：`Clash/Sample.yaml`、`Clash/Script.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。
+
+`Clash/Script.js` 是 `Clash/Sample.yaml` 生成完毕后再解析出来的等效 mihomo 覆写脚本
+（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 / 规则 /
+基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Sample.yaml 的解析结果、不重新
+实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
