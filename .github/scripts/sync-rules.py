@@ -848,6 +848,7 @@ def convert_ipcidr_to_clash(text: str) -> str | None:
 def convert_classical_payload_to_singbox(text: str) -> str | None:
     """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。"""
     groups: dict[str, list[str]] = {}
+    logical_rules: list[dict] = []
     for line in _iter_clash_payload_rules(text):
         if line.startswith("#") or line.startswith("//"):
             continue
@@ -855,15 +856,29 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
         hash_idx = line.find("#")
         if hash_idx > 0:
             line = line[:hash_idx].rstrip().rstrip(",")
+        line = line.strip()
+
+        if line.startswith("AND,"):
+            # 逻辑规则 → sing-box type:logical/mode:and（version 2 起即支持）。
+            # 所有子条件均为 sing-box 支持的类型才转换；含 USER-AGENT 等不支持
+            # 子类型则整条跳过（与 Clash preserve / QX 的处理一致）。
+            sub = parse_and_rule(line)
+            if not sub:
+                continue
+            sb_sub = [{SINGBOX_MAP[t]: [v]} for t, v in sub if t in SINGBOX_MAP]
+            if sb_sub and len(sb_sub) == len(sub):
+                logical_rules.append({"type": "logical", "mode": "and", "rules": sb_sub})
+            continue
+
         parts = [p.strip() for p in line.split(",")]
         sb_type = SINGBOX_MAP.get(parts[0])
         if sb_type and len(parts) > 1:
             groups.setdefault(sb_type, []).append(parts[1])
 
-    if not groups:
+    if not groups and not logical_rules:
         return None
 
-    rules = _groups_to_singbox_rules(groups)
+    rules = _groups_to_singbox_rules(groups, logical_rules)
     return (json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
             if rules else None)
 
