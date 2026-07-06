@@ -471,13 +471,13 @@ function main(config) {
     '🇸🇬 Singapore': 'SG',
     '🇯🇵 Japan': '^(?=.*JP)(?!.*Pro)',
     '🇺🇸 America': '^(?=.*US)(?!.*Pro)',
+    '🇬🇧 England': 'UK',
+    '🇩🇪 Germany': 'DE',
     '🇸🇱 Relay': '^.*(GoMaMi|Neburst|Pro).*$',
     '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi).*$',
     '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst).*$',
     '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro).*$',
     '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro).*$',
-    '🇬🇧 England': 'UK',
-    '🇩🇪 Germany': 'DE',
   };
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;

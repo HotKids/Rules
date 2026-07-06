@@ -18,6 +18,22 @@
 
   "extra_pool_groups": [
     {
+      "name": "🇬🇧 England",
+      "insert_after": "🇺🇸 America",
+      "type": "fallback",
+      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
+      "hidden": true,
+      "filter": "UK"
+    },
+    {
+      "name": "🇩🇪 Germany",
+      "insert_after": "🇬🇧 England",
+      "type": "fallback",
+      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
+      "hidden": true,
+      "filter": "DE"
+    },
+    {
       "name": "🇸🇱 Relay",
       "insert_after": "📛 REJECT-DROP",
       "type": "url-test",
@@ -57,22 +73,6 @@
       "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*US)(?=.*Pro).*$"
-    },
-    {
-      "name": "🇬🇧 England",
-      "insert_after": "🇺🇸 America",
-      "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
-      "hidden": true,
-      "filter": "UK"
-    },
-    {
-      "name": "🇩🇪 Germany",
-      "insert_after": "🇬🇧 England",
-      "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
-      "hidden": true,
-      "filter": "DE"
     }
   ]
 }
