@@ -1,5 +1,5 @@
 {
-  "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。",
+  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。结构上与 myscript.overlay.json 相同（地区 fallback + Relay 中转链 + England/Germany），额外多了 OneDrive/Microsoft 的改名换图标 + 默认关闭。",
 
   "group_overrides": {
     "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
@@ -7,8 +7,12 @@
     "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
     "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
     "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" },
-    "📧 Mail": { "filter": null }
+    "📧 Mail": { "filter": null },
+    "☁️ OneDrive": { "name": "OneDrive", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png" },
+    "Ⓜ️ Microsoft": { "name": "Microsoft", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png" }
   },
+
+  "disabled_by_default": ["OneDrive", "Microsoft"],
 
   "group_proxies_insert": {
     "🔰 Proxy": { "after": "🇺🇸 America", "insert": ["🇬🇧 England", "🇩🇪 Germany"] },
