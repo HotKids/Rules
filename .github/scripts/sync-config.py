@@ -2583,7 +2583,7 @@ def _apply_overlay(
 ) -> None:
     """把私人差异声明（如 sync-config/Enhanced/myscript.overlay.json、
     clashbox.overlay.json）叠加到自动生成的基座上，就地修改 groups / pool_filters /
-    rules。四类差异，对应 overlay 里的字段：
+    rules / structural_pool_names。各类差异对应 overlay 里的字段（按此处的处理顺序）：
 
     - remove_groups：整组删掉（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
       里剔除对它的引用、删掉 rules 里以它为策略目标的行。
@@ -2728,8 +2728,9 @@ def _gen_clash_script_js(
     Surge/Profile.conf 的改动同步更新，无需手动维护。
 
     可选分流分组（非隐藏、非节点池/地区组、非兜底策略组）会额外生成一份
-    `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
-    某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
+    `ruleOptionsEnable`（默认 true，但 overlay 的 disabled_by_default 声明的分组
+    默认 false），供使用者在本地临时切换开关某个分组——关闭时一并裁剪其 rules
+    与专属 rule-providers，不改 Profile.conf。
     关闭分组时还会从其余组的候选列表中剔除对已删组的引用，即使日后策略组之间
     出现互相引用，也不会因指向不存在的策略而导致 mihomo 启动失败。
 
@@ -2784,8 +2785,8 @@ def _gen_clash_script_js(
         header_source = [
             " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + ",
             f" * sync-config/Enhanced/{overlay_label}（私人差异声明）自动生成。",
-            " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /",
-            f" * 候选节点插入位置）改 {overlay_label}，均不要直接编辑本文件。",
+            " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（改名 / 换图标 / 额外分组 /",
+            f" * 分组类型 / 候选节点插入位置 / 默认开关等）改 {overlay_label}，均不要直接编辑本文件。",
         ]
     else:
         header_source = [
@@ -2806,8 +2807,9 @@ def _gen_clash_script_js(
         " * 仓库：https://github.com/HotKids/Rules",
         " */",
         "",
-        "// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组",
-        "// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）",
+        "// 分流分组开关：true 启用 / false 关闭对应分组（连同其专属 rules /",
+        "// rule-providers 一并裁剪，无需改动 Profile.conf）。默认值见下方——",
+        "// 大多默认启用，个别按需默认关闭的直接标成 false，本地可随时改回 true。",
         f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0)};",
         "",
         "function main(config) {",

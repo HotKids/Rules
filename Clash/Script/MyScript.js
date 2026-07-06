@@ -3,8 +3,8 @@
  *
  * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + 
  * sync-config/Enhanced/myscript.overlay.json（私人差异声明）自动生成。
- * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /
- * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。
+ * 公共部分改动请提交到 Surge/Profile.conf；私人差异（改名 / 换图标 / 额外分组 /
+ * 分组类型 / 候选节点插入位置 / 默认开关等）改 myscript.overlay.json，均不要直接编辑本文件。
  * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。
  *
  * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的
@@ -13,8 +13,9 @@
  * 仓库：https://github.com/HotKids/Rules
  */
 
-// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组
-// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）
+// 分流分组开关：true 启用 / false 关闭对应分组（连同其专属 rules /
+// rule-providers 一并裁剪，无需改动 Profile.conf）。默认值见下方——
+// 大多默认启用，个别按需默认关闭的直接标成 false，本地可随时改回 true。
 const ruleOptionsEnable = {
   '🎬 Streaming': true,
   '📺 CNTV': true,
