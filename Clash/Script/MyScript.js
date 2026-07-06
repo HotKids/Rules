@@ -214,7 +214,7 @@ function main(config) {
     {
       name: '🔰 Proxy',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png',
       proxies: [
         '🇭🇰 Hong Kong',
         '🇨🇳 Taiwan',
@@ -230,7 +230,7 @@ function main(config) {
     {
       name: '🎬 Streaming',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png',
       proxies: [
         '🔰 Proxy',
         '🇭🇰 Hong Kong',
@@ -246,7 +246,7 @@ function main(config) {
     {
       name: '📺 CNTV',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png',
       proxies: [
         '🔘 DIRECT',
         '🇨🇳 Taiwan',
@@ -256,7 +256,7 @@ function main(config) {
     {
       name: '🍎 Apple',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png',
       proxies: [
         '🔘 DIRECT',
         '🔰 Proxy',
@@ -267,7 +267,7 @@ function main(config) {
     {
       name: '🔍 Google',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png',
       proxies: [
         '🇺🇸 America',
         '🔰 Proxy',
@@ -294,7 +294,7 @@ function main(config) {
     {
       name: '📬 Telegram',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png',
       proxies: [
         '🔰 Proxy',
         '🇸🇬 Singapore',
@@ -304,7 +304,7 @@ function main(config) {
     {
       name: '🤖 AIGC',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png',
       proxies: [
         '🇺🇸 America',
         '🇸🇬 Singapore',
@@ -314,7 +314,7 @@ function main(config) {
     {
       name: '🪙 Crypto',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png',
       proxies: [
         '🇩🇪 Germany',
         '🇺🇸 America',
@@ -325,7 +325,7 @@ function main(config) {
     {
       name: '💳 Finance',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png',
       proxies: [
         '🇺🇸 America',
         '🇩🇪 Germany',
@@ -336,7 +336,7 @@ function main(config) {
     {
       name: '📧 Mail',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Mail.png',
+      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Mail.png',
       proxies: [
         '🔰 Proxy',
         '🔘 DIRECT',
@@ -345,7 +345,7 @@ function main(config) {
     {
       name: '🚧 AdGuard',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png',
       proxies: [
         '🔘 DIRECT',
         '⛔️ REJECT',
@@ -355,7 +355,7 @@ function main(config) {
     {
       name: '🔘 DIRECT',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png',
       hidden: true,
       proxies: [
         'DIRECT',
@@ -364,7 +364,7 @@ function main(config) {
     {
       name: '⛔️ REJECT',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
       hidden: true,
       proxies: [
         'REJECT',
@@ -373,7 +373,7 @@ function main(config) {
     {
       name: '📛 REJECT-DROP',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
       hidden: true,
       proxies: [
         'REJECT-DROP',
@@ -413,7 +413,7 @@ function main(config) {
     {
       name: '🇺🇳 Server',
       type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png',
     },
     {
       name: '🇭🇰 Hong Kong',
@@ -491,189 +491,189 @@ function main(config) {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Bypass.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml',
       interval: 86400,
     },
     Reroute: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Reroute.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml',
       interval: 86400,
     },
     Private: {
       type: 'http',
       behavior: 'domain',
       path: './Provider/RuleSet/Private.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt',
+      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt',
       interval: 86400,
     },
     HTTPDNS: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/HTTPDNS.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml',
       interval: 86400,
     },
     Reject: {
       type: 'http',
       behavior: 'domain',
       path: './Provider/RuleSet/Reject.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt',
+      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt',
       interval: 86400,
     },
     AdBlock: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/AdBlock.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml',
       interval: 86400,
     },
     Streaming_TW: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Streaming_TW.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml',
       interval: 86400,
     },
     Streaming_JP: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Streaming_JP.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml',
       interval: 86400,
     },
     Streaming_US: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Streaming_US.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml',
       interval: 86400,
     },
     Streaming: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Streaming.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml',
       interval: 86400,
     },
     CNTV: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/CNTV.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml',
       interval: 86400,
     },
     'Google AI Studio': {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Google_AI_Studio.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml',
       interval: 86400,
     },
     AIGC: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/AIGC.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml',
       interval: 86400,
     },
     'Apple CN': {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Apple_CN.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml',
       interval: 86400,
     },
     Apple: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Apple.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml',
       interval: 86400,
     },
     Google: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Google.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml',
       interval: 86400,
     },
     OneDrive: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/OneDrive.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml',
       interval: 86400,
     },
     Microsoft: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Microsoft.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml',
       interval: 86400,
     },
     Telegram: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Telegram.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml',
       interval: 86400,
     },
     Crypto: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Crypto.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml',
       interval: 86400,
     },
     Finance: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Finance.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml',
       interval: 86400,
     },
     Spark: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/Spark.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml',
       interval: 86400,
     },
     Global: {
       type: 'http',
       behavior: 'domain',
       path: './Provider/RuleSet/Global.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt',
+      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt',
       interval: 86400,
     },
     China: {
       type: 'http',
       behavior: 'domain',
       path: './Provider/RuleSet/China.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
+      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
       interval: 86400,
     },
     CNASN: {
       type: 'http',
       behavior: 'classical',
       path: './Provider/RuleSet/CNASN.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml',
+      url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml',
       interval: 86400,
     },
     CNCIDR: {
       type: 'http',
       behavior: 'ipcidr',
       path: './Provider/RuleSet/CNCIDR.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt',
+      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt',
       interval: 86400,
     },
     LAN: {
       type: 'http',
       behavior: 'ipcidr',
       path: './Provider/RuleSet/LANCIDR.yaml',
-      url: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt',
+      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt',
       interval: 86400,
     },
   };
