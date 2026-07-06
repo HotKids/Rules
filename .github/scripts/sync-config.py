@@ -2540,18 +2540,23 @@ def _to_js(value, indent: int = 2) -> str:
     return _js_string(str(value))
 
 
-def _convert_group_for_script(g: dict) -> dict:
-    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider）→ Script.js 场景下
-    没有 provider，改用 mihomo 原生 `include-all: true` 对 config.proxies 生效，效果等价。"""
+def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> dict:
+    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider，可选 filter）
+    → Script.js 场景下没有 provider，改由运行时 JS 手动过滤 config.proxies 填充
+    `proxies`（见 _gen_clash_script_js 里生成的 poolGroupFilters 循环）。
+
+    不用 mihomo 原生 `include-all`：它对候选节点列表做隐式字母序排序
+    （mihomo config/config.go 里 `slices.Sort(AllProxies)`，无条件执行、无开关
+    可关闭），会打乱订阅的原始顺序；而 `use:`+`filter` 这条路径（真正的
+    Sample.yaml/Clash 用的）走 outboundgroup/groupbase.go，不排序。这里手动
+    实现同等语义（Array.filter 保序），行为对齐真正的 Clash 输出。
+
+    pool_filters 用于记录 name → filter（无 filter 记 None），供上层生成填充代码。
+    """
     if g.get("use") != ["Server"]:
         return dict(g)
-    new_g = {}
-    for k, v in g.items():
-        if k == "use":
-            new_g["include-all"] = True
-        else:
-            new_g[k] = v
-    return new_g
+    pool_filters[g["name"]] = g.get("filter")
+    return {k: v for k, v in g.items() if k not in ("use", "filter")}
 
 
 def _gen_clash_script_js(sample_yaml_text: str) -> str:
@@ -2564,7 +2569,7 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     本函数只读 Sample.yaml 的解析结果，不重新实现转换逻辑，因此天然随
     Surge/Profile.conf 的改动同步更新，无需手动维护。
 
-    可选分流分组（非隐藏、非 include-all、非兜底策略组）会额外生成一份
+    可选分流分组（非隐藏、非节点池/地区组、非兜底策略组）会额外生成一份
     `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
     某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
     关闭分组时还会从其余组的候选列表中剔除对已删组的引用，即使日后策略组之间
@@ -2572,16 +2577,17 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     """
     data = yaml.safe_load(sample_yaml_text) or {}
 
-    groups = [_convert_group_for_script(g) for g in (data.get("proxy-groups") or [])]
+    pool_filters: dict[str, str | None] = {}
+    groups = [_convert_group_for_script(g, pool_filters) for g in (data.get("proxy-groups") or [])]
     rule_providers = data.get("rule-providers") or {}
     rules = data.get("rules") or []
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
-    # include-all 的节点池 / 地区组同样视为核心组，均不纳入可选开关。
+    # 节点池 / 地区组（pool_filters 记录的）同样视为核心组，均不纳入可选开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
     optional_group_names = [
         g["name"] for g in groups
-        if not g.get("hidden") and not g.get("include-all") and g["name"] != main_group_name
+        if not g.get("hidden") and g["name"] not in pool_filters and g["name"] != main_group_name
     ]
 
     lines = [
@@ -2617,6 +2623,21 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
 
     lines.append(f"  const proxyGroups = {_to_js(groups)};")
     lines.append("")
+    lines += [
+        "  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤",
+        "  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选",
+        "  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），",
+        "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
+        "  const allProxyNames = config.proxies.map((p) => p.name);",
+        f"  const poolGroupFilters = {_to_js(pool_filters)};",
+        "  for (const g of proxyGroups) {",
+        "    if (!(g.name in poolGroupFilters)) continue;",
+        "    const filter = poolGroupFilters[g.name];",
+        "    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;",
+        "    g.proxies = matched.length > 0 ? matched : ['COMPATIBLE'];",
+        "  }",
+        "",
+    ]
     lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
     lines.append("")
     lines.append(f"  const rules = {_to_js(rules)};")
@@ -2911,9 +2932,69 @@ SB_SOURCE_DIR = REPO_ROOT / "sing-box" / "source"
 SB_BASE_JSON = REPO_ROOT / ".github" / "scripts" / "sync-config" / "sing-box.ini"
 SB_CONFIG_OUT = REPO_ROOT / "sing-box" / "config.json"
 SB_SRS_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/"
+SB_DIRECT_TAG = "🔘 Direct"
+# 兜底占位（理论上不会用到：SB_EXAMPLE_NODES 已覆盖 Profile.conf 现有的全部地区组，
+# 仅当出现无法识别的新地区组时才会引用，此时仍需手动订阅工具注入节点）
 SB_PLACEHOLDER = "🚀 Proxy（请用订阅工具注入节点）"
 # 组名含这些关键词的策略组不生成 outbound（与其他平台的 skip 语义一致）
 SB_SKIP_GROUP_KW = ("Speedtest", "Gateway", "Apple TV")
+
+# 各地区示例节点（占位用途：sing-box 无订阅机制，先内置一份可直接连通的示例
+# Shadowsocks 节点，方便直接改 server/password 试用；真实使用请用订阅工具替换）
+# 按地区组 policy-regex-filter 命中的关键词匹配，与本仓库 Profile.conf 的固定 5 个地区一一对应
+SB_EXAMPLE_NODES = {
+    "HK": ("🇭🇰 HK", "hk.hotkids.me"),
+    "TW": ("🇨🇳 TW", "tw.hotkids.me"),
+    "SG": ("🇸🇬 SG", "sg.hotkids.me"),
+    "JP": ("🇯🇵 JP", "jp.hotkids.me"),
+    "US": ("🇺🇸 US", "us.hotkids.me"),
+}
+_SB_EXAMPLE_METHOD = "2022-blake3-aes-128-gcm"
+_SB_EXAMPLE_PORT = 12345
+_SB_EXAMPLE_PASSWORD = "qwerty"
+
+
+def _sb_example_node_for(regex_filter: str) -> tuple[str, str] | None:
+    return next((v for kw, v in SB_EXAMPLE_NODES.items() if kw in regex_filter), None)
+
+
+def _sb_example_outbound(tag: str, domain: str) -> dict:
+    return {
+        "type": "shadowsocks", "tag": tag,
+        "server": domain, "server_port": _SB_EXAMPLE_PORT,
+        "method": _SB_EXAMPLE_METHOD, "password": _SB_EXAMPLE_PASSWORD,
+        "tcp_fast_open": True,
+    }
+
+# 外部规则集（Loyalsoldier / VirgilClyne）→ SagerNet 官方 sing-box 规则集。
+# 这是跨项目等价映射（非机械转换），故显式列出；token 用子串匹配。
+_SB_SAGER_URL = {
+    "geosite-cn": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+    "geoip-cn": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+    "geolocation-!cn": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
+}
+_SB_EXTERNAL_TO_SAGER = {
+    "surge-rules/release/proxy.txt": "geolocation-!cn",
+    "surge-rules/release/direct.txt": "geosite-cn",
+    "surge-rules/release/cncidr.txt": "geoip-cn",
+    "ruleset/ASN.China": "geoip-cn",
+}
+# Loyalsoldier private.txt → sing-box 内建 ip_is_private（非 rule_set）
+_SB_PRIVATE_TOKEN = "surge-rules/release/private.txt"
+
+
+def _sb_human_name(token: str) -> str:
+    """Surge 规则 token → 人类可读名（解码 URL 转义），供 skip 关键词匹配。
+
+    其他平台（Clash 等）用派生的 provider 名做第二次 skip 检查才能命中
+    "Apple News" 这类关键词——因为原始 URL 里是 `Apple%20News`（URL 转义），
+    直接按原始 token 匹配会漏判。这里保持同一语义。
+    """
+    if token.startswith(HOTKIDS_SURGE_PREFIX):
+        return Path(unquote(token[len(HOTKIDS_SURGE_PREFIX):])).stem
+    if token.startswith("http"):
+        return Path(unquote(token)).stem
+    return token
 
 
 def _sb_resolve_our_stem(token: str) -> str | None:
@@ -2937,9 +3018,29 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
     - smart/地区组（有 policy-regex-filter）→ urltest（节点占位）
     - include-all-proxies 组（🇺🇳 Server）→ selector（节点占位）
     - policy-path 动作组（🚧 AdGuard）→ 不生成 outbound（规则里用 action:reject）
-    - 其余 select → selector，候选里 🔘 DIRECT→direct，REJECT 变体丢弃
+    - 其余 select → selector，候选里 🔘 DIRECT→🔘 Direct，REJECT 变体丢弃
+
+    地区组（urltest）候选默认填入 SB_EXAMPLE_NODES 对应的示例节点（可直接连通，
+    改 server/password 即用）；Server 组（include-all-proxies）候选为全部示例节点。
+    未识别的地区组退回占位 tag，需订阅工具注入真实节点。
     """
     selectors, urltests, server = [], [], []
+    example_nodes: list[dict] = []
+    example_tags: list[str] = []
+    placeholder_used = False
+
+    def use_example(regex_filter: str) -> str:
+        nonlocal placeholder_used
+        found = _sb_example_node_for(regex_filter)
+        if not found:
+            placeholder_used = True
+            return SB_PLACEHOLDER
+        tag, domain = found
+        if tag not in example_tags:
+            example_tags.append(tag)
+            example_nodes.append(_sb_example_outbound(tag, domain))
+        return tag
+
     for line in group_lines:
         if line.startswith("#"):
             continue
@@ -2953,59 +3054,104 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-path" in params:                       # 动作组 → 规则里处理
             continue
         if "policy-regex-filter" in params:               # 地区组
-            urltests.append({"type": "urltest", "tag": name, "outbounds": [SB_PLACEHOLDER],
+            urltests.append({"type": "urltest", "tag": name,
+                             "outbounds": [use_example(params["policy-regex-filter"])],
                              "url": "https://www.gstatic.com/generate_204", "interval": "3m"})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
-            server.append({"type": "selector", "tag": name, "outbounds": [SB_PLACEHOLDER]})
+            server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
         else:
             outs = []
             for p in g["proxies"]:
                 if p == "🔘 DIRECT":
-                    outs.append("direct")
+                    outs.append(SB_DIRECT_TAG)
                 elif p in ("⛔️ REJECT", "📛 REJECT-DROP"):
                     continue
                 else:
                     outs.append(p)
             selectors.append({"type": "selector", "tag": name, "outbounds": outs})
-    return [*selectors, *server, *urltests,
-            {"type": "direct", "tag": "direct"},
-            {"type": "direct", "tag": SB_PLACEHOLDER}]
+
+    for s in server:                                       # Server 组候选 = 全部示例节点
+        s["outbounds"] = example_tags or [SB_PLACEHOLDER]
+
+    tail = [*example_nodes, {"type": "direct", "tag": SB_DIRECT_TAG}]
+    if placeholder_used:
+        tail.append({"type": "direct", "tag": SB_PLACEHOLDER})
+    return [*selectors, *server, *urltests, *tail]
 
 
-def _gen_singbox_service_rules(
+def _sb_policy_target(policy: str, out_tags: set[str]) -> dict | None:
+    """Surge 策略 → sing-box 规则动作字段：DIRECT/AdGuard/已生成出站，否则 None（跳过）。"""
+    if policy == "🔘 DIRECT":
+        return {"outbound": SB_DIRECT_TAG}
+    if policy == "🚧 AdGuard":
+        return {"action": "reject"}
+    if policy in out_tags:
+        return {"outbound": policy}
+    return None
+
+
+def _gen_singbox_rules(
     rule_lines: list[str], out_tags: set[str], skips: list[str]
 ) -> tuple[list[dict], list[dict]]:
-    """从 Surge [Rule] 生成服务类 route.rules + 对应我方 .srs rule_set（仅自有清单）。"""
+    """从 Surge [Rule] 生成完整 route.rules + rule_set。
+
+    - PROTOCOL,QUIC → {protocol:quic, action:reject}
+    - SSH（AND DEST-PORT 22 + TCP）→ {network:tcp, port:22, outbound:🔘 Direct}
+    - RULE-SET/DOMAIN-SET 自有清单 → 我方 .srs
+    - Loyalsoldier private.txt → 内建 ip_is_private
+    - Loyalsoldier proxy/direct/cncidr、VirgilClyne ASN.China → SagerNet 规则集
+    - 其余外部规则集（reject/HTTPDNS/ConnersHua/speedtest 等）→ 跳过
+    - FINAL / IP-CIDR 保护 / 注释 → 跳过（FINAL 由基座 route.final 承载）
+    sniff / hijack-dns 属 sing-box 专属基础设施，无 Surge 等价，留在基座。
+    """
     rules: list[dict] = []
     sets: list[dict] = []
     seen_sets: set[str] = set()
+
+    def add_set(tag: str, url: str) -> None:
+        if tag not in seen_sets:
+            seen_sets.add(tag)
+            sets.append({"type": "remote", "tag": tag, "format": "binary",
+                         "url": url, "download_detour": SB_DIRECT_TAG, "update_interval": "1440m"})
+
     for line in rule_lines:
         s = line.strip()
         if not s or s.startswith("#"):
             continue
         parts = [p.strip() for p in s.split(",")]
-        if parts[0].upper() not in ("RULE-SET", "DOMAIN-SET") or len(parts) < 3:
+        rtype = parts[0].upper()
+
+        if rtype == "PROTOCOL" and len(parts) > 1 and parts[1].upper() == "QUIC":
+            rules.append({"protocol": "quic", "action": "reject"})
             continue
-        stem = _sb_resolve_our_stem(parts[1])
-        if not stem:
-            continue                                       # 外部规则集：由静态基座覆盖或跳过
-        policy = parts[2]
-        if _should_skip([parts[1], stem, policy], skips):  # 与其他平台同一份 skip 语义
+        if rtype == "AND" and "DEST-PORT,22" in s.replace(" ", "") and "PROTOCOL,TCP" in s.replace(" ", ""):
+            rules.append({"network": "tcp", "port": 22, "outbound": SB_DIRECT_TAG})
             continue
-        if policy == "🔘 DIRECT":
-            rule = {"rule_set": stem, "outbound": "direct"}
-        elif policy == "🚧 AdGuard":
-            rule = {"rule_set": stem, "action": "reject"}
-        elif policy in out_tags:
-            rule = {"rule_set": stem, "outbound": policy}
-        else:
-            continue                                       # 目标组未生成（被 skip）→ 跳过
-        rules.append(rule)
-        if stem not in seen_sets:
-            seen_sets.add(stem)
-            sets.append({"type": "remote", "tag": stem, "format": "binary",
-                         "url": SB_SRS_PREFIX + quote(stem) + ".srs",
-                         "download_detour": "direct", "update_interval": "1d"})
+        if rtype not in ("RULE-SET", "DOMAIN-SET") or len(parts) < 3:
+            continue
+
+        token, policy = parts[1], parts[2]
+        if _should_skip([token, _sb_human_name(token), policy], skips):
+            continue
+        target = _sb_policy_target(policy, out_tags)
+        if target is None:
+            continue
+
+        stem = _sb_resolve_our_stem(token)
+        if stem:                                           # 自有清单 → 我方 .srs
+            if stem in seen_sets:
+                continue
+            add_set(stem, SB_SRS_PREFIX + quote(stem) + ".srs")
+            rules.append({"rule_set": stem, **target})
+        elif _SB_PRIVATE_TOKEN in token:                   # 私有网络 → 内建规则
+            rules.append({"ip_is_private": True, **target})
+        else:                                              # 外部规则集 → SagerNet 或跳过
+            sager = next((v for k, v in _SB_EXTERNAL_TO_SAGER.items() if k in token), None)
+            if not sager or sager in seen_sets:
+                continue
+            add_set(sager, _SB_SAGER_URL[sager])
+            rules.append({"rule_set": sager, **target})
+
     return rules, sets
 
 
@@ -3019,13 +3165,13 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 
     outbounds = _gen_singbox_outbounds(group_lines, skips)
     out_tags = {o["tag"] for o in outbounds}
-    service_rules, our_sets = _gen_singbox_service_rules(rule_lines, out_tags, skips)
+    gen_rules, gen_sets = _gen_singbox_rules(rule_lines, out_tags, skips)
 
     base["outbounds"] = outbounds
     rules = base["route"]["rules"]
-    rules[rules.index("__SERVICE_RULES__"):rules.index("__SERVICE_RULES__") + 1] = service_rules
+    rules[rules.index("__RULES__"):rules.index("__RULES__") + 1] = gen_rules
     rs = base["route"]["rule_set"]
-    rs[rs.index("__OUR_RULE_SETS__"):rs.index("__OUR_RULE_SETS__") + 1] = our_sets
+    rs[rs.index("__RULE_SETS__"):rs.index("__RULE_SETS__") + 1] = gen_sets
 
     # 引用自洽校验（生成期即失败，避免推出坏配置）
     set_tags = {r["tag"] for r in base["route"]["rule_set"]}
@@ -3040,10 +3186,13 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
         for t in (lambda x: [x] if isinstance(x, str) else x or [])(r.get("rule_set")):
             assert t in set_tags, f"rule 引用不存在 rule_set: {t}"
     assert base["route"]["final"] in out_tags
+    for srv in base.get("dns", {}).get("servers", []):
+        if "detour" in srv:
+            assert srv["detour"] in out_tags, f"dns server {srv['tag']} detour 引用不存在: {srv['detour']}"
 
     body = json.dumps(base, ensure_ascii=False, indent=2) + "\n"
     changed = _write_if_changed(SB_CONFIG_OUT, body)
-    print(f"  outbounds={len(outbounds)} | service_rules={len(service_rules)} | our_sets={len(our_sets)}")
+    print(f"  outbounds={len(outbounds)} | rules={len(gen_rules)} | rule_set={len(gen_sets)}")
     print(f"  {'✓ sing-box/config.json 已更新' if changed else '✓ sing-box/config.json 无变化'}")
 
 

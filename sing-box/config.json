@@ -15,7 +15,7 @@
         "type": "https",
         "tag": "dns-direct",
         "server": "223.5.5.5",
-        "detour": "direct"
+        "detour": "🔘 Direct"
       },
       {
         "type": "local",
@@ -66,7 +66,7 @@
         "🇯🇵 Japan",
         "🇺🇸 America",
         "🇺🇳 Server",
-        "direct"
+        "🔘 Direct"
       ]
     },
     {
@@ -86,7 +86,7 @@
       "type": "selector",
       "tag": "📺 CNTV",
       "outbounds": [
-        "direct",
+        "🔘 Direct",
         "🇨🇳 Taiwan",
         "🇭🇰 Hong Kong"
       ]
@@ -95,7 +95,7 @@
       "type": "selector",
       "tag": "🍎 Apple",
       "outbounds": [
-        "direct",
+        "🔘 Direct",
         "🔰 Proxy",
         "🇺🇸 America",
         "🇯🇵 Japan"
@@ -115,7 +115,7 @@
       "outbounds": [
         "🔰 Proxy",
         "🇸🇬 Singapore",
-        "direct"
+        "🔘 Direct"
       ]
     },
     {
@@ -133,7 +133,7 @@
       "outbounds": [
         "🇺🇸 America",
         "🔰 Proxy",
-        "direct"
+        "🔘 Direct"
       ]
     },
     {
@@ -142,7 +142,7 @@
       "outbounds": [
         "🇺🇸 America",
         "🔰 Proxy",
-        "direct"
+        "🔘 Direct"
       ]
     },
     {
@@ -150,21 +150,25 @@
       "tag": "📧 Mail",
       "outbounds": [
         "🔰 Proxy",
-        "direct"
+        "🔘 Direct"
       ]
     },
     {
       "type": "selector",
       "tag": "🇺🇳 Server",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇭🇰 HK",
+        "🇨🇳 TW",
+        "🇸🇬 SG",
+        "🇯🇵 JP",
+        "🇺🇸 US"
       ]
     },
     {
       "type": "urltest",
       "tag": "🇭🇰 Hong Kong",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇭🇰 HK"
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
@@ -173,7 +177,7 @@
       "type": "urltest",
       "tag": "🇨🇳 Taiwan",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇨🇳 TW"
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
@@ -182,7 +186,7 @@
       "type": "urltest",
       "tag": "🇸🇬 Singapore",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇸🇬 SG"
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
@@ -191,7 +195,7 @@
       "type": "urltest",
       "tag": "🇯🇵 Japan",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇯🇵 JP"
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
@@ -200,18 +204,59 @@
       "type": "urltest",
       "tag": "🇺🇸 America",
       "outbounds": [
-        "🚀 Proxy（请用订阅工具注入节点）"
+        "🇺🇸 US"
       ],
       "url": "https://www.gstatic.com/generate_204",
       "interval": "3m"
     },
     {
-      "type": "direct",
-      "tag": "direct"
+      "type": "shadowsocks",
+      "tag": "🇭🇰 HK",
+      "server": "hk.hotkids.me",
+      "server_port": 12345,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "qwerty",
+      "tcp_fast_open": true
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "🇨🇳 TW",
+      "server": "tw.hotkids.me",
+      "server_port": 12345,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "qwerty",
+      "tcp_fast_open": true
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "🇸🇬 SG",
+      "server": "sg.hotkids.me",
+      "server_port": 12345,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "qwerty",
+      "tcp_fast_open": true
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "🇯🇵 JP",
+      "server": "jp.hotkids.me",
+      "server_port": 12345,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "qwerty",
+      "tcp_fast_open": true
+    },
+    {
+      "type": "shadowsocks",
+      "tag": "🇺🇸 US",
+      "server": "us.hotkids.me",
+      "server_port": 12345,
+      "method": "2022-blake3-aes-128-gcm",
+      "password": "qwerty",
+      "tcp_fast_open": true
     },
     {
       "type": "direct",
-      "tag": "🚀 Proxy（请用订阅工具注入节点）"
+      "tag": "🔘 Direct"
     }
   ],
   "route": {
@@ -228,21 +273,21 @@
         "action": "reject"
       },
       {
-        "ip_is_private": true,
-        "outbound": "direct"
-      },
-      {
         "network": "tcp",
         "port": 22,
-        "outbound": "direct"
+        "outbound": "🔘 Direct"
       },
       {
         "rule_set": "Bypass",
-        "outbound": "direct"
+        "outbound": "🔘 Direct"
       },
       {
         "rule_set": "Reroute",
         "outbound": "🔰 Proxy"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "🔘 Direct"
       },
       {
         "rule_set": "Block",
@@ -278,7 +323,7 @@
       },
       {
         "rule_set": "Apple CN",
-        "outbound": "direct"
+        "outbound": "🔘 Direct"
       },
       {
         "rule_set": "Apple",
@@ -305,20 +350,20 @@
         "outbound": "📧 Mail"
       },
       {
-        "rule_set": "LAN",
-        "outbound": "direct"
-      },
-      {
         "rule_set": "geolocation-!cn",
         "outbound": "🔰 Proxy"
       },
       {
         "rule_set": "geosite-cn",
-        "outbound": "direct"
+        "outbound": "🔘 Direct"
       },
       {
         "rule_set": "geoip-cn",
-        "outbound": "direct"
+        "outbound": "🔘 Direct"
+      },
+      {
+        "rule_set": "LAN",
+        "outbound": "🔘 Direct"
       }
     ],
     "rule_set": [
@@ -327,168 +372,168 @@
         "tag": "Bypass",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Bypass.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Reroute",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Reroute.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Block",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Block.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Streaming_TW",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_TW.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Streaming_JP",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_JP.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Streaming_US",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_US.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Streaming",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "CNTV",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/CNTV.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Gemini",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Gemini.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "GenAI",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/GenAI.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Apple CN",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple%20CN.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Apple",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Google",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Google.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Telegram",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Telegram.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Crypto",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Crypto.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Finance",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Finance.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "Spark",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Spark.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
-      },
-      {
-        "type": "remote",
-        "tag": "LAN",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/LAN.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
-      },
-      {
-        "type": "remote",
-        "tag": "geosite-cn",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
-      },
-      {
-        "type": "remote",
-        "tag": "geoip-cn",
-        "format": "binary",
-        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       },
       {
         "type": "remote",
         "tag": "geolocation-!cn",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
-        "download_detour": "direct",
-        "update_interval": "1d"
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "LAN",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/LAN.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
       }
     ],
     "final": "🔰 Proxy",
