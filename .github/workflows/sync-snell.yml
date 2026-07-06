@@ -1,4 +1,4 @@
-name: Sync Snell Upstream
+name: Sync Snell
 
 on:
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Sync upstream
-        run: bash Rules/snell/sync-upstream.sh
+        run: bash snell/sync-upstream.sh
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
