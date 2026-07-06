@@ -2559,25 +2559,47 @@ def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> d
     return {k: v for k, v in g.items() if k not in ("use", "filter")}
 
 
-def _apply_myscript_overlay(
-    groups: list[dict], pool_filters: dict[str, str | None], overlay: dict
-) -> None:
-    """把私人差异（.github/scripts/sync-config/Enhanced/myscript.overlay.json）叠加到自动生成的
-    基座上，就地修改 groups / pool_filters。三类差异，对应 overlay 里的三个字段：
+def _rule_policy_index(parts: list[str]) -> int:
+    """Surge/Clash 规则行里策略字段的下标。`MATCH,POLICY` 策略在 index 1；
+    `AND/OR/NOT,(...),POLICY` 策略永远是最后一个逗号分段（拆括号里的逗号
+    也没关系，反正策略本身不含逗号，取 -1 仍然对）；其余类型固定是
+    `TYPE,VALUE,POLICY[,no-resolve]` 形式，策略在 index 2。
+    """
+    if parts[0] == "MATCH":
+        return 1
+    if parts[0] in ("AND", "OR", "NOT"):
+        return len(parts) - 1
+    return 2
 
-    - group_overrides：改写已有分组的字段（如地区组 select→fallback）+ pool_filters 的
-      filter（换成带排除条件的正则）。
+
+def _apply_overlay(
+    groups: list[dict],
+    pool_filters: dict[str, str | None],
+    rules: list[str],
+    overlay: dict,
+    overlay_label: str,
+) -> None:
+    """把私人差异声明（如 sync-config/Enhanced/myscript.overlay.json、
+    clashbox.overlay.json）叠加到自动生成的基座上，就地修改 groups / pool_filters /
+    rules。四类差异，对应 overlay 里的字段：
+
+    - group_overrides：改写已有分组的字段（如地区组 select→fallback，或改名/换图标）+
+      pool_filters 的 filter（换成带排除条件的正则）。若 patch 带 name（改名），
+      同步更新其余分组 proxies 候选里的旧名引用、pool_filters 的 key、以及
+      rules 里以该分组为策略目标的行，避免残留指向旧名字的悬空引用。
     - group_proxies_insert：在已有分组的静态 proxies 候选列表里，紧邻某个已有条目
       之前/之后插入新地区（如 🔰 Proxy 的候选里插入 🇬🇧 England / 🇩🇪 Germany）。
     - extra_pool_groups：整个新增的池分组（Relay 中转链、新地区），插入到指定锚点
       分组之后，并登记进 pool_filters（运行时按 filter 从 config.proxies 里挑节点）。
+
+    overlay_label 只用于报错信息里指明是哪个 overlay 文件（如 'myscript.overlay.json'）。
     """
     by_name = {g["name"]: g for g in groups}
 
     def _get_group(name: str, where: str) -> dict:
         if name not in by_name:
             raise ValueError(
-                f"myscript.overlay.json 的 {where} 引用了不存在的分组 {name!r}；"
+                f"{overlay_label} 的 {where} 引用了不存在的分组 {name!r}；"
                 f"当前基座里的分组有：{sorted(by_name)}"
             )
         return by_name[name]
@@ -2588,18 +2610,34 @@ def _apply_myscript_overlay(
         if "filter" in patch:
             pool_filters[name] = patch["filter"]
 
+        new_name = patch.get("name")
+        if new_name and new_name != name:
+            for g in groups:
+                if isinstance(g.get("proxies"), list):
+                    g["proxies"] = [new_name if p == name else p for p in g["proxies"]]
+            if name in pool_filters:
+                pool_filters[new_name] = pool_filters.pop(name)
+            for i, r in enumerate(rules):
+                parts = r.split(",")
+                idx = _rule_policy_index(parts)
+                if idx < len(parts) and parts[idx] == name:
+                    parts[idx] = new_name
+                    rules[i] = ",".join(parts)
+            del by_name[name]
+            by_name[new_name] = group
+
     for name, spec in overlay.get("group_proxies_insert", {}).items():
         group = _get_group(name, f"group_proxies_insert.{name!r}")
         if "proxies" not in group:
             raise ValueError(
-                f"myscript.overlay.json 的 group_proxies_insert.{name!r} 指向的分组"
+                f"{overlay_label} 的 group_proxies_insert.{name!r} 指向的分组"
                 f"没有静态 proxies 候选列表（可能是节点池/地区组），无法插入"
             )
         proxies = group["proxies"]
         anchor = spec.get("after") or spec.get("before")
         if anchor not in proxies:
             raise ValueError(
-                f"myscript.overlay.json 的 group_proxies_insert.{name!r} 里的锚点 "
+                f"{overlay_label} 的 group_proxies_insert.{name!r} 里的锚点 "
                 f"{anchor!r} 不在该分组的 proxies 候选列表里：{proxies}"
             )
         idx = proxies.index(anchor) + (1 if "after" in spec else 0)
@@ -2610,7 +2648,7 @@ def _apply_myscript_overlay(
         name = spec.get("name", f"#{i}")
         if "insert_after" not in spec:
             raise ValueError(
-                f"myscript.overlay.json 的 extra_pool_groups[{name!r}] 缺少必填字段 insert_after"
+                f"{overlay_label} 的 extra_pool_groups[{name!r}] 缺少必填字段 insert_after"
             )
         anchor_name = spec.pop("insert_after")
         filter_ = spec.pop("filter", None)
@@ -2618,7 +2656,7 @@ def _apply_myscript_overlay(
         idx = next((j for j, g in enumerate(groups) if g["name"] == anchor_name), None)
         if idx is None:
             raise ValueError(
-                f"myscript.overlay.json 的 extra_pool_groups[{name!r}] 的 insert_after "
+                f"{overlay_label} 的 extra_pool_groups[{name!r}] 的 insert_after "
                 f"引用了不存在的分组 {anchor_name!r}；当前分组有：{[g['name'] for g in groups]}"
             )
         groups.insert(idx + 1, new_group)
@@ -2626,7 +2664,9 @@ def _apply_myscript_overlay(
         pool_filters[new_group["name"]] = filter_
 
 
-def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> str:
+def _gen_clash_script_js(
+    sample_yaml_text: str, overlay: dict | None = None, overlay_label: str = ""
+) -> str:
     """由最终生成的 Clash/Sample.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
     用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
@@ -2657,7 +2697,7 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
     structural_pool_names = set(pool_filters)
 
     if overlay:
-        _apply_myscript_overlay(groups, pool_filters, overlay)
+        _apply_overlay(groups, pool_filters, rules, overlay, overlay_label)
         structural_pool_names.update(spec["name"] for spec in overlay.get("extra_pool_groups", []))
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
@@ -2668,12 +2708,22 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
         if not g.get("hidden") and g["name"] not in structural_pool_names and g["name"] != main_group_name
     ]
 
+    # overlay 可声明 disabled_by_default，让某些可选分组默认关闭（仍可随时手动改回
+    # true），而不是像其余分组一样默认全部启用。
+    disabled_by_default = set((overlay or {}).get("disabled_by_default", []))
+    unknown_disabled = disabled_by_default - set(optional_group_names)
+    if unknown_disabled:
+        raise ValueError(
+            f"{overlay_label} 的 disabled_by_default 引用了不存在或不可开关的分组 "
+            f"{sorted(unknown_disabled)}；当前可开关的分组有：{optional_group_names}"
+        )
+
     if overlay:
         header_source = [
             " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + ",
-            " * sync-config/Enhanced/myscript.overlay.json（私人差异声明）自动生成。",
+            f" * sync-config/Enhanced/{overlay_label}（私人差异声明）自动生成。",
             " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /",
-            " * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。",
+            f" * 候选节点插入位置）改 {overlay_label}，均不要直接编辑本文件。",
         ]
     else:
         header_source = [
@@ -2696,7 +2746,7 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
         "",
         "// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组",
         "// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）",
-        f"const ruleOptionsEnable = {_to_js({name: True for name in optional_group_names}, 0)};",
+        f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0)};",
         "",
         "function main(config) {",
         "  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {",
@@ -2826,15 +2876,21 @@ def _sync_clash(
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
-    myscript_overlay_path = (
-        REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced" / "myscript.overlay.json"
-    )
-    if myscript_overlay_path.exists():
-        overlay = json.loads(myscript_overlay_path.read_text(encoding="utf-8"))
-        myscript_path = Path(clash_out).parent / "Script" / "MyScript.js"
-        myscript_body = _gen_clash_script_js(body, overlay=overlay)
-        myscript_changed = _write_if_changed(REPO_ROOT / myscript_path, myscript_body)
-        print(f"  {'✓ ' + str(myscript_path) + ' 已更新' if myscript_changed else '✓ ' + str(myscript_path) + ' 无变化'}")
+    # 个人差异声明（Enhanced/ 下）：每个 *.overlay.json 对应一份同名派生脚本，
+    # 均由本函数按同一套逻辑生成，公共部分自动跟随 Script.js 同步。
+    enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
+    for overlay_label, out_name in (
+        ("myscript.overlay.json", "MyScript.js"),
+        ("clashbox.overlay.json", "ClashBox.js"),
+    ):
+        overlay_path = enhanced_dir / overlay_label
+        if not overlay_path.exists():
+            continue
+        overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+        out_path = Path(clash_out).parent / "Script" / out_name
+        out_body = _gen_clash_script_js(body, overlay=overlay, overlay_label=overlay_label)
+        out_changed = _write_if_changed(REPO_ROOT / out_path, out_body)
+        print(f"  {'✓ ' + str(out_path) + ' 已更新' if out_changed else '✓ ' + str(out_path) + ' 无变化'}")
 
 
 def _sync_loon(
