@@ -1,83 +1,75 @@
 {
-  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。结构上与 myscript.overlay.json 相同（地区 fallback + Relay 中转链 + England/Germany），额外多了 OneDrive/Microsoft 的改名换图标 + 默认关闭。",
+  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果（地区 fallback / Relay 中转链 / England·Germany）继续叠加，本文件只需要写与 MyScript 的差异：批量去 emoji 改名换 Liquid Glass 图标、REJECT-DROP 整组去掉、OneDrive/Microsoft 保留但改名换图标且默认关闭、Telegram/AIGC 多插入 Japan 候选、Relay 链图标换 Protect + 4 个子节点 select 化、Server 挪到地区组最后。",
 
-  "group_overrides": {
-    "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
-    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)" },
-    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
-    "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
-    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" },
-    "📧 Mail": { "filter": null },
-    "☁️ OneDrive": { "name": "OneDrive", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png" },
-    "Ⓜ️ Microsoft": { "name": "Microsoft", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png" }
-  },
+  "extends": "myscript.overlay.json",
+
+  "remove_groups": ["📛 REJECT-DROP"],
 
   "disabled_by_default": ["OneDrive", "Microsoft"],
 
-  "group_proxies_insert": {
-    "🔰 Proxy": { "after": "🇺🇸 America", "insert": ["🇬🇧 England", "🇩🇪 Germany"] },
-    "🎬 Streaming": { "after": "🇺🇸 America", "insert": ["🇬🇧 England", "🇩🇪 Germany"] },
-    "🪙 Crypto": { "before": "🇺🇸 America", "insert": ["🇩🇪 Germany"] },
-    "💳 Finance": { "after": "🇺🇸 America", "insert": ["🇩🇪 Germany"] }
+  "rename_map": {
+    "🔰 Proxy": "Proxy",
+    "🎬 Streaming": "Streaming",
+    "📺 CNTV": "CNTV",
+    "🍎 Apple": "Apple",
+    "🔍 Google": "Google",
+    "📬 Telegram": "Telegram",
+    "🤖 AIGC": "AIGC",
+    "🪙 Crypto": "Crypto",
+    "💳 Finance": "Finance",
+    "📧 Mail": "Mail",
+    "🚧 AdGuard": "AdGuard",
+    "🔘 DIRECT": "Direct",
+    "⛔️ REJECT": "Reject",
+    "🇺🇳 Server": "Server",
+    "🇭🇰 Hong Kong": "Hong Kong",
+    "🇨🇳 Taiwan": "Taiwan",
+    "🇸🇬 Singapore": "Singapore",
+    "🇯🇵 Japan": "Japan",
+    "🇺🇸 America": "America",
+    "🇬🇧 England": "England",
+    "🇩🇪 Germany": "Germany",
+    "☁️ OneDrive": "OneDrive",
+    "Ⓜ️ Microsoft": "Microsoft"
   },
 
-  "extra_pool_groups": [
-    {
-      "name": "🇬🇧 England",
-      "insert_after": "🇺🇸 America",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
-      "hidden": true,
-      "filter": "^(?=.*UK)"
-    },
-    {
-      "name": "🇩🇪 Germany",
-      "insert_after": "🇬🇧 England",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
-      "hidden": true,
-      "filter": "^(?=.*DE)"
-    },
-    {
-      "name": "🇸🇱 Relay",
-      "insert_after": "📛 REJECT-DROP",
-      "type": "url-test",
-      "tolerance": 50,
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "^(?=.*(GoMaMi|Neburst|Pro))"
-    },
-    {
-      "name": "🇭🇰 HK Relay",
-      "insert_after": "🇸🇱 Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "^(?=.*HK)(?=.*GoMaMi)"
-    },
-    {
-      "name": "🇨🇳 TW Relay",
-      "insert_after": "🇭🇰 HK Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "^(?=.*TW)(?=.*Neburst)"
-    },
-    {
-      "name": "🇯🇵 JP Relay",
-      "insert_after": "🇨🇳 TW Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "^(?=.*JP)(?=.*Pro)"
-    },
-    {
-      "name": "🇺🇸 US Relay",
-      "insert_after": "🇯🇵 JP Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "^(?=.*US)(?=.*Pro)"
-    }
-  ]
+  "icon_overrides": {
+    "Proxy": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Shield.png",
+    "Streaming": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Video.png",
+    "CNTV": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/TV.png",
+    "Apple": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitten%20Apple.png",
+    "Google": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Google.png",
+    "Telegram": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Telegram.png",
+    "AIGC": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png",
+    "Crypto": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitcoin.png",
+    "Finance": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Wallet.png",
+    "Mail": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Email.png",
+    "AdGuard": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png",
+    "Direct": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png",
+    "Reject": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
+    "Server": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png",
+    "OneDrive": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png",
+    "Microsoft": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png",
+    "🇸🇱 Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
+    "🇭🇰 HK Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
+    "🇨🇳 TW Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
+    "🇯🇵 JP Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
+    "🇺🇸 US Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png"
+  },
+
+  "group_overrides": {
+    "🇭🇰 HK Relay": { "type": "select" },
+    "🇨🇳 TW Relay": { "type": "select" },
+    "🇯🇵 JP Relay": { "type": "select" },
+    "🇺🇸 US Relay": { "type": "select" }
+  },
+
+  "group_proxies_insert": {
+    "Telegram": { "after": "Singapore", "insert": ["Japan"] },
+    "AIGC": { "after": "America", "insert": ["Japan"] }
+  },
+
+  "move_after": {
+    "Server": "Germany"
+  }
 }
