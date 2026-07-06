@@ -340,7 +340,7 @@ function main(config) {
     {
       name: '📧 Mail',
       type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Mail.png',
+      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png',
       proxies: [
         '🔰 Proxy',
         '🔘 DIRECT',
