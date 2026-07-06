@@ -3013,7 +3013,10 @@ SB_EXAMPLE_NODES = {
 }
 _SB_EXAMPLE_METHOD = "2022-blake3-aes-128-gcm"
 _SB_EXAMPLE_PORT = 12345
-_SB_EXAMPLE_PASSWORD = "qwerty"
+# 2022-blake3-aes-128-gcm 要求 password 为 base64 编码的 16 字节 PSK，随意字符串
+# （如 "qwerty"）会被 sing-box check 判为非法密钥而报错。此处用一个合法的占位 PSK
+# （base64("HotKidsRulesDemo")），仅为通过校验，正式使用时由订阅工具替换。
+_SB_EXAMPLE_PASSWORD = "SG90S2lkc1J1bGVzRGVtbw=="
 
 
 def _sb_example_node_for(regex_filter: str) -> tuple[str, str] | None:
@@ -3133,7 +3136,7 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
             selectors.append({"type": "selector", "tag": name, "outbounds": outs})
 
     for s in server:                                       # Server 组候选 = 全部示例节点
-        s["outbounds"] = example_tags or [SB_PLACEHOLDER]
+        s["outbounds"] = list(example_tags) or [SB_PLACEHOLDER]  # 复制，避免多个组共享同一列表
 
     tail = [*example_nodes, {"type": "direct", "tag": SB_DIRECT_TAG}]
     if placeholder_used:
