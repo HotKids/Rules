@@ -1,0 +1,509 @@
+{
+  "log": {
+    "level": "info",
+    "timestamp": true
+  },
+  "dns": {
+    "servers": [
+      {
+        "type": "https",
+        "tag": "dns-proxy",
+        "server": "8.8.8.8",
+        "detour": "🔰 Proxy"
+      },
+      {
+        "type": "https",
+        "tag": "dns-direct",
+        "server": "223.5.5.5",
+        "detour": "direct"
+      },
+      {
+        "type": "local",
+        "tag": "dns-local"
+      }
+    ],
+    "rules": [
+      {
+        "rule_set": "geosite-cn",
+        "server": "dns-direct"
+      }
+    ],
+    "final": "dns-proxy",
+    "strategy": "ipv4_only"
+  },
+  "ntp": {
+    "enabled": true,
+    "server": "time.apple.com",
+    "server_port": 123,
+    "interval": "30m"
+  },
+  "inbounds": [
+    {
+      "type": "tun",
+      "tag": "tun-in",
+      "address": [
+        "172.19.0.1/30"
+      ],
+      "auto_route": true,
+      "strict_route": true,
+      "stack": "mixed"
+    },
+    {
+      "type": "mixed",
+      "tag": "mixed-in",
+      "listen": "127.0.0.1",
+      "listen_port": 7890
+    }
+  ],
+  "outbounds": [
+    {
+      "type": "selector",
+      "tag": "🔰 Proxy",
+      "outbounds": [
+        "🇭🇰 Hong Kong",
+        "🇨🇳 Taiwan",
+        "🇸🇬 Singapore",
+        "🇯🇵 Japan",
+        "🇺🇸 America",
+        "🇺🇳 Server",
+        "direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🎬 Streaming",
+      "outbounds": [
+        "🔰 Proxy",
+        "🇭🇰 Hong Kong",
+        "🇨🇳 Taiwan",
+        "🇸🇬 Singapore",
+        "🇯🇵 Japan",
+        "🇺🇸 America",
+        "🇺🇳 Server"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "📺 CNTV",
+      "outbounds": [
+        "direct",
+        "🇨🇳 Taiwan",
+        "🇭🇰 Hong Kong"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🍎 Apple",
+      "outbounds": [
+        "direct",
+        "🔰 Proxy",
+        "🇺🇸 America",
+        "🇯🇵 Japan"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🔍 Google",
+      "outbounds": [
+        "🇺🇸 America",
+        "🔰 Proxy"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "📬 Telegram",
+      "outbounds": [
+        "🔰 Proxy",
+        "🇸🇬 Singapore",
+        "direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🤖 AIGC",
+      "outbounds": [
+        "🇺🇸 America",
+        "🇸🇬 Singapore",
+        "🔰 Proxy"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "🪙 Crypto",
+      "outbounds": [
+        "🇺🇸 America",
+        "🔰 Proxy",
+        "direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "💳 Finance",
+      "outbounds": [
+        "🇺🇸 America",
+        "🔰 Proxy",
+        "direct"
+      ]
+    },
+    {
+      "type": "selector",
+      "tag": "📧 Mail",
+      "outbounds": [
+        "🔰 Proxy",
+        "direct"
+      ]
+    },
+    {
+      "type": "urltest",
+      "tag": "🇭🇰 Hong Kong",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m"
+    },
+    {
+      "type": "urltest",
+      "tag": "🇨🇳 Taiwan",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m"
+    },
+    {
+      "type": "urltest",
+      "tag": "🇸🇬 Singapore",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m"
+    },
+    {
+      "type": "urltest",
+      "tag": "🇯🇵 Japan",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m"
+    },
+    {
+      "type": "urltest",
+      "tag": "🇺🇸 America",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ],
+      "url": "https://www.gstatic.com/generate_204",
+      "interval": "3m"
+    },
+    {
+      "type": "selector",
+      "tag": "🇺🇳 Server",
+      "outbounds": [
+        "🚀 Proxy（请用订阅工具注入节点）"
+      ]
+    },
+    {
+      "type": "direct",
+      "tag": "direct"
+    },
+    {
+      "type": "direct",
+      "tag": "🚀 Proxy（请用订阅工具注入节点）"
+    }
+  ],
+  "route": {
+    "rules": [
+      {
+        "action": "sniff"
+      },
+      {
+        "protocol": "dns",
+        "action": "hijack-dns"
+      },
+      {
+        "protocol": "quic",
+        "action": "reject"
+      },
+      {
+        "ip_is_private": true,
+        "outbound": "direct"
+      },
+      {
+        "network": "tcp",
+        "port": 22,
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "Bypass",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "Reroute",
+        "outbound": "🔰 Proxy"
+      },
+      {
+        "rule_set": "Block",
+        "action": "reject"
+      },
+      {
+        "rule_set": "Streaming_TW",
+        "outbound": "🇨🇳 Taiwan"
+      },
+      {
+        "rule_set": "Streaming_JP",
+        "outbound": "🇯🇵 Japan"
+      },
+      {
+        "rule_set": "Streaming_US",
+        "outbound": "🇺🇸 America"
+      },
+      {
+        "rule_set": "Streaming",
+        "outbound": "🎬 Streaming"
+      },
+      {
+        "rule_set": "CNTV",
+        "outbound": "📺 CNTV"
+      },
+      {
+        "rule_set": "Gemini",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": "GenAI",
+        "outbound": "🤖 AIGC"
+      },
+      {
+        "rule_set": "Apple CN",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "Apple",
+        "outbound": "🍎 Apple"
+      },
+      {
+        "rule_set": "Google",
+        "outbound": "🔍 Google"
+      },
+      {
+        "rule_set": "Telegram",
+        "outbound": "📬 Telegram"
+      },
+      {
+        "rule_set": "Crypto",
+        "outbound": "🪙 Crypto"
+      },
+      {
+        "rule_set": "Finance",
+        "outbound": "💳 Finance"
+      },
+      {
+        "rule_set": "Spark",
+        "outbound": "📧 Mail"
+      },
+      {
+        "rule_set": "geolocation-!cn",
+        "outbound": "🔰 Proxy"
+      },
+      {
+        "rule_set": "geosite-cn",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "geoip-cn",
+        "outbound": "direct"
+      },
+      {
+        "rule_set": "LAN",
+        "outbound": "direct"
+      }
+    ],
+    "rule_set": [
+      {
+        "type": "remote",
+        "tag": "Bypass",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Bypass.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Reroute",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Reroute.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Block",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Block.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Streaming",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Streaming_TW",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_TW.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Streaming_JP",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_JP.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Streaming_US",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Streaming_US.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "CNTV",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/CNTV.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Gemini",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Gemini.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "GenAI",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/GenAI.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Apple",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Apple CN",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Apple%20CN.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Google",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Google.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Telegram",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Telegram.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Crypto",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Crypto.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Finance",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Finance.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "Spark",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Spark.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "LAN",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/LAN.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "geosite-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "geoip-cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      },
+      {
+        "type": "remote",
+        "tag": "geolocation-!cn",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
+        "download_detour": "direct",
+        "update_interval": "1d"
+      }
+    ],
+    "final": "🔰 Proxy",
+    "auto_detect_interface": true,
+    "default_domain_resolver": {
+      "server": "dns-direct"
+    }
+  },
+  "experimental": {
+    "cache_file": {
+      "enabled": true
+    },
+    "clash_api": {
+      "external_controller": "127.0.0.1:9090",
+      "external_ui": "ui"
+    }
+  }
+}
