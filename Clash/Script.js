@@ -646,7 +646,15 @@ function main(config) {
     Object.keys(ruleOptionsEnable).filter((name) => !ruleOptionsEnable[name]),
   );
 
-  config['proxy-groups'] = proxyGroups.filter((g) => !disabledGroups.has(g.name));
+  // 移除被关闭的组，并从其余组的候选列表中剔除对已删组的引用，
+  // 避免任何组指向不存在的策略导致 mihomo 启动失败。
+  config['proxy-groups'] = proxyGroups
+    .filter((g) => !disabledGroups.has(g.name))
+    .map((g) =>
+      Array.isArray(g.proxies)
+        ? { ...g, proxies: g.proxies.filter((p) => !disabledGroups.has(p)) }
+        : g,
+    );
 
   const enabledRules = rules.filter((r) => {
     const parts = r.split(',');
