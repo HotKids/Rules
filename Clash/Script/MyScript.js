@@ -1,20 +1,24 @@
 /**
- * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）
+ * mihomo 覆写脚本（Enhance Script）· HotKids/Rules
  *
- * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + 
- * sync-config/Enhanced/myscript.overlay.json（私人差异声明）自动生成。
- * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /
- * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。
- * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。
+ * 用途：在 Clash Verge 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅
+ * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的
+ * 策略组、分流规则与基础设置，不必依赖机场自带配置。
  *
- * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的
- * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）
- * 导入时，动态生成与本仓库 Surge/Profile.conf 等效的策略组、规则与基础设置。
+ * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经
+ * Clash/Sample.yaml）叠加 sync-config/Enhanced/myscript.overlay.json（私人差异声明）
+ * 而来，直接改本文件会在下次同步时被覆盖。公共部分请改 Surge/Profile.conf；
+ * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）
+ * 请改 myscript.overlay.json。
+ *
+ * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。
+ *
  * 仓库：https://github.com/HotKids/Rules
  */
 
-// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组
-// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）
+// 分流分组开关：true 启用 / false 关闭对应分组（连同其专属 rules /
+// rule-providers 一并裁剪，无需改动 Profile.conf）。默认值见下方——
+// 大多默认启用，个别按需默认关闭的直接标成 false，本地可随时改回 true。
 const ruleOptionsEnable = {
   '🎬 Streaming': true,
   '📺 CNTV': true,
