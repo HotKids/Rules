@@ -215,7 +215,7 @@
       "server": "hk.hotkids.me",
       "server_port": 12345,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "qwerty",
+      "password": "SG90S2lkc1J1bGVzRGVtbw==",
       "tcp_fast_open": true
     },
     {
@@ -224,7 +224,7 @@
       "server": "tw.hotkids.me",
       "server_port": 12345,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "qwerty",
+      "password": "SG90S2lkc1J1bGVzRGVtbw==",
       "tcp_fast_open": true
     },
     {
@@ -233,7 +233,7 @@
       "server": "sg.hotkids.me",
       "server_port": 12345,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "qwerty",
+      "password": "SG90S2lkc1J1bGVzRGVtbw==",
       "tcp_fast_open": true
     },
     {
@@ -242,7 +242,7 @@
       "server": "jp.hotkids.me",
       "server_port": 12345,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "qwerty",
+      "password": "SG90S2lkc1J1bGVzRGVtbw==",
       "tcp_fast_open": true
     },
     {
@@ -251,7 +251,7 @@
       "server": "us.hotkids.me",
       "server_port": 12345,
       "method": "2022-blake3-aes-128-gcm",
-      "password": "qwerty",
+      "password": "SG90S2lkc1J1bGVzRGVtbw==",
       "tcp_fast_open": true
     },
     {
