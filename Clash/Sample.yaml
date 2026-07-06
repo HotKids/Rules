@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-06 20:25:54
+# Date: 2026-07-06 21:47:59
 # Author: @HotKids
 
 # 通用设置
@@ -440,7 +440,7 @@ proxy-groups:
   # Mail
   - name: "📧 Mail"
     type: select
-    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Mail.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png
     proxies:
       - 🔰 Proxy
       - 🔘 DIRECT
