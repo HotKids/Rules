@@ -1,5 +1,7 @@
 {
-  "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。",
+  "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。output 指定生成脚本的输出路径（仓库根相对）。",
+
+  "output": "Clash/Script/MyScript.js",
 
   "group_overrides": {
     "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
