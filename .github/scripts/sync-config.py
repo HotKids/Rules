@@ -2782,28 +2782,32 @@ def _gen_clash_script_js(
         )
 
     if overlay:
-        header_source = [
-            " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + ",
-            f" * sync-config/Enhanced/{overlay_label}（私人差异声明）自动生成。",
-            " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（改名 / 换图标 / 额外分组 /",
-            f" * 分组类型 / 候选节点插入位置 / 默认开关等）改 {overlay_label}，均不要直接编辑本文件。",
+        source_lines = [
+            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
+            f" * Clash/Sample.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
+            " * 而来，直接改本文件会在下次同步时被覆盖。公共部分请改 Surge/Profile.conf；",
+            " * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）",
+            f" * 请改 {overlay_label}。",
         ]
     else:
-        header_source = [
-            " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，",
-            " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；",
+        source_lines = [
+            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * Clash/Sample.yaml）转译而来，直接改本文件会在下次同步时被覆盖；",
+            " * 要改内容请改 Surge/Profile.conf。",
         ]
 
     lines = [
         "/**",
-        " * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）",
+        " * mihomo 覆写脚本（Enhance Script）· HotKids/Rules",
         " *",
-        *header_source,
-        " * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。",
+        " * 用途：在 Clash Verge 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
+        " * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的",
+        " * 策略组、分流规则与基础设置，不必依赖机场自带配置。",
         " *",
-        " * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的",
-        " * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）",
-        " * 导入时，动态生成与本仓库 Surge/Profile.conf 等效的策略组、规则与基础设置。",
+        *source_lines,
+        " *",
+        " * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。",
+        " *",
         " * 仓库：https://github.com/HotKids/Rules",
         " */",
         "",
