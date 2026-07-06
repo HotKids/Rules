@@ -2966,6 +2966,7 @@ def _sync_clash(
     # 声明同样的地区/Relay 链差异，依赖顺序按 extends 自动拓扑解析。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
     overlays: dict[str, dict] = {}
+    output_owner: dict[str, str] = {}  # 归一化 output 路径 → 声明它的 overlay 文件名
     for overlay_path in sorted(enhanced_dir.glob("*.overlay.json")):
         overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
         if not overlay.get("output"):
@@ -2973,6 +2974,14 @@ def _sync_clash(
                 f"{overlay_path.name} 缺少必填字段 output（派生脚本的输出路径，"
                 f"仓库根相对，如 \"Clash/Script/{overlay_path.name.split('.')[0].capitalize()}.js\"）"
             )
+        # 防止两份 overlay 声明同一个 output 互相覆盖（复制 overlay 后忘了改 output 的典型误操作）
+        out_key = str((REPO_ROOT / overlay["output"]).resolve())
+        if out_key in output_owner:
+            raise ValueError(
+                f"{overlay_path.name} 和 {output_owner[out_key]} 的 output 都指向 "
+                f"{overlay['output']!r}，会互相覆盖；请给每份 overlay 用不同的 output"
+            )
+        output_owner[out_key] = overlay_path.name
         overlays[overlay_path.name] = overlay
 
     resolved_states: dict[str, tuple] = {}
