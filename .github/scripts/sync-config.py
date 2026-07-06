@@ -2540,18 +2540,23 @@ def _to_js(value, indent: int = 2) -> str:
     return _js_string(str(value))
 
 
-def _convert_group_for_script(g: dict) -> dict:
-    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider）→ Script.js 场景下
-    没有 provider，改用 mihomo 原生 `include-all: true` 对 config.proxies 生效，效果等价。"""
+def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> dict:
+    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider，可选 filter）
+    → Script.js 场景下没有 provider，改由运行时 JS 手动过滤 config.proxies 填充
+    `proxies`（见 _gen_clash_script_js 里生成的 poolGroupFilters 循环）。
+
+    不用 mihomo 原生 `include-all`：它对候选节点列表做隐式字母序排序
+    （mihomo config/config.go 里 `slices.Sort(AllProxies)`，无条件执行、无开关
+    可关闭），会打乱订阅的原始顺序；而 `use:`+`filter` 这条路径（真正的
+    Sample.yaml/Clash 用的）走 outboundgroup/groupbase.go，不排序。这里手动
+    实现同等语义（Array.filter 保序），行为对齐真正的 Clash 输出。
+
+    pool_filters 用于记录 name → filter（无 filter 记 None），供上层生成填充代码。
+    """
     if g.get("use") != ["Server"]:
         return dict(g)
-    new_g = {}
-    for k, v in g.items():
-        if k == "use":
-            new_g["include-all"] = True
-        else:
-            new_g[k] = v
-    return new_g
+    pool_filters[g["name"]] = g.get("filter")
+    return {k: v for k, v in g.items() if k not in ("use", "filter")}
 
 
 def _gen_clash_script_js(sample_yaml_text: str) -> str:
@@ -2564,7 +2569,7 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     本函数只读 Sample.yaml 的解析结果，不重新实现转换逻辑，因此天然随
     Surge/Profile.conf 的改动同步更新，无需手动维护。
 
-    可选分流分组（非隐藏、非 include-all、非兜底策略组）会额外生成一份
+    可选分流分组（非隐藏、非节点池/地区组、非兜底策略组）会额外生成一份
     `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
     某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
     关闭分组时还会从其余组的候选列表中剔除对已删组的引用，即使日后策略组之间
@@ -2572,16 +2577,17 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     """
     data = yaml.safe_load(sample_yaml_text) or {}
 
-    groups = [_convert_group_for_script(g) for g in (data.get("proxy-groups") or [])]
+    pool_filters: dict[str, str | None] = {}
+    groups = [_convert_group_for_script(g, pool_filters) for g in (data.get("proxy-groups") or [])]
     rule_providers = data.get("rule-providers") or {}
     rules = data.get("rules") or []
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
-    # include-all 的节点池 / 地区组同样视为核心组，均不纳入可选开关。
+    # 节点池 / 地区组（pool_filters 记录的）同样视为核心组，均不纳入可选开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
     optional_group_names = [
         g["name"] for g in groups
-        if not g.get("hidden") and not g.get("include-all") and g["name"] != main_group_name
+        if not g.get("hidden") and g["name"] not in pool_filters and g["name"] != main_group_name
     ]
 
     lines = [
@@ -2617,6 +2623,21 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
 
     lines.append(f"  const proxyGroups = {_to_js(groups)};")
     lines.append("")
+    lines += [
+        "  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤",
+        "  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选",
+        "  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），",
+        "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
+        "  const allProxyNames = config.proxies.map((p) => p.name);",
+        f"  const poolGroupFilters = {_to_js(pool_filters)};",
+        "  for (const g of proxyGroups) {",
+        "    if (!(g.name in poolGroupFilters)) continue;",
+        "    const filter = poolGroupFilters[g.name];",
+        "    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;",
+        "    g.proxies = matched.length > 0 ? matched : ['COMPATIBLE'];",
+        "  }",
+        "",
+    ]
     lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
     lines.append("")
     lines.append(f"  const rules = {_to_js(rules)};")
