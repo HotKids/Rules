@@ -11,8 +11,9 @@
  * 仓库：https://github.com/HotKids/Rules
  */
 
-// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组
-// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）
+// 分流分组开关：true 启用 / false 关闭对应分组（连同其专属 rules /
+// rule-providers 一并裁剪，无需改动 Profile.conf）。默认值见下方——
+// 大多默认启用，个别按需默认关闭的直接标成 false，本地可随时改回 true。
 const ruleOptionsEnable = {
   '🎬 Streaming': true,
   '📺 CNTV': true,
