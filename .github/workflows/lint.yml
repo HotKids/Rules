@@ -1,4 +1,4 @@
-name: Lint & Validate
+name: Lint Scripts
 
 on:
   push:

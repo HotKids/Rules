@@ -2562,7 +2562,7 @@ def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> d
 def _apply_myscript_overlay(
     groups: list[dict], pool_filters: dict[str, str | None], overlay: dict
 ) -> None:
-    """把私人差异（.github/scripts/sync-config/myscript.overlay.json）叠加到自动生成的
+    """把私人差异（.github/scripts/sync-config/Enhanced/myscript.overlay.json）叠加到自动生成的
     基座上，就地修改 groups / pool_filters。三类差异，对应 overlay 里的三个字段：
 
     - group_overrides：改写已有分组的字段（如地区组 select→fallback）+ pool_filters 的
@@ -2633,7 +2633,7 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
     if overlay:
         header_source = [
             " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + ",
-            " * sync-config/myscript.overlay.json（私人差异声明）自动生成。",
+            " * sync-config/Enhanced/myscript.overlay.json（私人差异声明）自动生成。",
             " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /",
             " * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。",
         ]
@@ -2779,15 +2779,17 @@ def _sync_clash(
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
-    script_path = Path(clash_out).with_name("Script.js")
+    script_path = Path(clash_out).parent / "Script" / "Script.js"
     script_body = _gen_clash_script_js(body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
-    myscript_overlay_path = REPO_ROOT / ".github" / "scripts" / "sync-config" / "myscript.overlay.json"
+    myscript_overlay_path = (
+        REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced" / "myscript.overlay.json"
+    )
     if myscript_overlay_path.exists():
         overlay = json.loads(myscript_overlay_path.read_text(encoding="utf-8"))
-        myscript_path = Path(clash_out).with_name("MyScript.js")
+        myscript_path = Path(clash_out).parent / "Script" / "MyScript.js"
         myscript_body = _gen_clash_script_js(body, overlay=overlay)
         myscript_changed = _write_if_changed(REPO_ROOT / myscript_path, myscript_body)
         print(f"  {'✓ ' + str(myscript_path) + ' 已更新' if myscript_changed else '✓ ' + str(myscript_path) + ' 无变化'}")
