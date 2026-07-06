@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-06 21:47:59
+# Date: 2026-07-06 22:08:34
 # Author: @HotKids
 
 # 通用设置
@@ -725,10 +725,6 @@ rules:
   # 标准 SSH 端口
   - AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT
 
-  # 禁用国外 QUIC（UDP 443），强制回退 TCP；国内放行
-  # 对应 Surge 的 PROTOCOL,QUIC 拦截（该规则转 Clash 无直接等价，借 mihomo 逻辑规则补齐）
-  - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT
-
   # Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
   - RULE-SET,Bypass,🔘 DIRECT
   - RULE-SET,Reroute,🔰 Proxy
@@ -804,5 +800,8 @@ rules:
   - GEOSITE,geolocation-!cn,🔰 Proxy
 
   # Final
+  # 禁用国外 QUIC（UDP 443），强制回退 TCP；国内放行
+  # 对应 Surge 的 PROTOCOL,QUIC 拦截（该规则转 Clash 无直接等价，借 mihomo 逻辑规则补齐）
+  - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT
   - MATCH,🔰 Proxy
 
