@@ -2,13 +2,31 @@
  * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）
  *
  * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，
- * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件。
+ * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；
+ * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。
  *
  * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的
  * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）
  * 导入时，动态生成与本仓库 Surge/Profile.conf 等效的策略组、规则与基础设置。
  * 仓库：https://github.com/HotKids/Rules
  */
+
+// 分流分组开关，默认全部启用；改成 false 可临时关闭对应分组
+// （连同其专属 rules / rule-providers 一并裁剪，无需改动 Profile.conf）
+const ruleOptionsEnable = {
+  '🎬 Streaming': true,
+  '📺 CNTV': true,
+  '🍎 Apple': true,
+  '🔍 Google': true,
+  '☁️ OneDrive': true,
+  'Ⓜ️ Microsoft': true,
+  '📬 Telegram': true,
+  '🤖 AIGC': true,
+  '🪙 Crypto': true,
+  '💳 Finance': true,
+  '📧 Mail': true,
+  '🚧 AdGuard': true,
+};
 
 function main(config) {
   if (!Array.isArray(config.proxies) || config.proxies.length === 0) {
@@ -190,7 +208,7 @@ function main(config) {
     'disable-icmp-forwarding': true,
   };
 
-  config['proxy-groups'] = [
+  const proxyGroups = [
     {
       name: '🔰 Proxy',
       type: 'select',
@@ -396,7 +414,7 @@ function main(config) {
     },
   ];
 
-  config['rule-providers'] = {
+  const ruleProviders = {
     Bypass: {
       type: 'http',
       behavior: 'classical',
@@ -588,7 +606,7 @@ function main(config) {
     },
   };
 
-  config['rules'] = [
+  const rules = [
     'AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT',
     'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT',
     'RULE-SET,Bypass,🔘 DIRECT',
@@ -623,6 +641,28 @@ function main(config) {
     'GEOSITE,geolocation-!cn,🔰 Proxy',
     'MATCH,🔰 Proxy',
   ];
+
+  const disabledGroups = new Set(
+    Object.keys(ruleOptionsEnable).filter((name) => !ruleOptionsEnable[name]),
+  );
+
+  config['proxy-groups'] = proxyGroups.filter((g) => !disabledGroups.has(g.name));
+
+  const enabledRules = rules.filter((r) => {
+    const parts = r.split(',');
+    return !(parts[0] === 'RULE-SET' && parts.length >= 3 && disabledGroups.has(parts[2]));
+  });
+
+  const usedProviders = new Set();
+  for (const r of enabledRules) {
+    const parts = r.split(',');
+    if (parts[0] === 'RULE-SET' && parts.length >= 2) usedProviders.add(parts[1]);
+  }
+  config['rule-providers'] = Object.fromEntries(
+    Object.entries(ruleProviders).filter(([name]) => usedProviders.has(name)),
+  );
+
+  config['rules'] = enabledRules;
 
   return config;
 }
