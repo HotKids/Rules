@@ -2559,7 +2559,44 @@ def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> d
     return {k: v for k, v in g.items() if k not in ("use", "filter")}
 
 
-def _gen_clash_script_js(sample_yaml_text: str) -> str:
+def _apply_myscript_overlay(
+    groups: list[dict], pool_filters: dict[str, str | None], overlay: dict
+) -> None:
+    """把私人差异（.github/scripts/sync-config/myscript.overlay.json）叠加到自动生成的
+    基座上，就地修改 groups / pool_filters。三类差异，对应 overlay 里的三个字段：
+
+    - group_overrides：改写已有分组的字段（如地区组 select→fallback）+ pool_filters 的
+      filter（换成带排除条件的正则）。
+    - group_proxies_insert：在已有分组的静态 proxies 候选列表里，紧邻某个已有条目
+      之前/之后插入新地区（如 🔰 Proxy 的候选里插入 🇬🇧 England / 🇩🇪 Germany）。
+    - extra_pool_groups：整个新增的池分组（Relay 中转链、新地区），插入到指定锚点
+      分组之后，并登记进 pool_filters（运行时按 filter 从 config.proxies 里挑节点）。
+    """
+    by_name = {g["name"]: g for g in groups}
+
+    for name, patch in overlay.get("group_overrides", {}).items():
+        by_name[name].update({k: v for k, v in patch.items() if k != "filter"})
+        if "filter" in patch:
+            pool_filters[name] = patch["filter"]
+
+    for name, spec in overlay.get("group_proxies_insert", {}).items():
+        proxies = by_name[name]["proxies"]
+        anchor = spec.get("after") or spec.get("before")
+        idx = proxies.index(anchor) + (1 if "after" in spec else 0)
+        proxies[idx:idx] = spec["insert"]
+
+    for spec in overlay.get("extra_pool_groups", []):
+        spec = dict(spec)
+        anchor_name = spec.pop("insert_after")
+        filter_ = spec.pop("filter", None)
+        new_group = spec  # 剩余字段（name/type/icon/hidden/tolerance…）直接作为分组定义
+        idx = next(i for i, g in enumerate(groups) if g["name"] == anchor_name) + 1
+        groups.insert(idx, new_group)
+        by_name[new_group["name"]] = new_group
+        pool_filters[new_group["name"]] = filter_
+
+
+def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> str:
     """由最终生成的 Clash/Sample.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
     用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
@@ -2582,6 +2619,9 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     rule_providers = data.get("rule-providers") or {}
     rules = data.get("rules") or []
 
+    if overlay:
+        _apply_myscript_overlay(groups, pool_filters, overlay)
+
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
     # 节点池 / 地区组（pool_filters 记录的）同样视为核心组，均不纳入可选开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
@@ -2590,12 +2630,24 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
         if not g.get("hidden") and g["name"] not in pool_filters and g["name"] != main_group_name
     ]
 
+    if overlay:
+        header_source = [
+            " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + ",
+            " * sync-config/myscript.overlay.json（私人差异声明）自动生成。",
+            " * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /",
+            " * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。",
+        ]
+    else:
+        header_source = [
+            " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，",
+            " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；",
+        ]
+
     lines = [
         "/**",
         " * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）",
         " *",
-        " * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml 自动生成，",
-        " * 内容改动请提交到 Surge/Profile.conf，而非直接编辑本文件；",
+        *header_source,
         " * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。",
         " *",
         " * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的",
@@ -2731,6 +2783,14 @@ def _sync_clash(
     script_body = _gen_clash_script_js(body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
+
+    myscript_overlay_path = REPO_ROOT / ".github" / "scripts" / "sync-config" / "myscript.overlay.json"
+    if myscript_overlay_path.exists():
+        overlay = json.loads(myscript_overlay_path.read_text(encoding="utf-8"))
+        myscript_path = Path(clash_out).with_name("MyScript.js")
+        myscript_body = _gen_clash_script_js(body, overlay=overlay)
+        myscript_changed = _write_if_changed(REPO_ROOT / myscript_path, myscript_body)
+        print(f"  {'✓ ' + str(myscript_path) + ' 已更新' if myscript_changed else '✓ ' + str(myscript_path) + ' 无变化'}")
 
 
 def _sync_loon(
