@@ -469,10 +469,10 @@ function main(config) {
     Mail: null,
     Server: null,
     'Hong Kong': '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
-    Taiwan: '^(?=.*TW)(?!.*Neburst)',
-    Singapore: '^(?=.*SG)',
+    Taiwan: '^(?=.*TW)(?!.*Neburst)(?!.*Pro)',
+    Singapore: '^(?=.*SG)(?!.*Neburst)(?!.*Pro)',
     Japan: '^(?=.*JP)(?!.*Pro)',
-    America: '^(?=.*US)(?!.*Pro)',
+    America: '^(?=.*US)(?!.*GoMaMi)(?!.*Pro)',
     England: '^(?=.*UK)',
     Germany: '^(?=.*DE)',
   };
