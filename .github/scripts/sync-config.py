@@ -2574,24 +2574,54 @@ def _apply_myscript_overlay(
     """
     by_name = {g["name"]: g for g in groups}
 
+    def _get_group(name: str, where: str) -> dict:
+        if name not in by_name:
+            raise ValueError(
+                f"myscript.overlay.json 的 {where} 引用了不存在的分组 {name!r}；"
+                f"当前基座里的分组有：{sorted(by_name)}"
+            )
+        return by_name[name]
+
     for name, patch in overlay.get("group_overrides", {}).items():
-        by_name[name].update({k: v for k, v in patch.items() if k != "filter"})
+        group = _get_group(name, f"group_overrides.{name!r}")
+        group.update({k: v for k, v in patch.items() if k != "filter"})
         if "filter" in patch:
             pool_filters[name] = patch["filter"]
 
     for name, spec in overlay.get("group_proxies_insert", {}).items():
-        proxies = by_name[name]["proxies"]
+        group = _get_group(name, f"group_proxies_insert.{name!r}")
+        if "proxies" not in group:
+            raise ValueError(
+                f"myscript.overlay.json 的 group_proxies_insert.{name!r} 指向的分组"
+                f"没有静态 proxies 候选列表（可能是节点池/地区组），无法插入"
+            )
+        proxies = group["proxies"]
         anchor = spec.get("after") or spec.get("before")
+        if anchor not in proxies:
+            raise ValueError(
+                f"myscript.overlay.json 的 group_proxies_insert.{name!r} 里的锚点 "
+                f"{anchor!r} 不在该分组的 proxies 候选列表里：{proxies}"
+            )
         idx = proxies.index(anchor) + (1 if "after" in spec else 0)
         proxies[idx:idx] = spec["insert"]
 
-    for spec in overlay.get("extra_pool_groups", []):
-        spec = dict(spec)
+    for i, raw_spec in enumerate(overlay.get("extra_pool_groups", [])):
+        spec = dict(raw_spec)
+        name = spec.get("name", f"#{i}")
+        if "insert_after" not in spec:
+            raise ValueError(
+                f"myscript.overlay.json 的 extra_pool_groups[{name!r}] 缺少必填字段 insert_after"
+            )
         anchor_name = spec.pop("insert_after")
         filter_ = spec.pop("filter", None)
         new_group = spec  # 剩余字段（name/type/icon/hidden/tolerance…）直接作为分组定义
-        idx = next(i for i, g in enumerate(groups) if g["name"] == anchor_name) + 1
-        groups.insert(idx, new_group)
+        idx = next((j for j, g in enumerate(groups) if g["name"] == anchor_name), None)
+        if idx is None:
+            raise ValueError(
+                f"myscript.overlay.json 的 extra_pool_groups[{name!r}] 的 insert_after "
+                f"引用了不存在的分组 {anchor_name!r}；当前分组有：{[g['name'] for g in groups]}"
+            )
+        groups.insert(idx + 1, new_group)
         by_name[new_group["name"]] = new_group
         pool_filters[new_group["name"]] = filter_
 
@@ -3121,7 +3151,7 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-regex-filter" in params:               # 地区组
             urltests.append({"type": "urltest", "tag": name,
                              "outbounds": [use_example(params["policy-regex-filter"])],
-                             "url": "https://www.gstatic.com/generate_204", "interval": "3m"})
+                             "url": "https://www.gstatic.com/generate_204", "interval": "180s"})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
             server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
         else:

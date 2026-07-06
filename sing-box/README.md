@@ -4,6 +4,8 @@
 
 对齐 sing-box **1.12+ 新格式**（typed DNS server、route rule action、`default_domain_resolver`、remote binary rule-set）的完整客户端配置。由 `sync-config.py` 从 `Surge/Profile.conf` 自动生成（静态基座见 `.github/scripts/sync-config/sing-box.ini`），策略组 / 路由与其他平台一致，请勿手改。
 
+> ⚠️ 由脚本自动生成，仅做过 `sing-box check` 结构校验（CI `lint.yml`），**未实际跑过 sing-box 内核联网测试**，正式使用前请自行验证可用性。
+
 **节点**：sing-box 无订阅机制，`outbounds` 必须是具体节点。已内置港/台/新/日/美 5 个示例 Shadowsocks 节点（`hk/tw/sg/jp/us.hotkids.me`，仅供占位，非真实可用凭据），可直接改 `server`/`password` 试用；正式使用请用订阅工具（机场 sing-box 订阅 / sing-box-subscribe / subconverter 等）替换 `🇺🇳 Server` 与各地区组的 `outbounds`。
 
 ---
