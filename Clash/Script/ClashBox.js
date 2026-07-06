@@ -20,8 +20,8 @@ const ruleOptionsEnable = {
   CNTV: true,
   Apple: true,
   Google: true,
-  OneDrive: true,
-  Microsoft: true,
+  OneDrive: false,
+  Microsoft: false,
   Telegram: true,
   AIGC: true,
   Crypto: true,
@@ -349,7 +349,6 @@ function main(config) {
       proxies: [
         'Direct',
         'Reject',
-        'Reject-Drop',
       ],
     },
     {
@@ -368,15 +367,6 @@ function main(config) {
       hidden: true,
       proxies: [
         'REJECT',
-      ],
-    },
-    {
-      name: 'Reject-Drop',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png',
-      hidden: true,
-      proxies: [
-        'REJECT-DROP',
       ],
     },
     {
