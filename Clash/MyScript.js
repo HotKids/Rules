@@ -378,104 +378,105 @@ function main(config) {
       tolerance: 50,
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
       hidden: true,
-      'include-all': true,
-      filter: '^.*(GoMaMi|Neburst|Pro).*$',
     },
     {
       name: '🇭🇰 HK Relay',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*HK)(?=.*GoMaMi).*$',
     },
     {
       name: '🇨🇳 TW Relay',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*TW)(?=.*Neburst).*$',
     },
     {
       name: '🇯🇵 JP Relay',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*JP)(?=.*Pro).*$',
     },
     {
       name: '🇺🇸 US Relay',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*US)(?=.*Pro).*$',
     },
     {
       name: '🇺🇳 Server',
       type: 'select',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png',
-      'include-all': true,
     },
     {
       name: '🇭🇰 Hong Kong',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
     },
     {
       name: '🇨🇳 Taiwan',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*TW)(?!.*Neburst)',
     },
     {
       name: '🇸🇬 Singapore',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png',
       hidden: true,
-      'include-all': true,
-      filter: 'SG',
     },
     {
       name: '🇯🇵 Japan',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*JP)(?!.*Pro)',
     },
     {
       name: '🇺🇸 America',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png',
       hidden: true,
-      'include-all': true,
-      filter: '^(?=.*US)(?!.*Pro)',
     },
     {
       name: '🇬🇧 England',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png',
       hidden: true,
-      'include-all': true,
-      filter: 'UK',
     },
     {
       name: '🇩🇪 Germany',
       type: 'fallback',
       icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png',
       hidden: true,
-      'include-all': true,
-      filter: 'DE',
     },
   ];
+
+  // 节点池分组：手动按正则过滤 config.proxies 并保持订阅原始顺序，不用 mihomo
+  // 的 include-all —— 它对候选节点做隐式字母序排序（mihomo config/config.go：
+  // slices.Sort(AllProxies)），无条件执行、无开关可关闭，会打乱订阅原始顺序。
+  const allProxyNames = config.proxies.map((p) => p.name);
+  const poolGroupFilters = {
+    '🇸🇱 Relay': '^.*(GoMaMi|Neburst|Pro).*$',
+    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi).*$',
+    '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst).*$',
+    '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro).*$',
+    '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro).*$',
+    '🇺🇳 Server': null,
+    '🇭🇰 Hong Kong': '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
+    '🇨🇳 Taiwan': '^(?=.*TW)(?!.*Neburst)',
+    '🇸🇬 Singapore': 'SG',
+    '🇯🇵 Japan': '^(?=.*JP)(?!.*Pro)',
+    '🇺🇸 America': '^(?=.*US)(?!.*Pro)',
+    '🇬🇧 England': 'UK',
+    '🇩🇪 Germany': 'DE',
+  };
+  for (const g of proxyGroups) {
+    if (!(g.name in poolGroupFilters)) continue;
+    const filter = poolGroupFilters[g.name];
+    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;
+    g.proxies = matched.length > 0 ? matched : ['COMPATIBLE'];
+  }
 
   const ruleProviders = {
     Bypass: {
