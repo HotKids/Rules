@@ -1,5 +1,11 @@
 /**
- * mihomo 私人用配置覆写脚本，根据 Clash/Script.js 手动维护
+ * mihomo 配置覆写脚本（HotKids/Rules 版，自动生成，请勿手改）
+ *
+ * 本文件由 .github/scripts/sync-config.py 依据 Clash/Sample.yaml + 
+ * sync-config/myscript.overlay.json（私人差异声明）自动生成。
+ * 公共部分改动请提交到 Surge/Profile.conf；私人差异（额外分组 / 分组类型 /
+ * 候选节点插入位置）改 myscript.overlay.json，均不要直接编辑本文件。
+ * 仅 ruleOptionsEnable 的取值支持本地临时修改，用于按需关闭某个分组。
  *
  * 用途：用于 Clash Verge（或其他支持 Script Provider 的 mihomo 客户端）的
  * 「覆写脚本」（Enhance Script），在任意订阅（如 https://sub.hotkids.me）
@@ -21,6 +27,7 @@ const ruleOptionsEnable = {
   '🪙 Crypto': true,
   '💳 Finance': true,
   '📧 Mail': true,
+  '🚧 AdGuard': true,
 };
 
 function main(config) {
@@ -452,22 +459,23 @@ function main(config) {
     },
   ];
 
-  // 节点池分组：手动按正则过滤 config.proxies 并保持订阅原始顺序，不用 mihomo
-  // 的 include-all —— 它对候选节点做隐式字母序排序（mihomo config/config.go：
-  // slices.Sort(AllProxies)），无条件执行、无开关可关闭，会打乱订阅原始顺序。
+  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤
+  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选
+  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），
+  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
   const allProxyNames = config.proxies.map((p) => p.name);
   const poolGroupFilters = {
-    '🇸🇱 Relay': '^.*(GoMaMi|Neburst|Pro).*$',
-    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi).*$',
-    '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst).*$',
-    '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro).*$',
-    '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro).*$',
     '🇺🇳 Server': null,
     '🇭🇰 Hong Kong': '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
     '🇨🇳 Taiwan': '^(?=.*TW)(?!.*Neburst)',
     '🇸🇬 Singapore': 'SG',
     '🇯🇵 Japan': '^(?=.*JP)(?!.*Pro)',
     '🇺🇸 America': '^(?=.*US)(?!.*Pro)',
+    '🇸🇱 Relay': '^.*(GoMaMi|Neburst|Pro).*$',
+    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi).*$',
+    '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst).*$',
+    '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro).*$',
+    '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro).*$',
     '🇬🇧 England': 'UK',
     '🇩🇪 Germany': 'DE',
   };
