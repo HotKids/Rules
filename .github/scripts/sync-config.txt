@@ -33,7 +33,7 @@ Speedtest
 # > Builtin
 << .github/scripts/sync-config/clash.ini
 # > Gist
-ReverseProxy => testingcf.jsdelivr.net
+ReverseProxy => fastly.jsdelivr.net
 # > Skip
 ConnersHua
 iCloud
