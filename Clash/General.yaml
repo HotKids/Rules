@@ -283,6 +283,10 @@ tun:
   # 改善游戏、VOIP、WebRTC 的 UDP 打洞成功率
   endpoint-independent-nat: true
 
+  # 不代答 ICMP：默认 TUN（尤其 gvisor 栈）会自动应答所有 ICMP echo，
+  # 导致 ping 任意地址都通、掩盖真实可达性；关闭代答后 ping 反映真实链路
+  disable-icmp-forwarding: true
+
   # 自定义路由（留空则使用默认全局路由）
   # route-address:
   #   - 0.0.0.0/1
