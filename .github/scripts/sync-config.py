@@ -11,6 +11,7 @@ sync-config.txt 格式（平台块 + 子分区）：
   # > Mapping   URL 映射（X => Y）与内置规则集映射
 """
 
+import copy
 import json
 import re
 import urllib.request
@@ -2576,6 +2577,7 @@ def _apply_overlay(
     groups: list[dict],
     pool_filters: dict[str, str | None],
     rules: list[str],
+    structural_pool_names: set[str],
     overlay: dict,
     overlay_label: str,
 ) -> None:
@@ -2583,14 +2585,22 @@ def _apply_overlay(
     clashbox.overlay.json）叠加到自动生成的基座上，就地修改 groups / pool_filters /
     rules。四类差异，对应 overlay 里的字段：
 
-    - group_overrides：改写已有分组的字段（如地区组 select→fallback，或改名/换图标）+
-      pool_filters 的 filter（换成带排除条件的正则）。若 patch 带 name（改名），
-      同步更新其余分组 proxies 候选里的旧名引用、pool_filters 的 key、以及
-      rules 里以该分组为策略目标的行，避免残留指向旧名字的悬空引用。
+    - remove_groups：整组删掉（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
+      里剔除对它的引用、删掉 rules 里以它为策略目标的行。
+    - rename_map：批量改名（{旧名: 新名}），同步更新其余分组 proxies 候选里的旧名
+      引用、pool_filters 的 key、以及 rules 里以该分组为策略目标的行，避免残留
+      指向旧名字的悬空引用。多个 overlay 之间要做同一批改名时用这个，而不是在
+      group_overrides 里逐个重复写 {"name": ...}。
+    - icon_overrides：批量换图标（{名字: 图标 URL}，用改名后的新名字做 key）。
+    - group_overrides：改写已有分组的其余字段（如地区组 select→fallback）+
+      pool_filters 的 filter（换成带排除条件的正则）。同样支持带 name 改名
+      （效果等同 rename_map 的单条写法），二者可以混用。
     - group_proxies_insert：在已有分组的静态 proxies 候选列表里，紧邻某个已有条目
       之前/之后插入新地区（如 🔰 Proxy 的候选里插入 🇬🇧 England / 🇩🇪 Germany）。
     - extra_pool_groups：整个新增的池分组（Relay 中转链、新地区），插入到指定锚点
       分组之后，并登记进 pool_filters（运行时按 filter 从 config.proxies 里挑节点）。
+    - move_after：把一个既有分组（结构性池组，无法用 group_proxies_insert 挪位置）
+      挪到另一个分组之后，纯粹调整展示顺序，不影响候选列表/规则。
 
     overlay_label 只用于报错信息里指明是哪个 overlay 文件（如 'myscript.overlay.json'）。
     """
@@ -2604,27 +2614,57 @@ def _apply_overlay(
             )
         return by_name[name]
 
+    def _rename_group(old_name: str, new_name: str) -> None:
+        if new_name == old_name:
+            return
+        group = by_name[old_name]
+        group["name"] = new_name
+        for g in groups:
+            if isinstance(g.get("proxies"), list):
+                g["proxies"] = [new_name if p == old_name else p for p in g["proxies"]]
+        if old_name in pool_filters:
+            pool_filters[new_name] = pool_filters.pop(old_name)
+        if old_name in structural_pool_names:
+            structural_pool_names.discard(old_name)
+            structural_pool_names.add(new_name)
+        for i, r in enumerate(rules):
+            parts = r.split(",")
+            idx = _rule_policy_index(parts)
+            if idx < len(parts) and parts[idx] == old_name:
+                parts[idx] = new_name
+                rules[i] = ",".join(parts)
+        del by_name[old_name]
+        by_name[new_name] = group
+
+    for name in overlay.get("remove_groups", []):
+        _get_group(name, f"remove_groups[{name!r}]")
+        groups[:] = [g for g in groups if g["name"] != name]
+        for g in groups:
+            if isinstance(g.get("proxies"), list):
+                g["proxies"] = [p for p in g["proxies"] if p != name]
+        pool_filters.pop(name, None)
+        structural_pool_names.discard(name)
+        for i in reversed(range(len(rules))):
+            parts = rules[i].split(",")
+            idx = _rule_policy_index(parts)
+            if idx < len(parts) and parts[idx] == name:
+                del rules[i]
+        del by_name[name]
+
+    for old_name, new_name in overlay.get("rename_map", {}).items():
+        _get_group(old_name, f"rename_map.{old_name!r}")
+        _rename_group(old_name, new_name)
+
+    for name, icon in overlay.get("icon_overrides", {}).items():
+        _get_group(name, f"icon_overrides.{name!r}")["icon"] = icon
+
     for name, patch in overlay.get("group_overrides", {}).items():
         group = _get_group(name, f"group_overrides.{name!r}")
-        group.update({k: v for k, v in patch.items() if k != "filter"})
+        group.update({k: v for k, v in patch.items() if k not in ("filter", "name")})
         if "filter" in patch:
-            pool_filters[name] = patch["filter"]
-
-        new_name = patch.get("name")
-        if new_name and new_name != name:
-            for g in groups:
-                if isinstance(g.get("proxies"), list):
-                    g["proxies"] = [new_name if p == name else p for p in g["proxies"]]
-            if name in pool_filters:
-                pool_filters[new_name] = pool_filters.pop(name)
-            for i, r in enumerate(rules):
-                parts = r.split(",")
-                idx = _rule_policy_index(parts)
-                if idx < len(parts) and parts[idx] == name:
-                    parts[idx] = new_name
-                    rules[i] = ",".join(parts)
-            del by_name[name]
-            by_name[new_name] = group
+            pool_filters[group["name"]] = patch["filter"]
+        if "name" in patch:
+            _rename_group(name, patch["name"])
 
     for name, spec in overlay.get("group_proxies_insert", {}).items():
         group = _get_group(name, f"group_proxies_insert.{name!r}")
@@ -2662,11 +2702,22 @@ def _apply_overlay(
         groups.insert(idx + 1, new_group)
         by_name[new_group["name"]] = new_group
         pool_filters[new_group["name"]] = filter_
+        structural_pool_names.add(new_group["name"])
+
+    for name, anchor_name in overlay.get("move_after", {}).items():
+        group = _get_group(name, f"move_after.{name!r}")
+        _get_group(anchor_name, f"move_after.{name!r} 的目标位置")
+        groups.remove(group)
+        idx = next(j for j, g in enumerate(groups) if g["name"] == anchor_name)
+        groups.insert(idx + 1, group)
 
 
 def _gen_clash_script_js(
-    sample_yaml_text: str, overlay: dict | None = None, overlay_label: str = ""
-) -> str:
+    sample_yaml_text: str,
+    overlay: dict | None = None,
+    overlay_label: str = "",
+    base_state: tuple[list[dict], dict[str, str | None], list[str], set[str]] | None = None,
+) -> tuple[str, tuple[list[dict], dict[str, str | None], list[str], set[str]]]:
     """由最终生成的 Clash/Sample.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
     用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
@@ -2681,24 +2732,35 @@ def _gen_clash_script_js(
     某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
     关闭分组时还会从其余组的候选列表中剔除对已删组的引用，即使日后策略组之间
     出现互相引用，也不会因指向不存在的策略而导致 mihomo 启动失败。
+
+    base_state 用于多份 overlay 之间的链式叠加（overlay 的 extends 字段）：传入
+    另一份已 resolve 好的 (groups, pool_filters, rules, structural_pool_names)，
+    本次从这个状态（深拷贝，不影响调用方）而非 Sample.yaml 原始解析结果起步叠加
+    overlay，从而复用公共部分（如地区/Relay链），不必在每份 overlay 里重复声明。
+    返回值第二项就是这次 resolve 出的状态，供下一环 extends 复用。
     """
     data = yaml.safe_load(sample_yaml_text) or {}
-
-    pool_filters: dict[str, str | None] = {}
-    groups = [_convert_group_for_script(g, pool_filters) for g in (data.get("proxy-groups") or [])]
     rule_providers = data.get("rule-providers") or {}
-    rules = data.get("rules") or []
 
-    # 结构性池组（Server + 地区，均来自 Sample.yaml 的 use:[Server]）——这些没有
-    # 直接对应的 RULE-SET 目标，不纳入可选开关。overlay 的 extra_pool_groups
-    # 新增的同样是结构性的（Relay 链 / 新地区）。但 group_overrides 给既有分组
-    # （如 📧 Mail）追加 filter 只是让它"顺带拿到全部节点"，不改变它本来是个
-    # 可开关的功能分组这件事，因此不计入本集合。
-    structural_pool_names = set(pool_filters)
+    if base_state is not None:
+        base_groups, base_pool_filters, base_rules, base_structural = base_state
+        groups = copy.deepcopy(base_groups)
+        pool_filters = dict(base_pool_filters)
+        rules = list(base_rules)
+        structural_pool_names = set(base_structural)
+    else:
+        pool_filters = {}
+        groups = [_convert_group_for_script(g, pool_filters) for g in (data.get("proxy-groups") or [])]
+        rules = list(data.get("rules") or [])
+        structural_pool_names = set(pool_filters)
 
+    # 结构性池组（Server + 地区，均来自 Sample.yaml 的 use:[Server]，或链式继承自
+    # base_state）——这些没有直接对应的 RULE-SET 目标，不纳入可选开关。overlay 的
+    # extra_pool_groups 新增的同样是结构性的（Relay 链 / 新地区）。但 group_overrides
+    # 给既有分组（如 📧 Mail）追加 filter 只是让它"顺带拿到全部节点"，不改变它本来是
+    # 个可开关的功能分组这件事，因此不计入本集合。
     if overlay:
-        _apply_overlay(groups, pool_filters, rules, overlay, overlay_label)
-        structural_pool_names.update(spec["name"] for spec in overlay.get("extra_pool_groups", []))
+        _apply_overlay(groups, pool_filters, rules, structural_pool_names, overlay, overlay_label)
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
     # 结构性池组同样视为核心组，均不纳入可选开关。
@@ -2821,7 +2883,7 @@ def _gen_clash_script_js(
         "}",
         "",
     ]
-    return "\n".join(lines)
+    return "\n".join(lines), (groups, pool_filters, rules, structural_pool_names)
 
 
 # ---------------------------------------------------------------------------
@@ -2872,23 +2934,40 @@ def _sync_clash(
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
     script_path = Path(clash_out).parent / "Script" / "Script.js"
-    script_body = _gen_clash_script_js(body)
+    script_body, _ = _gen_clash_script_js(body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
     # 个人差异声明（Enhanced/ 下）：每个 *.overlay.json 对应一份同名派生脚本，
-    # 均由本函数按同一套逻辑生成，公共部分自动跟随 Script.js 同步。
+    # 均由本函数按同一套逻辑生成，公共部分自动跟随 Script.js 同步。overlay 可用
+    # extends 声明基于另一份已生成的 overlay（而非从 Sample.yaml 重新起步）叠加，
+    # 避免多份个人配置之间重复声明同样的地区/Relay 链差异。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
-    for overlay_label, out_name in (
+    overlay_specs = [
         ("myscript.overlay.json", "MyScript.js"),
         ("clashbox.overlay.json", "ClashBox.js"),
-    ):
+    ]
+    resolved_states: dict[str, tuple] = {}
+    for overlay_label, out_name in overlay_specs:
         overlay_path = enhanced_dir / overlay_label
         if not overlay_path.exists():
             continue
         overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+        extends = overlay.get("extends")
+        base_state = None
+        if extends:
+            if extends not in resolved_states:
+                raise ValueError(
+                    f"{overlay_label} 的 extends 引用了 {extends!r}，但它不在 "
+                    f"_sync_clash 的 overlay_specs 里，或排在本文件之后（extends "
+                    f"只能引用排在自己之前、且已存在的 overlay 文件）"
+                )
+            base_state = resolved_states[extends]
+        out_body, state = _gen_clash_script_js(
+            body, overlay=overlay, overlay_label=overlay_label, base_state=base_state
+        )
+        resolved_states[overlay_label] = state
         out_path = Path(clash_out).parent / "Script" / out_name
-        out_body = _gen_clash_script_js(body, overlay=overlay, overlay_label=overlay_label)
         out_changed = _write_if_changed(REPO_ROOT / out_path, out_body)
         print(f"  {'✓ ' + str(out_path) + ' 已更新' if out_changed else '✓ ' + str(out_path) + ' 无变化'}")
 
