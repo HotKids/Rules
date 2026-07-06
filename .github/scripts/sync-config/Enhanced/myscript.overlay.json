@@ -7,8 +7,12 @@
     "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
     "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
     "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" },
-    "📧 Mail": { "filter": null }
+    "📧 Mail": { "filter": null },
+    "☁️ OneDrive": { "name": "OneDrive", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png" },
+    "Ⓜ️ Microsoft": { "name": "Microsoft", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png" }
   },
+
+  "disabled_by_default": ["OneDrive", "Microsoft"],
 
   "group_proxies_insert": {
     "🔰 Proxy": { "after": "🇺🇸 America", "insert": ["🇬🇧 England", "🇩🇪 Germany"] },
