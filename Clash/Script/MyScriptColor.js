@@ -688,8 +688,8 @@ function main(config) {
   };
 
   const rules = [
-    'AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT',
     'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT',
+    'AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT',
     'RULE-SET,Bypass,🔘 DIRECT',
     'RULE-SET,Reroute,🔰 Proxy',
     'RULE-SET,Private,🔘 DIRECT',
