@@ -1,7 +1,11 @@
 {
-  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果继续叠加——ClashBox 相对 MyScript 只是纯粹的批量改名（rename_map）+ 换图标（icon_overrides），不带任何结构性差异，因此日常只需要维护 myscript.overlay.json，ClashBox 会自动跟着地区/Relay链等公共部分同步，无需另外改本文件。",
+  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果继续叠加——ClashBox 相对 MyScript 主要是批量改名（rename_map）+ 换图标（icon_overrides），额外两处独有差异：REJECT-DROP 整组去掉（AdGuard 候选两选一）、OneDrive/Microsoft 默认关闭。日常改地区/Relay链等公共部分只需要维护 myscript.overlay.json，ClashBox 会自动跟着同步。",
 
   "extends": "myscript.overlay.json",
+
+  "remove_groups": ["📛 REJECT-DROP"],
+
+  "disabled_by_default": ["OneDrive", "Microsoft"],
 
   "rename_map": {
     "🔰 Proxy": "Proxy",
@@ -17,7 +21,6 @@
     "🚧 AdGuard": "AdGuard",
     "🔘 DIRECT": "Direct",
     "⛔️ REJECT": "Reject",
-    "📛 REJECT-DROP": "Reject-Drop",
     "🇺🇳 Server": "Server",
     "🇭🇰 Hong Kong": "Hong Kong",
     "🇨🇳 Taiwan": "Taiwan",
@@ -44,7 +47,6 @@
     "AdGuard": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png",
     "Direct": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png",
     "Reject": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
-    "Reject-Drop": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
     "Server": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png",
     "OneDrive": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png",
     "Microsoft": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png",
