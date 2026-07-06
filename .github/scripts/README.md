@@ -41,9 +41,9 @@
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Script.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`
+**目标**：`Clash/Sample.yaml`、`Clash/Script.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
-各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。
+各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座，生成的 `outbounds` 与服务类 `route` 规则 splice 进哨兵位；服务规则集用本仓库 `.srs`，CN/geo 用 SagerNet 官方规则集。
 
 `Clash/Script.js` 是 `Clash/Sample.yaml` 生成完毕后再解析出来的等效 mihomo 覆写脚本
 （Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 / 规则 /
