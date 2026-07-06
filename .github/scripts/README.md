@@ -55,11 +55,16 @@
 
 `Clash/Script/MyScript.js`、`Clash/Script/ClashBox.js` 都是 `Script.js` 的私人定制版：
 在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
-声明的差异（分组改名/换图标、类型覆盖、候选节点插入位置、额外分组、部分分组默认关闭
-`disabled_by_default`），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay
-覆盖的分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可，
-禁止手改这两个生成产物本体。`Enhanced/` 下每多一份 `<name>.overlay.json` 就会多生成一份
-`Clash/Script/<Name>.js`（见 `sync-config.py` 的 `_sync_clash`），互不影响。
+声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`remove_groups` 整组
+删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
+`extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
+分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
+分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可，禁止手改
+这两个生成产物本体。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
+已生成的 overlay 结果继续叠加（`clashbox.overlay.json` extends `myscript.overlay.json`），
+只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
+`Enhanced/` 下每多一份 `<name>.overlay.json` 就会多生成一份 `Clash/Script/<Name>.js`
+（对应关系见 `sync-config.py` 的 `_sync_clash` 里的 `overlay_specs`）。
 
 **触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
