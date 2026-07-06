@@ -13,6 +13,8 @@
     "📺 CNTV": "CNTV",
     "🍎 Apple": "Apple",
     "🔍 Google": "Google",
+    "☁️ OneDrive": "OneDrive",
+    "Ⓜ️ Microsoft": "Microsoft",
     "📬 Telegram": "Telegram",
     "🤖 AIGC": "AIGC",
     "🪙 Crypto": "Crypto",
@@ -28,9 +30,7 @@
     "🇯🇵 Japan": "Japan",
     "🇺🇸 America": "America",
     "🇬🇧 England": "England",
-    "🇩🇪 Germany": "Germany",
-    "☁️ OneDrive": "OneDrive",
-    "Ⓜ️ Microsoft": "Microsoft"
+    "🇩🇪 Germany": "Germany"
   },
 
   "icon_overrides": {
@@ -39,6 +39,8 @@
     "CNTV": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/TV.png",
     "Apple": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitten%20Apple.png",
     "Google": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Google.png",
+    "OneDrive": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png",
+    "Microsoft": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png",
     "Telegram": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Telegram.png",
     "AIGC": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png",
     "Crypto": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitcoin.png",
@@ -48,8 +50,6 @@
     "Direct": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png",
     "Reject": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
     "Server": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png",
-    "OneDrive": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png",
-    "Microsoft": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png",
     "🇸🇱 Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
     "🇭🇰 HK Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
     "🇨🇳 TW Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
