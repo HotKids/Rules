@@ -679,7 +679,6 @@ function main(config) {
 
   const rules = [
     'AND,((DST-PORT,22),(NETWORK,TCP)),Direct',
-    'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT',
     'RULE-SET,Bypass,Direct',
     'RULE-SET,Reroute,Proxy',
     'RULE-SET,Private,Direct',
@@ -710,6 +709,7 @@ function main(config) {
     'GEOSITE,cn,Direct',
     'GEOIP,CN,Direct,no-resolve',
     'GEOSITE,geolocation-!cn,Proxy',
+    'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),REJECT',
     'MATCH,Proxy',
   ];
 
