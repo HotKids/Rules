@@ -2649,15 +2649,23 @@ def _gen_clash_script_js(sample_yaml_text: str, overlay: dict | None = None) -> 
     rule_providers = data.get("rule-providers") or {}
     rules = data.get("rules") or []
 
+    # 结构性池组（Server + 地区，均来自 Sample.yaml 的 use:[Server]）——这些没有
+    # 直接对应的 RULE-SET 目标，不纳入可选开关。overlay 的 extra_pool_groups
+    # 新增的同样是结构性的（Relay 链 / 新地区）。但 group_overrides 给既有分组
+    # （如 📧 Mail）追加 filter 只是让它"顺带拿到全部节点"，不改变它本来是个
+    # 可开关的功能分组这件事，因此不计入本集合。
+    structural_pool_names = set(pool_filters)
+
     if overlay:
         _apply_myscript_overlay(groups, pool_filters, overlay)
+        structural_pool_names.update(spec["name"] for spec in overlay.get("extra_pool_groups", []))
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
-    # 节点池 / 地区组（pool_filters 记录的）同样视为核心组，均不纳入可选开关。
+    # 结构性池组同样视为核心组，均不纳入可选开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
     optional_group_names = [
         g["name"] for g in groups
-        if not g.get("hidden") and g["name"] not in pool_filters and g["name"] != main_group_name
+        if not g.get("hidden") and g["name"] not in structural_pool_names and g["name"] != main_group_name
     ]
 
     if overlay:
