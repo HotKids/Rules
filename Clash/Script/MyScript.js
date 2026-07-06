@@ -481,10 +481,10 @@ function main(config) {
     '🇬🇧 England': '^(?=.*UK)',
     '🇩🇪 Germany': '^(?=.*DE)',
     '🇸🇱 Relay': '^(?=.*(GoMaMi|Neburst|Pro))',
-    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi)',
+    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*(?:GoMaMi|Pro))',
     '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst)',
     '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro)',
-    '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro)',
+    '🇺🇸 US Relay': '^(?=.*US)(?=.*(?:GoMaMi|Pro))',
   };
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
