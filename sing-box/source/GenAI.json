@@ -89,6 +89,38 @@
         "160.79.104.0/21",
         "2607:6bc0::/32"
       ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "openaicom-api-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "azurefd.net"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "chatgpt-async-webps-prod-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "webpubsub.azure.com"
+          ]
+        }
+      ]
     }
   ]
 }

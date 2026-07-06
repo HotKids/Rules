@@ -16,6 +16,7 @@ import re
 import urllib.request
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+from urllib.parse import quote, unquote
 
 import yaml
 
@@ -2902,6 +2903,151 @@ def _sync_surfboard(
 
 
 # ---------------------------------------------------------------------------
+# sing-box 完整配置（config.json）：静态基座 + Profile.conf 生成 outbounds/服务规则
+# ---------------------------------------------------------------------------
+
+SB_SOURCE_DIR = REPO_ROOT / "sing-box" / "source"
+# 静态基座（JSON 内容，沿用 sync-config/<平台>.ini 命名惯例，与 clash.ini 等并列）
+SB_BASE_JSON = REPO_ROOT / ".github" / "scripts" / "sync-config" / "sing-box.ini"
+SB_CONFIG_OUT = REPO_ROOT / "sing-box" / "config.json"
+SB_SRS_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/"
+SB_PLACEHOLDER = "🚀 Proxy（请用订阅工具注入节点）"
+# 组名含这些关键词的策略组不生成 outbound（与其他平台的 skip 语义一致）
+SB_SKIP_GROUP_KW = ("Speedtest", "Gateway", "Apple TV")
+
+
+def _sb_resolve_our_stem(token: str) -> str | None:
+    """Surge 规则 token → 本仓库自有清单 stem（前提：有对应 sing-box/source/<stem>.json）。
+
+    命中 HotKids Surge RULE-SET URL 或可直接作为文件名的 builtin token 时返回 stem，
+    否则（外部 URL / 无对应 source）返回 None，交由静态基座处理或跳过。
+    """
+    if token.startswith(HOTKIDS_SURGE_PREFIX):
+        stem = Path(unquote(token[len(HOTKIDS_SURGE_PREFIX):])).stem
+    elif token.startswith("http"):
+        return None
+    else:
+        stem = token
+    return stem if (SB_SOURCE_DIR / f"{stem}.json").exists() else None
+
+
+def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dict]:
+    """从 Surge [Proxy Group] 生成 sing-box outbounds。
+
+    - smart/地区组（有 policy-regex-filter）→ urltest（节点占位）
+    - include-all-proxies 组（🇺🇳 Server）→ selector（节点占位）
+    - policy-path 动作组（🚧 AdGuard）→ 不生成 outbound（规则里用 action:reject）
+    - 其余 select → selector，候选里 🔘 DIRECT→direct，REJECT 变体丢弃
+    """
+    selectors, urltests, server = [], [], []
+    for line in group_lines:
+        if line.startswith("#"):
+            continue
+        g = parse_group_line(line)
+        if not g:
+            continue
+        name = g["name"]
+        if any(kw in name for kw in SB_SKIP_GROUP_KW) or _is_skipped(name, skips):
+            continue
+        params = g["params"]
+        if "policy-path" in params:                       # 动作组 → 规则里处理
+            continue
+        if "policy-regex-filter" in params:               # 地区组
+            urltests.append({"type": "urltest", "tag": name, "outbounds": [SB_PLACEHOLDER],
+                             "url": "https://www.gstatic.com/generate_204", "interval": "3m"})
+        elif params.get("include-all-proxies", "").lower() in ("true", "1"):
+            server.append({"type": "selector", "tag": name, "outbounds": [SB_PLACEHOLDER]})
+        else:
+            outs = []
+            for p in g["proxies"]:
+                if p == "🔘 DIRECT":
+                    outs.append("direct")
+                elif p in ("⛔️ REJECT", "📛 REJECT-DROP"):
+                    continue
+                else:
+                    outs.append(p)
+            selectors.append({"type": "selector", "tag": name, "outbounds": outs})
+    return [*selectors, *server, *urltests,
+            {"type": "direct", "tag": "direct"},
+            {"type": "direct", "tag": SB_PLACEHOLDER}]
+
+
+def _gen_singbox_service_rules(
+    rule_lines: list[str], out_tags: set[str], skips: list[str]
+) -> tuple[list[dict], list[dict]]:
+    """从 Surge [Rule] 生成服务类 route.rules + 对应我方 .srs rule_set（仅自有清单）。"""
+    rules: list[dict] = []
+    sets: list[dict] = []
+    seen_sets: set[str] = set()
+    for line in rule_lines:
+        s = line.strip()
+        if not s or s.startswith("#"):
+            continue
+        parts = [p.strip() for p in s.split(",")]
+        if parts[0].upper() not in ("RULE-SET", "DOMAIN-SET") or len(parts) < 3:
+            continue
+        stem = _sb_resolve_our_stem(parts[1])
+        if not stem:
+            continue                                       # 外部规则集：由静态基座覆盖或跳过
+        policy = parts[2]
+        if _should_skip([parts[1], stem, policy], skips):  # 与其他平台同一份 skip 语义
+            continue
+        if policy == "🔘 DIRECT":
+            rule = {"rule_set": stem, "outbound": "direct"}
+        elif policy == "🚧 AdGuard":
+            rule = {"rule_set": stem, "action": "reject"}
+        elif policy in out_tags:
+            rule = {"rule_set": stem, "outbound": policy}
+        else:
+            continue                                       # 目标组未生成（被 skip）→ 跳过
+        rules.append(rule)
+        if stem not in seen_sets:
+            seen_sets.add(stem)
+            sets.append({"type": "remote", "tag": stem, "format": "binary",
+                         "url": SB_SRS_PREFIX + quote(stem) + ".srs",
+                         "download_detour": "direct", "update_interval": "1d"})
+    return rules, sets
+
+
+def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -> None:
+    """生成 sing-box/config.json：静态基座 splice 生成的 outbounds / 服务规则。"""
+    if not SB_BASE_JSON.exists():
+        return
+    print("\n── sync-config: Surge Profile → sing-box config.json ──")
+    skips = config.get("global_skips", []) + config.get("Clash", {}).get("skips", [])
+    base = json.loads(SB_BASE_JSON.read_text(encoding="utf-8"))
+
+    outbounds = _gen_singbox_outbounds(group_lines, skips)
+    out_tags = {o["tag"] for o in outbounds}
+    service_rules, our_sets = _gen_singbox_service_rules(rule_lines, out_tags, skips)
+
+    base["outbounds"] = outbounds
+    rules = base["route"]["rules"]
+    rules[rules.index("__SERVICE_RULES__"):rules.index("__SERVICE_RULES__") + 1] = service_rules
+    rs = base["route"]["rule_set"]
+    rs[rs.index("__OUR_RULE_SETS__"):rs.index("__OUR_RULE_SETS__") + 1] = our_sets
+
+    # 引用自洽校验（生成期即失败，避免推出坏配置）
+    set_tags = {r["tag"] for r in base["route"]["rule_set"]}
+    for o in outbounds:
+        for ref in o.get("outbounds", []):
+            assert ref in out_tags, f"outbound {o['tag']} 引用不存在: {ref}"
+    for r in base["route"]["rules"]:
+        if isinstance(r, str):
+            raise AssertionError(f"未替换的哨兵: {r}")
+        if "outbound" in r:
+            assert r["outbound"] in out_tags, f"rule 引用不存在出站: {r['outbound']}"
+        for t in (lambda x: [x] if isinstance(x, str) else x or [])(r.get("rule_set")):
+            assert t in set_tags, f"rule 引用不存在 rule_set: {t}"
+    assert base["route"]["final"] in out_tags
+
+    body = json.dumps(base, ensure_ascii=False, indent=2) + "\n"
+    changed = _write_if_changed(SB_CONFIG_OUT, body)
+    print(f"  outbounds={len(outbounds)} | service_rules={len(service_rules)} | our_sets={len(our_sets)}")
+    print(f"  {'✓ sing-box/config.json 已更新' if changed else '✓ sing-box/config.json 无变化'}")
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -2920,6 +3066,7 @@ def main() -> None:
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
+    _sync_singbox(config, group_lines, rule_lines)
 
 
 if __name__ == "__main__":
