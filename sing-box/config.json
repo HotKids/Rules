@@ -171,7 +171,7 @@
         "🇭🇰 HK"
       ],
       "url": "https://www.gstatic.com/generate_204",
-      "interval": "3m"
+      "interval": "180s"
     },
     {
       "type": "urltest",
@@ -180,7 +180,7 @@
         "🇨🇳 TW"
       ],
       "url": "https://www.gstatic.com/generate_204",
-      "interval": "3m"
+      "interval": "180s"
     },
     {
       "type": "urltest",
@@ -189,7 +189,7 @@
         "🇸🇬 SG"
       ],
       "url": "https://www.gstatic.com/generate_204",
-      "interval": "3m"
+      "interval": "180s"
     },
     {
       "type": "urltest",
@@ -198,7 +198,7 @@
         "🇯🇵 JP"
       ],
       "url": "https://www.gstatic.com/generate_204",
-      "interval": "3m"
+      "interval": "180s"
     },
     {
       "type": "urltest",
@@ -207,7 +207,7 @@
         "🇺🇸 US"
       ],
       "url": "https://www.gstatic.com/generate_204",
-      "interval": "3m"
+      "interval": "180s"
     },
     {
       "type": "shadowsocks",
