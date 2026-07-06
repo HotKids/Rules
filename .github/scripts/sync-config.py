@@ -2566,6 +2566,8 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
     可选分流分组（非隐藏、非 include-all、非兜底策略组）会额外生成一份
     `ruleOptionsEnable`（默认全部 true），供使用者在本地临时改成 false 关闭
     某个分组——一并裁剪其 rules 与专属 rule-providers，不改 Profile.conf。
+    关闭分组时还会从其余组的候选列表中剔除对已删组的引用，即使日后策略组之间
+    出现互相引用，也不会因指向不存在的策略而导致 mihomo 启动失败。
     """
     data = yaml.safe_load(sample_yaml_text) or {}
 
@@ -2623,7 +2625,15 @@ def _gen_clash_script_js(sample_yaml_text: str) -> str:
         "    Object.keys(ruleOptionsEnable).filter((name) => !ruleOptionsEnable[name]),",
         "  );",
         "",
-        "  config['proxy-groups'] = proxyGroups.filter((g) => !disabledGroups.has(g.name));",
+        "  // 移除被关闭的组，并从其余组的候选列表中剔除对已删组的引用，",
+        "  // 避免任何组指向不存在的策略导致 mihomo 启动失败。",
+        "  config['proxy-groups'] = proxyGroups",
+        "    .filter((g) => !disabledGroups.has(g.name))",
+        "    .map((g) =>",
+        "      Array.isArray(g.proxies)",
+        "        ? { ...g, proxies: g.proxies.filter((p) => !disabledGroups.has(p)) }",
+        "        : g,",
+        "    );",
         "",
         "  const enabledRules = rules.filter((r) => {",
         "    const parts = r.split(',');",
