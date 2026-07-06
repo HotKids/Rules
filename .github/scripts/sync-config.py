@@ -2944,38 +2944,53 @@ def _sync_clash(
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
-    # 个人差异声明（Enhanced/ 下）：每个 *.overlay.json 对应一份同名派生脚本，
-    # 均由本函数按同一套逻辑生成，公共部分自动跟随 Script.js 同步。overlay 可用
-    # extends 声明基于另一份已生成的 overlay（而非从 Sample.yaml 重新起步）叠加，
-    # 避免多份个人配置之间重复声明同样的地区/Relay 链差异。
+    # 个人差异声明（Enhanced/ 下）：自动扫描所有 *.overlay.json，每份生成一份派生
+    # 脚本，输出路径由 overlay 自己的 output 字段声明（仓库根相对路径，如
+    # "Clash/Script/ClashBox.js"）——以后新增一份 overlay 文件即可自动生成对应脚本，
+    # 无需改动本脚本。公共部分自动跟随 Script.js 同步；overlay 可用 extends 声明基于
+    # 另一份 overlay（而非从 Sample.yaml 重新起步）叠加，避免多份个人配置之间重复
+    # 声明同样的地区/Relay 链差异，依赖顺序按 extends 自动拓扑解析。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
-    overlay_specs = [
-        ("myscript.overlay.json", "MyScript.js"),
-        ("clashbox.overlay.json", "ClashBox.js"),
-    ]
-    resolved_states: dict[str, tuple] = {}
-    for overlay_label, out_name in overlay_specs:
-        overlay_path = enhanced_dir / overlay_label
-        if not overlay_path.exists():
-            continue
+    overlays: dict[str, dict] = {}
+    for overlay_path in sorted(enhanced_dir.glob("*.overlay.json")):
         overlay = json.loads(overlay_path.read_text(encoding="utf-8"))
+        if not overlay.get("output"):
+            raise ValueError(
+                f"{overlay_path.name} 缺少必填字段 output（派生脚本的输出路径，"
+                f"仓库根相对，如 \"Clash/Script/{overlay_path.name.split('.')[0].capitalize()}.js\"）"
+            )
+        overlays[overlay_path.name] = overlay
+
+    resolved_states: dict[str, tuple] = {}
+
+    def _resolve_overlay(label: str, chain: list[str]) -> None:
+        if label in resolved_states:
+            return
+        if label in chain:
+            raise ValueError(
+                f"overlay 的 extends 出现循环依赖：{' -> '.join(chain + [label])}"
+            )
+        overlay = overlays[label]
         extends = overlay.get("extends")
         base_state = None
         if extends:
-            if extends not in resolved_states:
+            if extends not in overlays:
                 raise ValueError(
-                    f"{overlay_label} 的 extends 引用了 {extends!r}，但它不在 "
-                    f"_sync_clash 的 overlay_specs 里，或排在本文件之后（extends "
-                    f"只能引用排在自己之前、且已存在的 overlay 文件）"
+                    f"{label} 的 extends 引用了不存在的 overlay 文件 {extends!r}；"
+                    f"Enhanced/ 下现有：{sorted(overlays)}"
                 )
+            _resolve_overlay(extends, chain + [label])
             base_state = resolved_states[extends]
         out_body, state = _gen_clash_script_js(
-            body, overlay=overlay, overlay_label=overlay_label, base_state=base_state
+            body, overlay=overlay, overlay_label=label, base_state=base_state
         )
-        resolved_states[overlay_label] = state
-        out_path = Path(clash_out).parent / "Script" / out_name
-        out_changed = _write_if_changed(REPO_ROOT / out_path, out_body)
-        print(f"  {'✓ ' + str(out_path) + ' 已更新' if out_changed else '✓ ' + str(out_path) + ' 无变化'}")
+        resolved_states[label] = state
+        out_rel = overlay["output"]
+        out_changed = _write_if_changed(REPO_ROOT / out_rel, out_body)
+        print(f"  {'✓ ' + out_rel + ' 已更新' if out_changed else '✓ ' + out_rel + ' 无变化'}")
+
+    for label in overlays:
+        _resolve_overlay(label, [])
 
 
 def _sync_loon(
