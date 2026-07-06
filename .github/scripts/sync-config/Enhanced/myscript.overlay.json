@@ -2,11 +2,11 @@
   "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。",
 
   "group_overrides": {
-    "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
-    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)" },
-    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
-    "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
-    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" }
+    "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
+    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)" },
+    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)" },
+    "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
+    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*Pro)" }
   },
 
   "group_proxies_insert": {
@@ -21,7 +21,7 @@
       "name": "🇬🇧 England",
       "insert_after": "🇺🇸 America",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
+      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
       "hidden": true,
       "filter": "^(?=.*UK)"
     },
@@ -29,7 +29,7 @@
       "name": "🇩🇪 Germany",
       "insert_after": "🇬🇧 England",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
+      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
       "hidden": true,
       "filter": "^(?=.*DE)"
     },
@@ -38,7 +38,7 @@
       "insert_after": "📛 REJECT-DROP",
       "type": "url-test",
       "tolerance": 50,
-      "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
+      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*(GoMaMi|Neburst|Pro))"
     },
@@ -46,7 +46,7 @@
       "name": "🇭🇰 HK Relay",
       "insert_after": "🇸🇱 Relay",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
+      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*HK)(?=.*GoMaMi)"
     },
@@ -54,7 +54,7 @@
       "name": "🇨🇳 TW Relay",
       "insert_after": "🇭🇰 HK Relay",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
+      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*TW)(?=.*Neburst)"
     },
@@ -62,7 +62,7 @@
       "name": "🇯🇵 JP Relay",
       "insert_after": "🇨🇳 TW Relay",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
+      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*JP)(?=.*Pro)"
     },
@@ -70,7 +70,7 @@
       "name": "🇺🇸 US Relay",
       "insert_after": "🇯🇵 JP Relay",
       "type": "fallback",
-      "icon": "https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
+      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
       "filter": "^(?=.*US)(?=.*Pro)"
     }
