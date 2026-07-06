@@ -462,10 +462,10 @@ function main(config) {
   const allProxyNames = config.proxies.map((p) => p.name);
   const poolGroupFilters = {
     '🇸🇱 Relay': '^(?=.*(GoMaMi|Neburst|Pro))',
-    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*GoMaMi)',
+    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*(?:GoMaMi|Pro))',
     '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst)',
     '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro)',
-    '🇺🇸 US Relay': '^(?=.*US)(?=.*Pro)',
+    '🇺🇸 US Relay': '^(?=.*US)(?=.*(?:GoMaMi|Pro))',
     Mail: null,
     Server: null,
     'Hong Kong': '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
