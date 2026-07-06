@@ -1,6 +1,4 @@
 {
-  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果继续叠加——ClashBox 相对 MyScript 主要是批量改名（rename_map）+ 换图标（icon_overrides），额外两处独有差异：REJECT-DROP 整组去掉（AdGuard 候选两选一）、OneDrive/Microsoft 默认关闭。日常改地区/Relay链等公共部分只需要维护 myscript.overlay.json，ClashBox 会自动跟着同步。",
-
   "output": "Clash/Script/MyScriptColor.js",
 
   "extends": "myscript.overlay.json",
