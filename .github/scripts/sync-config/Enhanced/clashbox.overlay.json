@@ -1,11 +1,7 @@
 {
-  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果（地区 fallback / Relay 中转链 / England·Germany）继续叠加，本文件只需要写与 MyScript 的差异：批量去 emoji 改名换 Liquid Glass 图标、REJECT-DROP 整组去掉、OneDrive/Microsoft 保留但改名换图标且默认关闭、Telegram/AIGC 多插入 Japan 候选、Relay 链图标换 Protect + 4 个子节点 select 化、Server 挪到地区组最后。",
+  "_comment": "Clash/Script/ClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 ClashBox.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已经生成的结果继续叠加——ClashBox 相对 MyScript 只是纯粹的批量改名（rename_map）+ 换图标（icon_overrides），不带任何结构性差异，因此日常只需要维护 myscript.overlay.json，ClashBox 会自动跟着地区/Relay链等公共部分同步，无需另外改本文件。",
 
   "extends": "myscript.overlay.json",
-
-  "remove_groups": ["📛 REJECT-DROP"],
-
-  "disabled_by_default": ["OneDrive", "Microsoft"],
 
   "rename_map": {
     "🔰 Proxy": "Proxy",
@@ -21,6 +17,7 @@
     "🚧 AdGuard": "AdGuard",
     "🔘 DIRECT": "Direct",
     "⛔️ REJECT": "Reject",
+    "📛 REJECT-DROP": "Reject-Drop",
     "🇺🇳 Server": "Server",
     "🇭🇰 Hong Kong": "Hong Kong",
     "🇨🇳 Taiwan": "Taiwan",
@@ -47,6 +44,7 @@
     "AdGuard": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png",
     "Direct": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png",
     "Reject": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
+    "Reject-Drop": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png",
     "Server": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png",
     "OneDrive": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png",
     "Microsoft": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png",
@@ -55,21 +53,5 @@
     "🇨🇳 TW Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
     "🇯🇵 JP Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png",
     "🇺🇸 US Relay": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png"
-  },
-
-  "group_overrides": {
-    "🇭🇰 HK Relay": { "type": "select" },
-    "🇨🇳 TW Relay": { "type": "select" },
-    "🇯🇵 JP Relay": { "type": "select" },
-    "🇺🇸 US Relay": { "type": "select" }
-  },
-
-  "group_proxies_insert": {
-    "Telegram": { "after": "Singapore", "insert": ["Japan"] },
-    "AIGC": { "after": "America", "insert": ["Japan"] }
-  },
-
-  "move_after": {
-    "Server": "Germany"
   }
 }
