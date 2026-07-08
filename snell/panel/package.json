@@ -1,0 +1,24 @@
+{
+  "name": "snell-panel",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --filter '@snell-panel/server' dev",
+    "dev:web": "bun run --filter '@snell-panel/web' dev",
+    "build": "bun run --filter '@snell-panel/web' build",
+    "deploy": "bun run build && bun run --filter '@snell-panel/server' deploy",
+    "typecheck": "bun run --filter '*' typecheck",
+    "db:generate": "bun run --filter '@snell-panel/server' db:generate",
+    "db:migrate:local": "bun run --filter '@snell-panel/server' db:migrate:local"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  }
+}

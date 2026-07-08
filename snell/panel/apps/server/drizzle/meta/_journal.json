@@ -1,0 +1,27 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "6",
+      "when": 1781414427237,
+      "tag": "0000_zippy_lockjaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1781414807354,
+      "tag": "0001_glamorous_archangel",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1781416771949,
+      "tag": "0002_bent_mongu",
+      "breakpoints": true
+    }
+  ]
+}

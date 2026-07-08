@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build output
+dist/
+build/
+.output/
+apps/web/dist/
+
+# Cloudflare / Wrangler
+.wrangler/
+# ...but commit the root deploy-config redirect, so `wrangler deploy` works from
+# the monorepo root (where Workers Builds / one-click deploy run it).
+!/.wrangler/
+/.wrangler/*
+!/.wrangler/deploy/
+/.wrangler/deploy/*
+!/.wrangler/deploy/config.json
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+
+# Drizzle local
+*.sqlite
+*.sqlite3
+.d1/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+*.import.sql
+import.sql
+
+# Editor / OS
+.claude/
+.DS_Store
+*.log

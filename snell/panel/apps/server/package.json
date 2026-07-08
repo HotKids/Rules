@@ -1,0 +1,27 @@
+{
+  "name": "@snell-panel/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev -c wrangler.jsonc",
+    "deploy": "wrangler deploy -c wrangler.jsonc",
+    "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply snell-panel --local -c wrangler.jsonc",
+    "db:migrate:remote": "wrangler d1 migrations apply snell-panel --remote -c wrangler.jsonc"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.4.3",
+    "@snell-panel/shared": "workspace:*",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250620.0",
+    "drizzle-kit": "^0.31.10",
+    "typescript": "^5.7.3",
+    "wrangler": "^4.0.0"
+  }
+}

@@ -1,22 +1,16 @@
 # Snell Panel
 
-`snell/panel` is a Git submodule that points to:
+`snell/panel` contains the vendored source for Snell Panel.
+
+Upstream source:
 
 - Repository: https://github.com/missuo/snell-panel
 - Branch: `refactor/hono-heroui`
 - Commit: `f4610e4921e68c332fdbaaf2e6f5d0c61b2f3c4e`
 
-## Initialize
-
-After cloning this repository, initialize the panel:
-
-```bash
-git submodule update --init --recursive snell/panel
-```
-
 ## Deploy
 
-Run panel commands from the submodule directory:
+Run panel commands from the vendored source directory:
 
 ```bash
 cd snell/panel
@@ -30,10 +24,4 @@ Before deploying, replace `apps/server/wrangler.jsonc`'s D1 `database_id` with t
 
 ## Update
 
-To update the panel later:
-
-```bash
-git submodule update --remote snell/panel
-git add snell/panel
-git commit -m "chore: update snell panel"
-```
+To update the vendored source later, copy the tracked files from the upstream repository into `snell/panel/`, review the diff, then commit the changes in this repository.

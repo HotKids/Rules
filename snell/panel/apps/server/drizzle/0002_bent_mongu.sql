@@ -1,0 +1,1 @@
+ALTER TABLE `nodes` ADD `enabled` integer DEFAULT true NOT NULL;
