@@ -3,7 +3,7 @@ import { Button, Chip, Dropdown, Label, Spinner, Table } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NodeDTO } from "@snell-panel/shared";
 import { api } from "../api/client";
-import { useNodes } from "../api/hooks";
+import { nodeQueryKey, useNodes } from "../api/hooks";
 import { addrText, countryFlag, maskHost } from "../lib/format";
 import { CommandModal } from "./CommandModal";
 import { RelayModal } from "./RelayModal";
@@ -138,13 +138,13 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
 
   const del = useMutation({
     mutationFn: (id: string) => api.deleteNode(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["nodes"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: nodeQueryKey }),
   });
 
   const toggle = useMutation({
     mutationFn: (v: { id: string; enabled: boolean }) =>
       api.patchNode(v.id, { enabled: v.enabled }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["nodes"] }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: nodeQueryKey }),
   });
 
   if (nodes.isLoading)
