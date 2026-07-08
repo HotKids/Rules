@@ -7,8 +7,9 @@ Cloudflare Workers + D1 + Hono 后端，Vite / React / HeroUI 前端，同 Worke
 ## 一键部署
 
 ```bash
-git clone https://github.com/HotKids/Rules
-cd Rules/snell-panel
+git clone https://github.com/HotKids/Rules Rules
+mv Rules/snell-panel snell-panel && rm -rf Rules
+cd snell-panel
 chmod +x deploy.sh
 ./deploy.sh
 ```
@@ -16,14 +17,14 @@ chmod +x deploy.sh
 ## 一键更新
 
 ```bash
-cd Rules/snell-panel
+cd snell-panel
 ./update.sh
 ```
 
 ## 备份 / 恢复
 
 ```bash
-cd Rules/snell-panel
+cd snell-panel
 ./backup.sh
 ./restore.sh backups/<file.sql>
 ```
