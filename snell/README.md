@@ -37,7 +37,7 @@ Snell 管理菜单支持：
 
 ## Snell Panel
 
-`snell/panel/` 已作为 Git 子模块整合 `missuo/snell-panel`，提供基于 Cloudflare Workers + D1 的 Snell 节点管理面板和订阅生成服务。
+`snell/panel/` 已直接整合 `missuo/snell-panel` 源码，提供基于 Cloudflare Workers + D1 的 Snell 节点管理面板和订阅生成服务。
 
 面板支持：
 
@@ -49,7 +49,6 @@ Snell 管理菜单支持：
 部署入口：
 
 ```bash
-git submodule update --init --recursive snell/panel
 cd snell/panel
 bun install
 bunx wrangler login

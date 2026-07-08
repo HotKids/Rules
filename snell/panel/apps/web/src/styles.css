@@ -1,0 +1,28 @@
+/* Tailwind CSS v4 — must come first */
+@import "tailwindcss";
+
+/* HeroUI v3 styles — must come after Tailwind */
+@import "@heroui/styles";
+
+/* Brand accent (green, to match the logo). HeroUI derives accent-hover,
+   accent-soft and focus from --accent, so overriding it rebrands everything. */
+:root {
+  --accent: oklch(0.69 0.17 159);
+  --accent-foreground: oklch(0.99 0.01 159);
+}
+
+.dark {
+  --accent: oklch(0.74 0.16 159);
+  --accent-foreground: oklch(0.2 0.03 159);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

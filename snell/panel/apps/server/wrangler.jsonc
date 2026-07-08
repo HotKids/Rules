@@ -1,0 +1,30 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "snell-panel",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-01",
+  // Serve the built SPA as static assets from the same Worker (same origin → no CORS).
+  // `run_worker_first` forces the Worker to handle the API + installer script so the
+  // SPA not-found fallback doesn't swallow them.
+  "assets": {
+    "directory": "../web/dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/install.sh"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "snell-panel",
+      "database_id": "replace-with-your-d1-database-id",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "vars": {
+    "SNELL_V5_VERSION": "v5.0.1",
+    "SNELL_V6_VERSION": "v6.0.0b4",
+    "ENVIRONMENT": "production"
+  },
+  // Bundle the installer script as a text module so GET /install.sh can serve it.
+  "rules": [{ "type": "Text", "globs": ["**/*.sh"], "fallthrough": true }]
+}
