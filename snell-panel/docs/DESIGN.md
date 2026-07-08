@@ -2,8 +2,9 @@
 
 > Status: accepted · Stack: Hono (Cloudflare Workers) + D1 · HeroUI v3 SPA · Bun tooling
 
-This document is the design record for the full rewrite of Snell Panel. It is committed
-**before** any implementation so the rationale behind the architecture is preserved.
+This document is the design record for the `Rules/snell-panel` rewrite. The project is
+based on [missuo/snell-panel](https://github.com/missuo/snell-panel), then adapted into
+the `HotKids/Rules` tree as direct source code with a Panel-first provisioning flow.
 
 ---
 
@@ -29,7 +30,7 @@ called out:
 
 - Multi-user accounts / RBAC. A single operator authenticates with one Access Token.
 - Migrating the iOS app (`Snell Hub`) — out of scope here.
-- Shipping a no-panel standalone installer — OpenSnell's repo already provides one.
+- Shipping a no-panel standalone script — provisioning is part of the panel flow.
 
 ---
 
@@ -39,7 +40,7 @@ called out:
 ┌──────────────────────── Cloudflare Worker (workerd) ────────────────────────┐
 │  Hono app                                                                    │
 │   ├─ /api/*        admin + data-plane + subscription endpoints               │
-│   ├─ /install.sh   serves the installer script                               │
+│   ├─ /install.sh   serves the panel provisioner                               │
 │   └─ static assets (apps/web/dist)  ── SPA fallback for all other paths       │
 │  Bindings:  DB = D1 (SQLite)                                                  │
 │  Secrets:   ACCESS_TOKEN, API_TOKEN                                           │
@@ -47,7 +48,7 @@ called out:
 └──────────────────────────────────────────────────────────────────────────────┘
         ▲ same origin (no CORS)                         ▲ one-time install token
         │                                               │
-   HeroUI v3 SPA (browser)                       snell-server VPS (bash installer)
+   HeroUI v3 SPA (browser)                       snell-server VPS (bash provisioner)
 ```
 
 **Tooling vs runtime.** **Bun** is the package manager / workspace / script + test runner
@@ -159,7 +160,7 @@ those values verbatim, and the register endpoint keeps pre-filled values authori
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/subscribe?token=<ACCESS_TOKEN>&format=surge\|shadowrocket\|mihomo&filter=&flag=&via=` | render subscription |
-| GET | `/install.sh` | serve the installer script |
+| GET | `/install.sh` | serve the panel provisioner |
 
 **GeoIP** (`lib/geoip.ts`): `GET https://api.ip.sb/geoip/<ip>` (works from workerd). If the
 address is a domain, resolve an A record via DoH (`https://cloudflare-dns.com/dns-query`)
@@ -187,7 +188,7 @@ bash <(curl -fsSL https://panel.example.com/install.sh) install \
 ```
 
 "Latest V5/V6" is owned centrally by Worker vars `SNELL_V5_VERSION` (default `v5.0.1`) and
-`SNELL_V6_VERSION` (default `v6.0.0b4`) — matching the constants in OpenSnell's installer.
+`SNELL_V6_VERSION` (default `v6.0.0b4`) — matching the provisioner's defaults.
 The backend resolves family→exact version and passes `--snell-version`, so bumping a
 version is an env change, not a script edit.
 
@@ -197,10 +198,9 @@ operator runs it → script installs snell + registers → node becomes **active
 
 ---
 
-## 7. Installer script (`scripts/snell-install.sh`)
+## 7. Panel provisioner (`scripts/snell-install.sh`)
 
-Modeled on OpenSnell's polished, version-aware `install.sh`, adapted to **non-interactive
-flag mode** plus a panel register callback. Reused patterns: 32-char `gen_psk`, arch
+Adapted into **non-interactive flag mode** plus a panel register callback. Reused patterns: 32-char `gen_psk`, arch
 detection for both Surge and OpenSnell binaries, `download_surge <version>` (handles
 `v5.0.1` and `v6.0.0b4`; v6 has no armv7l build), version-branched config builder, systemd
 unit, firewall, geo fetch, and a `META_FILE` at `/etc/snell/.install_meta`. Paths:
@@ -300,7 +300,7 @@ Decisions added after the original design, all implemented and verified:
   /api/settings/subscribe-token/reset` rotates it (old URLs stop working). The panel's
   Subscription card builds the URL from toggles (format / flag / filter / via) and has a
   **Reset token** button. (VLESS is intentionally omitted — Snell is not VLESS.)
-- **Uninstall by Node ID, not IP.** The installer writes a hidden `/etc/snell/.install_meta`
+- **Uninstall by Node ID, not IP.** The provisioner writes a hidden `/etc/snell/.install_meta`
   holding `node_id`, `api_url`, `variant`, etc. `uninstall` reads `node_id` from it and calls
   `DELETE /api/nodes/<node_id>` — IP is not relied on (it may not be unique). The DELETE
   endpoint accepts `ACCESS_TOKEN` (panel) or `API_TOKEN` (passed to uninstall as `--api-token`).
