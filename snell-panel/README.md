@@ -33,12 +33,12 @@ cd snell-panel
 
 ### D1 已存在怎么办？
 
-运行 `./deploy.sh`。脚本会自动识别并复用 `apps/server/wrangler.jsonc` 中已有的有效 `database_id`；只有未配置时才会询问是否复用现有 D1。
+运行 `./deploy.sh`，选择复用现有 D1，并粘贴 Cloudflare D1 的 `database_id`。脚本不会覆盖 `apps/server/wrangler.jsonc` 中已有的有效 `database_id`。
 
 ### secrets 如何处理？
 
-部署时可以跳过、覆盖、手动隐藏输入或回车自动生成 `ACCESS_TOKEN` / `API_TOKEN`。最终摘要默认只显示脱敏 token；确需明文输出时使用 `./deploy.sh --show-secrets`。Cloudflare secret 写入后无法读回原文，请妥善保存自动生成的 token。
+部署时可以跳过、覆盖、手动隐藏输入或回车自动生成 `ACCESS_TOKEN` / `API_TOKEN`。Cloudflare secret 写入后无法读回原文，请保存自动生成的 token。
 
 ### 如何排查部署问题？
 
-运行 `./doctor.sh`。部署脚本也会在发布后自动检查 Worker URL，避免误以为 Cloudflare 默认空 Worker 页面是部署成功。更多说明见 `docs/DEPLOY.md`、`docs/UPDATE.md`、`docs/BACKUP.md`、`docs/SECURITY.md`、`docs/OPERATIONS.md`。
+运行 `./doctor.sh`。更多说明见 `docs/DEPLOY.md`、`docs/UPDATE.md`、`docs/BACKUP.md`、`docs/SECURITY.md`、`docs/OPERATIONS.md`。
