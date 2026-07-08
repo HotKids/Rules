@@ -47,7 +47,7 @@ function RowActions({
     <div className="flex items-center justify-end gap-1.5 whitespace-nowrap">
       {n.status === "pending" && (
         <Button size="sm" variant="primary" onPress={onInstall}>
-          Install
+          Provision
         </Button>
       )}
       <Dropdown>
@@ -177,7 +177,7 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
   if (list.length === 0)
     return (
       <p className="rounded-2xl border border-black/5 bg-background-secondary p-8 text-center text-sm text-muted dark:border-white/10">
-        No nodes yet. Click “Add Node” to create one.
+        No nodes yet. Click “Add Node” to create a provisioning job.
       </p>
     );
 

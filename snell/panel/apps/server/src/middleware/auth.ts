@@ -19,7 +19,7 @@ export function bearerToken(c: Context<AppEnv>): string | null {
 }
 
 /** Token from `Authorization: Bearer <t>` or the `?token=` query param.
- *  Used only where a URL token is required: subscriptions and installer callbacks. */
+ *  Used only where a URL token is required: subscriptions and provisioner callbacks. */
 export function extractToken(c: Context<AppEnv>): string | null {
   return bearerToken(c) ?? c.req.query("token") ?? null;
 }

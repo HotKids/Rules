@@ -40,7 +40,7 @@ export async function mintToken(
 }
 
 /**
- * Validate a token for a node WITHOUT consuming it (installer pre-flight, so a
+ * Validate a token for a node WITHOUT consuming it (provisioner pre-flight, so a
  * doomed install never starts). Looks the token up by its hash.
  */
 export async function validateToken(

@@ -98,7 +98,7 @@ router.post("/:id/relay", requireAccess, zValidator("json", relayNodeSchema), as
   return c.json({ node: toNodeDTO(inserted[0]) }, 201);
 });
 
-// GET /api/nodes/:id/install — mint a one-time token + build the install command
+// GET /api/nodes/:id/install — mint a one-time token + build the provisioning command
 router.get("/:id/install", requireAccess, async (c) => {
   const db = c.get("db");
   const row = await getNode(db, c.req.param("id"));
@@ -158,7 +158,7 @@ router.patch("/:id", requireAccess, zValidator("json", patchNodeSchema), async (
   return c.json({ node: toNodeDTO(updated!) });
 });
 
-// DELETE /api/nodes/:id — panel (ACCESS) or installer uninstall (API_TOKEN)
+// DELETE /api/nodes/:id — panel (ACCESS) or provisioner uninstall (API_TOKEN)
 router.delete("/:id", requireAccessOrApiToken, async (c) => {
   const db = c.get("db");
   const id = c.req.param("id");

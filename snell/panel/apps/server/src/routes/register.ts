@@ -11,7 +11,7 @@ import { toNodeDTO } from "../lib/dto";
 
 const router = new Hono<AppEnv>();
 
-// GET /api/nodes/:id/verify-token — installer pre-flight; does NOT consume the token.
+// GET /api/nodes/:id/verify-token — provisioner pre-flight; does NOT consume the token.
 router.get("/:id/verify-token", async (c) => {
   const db = c.get("db");
   const id = c.req.param("id");
@@ -25,7 +25,7 @@ router.get("/:id/verify-token", async (c) => {
   return c.json({ ok: true });
 });
 
-// POST /api/nodes/:id/register — installer callback (one-time token OR API_TOKEN)
+// POST /api/nodes/:id/register — provisioner callback (one-time token OR API_TOKEN)
 router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) => {
   const db = c.get("db");
   const id = c.req.param("id");

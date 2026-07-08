@@ -69,7 +69,7 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
             <Logo className="h-9 w-9" />
             <div className="leading-tight">
               <h1 className="text-lg font-semibold">Snell Panel</h1>
-              <p className="text-xs text-muted">Node &amp; subscription manager</p>
+              <p className="text-xs text-muted">Provisioning &amp; subscriptions</p>
             </div>
           </div>
           <div className="flex items-center gap-2">

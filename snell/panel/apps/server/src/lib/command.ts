@@ -14,24 +14,30 @@ export interface CommandParams {
   purpose: TokenPurpose;
 }
 
-/** Build the copy-paste command shown in the panel's Install / Upgrade modal. */
+function shellArg(value: string): string {
+  if (/^[A-Za-z0-9_./:@%+=,-]+$/.test(value)) return value;
+  return `'${value.replace(/'/g, `'\"'\"'`)}'`;
+}
+
+/** Build the copy-paste command shown in the panel's Provision / Upgrade modal. */
 export function buildCommand(p: CommandParams): string {
   const { apiUrl, node, token, version, snellVersion, purpose } = p;
   const args: string[] = [
-    `bash <(curl -fsSL ${apiUrl}/install.sh) ${purpose}`,
-    `--api-url ${apiUrl}`,
-    `--node-id ${node.nodeId}`,
-    `--token ${token}`,
-    `--version ${version}`,
-    `--snell-version ${snellVersion}`,
+    `bash <(curl -fsSL ${shellArg(`${apiUrl}/install.sh`)}) ${purpose}`,
+    `--api-url ${shellArg(apiUrl)}`,
+    `--node-id ${shellArg(node.nodeId)}`,
+    `--token ${shellArg(token)}`,
+    `--version ${shellArg(version)}`,
+    `--snell-version ${shellArg(snellVersion)}`,
+    `--name ${shellArg(node.nodeName)}`,
   ];
 
   if (purpose === "install") {
-    // Pre-filled IP/Port must be honored verbatim by the installer.
-    // The node name is panel-authoritative (set at creation, never overwritten
-    // by register), so it is intentionally NOT passed to the installer.
-    if (node.ipPrefilled && node.ip) args.push(`--ip ${node.ip}`);
-    if (node.portPrefilled && node.port) args.push(`--port ${node.port}`);
+    // Pre-filled IP/Port must be honored verbatim by the provisioner.
+    // The panel remains authoritative for the node name; --name is only used
+    // for the VPS-side completion summary.
+    if (node.ipPrefilled && node.ip) args.push(`--ip ${shellArg(node.ip)}`);
+    if (node.portPrefilled && node.port) args.push(`--port ${shellArg(String(node.port))}`);
   }
 
   // One line — easier to paste; no backslash continuations.

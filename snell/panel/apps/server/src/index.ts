@@ -31,7 +31,7 @@ app.use("/api/*", (c, next) => {
 
 app.get("/api/snell-versions", requireAccess, (c) => c.json(resolveVersions(c.env)));
 
-// Installer callback (token / API_TOKEN auth) must be registered before the
+// Provisioner callback (token / API_TOKEN auth) must be registered before the
 // admin router so its per-route auth applies, not the admin guard.
 app.route("/api/nodes", registerRouter);
 app.route("/api/nodes", nodesRouter);
