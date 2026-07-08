@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { like } from "drizzle-orm";
+import { and, eq, like } from "drizzle-orm";
 import {
   SUBSCRIPTION_FORMATS,
   type SubscriptionFormat,
@@ -25,10 +25,21 @@ router.get("/", async (c) => {
   const filter = c.req.query("filter") || "";
   const showFlag = c.req.query("flag") !== "false";
 
+  const predicates = [eq(nodes.status, "active"), eq(nodes.enabled, true)];
+  const structured = ["tag", "region", "vendor", "protocol", "enabled"] as const;
+  for (const key of structured) {
+    const value = c.req.query(key);
+    if (!value) continue;
+    if (key === "tag") predicates.push(like(nodes.tags, `%"${value}"%`));
+    if (key === "region") predicates.push(eq(nodes.region, value));
+    if (key === "vendor") predicates.push(eq(nodes.vendor, value));
+    if (key === "protocol") predicates.push(eq(nodes.protocol, value));
+    if (key === "enabled") predicates.push(eq(nodes.enabled, value !== "false"));
+  }
+  if (filter) predicates.push(like(nodes.nodeName, `%${filter}%`));
+
   const db = c.get("db");
-  const rows = filter
-    ? await db.select().from(nodes).where(like(nodes.nodeName, `%${filter}%`)).orderBy(nodes.id)
-    : await db.select().from(nodes).orderBy(nodes.id);
+  const rows = await db.select().from(nodes).where(and(...predicates)).orderBy(nodes.id);
 
   return c.text(renderSubscription(rows, { format, via, showFlag }));
 });

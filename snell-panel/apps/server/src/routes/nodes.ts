@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
-import { desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, like } from "drizzle-orm";
 import {
   DEFAULT_SS2022_METHOD,
   createNodeSchema,
@@ -31,9 +31,22 @@ async function getNode(db: Db, nodeId: string): Promise<NodeRow | null> {
   return rows[0] ?? null;
 }
 
-// GET /api/nodes — list all
+// GET /api/nodes — list with structured filters and sorting.
 router.get("/", requireAccess, async (c) => {
-  const rows = await c.get("db").select().from(nodes).orderBy(desc(nodes.id));
+  const q = c.req.query();
+  const filters = [];
+  if (q.vendor) filters.push(eq(nodes.vendor, q.vendor));
+  if (q.region) filters.push(eq(nodes.region, q.region));
+  if (q.protocol) filters.push(eq(nodes.protocol, q.protocol));
+  if (q.status) filters.push(eq(nodes.status, q.status));
+  if (q.enabled === "true" || q.enabled === "false") filters.push(eq(nodes.enabled, q.enabled === "true"));
+  if (q.tag) filters.push(like(nodes.tags, `%"${q.tag}"%`));
+
+  const sort = q.sort;
+  const sortColumn = sort === "registered_at" ? nodes.registeredAt : sort === "expire_at" ? nodes.expireAt : nodes.createdAt;
+  const order = q.order === "asc" ? asc(sortColumn) : desc(sortColumn);
+  const query = c.get("db").select().from(nodes).where(filters.length ? and(...filters) : undefined).orderBy(order);
+  const rows = await query;
   return c.json({ nodes: rows.map(toNodeDTO) });
 });
 
@@ -68,6 +81,16 @@ router.post("/", requireAccess, zValidator("json", createNodeSchema), async (c) 
     portPrefilled: input.port !== undefined,
     createdAt: now(),
     registeredAt: null,
+    installStartedAt: null,
+    installFinishedAt: null,
+    lastError: null,
+    lastSeenAt: null,
+    lastCheckAt: null,
+    vendor: input.vendor || null,
+    region: input.region || null,
+    tags: JSON.stringify(input.tags ?? []),
+    expireAt: input.expire_at ?? null,
+    remark: input.remark || null,
   };
 
   const inserted = await db.insert(nodes).values(values).returning();
@@ -104,6 +127,16 @@ router.post("/:id/relay", requireAccess, zValidator("json", relayNodeSchema), as
     portPrefilled: true,
     createdAt: ts,
     registeredAt: ts,
+    installStartedAt: ts,
+    installFinishedAt: ts,
+    lastSeenAt: ts,
+    lastCheckAt: null,
+    lastError: null,
+    vendor: origin.vendor,
+    region: origin.region,
+    tags: origin.tags,
+    expireAt: origin.expireAt,
+    remark: origin.remark,
   };
   const inserted = await db.insert(nodes).values(values).returning();
   return c.json({ node: toNodeDTO(inserted[0]) }, 201);
@@ -168,6 +201,11 @@ router.patch("/:id", requireAccess, zValidator("json", patchNodeSchema), async (
     update.isp = geo.isp;
     update.asn = geo.asn;
   }
+  if (input.vendor !== undefined) update.vendor = input.vendor || null;
+  if (input.region !== undefined) update.region = input.region || null;
+  if (input.tags !== undefined) update.tags = JSON.stringify(input.tags);
+  if (input.expire_at !== undefined) update.expireAt = input.expire_at;
+  if (input.remark !== undefined) update.remark = input.remark || null;
 
   await db.update(nodes).set(update).where(eq(nodes.nodeId, id));
   const updated = await getNode(db, id);
