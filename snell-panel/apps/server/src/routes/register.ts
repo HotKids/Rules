@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
-import { registerNodeSchema, type NodeProtocol } from "@snell-panel/shared";
+import { heartbeatSchema, installFailedSchema, registerNodeSchema, type NodeProtocol } from "@snell-panel/shared";
 import { nodes } from "../db/schema";
 import type { AppEnv } from "../env";
 import { extractToken, hasApiToken } from "../middleware/auth";
@@ -20,8 +20,10 @@ router.get("/:id/verify-token", async (c) => {
   const token = extractToken(c);
   if (!token) return c.json({ ok: false, error: "missing token" }, 401);
 
-  const res = await validateToken(db, token, id, Math.floor(Date.now() / 1000));
+  const ts = Math.floor(Date.now() / 1000);
+  const res = await validateToken(db, token, id, ts);
   if (!res.ok) return c.json({ ok: false, error: res.reason }, 401);
+  await db.update(nodes).set({ status: "installing", installStartedAt: ts, lastError: null }).where(eq(nodes.nodeId, id));
   return c.json({ ok: true });
 });
 
@@ -44,7 +46,7 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
   // The token's purpose must match the node's lifecycle: a pending node expects
   // an 'install' token, an active node an 'upgrade' token.
   const ts = Math.floor(Date.now() / 1000);
-  const expectedPurpose = row.status === "active" ? "upgrade" : "install";
+  const expectedPurpose = row.status === "active" || row.status === "upgrading" ? "upgrade" : "install";
   let authorized = hasApiToken(c);
   if (!authorized) {
     const token = extractToken(c);
@@ -71,6 +73,9 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
       version: input.version,
       method: rowProtocol === "ss2022" ? input.method ?? row.method : null,
       status: "active",
+      installFinishedAt: ts,
+      lastSeenAt: ts,
+      lastError: null,
       countryCode: geo.countryCode,
       isp: geo.isp,
       asn: geo.asn,
@@ -82,6 +87,45 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
     await db.select().from(nodes).where(eq(nodes.nodeId, id)).limit(1)
   )[0];
   return c.json({ node: toNodeDTO(updated) });
+});
+
+// POST /api/nodes/:id/install-failed — provisioner failure callback.
+router.post("/:id/install-failed", zValidator("json", installFailedSchema), async (c) => {
+  const db = c.get("db");
+  const id = c.req.param("id");
+  const token = extractToken(c);
+  const ts = Math.floor(Date.now() / 1000);
+  if (!hasApiToken(c)) {
+    if (!token || !(await validateToken(db, token, id, ts)).ok) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+  }
+  const input = c.req.valid("json");
+  await db.update(nodes).set({ status: "failed", installFinishedAt: ts, lastError: input.error }).where(eq(nodes.nodeId, id));
+  return c.json({ ok: true });
+});
+
+// POST /api/nodes/:id/heartbeat — node-scoped health callback.
+router.post("/:id/heartbeat", zValidator("json", heartbeatSchema), async (c) => {
+  const db = c.get("db");
+  const id = c.req.param("id");
+  const token = extractToken(c);
+  const ts = Math.floor(Date.now() / 1000);
+  if (!hasApiToken(c)) {
+    if (!token || !(await validateToken(db, token, id, ts)).ok) {
+      return c.json({ error: "Unauthorized" }, 401);
+    }
+  }
+  const input = c.req.valid("json");
+  await db.update(nodes).set({
+    status: input.service_active ? "active" : "failed",
+    lastSeenAt: ts,
+    lastCheckAt: ts,
+    lastError: input.error ?? null,
+    port: input.port,
+    ip: input.ip,
+  }).where(eq(nodes.nodeId, id));
+  return c.json({ ok: true });
 });
 
 export default router;
