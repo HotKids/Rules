@@ -3,6 +3,7 @@ import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NodeDTO } from "@snell-panel/shared";
 import { api } from "../api/client";
+import { nodeQueryKey } from "../api/hooks";
 
 export function RelayModal({
   origin,
@@ -27,7 +28,7 @@ export function RelayModal({
         port: Number(port),
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nodes"] });
+      qc.invalidateQueries({ queryKey: nodeQueryKey });
       onOpenChange(false);
     },
     onError: (e: Error) => setError(e.message),

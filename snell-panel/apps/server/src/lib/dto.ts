@@ -7,6 +7,16 @@ import type {
 } from "@snell-panel/shared";
 import type { NodeRow } from "../db/schema";
 
+function parseTags(tags: string | null): string[] {
+  if (!tags) return [];
+  try {
+    const value = JSON.parse(tags) as unknown;
+    return Array.isArray(value) ? value.filter((tag): tag is string => typeof tag === "string") : [];
+  } catch {
+    return [];
+  }
+}
+
 export function toNodeDTO(n: NodeRow): NodeDTO {
   return {
     id: n.id,
@@ -28,5 +38,15 @@ export function toNodeDTO(n: NodeRow): NodeDTO {
     port_prefilled: n.portPrefilled,
     created_at: n.createdAt,
     registered_at: n.registeredAt,
+    install_started_at: n.installStartedAt,
+    install_finished_at: n.installFinishedAt,
+    last_seen_at: n.lastSeenAt,
+    last_check_at: n.lastCheckAt,
+    last_error: n.lastError,
+    vendor: n.vendor,
+    region: n.region,
+    tags: parseTags(n.tags),
+    expire_at: n.expireAt,
+    remark: n.remark,
   };
 }
