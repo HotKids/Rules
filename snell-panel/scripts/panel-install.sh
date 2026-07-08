@@ -169,6 +169,13 @@ meta(){
 metaget(){ [ -f "$1" ] && grep "^$2=" "$1"|head -1|cut -d= -f2- || true; }
 detect(){ [ -f "$SSMETA" ] || [ -f "$SSUNIT" ] && { echo ss2022; return; }; [ -f "$SNMETA" ] || [ -f "$SNUNIT" ] && { echo snell; return; }; echo snell; }
 
+verify_install(){ [ -n "$API" ] && [ -n "$ID" ] && [ -n "$TOKEN" ] || return 0; curl -fsS "$API/api/nodes/$ID/verify-token?token=$TOKEN" >/dev/null; }
+report_failed(){
+  rc=$?; [ "$rc" -eq 0 ] && return 0
+  msg=$(esc "install failed at line ${BASH_LINENO[0]} with exit code $rc")
+  [ -n "$API" ] && [ -n "$ID" ] && [ -n "$TOKEN" ] && curl -fsS -X POST "$API/api/nodes/$ID/install-failed?token=$TOKEN" -H "Content-Type: application/json" -d "{\"error\":\"$msg\"}" >/dev/null 2>&1 || true
+  exit "$rc"
+}
 register(){
   [ -n "$API" ] && [ -n "$ID" ] && [ -n "$TOKEN" ] || return 0
   mj= ij=; [ "$PROTO" = ss2022 ] && mj=",\"method\":\"$(esc "$METHOD")\""; [ -n "$IP" ] && ij=",\"ip\":\"$(esc "$IP")\""
@@ -178,12 +185,12 @@ register(){
 del_panel(){ [ -n "$API" ] && [ -n "$ID" ] || return 0; t=${API_TOKEN:-$TOKEN}; [ -n "$t" ] && curl -fsS -X DELETE "$API/api/nodes/$ID?token=$t" >/dev/null || true; }
 
 install_node(){
-  root; norm; need --api-url "$API"; need --node-id "$ID"; need --token "$TOKEN"; deps
+  trap report_failed ERR
+  root; norm; need --api-url "$API"; need --node-id "$ID"; need --token "$TOKEN"; verify_install; deps
   PORT=${PORT:-$(freeport)}; IP=${IP:-$(pubip || true)}; PSK=$(genpsk)
-  log "Registering node with panel"; register
-  if [ "$PROTO" = ss2022 ]; then log "Installing SS2022 $METHOD"; backup "$SSBIN"; backup "$SSCONF"; backup "$SSUNIT"; dl_ss; write_conf; tfo; write_unit; systemctl enable "$SSSVC" >/dev/null 2>&1 || true; systemctl restart "$SSSVC"; openport "$PORT" tcp; openport "$PORT" udp
-  else log "Installing Snell V$VER $SNVER"; backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; tfo; write_unit; systemctl enable "$SNSVC" >/dev/null 2>&1 || true; systemctl restart "$SNSVC"; openport "$PORT" tcp; fi
-  meta; ok "Installed $PROTO"; printf "Protocol: %s\nPort: %s\nPassword/PSK: %s\n" "$PROTO" "$PORT" "$PSK"; [ -n "$IP" ] && echo "IP: $IP"
+  if [ "$PROTO" = ss2022 ]; then log "Installing SS2022 $METHOD"; backup "$SSBIN"; backup "$SSCONF"; backup "$SSUNIT"; dl_ss; write_conf; tfo; write_unit; systemctl enable "$SSSVC" >/dev/null 2>&1 || true; systemctl restart "$SSSVC"; systemctl is-active --quiet "$SSSVC"; openport "$PORT" tcp; openport "$PORT" udp
+  else log "Installing Snell V$VER $SNVER"; backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; tfo; write_unit; systemctl enable "$SNSVC" >/dev/null 2>&1 || true; systemctl restart "$SNSVC"; systemctl is-active --quiet "$SNSVC"; openport "$PORT" tcp; fi
+  meta; log "Registering installed node with panel"; register; trap - ERR; ok "Installed $PROTO"; printf "Protocol: %s\nPort: %s\nPassword/PSK: %s\n" "$PROTO" "$PORT" "$PSK"; [ -n "$IP" ] && echo "IP: $IP"
 }
 
 uninstall_node(){
