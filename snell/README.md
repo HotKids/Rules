@@ -1,13 +1,13 @@
 # Snell Toolkit
 
-`snell/` 是 `HotKids/Rules` 里独立维护的 Snell 工具项目，当前整合为两部分：
+`snell/` 是 `HotKids/Rules` 里独立维护的 Snell Toolkit。现在只保留一个入口脚本：
 
-- `snell-anytls.sh`：VPS 上使用的一键管理脚本，管理 Snell、ShadowTLS、AnyTLS 和基础流量查看。
-- `panel/`：Cloudflare Workers + D1 + React 面板源码，管理 Snell 节点并生成订阅。
+- `snell-anytls.sh`：统一管理 Snell、ShadowTLS、AnyTLS、基础流量查看和 Snell Panel。
+- `panel/`：面板源码目录，由 `snell-anytls.sh` 的 Snell Panel 菜单调用和管理。
 
 本目录按当前代码独立维护，不再保留外部快照，不再自动同步外部脚本仓库。
 
-## 一键脚本
+## 统一入口脚本
 
 本地运行：
 
@@ -27,6 +27,7 @@ bash <(curl -L -s https://raw.githubusercontent.com/HotKids/Rules/master/snell/s
 - Snell v5 / v6 安装、切换、更新、查看、卸载
 - ShadowTLS 安装、更新、查看、卸载
 - AnyTLS 安装、更新、查看、卸载
+- Snell Panel 依赖安装、本地变量写入、本地迁移、开发服务、构建和部署
 - 查看当前节点配置
 - 查看连接和监听端口
 
@@ -34,7 +35,7 @@ bash <(curl -L -s https://raw.githubusercontent.com/HotKids/Rules/master/snell/s
 
 ## 面板
 
-面板源码直接放在 `snell/panel/`，作为普通源码目录维护。
+面板源码直接放在 `snell/panel/`，作为普通源码目录维护。日常使用直接运行 `snell/snell-anytls.sh`，然后进入 `管理 Snell Panel`。
 
 面板支持：
 
@@ -43,15 +44,13 @@ bash <(curl -L -s https://raw.githubusercontent.com/HotKids/Rules/master/snell/s
 - Surge / Shadowrocket / Mihomo 订阅
 - 节点启用、禁用、Relay 和升级
 
-部署入口：
+如果只想管理面板，不需要 root 权限：
 
 ```bash
-cd snell/panel
-bun install
-bunx wrangler login
+bash snell/snell-anytls.sh
 ```
 
-随后按 `snell/panel/README.md` 创建 D1、设置 `ACCESS_TOKEN` / `API_TOKEN` 并部署 Worker。
+面板部署前仍需要按 `snell/panel/README.md` 创建 D1，并设置 `ACCESS_TOKEN` / `API_TOKEN`。
 
 ## AnyTLS 输出示例
 
