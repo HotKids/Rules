@@ -14,7 +14,7 @@ export const nodes = sqliteTable(
     version: text("version").notNull(),
     /** SS2022 cipher method; null for Snell. */
     method: text("method"),
-    /** 'pending' | 'active' */
+    /** 'pending' | 'installing' | 'active' | 'failed' | 'upgrading' | 'disabled' */
     status: text("status").notNull().default("pending"),
     ip: text("ip"),
     port: integer("port"),
@@ -29,10 +29,23 @@ export const nodes = sqliteTable(
     portPrefilled: integer("port_prefilled", { mode: "boolean" }).notNull().default(false),
     createdAt: integer("created_at").notNull(),
     registeredAt: integer("registered_at"),
+    installStartedAt: integer("install_started_at"),
+    installFinishedAt: integer("install_finished_at"),
+    lastError: text("last_error"),
+    lastSeenAt: integer("last_seen_at"),
+    lastCheckAt: integer("last_check_at"),
+    vendor: text("vendor"),
+    region: text("region"),
+    tags: text("tags").notNull().default("[]"),
+    expireAt: integer("expire_at"),
+    remark: text("remark"),
   },
   (t) => ({
     protocolIdx: index("nodes_protocol_idx").on(t.protocol),
     statusIdx: index("nodes_status_idx").on(t.status),
+    vendorIdx: index("nodes_vendor_idx").on(t.vendor),
+    regionIdx: index("nodes_region_idx").on(t.region),
+    expireIdx: index("nodes_expire_idx").on(t.expireAt),
   }),
 );
 
@@ -44,7 +57,7 @@ export const installTokens = sqliteTable(
     nodeId: text("node_id")
       .notNull()
       .references(() => nodes.nodeId, { onDelete: "cascade" }),
-    /** 'install' | 'upgrade' */
+    /** 'install' | 'upgrade' | 'uninstall' | 'heartbeat' */
     purpose: text("purpose").notNull().default("install"),
     expiresAt: integer("expires_at").notNull(),
     usedAt: integer("used_at"),
