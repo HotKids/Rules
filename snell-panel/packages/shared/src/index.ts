@@ -26,11 +26,11 @@ export const NODE_VERSIONS = [...SNELL_VERSIONS, "2022"] as const;
 export type NodeVersion = (typeof NODE_VERSIONS)[number];
 
 /** Lifecycle of a node row. */
-export const NODE_STATUSES = ["pending", "active"] as const;
+export const NODE_STATUSES = ["pending", "installing", "active", "failed", "upgrading", "disabled"] as const;
 export type NodeStatus = (typeof NODE_STATUSES)[number];
 
 /** Subscription output formats. */
-export const SUBSCRIPTION_FORMATS = ["surge", "shadowrocket", "mihomo"] as const;
+export const SUBSCRIPTION_FORMATS = ["surge", "shadowrocket", "mihomo", "loon", "stash", "sing-box", "mihomo-provider"] as const;
 export type SubscriptionFormat = (typeof SUBSCRIPTION_FORMATS)[number];
 
 /* -------------------------------------------------------------------------- */
@@ -59,6 +59,16 @@ export interface NodeDTO {
   port_prefilled: boolean;
   created_at: number;
   registered_at: number | null;
+  install_started_at: number | null;
+  install_finished_at: number | null;
+  last_seen_at: number | null;
+  last_check_at: number | null;
+  last_error: string | null;
+  vendor: string | null;
+  region: string | null;
+  tags: string[];
+  expire_at: number | null;
+  remark: string | null;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -93,6 +103,11 @@ export const createNodeSchema = z
     /** Optional pre-fill: if present, install MUST listen on this port. */
     port: portSchema.optional(),
     tfo: z.boolean().optional().default(true),
+    vendor: z.string().trim().max(64).optional(),
+    region: z.string().trim().max(64).optional(),
+    tags: z.array(z.string().trim().min(1).max(32)).optional(),
+    expire_at: z.coerce.number().int().positive().optional(),
+    remark: z.string().trim().max(500).optional(),
   })
   .superRefine((v, ctx) => {
     if (v.protocol === "snell") {
@@ -122,10 +137,15 @@ export const patchNodeSchema = z
     node_name: z.string().trim().min(1).max(64).optional(),
     ip: hostSchema.optional(),
     enabled: z.boolean().optional(),
+    vendor: z.string().trim().max(64).nullable().optional(),
+    region: z.string().trim().max(64).nullable().optional(),
+    tags: z.array(z.string().trim().min(1).max(32)).optional(),
+    expire_at: z.coerce.number().int().positive().nullable().optional(),
+    remark: z.string().trim().max(500).nullable().optional(),
   })
   .refine(
     (v) =>
-      v.node_name !== undefined || v.ip !== undefined || v.enabled !== undefined,
+      v.node_name !== undefined || v.ip !== undefined || v.enabled !== undefined || v.vendor !== undefined || v.region !== undefined || v.tags !== undefined || v.expire_at !== undefined || v.remark !== undefined,
     { message: "nothing to update" },
   );
 export type PatchNodeInput = z.infer<typeof patchNodeSchema>;
@@ -166,6 +186,22 @@ export const registerNodeSchema = z
     }
   });
 export type RegisterNodeInput = z.infer<typeof registerNodeSchema>;
+
+
+export const installFailedSchema = z.object({
+  error: z.string().trim().min(1).max(2000),
+});
+export type InstallFailedInput = z.infer<typeof installFailedSchema>;
+
+export const heartbeatSchema = z.object({
+  service_active: z.boolean(),
+  version: z.string().trim().max(64).optional(),
+  port: portSchema.optional(),
+  uptime: z.coerce.number().int().nonnegative().optional(),
+  ip: hostSchema.optional(),
+  error: z.string().trim().max(2000).optional(),
+});
+export type HeartbeatInput = z.infer<typeof heartbeatSchema>;
 
 /* -------------------------------------------------------------------------- */
 /*  Response shapes                                                           */

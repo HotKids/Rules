@@ -19,6 +19,7 @@ import {
   type SS2022Method,
 } from "@snell-panel/shared";
 import { api } from "../api/client";
+import { nodeQueryKey } from "../api/hooks";
 
 export function AddNodeModal({
   isOpen,
@@ -63,7 +64,7 @@ export function AddNodeModal({
       return api.createNode(body);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nodes"] });
+      qc.invalidateQueries({ queryKey: nodeQueryKey });
       reset();
       onOpenChange(false);
     },
