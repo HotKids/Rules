@@ -7,10 +7,9 @@
 
 ---
 
-## Repository integration
+## Project integration
 
-This panel is vendored into `HotKids/Rules` under `snell/panel/`.
-Its upstream source is [`missuo/snell-panel`](https://github.com/missuo/snell-panel).
+This panel is part of the `HotKids/Rules` Snell Toolkit and lives under `snell/panel/`.
 
 Run all panel commands from this directory:
 
@@ -79,7 +78,7 @@ bunx wrangler d1 migrations apply snell-panel --remote
 printf '%s' "<access-token>" | bunx wrangler secret put ACCESS_TOKEN
 printf '%s' "<api-token>"    | bunx wrangler secret put API_TOKEN
 
-# build the SPA + deploy the Worker (serves the SPA + API) from the repo root
+# build the SPA + deploy the Worker (serves the SPA + API) from the panel root
 cd ../..
 bun run build
 bunx wrangler deploy
