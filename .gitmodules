@@ -1,0 +1,4 @@
+[submodule "snell/panel"]
+	path = snell/panel
+	url = https://github.com/missuo/snell-panel.git
+	branch = refactor/hono-heroui

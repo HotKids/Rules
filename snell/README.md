@@ -13,10 +13,10 @@ chmod +x snell/snell-anytls.sh
 sudo bash snell/snell-anytls.sh
 ```
 
-远程运行示例（请替换占位仓库地址）：
+远程运行：
 
 ```bash
-bash <(curl -L -s https://raw.githubusercontent.com/<你的用户名>/<你的仓库>/main/snell/snell-anytls.sh)
+bash <(curl -L -s https://raw.githubusercontent.com/HotKids/Rules/master/snell/snell-anytls.sh)
 ```
 
 ## Snell 版本说明
@@ -34,6 +34,28 @@ Snell 管理菜单支持：
 - 修改密码/PSK
 - 启动、停止、重启、状态、日志
 - 卸载
+
+## Snell Panel
+
+`snell/panel/` 已作为 Git 子模块整合 `missuo/snell-panel`，提供基于 Cloudflare Workers + D1 的 Snell 节点管理面板和订阅生成服务。
+
+面板支持：
+
+- Snell v5 / v6 节点管理
+- 一次性安装命令
+- Surge / Shadowrocket / Mihomo 订阅
+- 节点启用、禁用、Relay 和升级
+
+部署入口：
+
+```bash
+git submodule update --init --recursive snell/panel
+cd snell/panel
+bun install
+bunx wrangler login
+```
+
+随后按 [`snell/PANEL.md`](PANEL.md) 和 [`snell/panel/README.md`](panel/README.md) 创建 D1、设置 `ACCESS_TOKEN` / `API_TOKEN` 并部署 Worker。
 
 ## AnyTLS 特性
 
@@ -105,6 +127,8 @@ bash snell/sync-upstream.sh
 - 默认每周一 UTC 03:30 运行一次。
 - 同步脚本只把上游原始文件保存到 `snell/upstream/` 供对比，不会直接覆盖 `snell/snell-anytls.sh` 的 AnyTLS 实现。
 - 如有变更，工作流会创建 Pull Request，便于人工审查。
+
+注意：`snell/sync-upstream.sh` 同步的是 `jinqians/snell.sh` 当前的 `main` 分支；本仓库默认分支仍为 `master`。
 
 ## 注意事项
 
