@@ -1,4 +1,10 @@
-import type { NodeDTO, NodeStatus, SnellVersion } from "@snell-panel/shared";
+import type {
+  NodeDTO,
+  NodeProtocol,
+  NodeStatus,
+  NodeVersion,
+  SS2022Method,
+} from "@snell-panel/shared";
 import type { NodeRow } from "../db/schema";
 
 export function toNodeDTO(n: NodeRow): NodeDTO {
@@ -6,7 +12,9 @@ export function toNodeDTO(n: NodeRow): NodeDTO {
     id: n.id,
     node_id: n.nodeId,
     node_name: n.nodeName,
-    version: n.version as SnellVersion,
+    protocol: (n.protocol ?? "snell") as NodeProtocol,
+    version: n.version as NodeVersion,
+    method: n.method as SS2022Method | null,
     status: n.status as NodeStatus,
     ip: n.ip,
     port: n.port,

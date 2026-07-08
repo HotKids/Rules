@@ -5,6 +5,8 @@
 This document is the design record for the `Rules/snell-panel` rewrite. The project is
 based on [missuo/snell-panel](https://github.com/missuo/snell-panel), then adapted into
 the `HotKids/Rules` tree as direct source code with a Panel-first provisioning flow.
+SS2022 support is rewritten into the same Panel provisioner while following the core
+`shadowsocks-rust` service/config approach from [jinqians/ss-2022.sh](https://github.com/jinqians/ss-2022.sh).
 
 ---
 
@@ -18,8 +20,8 @@ called out:
 1. **Two independent secrets** — a panel **Access Token** (control plane) and a backend
    **API Token** (data-plane writes), which must never be the same value or derivable from
    each other.
-2. **"Add node, then Install"** — the panel creates a *pending* node first (choose Snell
-   **V5 or V6**, name, and optionally **pre-fill IP/Port**); pressing **Install** yields a
+2. **"Add node, then Install"** — the panel creates a *pending* node first (choose
+   **Snell V5/V6** or **SS2022 method**, name, and optionally **pre-fill IP/Port**); pressing **Install** yields a
    copy-paste command to run on the server, which then back-fills `ip/port/psk` and flips
    the node to *active*.
 3. **Config-migrating upgrade** — replace the old "jump upgrade" with an in-place upgrade
@@ -48,7 +50,7 @@ called out:
 └──────────────────────────────────────────────────────────────────────────────┘
         ▲ same origin (no CORS)                         ▲ one-time install token
         │                                               │
-   HeroUI v3 SPA (browser)                       snell-server VPS (bash provisioner)
+   HeroUI v3 SPA (browser)                       snell-server / ss-rust VPS
 ```
 
 **Tooling vs runtime.** **Bun** is the package manager / workspace / script + test runner
@@ -72,9 +74,9 @@ apps/
   web/           # Vite + React + HeroUI v3 SPA → builds to apps/web/dist
     src/{App.tsx, api/client.ts, pages/*, components/*}
 packages/
-  shared/        # shared TS types + zod schemas (Node, version enum, API DTOs)
+  shared/        # shared TS types + zod schemas (Node, protocol/version/method enums, API DTOs)
 scripts/
-  snell-install.sh                # param-driven install/uninstall/upgrade
+  panel-install.sh                # param-driven install/uninstall/upgrade
 docs/
   DESIGN.md                       # this document
 ```
@@ -106,7 +108,9 @@ nodes
   id             integer  pk autoincrement
   node_id        text     unique not null        -- uuid, used in URLs/commands
   node_name      text     not null
-  version        text     not null               -- '5' | '6'
+  protocol       text     not null default 'snell' -- 'snell' | 'ss2022'
+  version        text     not null               -- Snell: '5' | '6'; SS2022: '2022'
+  method         text                             -- SS2022 method; null for Snell
   status         text     not null default 'pending'   -- 'pending' | 'active'
   ip             text                             -- null until prefilled or registered
   port           integer                          -- null until prefilled or randomized
@@ -142,7 +146,7 @@ those values verbatim, and the register endpoint keeps pre-filled values authori
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/nodes` | list all nodes (pending + active) |
-| POST | `/api/nodes` | create a draft: `{ version:'5'|'6', node_name, ip?, port?, tfo? }` → pending node |
+| POST | `/api/nodes` | create a draft: `{ protocol:'snell'\|'ss2022', version?, method?, node_name, ip?, port?, tfo? }` → pending node |
 | GET | `/api/nodes/:id/install` | mint one-time token → `{ command, token, expires_at }` |
 | GET | `/api/nodes/:id/upgrade` | mint one-time token → upgrade command |
 | PATCH | `/api/nodes/:id` | rename / change IP (re-resolves geo) |
@@ -153,7 +157,7 @@ those values verbatim, and the register endpoint keeps pre-filled values authori
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | `/api/nodes/:id/register` | `{ ip?, port, psk, version }` → fill geo, `status:'active'`, consume token |
+| POST | `/api/nodes/:id/register` | `{ protocol, ip?, port, psk, version, method? }` → fill geo, `status:'active'`, consume token |
 
 **Public:**
 
@@ -167,8 +171,8 @@ address is a domain, resolve an A record via DoH (`https://cloudflare-dns.com/dn
 first. Geo is best-effort — blank on failure. Replaces the old `utils.GetIPInfoFromDomainOrIP`.
 
 **Subscription** (`lib/subscription.ts`): port the three formatters and the country→flag
-emoji helper from the old Go `handlers` verbatim in behavior (Surge line, Shadowrocket
-`snell://` base64 URI, Mihomo YAML proxy entry), including `tfo`, `via`/underlying-proxy,
+emoji helper from the old Go `handlers` in behavior for Snell and add SS2022 output:
+Surge `ss`, Shadowrocket `ss://`, and Mihomo `type: ss`, including `tfo`, `via`/underlying-proxy,
 `filter`, and `flag` handling.
 
 ---
@@ -182,6 +186,7 @@ bash <(curl -fsSL https://panel.example.com/install.sh) install \
   --api-url https://panel.example.com \
   --node-id <NODE_ID> \
   --token <ONE_TIME_TOKEN> \
+  --protocol snell \
   --version 6 \
   --snell-version v6.0.0b4          # backend injects exact "latest" for the family
   [--ip <PREFILL_IP>] [--port <PREFILL_PORT>] [--name <NODE_NAME>]
@@ -193,29 +198,36 @@ The backend resolves family→exact version and passes `--snell-version`, so bum
 version is an env change, not a script edit.
 
 Flow: **create draft (pending)** → **Install** mints a token and returns the command →
-operator runs it → script installs snell + registers → node becomes **active** with real
+operator runs it → script installs Snell or SS2022 + registers → node becomes **active** with real
 `ip/port/psk` → subscription reflects it immediately (regenerated from the DB).
 
 ---
 
-## 7. Panel provisioner (`scripts/snell-install.sh`)
+## 7. Panel provisioner (`scripts/panel-install.sh`)
 
-Adapted into **non-interactive flag mode** plus a panel register callback. Reused patterns: 32-char `gen_psk`, arch
+Adapted into **non-interactive flag mode** plus a panel register callback. It is a single
+provisioner with `--protocol snell|ss2022`, served as `/install.sh`.
+
+**Snell.** Reused patterns: 32-char `gen_psk`, arch
 detection for both Surge and OpenSnell binaries, `download_surge <version>` (handles
 `v5.0.1` and `v6.0.0b4`; v6 has no armv7l build), version-branched config builder, systemd
 unit, firewall, geo fetch, and a `META_FILE` at `/etc/snell/.install_meta`. Paths:
-`INSTALL_BIN=/usr/local/bin/snell-server`, `CONFIG_DIR=/etc/snell`,
-`SERVICE_NAME=snell-server`.
+`SNELL_BIN=/usr/local/bin/snell-server`, `SNELL_DIR=/etc/snell`,
+`SNELL_SERVICE_NAME=snell-server`.
+
+**SS2022.** Rewritten from the jinqians SS2022 flow for Panel control: detect Linux arch,
+download `shadowsocks-rust` release assets, install `ssserver` as `/usr/local/bin/ss-rust`,
+write `/etc/ss-rust/config.json`, install `ss-rust.service`, set `mode: tcp_and_udp`,
+open TCP + UDP ports, enable `fast_open`, and generate base64 keys with 16 bytes for
+`2022-blake3-aes-128-gcm` or 32 bytes for the other SS2022 methods.
 
 Binary source per `--version`: **V6** → Surge official `v6.0.0b4` (closed beta, Linux only);
 **V5** → Surge official `v5.0.1` (default) or OpenSnell GPLv3 (optional `--variant opensnell`,
 all-arch).
 
-**install**: parse flags → pick binary by version at the exact `--snell-version` → port =
-`--port` or random free → IP = `--ip` or `curl -s -4 ip.sb` → generate a compliant PSK →
-write a version-specific config (V6: `dns-ip-preference`, no `obfs`/`ipv6`; V5: classic
-`obfs`/`ipv6`) → systemd unit → `POST $API_URL/api/nodes/$NODE_ID/register?token=$TOKEN` →
-persist meta.
+**install**: parse flags → generate protocol-appropriate credentials → register quickly
+with the panel while the one-time token is fresh → install the selected binary → write
+protocol config → systemd unit → firewall → persist meta.
 
 **uninstall**: stop + remove service/dir. The primary delete path is the panel (admin
 clicks Delete); the script does a best-effort `DELETE /api/nodes/:id` when a credential is
@@ -308,4 +320,3 @@ Decisions added after the original design, all implemented and verified:
   drops V5 nodes (the legacy USIT7 node — V5/V6 don't interoperate), preserves each
   `node_id` (uuid) for continuity, sets `status='active'`, and emits SQL **without** the
   integer `id` so D1 re-assigns ids from 1. Apply with `wrangler d1 execute --file`.
-</content>

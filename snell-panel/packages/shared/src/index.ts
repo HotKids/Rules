@@ -4,9 +4,26 @@ import { z } from "zod";
 /*  Enums / constants                                                         */
 /* -------------------------------------------------------------------------- */
 
+/** Protocol families the panel can provision. */
+export const NODE_PROTOCOLS = ["snell", "ss2022"] as const;
+export type NodeProtocol = (typeof NODE_PROTOCOLS)[number];
+
 /** Snell protocol versions the panel can install. V5 and V6 only. */
 export const SNELL_VERSIONS = ["5", "6"] as const;
 export type SnellVersion = (typeof SNELL_VERSIONS)[number];
+
+/** Shadowsocks 2022 methods mirrored from the jinqians SS2022 installer. */
+export const SS2022_METHODS = [
+  "2022-blake3-aes-128-gcm",
+  "2022-blake3-aes-256-gcm",
+  "2022-blake3-chacha20-poly1305",
+  "2022-blake3-chacha8-poly1305",
+] as const;
+export type SS2022Method = (typeof SS2022_METHODS)[number];
+export const DEFAULT_SS2022_METHOD: SS2022Method = "2022-blake3-aes-128-gcm";
+
+export const NODE_VERSIONS = [...SNELL_VERSIONS, "2022"] as const;
+export type NodeVersion = (typeof NODE_VERSIONS)[number];
 
 /** Lifecycle of a node row. */
 export const NODE_STATUSES = ["pending", "active"] as const;
@@ -24,7 +41,9 @@ export interface NodeDTO {
   id: number;
   node_id: string;
   node_name: string;
-  version: SnellVersion;
+  protocol: NodeProtocol;
+  version: NodeVersion;
+  method: SS2022Method | null;
   status: NodeStatus;
   ip: string | null;
   port: number | null;
@@ -58,16 +77,43 @@ const portSchema = z.coerce
   .min(1)
   .max(65535);
 
+const nodeProtocolSchema = z.enum(NODE_PROTOCOLS);
+const nodeVersionSchema = z.enum(NODE_VERSIONS);
+const ss2022MethodSchema = z.enum(SS2022_METHODS);
+
 /** POST /api/nodes — create a pending (draft) node. */
-export const createNodeSchema = z.object({
-  version: z.enum(SNELL_VERSIONS),
-  node_name: z.string().trim().min(1).max(64),
-  /** Optional pre-fill: if present, install MUST use this address. */
-  ip: hostSchema.optional(),
-  /** Optional pre-fill: if present, install MUST listen on this port. */
-  port: portSchema.optional(),
-  tfo: z.boolean().optional().default(true),
-});
+export const createNodeSchema = z
+  .object({
+    protocol: nodeProtocolSchema.optional().default("snell"),
+    version: nodeVersionSchema.optional(),
+    method: ss2022MethodSchema.optional(),
+    node_name: z.string().trim().min(1).max(64),
+    /** Optional pre-fill: if present, install MUST use this address. */
+    ip: hostSchema.optional(),
+    /** Optional pre-fill: if present, install MUST listen on this port. */
+    port: portSchema.optional(),
+    tfo: z.boolean().optional().default(true),
+  })
+  .superRefine((v, ctx) => {
+    if (v.protocol === "snell") {
+      if (v.version !== undefined && !(SNELL_VERSIONS as readonly string[]).includes(v.version)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["version"],
+          message: "Snell nodes must use version 5 or 6",
+        });
+      }
+      return;
+    }
+
+    if (v.version !== undefined && v.version !== "2022") {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["version"],
+        message: "SS2022 nodes must use version 2022",
+      });
+    }
+  });
 export type CreateNodeInput = z.infer<typeof createNodeSchema>;
 
 /** PATCH /api/nodes/:id — rename, repoint, or enable/disable a node. */
@@ -93,12 +139,32 @@ export const relayNodeSchema = z.object({
 export type RelayNodeInput = z.infer<typeof relayNodeSchema>;
 
 /** POST /api/nodes/:id/register — server-side callback from the provisioner. */
-export const registerNodeSchema = z.object({
-  ip: hostSchema.optional(),
-  port: portSchema,
-  psk: z.string().min(1).max(255),
-  version: z.enum(SNELL_VERSIONS),
-});
+export const registerNodeSchema = z
+  .object({
+    protocol: nodeProtocolSchema.optional(),
+    ip: hostSchema.optional(),
+    port: portSchema,
+    psk: z.string().min(1).max(255),
+    version: nodeVersionSchema,
+    method: ss2022MethodSchema.optional(),
+  })
+  .superRefine((v, ctx) => {
+    const protocol = v.protocol ?? (v.version === "2022" ? "ss2022" : "snell");
+    if (protocol === "ss2022" && v.method === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["method"],
+        message: "SS2022 register callbacks must include method",
+      });
+    }
+    if (protocol === "snell" && !(SNELL_VERSIONS as readonly string[]).includes(v.version)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["version"],
+        message: "Snell register callbacks must use version 5 or 6",
+      });
+    }
+  });
 export type RegisterNodeInput = z.infer<typeof registerNodeSchema>;
 
 /* -------------------------------------------------------------------------- */

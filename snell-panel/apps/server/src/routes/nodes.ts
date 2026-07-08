@@ -2,9 +2,12 @@ import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { desc, eq } from "drizzle-orm";
 import {
+  DEFAULT_SS2022_METHOD,
   createNodeSchema,
   patchNodeSchema,
   relayNodeSchema,
+  type NodeProtocol,
+  type NodeVersion,
   type SnellVersion,
 } from "@snell-panel/shared";
 import { installTokens, nodes, type NodeInsert, type NodeRow } from "../db/schema";
@@ -42,11 +45,17 @@ router.post("/", requireAccess, zValidator("json", createNodeSchema), async (c) 
   const geo = input.ip
     ? await lookupGeo(input.ip)
     : { countryCode: null, isp: null, asn: null };
+  const protocol: NodeProtocol = input.protocol;
+  const version: NodeVersion =
+    protocol === "ss2022" ? "2022" : ((input.version ?? "6") as SnellVersion);
+  const method = protocol === "ss2022" ? input.method ?? DEFAULT_SS2022_METHOD : null;
 
   const values: NodeInsert = {
     nodeId: crypto.randomUUID(),
     nodeName: input.node_name,
-    version: input.version,
+    protocol,
+    version,
+    method,
     status: "pending",
     ip: input.ip ?? null,
     port: input.port ?? null,
@@ -80,7 +89,9 @@ router.post("/:id/relay", requireAccess, zValidator("json", relayNodeSchema), as
   const values: NodeInsert = {
     nodeId: crypto.randomUUID(),
     nodeName: input.node_name,
+    protocol: (origin.protocol ?? "snell") as NodeProtocol,
     version: origin.version,
+    method: origin.method,
     status: "active", // PSK is known (copied), so no install step is needed
     ip: input.ip,
     port: input.port,
@@ -104,14 +115,16 @@ router.get("/:id/install", requireAccess, async (c) => {
   const row = await getNode(db, c.req.param("id"));
   if (!row) return c.json({ error: "Node not found" }, 404);
 
-  const version = row.version as SnellVersion;
+  const protocol = (row.protocol ?? "snell") as NodeProtocol;
+  const version = (protocol === "ss2022" ? "2022" : row.version) as NodeVersion;
   const { token, expiresAt } = await mintToken(db, row.nodeId, "install", now());
   const command = buildCommand({
     apiUrl: new URL(c.req.url).origin,
     node: row,
     token,
     version,
-    snellVersion: snellVersionFor(c.env, version),
+    snellVersion:
+      protocol === "snell" ? snellVersionFor(c.env, version as SnellVersion) : undefined,
     purpose: "install",
   });
   return c.json({ command, token, expires_at: expiresAt, purpose: "install" });
@@ -122,6 +135,9 @@ router.get("/:id/upgrade", requireAccess, async (c) => {
   const db = c.get("db");
   const row = await getNode(db, c.req.param("id"));
   if (!row) return c.json({ error: "Node not found" }, 404);
+  if ((row.protocol ?? "snell") !== "snell") {
+    return c.json({ error: "Only Snell nodes can be upgraded to V6" }, 400);
+  }
 
   const { token, expiresAt } = await mintToken(db, row.nodeId, "upgrade", now());
   const command = buildCommand({

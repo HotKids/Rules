@@ -1,4 +1,9 @@
-import type { SubscriptionFormat } from "@snell-panel/shared";
+import {
+  DEFAULT_SS2022_METHOD,
+  type NodeProtocol,
+  type SS2022Method,
+  type SubscriptionFormat,
+} from "@snell-panel/shared";
 import type { NodeRow } from "../db/schema";
 
 const SHADOWROCKET_METHOD = "chacha20-ietf-poly1305";
@@ -52,6 +57,13 @@ function formatLine(n: NodeRow, name: string, opts: SubscriptionOptions): string
 }
 
 function formatSurge(n: NodeRow, name: string, via?: string): string {
+  if (nodeProtocol(n) === "ss2022") {
+    const method = ss2022Method(n);
+    let line = `${name} = ss, ${n.ip}, ${n.port}, encrypt-method=${method}, password=${n.psk}, tfo=${n.tfo ? "true" : "false"}, udp-relay=true`;
+    if (via) line += `, underlying-proxy = ${via}`;
+    return line;
+  }
+
   let line = via
     ? `${name} = snell, ${n.ip}, ${n.port}, psk = ${n.psk}, version = ${n.version}, underlying-proxy = ${via}`
     : `${name} = snell, ${n.ip}, ${n.port}, psk = ${n.psk}, version = ${n.version}`;
@@ -60,6 +72,14 @@ function formatSurge(n: NodeRow, name: string, via?: string): string {
 }
 
 function formatShadowrocket(n: NodeRow, name: string): string {
+  if (nodeProtocol(n) === "ss2022") {
+    const server = joinHostPort(n.ip!, n.port!);
+    const encoded = base64UrlNoPad(`${ss2022Method(n)}:${n.psk}@${server}`);
+    let line = `ss://${encoded}`;
+    if (name) line += `#${encodeURIComponent(name)}`;
+    return line;
+  }
+
   const server = joinHostPort(n.ip!, n.port!);
   const encoded = base64RawStd(`${SHADOWROCKET_METHOD}:${n.psk}@${server}`);
   const params = new URLSearchParams();
@@ -71,6 +91,21 @@ function formatShadowrocket(n: NodeRow, name: string): string {
 }
 
 function formatMihomo(n: NodeRow, name: string, via?: string): string {
+  if (nodeProtocol(n) === "ss2022") {
+    const fields = [
+      `name: ${yamlFlow(name)}`,
+      `server: ${yamlFlow(n.ip!)}`,
+      `port: ${n.port}`,
+      "type: ss",
+      `cipher: ${yamlFlow(ss2022Method(n))}`,
+      `password: ${yamlFlow(n.psk!)}`,
+      "udp: true",
+    ];
+    if (n.tfo) fields.push("tfo: true");
+    if (via) fields.push(`dialer-proxy: ${yamlFlow(via)}`);
+    return "  - {" + fields.join(", ") + "}";
+  }
+
   const fields = [
     `name: ${yamlFlow(name)}`,
     `server: ${yamlFlow(n.ip!)}`,
@@ -107,7 +142,19 @@ function base64RawStd(s: string): string {
   return btoa(s).replace(/=+$/, "");
 }
 
+function base64UrlNoPad(s: string): string {
+  return btoa(s).replace(/=+$/, "").replace(/\+/g, "-").replace(/\//g, "_");
+}
+
 function yamlFlow(value: string): string {
   // Double-quoted YAML flow scalar; JSON.stringify is a close analog of Go's strconv.Quote.
   return JSON.stringify(value);
+}
+
+function nodeProtocol(n: NodeRow): NodeProtocol {
+  return (n.protocol ?? "snell") as NodeProtocol;
+}
+
+function ss2022Method(n: NodeRow): SS2022Method {
+  return (n.method ?? DEFAULT_SS2022_METHOD) as SS2022Method;
 }

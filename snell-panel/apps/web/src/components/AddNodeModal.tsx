@@ -10,7 +10,14 @@ import {
   TextField,
 } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { CreateNodeInput, SnellVersion } from "@snell-panel/shared";
+import {
+  DEFAULT_SS2022_METHOD,
+  SS2022_METHODS,
+  type CreateNodeInput,
+  type NodeProtocol,
+  type SnellVersion,
+  type SS2022Method,
+} from "@snell-panel/shared";
 import { api } from "../api/client";
 
 export function AddNodeModal({
@@ -21,7 +28,9 @@ export function AddNodeModal({
   onOpenChange: (open: boolean) => void;
 }) {
   const qc = useQueryClient();
+  const [protocol, setProtocol] = useState<NodeProtocol>("snell");
   const [version, setVersion] = useState<SnellVersion>("6");
+  const [method, setMethod] = useState<SS2022Method>(DEFAULT_SS2022_METHOD);
   const [name, setName] = useState("");
   const [prefill, setPrefill] = useState(false);
   const [ip, setIp] = useState("");
@@ -30,7 +39,9 @@ export function AddNodeModal({
   const [error, setError] = useState("");
 
   function reset() {
+    setProtocol("snell");
     setVersion("6");
+    setMethod(DEFAULT_SS2022_METHOD);
     setName("");
     setPrefill(false);
     setIp("");
@@ -41,7 +52,12 @@ export function AddNodeModal({
 
   const mutation = useMutation({
     mutationFn: () => {
-      const body: CreateNodeInput = { version, node_name: name.trim(), tfo };
+      const body: CreateNodeInput = { protocol, node_name: name.trim(), tfo };
+      if (protocol === "snell") body.version = version;
+      if (protocol === "ss2022") {
+        body.version = "2022";
+        body.method = method;
+      }
       if (prefill && ip.trim()) body.ip = ip.trim();
       if (prefill && port.trim()) body.port = Number(port);
       return api.createNode(body);
@@ -74,27 +90,73 @@ export function AddNodeModal({
           <Modal.Body>
             <div className="flex flex-col gap-4">
               <Select
-                selectedKey={version}
-                onSelectionChange={(k) => setVersion(String(k) as SnellVersion)}
+                selectedKey={protocol}
+                onSelectionChange={(k) => setProtocol(String(k) as NodeProtocol)}
               >
-                <Label>Snell version</Label>
+                <Label>Protocol</Label>
                 <Select.Trigger>
                   <Select.Value />
                   <Select.Indicator />
                 </Select.Trigger>
                 <Select.Popover>
                   <ListBox>
-                    <ListBox.Item id="6" textValue="V6">
-                      V6 (latest beta)
+                    <ListBox.Item id="snell" textValue="Snell">
+                      Snell
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
-                    <ListBox.Item id="5" textValue="V5">
-                      V5 (stable)
+                    <ListBox.Item id="ss2022" textValue="SS2022">
+                      SS2022
                       <ListBox.ItemIndicator />
                     </ListBox.Item>
                   </ListBox>
                 </Select.Popover>
               </Select>
+
+              {protocol === "snell" ? (
+                <Select
+                  selectedKey={version}
+                  onSelectionChange={(k) => setVersion(String(k) as SnellVersion)}
+                >
+                  <Label>Snell version</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      <ListBox.Item id="6" textValue="V6">
+                        V6 (latest beta)
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                      <ListBox.Item id="5" textValue="V5">
+                        V5 (stable)
+                        <ListBox.ItemIndicator />
+                      </ListBox.Item>
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              ) : (
+                <Select
+                  selectedKey={method}
+                  onSelectionChange={(k) => setMethod(String(k) as SS2022Method)}
+                >
+                  <Label>SS2022 method</Label>
+                  <Select.Trigger>
+                    <Select.Value />
+                    <Select.Indicator />
+                  </Select.Trigger>
+                  <Select.Popover>
+                    <ListBox>
+                      {SS2022_METHODS.map((m) => (
+                        <ListBox.Item key={m} id={m} textValue={m}>
+                          {m}
+                          <ListBox.ItemIndicator />
+                        </ListBox.Item>
+                      ))}
+                    </ListBox>
+                  </Select.Popover>
+                </Select>
+              )}
 
               <TextField value={name} onChange={setName}>
                 <Label>Node name</Label>

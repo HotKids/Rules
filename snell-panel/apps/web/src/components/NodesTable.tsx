@@ -28,10 +28,16 @@ function MoreIcon() {
 function StatusChips({ n }: { n: NodeDTO }) {
   return (
     <div className="flex flex-wrap gap-1.5">
+      <Chip>{n.protocol === "ss2022" ? "SS2022" : "Snell"}</Chip>
       <Chip color={n.status === "active" ? "success" : "warning"}>{n.status}</Chip>
       {!n.enabled && <Chip>hidden</Chip>}
     </div>
   );
+}
+
+function protocolDetail(n: NodeDTO): string {
+  if (n.protocol === "ss2022") return n.method ?? "SS2022";
+  return `V${n.version}`;
 }
 
 function RowActions({
@@ -63,7 +69,7 @@ function RowActions({
             >
               <Label>Add relay</Label>
             </Dropdown.Item>
-            {n.status === "active" && n.version === "5" && (
+            {n.protocol === "snell" && n.status === "active" && n.version === "5" && (
               <Dropdown.Item id="upgrade" textValue="Upgrade to V6">
                 <Label>Upgrade to V6</Label>
               </Dropdown.Item>
@@ -109,8 +115,8 @@ function NodeCard({
         <RowActions n={n} onInstall={onInstall} onMenu={onMenu} />
       </div>
       <dl className="mt-3 grid grid-cols-[3rem_1fr] gap-y-1 text-sm">
-        <dt className="text-muted">Ver</dt>
-        <dd>V{n.version}</dd>
+        <dt className="text-muted">Type</dt>
+        <dd>{protocolDetail(n)}</dd>
         <dt className="text-muted">Addr</dt>
         <dd className="font-mono text-xs break-all">
           {addrText(n.ip, n.port, privacy)}
@@ -206,7 +212,7 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
                   Name
                 </Table.Column>
                 <Table.Column width={104}>Status</Table.Column>
-                <Table.Column width={64}>Ver</Table.Column>
+                <Table.Column width={126}>Protocol</Table.Column>
                 <Table.Column width={150}>IP</Table.Column>
                 <Table.Column width={80}>Port</Table.Column>
                 <Table.Column width="1.6fr" minWidth={180}>
@@ -225,7 +231,9 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
                     <Table.Cell>
                       <StatusChips n={n} />
                     </Table.Cell>
-                    <Table.Cell>V{n.version}</Table.Cell>
+                    <Table.Cell>
+                      <span className="text-xs">{protocolDetail(n)}</span>
+                    </Table.Cell>
                     <Table.Cell>
                       <span className="font-mono text-xs">
                         {n.ip ? (privacy ? maskHost(n.ip) : n.ip) : "—"}

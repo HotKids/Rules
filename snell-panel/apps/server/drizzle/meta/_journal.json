@@ -22,6 +22,13 @@
       "when": 1781416771949,
       "tag": "0002_bent_mongu",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1783501400000,
+      "tag": "0003_ss2022_protocol",
+      "breakpoints": true
     }
   ]
 }
