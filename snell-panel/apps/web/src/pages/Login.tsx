@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button, Card, Input, Label, TextField } from "@heroui/react";
+import { Button, Card, Input, Label, ListBox, Select, TextField } from "@heroui/react";
 import { api } from "../api/client";
 import { clearToken, setToken } from "../lib/auth";
 import { Logo } from "../components/Logo";
@@ -8,12 +8,13 @@ export function Login({ onAuthed }: { onAuthed: () => void }) {
   const [value, setValue] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [storageMode, setStorageMode] = useState<"local" | "session" | "memory">("local");
 
   async function submit() {
     if (!value.trim()) return;
     setLoading(true);
     setError("");
-    setToken(value.trim());
+    setToken(value.trim(), storageMode);
     try {
       await api.settings();
       onAuthed();
@@ -47,6 +48,21 @@ export function Login({ onAuthed }: { onAuthed: () => void }) {
               }}
             />
           </TextField>
+          <Select
+            className="mt-4"
+            selectedKey={storageMode}
+            onSelectionChange={(k) => setStorageMode(String(k) as "local" | "session" | "memory")}
+          >
+            <Label>Login storage</Label>
+            <Select.Trigger><Select.Value /><Select.Indicator /></Select.Trigger>
+            <Select.Popover>
+              <ListBox>
+                <ListBox.Item id="local" textValue="Remember login">Remember login</ListBox.Item>
+                <ListBox.Item id="session" textValue="This session">This session</ListBox.Item>
+                <ListBox.Item id="memory" textValue="High security">High security</ListBox.Item>
+              </ListBox>
+            </Select.Popover>
+          </Select>
           {error && <p className="mt-2 text-sm text-danger">{error}</p>}
         </div>
 
