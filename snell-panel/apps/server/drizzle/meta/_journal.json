@@ -29,6 +29,13 @@
       "when": 1783501400000,
       "tag": "0003_ss2022_protocol",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1783502400000,
+      "tag": "0004_node_operations",
+      "breakpoints": true
     }
   ]
 }
