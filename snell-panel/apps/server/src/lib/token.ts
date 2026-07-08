@@ -5,7 +5,7 @@ import type { Db } from "../db/client";
 /** One-time install/upgrade tokens live for 5 minutes. */
 export const TOKEN_TTL_SECONDS = 5 * 60;
 
-export type TokenPurpose = "install" | "upgrade";
+export type TokenPurpose = "install" | "upgrade" | "uninstall" | "heartbeat";
 
 /** 32 random bytes, hex-encoded. */
 export function newToken(): string {
