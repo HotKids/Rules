@@ -28,7 +28,8 @@ export function renderSubscription(nodes: NodeRow[], opts: SubscriptionOptions):
     const name = composeNodeName(n, o);
     lines.push(formatLine(n, name, o));
   }
-  if (o.format === "mihomo") return "proxies:\n" + lines.join("\n");
+  if (["mihomo", "stash", "mihomo-provider"].includes(o.format)) return "proxies:\n" + lines.join("\n");
+  if (o.format === "sing-box") return JSON.stringify({ outbounds: lines.map((line) => JSON.parse(line)) }, null, 2);
   return lines.join("\n");
 }
 
@@ -50,7 +51,13 @@ function formatLine(n: NodeRow, name: string, opts: SubscriptionOptions): string
     case "shadowrocket":
       return formatShadowrocket(n, name);
     case "mihomo":
+    case "stash":
+    case "mihomo-provider":
       return formatMihomo(n, name, opts.via);
+    case "loon":
+      return formatSurge(n, name, opts.via);
+    case "sing-box":
+      return formatSingBox(n, name);
     default:
       return formatSurge(n, name, opts.via);
   }
@@ -117,6 +124,27 @@ function formatMihomo(n: NodeRow, name: string, via?: string): string {
   if (n.tfo) fields.push("tfo: true");
   if (via) fields.push(`dialer-proxy: ${yamlFlow(via)}`);
   return "  - {" + fields.join(", ") + "}";
+}
+
+function formatSingBox(n: NodeRow, name: string): string {
+  if (nodeProtocol(n) === "ss2022") {
+    return JSON.stringify({
+      type: "shadowsocks",
+      tag: name,
+      server: n.ip,
+      server_port: n.port,
+      method: ss2022Method(n),
+      password: n.psk,
+    });
+  }
+  return JSON.stringify({
+    type: "snell",
+    tag: name,
+    server: n.ip,
+    server_port: n.port,
+    version: Number(n.version),
+    psk: n.psk,
+  });
 }
 
 // --- helpers --------------------------------------------------------------
