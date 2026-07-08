@@ -2,6 +2,8 @@
 
 Cloudflare Workers + D1 + Hono 后端，Vite / React / HeroUI 前端，同 Worker 托管 SPA 的 Snell V5/V6 与 SS2022 节点生命周期管理面板。
 
+本项目基于 [missuo/snell-panel](https://github.com/missuo/snell-panel) 重构，并在 `HotKids/Rules` 仓库内继续维护。
+
 ## 一键部署
 
 ```bash
