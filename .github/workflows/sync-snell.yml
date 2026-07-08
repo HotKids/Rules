@@ -1,0 +1,36 @@
+name: Sync Snell
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "30 3 * * 1"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Pull latest master
+        run: git pull --ff-only origin master
+      - name: Sync upstream
+        run: bash snell/sync-upstream.sh
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v8
+        with:
+          commit-message: "sync: update snell upstream changes"
+          title: "sync: update snell upstream changes"
+          body: |
+            已同步 jinqians/snell.sh 上游变更。
+
+            - 已保留本地 AnyTLS 实现
+            - 已检查未重新引入 Snell v4
+            - 已检查未重新引入 VLESS / REALITY / sing-box / Xray
+          branch: sync/snell-upstream
+          base: master
