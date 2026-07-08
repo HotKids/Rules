@@ -4,7 +4,6 @@ source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/scripts/deploy-common.sh"
 trap on_error ERR
 
 main() {
-  parse_common_args "$@"
   require_project
   ensure_runtime_tools
 
@@ -30,7 +29,6 @@ main() {
 
   build_panel
   deploy_worker
-  health_check_worker
   print_status "Update"
 }
 
