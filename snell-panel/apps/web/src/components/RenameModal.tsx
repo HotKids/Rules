@@ -3,6 +3,7 @@ import { Button, Input, Label, Modal, TextField } from "@heroui/react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { NodeDTO, PatchNodeInput } from "@snell-panel/shared";
 import { api } from "../api/client";
+import { nodeQueryKey } from "../api/hooks";
 
 export function RenameModal({
   node,
@@ -26,7 +27,7 @@ export function RenameModal({
       return api.patchNode(node.node_id, body);
     },
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["nodes"] });
+      qc.invalidateQueries({ queryKey: nodeQueryKey });
       onOpenChange(false);
     },
     onError: (e: Error) => setError(e.message),
