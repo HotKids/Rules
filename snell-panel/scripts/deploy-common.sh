@@ -255,7 +255,7 @@ deploy_worker() {
 print_status() {
   local mode="$1"
   printf '\n\033[1;32m%s complete.\033[0m\n' "$mode"
-  printf 'Project root: %s\n' "$PANEL_ROOT"
+  printf 'Project: snell-panel\n'
   printf 'Wrangler config: apps/server/wrangler.jsonc\n'
   printf 'D1 database_id: %s\n' "$(current_database_id)"
   printf 'Migrations: applied remotely\n'
