@@ -10,7 +10,7 @@ from pathlib import Path
 readme = Path('snell-panel/README.md')
 text = readme.read_text()
 text = text.replace(
-    'This panel is part of the `HotKids/Rules` Snell Toolkit and lives under `snell/panel`.',
+    'This panel is part of the `HotKids/Rules` Snell Toolkit and lives under `snell/panel/`.',
     'This project lives directly under `Rules/snell-panel`.\n\nIt is rewritten from [missuo/snell-panel](https://github.com/missuo/snell-panel) and maintained as part of `HotKids/Rules`. The upstream project is used as the source inspiration; this tree is direct source code in this repository, not a submodule.',
 )
 text = text.replace('cd snell/panel', 'cd snell-panel')
@@ -41,7 +41,7 @@ git diff --check
 bash -n snell-panel/scripts/snell-install.sh
 snell-panel/scripts/snell-install.sh --help
 node -e "for (const p of ['snell-panel/package.json','snell-panel/apps/server/package.json','snell-panel/apps/web/package.json','snell-panel/packages/shared/package.json']) JSON.parse(require('fs').readFileSync(p,'utf8'));"
-if rg -n 'snell-anytls|snell/panel|Rules/snell/panel|Rules/snell\b' snell-panel README.md .github --glob '!snell-panel/bun.lock'; then
+if rg -n 'snell-anytls|snell/panel|Rules/snell/panel|Rules/snell(/|$)' snell-panel README.md .github --glob '!snell-panel/bun.lock'; then
   echo 'old snell paths still present' >&2
   exit 1
 fi
