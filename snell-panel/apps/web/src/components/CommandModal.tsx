@@ -26,7 +26,10 @@ export function CommandModal({
     staleTime: 0,
   });
 
-  const title = purpose === "install" ? "Provision node" : "Upgrade node to V6";
+  const title =
+    purpose === "install"
+      ? `Provision ${node.protocol === "ss2022" ? "SS2022" : "Snell"} node`
+      : "Upgrade node to V6";
 
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>

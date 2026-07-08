@@ -1,7 +1,7 @@
 <div align="center">
   <img src="apps/web/public/favicon.svg" width="76" alt="Snell Panel" />
   <h1>Snell Panel</h1>
-  <p>Provision Snell proxy nodes and generate subscription links.<br/>
+  <p>Provision Snell and SS2022 proxy nodes, then generate subscription links.<br/>
   Hono on <b>Cloudflare Workers + D1</b>, with a <b>HeroUI v3</b> panel served from the same Worker.</p>
 </div>
 
@@ -13,6 +13,8 @@ This project lives directly under `Rules/snell-panel`.
 
 It is rewritten from [missuo/snell-panel](https://github.com/missuo/snell-panel) and maintained as part of `HotKids/Rules`. The upstream project is used as the source inspiration; this tree is direct source code in this repository, not a submodule.
 
+The SS2022 provisioner path is rewritten for this Panel and follows the core service/config approach from [jinqians/ss-2022.sh](https://github.com/jinqians/ss-2022.sh): `shadowsocks-rust` as `ss-rust`, `/etc/ss-rust/config.json`, `tcp_and_udp`, TCP Fast Open, and method-aware base64 keys.
+
 Run all panel commands from this directory:
 
 ```bash
@@ -23,7 +25,8 @@ cd snell-panel
 
 ## Features
 
-- **V5 / V6 nodes** with a Panel-first provisioning flow — create a node, run the generated one-line command on your server, and it back-fills `ip/port/psk`.
+- **Snell V5 / V6 and SS2022 nodes** with a Panel-first provisioning flow — create a node, run the generated one-line command on your server, and it back-fills `ip/port/psk`.
+- **SS2022 methods** — `2022-blake3-aes-128-gcm`, `2022-blake3-aes-256-gcm`, `2022-blake3-chacha20-poly1305`, and `2022-blake3-chacha8-poly1305`.
 - **Two independent secrets**: a panel **Access Token** and a backend **API Token**; servers only ever receive a **per-node one-time install token**.
 - **Relay / transit nodes** — clone an active node behind a different IP/port.
 - **Enable / disable** — hide a node from subscriptions while it keeps running.
@@ -47,7 +50,7 @@ See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design.
 apps/server      Hono Worker (API + serves the SPA) + D1 schema/migrations
 apps/web         Vite + React + HeroUI v3 SPA  -> builds to apps/web/dist
 packages/shared  Shared TS types + zod schemas
-scripts          snell-install.sh (Panel provisioner) + import-legacy.ts
+scripts          panel-install.sh (Panel provisioner) + import-legacy.ts
 ```
 
 ---
@@ -125,16 +128,16 @@ The **subscription token** is separate, stored in D1, and rotatable from the pan
 
 ## Node lifecycle
 
-1. **Add Node** — pick V5/V6, name, optionally pre-fill IP/Port → a `pending` node.
+1. **Add Node** — pick Snell V5/V6 or SS2022 method, name, optionally pre-fill IP/Port → a `pending` node.
 2. **Provision** — copy the generated one-line command, run it on the server; it installs
-   Snell, writes systemd, enables TFO, tries to open the TCP port, and registers
+   Snell or `ss-rust`, writes systemd, enables TFO, tries to open the required port(s), and registers
    `ip/port/psk` → the node becomes `active`.
 3. **Relay** — clone an active node behind a different IP/port (transit front).
-4. **Upgrade** — migrate a V4/V5 node to V6 in place (config migration + binary swap).
+4. **Upgrade** — migrate a Snell V4/V5 node to V6 in place (config migration + binary swap).
 
-The provisioner (`scripts/snell-install.sh`, served by the Worker at `/install.sh`) stores
-`node_id` in `/etc/snell/.install_meta`, so `uninstall` removes the panel entry **by node id**,
-not by IP.
+The provisioner (`scripts/panel-install.sh`, served by the Worker at `/install.sh`) stores
+`node_id` in `/etc/snell/.install_meta` for Snell or `/etc/ss-rust/.install_meta` for SS2022,
+so `uninstall` removes the panel entry **by node id**, not by IP.
 
 ---
 

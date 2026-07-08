@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { AppEnv } from "../env";
 // Bundled as a text module via wrangler `rules` (type: "Text", globs: ["**/*.sh"]).
-import installScript from "../../../../scripts/snell-install.sh";
+import installScript from "../../../../scripts/panel-install.sh";
 
 // Normalize line endings to LF. If the repo was checked out on Windows (git
 // autocrlf), the bundled script could contain CRLF, which breaks `bash` with

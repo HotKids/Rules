@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
-import { registerNodeSchema } from "@snell-panel/shared";
+import { registerNodeSchema, type NodeProtocol } from "@snell-panel/shared";
 import { nodes } from "../db/schema";
 import type { AppEnv } from "../env";
 import { extractToken, hasApiToken } from "../middleware/auth";
@@ -34,6 +34,11 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
   const rows = await db.select().from(nodes).where(eq(nodes.nodeId, id)).limit(1);
   const row = rows[0];
   if (!row) return c.json({ error: "Node not found" }, 404);
+  const rowProtocol = (row.protocol ?? "snell") as NodeProtocol;
+  const inputProtocol = input.protocol ?? (input.version === "2022" ? "ss2022" : "snell");
+  if (inputProtocol !== rowProtocol) {
+    return c.json({ error: "Protocol mismatch" }, 400);
+  }
 
   // Authorize via the master API token, else consume a valid one-time token.
   // The token's purpose must match the node's lifecycle: a pending node expects
@@ -62,7 +67,9 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
       ip,
       port,
       psk: input.psk,
+      protocol: rowProtocol,
       version: input.version,
+      method: rowProtocol === "ss2022" ? input.method ?? row.method : null,
       status: "active",
       countryCode: geo.countryCode,
       isp: geo.isp,

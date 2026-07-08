@@ -54,8 +54,8 @@ export function RelayModal({
             <div className="flex flex-col gap-4">
               <p className="text-sm text-muted">
                 Creates a new active node that reuses{" "}
-                <span className="font-medium">{origin.node_name}</span>’s PSK and
-                version, but points at a different IP/port (the relay front).
+                <span className="font-medium">{origin.node_name}</span>’s protocol,
+                credential and version/method, but points at a different IP/port.
               </p>
               <TextField value={name} onChange={setName}>
                 <Label>Relay node name</Label>

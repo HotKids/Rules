@@ -8,8 +8,12 @@ export const nodes = sqliteTable(
     id: integer("id").primaryKey({ autoIncrement: true }),
     nodeId: text("node_id").notNull().unique(),
     nodeName: text("node_name").notNull(),
-    /** '5' | '6' */
+    /** 'snell' | 'ss2022' */
+    protocol: text("protocol").notNull().default("snell"),
+    /** Snell: '5' | '6'; SS2022: '2022' */
     version: text("version").notNull(),
+    /** SS2022 cipher method; null for Snell. */
+    method: text("method"),
     /** 'pending' | 'active' */
     status: text("status").notNull().default("pending"),
     ip: text("ip"),
@@ -27,6 +31,7 @@ export const nodes = sqliteTable(
     registeredAt: integer("registered_at"),
   },
   (t) => ({
+    protocolIdx: index("nodes_protocol_idx").on(t.protocol),
     statusIdx: index("nodes_status_idx").on(t.status),
   }),
 );
