@@ -1,0 +1,21 @@
+name: Unify Snell entry
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - '.github/run-unify-snell-entry'
+
+permissions:
+  contents: write
+
+jobs:
+  unify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: master
+      - name: Apply unified Snell entry changes
+        run: bash .github/scripts/unify-snell-entry.sh
