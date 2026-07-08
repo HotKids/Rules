@@ -1,0 +1,24 @@
+name: snell-panel-ci
+
+on:
+  push:
+    paths:
+      - 'snell-panel/**'
+  pull_request:
+    paths:
+      - 'snell-panel/**'
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: snell-panel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun run build
+      - run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - run: shellcheck scripts/*.sh deploy.sh update.sh doctor.sh backup.sh restore.sh
