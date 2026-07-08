@@ -9,12 +9,14 @@
 
 ## Project integration
 
-This panel is part of the `HotKids/Rules` Snell Toolkit and lives under `snell/panel/`.
+This project lives directly under `Rules/snell-panel`.
+
+It is rewritten from [missuo/snell-panel](https://github.com/missuo/snell-panel) and maintained as part of `HotKids/Rules`. The upstream project is used as the source inspiration; this tree is direct source code in this repository, not a submodule.
 
 Run all panel commands from this directory:
 
 ```bash
-cd snell/panel
+cd snell-panel
 ```
 
 ---
@@ -56,13 +58,13 @@ Deploy from a local clone with the Wrangler CLI. There is **no one-click deploy*
 the panel needs a D1 database and two secrets that only you can create, and the SPA
 must be built before the Worker is uploaded.
 
-`wrangler deploy` runs from the panel root (`snell/panel`) — the committed
+`wrangler deploy` runs from the panel root (`snell-panel`) — the committed
 `.wrangler/deploy/config.json` points it at `apps/server/wrangler.jsonc`. The D1 and
 secret commands read the config from the current directory, so they run from
 `apps/server` (where `wrangler.jsonc` lives).
 
 ```bash
-git clone https://github.com/HotKids/Rules && cd Rules/snell/panel
+git clone https://github.com/HotKids/Rules && cd Rules/snell-panel
 bun install
 
 bunx wrangler login
