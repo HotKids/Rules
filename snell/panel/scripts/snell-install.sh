@@ -21,7 +21,7 @@
 #                        panel owns the node name, so it is not sent on register.
 #   --variant V          official | opensnell  (default official; opensnell is V5-only)
 #
-# Modeled on github.com/missuo/opensnell install.sh.
+# The optional opensnell variant uses its public release API.
 
 set -uo pipefail
 
