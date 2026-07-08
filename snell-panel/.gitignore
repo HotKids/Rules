@@ -38,3 +38,6 @@ import.sql
 .claude/
 .DS_Store
 *.log
+
+# D1 backups
+backups/
