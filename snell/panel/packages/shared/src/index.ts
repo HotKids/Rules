@@ -92,7 +92,7 @@ export const relayNodeSchema = z.object({
 });
 export type RelayNodeInput = z.infer<typeof relayNodeSchema>;
 
-/** POST /api/nodes/:id/register — server-side callback from the installer. */
+/** POST /api/nodes/:id/register — server-side callback from the provisioner. */
 export const registerNodeSchema = z.object({
   ip: hostSchema.optional(),
   port: portSchema,
@@ -106,7 +106,7 @@ export type RegisterNodeInput = z.infer<typeof registerNodeSchema>;
 /* -------------------------------------------------------------------------- */
 
 export interface InstallCommandResponse {
-  /** The full copy-paste command to run on the server. */
+  /** The full copy-paste provisioning command to run on the server. */
   command: string;
   /** The one-time token embedded in the command (also shown for reference). */
   token: string;

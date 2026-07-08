@@ -10,7 +10,7 @@ const script = installScript.replace(/\r\n?/g, "\n");
 
 const router = new Hono<AppEnv>();
 
-// GET /install.sh — serve the installer so the generated command can curl it.
+// GET /install.sh — serve the provisioner so the generated command can curl it.
 router.get("/", (c) => {
   c.header("Content-Type", "text/x-shellscript; charset=utf-8");
   c.header("Cache-Control", "no-cache");

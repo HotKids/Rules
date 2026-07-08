@@ -2,9 +2,9 @@ import { useState } from "react";
 
 type Seg = { text: string; cls: string };
 
-const KEYWORDS = new Set(["bash", "curl", "install", "upgrade", "uninstall"]);
+const KEYWORDS = new Set(["bash", "curl", "install", "provision", "setup", "upgrade", "uninstall"]);
 
-// Lightweight highlighter for the installer command. prism-react-renderer does
+// Lightweight highlighter for the provisioning command. prism-react-renderer does
 // not bundle a bash grammar, so we tokenize this known command shape ourselves:
 // URLs, quoted strings, flags, shell punctuation, and keywords.
 function tokenize(cmd: string): Seg[] {

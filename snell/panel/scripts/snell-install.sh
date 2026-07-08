@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
 #
-# snell-panel installer — driven by the panel's generated command.
+# snell-panel provisioner — driven by the panel's generated command.
 #
 # Subcommands:
-#   install     Install a snell-server (V5 or V6) and register it with the panel.
+#   install     Provision a snell-server (V5 or V6) and register it with the panel.
 #   uninstall   Stop + remove the service; optionally delete the panel entry.
 #   upgrade     Migrate an existing V4/V5 node to V6 in place (config + binary),
 #               then re-report to the panel.
+#   status      Show local service/config metadata.
+#   restart     Restart the local snell-server service.
 #
 # Flags:
 #   --api-url URL        Panel base URL (e.g. https://panel.example.com)
@@ -52,6 +54,14 @@ DEFAULT_SURGE_V5="v5.0.1"
 DEFAULT_SURGE_V6="v6.0.0b4"
 SURGE_BASE_URL="https://dl.nssurge.com/snell"
 
+show_help() {
+  cat <<EOF
+Usage: $0 {install|provision|upgrade|uninstall|status|restart} [flags]
+
+This provisioner is normally invoked by Snell Panel's generated one-line command.
+EOF
+}
+
 # ----------------------------------------------------------------------------
 # Flags
 # ----------------------------------------------------------------------------
@@ -83,27 +93,55 @@ PORT=""; PSK=""; REPORT_IP=""; PSK_CHANGED=0
 # ----------------------------------------------------------------------------
 # Helpers
 # ----------------------------------------------------------------------------
-show_help() {
-  sed -n '2,30p' "$0" 2>/dev/null || echo "Usage: $0 {install|uninstall|upgrade} [flags]"
-}
-
 check_root() {
   [ "$(id -u)" -eq 0 ] || { print_error "Please run as root."; exit 1; }
 }
 
 ensure_tools() {
-  local missing=() pkg
-  for pkg in curl unzip openssl; do
-    command -v "$pkg" >/dev/null 2>&1 || missing+=("$pkg")
+  local missing=() bin
+  for bin in curl unzip openssl shuf ss sysctl systemctl; do
+    command -v "$bin" >/dev/null 2>&1 || missing+=("$bin")
   done
   [ ${#missing[@]} -eq 0 ] && return 0
-  print_info "Installing dependencies: ${missing[*]}"
-  if   command -v apt-get >/dev/null 2>&1; then apt-get update -qq && apt-get install -y "${missing[@]}"
-  elif command -v dnf >/dev/null 2>&1;     then dnf install -y "${missing[@]}"
-  elif command -v yum >/dev/null 2>&1;     then yum install -y "${missing[@]}"
-  elif command -v pacman >/dev/null 2>&1;  then pacman -Sy --noconfirm "${missing[@]}"
-  elif command -v zypper >/dev/null 2>&1;  then zypper install -y "${missing[@]}"
-  else print_error "Install these manually: ${missing[*]}"; exit 1; fi
+  print_info "Installing system dependencies for provisioning."
+  if command -v apt-get >/dev/null 2>&1; then
+    apt-get update -qq && apt-get install -y ca-certificates curl unzip openssl iproute2 procps coreutils
+  elif command -v dnf >/dev/null 2>&1; then
+    dnf install -y ca-certificates curl unzip openssl iproute procps-ng coreutils
+  elif command -v yum >/dev/null 2>&1; then
+    yum install -y ca-certificates curl unzip openssl iproute procps-ng coreutils
+  elif command -v pacman >/dev/null 2>&1; then
+    pacman -Sy --noconfirm ca-certificates curl unzip openssl iproute2 procps-ng coreutils
+  elif command -v zypper >/dev/null 2>&1; then
+    zypper install -y ca-certificates curl unzip openssl iproute2 procps coreutils
+  else
+    print_error "Install these manually: curl unzip openssl iproute2 procps coreutils"
+    exit 1
+  fi
+  for bin in curl unzip openssl shuf ss sysctl systemctl; do
+    command -v "$bin" >/dev/null 2>&1 || { print_error "Missing required tool after dependency install: $bin"; exit 1; }
+  done
+}
+
+backup_file() {
+  local f="$1" ts
+  [ -e "$f" ] || return 0
+  ts="$(date +%Y%m%d-%H%M%S)"
+  cp -a "$f" "${f}.bak.${ts}"
+}
+
+allow_tcp_port() {
+  local port="$1"
+  if command -v firewall-cmd >/dev/null 2>&1 && firewall-cmd --state >/dev/null 2>&1; then
+    firewall-cmd --add-port="${port}/tcp" --permanent >/dev/null 2>&1 \
+      && firewall-cmd --reload >/dev/null 2>&1 \
+      && { print_success "Allowed TCP ${port} through firewalld."; return 0; }
+  fi
+  if command -v ufw >/dev/null 2>&1 && ufw status 2>/dev/null | grep -q "Status: active"; then
+    ufw allow "${port}/tcp" >/dev/null 2>&1 \
+      && { print_success "Allowed TCP ${port} through ufw."; return 0; }
+  fi
+  print_warning "Open TCP ${port} in your VPS firewall/security group if it is not reachable."
 }
 
 detect_arch_surge() {
@@ -258,7 +296,8 @@ write_systemd_unit() {
   cat > "$SERVICE_FILE" <<EOF
 [Unit]
 Description=Snell server
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
@@ -301,11 +340,11 @@ verify_token() {
     "${API_URL}/api/nodes/${NODE_ID}/verify-token?token=${TOKEN}" 2>/dev/null || echo "000")
   [ "$code" = "000" ] && return 0                        # network blip; let register decide
   if [ "$code" != "200" ]; then
-    print_error "Install token is invalid or expired (HTTP ${code})."
+    print_error "Provision token is invalid or expired (HTTP ${code})."
     print_info "Generate a fresh command from the panel and run it within 5 minutes."
     exit 1
   fi
-  print_success "Install token verified."
+  print_success "Provision token verified."
 }
 
 # Report ip/port/psk/version to the panel (consumes the one-time token).
@@ -371,12 +410,17 @@ do_install() {
   print_success "Node registered. Installing snell-server (this can take a moment)..."
 
   print_header "Installing Snell V${VERSION}"
+  backup_file "$INSTALL_BIN"
+  backup_file "$CONFIG_FILE"
+  backup_file "$META_FILE"
+  backup_file "$SERVICE_FILE"
   download_binary
   write_config
   enable_tfo
   write_systemd_unit
   systemctl enable "$SERVICE_NAME" >/dev/null 2>&1
   systemctl restart "$SERVICE_NAME"
+  allow_tcp_port "$PORT"
   sleep 1
   systemctl is-active --quiet "$SERVICE_NAME" \
     || print_warning "Service not active; check 'journalctl -u ${SERVICE_NAME} -n 30'."
@@ -421,6 +465,10 @@ do_upgrade() {
     PSK="$(gen_psk)"; PSK_CHANGED=1
   fi
 
+  backup_file "$INSTALL_BIN"
+  backup_file "$CONFIG_FILE"
+  backup_file "$META_FILE"
+  backup_file "$SERVICE_FILE"
   migrate_config_to_v6
   print_success "Config migrated to V6 (removed obfs/ipv6, set dns-ip-preference)."
 
@@ -428,6 +476,7 @@ do_upgrade() {
   download_binary
   write_systemd_unit
   systemctl start "$SERVICE_NAME"
+  allow_tcp_port "$PORT"
   sleep 1
   systemctl is-active --quiet "$SERVICE_NAME" \
     || print_warning "Service not active after upgrade; check 'journalctl -u ${SERVICE_NAME} -n 30'."
@@ -448,13 +497,37 @@ do_upgrade() {
   print_summary
 }
 
+do_status() {
+  print_header "Snell service"
+  if systemctl list-unit-files --no-legend "${SERVICE_NAME}.service" 2>/dev/null | grep -q "^${SERVICE_NAME}.service"; then
+    systemctl status "$SERVICE_NAME" --no-pager || true
+  else
+    print_warning "Service ${SERVICE_NAME} is not installed."
+  fi
+  print_header "Local metadata"
+  if [ -f "$META_FILE" ]; then
+    sed -E 's/^(psk=).+/\1****/' "$META_FILE"
+  else
+    print_warning "No metadata at ${META_FILE}."
+  fi
+}
+
+do_restart() {
+  check_root
+  systemctl restart "$SERVICE_NAME"
+  systemctl status "$SERVICE_NAME" --no-pager || true
+}
+
 # ----------------------------------------------------------------------------
 # Main
 # ----------------------------------------------------------------------------
 case "$ACTION" in
   install)   do_install ;;
+  provision|setup) do_install ;;
   uninstall) do_uninstall ;;
   upgrade)   do_upgrade ;;
+  status)    do_status ;;
+  restart)   do_restart ;;
   ""|-h|--help|help) show_help ;;
   *) print_error "Unknown command: $ACTION"; show_help; exit 1 ;;
 esac

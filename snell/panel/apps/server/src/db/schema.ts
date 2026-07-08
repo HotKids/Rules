@@ -1,7 +1,7 @@
 import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
 
 /** A Snell node. Created as a draft (status='pending'), then back-filled by the
- *  installer callback (status='active'). */
+ *  provisioner callback (status='active'). */
 export const nodes = sqliteTable(
   "nodes",
   {
@@ -31,7 +31,7 @@ export const nodes = sqliteTable(
   }),
 );
 
-/** Per-node, single-use, expiring tokens embedded in install/upgrade commands. */
+/** Per-node, single-use, expiring tokens embedded in provision/upgrade commands. */
 export const installTokens = sqliteTable(
   "install_tokens",
   {

@@ -1,56 +1,49 @@
 # Snell Toolkit
 
-`snell/` 是 `HotKids/Rules` 里独立维护的 Snell Toolkit。现在只保留一个入口脚本：
+`snell/` 是 `HotKids/Rules` 里独立维护的 Snell Toolkit。现在以 Panel 为主入口：
 
-- `snell-anytls.sh`：统一管理 Snell、ShadowTLS、AnyTLS、基础流量查看和 Snell Panel。
-- `panel/`：面板源码目录，由 `snell-anytls.sh` 的 Snell Panel 菜单调用和管理。
+- `panel/`：Snell Panel 源码和部署入口，负责节点开通、升级、订阅和日常管理。
+- `panel/scripts/snell-install.sh`：由 Panel 生成命令并通过 `/install.sh` 下发到 VPS 的节点开通器。
+- `snell-anytls.sh`：保留为独立 VPS 备用脚本，不再作为 Panel 工作流入口。
 
 本目录按当前代码独立维护，不再保留外部快照，不再自动同步外部脚本仓库。
 
-## 统一入口脚本
+## 推荐工作流
 
-本地运行：
+部署并登录 Panel：
 
 ```bash
-chmod +x snell/snell-anytls.sh
-sudo bash snell/snell-anytls.sh
+cd snell/panel
+bun install
+# 按 snell/panel/README.md 创建 D1 并设置 ACCESS_TOKEN / API_TOKEN 后：
+bun run deploy
 ```
 
-远程运行：
+随后在 Panel 中添加节点，复制面板生成的一次性命令到 VPS 执行。VPS 上执行的是 Panel 托管的 `/install.sh`，它会完成 Snell 安装、systemd 服务、端口放行尝试、TFO 设置，并把 `ip/port/psk` 注册回 Panel。
+
+Panel 工作流支持：
+
+- Snell v5 / v6 节点开通
+- 节点升级到 Snell v6
+- 节点启用、禁用、Relay 和删除
+- Surge / Shadowrocket / Mihomo 订阅
+- 订阅 token 轮换
+
+Panel 安装器不使用 VLESS / REALITY / sing-box / Xray，并已移除 Snell v4，仅保留 Snell v5 / v6。
+
+## 面板
+
+面板源码直接放在 `snell/panel/`，作为普通源码目录维护。部署前需要按 `snell/panel/README.md` 创建 D1，并设置 `ACCESS_TOKEN` / `API_TOKEN`。
+
+## 备用脚本
+
+`snell-anytls.sh` 仍保留给不部署 Panel 的场景使用，可独立安装 Snell、ShadowTLS、AnyTLS 和查看基础流量。Panel 工作流不依赖它。
+
+远程运行备用脚本：
 
 ```bash
 bash <(curl -L -s https://raw.githubusercontent.com/HotKids/Rules/master/snell/snell-anytls.sh)
 ```
-
-脚本功能：
-
-- Snell v5 / v6 安装、切换、更新、查看、卸载
-- ShadowTLS 安装、更新、查看、卸载
-- AnyTLS 安装、更新、查看、卸载
-- Snell Panel 依赖安装、本地变量写入、本地迁移、开发服务、构建和部署
-- 查看当前节点配置
-- 查看连接和监听端口
-
-本脚本不使用 VLESS / REALITY / sing-box / Xray，并已移除 Snell v4，仅保留 Snell v5 / v6。
-
-## 面板
-
-面板源码直接放在 `snell/panel/`，作为普通源码目录维护。日常使用直接运行 `snell/snell-anytls.sh`，然后进入 `管理 Snell Panel`。
-
-面板支持：
-
-- Snell v5 / v6 节点管理
-- 一次性安装命令
-- Surge / Shadowrocket / Mihomo 订阅
-- 节点启用、禁用、Relay 和升级
-
-如果只想管理面板，不需要 root 权限：
-
-```bash
-bash snell/snell-anytls.sh
-```
-
-面板部署前仍需要按 `snell/panel/README.md` 创建 D1，并设置 `ACCESS_TOKEN` / `API_TOKEN`。
 
 ## AnyTLS 输出示例
 

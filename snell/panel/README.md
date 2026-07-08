@@ -1,7 +1,7 @@
 <div align="center">
   <img src="apps/web/public/favicon.svg" width="76" alt="Snell Panel" />
   <h1>Snell Panel</h1>
-  <p>Manage Snell proxy nodes and generate subscription links.<br/>
+  <p>Provision Snell proxy nodes and generate subscription links.<br/>
   Hono on <b>Cloudflare Workers + D1</b>, with a <b>HeroUI v3</b> panel served from the same Worker.</p>
 </div>
 
@@ -21,7 +21,7 @@ cd snell/panel
 
 ## Features
 
-- **V5 / V6 nodes** with an *add-then-install* flow — create a node in the panel, run the generated one-line command on your server, and it back-fills `ip/port/psk`.
+- **V5 / V6 nodes** with a Panel-first provisioning flow — create a node, run the generated one-line command on your server, and it back-fills `ip/port/psk`.
 - **Two independent secrets**: a panel **Access Token** and a backend **API Token**; servers only ever receive a **per-node one-time install token**.
 - **Relay / transit nodes** — clone an active node behind a different IP/port.
 - **Enable / disable** — hide a node from subscriptions while it keeps running.
@@ -42,10 +42,10 @@ See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design.
 | Tooling | Bun (workspace, scripts), Wrangler (deploy) |
 
 ```
-apps/server   Hono Worker (API + serves the SPA) + D1 schema/migrations
-apps/web      Vite + React + HeroUI v3 SPA  → builds to apps/web/dist
+apps/server      Hono Worker (API + serves the SPA) + D1 schema/migrations
+apps/web         Vite + React + HeroUI v3 SPA  -> builds to apps/web/dist
 packages/shared  Shared TS types + zod schemas
-scripts       snell-install.sh (installer) + import-legacy.ts
+scripts          snell-install.sh (Panel provisioner) + import-legacy.ts
 ```
 
 ---
@@ -124,13 +124,15 @@ The **subscription token** is separate, stored in D1, and rotatable from the pan
 ## Node lifecycle
 
 1. **Add Node** — pick V5/V6, name, optionally pre-fill IP/Port → a `pending` node.
-2. **Install** — copy the generated one-line command, run it on the server; it installs
-   snell and registers `ip/port/psk` → the node becomes `active`.
+2. **Provision** — copy the generated one-line command, run it on the server; it installs
+   Snell, writes systemd, enables TFO, tries to open the TCP port, and registers
+   `ip/port/psk` → the node becomes `active`.
 3. **Relay** — clone an active node behind a different IP/port (transit front).
 4. **Upgrade** — migrate a V4/V5 node to V6 in place (config migration + binary swap).
 
-The installer (`scripts/snell-install.sh`) stores `node_id` in `/etc/snell/.install_meta`,
-so `uninstall` removes the panel entry **by node id**, not by IP.
+The provisioner (`scripts/snell-install.sh`, served by the Worker at `/install.sh`) stores
+`node_id` in `/etc/snell/.install_meta`, so `uninstall` removes the panel entry **by node id**,
+not by IP.
 
 ---
 

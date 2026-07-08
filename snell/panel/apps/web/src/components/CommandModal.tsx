@@ -26,7 +26,7 @@ export function CommandModal({
     staleTime: 0,
   });
 
-  const title = purpose === "install" ? "Install command" : "Upgrade to V6";
+  const title = purpose === "install" ? "Provision node" : "Upgrade node to V6";
 
   return (
     <Modal.Backdrop isOpen={isOpen} onOpenChange={onOpenChange}>
@@ -49,12 +49,13 @@ export function CommandModal({
             )}
             {q.data && (
               <div className="flex flex-col gap-3">
-                <p className="text-sm text-muted">
-                  Run this on the server. The one-time token expires at{" "}
-                  {new Date(q.data.expires_at * 1000).toLocaleString()}.
-                </p>
+                <div className="flex flex-col gap-1 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  <span className="text-muted">Token expires</span>
+                  <time className="font-mono text-xs break-all">
+                    {new Date(q.data.expires_at * 1000).toLocaleString()}
+                  </time>
+                </div>
                 <CommandBlock code={q.data.command} />
-                <p className="text-xs text-muted">Click the command to copy it.</p>
               </div>
             )}
           </Modal.Body>
