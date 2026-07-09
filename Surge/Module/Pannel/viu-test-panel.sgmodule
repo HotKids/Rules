@@ -8,4 +8,4 @@
 viu-test-panel = type=generic,script-name=viu-test,update-interval=900,icon=play.circle.fill
 
 [Script]
-viu-test = type=generic,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/viu-test.js
+viu-test = type=generic,timeout=15,script-path=https://raw.githubusercontent.com/HotKids/Rules/claude/compassionate-lamport-5d0wl4/Surge/Module/Scripts/viu-test.js
