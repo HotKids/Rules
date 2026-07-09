@@ -1,5 +1,5 @@
 #!name=广告平台拦截器
-#!desc=此插件是所有去广告插件的基础，只针对广告平台处理。你依然需要安装其他去广告插件来搭配使用，并确保此插件始终排序在顶部
+#!desc=此插件是所有去广告插件的基础，只针对广告平台处理。你依然需要安装其他去广告插件来搭配使用，并确保此插件始终排序在顶部。
 #!author=可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/Website_icon/120px/TencentAd.png
 #!category=去广告
