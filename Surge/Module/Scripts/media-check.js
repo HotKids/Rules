@@ -588,9 +588,11 @@ class ServiceChecker {
       { name: "Reddit", result: reddit }
     ];
 
-    // Viu：默认关闭，且仅在可用（OK）时才追加显示；不可用 / 未启用一律不显示
+    // Viu：默认关闭，且仅在可用（OK）时才显示；不可用 / 未启用一律不显示。
+    // 插到 Spotify 之前，让前几行都是流媒体（Netflix/Disney+/HBO Max/YouTube/Viu/Spotify）。
     if (viu && viu.status === STATUS.OK) {
-      services.push({ name: "Viu", result: viu });
+      const at = services.findIndex(s => s.name === "Spotify");
+      services.splice(at < 0 ? services.length : at, 0, { name: "Viu", result: viu });
     }
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
