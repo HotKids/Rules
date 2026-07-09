@@ -1,0 +1,4 @@
+# Local dev secrets for `wrangler dev` (copy to .dev.vars). Do not commit .dev.vars.
+ACCESS_TOKEN=dev-access-token
+API_TOKEN=dev-api-token
+ENVIRONMENT=development
