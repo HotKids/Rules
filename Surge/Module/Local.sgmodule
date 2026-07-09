@@ -1,4 +1,4 @@
-#!name=LOCAL NETWORK
+#!name=Local Network
 #!desc=个人向直连规则，适用于本地网络、局域网设备及文件传输等需要绕过代理的场景
 #!category=HotKids
 #!arguments=SSID:JOEY,HotspotSSID:HotspotSSID

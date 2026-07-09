@@ -37,7 +37,7 @@ export function RelayModal({
   function submit() {
     setError("");
     if (!name.trim() || !ip.trim() || !port.trim()) {
-      return setError("Name, IP and port are required.");
+      return setError("Name, IP, and port are required.");
     }
     if (!/^\d+$/.test(port.trim())) return setError("Port must be a number.");
     mutation.mutate();

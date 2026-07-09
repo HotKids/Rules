@@ -183,7 +183,7 @@ export function NodesTable({ privacy }: { privacy: boolean }) {
   if (list.length === 0)
     return (
       <p className="rounded-2xl border border-black/5 bg-background-secondary p-8 text-center text-sm text-muted dark:border-white/10">
-        No nodes yet. Click “Add Node” to create a provisioning job.
+        No nodes yet. Click “Add node” to create one.
       </p>
     );
 
