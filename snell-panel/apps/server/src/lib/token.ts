@@ -7,6 +7,14 @@ export const TOKEN_TTL_SECONDS = 5 * 60;
 
 export type TokenPurpose = "install" | "upgrade" | "uninstall" | "heartbeat";
 
+/** The one-time-token purpose a node's current lifecycle expects: an active or
+ *  mid-upgrade node is being upgraded (upgrade token); anything else (pending /
+ *  installing / failed) is a fresh install. Keeps a provisioner callback from
+ *  being authorized by a token minted for a different lifecycle step. */
+export function expectedPurpose(status: string): TokenPurpose {
+  return status === "active" || status === "upgrading" ? "upgrade" : "install";
+}
+
 /** 32 random bytes, hex-encoded. */
 export function newToken(): string {
   const bytes = new Uint8Array(32);
@@ -41,14 +49,17 @@ export async function mintToken(
 
 /**
  * Validate a token for a node WITHOUT consuming it (provisioner pre-flight, so a
- * doomed install never starts). Looks the token up by its hash.
+ * doomed install never starts). Looks the token up by its hash. When `purposes`
+ * is given, the token's purpose must be one of them (defense against a token
+ * minted for one lifecycle step being replayed against another).
  */
 export async function validateToken(
   db: Db,
   token: string,
   nodeId: string,
   now: number,
-): Promise<{ ok: boolean; reason?: "missing" | "used" | "expired" }> {
+  purposes?: readonly TokenPurpose[],
+): Promise<{ ok: boolean; reason?: "missing" | "used" | "expired" | "purpose" }> {
   const hash = await hashToken(token);
   const rows = await db
     .select()
@@ -60,6 +71,9 @@ export async function validateToken(
   if (!row) return { ok: false, reason: "missing" };
   if (row.usedAt !== null) return { ok: false, reason: "used" };
   if (row.expiresAt < now) return { ok: false, reason: "expired" };
+  if (purposes && !purposes.includes(row.purpose as TokenPurpose)) {
+    return { ok: false, reason: "purpose" };
+  }
   return { ok: true };
 }
 

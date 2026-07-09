@@ -10,26 +10,17 @@ import {
   type NodeVersion,
   type SnellVersion,
 } from "@snell-panel/shared";
-import { installTokens, nodes, type NodeInsert, type NodeRow } from "../db/schema";
+import { installTokens, nodes, type NodeInsert } from "../db/schema";
 import type { AppEnv } from "../env";
-import type { Db } from "../db/client";
 import { requireAccess, requireAccessOrApiToken } from "../middleware/auth";
 import { toNodeDTO } from "../lib/dto";
 import { mintToken } from "../lib/token";
+import { getNode, nowSeconds as now } from "../lib/node-repo";
 import { snellVersionFor } from "../lib/versions";
 import { buildCommand } from "../lib/command";
 import { lookupGeo } from "../lib/geoip";
 
 const router = new Hono<AppEnv>();
-
-function now(): number {
-  return Math.floor(Date.now() / 1000);
-}
-
-async function getNode(db: Db, nodeId: string): Promise<NodeRow | null> {
-  const rows = await db.select().from(nodes).where(eq(nodes.nodeId, nodeId)).limit(1);
-  return rows[0] ?? null;
-}
 
 // GET /api/nodes — list with structured filters and sorting.
 router.get("/", requireAccess, async (c) => {
@@ -196,6 +187,9 @@ router.patch("/:id", requireAccess, zValidator("json", patchNodeSchema), async (
   if (input.enabled !== undefined) update.enabled = input.enabled;
   if (input.ip !== undefined) {
     update.ip = input.ip;
+    // An explicit admin repoint is authoritative — pin it so later node-reported
+    // heartbeats can't silently overwrite it (mirrors create/relay semantics).
+    update.ipPrefilled = true;
     const geo = await lookupGeo(input.ip);
     update.countryCode = geo.countryCode;
     update.isp = geo.isp;
