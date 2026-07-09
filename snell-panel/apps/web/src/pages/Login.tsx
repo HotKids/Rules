@@ -39,7 +39,7 @@ export function Login({ onAuthed }: { onAuthed: () => void }) {
 
         <div className="px-6 pb-1">
           <TextField value={value} onChange={setValue} type="password">
-            <Label className="sr-only">Access Token</Label>
+            <Label className="sr-only">Access token</Label>
             <Input
               placeholder="Access token"
               autoFocus
@@ -53,13 +53,13 @@ export function Login({ onAuthed }: { onAuthed: () => void }) {
             selectedKey={storageMode}
             onSelectionChange={(k) => setStorageMode(String(k) as "local" | "session" | "memory")}
           >
-            <Label>Login storage</Label>
+            <Label>Keep signed in</Label>
             <Select.Trigger><Select.Value /><Select.Indicator /></Select.Trigger>
             <Select.Popover>
               <ListBox>
-                <ListBox.Item id="local" textValue="Remember login">Remember login</ListBox.Item>
-                <ListBox.Item id="session" textValue="This session">This session</ListBox.Item>
-                <ListBox.Item id="memory" textValue="High security">High security</ListBox.Item>
+                <ListBox.Item id="local" textValue="On this device">On this device</ListBox.Item>
+                <ListBox.Item id="session" textValue="Until tab closes">Until tab closes</ListBox.Item>
+                <ListBox.Item id="memory" textValue="Clear on refresh">Clear on refresh</ListBox.Item>
               </ListBox>
             </Select.Popover>
           </Select>

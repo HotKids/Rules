@@ -21,7 +21,9 @@ router.get("/", async (c) => {
   }
 
   const format = parseFormat(c.req.query("format"), c.req.query());
-  const via = c.req.query("via") || undefined;
+  // Strip CR/LF so a crafted `via` can't inject extra lines/directives into the
+  // rendered config (it's reflected verbatim into Surge/Mihomo node entries).
+  const via = (c.req.query("via") || "").replace(/[\r\n]+/g, " ").trim() || undefined;
   const filter = c.req.query("filter") || "";
   const showFlag = c.req.query("flag") !== "false";
 

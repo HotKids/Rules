@@ -41,7 +41,7 @@ cd snell-panel
 
 ### 如何排查部署问题？
 
-运行 `./doctor.sh`。部署脚本也会在发布后自动检查 Worker URL，避免误以为 Cloudflare 默认空 Worker 页面是部署成功。
+运行 `./doctor.sh`。部署脚本也会在发布后自动检查 Worker URL，避免误以为 Cloudflare 默认的空 Worker 页面代表部署成功。
 
 ### update.sh 提示不是 Git checkout 怎么办？
 

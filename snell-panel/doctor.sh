@@ -12,7 +12,7 @@ main() {
   command_exists git && check_ok "git found: $(git --version)" || check_fail "git is missing."
   command_exists node && check_ok "node found: $(node --version)" || check_fail "node is missing."
   command_exists bun && check_ok "bun found: $(bun --version)" || check_fail "bun is missing. Run ./deploy.sh to install it."
-  command_exists bun && (cd "$SERVER_DIR" && bunx wrangler --version >/dev/null 2>&1) && check_ok "wrangler is available via bunx." || check_fail "wrangler is not available."
+  command_exists bun && (cd "$SERVER_DIR" && bunx wrangler --version >/dev/null 2>&1) && check_ok "Wrangler is available via bunx." || check_fail "Wrangler is not available."
 
   if command_exists bun; then
     if wrangler whoami >/dev/null 2>&1; then

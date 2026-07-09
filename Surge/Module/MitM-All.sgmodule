@@ -1,5 +1,5 @@
 #!name=MitM All
-#!desc=临时对所有网站开启MitM，不建议长久开启，比较耗费性能，主profile配置下还是需要进行证书安装/配置
+#!desc=临时对所有网站开启 MitM，不建议长久开启，比较耗费性能，主 profile 配置下还是需要进行证书安装 / 配置
 #!category=HotKids
 
 [MITM]
