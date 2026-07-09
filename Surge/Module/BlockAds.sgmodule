@@ -1,5 +1,5 @@
 #!name=去广告合集
-#!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护，部分 App 需清除缓存或重新安装后才会生效。
+#!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护，部分 App 需清除缓存或重新安装后才会生效
 #!category=去广告
 #!remark=广告平台拦截器是去广告基础，优先级需置于本模块之前: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 #!arguments=12306:12306,123云盘:123pan,B612咔叽:kaji,ECOVACS HOME:eco,Foodie:kaji,IT之家:ithome,IT之家-removePinnedArticles:false,IT之家-removeAllBanners:false,Keep:gotokeep,Line:line,QQ音乐:tencentmusic,阿里云盘:alipan,爱奇艺:iqiyi,百度地图:baidu,百度网页:baidu,百度网盘:baidu,哔哩哔哩漫画:bilibili,波点音乐:kuwo,菜鸟:cainiao,彩云天气:caiyun,财新:caixin,大麦:taobao,得物:dewu,滴滴出行:didi,叮咚买菜:ddxq,飞客:flyert,飞猪旅行:taobao,高德地图:amap,航旅纵横:umetrip,金山文档:kdocs,京东外卖:jd,酷安:coolapk,快递100:kuaidi100,芒果TV:tv,起点读书:qidian,瑞幸咖啡:lkcoffee,什么值得买:smzdm,淘票票:taobao,网易有道词典:youdao,网易邮箱大师:163,微信公众号:qq,下厨房:xiachufang,闲鱼:goofish,香港抖音:me,小红书:xiaohongshu,小象超市:meituan,小宇宙:xiaoyuzhoufm,萤石云视频:ys7,优酷视频:youku,知乎:zhihu,转转:zhuanzhuan,中国联通:10010

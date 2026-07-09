@@ -1,5 +1,5 @@
 #!name=哔哩哔哩去广告
-#!desc=哔哩哔哩去广告，部分 App 需清除缓存或重新安装后才会生效。
+#!desc=哔哩哔哩去广告，部分 App 需清除缓存或重新安装后才会生效
 #!author=kokoryh
 #!category=去广告
 #!arguments=动态最常访问:auto,创作中心:0,过滤置顶评论广告:1,优化评论区加载:bilibili.request,空降助手:bilibili.airborne,空降助手策略:DIRECT,日志等级:4
