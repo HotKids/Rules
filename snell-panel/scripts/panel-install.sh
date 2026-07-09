@@ -29,7 +29,7 @@ VARIANT=official; TFO=true; PSK=
 die(){ echo "[ERROR] $*" >&2; exit 1; }
 log(){ echo "[INFO] $*"; }
 ok(){ echo "[OK] $*"; }
-root(){ [ "$(id -u)" -eq 0 ] || die "Please run as root."; }
+root(){ [ "$(id -u)" -eq 0 ] || die "Please run as root"; }
 need(){ [ -n "$2" ] || die "Missing required flag: $1"; }
 yes(){ case "$(printf %s "$1"|tr A-Z a-z)" in 1|true|yes|on) return 0;; *) return 1;; esac; }
 esc(){ local s=$1; s=${s//\\/\\\\}; s=${s//\"/\\\"}; printf %s "$s"; }
