@@ -89,7 +89,7 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
                 onLogout();
               }}
             >
-              Logout
+              Sign out
             </Button>
           </div>
         </header>
@@ -108,7 +108,7 @@ export function Dashboard({ onLogout }: { onLogout: () => void }) {
                 Subscription
               </Button>
               <Button variant="primary" onPress={() => setAddOpen(true)}>
-                Add Node
+                Add node
               </Button>
             </div>
           </div>
