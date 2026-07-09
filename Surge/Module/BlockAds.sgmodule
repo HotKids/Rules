@@ -2,12 +2,12 @@
 #!desc=（个人向）按需收录自 QingRex/LoonKissSurge，自动同步上游，不另行维护，部分 App 需清除缓存或重新安装后才会生效。
 #!category=去广告
 #!remark=广告平台拦截器是去广告基础，优先级需置于本模块之前: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
-#!arguments=12306:12306,123云盘:123pan,B612咔叽:kaji,ECOVACS HOME:eco,Foodie:kaji,IT之家:ithome,IT之家-removePinnedArticles:false,IT之家-removeAllBanners:false,Keep:gotokeep,Line:line,QQ音乐:tencentmusic,Reddit:reddit,阿里云盘:alipan,爱奇艺:iqiyi,百度地图:baidu,百度网页:baidu,百度网盘:baidu,哔哩哔哩漫画:bilibili,波点音乐:kuwo,菜鸟:cainiao,彩云天气:caiyun,财新:caixin,大麦:taobao,得物:dewu,滴滴出行:didi,叮咚买菜:ddxq,飞客:flyert,飞猪旅行:taobao,高德地图:amap,航旅纵横:umetrip,金山文档:kdocs,京东:jd,京东外卖:jd,酷安:coolapk,快递100:kuaidi100,芒果TV:tv,美图秀秀:meitu,墨迹天气:moji,拼多多:pinduoduo,起点读书:qidian,瑞幸咖啡:lkcoffee,什么值得买:smzdm,顺丰速运:sf-express,淘票票:taobao,网易有道词典:youdao,网易邮箱大师:163,微博:weibo,微信公众号:qq,喜马拉雅:ximalaya,下厨房:xiachufang,闲鱼:goofish,香港抖音:me,小黑盒:xiaoheihe,小红书:xiaohongshu,小象超市:meituan,小宇宙:xiaoyuzhoufm,萤石云视频:ys7,优酷视频:youku,知乎:zhihu,转转:zhuanzhuan,中国联通:10010
+#!arguments=12306:12306,123云盘:123pan,B612咔叽:kaji,ECOVACS HOME:eco,Foodie:kaji,IT之家:ithome,IT之家-removePinnedArticles:false,IT之家-removeAllBanners:false,Keep:gotokeep,Line:line,QQ音乐:tencentmusic,阿里云盘:alipan,爱奇艺:iqiyi,百度地图:baidu,百度网页:baidu,百度网盘:baidu,哔哩哔哩漫画:bilibili,波点音乐:kuwo,菜鸟:cainiao,彩云天气:caiyun,财新:caixin,大麦:taobao,得物:dewu,滴滴出行:didi,叮咚买菜:ddxq,飞客:flyert,飞猪旅行:taobao,高德地图:amap,航旅纵横:umetrip,金山文档:kdocs,京东外卖:jd,酷安:coolapk,快递100:kuaidi100,芒果TV:tv,起点读书:qidian,瑞幸咖啡:lkcoffee,什么值得买:smzdm,淘票票:taobao,网易有道词典:youdao,网易邮箱大师:163,微信公众号:qq,下厨房:xiachufang,闲鱼:goofish,香港抖音:me,小红书:xiaohongshu,小象超市:meituan,小宇宙:xiaoyuzhoufm,萤石云视频:ys7,优酷视频:youku,知乎:zhihu,转转:zhuanzhuan,中国联通:10010
 #!arguments-desc=各参数值为对应 App 的域名关键字，默认启用；如需禁用某 App 去广告，将其改为任意非常见域名值即可（e.g. NO）。
-#!date=2026-07-09 01:14:52
+#!date=2026-07-09 11:00:28
 
 [MITM]
-hostname = %APPEND% *.{{{高德地图}}}.com, *.{{{爱奇艺}}}.com, *.{{{微博}}}.cn, *.{{{微博}}}.com, *.{{{知乎}}}.com, -i.vip.{{{爱奇艺}}}.com, 112.53.55.225, 113.46.225.*, 114.115.217.129, 116.85.*, 119.29.29.*, 120.241.142.*, 120.241.143.*, 123.207.209.*, 139.199.240.84, 162.14.157.*, a.{{{Line}}}.me, acs.m.{{{闲鱼}}}.com, acs.m.{{{大麦}}}.com, ad.{{{12306}}}.cn, ad.{{{Line}}}-scdn.net, afd.{{{百度地图}}}.com, api-app.dc-cn.cn.{{{ECOVACS HOME}}}user.net, api.{{{阿里云盘}}}.com, api.{{{彩云天气}}}app.com, api.{{{酷安}}}.com, api.{{{Keep}}}.com, api.m.{{{京东}}}.com, api.{{{拼多多}}}.com, api.posters.{{{美图秀秀}}}.com, api.udache.com, api.{{{下厨房}}}.com, api.{{{小黑盒}}}.cn, api.{{{小宇宙}}}.com, api.{{{萤石云视频}}}.com, api.zuihuimai.com, api5-normal-m.amemv.com, app-api.{{{什么值得买}}}.com, app.{{{得物}}}.com, app.{{{转转}}}.com, appconf.mail.{{{网易邮箱大师}}}.com, article-api.{{{什么值得买}}}.com, as.xiaojukeji.com, awe{{{香港抖音}}}.snssdk.com, bd-api.{{{波点音乐}}}.cn, biz.cyapi.cn, bizapi.{{{阿里云盘}}}.com, businessapi.ksedt.com, buy.{{{Line}}}.me, capi.{{{瑞幸咖啡}}}.com, ccsp-egmas.{{{顺丰速运}}}.com, cdn-w.{{{彩云天气}}}app.com, ci.{{{小红书}}}.com, cix.{{{Line}}}-apps.com, cn-acs.m.{{{菜鸟}}}.com, color.{{{京东外卖}}}dj.com, common.{{{滴滴出行}}}taxi.com.cn, conf.{{{滴滴出行}}}taxi.com.cn, crs-event.{{{Line}}}.me, ct.xiaojukeji.com, d.{{{Line}}}-scdn.net, damang.api.mg{{{芒果TV}}}.com, dashi.{{{网易邮箱大师}}}.com, dat.ruanmei.com, dc?.bz.mg{{{芒果TV}}}.com, dict.{{{网易有道词典}}}.com, e*.{{{财新}}}.com, e2e-mtop.{{{菜鸟}}}.com, ec-bot-obs.{{{Line}}}-scdn.net, ecom.map.{{{百度地图}}}.com, edith.{{{小红书}}}.com, f-api.{{{金山文档}}}.cn, fcard.api.{{{墨迹天气}}}.com, g*.{{{财新}}}.com, g-acs.m.{{{闲鱼}}}.com, gl-cn-api.{{{ECOVACS HOME}}}vacs.cn, gorgon.{{{网易有道词典}}}.com, gql-fed.{{{Reddit}}}.com, gql.{{{Reddit}}}.com, gslbali.{{{喜马拉雅}}}.com, gw.{{{Line}}}.naver.jp, h5.{{{什么值得买}}}.com, haojia-api.{{{什么值得买}}}.com, haojia-cdn.{{{什么值得买}}}.com, haojia.m.{{{什么值得买}}}.com, hb-boom.api.mg{{{芒果TV}}}.com, home.{{{航旅纵横}}}.com, homepage-api.{{{什么值得买}}}.com, i.{{{萤石云视频}}}.com, lan.{{{Line}}}.me, legy.{{{Line}}}-apps.com, lion.{{{滴滴出行}}}alift.com, longquan-mtop.{{{菜鸟}}}.com, m*.{{{财新}}}.com, m.{{{百度网页}}}.com, m.client.{{{中国联通}}}.com, m.{{{喜马拉雅}}}.com, magev6.if.{{{起点读书}}}.com, maicai.api.{{{叮咚买菜}}}.mobi, mall.{{{小象超市}}}.com, manga.{{{哔哩哔哩漫画}}}.com, me.bz.mg{{{芒果TV}}}.com, member.{{{阿里云盘}}}.com, mme.api.{{{墨迹天气}}}.com, mobile-thor.api.mg{{{芒果TV}}}.com, mobile.{{{12306}}}.cn, mobile.api.hunan{{{芒果TV}}}.com, mobile.api.mg{{{芒果TV}}}.com, mobile.{{{喜马拉雅}}}.com, mobilehera.{{{喜马拉雅}}}.com, mobileso.bz.mg{{{芒果TV}}}.com, mobwsa.{{{喜马拉雅}}}.com, mp.weixin.{{{微信公众号}}}.com, mwsa.{{{喜马拉雅}}}.com, napi.{{{IT之家}}}.com, nbcps-mtop.{{{菜鸟}}}.com, nelo2-col.{{{Line}}}corp.com, netflow-mtop.{{{菜鸟}}}.com, newclient.map.{{{百度地图}}}.com, obs.{{{Line}}}-scdn.net, p.{{{快递100}}}.com, pan.{{{百度网盘}}}.com, portal-portm.{{{小象超市}}}.com, post.m.{{{什么值得买}}}.com, psnlz.api.{{{墨迹天气}}}.com, ptf.{{{飞客}}}rip.com, push.m.{{{优酷视频}}}.com, rec.{{{小红书}}}.com, res.xiaojukeji.com, s-api.{{{什么值得买}}}.com, scdn.{{{Line}}}-apps.com, sch.{{{Line}}}.me, search.{{{喜马拉雅}}}.com, searchwsa.{{{喜马拉雅}}}.com, sns.api.{{{墨迹天气}}}.com, so.{{{小红书}}}.com, starplucker.cyapi.cn, static.{{{Line}}}-scdn.net, ucmp-static.{{{顺丰速运}}}.com, ucmp.{{{顺丰速运}}}.com, un-acs.{{{优酷视频}}}.com, user-api.{{{什么值得买}}}.com, user.api.{{{叮咚买菜}}}.mobi, uts-front.{{{Line}}}-apps.com, vdo.api.{{{墨迹天气}}}.com, w.{{{Line}}}.me, {{{微博}}}.com, www.{{{123云盘}}}.com, www.{{{百度网页}}}.com, www.{{{飞客}}}.com.cn, www.{{{金山文档}}}.cn, www.{{{小红书}}}.com, yongche.{{{百度地图}}}.com, ywab.reader.qq.com
+hostname = %APPEND% *.{{{高德地图}}}.com, *.{{{爱奇艺}}}.com, *.{{{知乎}}}.com, -i.vip.{{{爱奇艺}}}.com, 112.53.55.225, 113.46.225.*, 114.115.217.129, 116.85.*, 119.29.29.*, 120.241.142.*, 120.241.143.*, 123.207.209.*, 139.199.240.84, 162.14.157.*, a.{{{Line}}}.me, acs.m.{{{闲鱼}}}.com, acs.m.{{{大麦}}}.com, ad.{{{12306}}}.cn, ad.{{{Line}}}-scdn.net, afd.{{{百度地图}}}.com, api-app.dc-cn.cn.{{{ECOVACS HOME}}}user.net, api.{{{阿里云盘}}}.com, api.{{{彩云天气}}}app.com, api.{{{酷安}}}.com, api.{{{Keep}}}.com, api.m.{{{京东外卖}}}.com, api.udache.com, api.{{{下厨房}}}.com, api.{{{小宇宙}}}.com, api.{{{萤石云视频}}}.com, api.zuihuimai.com, api5-normal-m.amemv.com, app-api.{{{什么值得买}}}.com, app.{{{得物}}}.com, app.{{{转转}}}.com, appconf.mail.{{{网易邮箱大师}}}.com, article-api.{{{什么值得买}}}.com, as.xiaojukeji.com, awe{{{香港抖音}}}.snssdk.com, bd-api.{{{波点音乐}}}.cn, biz.cyapi.cn, bizapi.{{{阿里云盘}}}.com, businessapi.ksedt.com, buy.{{{Line}}}.me, capi.{{{瑞幸咖啡}}}.com, cdn-w.{{{彩云天气}}}app.com, ci.{{{小红书}}}.com, cix.{{{Line}}}-apps.com, cn-acs.m.{{{菜鸟}}}.com, color.{{{京东外卖}}}dj.com, common.{{{滴滴出行}}}taxi.com.cn, conf.{{{滴滴出行}}}taxi.com.cn, crs-event.{{{Line}}}.me, ct.xiaojukeji.com, d.{{{Line}}}-scdn.net, damang.api.mg{{{芒果TV}}}.com, dashi.{{{网易邮箱大师}}}.com, dat.ruanmei.com, dc?.bz.mg{{{芒果TV}}}.com, dict.{{{网易有道词典}}}.com, e*.{{{财新}}}.com, e2e-mtop.{{{菜鸟}}}.com, ec-bot-obs.{{{Line}}}-scdn.net, ecom.map.{{{百度地图}}}.com, edith.{{{小红书}}}.com, f-api.{{{金山文档}}}.cn, g*.{{{财新}}}.com, g-acs.m.{{{闲鱼}}}.com, gl-cn-api.{{{ECOVACS HOME}}}vacs.cn, gorgon.{{{网易有道词典}}}.com, gw.{{{Line}}}.naver.jp, h5.{{{什么值得买}}}.com, haojia-api.{{{什么值得买}}}.com, haojia-cdn.{{{什么值得买}}}.com, haojia.m.{{{什么值得买}}}.com, hb-boom.api.mg{{{芒果TV}}}.com, home.{{{航旅纵横}}}.com, homepage-api.{{{什么值得买}}}.com, i.{{{萤石云视频}}}.com, lan.{{{Line}}}.me, legy.{{{Line}}}-apps.com, lion.{{{滴滴出行}}}alift.com, longquan-mtop.{{{菜鸟}}}.com, m*.{{{财新}}}.com, m.{{{百度网页}}}.com, m.client.{{{中国联通}}}.com, magev6.if.{{{起点读书}}}.com, maicai.api.{{{叮咚买菜}}}.mobi, mall.{{{小象超市}}}.com, manga.{{{哔哩哔哩漫画}}}.com, me.bz.mg{{{芒果TV}}}.com, member.{{{阿里云盘}}}.com, mobile-thor.api.mg{{{芒果TV}}}.com, mobile.{{{12306}}}.cn, mobile.api.hunan{{{芒果TV}}}.com, mobile.api.mg{{{芒果TV}}}.com, mobileso.bz.mg{{{芒果TV}}}.com, mp.weixin.{{{微信公众号}}}.com, napi.{{{IT之家}}}.com, nbcps-mtop.{{{菜鸟}}}.com, nelo2-col.{{{Line}}}corp.com, netflow-mtop.{{{菜鸟}}}.com, newclient.map.{{{百度地图}}}.com, obs.{{{Line}}}-scdn.net, p.{{{快递100}}}.com, pan.{{{百度网盘}}}.com, portal-portm.{{{小象超市}}}.com, post.m.{{{什么值得买}}}.com, ptf.{{{飞客}}}rip.com, push.m.{{{优酷视频}}}.com, rec.{{{小红书}}}.com, res.xiaojukeji.com, s-api.{{{什么值得买}}}.com, scdn.{{{Line}}}-apps.com, sch.{{{Line}}}.me, so.{{{小红书}}}.com, starplucker.cyapi.cn, static.{{{Line}}}-scdn.net, un-acs.{{{优酷视频}}}.com, user-api.{{{什么值得买}}}.com, user.api.{{{叮咚买菜}}}.mobi, uts-front.{{{Line}}}-apps.com, w.{{{Line}}}.me, www.{{{123云盘}}}.com, www.{{{百度网页}}}.com, www.{{{飞客}}}.com.cn, www.{{{金山文档}}}.cn, www.{{{小红书}}}.com, yongche.{{{百度地图}}}.com, ywab.reader.qq.com
 
 [General]
 # > 中国联通 去广告
@@ -114,10 +114,6 @@ DOMAIN-SUFFIX,v.smtcdns.com,REJECT,extended-matching,pre-matching
 # desc = 过滤航旅纵横广告
 URL-REGEX,"^http?:\/\/(discardrp|startup)\.{{{航旅纵横}}}\.com\/gateway\/api\/umetrip\/native",REJECT,extended-matching
 
-# > 京东去广告 · 2025-05-13
-# desc = 移除京东开屏广告，精简我的页面产品推广。
-URL-REGEX,"^http:\/\/\w{32}\.{{{京东}}}debug\.com\/diagnose\?",REJECT,extended-matching
-
 # > 芒果TV去广告 · 2025-11-09
 # desc = 移除开屏广告、信息流广告、播放页广告，精简我的页面。
 DOMAIN,credits.bz.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
@@ -134,51 +130,13 @@ DOMAIN,rprain.log.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,vip.bz.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN-SUFFIX,da.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 
-# > 美图秀秀去广告 · 2025-08-31
-# desc = 移除开屏广告、横幅推广，精简我的页面。
-DOMAIN,adui.tg.{{{美图秀秀}}}.com,REJECT,extended-matching,pre-matching
-
-# > 拼多多去广告 · 2026-02-28
-# desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
-AND,((URL-REGEX,"^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?",extended-matching),(USER-AGENT,"*com.xunmeng.{{{拼多多}}}*")),REJECT
-AND,((URL-REGEX,"^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?",extended-matching),(USER-AGENT,"*com.xunmeng.{{{拼多多}}}*")),REJECT
-AND,((DOMAIN,api.{{{拼多多}}}.com,extended-matching),(PROTOCOL,QUIC)),REJECT
-DOMAIN,titan.{{{拼多多}}}.com,REJECT-NO-DROP,extended-matching,pre-matching
-DOMAIN,xg.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,cdl-1.pddpic.com,REJECT,extended-matching,pre-matching
-DOMAIN,titan.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,cdl-p2.pddpic.com,REJECT,extended-matching,pre-matching
-DOMAIN,cd-1.pddpic.com,REJECT,extended-matching,pre-matching
-DOMAIN,apm.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,th-b.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,ta.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,th.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,th-a.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,ta-a.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,meta.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,apm-a.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
-
 # > 什么值得买去广告 · 2025-11-27
 # desc = 移除开屏广告、信息流广告、各类横幅广告、搜索页广告、文章内广告，移除活动皮肤、精简我的页面。
 DOMAIN,adx-api.zdmimg.com,REJECT,extended-matching,pre-matching
 
-# > 微博去广告 · 2026-02-22
-# desc = 过滤微博广告及去除各部分推广模块
-DOMAIN-SUFFIX,uve.{{{微博}}}.com,DIRECT,extended-matching
-DOMAIN,huodong.{{{微博}}}.cn,REJECT,extended-matching,pre-matching
-DOMAIN-SUFFIX,biz.{{{微博}}}.com,REJECT,extended-matching,pre-matching
-
 # > 微信公众号去广告 · 2025-05-13
 # desc = 过滤微信公众号广告
 DOMAIN-SUFFIX,wxs.{{{微信公众号}}}.com,REJECT,extended-matching,pre-matching
-
-# > 喜马拉雅去广告 · 2025-07-11
-# desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
-DOMAIN,adse.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,adsehera.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,adse.wsa.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,adbehavior.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
-DOMAIN,adbehavior.wsa.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
 
 # > 香港抖音去广告 · 2025-05-13
 # desc = 精简左右侧边栏、移除底栏切换，其余内容后续再完善。
@@ -402,10 +360,6 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 ^https:\/\/www\.{{{金山文档}}}\.cn\/kdg\/api\/v1\/cards\/type\/27\?iosVer=\d+\.\d+\.\d+&isGetList=1 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/f-api\.{{{金山文档}}}\.cn\/godfather\/api\/thirdparty\/v1\/viewpager\?showLocal=mobileWebIndex data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 京东去广告 · 2025-05-13
-# desc = 移除京东开屏广告，精简我的页面产品推广。
-^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
 # > 京东外卖去广告 · 2025-11-28
 # desc = 移除首页推广、点评页面非美食内容、购物车及我的页面推荐、搜索发现、搜索榜单，精简我的页面。
 ^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=uniformRecommend data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -430,36 +384,6 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 ^https:\/\/hb-boom\.api\.mg{{{芒果TV}}}\.com\/release\/pullReleaseInfo$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/mobile\.api\.mg{{{芒果TV}}}\.com\/v\d\/mobile\/checkUpdate\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https?:\/\/mobileso\.bz\.mg{{{芒果TV}}}\.com\/mobile\/recommend\/v\d\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
-# > 墨迹天气去广告 · 2025-05-13
-# desc = 移除天气页面横幅、工具栏，移除时景关注页面推荐，精简我的页面。
-^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/card\/subscribe$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/video\/index_flow\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/video_user\/hotGuyRcm\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/zone\/follow_src_zone\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/sns\.api\.{{{墨迹天气}}}\.com\/user\/dynamic_v9\/json\/someone_interest\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
-# > 拼多多去广告 · 2026-02-28
-# desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/query_order_list_tabs_element\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/aquarius\/hungary\/global\/homepage\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/order_express_group\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/search_hotquery\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/zaire_biz\/chat\/resource\/get_list_data\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/new_chat_group\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/goods\/back_up\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/personal\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/brand-olay\/goods_detail\/bybt_guide\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/engels\/reviews\/require\/append\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/my_order_group\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/likes\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/phantom\/gbdbpdv\/extra\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/manufacturer\/cross\/shortcut\/list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/dunkirk\/liveactivity\/push\/create\/url\/report\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/growth\/nagato\/app\/index\/gather\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/engels\/wait\/receive\/review\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{拼多多}}}\.com\/api\/buffon\/nasus\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 起点读书去广告 · 2025-05-13
 # desc = 移除起点读书开屏广告、每日导读、各类弹窗、文末广告、搜索填充词，精简我的页面。
@@ -486,12 +410,6 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 ^https:\/\/s-api\.{{{什么值得买}}}\.com\/sou\/search_default_keyword\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/s-api\.{{{什么值得买}}}\.com\/sou\/popup_coupon\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 顺丰速运去广告 · 2026-02-23
-# desc = 移除开屏广告、首页下拉抽屉、首页推广、应用内悬浮窗、横幅广告，移除主题，精简我的页面。
-^https:\/\/ccsp-egmas\.{{{顺丰速运}}}\.com\/cx-app-base\/base\/app\/ad\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/ucmp\.{{{顺丰速运}}}\.com\/proxy\/esgcempcore\/memberGoods\/pointMallService\/goodsList$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/ucmp(-static)?\.{{{顺丰速运}}}\.com\/proxy\/ccspBase\/module-config\/(login\/)?query\? data-type=text data="{"version":"2.0","success":true,"obj":[{"positionName":"APP2025","positionChannel":"app","sceneList":[{"urlType":"webview","sceneCode":"ddcb36295d5d2939ba4bbe2e5e02a4d8","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29130,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":0,"sceneName":"寄快递","updateTime":"2026-02-06 18:55:15","url":"{ \"needLogin\": true, \"classify\": \"MY_SERVICE\", \"params\": { \"jumpName\": \"快速寄件\" } }","positionId":"app-index-2025","createTime":"2026-02-06 18:55:15","background":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/15FF24D0AC094758ACD2600331214A1A.png","typeId":"primary","typeLabel":"一级入口","status":1},{"urlType":"webview","sceneCode":"71e3cad43945360ffa6299644d9fbce0","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29132,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":2,"sceneName":"校园一级","updateTime":"2026-02-06 18:55:16","url":"{\"needLogin\":true,\"clientVersionCode\": \"1096920\",\"params\":{\"isEncode\":true,\"domain\":\"mcs-mimp-web.{{{顺丰速运}}}.com\",\"extendNoSign\":\"&source=SFAPP&bizCode=6196@UHB1a1hjd0V1RDR4a3RTRnJhMmJVMTA1SnhreUh6Vk43U0xYMWZ6aWk4Wk1XclA3MXFRT3dhUjZnK29KY2lSZg==\",\"isLanguage\":true,\"needReqTime\":\"1\",\"needSign\":true,\"source\":{\"uri\":\"https://mcs-mimp-web.{{{顺丰速运}}}.com/mcs-mimp/share/app/shareRedirect\"},\"mustUserInfo\":true},\"pageRoute\":\"WedViewPage\"}","positionId":"app-index-2025","createTime":"2026-02-06 18:55:16","background":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/04560114349E4DCF9F9C82348D5FD5B8.png","typeId":"primary","typeLabel":"一级入口","status":1},{"urlType":"webview","sceneCode":"d3cf8b8a7be155edc8d507b21a491401","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29134,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":4,"sceneName":"寄大件","updateTime":"2026-02-06 18:55:17","url":"{ \"params\": { \"source\": { \"uri\": \"https://ucmp.{{{顺丰速运}}}.com/we/cxmodules/large-items-aggregation\" }, \"needSign\": true, \"isEncode\": true }, \"needLogin\": true, \"pageRoute\": \"WedViewPage\", \"clientVersionCode\": 1095600 }","positionId":"app-index-2025","createTime":"2026-02-06 18:55:17","background":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/A234EFA247C04A6A91DEBD06E91BA24B.png","typeId":"primary","typeLabel":"一级入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/781D64D298F148F7892A7E705D8C2B1D.png","urlType":"webview","sceneCode":"b83fbeb018acfafc5ad8b38362cf684a","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29136,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":6,"sceneName":"同城急送","subjectTagContent":"低至3折","updateTime":"2025-11-10 10:45:03","url":"{ \"params\": { \"title\": \"同城急送\", \"source\": { \"uri\": \"https://shopic.{{{顺丰速运}}}.com/crm/webapp?platform=syapp\" }, \"domain\": \"shopic.{{{顺丰速运}}}.com\", \"launch\": { \"text\": \"服务提示：深圳市顺丰同城物流有限公司向您提供相关服务并承担法律责任\", \"onlyOne\": true, \"delayTime\": 2, \"iconUrl\": \"https://ucmp-static.{{{顺丰速运}}}.com/appmsoss/app-ms/manage/f082fcd320254d5aaca06316fff9ef8c.jpeg\" } }, \"needLogin\": true, \"pageRoute\": \"WedViewPage\" }","subjectContent":"同城急送","positionId":"app-index-2025","createTime":"2025-11-10 10:45:03","typeId":"business","typeLabel":"BU业务入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/52B9DF2E9E6742DFAD64EF4F786CBDE5.png","urlType":"webview","sceneCode":"eabfae966908cdf6947f67bd58618b80","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29137,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":7,"sceneName":"港澳台寄递聚合","updateTime":"2025-11-10 10:45:07","url":"{ \"params\": { \"source\": { \"uri\": \"https://ucmp.{{{顺丰速运}}}.com/wxaccess/app/auth/CX_REGION_APP\" }, \"needSign\": true, \"extendNoSign\": \"&reserved=scene%3Dhmt%26source%3Dsfapp\", \"isEncode\": true }, \"needLogin\": true, \"pageRoute\": \"WedViewPage\", \"clientVersionCode\": 1092600 }","subjectContent":"港澳台寄递","positionId":"app-index-2025","createTime":"2025-11-10 10:45:07","typeId":"business","typeLabel":"BU业务入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/6392EB5E406C4815AC447454FE22AED6.png","urlType":"webview","sceneCode":"51473b493e2e6fdf6ad5be62a816e34b","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29138,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":8,"sceneName":"国际寄递聚合","updateTime":"2025-11-10 10:45:08","url":"{ \"params\": { \"source\": { \"uri\": \"https://ucmp.{{{顺丰速运}}}.com/wxaccess/app/auth/CX_REGION_APP\" }, \"needSign\": true, \"extendNoSign\": \"&reserved=scene%3Dinternational%26source%3Dsfapp\", \"isEncode\": true }, \"needLogin\": true, \"pageRoute\": \"WedViewPage\", \"clientVersionCode\": 1092600 }","subjectContent":"国际寄递","positionId":"app-index-2025","createTime":"2025-11-10 10:45:08","typeId":"business","typeLabel":"BU业务入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/FD5BD3BB180F4144BA66DAF9206407DA.png","urlType":"webview","sceneCode":"7a41415450ee35202fb1c9788ea8451f","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29139,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":9,"sceneName":"冷链服务","updateTime":"2025-11-10 10:47:57","url":"{\n \"routeName\":\"WedViewPage\",\n \"params\":{\n  \"source\":{\n   \"uri\":\"https://ucmp.{{{顺丰速运}}}.com/wxaccess/app/auth/COLD_ENTRY\"\n  },\n  \"needSign\":true,\n  \"extendNoSign\":\"&reserved=source%3Dsfapp\",\n  \"isEncode\":true\n },\n \"needLogin\":true\n}","subjectContent":"冷链服务","positionId":"app-index-2025","createTime":"2025-11-10 10:47:57","typeId":"business","typeLabel":"BU业务入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/905E0C4475AF44FB94AB9D3BDD5E52AD.png","urlType":"webview","sceneCode":"4b7e32005e03a27212dcb65130261768","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29140,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":10,"sceneName":"货运用车","updateTime":"2025-11-26 17:38:32","url":"{\"needLogin\":true,\"params\":{\"isEncode\":true,\"signOption\":{\"header\":true},\"source\":{\"uri\":\"https://ucmp.{{{顺丰速运}}}.com/wxaccess/weixin/activity/acsp-tc-h5?channelCode=cx_app\"}},\"pageRoute\":\"WedViewPage\", \"clientVersionCode\": 1098500}","subjectContent":"货运用车","positionId":"app-index-2025","createTime":"2025-11-26 17:38:32","typeId":"business","typeLabel":"BU业务入口","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/A3E53FCA8C43433B8357EA57C29DFDAC.png","urlType":"webview","sceneCode":"0df8bc7fe4dd8da1becaa565ae20a853","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29141,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":11,"sceneName":"扫码寄件","updateTime":"2025-11-10 10:45:04","url":"{ \"needLogin\":true, \"pageRoute\":\"OtherScanner\", \"params\":{} }","subjectContent":"扫码寄件","positionId":"app-index-2025","createTime":"2025-11-10 10:45:04","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/23A69EB0535B44E48AD54306ED04B6DA.png","urlType":"webview","sceneCode":"26d1dd3ac7109ae291897706e01dbbe8","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29142,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":12,"sceneName":"批量寄","updateTime":"2025-11-10 10:45:05","url":"{ \"needLogin\":true, \"pageRoute\":\"PlaceOrder\", \"params\":{ \"jumpName\":\"批量寄\" } }","subjectContent":"批量寄","positionId":"app-index-2025","createTime":"2025-11-10 10:45:05","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/E344425C8BB244D6964FFFB0B108CF2F.png","urlType":"webview","sceneCode":"da6824bb91638c9c71b33ee461b65751","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29143,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":13,"sceneName":"丰巢寄件","updateTime":"2025-11-10 10:45:06","url":"{ \"needLogin\":true, \"pageRoute\":\"PlaceOrder\", \"params\":{ \"jumpName\":\"丰巢寄件\" } }","subjectContent":"丰巢寄件","positionId":"app-index-2025","createTime":"2025-11-10 10:45:06","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/E1A0E6FC7EE348BB89668ABB8C11ABA0.png","urlType":"webview","sceneCode":"d8c6e0777988662130261992e8723f92","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29144,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":14,"sceneName":"服务点自寄","updateTime":"2025-11-20 18:13:51","url":"{ \"needLogin\":true, \"pageRoute\":\"PlaceOrder\", \"params\":{ \"orderStyle\":1,\"nServicePoint\" :true}}","subjectContent":"服务点自寄","positionId":"app-index-2025","createTime":"2025-11-20 18:13:51","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/895DB023B42D4E72A69EB59942441B27.png","graySceneId":"ereturn-stop","urlType":"webview","sceneCode":"b43d71308c69324de5010852b7d5a897","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29145,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":15,"sceneName":"网购退货","updateTime":"2026-02-11 19:24:46","url":"{\"needLogin\":true,\"params\":{\"isEncode\":true,\"domain\":\"mcs-mimp-web.{{{顺丰速运}}}.com\",\"extendNoSign\":\"&source=SFAPP&bizCode=6107@Mk5hR09FSGJlUXVxVTNSUUtFRWJ4cEpBUzh2U2pUVlVWNGlYdVFmbEhQOGxlV1dYeGMwTWxXL25Pb0lXLzZqdkkrMFI0WDdSWk44MlZhZDk3dGl3NHNYT1hDV1NOS1Z0V2YwcDZLb2c0WGR5Y0pnNUs3bGtibDA1RWdsTkFmbCs=\",\"isLanguage\":true,\"needReqTime\":\"1\",\"needSign\":true,\"source\":{\"uri\":\"https://mcs-mimp-web.{{{顺丰速运}}}.com/mcs-mimp/share/app/shareRedirect\"},\"mustUserInfo\":true},\"pageRoute\":\"WedViewPage\"}","subjectContent":"网购退货","positionId":"app-index-2025","createTime":"2026-02-11 19:24:46","typeId":"featuredShipping","typeLabel":"特色寄","status":0},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/B6CD5E4A8A034850A85A1ACD08E85321.png","urlType":"webview","sceneCode":"b5c548c150ca439568161a24dc212ade","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29147,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":17,"sceneName":"寄快递二级","updateTime":"2025-11-10 11:03:34","url":"{ \"needLogin\":true,\"clientVersionCode\": \"1096920\", \"classify\":\"MY_SERVICE\", \"pageRoute\":\"PlaceOrder\", \"params\":{ \"orderStyle\":0 } }","subjectContent":"寄快递","positionId":"app-index-2025","createTime":"2025-11-10 11:03:34","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/1C97E1AD956E4BA096E167170A412274.png","graySceneId":"handling-documents","urlType":"webview","sceneCode":"3df254ebeee83568c56308bff1f7e86f","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29148,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":18,"sceneName":"跑腿服务","subjectTagContent":"帮我拿","updateTime":"2025-11-11 15:46:58","url":"{ \"needLogin\":true, \"classify\":\"MY_SERVICE\", \"pageRoute\":\"RunErrands\", \"params\":{ \"title\":\"跑腿服务\" } }","subjectContent":"跑腿服务","positionId":"app-index-2025","createTime":"2025-11-11 15:46:58","typeId":"featuredShipping","typeLabel":"特色寄","status":0},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/1071250D3EB947C0AFFFFD9514A01F4B.png","urlType":"webview","sceneCode":"5eaa2c330b1fc1a5ed7dab99c6617620","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29149,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":19,"sceneName":"礼物寄递","subjectTagContent":"送心意","updateTime":"2025-11-10 11:01:32","url":"{ \"needLogin\":true, \"pageRoute\":\"PlaceOrder\", \"clientVersionCode\": \"1094200\", \"params\":{ \"title\": \"\", \"jumpName\":\"无忧送礼\" } }","subjectContent":"礼品寄","positionId":"app-index-2025","createTime":"2025-11-10 11:01:32","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/78D77A27A5D149D6B5A514C104DE1112.png","urlType":"webview","sceneCode":"3b2705c751c4e259cab3ddcafdc91302","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29150,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":20,"sceneName":"雪具寄","updateTime":"2025-11-10 10:47:56","url":"{ \"needLogin\": true, \"pageRoute\": \"PlaceOrder\", \"clientVersionCode\":1096000,\"params\":{ \"title\": \"雪具寄\", \"orderStyle\" : 0, \"pickupEntranceCode\": \"XUEJUJIAPP\", \"tabIndex\": { \"first\": -1, \"second\": -1 } } }","subjectContent":"雪具寄","positionId":"app-index-2025","createTime":"2025-11-10 10:47:56","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/3A47AF90F705440DA5250D6FCDEB1798.png","urlType":"webview","sceneCode":"3e4fc16a26b75a72a68009c93eef6457","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29151,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":21,"sceneName":"行李寄存","subjectTagContent":"行李管家","updateTime":"2025-11-10 10:47:55","url":"{\"needLogin\":true,\"params\":{\"isEncode\":true,\"domain\":\"ucmp.{{{顺丰速运}}}.com\",\"extendNoSign\":\"&source=SFAPP&bizCode=6115@eHg3d1NZT1pPZU9SclhnYkhMUG9rNWRKK2FlZ1l5cklwNXUrbHVnbFYrTFVRRkVoZGRyRTltbjRCeDN6S1dwSQ==\",\"isLanguage\":true,\"needReqTime\":\"1\",\"needSign\":true,\"source\":{\"uri\":\"https://ucmp.{{{顺丰速运}}}.com/wxaccess/app/auth/cultural-tourism-agg\"},\"mustUserInfo\":true},\"pageRoute\":\"WedViewPage\"}","subjectContent":"轻松行","positionId":"app-index-2025","createTime":"2025-11-10 10:47:55","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/7842459BBA804A3DB3408EB00007AA7C.png","urlType":"webview","sceneCode":"94c646cdbc3e11682dc1fe5232119702","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29152,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":22,"sceneName":"校园专区","updateTime":"2025-12-15 20:46:41","url":"{\"needLogin\":true,\"params\":{\"isEncode\":true,\"domain\":\"mcs-mimp-web.{{{顺丰速运}}}.com\",\"extendNoSign\":\"&source=SFAPP&bizCode=%7B%22path%22%3A%22%2Forigin%2Fa%2Fmimp%2Dmember%2Dright%2FcampusZone%22%2C%22linkCode%22%3A%22SFAC20250321142854983%22%2C%22supportShare%22%3A%22YES%22%2C%22from%22%3A%22campuscxapp250321%22%7D\",\"isLanguage\":true,\"needReqTime\":\"1\",\"needSign\":true,\"source\":{\"uri\":\"https://mcs-mimp-web.{{{顺丰速运}}}.com/mcs-mimp/share/app/activityRedirect\"},\"mustUserInfo\":true},\"pageRoute\":\"WedViewPage\",\"clientVersionCode\": \"1097520\"}","subjectContent":"校园专享","positionId":"app-index-2025","createTime":"2025-12-15 20:46:41","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/00A17C284C654B17982A619CD6BC6E8C.png","urlType":"webview","sceneCode":"4dfb74ad847240da74ef779a71983e23","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29153,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":23,"sceneName":"代收货款","updateTime":"2025-11-10 11:03:29","url":"{\n    \"params\": {\n        \"title\": \"代收货款\"\n    },\n    \"needLogin\": true,\n    \"pageRoute\": \"WedViewPage\",\n    \"appId\": \"202112031150033323\",\n    \"isFromShare\": true\n}","subjectContent":"代收货款","positionId":"app-index-2025","createTime":"2025-11-10 11:03:29","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/2E5BA6994EB748A0B54ABC4E77BC8404.png","urlType":"webview","sceneCode":"61a4cc135ec404643b365081dd07a47b","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29154,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":24,"sceneName":"生鲜寄","updateTime":"2025-11-10 10:47:54","url":"{ \"needLogin\":true, \"pageRoute\":\"PlaceOrder\", \"params\":{ \"jumpName\":\"生鲜\" }, \"clientVersionCode\":\"1093300\"}","subjectContent":"生鲜寄","positionId":"app-index-2025","createTime":"2025-11-10 10:47:54","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/EDC51E372833483DA66B148F0CC38E1B.png","graySceneId":"campus_new_combine","urlType":"webview","sceneCode":"b95064ca6295426c4417a37ac1d867e4","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29155,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":25,"sceneName":"新校园专区","updateTime":"2025-11-10 14:26:45","url":"{\"needLogin\":true,\"params\":{\"isEncode\":true,\"domain\":\"mcs-mimp-web.{{{顺丰速运}}}.com\",\"extendNoSign\":\"&source=SFAPP&bizCode=%7B%22path%22%3A%22%2Forigin%2Fa%2Fmimp%2Dmember%2Dright%2FcampusZone%22%2C%22linkCode%22%3A%22SFAC20250321142854983%22%2C%22supportShare%22%3A%22YES%22%2C%22from%22%3A%22campuscxapp250321%22%7D\",\"isLanguage\":true,\"needReqTime\":\"1\",\"needSign\":true,\"source\":{\"uri\":\"https://mcs-mimp-web.{{{顺丰速运}}}.com/mcs-mimp/share/app/activityRedirect\"},\"mustUserInfo\":true},\"pageRoute\":\"WedViewPage\",\"clientVersionCode\": \"1097520\"}","subjectContent":"校园专享","positionId":"app-index-2025","createTime":"2025-11-10 14:26:45","typeId":"featuredShipping","typeLabel":"特色寄","status":0},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/898C16DD4D044C4AAAC8D6747E46176B.png","urlType":"webview","sceneCode":"18d0097382b3a34785905db39f7e0fbb","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29156,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":26,"sceneName":"顺丰集运","updateTime":"2025-11-10 11:03:30","url":"{\n    \"params\":{\n        \"title\":\"顺丰集运\"\n    },\n    \"needLogin\":true,\n    \"pageRoute\":\"WedViewPage\",\n    \"appId\":\"202112201117443948\",\n\"isFromShare\":true\n}","subjectContent":"顺丰集运","positionId":"app-index-2025","createTime":"2025-11-10 11:03:30","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/DF2501714CE24B7888FA3B3B4F3DCBDB.png","urlType":"webview","sceneCode":"357d56bec5fecc0d7aa91c6ed950155a","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29157,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":27,"sceneName":"微友寄","updateTime":"2025-11-10 11:03:31","url":"{\n\"params\": {\n\"appInfo\": {\n\"appId\": \"__UNI__4148A0B\",\n\"redirectPath\": \"\",\n\"version\": {\n\"name\": \"1.8.6\",\n\"code\": \"186\"\n},\n\"zipUrl\": \"https://ccsp-egmas-static.{{{顺丰速运}}}.com/sfoss/download/WeFriendMail/CCMAS/微友寄-186.zip\"\n},\n\"needSign\": true,\n\"mustUserInfo\": true,\n\"isEncode\": true,\n\"extendSign\": \"\",\n\"extendNoSign\": \"\"\n},\n\"needLogin\": true,\n\"pageRoute\": \"UniAppStartController\",\n\"clientVersionCode\": \"1093000\"\n}","subjectContent":"微友寄","positionId":"app-index-2025","createTime":"2025-11-10 11:03:31","typeId":"featuredShipping","typeLabel":"特色寄","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/4D055100B7D249FD8BE46667B409ED7D.png","urlType":"webview","sceneCode":"aa5344ca1a2e17ac68a867d47b5eca4c","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":29159,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":29,"sceneName":"球包寄","updateTime":"2026-01-21 18:52:18","url":"{ \"needLogin\":true, \"pageRoute\":\"GolfPreOrderPage\", \"clientVersionCode\":1098700,\"params\":{ \"title\":\"球包寄\"}}","subjectContent":"球包寄","positionId":"app-index-2025","createTime":"2026-01-21 18:52:18","typeId":"featuredShipping","typeLabel":"特色寄","status":1}],"id":"app-index-2025"},{"positionName":"跑腿服务聚合页-APP","positionChannel":"app","sceneList":[{"buttonName":"去使用","icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/C463C2F7093A4D1092843F7A1E187E20.png","graySceneId":"handling-documents","urlType":"webview","subSubjectContent":"香港证件代领，专业又安全","sceneCode":"3dc41995434864d883d6627607cf0260","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":28090,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":0,"sceneName":"代领证件","updateTime":"2025-11-28 18:47:05","url":"{\n \"params\": {\n  \"source\": {\n   \"uri\": \"https://ucmp.{{{顺丰速运}}}.com/wechat-act/weixin/activity/ibu-cios-h5-scan?originCode=HK_DBZJ\"\n  },\n\"signOption\": {\n        \"header\": true\n      },\n  \"isEncode\": true\n },\n \"needLogin\": true,\n \"pageRoute\": \"WedViewPage\"\n}","subjectContent":"代领证件","positionId":"run-errands-app","createTime":"2025-11-28 18:47:05","status":0},{"buttonName":"去使用","icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/9EADDED6E6EA4FDCAF3AA138CBDA52D6.png","urlType":"webview","subSubjectContent":"附近物品代取代送","sceneCode":"3af8615506597215e3051ddb9704604f","extendField1":"{\"boundApp\":\"Android,iOS\"}","id":28091,"extendFieldOneDTO":{"boundApp":"Android,iOS"},"seq":1,"sceneName":"帮我拿","updateTime":"2025-12-18 16:29:14","url":"{\n \"params\": {\n  \"source\": {\n   \"uri\": \"https://ucmp.{{{顺丰速运}}}.com/wxaccess/weixin/auth2?state=CARRY-H5&source=APP\"\n  },\n\"signOption\": {\n        \"header\": true\n      },\n  \"isEncode\": true\n },\n \"needLogin\": true,\n \"pageRoute\": \"WedViewPage\"\n}","subjectContent":"帮我拿","positionId":"run-errands-app","createTime":"2025-12-18 16:29:14","status":1}],"id":"run-errands-app"},{"positionName":"文旅专区聚合页-APP","positionChannel":"app","sceneList":[{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/9FD5B3B79E494E54A5440CE858DB6764.png","urlType":"webview","subSubjectContent":"一键下单，上门取送","sceneCode":"7c53ff994fecf766d5122ae78a43bba3","id":28809,"authType":1,"seq":0,"sceneName":"行李寄递","updateTime":"2026-02-09 09:39:55","subjectContent":"行李寄递","positionId":"travel_aggregation_page-app","createTime":"2026-02-09 09:39:55","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/49FB62B6CFAE46BA8054E07C784C077E.png","urlType":"webview","subSubjectContent":"随存随取，安全省心","sceneCode":"ff1ad1f975a57617c6347a843f7f464c","id":28810,"authType":1,"seq":1,"sceneName":"行李寄存","updateTime":"2025-12-18 11:30:10","url":"https://ucmp.{{{顺丰速运}}}.com/wxaccess/weixin/auth2?state=cx_luggage_storage","subjectContent":"行李寄存","positionId":"travel_aggregation_page-app","createTime":"2025-12-18 11:30:10","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/2DD4F459D6274638B894FC7CD07AF6EF.png","urlType":"webview","subSubjectContent":"专业加固，整装待发","sceneCode":"bcdb757976b8b9c57f008c3c9a65575c","id":28811,"authType":1,"seq":2,"sceneName":"行李打包","updateTime":"2025-12-18 11:30:44","url":"https://ucmp.{{{顺丰速运}}}.com/wxaccess/weixin/auth2?state=ustorage-pack-h5","subjectContent":"行李打包","positionId":"travel_aggregation_page-app","createTime":"2025-12-18 11:30:44","status":1},{"icon":"https://ucmp-static.{{{顺丰速运}}}.com/sfoss/ad-act/infoflow/AE31889D9E4B4954B8CF98B31FD6FA2C.png","urlType":"webview","subSubjectContent":"直送机场/酒店","sceneCode":"39e72b24e9a6f8b3dea76f374c4ce232","id":28812,"authType":1,"seq":3,"sceneName":"行李托运","updateTime":"2025-12-18 11:31:58","url":"https://ucmp.{{{顺丰速运}}}.com/wxaccess/weixin/auth2?state=ustorage-consign-h5","subjectContent":"行李托运","positionId":"travel_aggregation_page-app","createTime":"2025-12-18 11:31:58","status":1}],"id":"travel_aggregation_page-app"}]}" status-code=200 header="Content-Type:application/json"
-
 # > 淘票票去广告 · 2025-11-08
 # desc = 移除开屏广告、悬浮广告、轮播图广告和弹窗广告，移除搜索填充词和为你推荐。
 ^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.life\.popup\.get\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -509,49 +427,10 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 ^https:\/\/dashi\.{{{网易邮箱大师}}}\.com\/task-center-api\/fapi\/task\/list$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailoperating\/mailmaster\/api\/operator\/get$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 微博去广告 · 2026-02-22
-# desc = 过滤微博广告及去除各部分推广模块
-^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:ug\/checkin\/list|push\/daily|push\/info) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/live\/media_homelist\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/comments\/bullet_screens\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/photo\/info\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:container_positive|push_info) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/vote\/get_vote_detail\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/chaohua\/discovery\/home_bottom\/switch\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/huati\/(?:discovery_home_bottom_getdotinfo|mobile_discovery_searchchange) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/wbox\/\w+\/(?:home_bottom_modal|interest_category) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/search\/(?:container_discover|finder_nav_polling)\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/hot\/hours_spotlight\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/video\/redpacket\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/(?:search\/finder_nav_polling|sug\/list\/finderchange|was\/finder\/searchbarchange)\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/api\.{{{微博}}}\.cn\/2\/video\/tiny_video_info_show\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/bootrealtime\.uve\.{{{微博}}}\.com\/v[23]\/ad\/realtime data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/sdkapp\.uve\.{{{微博}}}\.com\/interface\/sdk\/(?:get-lbs-cell-info\.php|sdkconfig\.php) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/card\.{{{微博}}}\.com\/article\/m\/aj\/(?:reward|uvead) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/{{{微博}}}\.com\/ttarticle\/x\/m\/aj\/(?:reward|uvead) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
 # > 微信公众号去广告 · 2025-05-13
 # desc = 过滤微信公众号广告
 ^https:\/\/mp\.weixin\.{{{微信公众号}}}\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/mp\.weixin\.{{{微信公众号}}}\.com\/mp\/relatedsearchword data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
-# > 喜马拉雅去广告 · 2025-07-11
-# desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
-^https:\/\/(search|searchwsa)\.{{{喜马拉雅}}}\.com\/hub\/(guideWord|hotWord)V\d\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-feed\/v\d\/scene\/listen\/refresh\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(m|mwsa)\.{{{喜马拉雅}}}\.com\/x-web-activity\/signIn\/getHomePageSignInInfo\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/subscribe\/v\d\/subscribe\/tagAlbumList$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/track-feed\/v\d\/chase\/recommend\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/social-web\/follow-stream\/category\/\d+$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-playpage\/playpage\/recommendContentV\d\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-playpage\/playpage\/recommend\/resource\/allocation\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/firework-portal\/v\d+\/sync\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/business-sale-promotion-guide-mobile-web\/popup\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/app-skin-service\/skin\/setting\/info\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(live|livewsa)\.{{{喜马拉雅}}}\.com\/lamia\/v1\/subscribe\/status$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/subscribe\/v\d\/subscribe\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/purchased\/recommend\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-^https:\/\/(m|mwsa)\.{{{喜马拉雅}}}\.com\/community\/square\/v\d\/stream\? data-type=text data="{"data":{"cards":[{"content":{},"type":"RECOMMENDS"}]},"ret":0}" status-code=200 header="Content-Type:application/json"
 
 # > 下厨房去广告 · 2026-02-22
 # desc = 移除开屏广告、页面推广及横幅，精简首页标签。
@@ -569,10 +448,6 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 ^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idle\.item\.buy\.feeds\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlemtopsearch\.search\.shade\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 ^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idle\.playboy\.recommend\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
-
-# > 小黑盒去广告 · 2025-05-13
-# desc = 移除开屏广告和热点板块信息流广告
-^https:\/\/api\.{{{小黑盒}}}\.cn\/account\/get_ads_info_v2 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 # > 小红书去广告 · 2026-02-22
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
@@ -687,10 +562,6 @@ IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,REJECT,no-resolve,pre-matching
 # desc = 移除开屏广告、首页广告、板块广告、帖内广告和我的页面广告。
 ^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=advis - reject
 
-# > 墨迹天气去广告 · 2025-05-13
-# desc = 移除天气页面横幅、工具栏，移除时景关注页面推荐，精简我的页面。
-^https:\/\/fcard\.api\.{{{墨迹天气}}}\.com\/flycard\/flyCard\? - reject
-
 # > 瑞幸咖啡去广告 · 2025-05-13
 # desc = 移除开屏广告、弹窗和各类横幅推广。
 ^https:\/\/capi\.{{{瑞幸咖啡}}}\.com\/resource\/m\/growUp\/calendarList - reject
@@ -775,10 +646,6 @@ http-response-jq ^https:\/\/api\.{{{Keep}}}\.com\/twins\/union\/feed\/union_feed
 http-response-jq ^https:\/\/api\.{{{Keep}}}\.com\/twins\/v4\/feed\/entryDetail\? 'if (getpath([]) | has("data")) then (setpath(["data"]; {})) else . end'
 http-response-jq ^https:\/\/api\.{{{Keep}}}\.com\/config\/v3\/basic\? '.data.bottomBarControl.tabs |= map(select(.tabType | . == "home" or . == "schedule" or . == "dynamic_sports" or . == "personal")) | .data.homeTabs |= map(select(.type | . == "socialTab" or . == "union_feed_all" or . == "homeRecommend" or . == "suitTab" or . == "union_feed_route"))'
 http-response-jq ^https:\/\/api\.{{{Keep}}}\.com\/pencil-webapp\/play\/v1\/games\? '.data.games[].microGames[] |= if .leftIcon? and .leftIcon.type == "aiMode" then del(.leftIcon) else . end'
-
-# > Reddit去广告 · 2025-05-13
-# desc = 过滤应用内推广，阻止NSFW提示。
-http-response-jq ^https?:\/\/gql(-fed)?\.{{{Reddit}}}\.com ' walk(   if type == "object" then      (if .isNsfw == true then .isNsfw = false else . end)     | (if .isNsfwMediaBlocked == true then .isNsfwMediaBlocked = false else . end)     | (if .isNsfwContentShown == false then .isNsfwContentShown = true else . end)      | (if (.commentsPageAds | type == "array") then (.commentsPageAds = []) else . end)      | (if ( (.node | type == "object") and (.node.cells | type == "array") and (.node.cells | any(.__typename? == "AdMetadataCell" or .isAdPost? == true)) ) then empty else . end)     | (if (.node | type == "object") and (.node.adPayload | type == "object") then empty else . end)     | (if .__typename == "AdPost" then empty else . end)   else .  end)'
 
 # > 爱奇艺去广告 · 2025-05-13
 # desc = 移除开屏广告、焦点图广告、瀑布流广告、搜索页面广告、移除青少年弹窗，精简底栏和我的页面。
@@ -911,12 +778,6 @@ http-response-jq ^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/shield\/search_busi
 http-response-jq ^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/shield\/search_poi\/homepage\? 'delpaths([["history_tags"]])'
 http-response-jq ^https:\/\/m5-zb\.{{{高德地图}}}\.com\/ws\/sharedtrip\/taxi\/order_detail_car_tips\? 'delpaths([["data","carTips","data","popupInfo"]])'
 
-# > 京东去广告 · 2025-05-13
-# desc = 移除京东开屏广告，精简我的页面产品推广。
-http-response-jq ^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if (getpath(["data","JDMessage","socketmonitor"]) | has("isSocketEstablishedAhead")) then (setpath(["data","JDMessage","socketmonitor","isSocketEstablishedAhead"]; 0)) else . end'
-http-response-jq ^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if (getpath(["data","JDMessage","socketmonitor"]) | has("isSocketReport")) then (setpath(["data","JDMessage","socketmonitor","isSocketReport"]; 0)) else . end'
-http-response-jq ^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if (getpath(["data","JDHttpToolKit","httpdns"]) | has("httpdns")) then (setpath(["data","JDHttpToolKit","httpdns","httpdns"]; 0)) else . end'
-
 # > 京东外卖去广告 · 2025-11-28
 # desc = 移除首页推广、点评页面非美食内容、购物车及我的页面推荐、搜索发现、搜索榜单，精简我的页面。
 http-response-jq ^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=hours_home$ 'del(.result.config.searchFloor.data[].searchWords) | .result.data |= map(if .tnConfigVO?.businessCode == "nearby_HourlyGo_Operation_Tags" then empty else . end)'
@@ -978,34 +839,6 @@ http-response-jq ^https:\/\/mobile-thor\.api\.mg{{{芒果TV}}}\.com\/v\d+\/vod\/
 http-response-jq ^https:\/\/mobile-thor\.api\.mg{{{芒果TV}}}\.com\/v\d+\/vod\/info\? '.data.tabs |= map(select(.name == "视频" or .name == "讨论")) | .data.template.modules |= map(if .clipInfo.ext?.ipPublishEntrance then .clipInfo |= del(.ext) else . end) | .data.template.modules |= map(select(.dataType == 101 or .dataType == 201)) | .data.template.modules |= map(.media.list |= (if type == "array" then map(select(.type != 0)) else . end))'
 http-response-jq ^https:\/\/comment\.mg{{{芒果TV}}}\.com\/v\d\/comment\/getCommentList\? '.data.list |= map(select(.type == 0))'
 
-# > 美图秀秀去广告 · 2025-08-31
-# desc = 移除开屏广告、横幅推广，精简我的页面。
-http-response-jq ^https:\/\/api\.posters\.{{{美图秀秀}}}\.com\/common\/init\.json 'delpaths([["data","vip"]])'
-
-# > 墨迹天气去广告 · 2025-05-13
-# desc = 移除天气页面横幅、工具栏，移除时景关注页面推荐，精简我的页面。
-http-response-jq ^https:\/\/mme\.api\.{{{墨迹天气}}}\.com\/json\/entrance\/list$ 'del(.entrance_region_res_list[] | select(.region_name == "皇冠区域" or .region_name == "banner区")) | .entrance_region_res_list[].entrance_res_list |= if . then map(select(.entrance_name | . != "墨迹钱包" and . != "墨圈")) else . end'
-
-# > 拼多多去广告 · 2026-02-28
-# desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","dy_module","irregular_banner_dy"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","icon_set"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","search_bar_hot_query"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","dy_module","irregular_banner_dy"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? '.result.bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.buffer_bottom_tabs? |= map(select(.link | IN("index.html", "chat_list.html", "personal.html"))) | .result.all_top_opts |= map(del(.selected_image, .image, .height, .width))'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/search\? 'delpaths([["expansion"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/philo\/personal\/hub\? 'delpaths([["monthly_card_entrance"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/philo\/personal\/hub\? 'delpaths([["personal_center_style_v2_vo"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/philo\/personal\/hub\? 'delpaths([["icon_set","icons"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/philo\/personal\/hub\? 'delpaths([["icon_set","top_personal_icons"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/oak\/integration\/render\? 'delpaths([["bottom_section_list"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/oak\/integration\/render\? 'delpaths([["ui","bottom_section"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/oak\/integration\/render\? 'delpaths([["ui","live_section","float_info"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v3\/query\/order_detail_group\? 'delpaths([["data","goods_list"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/order\/ 'delpaths([["marketing_banner_vo"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/order\/ 'delpaths([["shipping","banner_above_recommend"]])'
-http-response-jq ^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/order_list_v4\? '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))'
-
 # > 起点读书去广告 · 2025-05-13
 # desc = 移除起点读书开屏广告、每日导读、各类弹窗、文末广告、搜索填充词，精简我的页面。
 http-response-jq ^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/client\/getconf$ 'if (getpath(["Data"]) | has("WolfEye")) then (setpath(["Data","WolfEye"]; 0)) else . end'
@@ -1047,10 +880,6 @@ http-response-jq ^https:\/\/haojia-cdn\.{{{什么值得买}}}\.com\/preload\/\d+
 http-response-jq ^https:\/\/post\.m\.{{{什么值得买}}}\.com\/ajax_app\/ajax_get_footer_list\? 'delpaths([["data","tuiguang_ad"]])'
 http-response-jq ^https:\/\/post\.m\.{{{什么值得买}}}\.com\/ajax_app\/ajax_get_footer_list\? 'delpaths([["data","activity_banner"]])'
 
-# > 顺丰速运去广告 · 2026-02-23
-# desc = 移除开屏广告、首页下拉抽屉、首页推广、应用内悬浮窗、横幅广告，移除主题，精简我的页面。
-http-response-jq ^https:\/\/ccsp-egmas\.{{{顺丰速运}}}\.com\/cx-app-base\/base\/app\/appHomeConfig\/query$ '.obj |= map(select(.position != 2))'
-
 # > 淘票票去广告 · 2025-11-08
 # desc = 移除开屏广告、悬浮广告、轮播图广告和弹窗广告，移除搜索填充词和为你推荐。
 http-response-jq ^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig\/ 'delpaths([["data","returnValue","floatingBanner"]])'
@@ -1077,18 +906,6 @@ http-response-jq ^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailma
 http-response-jq ^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/page\/v2\/conf\.do$ 'delpaths([["data","memberOperator"]])'
 http-response-jq ^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/page\/v2\/conf\.do$ 'delpaths([["data","activityTabInfoList"]])'
 http-response-jq ^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/config\/function\.do$ '.data.config[] |= if .result.tools then .result.tools |= map(select(.name == "邮件追踪" or .name == "替身邮箱")) else . end | del(.data.config[] | select(.functionName == "Function-AD"))'
-
-# > 喜马拉雅去广告 · 2025-07-11
-# desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-feed\/v\d\/mix\/ '.heData |= map(select(.item.list[].bizType != "SceneListenCard"))'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-category\/customCategories\/ '.categoryList |= map(.itemList |= map(select(.title | test("直播|123狂欢节|SVIP"; "i") | not))) | .customCategoryList |= map(select(.title | test("直播|123狂欢节|SVIP"; "i") | not))'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/football-portal\/diff2\/batch\? 'delpaths([["json","ad"]])'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/football-portal\/diff2\/batch\? 'delpaths([["json","toc"]])'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/nexus-web\/v\d\/tabs\/customTabs\? '.data.feedTabs |= map(select(.name != "大赛"))'
-http-response-jq ^https:\/\/mobwsa\.{{{喜马拉雅}}}\.com\/mobile-playpage\/playpage\/tabs\/v2\/ 'delpaths([["data","playpage","resourceMap","defaultResource"]])'
-http-response-jq ^https:\/\/mobwsa\.{{{喜马拉雅}}}\.com\/mobile-playpage\/playpage\/tabs\/v2\/ 'delpaths([["data","playpage","resourceMap","playPageTip"]])'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/homePage\/ 'delpaths([["data","freeListenV2"]])'
-http-response-jq ^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/homePage\/ '.data.serviceModule.entrances |= map(select(.name == "全部服务"))'
 
 # > 下厨房去广告 · 2026-02-22
 # desc = 移除开屏广告、页面推广及横幅，精简首页标签。
@@ -1131,10 +948,6 @@ http-response-jq ^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.a
 http-response-jq ^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/aweme\/homepage\/render\/\? '.data.tab_list[]? |= (if .extra.side_bar.modules != null then .extra.side_bar.modules[]?.items[]? |= (if .data.first_page_module?.module_title == "常用功能" then .data={} else . end) else . end) | .data.tab_list |= map(if .extra.tab_list != null then .extra.tab_list |= map(select(.tab_id | IN("homepage_tablive", "homepage_follow", "homepage_hot_container"))) else . end) | .data.tab_list |= map(select(.extra.tab_list != null and (.extra.tab_list | length > 0)))'
 http-response-jq ^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend 'if (getpath(["data","/service/settings/v3/","body","data","settings"]) | has("homepage_two_session_tab_skin_2025")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_two_session_tab_skin_2025"]; false)) else . end'
 http-response-jq ^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend 'if (getpath(["data","/service/settings/v3/","body","data","settings"]) | has("homepage_tab_skin_enable")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_tab_skin_enable"]; false)) else . end'
-
-# > 小黑盒去广告 · 2025-05-13
-# desc = 移除开屏广告和热点板块信息流广告
-http-response-jq ^https:\/\/api\.{{{小黑盒}}}\.cn\/bbs\/app\/feeds\/news '.result.links |= map(if .content_type == 27 then del(.title, .ad_pm, .img_gif, .idea_id, .ad_report, .label, .source, .intranet_only, .ad_cm, .content_type, .PROTOCOL, .img, .ad_ratio) else . end)'
 
 # > 小红书去广告 · 2026-02-22
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
@@ -1254,34 +1067,6 @@ IT之家去广告 = type=http-response, pattern=^https:\/\/napi\.{{{IT之家}}}\
 # desc = 过滤航旅纵横广告
 # hostname = 114.115.217.129, home.{{{航旅纵横}}}.com
 移除首页广告 = type=http-response, pattern=^http?:\/\/(114\.115\.217\.129)|(home\.{{{航旅纵横}}}\.com)\/gateway\/api\/umetrip\/native$, script-path=https://kelee.one/Resource/JavaScript/Umetrip/Umetrip_remove_ads.js
-
-# > 京东去广告 · 2025-05-13
-# desc = 移除京东开屏广告，精简我的页面产品推广。
-# hostname = api.m.{{{京东}}}.com
-移除京东广告 = type=http-response, pattern=^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome), script-path=https://kelee.one/Resource/JavaScript/JD/JD_remove_ads.js, requires-body=true
-
-# > 微博去广告 · 2026-02-22
-# desc = 过滤微博广告及去除各部分推广模块
-# hostname = *.{{{微博}}}.cn, *.{{{微博}}}.com, {{{微博}}}.com
-移除首页推广 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:checkin\/show|client\/publisher_list|push\/active), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除首页顶部标签 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/groups\/allgroups\/v2\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除信息流广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:cardlist|page), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除评论区广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/comments\/build_comments\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除个人微博详情页广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:container\/asyn|flowlist|flowpage), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除关注、取消关注弹窗 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/friendships\/(?:create|destroy), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除个人主页广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/profile\/(?:container_timeline|dealatt|me|statuses\/tab|userinfo), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除超话搜索页广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/shproxy\/chaohua\/discovery\/searchactive\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除信息流广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:container_detail(_comment)?|container_timeline(?:_hot|_topic|_topicpage|_unread)?|repost_timeline|unread_hot_timeline), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除微博详情页广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:extend|show)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除视频流广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/video\/(?:full_screen_stream|tiny_stream_mid_detail|tiny_stream_video_list)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除超话顶部标签 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/huati\/discovery_home_bottom_channels\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除消息页列表广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/direct_messages\/user_list\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除消息页提醒 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/messageflow\/notice\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除热门微博信息流广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/search\/(?:container_timeline|finder)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除发现页搜索结果广告 = type=http-response, pattern=^https:\/\/api\.{{{微博}}}\.cn\/2\/searchall\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除开屏广告 preload = type=http-response, pattern=^https:\/\/bootpreload\.uve\.{{{微博}}}\.com\/v[12]\/ad\/preload, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除开屏广告 sdkad = type=http-response, pattern=^https:\/\/sdkapp\.uve\.{{{微博}}}\.com\/interface\/sdk\/sdkad\.php, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-移除开屏广告 wbapplua = type=http-response, pattern=^https:\/\/wbapp\.uve\.{{{微博}}}\.com\/(?:preload\/get_ad|wbapplua\/wbpullad\.lua), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
 
 # > 小红书去广告 · 2026-02-22
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
