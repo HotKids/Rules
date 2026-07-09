@@ -35,7 +35,7 @@ pull_latest_code() {
   fi
 
   if [[ -z "${UPDATE_REPO_URL:-}" ]]; then
-    fail "当前目录不是 Git checkout，无法自动拉取代码。请使用 git clone 方式部署，或设置远程仓库地址。"
+    fail "Current directory is not a Git checkout, so code can't be pulled automatically. Deploy via 'git clone', or set UPDATE_REPO_URL to a remote repo to re-clone."
   fi
 
   local current_dir parent_dir backup_dir new_root
