@@ -80,7 +80,4 @@ payload:
   # > BOC HK
   ### 中银香港服务
   - DOMAIN-SUFFIX,bochk.com
-
-  # > ziniao
-  ### 紫鸟浏览器
   - PROCESS-NAME,*ziniao*

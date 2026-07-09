@@ -1,0 +1,4 @@
+# Force LF line endings so shell scripts never get CRLF on a Windows checkout
+# (CRLF breaks bash with "$'\r': command not found").
+* text=auto eol=lf
+*.sh text eol=lf
