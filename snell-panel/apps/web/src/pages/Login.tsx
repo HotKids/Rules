@@ -39,7 +39,7 @@ export function Login({ onAuthed }: { onAuthed: () => void }) {
 
         <div className="px-6 pb-1">
           <TextField value={value} onChange={setValue} type="password">
-            <Label className="sr-only">Access Token</Label>
+            <Label className="sr-only">Access token</Label>
             <Input
               placeholder="Access token"
               autoFocus

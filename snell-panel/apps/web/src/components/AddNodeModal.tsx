@@ -86,7 +86,7 @@ export function AddNodeModal({
         <Modal.Dialog className="sm:max-w-[460px]">
           <Modal.CloseTrigger />
           <Modal.Header>
-            <Modal.Heading>Add Node</Modal.Heading>
+            <Modal.Heading>Add node</Modal.Heading>
           </Modal.Header>
           <Modal.Body>
             <div className="flex flex-col gap-4">
