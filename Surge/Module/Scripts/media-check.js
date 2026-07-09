@@ -25,12 +25,16 @@
  * 🌐 社交 & 其他
  *    └─ Reddit        地区访问检测
  *
+ * 🧩 可选（默认关闭，需参数开启，且仅在可用时显示）
+ *    └─ Viu           HK/东南亚流媒体，viu=true 开启（参考 lmc999/RegionRestrictionCheck）
+ *
  * ═══════════════════════════════════════════════════════════════════════════
  * ⚙️ 参数配置
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * • geminiapikey=YOUR_KEY    Gemini API Key（可选，增强检测准确性）
  * • nfprice=false            关闭 Netflix 价格显示（默认开启）
+ * • viu=true                 开启 Viu 检测（默认关闭；开启后仅在可用时显示）
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎨 状态指示
@@ -523,6 +527,28 @@ class ServiceChecker {
     } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
   }
 
+  /**
+   * Viu 解锁检测（默认关闭，需面板参数 viu=true 启用；仅在可用时显示）
+   *
+   * 参考 lmc999/RegionRestrictionCheck：请求 www.viu.com，可用地区会重定向到
+   * www.viu.com/ott/{area}/{lang}，不支持的地区落到 no-service 页。原脚本取重定向
+   * 后最终 URL 的地区段判断；Surge $httpClient 不暴露 url_effective（实测 response
+   * 仅 status/headers），故改从最终页面正文里的 /ott/{area}/ 路径提取地区码——正文里
+   * 该路径多为相对形式（实测 SG 节点返回 `/ott/sg/en"`），不带 viu.com 前缀，故正则
+   * 只匹配 /ott/{2 位地区}/。提取不到即按不可用处理（安全失败：宁可不显示）。
+   * @returns {Promise<Object>} 检测结果
+   */
+  static async checkViu() {
+    try {
+      const res = await Utils.request({ url: "https://www.viu.com/" });
+      if (res.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
+      const m = (res.body || "").match(/\/ott\/([a-z]{2})[/"']/i);
+      return m
+        ? Utils.createResult(STATUS.OK, m[1].toUpperCase())
+        : Utils.createResult(STATUS.FAIL, "No");
+    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
+  }
+
 }
 
 /**
@@ -530,6 +556,7 @@ class ServiceChecker {
  */
 (async () => {
   try {
+    const args = Utils.parseArgs($argument);
     const results = await Promise.all([
       ServiceChecker.checkNetflix(),
       ServiceChecker.checkDisney(),
@@ -539,11 +566,12 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit()
+      ServiceChecker.checkReddit(),
+      // Viu 默认关闭：仅当面板参数 viu=true 时才发起检测（否则占位 null，不显示）
+      args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null)
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
-    const args = Utils.parseArgs($argument);
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, viu] = results;
     const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
       ? await ServiceChecker.getNetflixPrice(netflix.region)
       : "";
@@ -559,6 +587,13 @@ class ServiceChecker {
       { name: "Claude", result: claude },
       { name: "Reddit", result: reddit }
     ];
+
+    // Viu：默认关闭，且仅在可用（OK）时才显示；不可用 / 未启用一律不显示。
+    // 插到 Spotify 之前，让前几行都是流媒体（Netflix/Disney+/HBO Max/YouTube/Viu/Spotify）。
+    if (viu && viu.status === STATUS.OK) {
+      const at = services.findIndex(s => s.name === "Spotify");
+      services.splice(at < 0 ? services.length : at, 0, { name: "Viu", result: viu });
+    }
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
     const totalCount = services.length;
