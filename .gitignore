@@ -1,0 +1,8 @@
+# Python 字节码缓存（运行 .github/scripts/*.py 时自动产生，非源文件）
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 编辑器 / 系统杂项
+.DS_Store
+*.swp

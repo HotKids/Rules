@@ -2231,6 +2231,8 @@ def _qx_expand_lan_list(list_path: Path, title: str) -> list[str]:
             continue
         parts = [p.strip() for p in s.split(",")]
         rt = parts[0].upper()
+        if len(parts) < 2:
+            raise ValueError(f"_qx_expand_lan_list: malformed rule {s!r} in {list_path}")
         target = parts[1]
         if rt == "DOMAIN-SUFFIX":
             out.append(f"host-suffix, {target}, direct")

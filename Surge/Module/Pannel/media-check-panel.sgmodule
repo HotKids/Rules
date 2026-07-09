@@ -3,11 +3,11 @@
 #!author=HotKids&ChatGPT&Claude
 #!category=HotKids
 #!system=ios
-#!arguments=geminiapikey:null,nfprice:true
-#!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，无 Key 时通过网页检测，有 Key 时增加 API 检测作为 fallback）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）
+#!arguments=geminiapikey:null,nfprice:true,viu:false
+#!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，无 Key 时通过网页检测，有 Key 时增加 API 检测作为 fallback）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）\nviu: 检测 Viu（HK/东南亚流媒体，默认 false 关闭；设为 true 开启，且仅在可用时显示）
 
 [Panel]
 media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill
 
 [Script]
-media-check = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js,argument=geminiapikey={{{geminiapikey}}}&nfprice={{{nfprice}}}
+media-check = type=generic,timeout=30,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js,argument=geminiapikey={{{geminiapikey}}}&nfprice={{{nfprice}}}&viu={{{viu}}}
