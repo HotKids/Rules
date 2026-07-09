@@ -532,15 +532,17 @@ class ServiceChecker {
    *
    * 参考 lmc999/RegionRestrictionCheck：请求 www.viu.com，可用地区会重定向到
    * www.viu.com/ott/{area}/{lang}，不支持的地区落到 no-service 页。原脚本取重定向
-   * 后最终 URL 的地区段判断；Surge $httpClient 不暴露 url_effective，故改从最终页面
-   * 正文里的 /ott/{area}/ 路径提取地区码。提取不到即按不可用处理（安全失败：宁可不显示）。
+   * 后最终 URL 的地区段判断；Surge $httpClient 不暴露 url_effective（实测 response
+   * 仅 status/headers），故改从最终页面正文里的 /ott/{area}/ 路径提取地区码——正文里
+   * 该路径多为相对形式（实测 SG 节点返回 `/ott/sg/en"`），不带 viu.com 前缀，故正则
+   * 只匹配 /ott/{2 位地区}/。提取不到即按不可用处理（安全失败：宁可不显示）。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkViu() {
     try {
       const res = await Utils.request({ url: "https://www.viu.com/" });
       if (res.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
-      const m = (res.body || "").match(/viu\.com\/ott\/([a-z]{2})\//i);
+      const m = (res.body || "").match(/\/ott\/([a-z]{2})[/"']/i);
       return m
         ? Utils.createResult(STATUS.OK, m[1].toUpperCase())
         : Utils.createResult(STATUS.FAIL, "No");
