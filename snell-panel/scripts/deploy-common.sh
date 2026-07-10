@@ -146,16 +146,19 @@ MSG
 }
 
 current_database_id() {
-  node - "$WRANGLER_CONFIG" "$PLACEHOLDER_DB_ID" <<'NODE'
-const fs = require('fs');
+  # Read the first database_id from apps/server/wrangler.jsonc. The key is a
+  # quoted JSON key ("database_id":), so allow an optional closing quote between
+  # the name and the `:`/`=` — otherwise the pattern never matches JSON and the
+  # configured id is silently reported as missing. Placeholder filtering is left
+  # to has_database_id().
+  node - "$WRANGLER_CONFIG" <<'NODE'
+const fs = require("fs");
 const file = process.argv[2];
-const placeholder = process.argv[3];
-let text = fs.readFileSync(file, 'utf8')
-  .replace(/\/\*[\s\S]*?\*\//g, '')
-  .replace(/(^|[^:])\/\/.*$/gm, '$1');
-const ids = [...text.matchAll(/database_id\s*[:=]\s*["']([^"']+)["']/g)].map((m) => m[1]);
-const usable = ids.find((id) => id && id !== placeholder) || ids[0] || '';
-process.stdout.write(usable);
+const text = fs.readFileSync(file, "utf8");
+const ids = [...text.matchAll(/database_id["']?\s*[:=]\s*["']([^"']+)["']/g)]
+  .map((m) => m[1])
+  .filter(Boolean);
+console.log(ids[0] || "");
 NODE
 }
 
