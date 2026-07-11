@@ -494,12 +494,12 @@ function main(config) {
   // 过滤/全量结果追加在后面，而不是整体覆盖。
   const allProxyNames = config.proxies.map((p) => p.name);
   const poolGroupFilters = {
+    Mail: null,
     '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
     '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)',
     '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
     '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
-    Mail: null,
     Server: null,
     'Hong Kong': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
     Taiwan: '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Neburst)(?!.*Pro)',
