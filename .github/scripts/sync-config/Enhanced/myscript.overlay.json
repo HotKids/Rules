@@ -4,12 +4,12 @@
   "output": "Clash/Script/MyScript.js",
 
   "group_overrides": {
+    "📧 Mail": { "filter": null },
     "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" },
     "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Neburst)(?!.*Pro)" },
     "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "(?i)^(?=.*\\b(?:SG|SGP)\\d*\\b)(?!.*Neburst)(?!.*Pro)" },
     "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?!.*Pro)" },
-    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" },
-    "📧 Mail": { "filter": null }
+    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" }
   },
 
   "group_proxies_insert": {
