@@ -138,6 +138,18 @@ function main(config) {
   }
   Object.assign(config.hosts, proxyHosts);
 
+  // ── 节点 ──
+  // 节点池筛选正则（对应 Mihomo.yaml 的 &Region / &Filter* 锚点）：
+  // null = 不过滤、取全量节点；下方策略组生成后按此表运行时填充候选。
+  const poolGroupFilters = {
+    '🇺🇳 Server': null,
+    '🇭🇰 Hong Kong': '(?i)(?:🇭🇰|香港|Hong Kong|\\b(?:HK|HKG)\\d*\\b)',
+    '🇨🇳 Taiwan': '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\\b(?:TW|TWN)\\d*\\b)',
+    '🇸🇬 Singapore': '(?i)(?:🇸🇬|新加坡|Singapore|\\b(?:SG|SGP)\\d*\\b)',
+    '🇯🇵 Japan': '(?i)(?:🇯🇵|日本|Japan|\\b(?:JP|JPN)\\d*\\b)',
+    '🇺🇸 America': '(?i)(?:🇺🇸|美国|United States|\\b(?:US|USA)\\d*\\b)',
+  };
+
   // ── 策略组 ──
   const proxyGroups = [
     // Proxy
@@ -184,21 +196,13 @@ function main(config) {
     { name: '🇺🇸 America', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png' },
   ];
 
-  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤
-  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选
+  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：按上方 poolGroupFilters
+  // 手动过滤 config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选
   // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），
   // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
   // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，
   // 过滤/全量结果追加在后面，而不是整体覆盖。
   const allProxyNames = config.proxies.map((p) => p.name);
-  const poolGroupFilters = {
-    '🇺🇳 Server': null,
-    '🇭🇰 Hong Kong': '(?i)(?:🇭🇰|香港|Hong Kong|\\b(?:HK|HKG)\\d*\\b)',
-    '🇨🇳 Taiwan': '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\\b(?:TW|TWN)\\d*\\b)',
-    '🇸🇬 Singapore': '(?i)(?:🇸🇬|新加坡|Singapore|\\b(?:SG|SGP)\\d*\\b)',
-    '🇯🇵 Japan': '(?i)(?:🇯🇵|日本|Japan|\\b(?:JP|JPN)\\d*\\b)',
-    '🇺🇸 America': '(?i)(?:🇺🇸|美国|United States|\\b(?:US|USA)\\d*\\b)',
-  };
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
     const filter = poolGroupFilters[g.name];
@@ -216,6 +220,7 @@ function main(config) {
   }
 
   // ── 规则集 ──
+  // 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/
   // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用
   const remoteRuleProvider = { type: 'http', interval: 86400 };
   const ruleProviders = {
