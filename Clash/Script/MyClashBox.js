@@ -35,8 +35,32 @@ const ruleOptionsEnable = {
 };
 
 function main(config) {
-  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {
+  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点
+  const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];
+  const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));
+  if (!hasRealProxy) {
     throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');
+  }
+
+  // —— 保留机场私有 DNS / 节点域名 hosts ——
+  // 部分机场用私有 DNS 解析节点域名，或把节点域名解析写进订阅的 hosts /
+  // proxy-server-nameserver；下方 dns/hosts 会被整块覆盖，先把这些私有条目
+  // 采集出来（滤掉常见公共 DNS），覆盖后再合并回去，避免此类机场断连。
+  const commonDnsRe = /(223\.5\.5\.5|223\.6\.6\.6|119\.29\.29\.29|1\.12\.12\.12|120\.53\.53\.53|114\.114\.114\.114|180\.76\.76\.76|1\.1\.1\.1|1\.0\.0\.1|8\.8\.8\.8|8\.8\.4\.4|94\.140\.14\.14|94\.140\.15\.15|127\.0\.0\.1|alidns|doh\.pub|dot\.pub|dnspod|dns\.baidu|dns\.google|cloudflare|adguard|system)/i;
+  const origDns = config.dns || {};
+  const privateProxyNs = (origDns['proxy-server-nameserver'] || []).filter((d) => !commonDnsRe.test(String(d)));
+  const privateNsPolicy = {};
+  for (const policy of [origDns['proxy-server-nameserver-policy'] || {}, origDns['nameserver-policy'] || {}]) {
+    for (const [rule, dns] of Object.entries(policy)) {
+      const list = Array.isArray(dns) ? dns : [dns];
+      if (list.some((d) => commonDnsRe.test(String(d)))) continue;
+      privateNsPolicy[rule] = dns;
+    }
+  }
+  const proxyServerDomains = new Set(inputProxies.map((p) => String(p.server || '').toLowerCase()).filter(Boolean));
+  const proxyHosts = {};
+  for (const [host, v] of Object.entries(config.hosts || {})) {
+    if (proxyServerDomains.has(host.toLowerCase())) proxyHosts[host] = v;
   }
 
   config['mixed-port'] = 7892;
@@ -213,6 +237,15 @@ function main(config) {
     'endpoint-independent-nat': true,
     'disable-icmp-forwarding': true,
   };
+
+  // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）
+  if (privateProxyNs.length > 0) {
+    config.dns['proxy-server-nameserver'] = [...(config.dns['proxy-server-nameserver'] || []), ...privateProxyNs];
+  }
+  if (Object.keys(privateNsPolicy).length > 0) {
+    config.dns['proxy-server-nameserver-policy'] = privateNsPolicy;
+  }
+  Object.assign(config.hosts, proxyHosts);
 
   const proxyGroups = [
     {
@@ -492,196 +525,36 @@ function main(config) {
     g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];
   }
 
+  // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用
+  const remoteRuleProvider = { type: 'http', interval: 86400 };
   const ruleProviders = {
-    Bypass: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Bypass.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml',
-      interval: 86400,
-    },
-    Reroute: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Reroute.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml',
-      interval: 86400,
-    },
-    Private: {
-      type: 'http',
-      behavior: 'domain',
-      path: './Provider/RuleSet/Private.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt',
-      interval: 86400,
-    },
-    HTTPDNS: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/HTTPDNS.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml',
-      interval: 86400,
-    },
-    Reject: {
-      type: 'http',
-      behavior: 'domain',
-      path: './Provider/RuleSet/Reject.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt',
-      interval: 86400,
-    },
-    AdBlock: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/AdBlock.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml',
-      interval: 86400,
-    },
-    Streaming_TW: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Streaming_TW.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml',
-      interval: 86400,
-    },
-    Streaming_JP: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Streaming_JP.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml',
-      interval: 86400,
-    },
-    Streaming_US: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Streaming_US.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml',
-      interval: 86400,
-    },
-    Streaming: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Streaming.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml',
-      interval: 86400,
-    },
-    CNTV: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/CNTV.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml',
-      interval: 86400,
-    },
-    'Google AI Studio': {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Google_AI_Studio.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml',
-      interval: 86400,
-    },
-    AIGC: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/AIGC.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml',
-      interval: 86400,
-    },
-    'Apple CN': {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Apple_CN.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml',
-      interval: 86400,
-    },
-    Apple: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Apple.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml',
-      interval: 86400,
-    },
-    Google: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Google.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml',
-      interval: 86400,
-    },
-    OneDrive: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/OneDrive.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml',
-      interval: 86400,
-    },
-    Microsoft: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Microsoft.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml',
-      interval: 86400,
-    },
-    Telegram: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Telegram.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml',
-      interval: 86400,
-    },
-    Crypto: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Crypto.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml',
-      interval: 86400,
-    },
-    Finance: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Finance.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml',
-      interval: 86400,
-    },
-    Spark: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/Spark.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml',
-      interval: 86400,
-    },
-    Global: {
-      type: 'http',
-      behavior: 'domain',
-      path: './Provider/RuleSet/Global.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt',
-      interval: 86400,
-    },
-    China: {
-      type: 'http',
-      behavior: 'domain',
-      path: './Provider/RuleSet/China.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt',
-      interval: 86400,
-    },
-    CNASN: {
-      type: 'http',
-      behavior: 'classical',
-      path: './Provider/RuleSet/CNASN.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml',
-      interval: 86400,
-    },
-    CNCIDR: {
-      type: 'http',
-      behavior: 'ipcidr',
-      path: './Provider/RuleSet/CNCIDR.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt',
-      interval: 86400,
-    },
-    LAN: {
-      type: 'http',
-      behavior: 'ipcidr',
-      path: './Provider/RuleSet/LANCIDR.yaml',
-      url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt',
-      interval: 86400,
-    },
+    Bypass: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Bypass.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml' },
+    Reroute: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Reroute.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml' },
+    Private: { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Private.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt' },
+    HTTPDNS: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/HTTPDNS.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml' },
+    Reject: { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Reject.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt' },
+    AdBlock: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/AdBlock.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml' },
+    Streaming_TW: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_TW.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml' },
+    Streaming_JP: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_JP.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml' },
+    Streaming_US: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_US.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml' },
+    Streaming: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml' },
+    CNTV: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/CNTV.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml' },
+    'Google AI Studio': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Google_AI_Studio.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml' },
+    AIGC: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/AIGC.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml' },
+    'Apple CN': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Apple_CN.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml' },
+    Apple: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Apple.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml' },
+    Google: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Google.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml' },
+    OneDrive: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/OneDrive.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml' },
+    Microsoft: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Microsoft.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml' },
+    Telegram: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Telegram.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml' },
+    Crypto: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Crypto.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml' },
+    Finance: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Finance.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml' },
+    Spark: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Spark.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml' },
+    Global: { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Global.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt' },
+    China: { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/China.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt' },
+    CNASN: { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/CNASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
+    CNCIDR: { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/CNCIDR.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt' },
+    LAN: { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/LANCIDR.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt' },
   };
 
   const rules = [

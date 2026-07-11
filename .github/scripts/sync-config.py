@@ -2563,6 +2563,19 @@ def _to_js(value, indent: int = 2) -> str:
     return _js_string(str(value))
 
 
+def _to_js_inline(value) -> str:
+    """紧凑单行 JS 字面量（对象/数组不换行），用于 spread 抽公共后的单行条目。"""
+    if isinstance(value, dict):
+        if not value:
+            return "{}"
+        return "{ " + ", ".join(f"{_js_key(str(k))}: {_to_js_inline(v)}" for k, v in value.items()) + " }"
+    if isinstance(value, list):
+        if not value:
+            return "[]"
+        return "[" + ", ".join(_to_js_inline(v) for v in value) + "]"
+    return _to_js(value)
+
+
 def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> dict:
     """节点池组（Server / 地区）→ Script.js 场景下没有 provider，改由运行时 JS 手动
     过滤 config.proxies 填充 `proxies`（见 _gen_clash_script_js 里 poolGroupFilters 循环）。
@@ -3072,8 +3085,32 @@ def _gen_clash_script_js(
         f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0)};",
         "",
         "function main(config) {",
-        "  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {",
+        "  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点",
+        "  const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];",
+        "  const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));",
+        "  if (!hasRealProxy) {",
         "    throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');",
+        "  }",
+        "",
+        "  // —— 保留机场私有 DNS / 节点域名 hosts ——",
+        "  // 部分机场用私有 DNS 解析节点域名，或把节点域名解析写进订阅的 hosts /",
+        "  // proxy-server-nameserver；下方 dns/hosts 会被整块覆盖，先把这些私有条目",
+        "  // 采集出来（滤掉常见公共 DNS），覆盖后再合并回去，避免此类机场断连。",
+        "  const commonDnsRe = /(223\\.5\\.5\\.5|223\\.6\\.6\\.6|119\\.29\\.29\\.29|1\\.12\\.12\\.12|120\\.53\\.53\\.53|114\\.114\\.114\\.114|180\\.76\\.76\\.76|1\\.1\\.1\\.1|1\\.0\\.0\\.1|8\\.8\\.8\\.8|8\\.8\\.4\\.4|94\\.140\\.14\\.14|94\\.140\\.15\\.15|127\\.0\\.0\\.1|alidns|doh\\.pub|dot\\.pub|dnspod|dns\\.baidu|dns\\.google|cloudflare|adguard|system)/i;",
+        "  const origDns = config.dns || {};",
+        "  const privateProxyNs = (origDns['proxy-server-nameserver'] || []).filter((d) => !commonDnsRe.test(String(d)));",
+        "  const privateNsPolicy = {};",
+        "  for (const policy of [origDns['proxy-server-nameserver-policy'] || {}, origDns['nameserver-policy'] || {}]) {",
+        "    for (const [rule, dns] of Object.entries(policy)) {",
+        "      const list = Array.isArray(dns) ? dns : [dns];",
+        "      if (list.some((d) => commonDnsRe.test(String(d)))) continue;",
+        "      privateNsPolicy[rule] = dns;",
+        "    }",
+        "  }",
+        "  const proxyServerDomains = new Set(inputProxies.map((p) => String(p.server || '').toLowerCase()).filter(Boolean));",
+        "  const proxyHosts = {};",
+        "  for (const [host, v] of Object.entries(config.hosts || {})) {",
+        "    if (proxyServerDomains.has(host.toLowerCase())) proxyHosts[host] = v;",
         "  }",
         "",
     ]
@@ -3083,6 +3120,18 @@ def _gen_clash_script_js(
         lines.append(f"  config[{_js_string(key)}] = {_to_js(data[key])};")
         if isinstance(data[key], (dict, list)):
             lines.append("")
+
+    lines += [
+        "  // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）",
+        "  if (privateProxyNs.length > 0) {",
+        "    config.dns['proxy-server-nameserver'] = [...(config.dns['proxy-server-nameserver'] || []), ...privateProxyNs];",
+        "  }",
+        "  if (Object.keys(privateNsPolicy).length > 0) {",
+        "    config.dns['proxy-server-nameserver-policy'] = privateNsPolicy;",
+        "  }",
+        "  Object.assign(config.hosts, proxyHosts);",
+        "",
+    ]
 
     lines.append(f"  const proxyGroups = {_to_js(groups)};")
     lines.append("")
@@ -3112,7 +3161,27 @@ def _gen_clash_script_js(
         "  }",
         "",
     ]
-    lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
+    # 抽取所有 rule-provider 的公共参数（动态求交集，如 type/interval），以 ...spread
+    # 复用——JS 版的公共部分抽离，与 Mihomo.yaml 的 &Remote 锚点互为镜像。
+    rp_common: dict = {}
+    if len(rule_providers) > 1:
+        first_rp = next(iter(rule_providers.values()))
+        rp_common = {
+            k: v for k, v in first_rp.items()
+            if all(k in rp and rp[k] == v for rp in rule_providers.values())
+        }
+    if rp_common:
+        lines.append("  // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用")
+        lines.append(f"  const remoteRuleProvider = {_to_js_inline(rp_common)};")
+        lines.append("  const ruleProviders = {")
+        for rp_name, rp in rule_providers.items():
+            rest = ", ".join(
+                f"{_js_key(str(k))}: {_to_js_inline(v)}" for k, v in rp.items() if k not in rp_common
+            )
+            lines.append(f"    {_js_key(str(rp_name))}: {{ ...remoteRuleProvider, {rest} }},")
+        lines.append("  };")
+    else:
+        lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
     lines.append("")
     lines.append(f"  const rules = {_to_js(rules)};")
     lines.append("")
