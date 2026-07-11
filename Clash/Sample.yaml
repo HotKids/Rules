@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-07 00:34:23
+# Date: 2026-07-11 11:28:05
 # Author: @HotKids
 
 # 通用设置
@@ -491,35 +491,35 @@ proxy-groups:
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png
     use:
       - Server
-    filter: '🇭🇰|HK|Hong Kong|香港'
+    filter: '(?i)(?:🇭🇰|香港|Hong Kong|\b(?:HK|HKG)\d*\b)'
 
   - name: "🇨🇳 Taiwan"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png
     use:
       - Server
-    filter: '🇨🇳|🇹🇼|TW|Taiwan|台湾'
+    filter: '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\b(?:TW|TWN)\d*\b)'
 
   - name: "🇸🇬 Singapore"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png
     use:
       - Server
-    filter: '🇸🇬|SG|Singapore|新加坡'
+    filter: '(?i)(?:🇸🇬|新加坡|Singapore|\b(?:SG|SGP)\d*\b)'
 
   - name: "🇯🇵 Japan"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png
     use:
       - Server
-    filter: '🇯🇵|JP|Japan|日本'
+    filter: '(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)'
 
   - name: "🇺🇸 America"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png
     use:
       - Server
-    filter: '🇺🇸|US|United States|美国'
+    filter: '(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)'
 
 
 # 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/
