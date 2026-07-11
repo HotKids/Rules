@@ -1708,39 +1708,43 @@ def gen_rules_and_providers(
 # 生成 Loon [Proxy Group]
 # ---------------------------------------------------------------------------
 
-# Loon [Remote Filter] 的地区 tag 代码：组名（去 emoji）→ 代码，派生 Filter<code>，
-# 与 mihomo 锚点版的 &FilterHK 命名对齐。未列出的地区回退为组名（去 emoji 去空格）。
+# Loon [Remote Filter] 的 tag 代码：组名（去 emoji）→ 代码，派生 Filter<code>，
+# 与 mihomo 锚点版的 &FilterHK 命名对齐。未列出的组回退为组名（去 emoji 去空格）。
 _LOON_REGION_CODE = {
     "Hong Kong": "HK",
     "Taiwan": "TW",
     "Singapore": "SG",
     "Japan": "JP",
     "America": "US",
+    "Server": "UN",
 }
 
 
-def _gen_loon_region_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]]:
-    """从 Surge smart 组的 policy-regex-filter 自动生成 Loon [Remote Filter] 区域条目。
+def _gen_loon_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]]:
+    """从 Surge 策略组自动生成 Loon [Remote Filter] 条目（单点源，tag = Filter<code>）。
 
-    单点源：地区正则只维护在 Surge/Profile.conf，Loon 的 Filter<地区> NameRegex 过滤器
-    由此自动派生（tag 取 _LOON_REGION_CODE 的代码，如 '🇭🇰 Hong Kong' → 'FilterHK'），
-    正则封装成 Loon 的全匹配形式 ^(?=.*<regex>).*。无对应 policy-regex-filter 的过滤器
-    （如全节点兜底 Sub-UN）仍在 loon.ini [Remote Filter] 手维护。
+    - smart 组 + policy-regex-filter → 地区过滤器，正则封装成 ^(?=.*<regex>).*
+    - include-all-proxies 组（如 🇺🇳 Server）→ 全节点过滤器 ^(?=.+).*（不排除任何节点）
+    正则只维护在 Surge/Profile.conf；tag 代码取自 _LOON_REGION_CODE，未列出回退为组名。
     返回 ({组名: tag}, ['<tag> = NameRegex, FilterKey = "..."', ...])。
     """
     filter_map: dict[str, str] = {}
     lines: list[str] = []
     for gl in group_lines:
         g = parse_group_line(gl)
-        if not g or g["type"] != "smart":
+        if not g:
             continue
         regex = g["params"].get("policy-regex-filter", "")
-        if not regex:
+        if g["type"] == "smart" and regex:
+            filter_key = f"^(?=.*{regex}).*"
+        elif g["params"].get("include-all-proxies", "").lower() in ("true", "1"):
+            filter_key = "^(?=.+).*"
+        else:
             continue
         base = strip_emoji(g["name"])
         tag = "Filter" + _LOON_REGION_CODE.get(base, base.replace(" ", ""))
         filter_map[g["name"]] = tag
-        lines.append(f'{tag} = NameRegex, FilterKey = "^(?=.*{regex}).*"')
+        lines.append(f'{tag} = NameRegex, FilterKey = "{filter_key}"')
     return filter_map, lines
 
 
@@ -1765,8 +1769,8 @@ def _fmt_loon_group(
         return f"{name} = url-test,{filter_name}{extra}{icon_part}"
 
     if params.get("include-all-proxies", "").lower() in ("true", "1"):
-        # include-all-proxies → 使用 FilterMap 指定的 Remote Filter（默认 Sub-UN）
-        fm_val = filter_map.get(name, "Sub-UN")
+        # include-all-proxies → 使用 FilterMap 指定的 Remote Filter（默认 FilterUN）
+        fm_val = filter_map.get(name, "FilterUN")
         filter_name = fm_val.split(",")[0].strip()
         return f"{name} = select,{filter_name}{icon_part}"
 
@@ -3102,16 +3106,22 @@ def _sync_loon(
     explicit_filter_map = loon.get("filter_map", {})
     loon_skips = config.get("global_skips", []) + loon.get("skips", [])
 
-    # 地区过滤器：从 Profile.conf 的 policy-regex-filter 自动生成（单点源），tag 自动派生，
-    # 并注入 loon_header 的 [Remote Filter] 段（排在手维护条目如 Sub-UN 之前）。
-    region_filter_map, region_rf_lines = _gen_loon_region_filters(group_lines)
-    filter_map = {**region_filter_map, **explicit_filter_map}
-    if region_rf_lines:
-        injected = "[Remote Filter]\n" + "\n".join(region_rf_lines)
-        if "[Remote Filter]" in loon_header:
-            loon_header = loon_header.replace("[Remote Filter]", injected, 1)
+    # [Remote Filter]：全部从 Profile.conf 策略组自动生成（单点源），tag 自动派生，
+    # 并注入 loon_header 的 [Remote Filter] 段。
+    auto_filter_map, auto_rf_lines = _gen_loon_filters(group_lines)
+    filter_map = {**auto_filter_map, **explicit_filter_map}
+    if auto_rf_lines:
+        injected = "[Remote Filter]\n" + "\n".join(auto_rf_lines)
+        # 精确替换独占一行的 [Remote Filter] 段头（不能用 str.replace，会命中注释里的
+        # 同名字样；也不用 re.sub，注入内容含 \b/\d 会破坏替换串转义）。
+        hdr_lines = loon_header.split("\n")
+        for i, ln in enumerate(hdr_lines):
+            if ln.strip() == "[Remote Filter]":
+                hdr_lines[i] = injected
+                break
         else:
-            loon_header = loon_header.rstrip() + "\n\n" + injected
+            hdr_lines += ["", injected]
+        loon_header = "\n".join(hdr_lines)
 
     print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
     print(f"  Loon skip: {loon_skips}")
