@@ -6,7 +6,7 @@
  * 策略组、分流规则与基础设置，不必依赖机场自带配置。
  *
  * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经
- * Clash/Sample.yaml）转译而来，直接改本文件会在下次同步时被覆盖；
+ * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；
  * 要改内容请改 Surge/Profile.conf。
  *
  * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。
@@ -407,7 +407,7 @@ function main(config) {
     },
   ];
 
-  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤
+  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤
   // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选
   // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），
   // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
