@@ -27,8 +27,10 @@ router.get("/", async (c) => {
   const filter = c.req.query("filter") || "";
   const showFlag = c.req.query("flag") !== "false";
 
+  // A subscription only ever serves enabled+active nodes; there is deliberately
+  // no `enabled` query override (it would only contradict the base predicate).
   const predicates = [eq(nodes.status, "active"), eq(nodes.enabled, true)];
-  const structured = ["tag", "region", "vendor", "protocol", "enabled"] as const;
+  const structured = ["tag", "region", "vendor", "protocol"] as const;
   for (const key of structured) {
     const value = c.req.query(key);
     if (!value) continue;
@@ -36,7 +38,6 @@ router.get("/", async (c) => {
     if (key === "region") predicates.push(eq(nodes.region, value));
     if (key === "vendor") predicates.push(eq(nodes.vendor, value));
     if (key === "protocol") predicates.push(eq(nodes.protocol, value));
-    if (key === "enabled") predicates.push(eq(nodes.enabled, value !== "false"));
   }
   if (filter) predicates.push(like(nodes.nodeName, `%${filter}%`));
 
