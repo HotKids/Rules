@@ -2563,6 +2563,12 @@ def _to_js(value, indent: int = 2) -> str:
     return _js_string(str(value))
 
 
+def _sort_by_group_order(pool_filters: dict, groups: list[dict]) -> dict:
+    """把 pool_filters 的键序对齐到组在 proxyGroups 里的出现顺序（未知键排末尾）。"""
+    order = {g["name"]: i for i, g in enumerate(groups)}
+    return dict(sorted(pool_filters.items(), key=lambda kv: order.get(kv[0], len(order))))
+
+
 def _to_js_inline(value) -> str:
     """紧凑单行 JS 字面量（对象/数组不换行），用于 spread 抽公共后的单行条目。"""
     if isinstance(value, dict):
@@ -3143,7 +3149,10 @@ def _gen_clash_script_js(
         "  // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，",
         "  // 过滤/全量结果追加在后面，而不是整体覆盖。",
         "  const allProxyNames = config.proxies.map((p) => p.name);",
-        f"  const poolGroupFilters = {_to_js(pool_filters)};",
+        # poolGroupFilters 键序按组在 proxyGroups 里的出现顺序排列（与面板一致，
+        # 避免 overlay 阶段追加的键——如 📧 Mail——被排到地区中间）；仅影响可读性，
+        # 运行时按组名查表、与键序无关。
+        f"  const poolGroupFilters = {_to_js(_sort_by_group_order(pool_filters, groups))};",
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
