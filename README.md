@@ -14,3 +14,4 @@
 | [`subconverter/`](subconverter/) | subconverter 订阅转换远程配置（已弃用，仅维护 emoji） |
 | [`snell-panel/`](snell-panel/) | Snell / SS2022 节点管理面板（Cloudflare Workers + React） |
 | [`.github/scripts/`](.github/scripts/) | 三个同步脚本（rules / modules / config）及其说明文档 |
+
