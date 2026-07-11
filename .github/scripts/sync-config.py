@@ -2517,7 +2517,7 @@ def gen_surfboard_profile(
 
 
 # ---------------------------------------------------------------------------
-# Clash 覆写脚本（Script.js）：解析生成后的 Sample.yaml，转译为等效 JS
+# Clash 覆写脚本（Script.js）：解析生成后的 Mihomo.yaml，转译为等效 JS
 # ---------------------------------------------------------------------------
 
 _JS_IDENT_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
@@ -2844,7 +2844,7 @@ def _yaml_sq(s) -> str:
 
 
 def _scan_sample_item_comments(text: str, section_key: str) -> dict:
-    """扫描 Sample.yaml 某顶层块，取每个条目正上方（连续、未被空行打断）的注释。
+    """扫描 Sample.yaml / Mihomo.yaml 某顶层块，取每个条目正上方（连续、未被空行打断）的注释。
     返回 {条目名: [注释行]}；列表型条目（如 rules）汇总到 '__list__': [(值, [注释]), ...]。"""
     out: dict = {}
     pending: list[str] = []
@@ -3029,7 +3029,7 @@ def _gen_clash_script_js(
 
     base_state 用于多份 overlay 之间的链式叠加（overlay 的 extends 字段）：传入
     另一份已 resolve 好的 (groups, pool_filters, rules, structural_pool_names)，
-    本次从这个状态（深拷贝，不影响调用方）而非 Sample.yaml 原始解析结果起步叠加
+    本次从这个状态（深拷贝，不影响调用方）而非 Mihomo.yaml 原始解析结果起步叠加
     overlay，从而复用公共部分（如地区/Relay链），不必在每份 overlay 里重复声明。
     返回值第二项就是这次 resolve 出的状态，供下一环 extends 复用。
     """
@@ -3392,9 +3392,9 @@ def _sync_clash(
 
     # 个人差异声明（Enhanced/ 下）：自动扫描所有 *.overlay.json，每份生成一份派生
     # 脚本，输出路径由 overlay 自己的 output 字段声明（仓库根相对路径，如
-    # "Clash/Script/ClashBox.js"）——以后新增一份 overlay 文件即可自动生成对应脚本，
+    # "Clash/Script/MyClashBox.js"）——以后新增一份 overlay 文件即可自动生成对应脚本，
     # 无需改动本脚本。公共部分自动跟随 Script.js 同步；overlay 可用 extends 声明基于
-    # 另一份 overlay（而非从 Sample.yaml 重新起步）叠加，避免多份个人配置之间重复
+    # 另一份 overlay（而非从 Mihomo.yaml 重新起步）叠加，避免多份个人配置之间重复
     # 声明同样的地区/Relay 链差异，依赖顺序按 extends 自动拓扑解析。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
     overlays: dict[str, dict] = {}
