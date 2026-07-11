@@ -1,5 +1,7 @@
 # subconverter
 
+> ⚠️ 该项目已过时，不再跟进规则 / 分组结构变动，仅维护 emoji。
+
 [subconverter](https://github.com/tindy2013/subconverter) 订阅转换用的远程配置
 （`external-config`），套用本仓库 `Surge/RULE-SET/` 规则与统一分组结构，手动维护。
 
