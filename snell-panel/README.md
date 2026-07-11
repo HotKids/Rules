@@ -48,3 +48,4 @@ cd snell-panel
 推荐使用上面的一键部署命令：实际 Git 仓库保留在 `snell-panel-source`，日常通过软链接 `snell-panel` 进入项目，终端目录名仍显示 `snell-panel`，`./update.sh` 也可以自动拉取 GitHub 最新代码。旧版如果已经把子目录单独移动出来，可以临时执行 `UPDATE_REPO_URL=https://github.com/HotKids/Rules.git ./update.sh` 让脚本备份当前目录并重新 clone。
 
 更多说明见 `docs/DEPLOY.md`、`docs/UPDATE.md`、`docs/BACKUP.md`、`docs/SECURITY.md`、`docs/OPERATIONS.md`。
+
