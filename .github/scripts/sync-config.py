@@ -1708,9 +1708,9 @@ def gen_rules_and_providers(
 # 生成 Loon [Proxy Group]
 # ---------------------------------------------------------------------------
 
-# Loon [Remote Filter] 的 tag 代码：组名（去 emoji）→ 代码，派生 Filter<code>，
-# 与 mihomo 锚点版的 &FilterHK 命名对齐。未列出的组回退为组名（去 emoji 去空格）。
-_LOON_REGION_CODE = {
+# 地区代码表：组名（去 emoji）→ 代码，供 Loon [Remote Filter] tag 与 Clash 锚点版
+# （Mihomo.yaml）的 &Filter<code> 共用命名。未列出的组回退为组名（去 emoji 去空格）。
+_REGION_CODE = {
     "Hong Kong": "HK",
     "Taiwan": "TW",
     "Singapore": "SG",
@@ -1725,7 +1725,7 @@ def _gen_loon_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]
 
     - smart 组 + policy-regex-filter → 地区过滤器，正则封装成 ^(?=.*<regex>).*
     - include-all-proxies 组（如 🇺🇳 Server）→ 全节点过滤器 ^(?=.+).*（不排除任何节点）
-    正则只维护在 Surge/Profile.conf；tag 代码取自 _LOON_REGION_CODE，未列出回退为组名。
+    正则只维护在 Surge/Profile.conf；tag 代码取自 _REGION_CODE，未列出回退为组名。
     返回 ({组名: tag}, ['<tag> = NameRegex, FilterKey = "..."', ...])。
     """
     filter_map: dict[str, str] = {}
@@ -1742,7 +1742,7 @@ def _gen_loon_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]
         else:
             continue
         base = strip_emoji(g["name"])
-        tag = "Filter" + _LOON_REGION_CODE.get(base, base.replace(" ", ""))
+        tag = "Filter" + _REGION_CODE.get(base, base.replace(" ", ""))
         filter_map[g["name"]] = tag
         lines.append(f'{tag} = NameRegex, FilterKey = "{filter_key}"')
     return filter_map, lines
@@ -2764,6 +2764,218 @@ def _apply_overlay(
         groups.insert(idx + 1, group)
 
 
+def _yaml_flow(v) -> str:
+    """紧凑 flow 序列化（单行）。bare 标量会带 YAML 文档结束符 ...，去掉。"""
+    s = yaml.safe_dump(v, default_flow_style=True, allow_unicode=True,
+                       width=10**9, sort_keys=False).rstrip("\n")
+    if s.endswith("\n..."):
+        s = s[:-4].rstrip("\n")
+    return s
+
+
+def _yaml_sq(s) -> str:
+    """单引号 YAML 标量（不做转义，适合正则 / 规则字符串）。"""
+    return "'" + str(s).replace("'", "''") + "'"
+
+
+def _scan_sample_item_comments(text: str, section_key: str) -> dict:
+    """扫描 Sample.yaml 某顶层块，取每个条目正上方（连续、未被空行打断）的注释。
+    返回 {条目名: [注释行]}；列表型条目（如 rules）汇总到 '__list__': [(值, [注释]), ...]。"""
+    out: dict = {}
+    pending: list[str] = []
+    in_sec = False
+    for ln in text.split("\n"):
+        if ln.rstrip() == f"{section_key}:":
+            in_sec = True
+            pending = []
+            continue
+        if in_sec and ln and not ln[0].isspace():   # 到达下一个顶层键 / 顶层注释 → 离开本段
+            break
+        if not in_sec:
+            continue
+        s = ln.strip()
+        if s == "":
+            pending = []
+        elif s.startswith("#"):
+            pending.append(s)
+        elif s.startswith("- name:"):
+            m = re.search(r'name:\s*"?([^"]+?)"?\s*$', s)
+            if m:
+                out[m.group(1).strip()] = pending
+            pending = []
+        elif s.startswith("- "):
+            out.setdefault("__list__", []).append((s[2:].strip(), pending))
+            pending = []
+        elif re.match(r"^[^\s#-].*:$", s):
+            out[s[:-1].strip()] = pending
+            pending = []
+        else:
+            pending = []
+    return out
+
+
+def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
+    """由最终生成的 Clash/Sample.yaml 转译出锚点/flow 版 Clash/Mihomo.yaml（功能等价）。
+
+    与 Script.js 同思路：只读 Sample.yaml 的解析结果，天然随 Sample.yaml 变化。
+    - 地区组 use:[Server]+filter → <<: *Region, filter: *Filter<code>（正则单点源自 Sample.yaml）
+    - rule-providers 抽公共 type/interval 到 &Remote
+    - 大块（dns/tun/sniffer 等）转 flow 单行 + 摘要注释；策略组 / 规则的分层注释从 Sample.yaml 带过来
+    """
+    cfg = yaml.safe_load(sample_yaml_text) or {}
+
+    # 地区筛选正则 → &Filter<code> 锚点；组 → 锚点类型映射
+    filters: list[tuple[str, str]] = []
+    grp_anchor: dict[str, tuple[str, str | None]] = {}
+    for g in cfg.get("proxy-groups", []):
+        if g.get("use") == ["Server"]:
+            if "filter" in g:
+                base = strip_emoji(g["name"])
+                anchor = "Filter" + _REGION_CODE.get(base, base.replace(" ", ""))
+                filters.append((anchor, g["filter"]))
+                grp_anchor[g["name"]] = ("region", anchor)
+            else:
+                grp_anchor[g["name"]] = ("server", None)
+
+    L: list[str] = [
+        "# Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）",
+        "# Date: ",
+        "# Author: @HotKids",
+        "#",
+        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "",
+    ]
+
+    def emit_keys(divider, items):
+        L.append(f"# ── {divider} ──")
+        L.append("")
+        for key, comment in items:
+            if key not in cfg:
+                continue
+            if comment:
+                L.append(f"# {comment}")
+            L.append(f"{key}: {_yaml_flow(cfg[key])}")
+        L.append("")
+
+    emit_keys("通用设置", [
+        ("mixed-port", "混合代理端口（HTTP 和 SOCKS5 共用）"),
+        ("allow-lan", "允许局域网设备通过本机代理"),
+        ("bind-address", "监听地址，'*' 表示所有网卡"),
+        ("mode", "代理模式：rule（规则）/ global（全局）/ direct（直连）"),
+        ("log-level", "日志等级：silent / error / warning / info / debug"),
+        ("ipv6", "关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录"),
+        ("external-controller", "RESTful API 监听地址（供 Dashboard 及外部控制器使用）"),
+    ])
+    emit_keys("性能设置", [
+        ("unified-delay", "统一延迟：去除 TCP 握手耗时，使延迟测试结果更准确"),
+        ("tcp-concurrent", "TCP 并发：同时向所有解析 IP 发起连接，取最快握手"),
+        ("find-process-mode", "进程匹配模式：always 强制 / strict 自动（默认）/ off 不匹配（适合路由器）"),
+        ("geodata-loader", "GeoData 加载模式：standard 性能优先 / memconservative 低内存（适合路由器/嵌入式）"),
+        ("global-ua", "HTTP 请求 UA（显式声明，避免随版本漂移）"),
+        ("keep-alive-interval", "TCP Keep-Alive 探测间隔（秒）"),
+    ])
+    emit_keys("GeoData 设置", [
+        ("geo-auto-update", "自动更新 GeoData 数据库"),
+        ("geo-update-interval", "更新间隔（小时）"),
+        ("geox-url", "GeoData 数据库 URL"),
+    ])
+
+    def emit_flow(divider, key, summary):
+        if key not in cfg:
+            return
+        L.append(f"# ── {divider} ──")
+        L.append("")
+        for c in summary:
+            L.append(f"# {c}")
+        L.append(f"{key}: {_yaml_flow(cfg[key])}")
+        L.append("")
+
+    emit_flow("Hosts", "hosts", ["静态域名映射，优先级高于 DNS 解析"])
+    emit_flow("配置持久化", "profile", ["store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）"])
+    emit_flow("NTP 校时", "ntp", [
+        "内置 NTP：部分协议（如 VMess）对本机时间偏差敏感，校时失败会导致握手异常；",
+        "write-to-system=false 不写入系统时间，仅供内核内部使用"])
+    emit_flow("域名嗅探", "sniffer", [
+        "嗅探结果仅用于规则匹配、不替换目标地址（fake-ip 下 override-destination=false，HTTP 单独覆盖为 true）；",
+        "force-dns-mapping=true 改善直连 IP 命中；parse-pure-ip=false 避免纯 IP 连接的大量 \"may not have any sent data\" 警告"])
+    emit_flow("DNS", "dns", [
+        "fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；",
+        "nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；",
+        "fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH"])
+    emit_flow("TUN", "tun", [
+        "接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；",
+        "auto-route/auto-redirect 自动配路由与透明代理（仅 Linux）；strict-route 防 IP 泄漏；",
+        "EIM NAT 改善游戏/VOIP/WebRTC 打洞；disable-icmp-forwarding 关闭 ICMP 代答，让 ping 反映真实链路"])
+
+    # 节点 + 锚点
+    L += [
+        "# ── 节点 ──",
+        "",
+        "# 锚点：供下方 proxy-groups / rule-providers 以 <<: 合并、filter: 引用",
+        "anchors:",
+        "  # 远程规则集参数：http，每日更新一次（behavior/format 留各条自定）",
+        "  - &Remote {type: http, interval: 86400}",
+        "  # 地区分组基座：select + 全量 provider，节点保持订阅原序（🇺🇳 Server 直接用，地区组再叠 filter）",
+        "  - &Region {type: select, include-all-providers: true}",
+        "  # 地区节点筛选正则（与 Profile.conf policy-regex-filter 一致）",
+    ]
+    for anchor, val in filters:
+        L.append(f"  - &{anchor} {_yaml_sq(val)}")
+    L += [
+        "  # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——",
+        "  - &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &FallBack {type: fallback, interval: 6, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &LoadBalance {type: load-balance, interval: 6, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "",
+        "# 本地节点（订阅覆盖此处）",
+        f"proxies: {_yaml_flow(cfg.get('proxies', []))}",
+        "# 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）",
+        f"proxy-providers: {_yaml_flow(cfg['proxy-providers'])}" if cfg.get("proxy-providers") else "",
+        "",
+    ]
+
+    # 策略组
+    L.append("# ── 策略组 ──")
+    L.append("proxy-groups:")
+    gcmt = _scan_sample_item_comments(sample_yaml_text, "proxy-groups")
+    for g in cfg.get("proxy-groups", []):
+        for c in gcmt.get(g["name"], []):
+            L.append(f"  {c}")
+        kind = grp_anchor.get(g["name"])
+        if kind and kind[0] == "server":
+            L.append(f"  - {{name: {g['name']}, <<: *Region, icon: {_yaml_flow(g['icon'])}}}")
+        elif kind and kind[0] == "region":
+            L.append(f"  - {{name: {g['name']}, <<: *Region, filter: *{kind[1]}, icon: {_yaml_flow(g['icon'])}}}")
+        else:
+            parts = [f"name: {g['name']}", f"type: {g['type']}", f"proxies: {_yaml_flow(g['proxies'])}"]
+            if g.get("hidden"):
+                parts.append("hidden: true")
+            parts.append(f"icon: {_yaml_flow(g['icon'])}")
+            L.append("  - {" + ", ".join(parts) + "}")
+    L.append("")
+
+    # 规则集
+    L.append("# ── 规则集 ──")
+    L.append("# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/")
+    L.append("rule-providers:")
+    for name, rp in cfg.get("rule-providers", {}).items():
+        L.append(f"  {name}: {{<<: *Remote, behavior: {rp['behavior']}, "
+                 f"path: {_yaml_flow(rp['path'])}, url: {_yaml_flow(rp['url'])}}}")
+    L.append("")
+
+    # 规则
+    L.append("# ── 规则 ──")
+    L.append("rules:")
+    for val, cmts in _scan_sample_item_comments(sample_yaml_text, "rules").get("__list__", []):
+        for c in cmts:
+            L.append(f"  {c}")
+        L.append(f"  - {_yaml_sq(val)}")
+
+    out = "\n".join(L)
+    out = re.sub(r"\n\n\n+", "\n\n", out).rstrip() + "\n"
+    return out
+
+
 def _gen_clash_script_js(
     sample_yaml_text: str,
     overlay: dict | None = None,
@@ -2997,6 +3209,11 @@ def _sync_clash(
     body = _apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host)
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
+
+    # 锚点/flow 版：从刚生成的 Sample.yaml 转译出 Mihomo.yaml（同层级，功能等价）
+    mihomo_out = str(Path(clash_out).with_name("Mihomo.yaml"))
+    mihomo_changed = _write_stamped_if_changed(REPO_ROOT / mihomo_out, _gen_mihomo_yaml(body))
+    print(f"  {'✓ ' + mihomo_out + ' 已更新' if mihomo_changed else '✓ ' + mihomo_out + ' 无变化'}")
 
     script_dir = Path(clash_out).parent / "Script"
     script_path = script_dir / "Script.js"
