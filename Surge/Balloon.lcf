@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-11 11:39:06
+# Date: 2026-07-11 11:43:31
 # Author: @HotKids
 
 [General]
@@ -53,11 +53,11 @@ bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,1
 # 地区过滤器（Sub-<地区>）由 sync-config.py 从 Surge/Profile.conf 的
 # policy-regex-filter 自动生成并注入，无需在此维护；仅保留无对应正则的手写条目。
 [Remote Filter]
-Sub-HongKong = NameRegex, FilterKey = "^(?=.*(?i)(?:🇭🇰|香港|Hong Kong|\b(?:HK|HKG)\d*\b)).*"
-Sub-Taiwan = NameRegex, FilterKey = "^(?=.*(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\b(?:TW|TWN)\d*\b)).*"
-Sub-Singapore = NameRegex, FilterKey = "^(?=.*(?i)(?:🇸🇬|新加坡|Singapore|\b(?:SG|SGP)\d*\b)).*"
-Sub-Japan = NameRegex, FilterKey = "^(?=.*(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)).*"
-Sub-America = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)).*"
+FilterHK = NameRegex, FilterKey = "^(?=.*(?i)(?:🇭🇰|香港|Hong Kong|\b(?:HK|HKG)\d*\b)).*"
+FilterTW = NameRegex, FilterKey = "^(?=.*(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\b(?:TW|TWN)\d*\b)).*"
+FilterSG = NameRegex, FilterKey = "^(?=.*(?i)(?:🇸🇬|新加坡|Singapore|\b(?:SG|SGP)\d*\b)).*"
+FilterJP = NameRegex, FilterKey = "^(?=.*(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)).*"
+FilterUS = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)).*"
 Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium|DIRECT|REJECT)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
 
 [Proxy]
@@ -93,11 +93,11 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Nodes
 🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Club.png
 # Area
-🇭🇰 Hong Kong = url-test,Sub-HongKong,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
-🇨🇳 Taiwan = url-test,Sub-Taiwan,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
-🇸🇬 Singapore = url-test,Sub-Singapore,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
-🇯🇵 Japan = url-test,Sub-Japan,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
-🇺🇸 America = url-test,Sub-America,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+🇭🇰 Hong Kong = url-test,FilterHK,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+🇨🇳 Taiwan = url-test,FilterTW,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+🇸🇬 Singapore = url-test,FilterSG,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+🇯🇵 Japan = url-test,FilterJP,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+🇺🇸 America = url-test,FilterUS,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
 
 [Rule]
 # Local Rule
