@@ -2524,13 +2524,67 @@ _JS_IDENT_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
 
 # main(config) 中按此顺序透传的基础设置 key（proxies / proxy-providers /
 # proxy-groups / rule-providers / rules 单独处理，不在此列）
-_CLASH_SCRIPT_BASE_KEYS = [
-    "mixed-port", "allow-lan", "bind-address", "mode", "log-level", "ipv6",
-    "external-controller", "unified-delay", "tcp-concurrent", "find-process-mode",
-    "geodata-loader", "global-ua", "keep-alive-interval",
-    "geo-auto-update", "geo-update-interval", "geox-url",
-    "hosts", "profile", "ntp", "sniffer", "dns", "tun",
+# 基础设置的分节 + 每键注释（单一来源）：Mihomo.yaml 与 Script.js 两个生成器共用，
+# 保证锚点版 YAML 和覆写脚本的分节/注释永远一致。结构：[(分节标题, [(键, [注释行, ...])])]
+_CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
+    ("通用设置", [
+        ("mixed-port", ["混合代理端口（HTTP 和 SOCKS5 共用）"]),
+        ("allow-lan", ["允许局域网设备通过本机代理"]),
+        ("bind-address", ["监听地址，'*' 表示所有网卡"]),
+        ("mode", ["代理模式：rule（规则）/ global（全局）/ direct（直连）"]),
+        ("log-level", ["日志等级：silent / error / warning / info / debug"]),
+        ("ipv6", ["关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录"]),
+        ("external-controller", ["RESTful API 监听地址（供 Dashboard 及外部控制器使用）"]),
+    ]),
+    ("性能设置", [
+        ("unified-delay", ["统一延迟：去除 TCP 握手耗时，使延迟测试结果更准确"]),
+        ("tcp-concurrent", ["TCP 并发：同时向所有解析 IP 发起连接，取最快握手"]),
+        ("find-process-mode", ["进程匹配模式：always 强制 / strict 自动（默认）/ off 不匹配（适合路由器）"]),
+        ("geodata-loader", ["GeoData 加载模式：standard 性能优先 / memconservative 低内存（适合路由器/嵌入式）"]),
+        ("global-ua", ["HTTP 请求 UA（显式声明，避免随版本漂移）"]),
+        ("keep-alive-interval", ["TCP Keep-Alive 探测间隔（秒）"]),
+    ]),
+    ("GeoData 设置", [
+        ("geo-auto-update", ["自动更新 GeoData 数据库"]),
+        ("geo-update-interval", ["更新间隔（小时）"]),
+        ("geox-url", ["GeoData 数据库 URL"]),
+    ]),
+    ("Hosts", [
+        ("hosts", ["静态域名映射，优先级高于 DNS 解析"]),
+    ]),
+    ("配置持久化", [
+        ("profile", ["store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）"]),
+    ]),
+    ("NTP 校时", [
+        ("ntp", [
+            "内置 NTP：部分协议（如 VMess）对本机时间偏差敏感，校时失败会导致握手异常；",
+            "write-to-system=false 不写入系统时间，仅供内核内部使用",
+        ]),
+    ]),
+    ("域名嗅探", [
+        ("sniffer", [
+            "嗅探结果仅用于规则匹配、不替换目标地址（fake-ip 下 override-destination=false，HTTP 单独覆盖为 true）；",
+            "force-dns-mapping=true 改善直连 IP 命中；parse-pure-ip=false 避免纯 IP 连接的大量 \"may not have any sent data\" 警告",
+        ]),
+    ]),
+    ("DNS", [
+        ("dns", [
+            "fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；",
+            "nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；",
+            "fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH",
+        ]),
+    ]),
+    ("TUN", [
+        ("tun", [
+            "接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；",
+            "auto-route/auto-redirect 自动配路由与透明代理（仅 Linux）；strict-route 防 IP 泄漏；",
+            "EIM NAT 改善游戏/VOIP/WebRTC 打洞；disable-icmp-forwarding 关闭 ICMP 代答，让 ping 反映真实链路",
+        ]),
+    ]),
 ]
+
+# 覆写脚本要接管的基础键，直接由上表派生（顺序一致）
+_CLASH_SCRIPT_BASE_KEYS = [key for _, items in _CLASH_BASE_SECTIONS for key, _ in items]
 
 
 def _js_string(s: str) -> str:
@@ -2561,6 +2615,12 @@ def _to_js(value, indent: int = 2) -> str:
     if isinstance(value, (int, float)):
         return json.dumps(value)
     return _js_string(str(value))
+
+
+def _rule_comment_key(rule: str) -> str:
+    """规则 → 注释匹配键：前两段（类型,值）；MATCH 的第 2 段是策略（会被 overlay 改名），单用类型。"""
+    parts = rule.split(",")
+    return parts[0] if parts[0] == "MATCH" else ",".join(parts[:2])
 
 
 def _sort_by_group_order(pool_filters: dict, groups: list[dict]) -> dict:
@@ -2804,7 +2864,16 @@ def _scan_sample_item_comments(text: str, section_key: str) -> dict:
                 out[m.group(1).strip()] = pending
             pending = []
         elif s.startswith("- "):
-            out.setdefault("__list__", []).append((s[2:].strip(), pending))
+            body = s[2:].strip()
+            # flow 单行条目（Mihomo.yaml 的 - {name: ..., ...}）：按 name 归属
+            fm = re.match(r"^\{name:\s*([^,}]+)", body)
+            if fm:
+                out[fm.group(1).strip()] = pending
+            else:
+                # 列表条目；Mihomo.yaml 的规则带单引号，剥掉以与解析值对齐
+                if len(body) >= 2 and body[0] == body[-1] == "'":
+                    body = body[1:-1].replace("''", "'")
+                out.setdefault("__list__", []).append((body, pending))
             pending = []
         elif re.match(r"^[^\s#-].*:$", s):
             out[s[:-1].strip()] = pending
@@ -2846,66 +2915,18 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         "",
     ]
 
-    def emit_keys(divider, items):
-        L.append(f"# ── {divider} ──")
+    # 基础设置分节 + 注释来自 _CLASH_BASE_SECTIONS（与 Script.js 生成器共享单一来源）
+    for section, items in _CLASH_BASE_SECTIONS:
+        present = [(k, cs) for k, cs in items if k in cfg]
+        if not present:
+            continue
+        L.append(f"# ── {section} ──")
         L.append("")
-        for key, comment in items:
-            if key not in cfg:
-                continue
-            if comment:
-                L.append(f"# {comment}")
+        for key, comments in present:
+            for cline in comments:
+                L.append(f"# {cline}")
             L.append(f"{key}: {_yaml_flow(cfg[key])}")
         L.append("")
-
-    emit_keys("通用设置", [
-        ("mixed-port", "混合代理端口（HTTP 和 SOCKS5 共用）"),
-        ("allow-lan", "允许局域网设备通过本机代理"),
-        ("bind-address", "监听地址，'*' 表示所有网卡"),
-        ("mode", "代理模式：rule（规则）/ global（全局）/ direct（直连）"),
-        ("log-level", "日志等级：silent / error / warning / info / debug"),
-        ("ipv6", "关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录"),
-        ("external-controller", "RESTful API 监听地址（供 Dashboard 及外部控制器使用）"),
-    ])
-    emit_keys("性能设置", [
-        ("unified-delay", "统一延迟：去除 TCP 握手耗时，使延迟测试结果更准确"),
-        ("tcp-concurrent", "TCP 并发：同时向所有解析 IP 发起连接，取最快握手"),
-        ("find-process-mode", "进程匹配模式：always 强制 / strict 自动（默认）/ off 不匹配（适合路由器）"),
-        ("geodata-loader", "GeoData 加载模式：standard 性能优先 / memconservative 低内存（适合路由器/嵌入式）"),
-        ("global-ua", "HTTP 请求 UA（显式声明，避免随版本漂移）"),
-        ("keep-alive-interval", "TCP Keep-Alive 探测间隔（秒）"),
-    ])
-    emit_keys("GeoData 设置", [
-        ("geo-auto-update", "自动更新 GeoData 数据库"),
-        ("geo-update-interval", "更新间隔（小时）"),
-        ("geox-url", "GeoData 数据库 URL"),
-    ])
-
-    def emit_flow(divider, key, summary):
-        if key not in cfg:
-            return
-        L.append(f"# ── {divider} ──")
-        L.append("")
-        for c in summary:
-            L.append(f"# {c}")
-        L.append(f"{key}: {_yaml_flow(cfg[key])}")
-        L.append("")
-
-    emit_flow("Hosts", "hosts", ["静态域名映射，优先级高于 DNS 解析"])
-    emit_flow("配置持久化", "profile", ["store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）"])
-    emit_flow("NTP 校时", "ntp", [
-        "内置 NTP：部分协议（如 VMess）对本机时间偏差敏感，校时失败会导致握手异常；",
-        "write-to-system=false 不写入系统时间，仅供内核内部使用"])
-    emit_flow("域名嗅探", "sniffer", [
-        "嗅探结果仅用于规则匹配、不替换目标地址（fake-ip 下 override-destination=false，HTTP 单独覆盖为 true）；",
-        "force-dns-mapping=true 改善直连 IP 命中；parse-pure-ip=false 避免纯 IP 连接的大量 \"may not have any sent data\" 警告"])
-    emit_flow("DNS", "dns", [
-        "fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；",
-        "nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；",
-        "fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH"])
-    emit_flow("TUN", "tun", [
-        "接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；",
-        "auto-route/auto-redirect 自动配路由与透明代理（仅 Linux）；strict-route 防 IP 泄漏；",
-        "EIM NAT 改善游戏/VOIP/WebRTC 打洞；disable-icmp-forwarding 关闭 ICMP 代答，让 ping 反映真实链路"])
 
     # 节点 + 锚点
     L += [
@@ -3120,11 +3141,18 @@ def _gen_clash_script_js(
         "  }",
         "",
     ]
-    for key in _CLASH_SCRIPT_BASE_KEYS:
-        if key not in data:
+    # 基础设置：分节 + 注释与 Mihomo.yaml 共享同一来源（_CLASH_BASE_SECTIONS），
+    # 单行紧凑输出（与锚点版的 flow 单行风格对齐）
+    for section, items in _CLASH_BASE_SECTIONS:
+        present = [(k, cs) for k, cs in items if k in data]
+        if not present:
             continue
-        # 单行紧凑输出（与 Mihomo.yaml 的 flow 单行风格对齐）
-        lines.append(f"  config[{_js_string(key)}] = {_to_js_inline(data[key])};")
+        lines.append(f"  // ── {section} ──")
+        for key, comments in present:
+            for cline in comments:
+                lines.append(f"  // {cline}")
+            lines.append(f"  config[{_js_string(key)}] = {_to_js_inline(data[key])};")
+        lines.append("")
 
     lines += [
         "  // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）",
@@ -3138,9 +3166,15 @@ def _gen_clash_script_js(
         "",
     ]
 
-    # 每组一行（与 Mihomo.yaml 的 proxy-groups 单行条目风格对齐）
+    # 每组一行（与 Mihomo.yaml 的 proxy-groups 单行条目风格对齐），分组注释从
+    # Mihomo.yaml 带过来（# → //）；overlay 改过名的组经 rename_map 反查原名匹配。
+    group_cmts = _scan_sample_item_comments(sample_yaml_text, "proxy-groups")
+    rename_rev = {new: old for old, new in (overlay or {}).get("rename_map", {}).items()}
+    lines.append("  // ── 策略组 ──")
     lines.append("  const proxyGroups = [")
     for g in groups:
+        for cline in group_cmts.get(g["name"], group_cmts.get(rename_rev.get(g["name"], ""), [])):
+            lines.append(f"    {cline.replace('#', '//', 1)}")
         lines.append(f"    {_to_js_inline(g)},")
     lines.append("  ];")
     lines.append("")
@@ -3183,6 +3217,7 @@ def _gen_clash_script_js(
             if all(k in rp and rp[k] == v for rp in rule_providers.values())
         }
     if rp_common:
+        lines.append("  // ── 规则集 ──")
         lines.append("  // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用")
         lines.append(f"  const remoteRuleProvider = {_to_js_inline(rp_common)};")
         lines.append("  const ruleProviders = {")
@@ -3195,7 +3230,19 @@ def _gen_clash_script_js(
     else:
         lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
     lines.append("")
-    lines.append(f"  const rules = {_to_js(rules)};")
+    # 规则注释从 Mihomo.yaml 带过来（# → //）。匹配键用规则前两段（类型,值）——
+    # overlay 的 rename 只改策略字段，前两段稳定；MATCH 的策略在第 2 段，单用类型匹配。
+    rule_cmts: dict[str, list[str]] = {}
+    for val, cs in _scan_sample_item_comments(sample_yaml_text, "rules").get("__list__", []):
+        if cs:
+            rule_cmts[_rule_comment_key(val)] = cs
+    lines.append("  // ── 规则 ──")
+    lines.append("  const rules = [")
+    for r in rules:
+        for cline in rule_cmts.get(_rule_comment_key(r), []):
+            lines.append(f"    {cline.replace('#', '//', 1)}")
+        lines.append(f"    {_js_string(r)},")
+    lines.append("  ];")
     lines.append("")
     lines += [
         "  const disabledGroups = new Set(",

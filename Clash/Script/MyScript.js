@@ -63,28 +63,74 @@ function main(config) {
     if (proxyServerDomains.has(host.toLowerCase())) proxyHosts[host] = v;
   }
 
+  // ── 通用设置 ──
+  // 混合代理端口（HTTP 和 SOCKS5 共用）
   config['mixed-port'] = 7892;
+  // 允许局域网设备通过本机代理
   config['allow-lan'] = true;
+  // 监听地址，'*' 表示所有网卡
   config['bind-address'] = '*';
+  // 代理模式：rule（规则）/ global（全局）/ direct（直连）
   config['mode'] = 'rule';
+  // 日志等级：silent / error / warning / info / debug
   config['log-level'] = 'info';
+  // 关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录
   config['ipv6'] = false;
+  // RESTful API 监听地址（供 Dashboard 及外部控制器使用）
   config['external-controller'] = '127.0.0.1:9090';
+
+  // ── 性能设置 ──
+  // 统一延迟：去除 TCP 握手耗时，使延迟测试结果更准确
   config['unified-delay'] = true;
+  // TCP 并发：同时向所有解析 IP 发起连接，取最快握手
   config['tcp-concurrent'] = true;
+  // 进程匹配模式：always 强制 / strict 自动（默认）/ off 不匹配（适合路由器）
   config['find-process-mode'] = 'strict';
+  // GeoData 加载模式：standard 性能优先 / memconservative 低内存（适合路由器/嵌入式）
   config['geodata-loader'] = 'standard';
+  // HTTP 请求 UA（显式声明，避免随版本漂移）
   config['global-ua'] = 'clash.meta';
+  // TCP Keep-Alive 探测间隔（秒）
   config['keep-alive-interval'] = 30;
+
+  // ── GeoData 设置 ──
+  // 自动更新 GeoData 数据库
   config['geo-auto-update'] = true;
+  // 更新间隔（小时）
   config['geo-update-interval'] = 24;
+  // GeoData 数据库 URL
   config['geox-url'] = { geoip: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat', geosite: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat', mmdb: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb', asn: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb' };
+
+  // ── Hosts ──
+  // 静态域名映射，优先级高于 DNS 解析
   config['hosts'] = { '*.clash.dev': '127.0.0.1', localhost: '127.0.0.1' };
+
+  // ── 配置持久化 ──
+  // store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）
   config['profile'] = { 'store-selected': true, 'store-fake-ip': true };
+
+  // ── NTP 校时 ──
+  // 内置 NTP：部分协议（如 VMess）对本机时间偏差敏感，校时失败会导致握手异常；
+  // write-to-system=false 不写入系统时间，仅供内核内部使用
   config['ntp'] = { enable: true, 'write-to-system': false, server: 'ntp.aliyun.com', port: 123, interval: 60 };
+
+  // ── 域名嗅探 ──
+  // 嗅探结果仅用于规则匹配、不替换目标地址（fake-ip 下 override-destination=false，HTTP 单独覆盖为 true）；
+  // force-dns-mapping=true 改善直连 IP 命中；parse-pure-ip=false 避免纯 IP 连接的大量 "may not have any sent data" 警告
   config['sniffer'] = { enable: true, 'override-destination': false, 'force-dns-mapping': true, 'parse-pure-ip': false, sniff: { HTTP: { ports: [80, '8080-8880'], 'override-destination': true }, TLS: { ports: [443, 8443] }, QUIC: { ports: [443, 8443] } }, 'skip-domain': ['+.push.apple.com', 'Mijia Cloud'] };
+
+  // ── DNS ──
+  // fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；
+  // nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；
+  // fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH
   config['dns'] = { enable: true, listen: '0.0.0.0:1053', ipv6: false, 'use-system-hosts': true, 'cache-algorithm': 'arc', 'prefer-h3': false, 'respect-rules': false, 'default-nameserver': ['223.5.5.5', '119.29.29.29'], 'enhanced-mode': 'fake-ip', 'fake-ip-range': '198.18.0.1/16', 'fake-ip-range6': '', 'fake-ip-ttl': 1, 'fake-ip-filter-mode': 'blacklist', 'fake-ip-filter': ['*.lan', '+.lan', '*.local', '*.localdomain', '*.home.arpa', '*.localhost', 'WORKGROUP', 'time.*.com', 'time.*.gov', 'time.*.apple.com', 'ntp.*.com', '+.pool.ntp.org', '*.ntp.org.cn', '+.stun.*', '*.stun.*.*', '*.turn.twilio.com', '*.stun.twilio.com', 'stun.syncthing.net', '*.srv.nintendo.net', 'xbox.*.microsoft.com', 'xbox.*.*.microsoft.com', '*.xboxlive.com', '*.cm.steampowered.com', '*.steamcontent.com', '*.battlenet.com.cn', '*.battlenet.com', '*.blzstatic.cn', '*.battle.net', '*.msftncsi.com', '*.msftconnecttest.com', 'connectivitycheck.gstatic.com', 'connectivitycheck.android.com', 'connectivitycheck.platform.hicloud.com', 'connect.rom.miui.com', 'captive.apple.com', 'network-test.debian.org', 'detectportal.firefox.com', 'lens.l.google.com', '+.push.apple.com', '+.market.xiaomi.com', '*.tailscale.com', '*.zerotier.com', '*.spotify.com', '+.music.126.net', '*.mcdn.bilivideo.cn', 'localhost.*.qq.com'], nameserver: ['https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true'], fallback: ['https://1.1.1.1/dns-query#proxy'], 'fallback-filter': { geoip: true, 'geoip-code': 'CN', ipcidr: ['240.0.0.0/4'] }, 'proxy-server-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver-follow-policy': false };
+
+  // ── TUN ──
+  // 接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；
+  // auto-route/auto-redirect 自动配路由与透明代理（仅 Linux）；strict-route 防 IP 泄漏；
+  // EIM NAT 改善游戏/VOIP/WebRTC 打洞；disable-icmp-forwarding 关闭 ICMP 代答，让 ping 反映真实链路
   config['tun'] = { enable: true, stack: 'mixed', 'dns-hijack': ['any:53'], 'auto-route': true, 'auto-detect-interface': true, 'auto-redirect': true, gso: true, 'gso-max-size': 65536, 'strict-route': true, 'endpoint-independent-nat': true, 'disable-icmp-forwarding': true };
+
   // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）
   if (privateProxyNs.length > 0) {
     config.dns['proxy-server-nameserver'] = [...(config.dns['proxy-server-nameserver'] || []), ...privateProxyNs];
@@ -94,29 +140,50 @@ function main(config) {
   }
   Object.assign(config.hosts, proxyHosts);
 
+  // ── 策略组 ──
   const proxyGroups = [
+    // Proxy
     { name: '🔰 Proxy', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png', proxies: ['🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇬🇧 England', '🇩🇪 Germany', '🇺🇳 Server', '🔘 DIRECT'] },
+    // Streaming Global
     { name: '🎬 Streaming', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png', proxies: ['🔰 Proxy', '🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇬🇧 England', '🇩🇪 Germany', '🇺🇳 Server'] },
+    // CNTV APAC
     { name: '📺 CNTV', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png', proxies: ['🔘 DIRECT', '🇨🇳 Taiwan', '🇭🇰 Hong Kong'] },
+    // Apple
+    // > Apple Services
     { name: '🍎 Apple', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png', proxies: ['🔘 DIRECT', '🔰 Proxy', '🇺🇸 America', '🇯🇵 Japan'] },
+    // Google
     { name: '🔍 Google', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png', proxies: ['🇺🇸 America', '🔰 Proxy'] },
+    // Microsoft
+    // > OneDrive
     { name: '☁️ OneDrive', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    // > Microsoft Services
     { name: 'Ⓜ️ Microsoft', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    // Telegram
     { name: '📬 Telegram', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'] },
+    // AIGC
     { name: '🤖 AIGC', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'] },
+    // Crypto
     { name: '🪙 Crypto', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png', proxies: ['🇩🇪 Germany', '🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'] },
+    // Finance
     { name: '💳 Finance', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png', proxies: ['🇺🇸 America', '🇩🇪 Germany', '🔰 Proxy', '🔘 DIRECT'] },
+    // Mail
     { name: '📧 Mail', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png', proxies: ['🔰 Proxy', '🔘 DIRECT'] },
+    // Adblock
     { name: '🚧 AdGuard', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'] },
+    // DIRECT
     { name: '🔘 DIRECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png', hidden: true, proxies: ['DIRECT'] },
+    // REJECT
     { name: '⛔️ REJECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT'] },
+    // REJECT-DROP
     { name: '📛 REJECT-DROP', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT-DROP'] },
     { name: '🇸🇱 Relay', type: 'url-test', tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
     { name: '🇭🇰 HK Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
     { name: '🇨🇳 TW Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
     { name: '🇯🇵 JP Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
     { name: '🇺🇸 US Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    // Nodes
     { name: '🇺🇳 Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
+    // Area
     { name: '🇭🇰 Hong Kong', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png', hidden: true },
     { name: '🇨🇳 Taiwan', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png', hidden: true },
     { name: '🇸🇬 Singapore', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png', hidden: true },
@@ -165,6 +232,7 @@ function main(config) {
     g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];
   }
 
+  // ── 规则集 ──
   // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用
   const remoteRuleProvider = { type: 'http', interval: 86400 };
   const ruleProviders = {
@@ -197,39 +265,69 @@ function main(config) {
     LAN: { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/LANCIDR.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt' },
   };
 
+  // ── 规则 ──
   const rules = [
+    // 禁用国外 QUIC（UDP 443），强制回退 TCP；国内放行
+    // 对应 Surge 的 PROTOCOL,QUIC 拦截（该规则转 Clash 无直接等价，借 mihomo 逻辑规则补齐）
     'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT',
+    // 标准 SSH 端口
     'AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT',
+    // Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
     'RULE-SET,Bypass,🔘 DIRECT',
     'RULE-SET,Reroute,🔰 Proxy',
+    // Private 私有网络
     'RULE-SET,Private,🔘 DIRECT',
+    // HTTPDNS 请求/流量阻止
     'RULE-SET,HTTPDNS,🚧 AdGuard',
+    // Advertising 广告
     'RULE-SET,Reject,🚧 AdGuard',
     'RULE-SET,AdBlock,🚧 AdGuard',
+    // Global Area Network
+    // > Streaming by Region
+    // >> Streaming TW
     'RULE-SET,Streaming_TW,🇨🇳 Taiwan',
+    // >> Streaming JP
     'RULE-SET,Streaming_JP,🇯🇵 Japan',
+    // >> Streaming US
     'RULE-SET,Streaming_US,🇺🇸 America',
+    // > Streaming
     'RULE-SET,Streaming,🎬 Streaming',
+    // > CNTV（适用于 iQIYI Intl,WeTV,Bilibili 等大陆在港台东南亚提供服务的流媒体服务）
     'RULE-SET,CNTV,📺 CNTV',
+    // Global 全球代理规则
+    // > AIGC
     'RULE-SET,Google AI Studio,🔍 Google',
     'RULE-SET,AIGC,🤖 AIGC',
+    // > Apple
+    // >> Apple Services
     'RULE-SET,Apple CN,🔘 DIRECT',
     'RULE-SET,Apple,🍎 Apple',
+    // > Google
     'RULE-SET,Google,🔍 Google',
+    // > Microsoft
     'RULE-SET,OneDrive,☁️ OneDrive',
     'RULE-SET,Microsoft,Ⓜ️ Microsoft',
+    // > Telegram
     'RULE-SET,Telegram,📬 Telegram',
+    // > Crypto
     'RULE-SET,Crypto,🪙 Crypto',
+    // > Finance
     'RULE-SET,Finance,💳 Finance',
+    // > Mail
     'RULE-SET,Spark,📧 Mail',
+    // Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
     'RULE-SET,Global,🔰 Proxy',
+    // China Area Network
     'RULE-SET,China,🔘 DIRECT',
     'RULE-SET,CNASN,🔘 DIRECT',
     'RULE-SET,CNCIDR,🔘 DIRECT',
+    // Local Area Network
     'RULE-SET,LAN,🔘 DIRECT',
+    // GeoIP
     'GEOSITE,cn,🔘 DIRECT',
     'GEOIP,CN,🔘 DIRECT,no-resolve',
     'GEOSITE,geolocation-!cn,🔰 Proxy',
+    // Final
     'MATCH,🔰 Proxy',
   ];
 
