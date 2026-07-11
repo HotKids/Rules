@@ -70,7 +70,8 @@
 分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
 分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可，禁止手改
 这两个生成产物本体。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
-已生成的 overlay 结果继续叠加（`clashbox.overlay.json` extends `myscript.overlay.json`），
+已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
+`myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
 
 `_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
