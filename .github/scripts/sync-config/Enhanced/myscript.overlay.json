@@ -4,11 +4,11 @@
   "output": "Clash/Script/MyScript.js",
 
   "group_overrides": {
-    "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)" },
-    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "^(?=.*TW)(?!.*Neburst)(?!.*Pro)" },
-    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "^(?=.*SG)(?!.*Neburst)(?!.*Pro)" },
-    "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "^(?=.*JP)(?!.*Pro)" },
-    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "^(?=.*US)(?!.*GoMaMi)(?!.*Pro)" },
+    "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" },
+    "🇨🇳 Taiwan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png", "filter": "(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Neburst)(?!.*Pro)" },
+    "🇸🇬 Singapore": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png", "filter": "(?i)^(?=.*\\b(?:SG|SGP)\\d*\\b)(?!.*Neburst)(?!.*Pro)" },
+    "🇯🇵 Japan": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png", "filter": "(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?!.*Pro)" },
+    "🇺🇸 America": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png", "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" },
     "📧 Mail": { "filter": null }
   },
 
@@ -26,7 +26,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
       "hidden": true,
-      "filter": "^(?=.*UK)"
+      "filter": "(?i)^(?=.*\\b(?:UK|GBR)\\d*\\b)"
     },
     {
       "name": "🇩🇪 Germany",
@@ -34,7 +34,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
       "hidden": true,
-      "filter": "^(?=.*DE)"
+      "filter": "(?i)^(?=.*\\b(?:DE|DEU)\\d*\\b)"
     },
     {
       "name": "🇸🇱 Relay",
@@ -43,7 +43,7 @@
       "tolerance": 50,
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*(GoMaMi|Neburst|Pro))"
+      "filter": "(?i)^(?=.*(?:GoMaMi|Neburst|Pro))"
     },
     {
       "name": "🇭🇰 HK Relay",
@@ -51,7 +51,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*HK)(?=.*(?:GoMaMi|Pro))"
+      "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))"
     },
     {
       "name": "🇨🇳 TW Relay",
@@ -59,7 +59,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*TW)(?=.*Neburst)"
+      "filter": "(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)"
     },
     {
       "name": "🇯🇵 JP Relay",
@@ -67,7 +67,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*JP)(?=.*Pro)"
+      "filter": "(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)"
     },
     {
       "name": "🇺🇸 US Relay",
@@ -75,7 +75,7 @@
       "type": "fallback",
       "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
       "hidden": true,
-      "filter": "^(?=.*US)(?=.*(?:GoMaMi|Pro))"
+      "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))"
     }
   ]
 }

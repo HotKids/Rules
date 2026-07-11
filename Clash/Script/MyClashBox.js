@@ -461,20 +461,20 @@ function main(config) {
   // 过滤/全量结果追加在后面，而不是整体覆盖。
   const allProxyNames = config.proxies.map((p) => p.name);
   const poolGroupFilters = {
-    '🇸🇱 Relay': '^(?=.*(GoMaMi|Neburst|Pro))',
-    '🇭🇰 HK Relay': '^(?=.*HK)(?=.*(?:GoMaMi|Pro))',
-    '🇨🇳 TW Relay': '^(?=.*TW)(?=.*Neburst)',
-    '🇯🇵 JP Relay': '^(?=.*JP)(?=.*Pro)',
-    '🇺🇸 US Relay': '^(?=.*US)(?=.*(?:GoMaMi|Pro))',
+    '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
+    '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
+    '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)',
+    '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
+    '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     Mail: null,
     Server: null,
-    'Hong Kong': '^(?=.*HK)(?!.*GoMaMi)(?!.*Pro)',
-    Taiwan: '^(?=.*TW)(?!.*Neburst)(?!.*Pro)',
-    Singapore: '^(?=.*SG)(?!.*Neburst)(?!.*Pro)',
-    Japan: '^(?=.*JP)(?!.*Pro)',
-    America: '^(?=.*US)(?!.*GoMaMi)(?!.*Pro)',
-    England: '^(?=.*UK)',
-    Germany: '^(?=.*DE)',
+    'Hong Kong': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
+    Taiwan: '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Neburst)(?!.*Pro)',
+    Singapore: '(?i)^(?=.*\\b(?:SG|SGP)\\d*\\b)(?!.*Neburst)(?!.*Pro)',
+    Japan: '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?!.*Pro)',
+    America: '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
+    England: '(?i)^(?=.*\\b(?:UK|GBR)\\d*\\b)',
+    Germany: '(?i)^(?=.*\\b(?:DE|DEU)\\d*\\b)',
   };
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
