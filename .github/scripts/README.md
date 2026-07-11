@@ -55,9 +55,12 @@
 脚本（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 /
 规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
 不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。地区组 / `🇺🇳 Server`
-组不用 mihomo 的 `include-all`（它对候选节点做隐式字母序排序，无开关可关，见
-`_gen_clash_script_js` 注释），改为运行时按 `poolGroupFilters` 手动过滤
-`config.proxies` 并保持订阅原始顺序。脚本会保留订阅里的机场私有 DNS / 节点域名 hosts
+组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
+无开关可关，见 `_gen_clash_script_js` 注释）：订阅里的内联节点由运行时按
+`poolGroupFilters` 手动过滤 `config.proxies` 填入并保持订阅原始顺序；订阅只给
+`proxy-providers` 时则回退到组上预置的 `include-all-providers` + `filter`（provider
+路径同样保序），两种形态及混合订阅均兼容。三个 My* 私人定制版仍要求订阅含真实
+内联节点（纯手动填充）。脚本会保留订阅里的机场私有 DNS / 节点域名 hosts
 （覆盖 dns/hosts 前采集、覆盖后合并），规则集公共参数抽成 `remoteRuleProvider` 常量以
 `...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。
 

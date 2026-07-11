@@ -2517,7 +2517,7 @@ def gen_surfboard_profile(
 
 
 # ---------------------------------------------------------------------------
-# Clash 覆写脚本（Script.js）：解析生成后的 Sample.yaml，转译为等效 JS
+# Clash 覆写脚本（Script.js）：解析生成后的 Mihomo.yaml，转译为等效 JS
 # ---------------------------------------------------------------------------
 
 _JS_IDENT_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
@@ -2844,7 +2844,7 @@ def _yaml_sq(s) -> str:
 
 
 def _scan_sample_item_comments(text: str, section_key: str) -> dict:
-    """扫描 Sample.yaml 某顶层块，取每个条目正上方（连续、未被空行打断）的注释。
+    """扫描 Sample.yaml / Mihomo.yaml 某顶层块，取每个条目正上方（连续、未被空行打断）的注释。
     返回 {条目名: [注释行]}；列表型条目（如 rules）汇总到 '__list__': [(值, [注释]), ...]。"""
     out: dict = {}
     pending: list[str] = []
@@ -3029,7 +3029,7 @@ def _gen_clash_script_js(
 
     base_state 用于多份 overlay 之间的链式叠加（overlay 的 extends 字段）：传入
     另一份已 resolve 好的 (groups, pool_filters, rules, structural_pool_names)，
-    本次从这个状态（深拷贝，不影响调用方）而非 Sample.yaml 原始解析结果起步叠加
+    本次从这个状态（深拷贝，不影响调用方）而非 Mihomo.yaml 原始解析结果起步叠加
     overlay，从而复用公共部分（如地区/Relay链），不必在每份 overlay 里重复声明。
     返回值第二项就是这次 resolve 出的状态，供下一环 extends 复用。
     """
@@ -3062,6 +3062,17 @@ def _gen_clash_script_js(
     # 个可开关的功能分组这件事，因此不计入本集合。
     if overlay:
         _apply_overlay(groups, pool_filters, rules, structural_pool_names, overlay, overlay_label)
+
+    # 基座 Script.js 面向任意机场订阅：内联 proxies 由运行时 JS 手动过滤（保序）；
+    # provider 形态的订阅则给节点池分组补 include-all-providers + filter，由 mihomo
+    # 运行时经 provider 路径收集（getProviders 不排序）。两路来源互不重叠、不会重复。
+    # My* 私人变体绑定固定内联节点订阅，保持纯手动过滤，不加此兼容。
+    if overlay is None:
+        for g in groups:
+            if g["name"] in pool_filters:
+                g["include-all-providers"] = True
+                if pool_filters[g["name"]]:
+                    g["filter"] = pool_filters[g["name"]]
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
     # 结构性池组同样视为核心组，均不纳入可选开关。
@@ -3120,7 +3131,16 @@ def _gen_clash_script_js(
         "  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点",
         "  const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];",
         "  const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));",
-        "  if (!hasRealProxy) {",
+        *(
+            [
+                "  // provider 形态的订阅（无内联 proxies）同样支持：节点池分组带",
+                "  // include-all-providers + filter，由 mihomo 运行时从 provider 收集（不排序）",
+                "  const hasProviders = config['proxy-providers'] && Object.keys(config['proxy-providers']).length > 0;",
+                "  if (!hasRealProxy && !hasProviders) {",
+            ]
+            if overlay is None
+            else ["  if (!hasRealProxy) {"]
+        ),
         "    throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');",
         "  }",
         "",
@@ -3201,7 +3221,7 @@ def _gen_clash_script_js(
         "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
         "  // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，",
         "  // 过滤/全量结果追加在后面，而不是整体覆盖。",
-        "  const allProxyNames = config.proxies.map((p) => p.name);",
+        "  const allProxyNames = inputProxies.map((p) => p.name);",
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
@@ -3215,7 +3235,19 @@ def _gen_clash_script_js(
         "    const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;",
         "    const base = Array.isArray(g.proxies) ? g.proxies : [];",
         "    const merged = [...base, ...matched];",
-        "    g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];",
+        "    if (merged.length > 0) {",
+        "      g.proxies = merged;",
+        *(
+            [
+                "    } else if (g['include-all-providers'] && hasProviders) {",
+                "      delete g.proxies; // 无内联匹配且订阅带 provider：交给 provider 路径在运行时填充",
+            ]
+            if overlay is None
+            else []
+        ),
+        "    } else {",
+        "      g.proxies = ['COMPATIBLE'];",
+        "    }",
         "  }",
         "",
     ]
@@ -3360,9 +3392,9 @@ def _sync_clash(
 
     # 个人差异声明（Enhanced/ 下）：自动扫描所有 *.overlay.json，每份生成一份派生
     # 脚本，输出路径由 overlay 自己的 output 字段声明（仓库根相对路径，如
-    # "Clash/Script/ClashBox.js"）——以后新增一份 overlay 文件即可自动生成对应脚本，
+    # "Clash/Script/MyClashBox.js"）——以后新增一份 overlay 文件即可自动生成对应脚本，
     # 无需改动本脚本。公共部分自动跟随 Script.js 同步；overlay 可用 extends 声明基于
-    # 另一份 overlay（而非从 Sample.yaml 重新起步）叠加，避免多份个人配置之间重复
+    # 另一份 overlay（而非从 Mihomo.yaml 重新起步）叠加，避免多份个人配置之间重复
     # 声明同样的地区/Relay 链差异，依赖顺序按 extends 自动拓扑解析。
     enhanced_dir = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
     overlays: dict[str, dict] = {}
