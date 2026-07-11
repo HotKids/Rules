@@ -217,7 +217,7 @@ function main(config) {
   // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
   // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，
   // 过滤/全量结果追加在后面，而不是整体覆盖。
-  const allProxyNames = config.proxies.map((p) => p.name);
+  const allProxyNames = inputProxies.map((p) => p.name);
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
     const filter = poolGroupFilters[g.name];
@@ -231,7 +231,11 @@ function main(config) {
     const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;
     const base = Array.isArray(g.proxies) ? g.proxies : [];
     const merged = [...base, ...matched];
-    g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];
+    if (merged.length > 0) {
+      g.proxies = merged;
+    } else {
+      g.proxies = ['COMPATIBLE'];
+    }
   }
 
   // ── 规则集 ──
