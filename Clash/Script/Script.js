@@ -33,8 +33,32 @@ const ruleOptionsEnable = {
 };
 
 function main(config) {
-  if (!Array.isArray(config.proxies) || config.proxies.length === 0) {
+  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点
+  const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];
+  const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));
+  if (!hasRealProxy) {
     throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');
+  }
+
+  // —— 保留机场私有 DNS / 节点域名 hosts ——
+  // 部分机场用私有 DNS 解析节点域名，或把节点域名解析写进订阅的 hosts /
+  // proxy-server-nameserver；下方 dns/hosts 会被整块覆盖，先把这些私有条目
+  // 采集出来（滤掉常见公共 DNS），覆盖后再合并回去，避免此类机场断连。
+  const commonDnsRe = /(223\.5\.5\.5|223\.6\.6\.6|119\.29\.29\.29|1\.12\.12\.12|120\.53\.53\.53|114\.114\.114\.114|180\.76\.76\.76|1\.1\.1\.1|1\.0\.0\.1|8\.8\.8\.8|8\.8\.4\.4|94\.140\.14\.14|94\.140\.15\.15|127\.0\.0\.1|alidns|doh\.pub|dot\.pub|dnspod|dns\.baidu|dns\.google|cloudflare|adguard|system)/i;
+  const origDns = config.dns || {};
+  const privateProxyNs = (origDns['proxy-server-nameserver'] || []).filter((d) => !commonDnsRe.test(String(d)));
+  const privateNsPolicy = {};
+  for (const policy of [origDns['proxy-server-nameserver-policy'] || {}, origDns['nameserver-policy'] || {}]) {
+    for (const [rule, dns] of Object.entries(policy)) {
+      const list = Array.isArray(dns) ? dns : [dns];
+      if (list.some((d) => commonDnsRe.test(String(d)))) continue;
+      privateNsPolicy[rule] = dns;
+    }
+  }
+  const proxyServerDomains = new Set(inputProxies.map((p) => String(p.server || '').toLowerCase()).filter(Boolean));
+  const proxyHosts = {};
+  for (const [host, v] of Object.entries(config.hosts || {})) {
+    if (proxyServerDomains.has(host.toLowerCase())) proxyHosts[host] = v;
   }
 
   config['mixed-port'] = 7892;
@@ -211,6 +235,15 @@ function main(config) {
     'endpoint-independent-nat': true,
     'disable-icmp-forwarding': true,
   };
+
+  // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）
+  if (privateProxyNs.length > 0) {
+    config.dns['proxy-server-nameserver'] = [...(config.dns['proxy-server-nameserver'] || []), ...privateProxyNs];
+  }
+  if (Object.keys(privateNsPolicy).length > 0) {
+    config.dns['proxy-server-nameserver-policy'] = privateNsPolicy;
+  }
+  Object.assign(config.hosts, proxyHosts);
 
   const proxyGroups = [
     {
