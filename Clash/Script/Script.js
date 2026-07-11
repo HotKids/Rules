@@ -416,16 +416,23 @@ function main(config) {
   const allProxyNames = config.proxies.map((p) => p.name);
   const poolGroupFilters = {
     '🇺🇳 Server': null,
-    '🇭🇰 Hong Kong': '🇭🇰|HK|Hong Kong|香港',
-    '🇨🇳 Taiwan': '🇨🇳|🇹🇼|TW|Taiwan|台湾',
-    '🇸🇬 Singapore': '🇸🇬|SG|Singapore|新加坡',
-    '🇯🇵 Japan': '🇯🇵|JP|Japan|日本',
-    '🇺🇸 America': '🇺🇸|US|United States|美国',
+    '🇭🇰 Hong Kong': '(?i)(?:🇭🇰|香港|Hong Kong|\\b(?:HK|HKG)\\d*\\b)',
+    '🇨🇳 Taiwan': '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\\b(?:TW|TWN)\\d*\\b)',
+    '🇸🇬 Singapore': '(?i)(?:🇸🇬|新加坡|Singapore|\\b(?:SG|SGP)\\d*\\b)',
+    '🇯🇵 Japan': '(?i)(?:🇯🇵|日本|Japan|\\b(?:JP|JPN)\\d*\\b)',
+    '🇺🇸 America': '(?i)(?:🇺🇸|美国|United States|\\b(?:US|USA)\\d*\\b)',
   };
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
     const filter = poolGroupFilters[g.name];
-    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;
+    // 过滤正则可能带内联标志（如 (?i)）；JS RegExp 不支持内联标志，
+    // 需拆出标志作为第二参数传入（regexp2/ICU 等其他平台原样使用）。
+    let re = null;
+    if (filter) {
+      const fm = filter.match(/^\(\?([a-z]+)\)([\s\S]*)$/);
+      re = fm ? new RegExp(fm[2], fm[1]) : new RegExp(filter);
+    }
+    const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;
     const base = Array.isArray(g.proxies) ? g.proxies : [];
     const merged = [...base, ...matched];
     g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];
