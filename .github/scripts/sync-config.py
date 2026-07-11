@@ -1708,11 +1708,22 @@ def gen_rules_and_providers(
 # 生成 Loon [Proxy Group]
 # ---------------------------------------------------------------------------
 
+# Loon [Remote Filter] 的地区 tag 代码：组名（去 emoji）→ 代码，派生 Filter<code>，
+# 与 mihomo 锚点版的 &FilterHK 命名对齐。未列出的地区回退为组名（去 emoji 去空格）。
+_LOON_REGION_CODE = {
+    "Hong Kong": "HK",
+    "Taiwan": "TW",
+    "Singapore": "SG",
+    "Japan": "JP",
+    "America": "US",
+}
+
+
 def _gen_loon_region_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]]:
     """从 Surge smart 组的 policy-regex-filter 自动生成 Loon [Remote Filter] 区域条目。
 
-    单点源：地区正则只维护在 Surge/Profile.conf，Loon 的 Sub-<地区> NameRegex 过滤器
-    由此自动派生（tag 取组名去 emoji 去空格，如 '🇭🇰 Hong Kong' → 'Sub-HongKong'），
+    单点源：地区正则只维护在 Surge/Profile.conf，Loon 的 Filter<地区> NameRegex 过滤器
+    由此自动派生（tag 取 _LOON_REGION_CODE 的代码，如 '🇭🇰 Hong Kong' → 'FilterHK'），
     正则封装成 Loon 的全匹配形式 ^(?=.*<regex>).*。无对应 policy-regex-filter 的过滤器
     （如全节点兜底 Sub-UN）仍在 loon.ini [Remote Filter] 手维护。
     返回 ({组名: tag}, ['<tag> = NameRegex, FilterKey = "..."', ...])。
@@ -1726,7 +1737,8 @@ def _gen_loon_region_filters(group_lines: list[str]) -> tuple[dict[str, str], li
         regex = g["params"].get("policy-regex-filter", "")
         if not regex:
             continue
-        tag = "Sub-" + strip_emoji(g["name"]).replace(" ", "")
+        base = strip_emoji(g["name"])
+        tag = "Filter" + _LOON_REGION_CODE.get(base, base.replace(" ", ""))
         filter_map[g["name"]] = tag
         lines.append(f'{tag} = NameRegex, FilterKey = "^(?=.*{regex}).*"')
     return filter_map, lines
