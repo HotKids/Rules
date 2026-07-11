@@ -1708,6 +1708,30 @@ def gen_rules_and_providers(
 # 生成 Loon [Proxy Group]
 # ---------------------------------------------------------------------------
 
+def _gen_loon_region_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]]:
+    """从 Surge smart 组的 policy-regex-filter 自动生成 Loon [Remote Filter] 区域条目。
+
+    单点源：地区正则只维护在 Surge/Profile.conf，Loon 的 Sub-<地区> NameRegex 过滤器
+    由此自动派生（tag 取组名去 emoji 去空格，如 '🇭🇰 Hong Kong' → 'Sub-HongKong'），
+    正则封装成 Loon 的全匹配形式 ^(?=.*<regex>).*。无对应 policy-regex-filter 的过滤器
+    （如全节点兜底 Sub-UN）仍在 loon.ini [Remote Filter] 手维护。
+    返回 ({组名: tag}, ['<tag> = NameRegex, FilterKey = "..."', ...])。
+    """
+    filter_map: dict[str, str] = {}
+    lines: list[str] = []
+    for gl in group_lines:
+        g = parse_group_line(gl)
+        if not g or g["type"] != "smart":
+            continue
+        regex = g["params"].get("policy-regex-filter", "")
+        if not regex:
+            continue
+        tag = "Sub-" + strip_emoji(g["name"]).replace(" ", "")
+        filter_map[g["name"]] = tag
+        lines.append(f'{tag} = NameRegex, FilterKey = "^(?=.*{regex}).*"')
+    return filter_map, lines
+
+
 def _fmt_loon_group(
     name: str,
     gtype: str,
@@ -3064,31 +3088,18 @@ def _sync_loon(
     loon_rewrite_block = loon_blocks.get("Rewrite", "")
     loon_script_block = loon_blocks.get("Script", "")
     explicit_filter_map = loon.get("filter_map", {})
-    filter_defs = loon.get("filter_defs", {})
     loon_skips = config.get("global_skips", []) + loon.get("skips", [])
 
-    # 若无手动 FilterMap，从 loon.ini [Remote Filter] regex 自动推导
-    if explicit_filter_map:
-        filter_map = explicit_filter_map
-    elif filter_defs:
-        auto_map: dict[str, str] = {}
-        for grp_line in group_lines:
-            g = parse_group_line(grp_line)
-            if g and g["type"] == "smart":
-                name = g["name"]
-                for filter_name, pattern in filter_defs.items():
-                    try:
-                        # Loon FilterKey 中 (?i) 可出现在非开头位置；
-                        # Python re 不允许，将其剥离后以 IGNORECASE 标志替代
-                        clean_pat = pattern.replace("(?i)", "")
-                        if re.search(clean_pat, name, re.IGNORECASE):
-                            auto_map[name] = filter_name
-                            break
-                    except re.error:
-                        pass
-        filter_map = auto_map
-    else:
-        filter_map = {}
+    # 地区过滤器：从 Profile.conf 的 policy-regex-filter 自动生成（单点源），tag 自动派生，
+    # 并注入 loon_header 的 [Remote Filter] 段（排在手维护条目如 Sub-UN 之前）。
+    region_filter_map, region_rf_lines = _gen_loon_region_filters(group_lines)
+    filter_map = {**region_filter_map, **explicit_filter_map}
+    if region_rf_lines:
+        injected = "[Remote Filter]\n" + "\n".join(region_rf_lines)
+        if "[Remote Filter]" in loon_header:
+            loon_header = loon_header.replace("[Remote Filter]", injected, 1)
+        else:
+            loon_header = loon_header.rstrip() + "\n\n" + injected
 
     print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
     print(f"  Loon skip: {loon_skips}")
