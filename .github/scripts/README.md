@@ -2,7 +2,7 @@
 
 三个同步脚本 + 共用模块 `_common.py`（Python 3.12+），将 Surge 格式规则/配置/模块自动同步到其他平台。
 `sync-rules.py` 仅标准库；`sync-modules.py` 额外依赖 `pypinyin`（排序用）；
-`sync-config.py` 额外依赖 `pyyaml`（解析 Sample.yaml 以生成 Script.js）。
+`sync-config.py` 额外依赖 `pyyaml`（解析 Sample.yaml 以生成 Mihomo.yaml 与 Script.js）。
 
 ---
 
@@ -41,19 +41,28 @@
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/ClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyClashBox.js`、`Clash/Script/MyScriptColor.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
-`Clash/Script/Script.js` 是 `Clash/Sample.yaml` 生成完毕后再解析出来的等效 mihomo 覆写脚本
-（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 / 规则 /
-基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Sample.yaml 的解析结果、不重新
-实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。地区组 / `🇺🇳 Server`
+`Clash/Mihomo.yaml` 是 `Clash/Sample.yaml` 生成完毕后转译出的锚点/flow 版（功能等价）：
+公共参数抽成 YAML 锚点（`&Remote` 规则集参数、`&Region` 地区分组基座、`&Filter<码>`
+地区正则），条目单行紧凑排版；地区组由 `use:[Server]+filter` 改写为
+`<<: *Region, filter: *Filter<码>`（`include-all-providers` 与 `use:` 同走 mihomo
+保序路径，功能一致）。
+
+`Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
+脚本（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 /
+规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
+不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。地区组 / `🇺🇳 Server`
 组不用 mihomo 的 `include-all`（它对候选节点做隐式字母序排序，无开关可关，见
 `_gen_clash_script_js` 注释），改为运行时按 `poolGroupFilters` 手动过滤
-`config.proxies` 并保持订阅原始顺序。
+`config.proxies` 并保持订阅原始顺序。脚本会保留订阅里的机场私有 DNS / 节点域名 hosts
+（覆盖 dns/hosts 前采集、覆盖后合并），规则集公共参数抽成 `remoteRuleProvider` 常量以
+`...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。
 
-`Clash/Script/MyScript.js`、`Clash/Script/ClashBox.js` 都是 `Script.js` 的私人定制版：
+`Clash/Script/MyScript.js`、`Clash/Script/MyClashBox.js`、`Clash/Script/MyScriptColor.js`
+都是 `Script.js` 的私人定制版：
 在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
 声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`remove_groups` 整组
 删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
@@ -65,7 +74,7 @@
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
 
 `_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
-`output` 字段声明（仓库根相对，如 `"Clash/Script/ClashBox.js"`），`extends` 依赖顺序自动
+`output` 字段声明（仓库根相对，如 `"Clash/Script/MyClashBox.js"`），`extends` 依赖顺序自动
 拓扑解析——因此**新增一份个人配置只需在 `Enhanced/` 下放一个带 `output` 的 `*.overlay.json`
 即可自动生成对应脚本，无需改动 `sync-config.py`**。改某份 overlay 的 `output` 后，旧路径上
 遗留的脚本会在下次同步时自动清理（仅删带生成标记的产物，不碰手放的其它 `.js`）。
@@ -91,7 +100,9 @@
 
 **Loon**
 - Action proxy 映射：`reject-drop` → `REJECT-DROP`，其余 reject 变体 → `REJECT`
-- smart 组通过 FilterMap 映射为 Loon FilterKey；无匹配则整组丢弃
+- `[Remote Filter]` 条目全部自动生成（单点源 Profile.conf）：smart 组的
+  `policy-regex-filter` → `Filter<码>`（如 FilterHK），`include-all-proxies` 组 →
+  全节点 FilterUN；`loon.ini` 只留段头，`sync-config.txt` 的 FilterMap 仅作手动覆盖
 - 跳过：`include-other-group`、`policy-path` 参数；非 HTTP URL 的本地规则
 
 **QX**
