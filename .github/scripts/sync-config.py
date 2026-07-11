@@ -3171,6 +3171,17 @@ def _gen_clash_script_js(
         "",
     ]
 
+    # 节点池筛选表先于 proxy-groups 输出，对齐锚点版"锚点在前、引用在后"的结构。
+    # 键序按组在 proxyGroups 里的出现顺序排列（与面板一致，避免 overlay 阶段追加的
+    # 键——如 📧 Mail——被排到地区中间）；仅影响可读性，运行时按组名查表、与键序无关。
+    lines += [
+        "  // ── 节点 ──",
+        "  // 节点池筛选正则（对应 Mihomo.yaml 的 &Region / &Filter* 锚点）：",
+        "  // null = 不过滤、取全量节点；下方策略组生成后按此表运行时填充候选。",
+        f"  const poolGroupFilters = {_to_js(_sort_by_group_order(pool_filters, groups), quote_keys=True)};",
+        "",
+    ]
+
     # 每组一行（与 Mihomo.yaml 的 proxy-groups 单行条目风格对齐），分组注释从
     # Mihomo.yaml 带过来（# → //）；overlay 改过名的组经 rename_map 反查原名匹配。
     group_cmts = _scan_sample_item_comments(sample_yaml_text, "proxy-groups")
@@ -3184,17 +3195,13 @@ def _gen_clash_script_js(
     lines.append("  ];")
     lines.append("")
     lines += [
-        "  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤",
-        "  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选",
+        "  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：按上方 poolGroupFilters",
+        "  // 手动过滤 config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选",
         "  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），",
         "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
         "  // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，",
         "  // 过滤/全量结果追加在后面，而不是整体覆盖。",
         "  const allProxyNames = config.proxies.map((p) => p.name);",
-        # poolGroupFilters 键序按组在 proxyGroups 里的出现顺序排列（与面板一致，
-        # 避免 overlay 阶段追加的键——如 📧 Mail——被排到地区中间）；仅影响可读性，
-        # 运行时按组名查表、与键序无关。
-        f"  const poolGroupFilters = {_to_js(_sort_by_group_order(pool_filters, groups), quote_keys=True)};",
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
@@ -3223,6 +3230,7 @@ def _gen_clash_script_js(
         }
     if rp_common:
         lines.append("  // ── 规则集 ──")
+        lines.append("  // 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/")
         lines.append("  // 远程规则集公共参数（对应 Mihomo.yaml 的 &Remote 锚点），各条目以 ...spread 复用")
         lines.append(f"  const remoteRuleProvider = {_to_js_inline(rp_common)};")
         lines.append("  const ruleProviders = {")
