@@ -11,6 +11,6 @@
 | [`Clash/`](Clash/) | 自动生成：`Sample.yaml` / `Mihomo.yaml`（锚点版）/ 规则集 / Enhance Script |
 | [`Quantumult/`](Quantumult/) | 自动生成：QX 配置与规则；手动维护：图标库 `X/Images/` |
 | [`sing-box/`](sing-box/) | 自动生成：完整配置 `config.json`、规则集（`source/` 源码 + `rule-set/` 二进制） |
-| [`subconverter/`](subconverter/) | subconverter 订阅转换远程配置（已过时，仅维护 emoji） |
+| [`subconverter/`](subconverter/) | subconverter 订阅转换远程配置（停更，仅维护 emoji） |
 | [`snell-panel/`](snell-panel/) | Snell / SS2022 节点管理面板（Cloudflare Workers + React） |
 | [`.github/scripts/`](.github/scripts/) | 三个同步脚本（rules / modules / config）及其说明文档 |
