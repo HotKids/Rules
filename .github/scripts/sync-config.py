@@ -2662,14 +2662,16 @@ def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> d
     if is_pool:
         pool_filters[g["name"]] = g.get("filter")
     drop = {"use", "include-all-providers", "filter"} if is_pool else set()
-    ordered: dict = {}
-    for k in ("name", "type", "icon", "hidden", "proxies"):
-        if k in g and k not in drop:
-            ordered[k] = g[k]
-    for k, v in g.items():   # 保留任何额外键（稳定排在已知键之后）
-        if k not in ordered and k not in drop:
-            ordered[k] = v
-    return ordered
+    return _ordered_group({k: v for k, v in g.items() if k not in drop})
+
+
+def _ordered_group(g: dict) -> dict:
+    """组键序规范化为锚点版风格：name, type, proxies, hidden, …extras…, icon（icon 垫底）。
+    使输出与来源（Sample.yaml / Mihomo.yaml，二者键序不同）及 overlay 声明顺序无关。"""
+    head = [k for k in ("name", "type", "proxies", "hidden") if k in g]
+    extras = [k for k in g if k not in ("name", "type", "proxies", "hidden", "icon")]
+    tail = ["icon"] if "icon" in g else []
+    return {k: g[k] for k in head + extras + tail}
 
 
 def _rule_policy_index(parts: list[str]) -> int:
@@ -3175,7 +3177,7 @@ def _gen_clash_script_js(
     for g in groups:
         for cline in group_cmts.get(g["name"], group_cmts.get(rename_rev.get(g["name"], ""), [])):
             lines.append(f"    {cline.replace('#', '//', 1)}")
-        lines.append(f"    {_to_js_inline(g)},")
+        lines.append(f"    {_to_js_inline(_ordered_group(g))},")
     lines.append("  ];")
     lines.append("")
     lines += [

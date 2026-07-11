@@ -141,39 +141,39 @@ function main(config) {
   // ── 策略组 ──
   const proxyGroups = [
     // Proxy
-    { name: '🔰 Proxy', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png', proxies: ['🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇺🇳 Server', '🔘 DIRECT'] },
+    { name: '🔰 Proxy', type: 'select', proxies: ['🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇺🇳 Server', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png' },
     // Streaming Global
-    { name: '🎬 Streaming', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png', proxies: ['🔰 Proxy', '🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇺🇳 Server'] },
+    { name: '🎬 Streaming', type: 'select', proxies: ['🔰 Proxy', '🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇺🇳 Server'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png' },
     // CNTV APAC
-    { name: '📺 CNTV', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png', proxies: ['🔘 DIRECT', '🇨🇳 Taiwan', '🇭🇰 Hong Kong'] },
+    { name: '📺 CNTV', type: 'select', proxies: ['🔘 DIRECT', '🇨🇳 Taiwan', '🇭🇰 Hong Kong'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png' },
     // Apple
     // > Apple Services
-    { name: '🍎 Apple', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png', proxies: ['🔘 DIRECT', '🔰 Proxy', '🇺🇸 America', '🇯🇵 Japan'] },
+    { name: '🍎 Apple', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy', '🇺🇸 America', '🇯🇵 Japan'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png' },
     // Google
-    { name: '🔍 Google', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png', proxies: ['🇺🇸 America', '🔰 Proxy'] },
+    { name: '🔍 Google', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png' },
     // Microsoft
     // > OneDrive
-    { name: '☁️ OneDrive', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    { name: '☁️ OneDrive', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png' },
     // > Microsoft Services
-    { name: 'Ⓜ️ Microsoft', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    { name: 'Ⓜ️ Microsoft', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png' },
     // Telegram
-    { name: '📬 Telegram', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'] },
+    { name: '📬 Telegram', type: 'select', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png' },
     // AIGC
-    { name: '🤖 AIGC', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'] },
+    { name: '🤖 AIGC', type: 'select', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png' },
     // Crypto
-    { name: '🪙 Crypto', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'] },
+    { name: '🪙 Crypto', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png' },
     // Finance
-    { name: '💳 Finance', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'] },
+    { name: '💳 Finance', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png' },
     // Mail
-    { name: '📧 Mail', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png', proxies: ['🔰 Proxy', '🔘 DIRECT'] },
+    { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png' },
     // Adblock
-    { name: '🚧 AdGuard', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'] },
+    { name: '🚧 AdGuard', type: 'select', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png' },
     // DIRECT
-    { name: '🔘 DIRECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png', hidden: true, proxies: ['DIRECT'] },
+    { name: '🔘 DIRECT', type: 'select', proxies: ['DIRECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png' },
     // REJECT
-    { name: '⛔️ REJECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT'] },
+    { name: '⛔️ REJECT', type: 'select', proxies: ['REJECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png' },
     // REJECT-DROP
-    { name: '📛 REJECT-DROP', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT-DROP'] },
+    { name: '📛 REJECT-DROP', type: 'select', proxies: ['REJECT-DROP'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png' },
     // Nodes
     { name: '🇺🇳 Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
     // Area
