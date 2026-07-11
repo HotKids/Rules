@@ -1708,6 +1708,46 @@ def gen_rules_and_providers(
 # 生成 Loon [Proxy Group]
 # ---------------------------------------------------------------------------
 
+# Loon [Remote Filter] 的 tag 代码：组名（去 emoji）→ 代码，派生 Filter<code>，
+# 与 mihomo 锚点版的 &FilterHK 命名对齐。未列出的组回退为组名（去 emoji 去空格）。
+_LOON_REGION_CODE = {
+    "Hong Kong": "HK",
+    "Taiwan": "TW",
+    "Singapore": "SG",
+    "Japan": "JP",
+    "America": "US",
+    "Server": "UN",
+}
+
+
+def _gen_loon_filters(group_lines: list[str]) -> tuple[dict[str, str], list[str]]:
+    """从 Surge 策略组自动生成 Loon [Remote Filter] 条目（单点源，tag = Filter<code>）。
+
+    - smart 组 + policy-regex-filter → 地区过滤器，正则封装成 ^(?=.*<regex>).*
+    - include-all-proxies 组（如 🇺🇳 Server）→ 全节点过滤器 ^(?=.+).*（不排除任何节点）
+    正则只维护在 Surge/Profile.conf；tag 代码取自 _LOON_REGION_CODE，未列出回退为组名。
+    返回 ({组名: tag}, ['<tag> = NameRegex, FilterKey = "..."', ...])。
+    """
+    filter_map: dict[str, str] = {}
+    lines: list[str] = []
+    for gl in group_lines:
+        g = parse_group_line(gl)
+        if not g:
+            continue
+        regex = g["params"].get("policy-regex-filter", "")
+        if g["type"] == "smart" and regex:
+            filter_key = f"^(?=.*{regex}).*"
+        elif g["params"].get("include-all-proxies", "").lower() in ("true", "1"):
+            filter_key = "^(?=.+).*"
+        else:
+            continue
+        base = strip_emoji(g["name"])
+        tag = "Filter" + _LOON_REGION_CODE.get(base, base.replace(" ", ""))
+        filter_map[g["name"]] = tag
+        lines.append(f'{tag} = NameRegex, FilterKey = "{filter_key}"')
+    return filter_map, lines
+
+
 def _fmt_loon_group(
     name: str,
     gtype: str,
@@ -1729,8 +1769,8 @@ def _fmt_loon_group(
         return f"{name} = url-test,{filter_name}{extra}{icon_part}"
 
     if params.get("include-all-proxies", "").lower() in ("true", "1"):
-        # include-all-proxies → 使用 FilterMap 指定的 Remote Filter（默认 Sub-UN）
-        fm_val = filter_map.get(name, "Sub-UN")
+        # include-all-proxies → 使用 FilterMap 指定的 Remote Filter（默认 FilterUN）
+        fm_val = filter_map.get(name, "FilterUN")
         filter_name = fm_val.split(",")[0].strip()
         return f"{name} = select,{filter_name}{icon_part}"
 
@@ -2855,7 +2895,14 @@ def _gen_clash_script_js(
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
-        "    const matched = filter ? allProxyNames.filter((n) => new RegExp(filter).test(n)) : allProxyNames;",
+        "    // 过滤正则可能带内联标志（如 (?i)）；JS RegExp 不支持内联标志，",
+        "    // 需拆出标志作为第二参数传入（regexp2/ICU 等其他平台原样使用）。",
+        "    let re = null;",
+        "    if (filter) {",
+        "      const fm = filter.match(/^\\(\\?([a-z]+)\\)([\\s\\S]*)$/);",
+        "      re = fm ? new RegExp(fm[2], fm[1]) : new RegExp(filter);",
+        "    }",
+        "    const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;",
         "    const base = Array.isArray(g.proxies) ? g.proxies : [];",
         "    const merged = [...base, ...matched];",
         "    g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];",
@@ -3057,31 +3104,24 @@ def _sync_loon(
     loon_rewrite_block = loon_blocks.get("Rewrite", "")
     loon_script_block = loon_blocks.get("Script", "")
     explicit_filter_map = loon.get("filter_map", {})
-    filter_defs = loon.get("filter_defs", {})
     loon_skips = config.get("global_skips", []) + loon.get("skips", [])
 
-    # 若无手动 FilterMap，从 loon.ini [Remote Filter] regex 自动推导
-    if explicit_filter_map:
-        filter_map = explicit_filter_map
-    elif filter_defs:
-        auto_map: dict[str, str] = {}
-        for grp_line in group_lines:
-            g = parse_group_line(grp_line)
-            if g and g["type"] == "smart":
-                name = g["name"]
-                for filter_name, pattern in filter_defs.items():
-                    try:
-                        # Loon FilterKey 中 (?i) 可出现在非开头位置；
-                        # Python re 不允许，将其剥离后以 IGNORECASE 标志替代
-                        clean_pat = pattern.replace("(?i)", "")
-                        if re.search(clean_pat, name, re.IGNORECASE):
-                            auto_map[name] = filter_name
-                            break
-                    except re.error:
-                        pass
-        filter_map = auto_map
-    else:
-        filter_map = {}
+    # [Remote Filter]：全部从 Profile.conf 策略组自动生成（单点源），tag 自动派生，
+    # 并注入 loon_header 的 [Remote Filter] 段。
+    auto_filter_map, auto_rf_lines = _gen_loon_filters(group_lines)
+    filter_map = {**auto_filter_map, **explicit_filter_map}
+    if auto_rf_lines:
+        injected = "[Remote Filter]\n" + "\n".join(auto_rf_lines)
+        # 精确替换独占一行的 [Remote Filter] 段头（不能用 str.replace，会命中注释里的
+        # 同名字样；也不用 re.sub，注入内容含 \b/\d 会破坏替换串转义）。
+        hdr_lines = loon_header.split("\n")
+        for i, ln in enumerate(hdr_lines):
+            if ln.strip() == "[Remote Filter]":
+                hdr_lines[i] = injected
+                break
+        else:
+            hdr_lines += ["", injected]
+        loon_header = "\n".join(hdr_lines)
 
     print(f"  FilterMap (auto): {list(filter_map.keys())}" if not explicit_filter_map else f"  FilterMap: {list(filter_map.keys())}")
     print(f"  Loon skip: {loon_skips}")

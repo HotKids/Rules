@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-06 21:47:59
+# Date: 2026-07-11 11:49:35
 # Author: @HotKids
 
 [General]
@@ -50,13 +50,15 @@ bypass-tun = 10.0.0.0/8,100.64.0.0/10,127.0.0.0/8,169.254.0.0/16,172.16.0.0/12,1
 # 仅修改此处订阅链接即可
 # Sub = https://sub.hotkids.me
 
+# 本段由 sync-config.py 从 Surge/Profile.conf 策略组自动生成并注入
+# （地区 smart 组 → Filter<地区>；include-all-proxies 组 → FilterUN），此处无需维护。
 [Remote Filter]
-Sub-HK = NameRegex, FilterKey = "^(?=.*(?i)(🇭🇰|香港|\b(HK|Hong Kong)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-TW = NameRegex, FilterKey = "^(?=.*(?i)(🇨🇳|🇹🇼|台湾|\b(TW|Taiwan)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-SG = NameRegex, FilterKey = "^(?=.*(?i)(🇸🇬|新加坡|狮城|\b(SG|Singapore)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-JP = NameRegex, FilterKey = "^(?=.*(?i)(🇯🇵|日本|\b(JP|Japan)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-US = NameRegex, FilterKey = "^(?=.*(?i)(🇺🇸|美国|\b(US|United States)\d*\b))(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
-Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|Panel|Premium|DIRECT|REJECT)\b|\d{4}-\d{2}-\d{2}|\d+(\.\d+)?\s*G).*"
+FilterUN = NameRegex, FilterKey = "^(?=.+).*"
+FilterHK = NameRegex, FilterKey = "^(?=.*(?i)(?:🇭🇰|香港|Hong Kong|\b(?:HK|HKG)\d*\b)).*"
+FilterTW = NameRegex, FilterKey = "^(?=.*(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\b(?:TW|TWN)\d*\b)).*"
+FilterSG = NameRegex, FilterKey = "^(?=.*(?i)(?:🇸🇬|新加坡|Singapore|\b(?:SG|SGP)\d*\b)).*"
+FilterJP = NameRegex, FilterKey = "^(?=.*(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)).*"
+FilterUS = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)).*"
 
 [Proxy]
 🔘 DIRECT = DIRECT
@@ -89,13 +91,13 @@ Sub-UN = NameRegex, FilterKey = "^(?=.+)(?!.*(?i)\b(USE(D)?|TOTAL|EXPIRE|RESET|P
 # Adblock
 🚧 AdGuard = select,🔘 DIRECT,⛔️ REJECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Block.png
 # Nodes
-🇺🇳 Server = select,Sub-UN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Club.png
+🇺🇳 Server = select,FilterUN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Club.png
 # Area
-🇭🇰 Hong Kong = url-test,Sub-HK,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
-🇨🇳 Taiwan = url-test,Sub-TW,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
-🇸🇬 Singapore = url-test,Sub-SG,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
-🇯🇵 Japan = url-test,Sub-JP,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
-🇺🇸 America = url-test,Sub-US,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
+🇭🇰 Hong Kong = url-test,FilterHK,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Hong_Kong.png
+🇨🇳 Taiwan = url-test,FilterTW,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Taiwan.png
+🇸🇬 Singapore = url-test,FilterSG,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Singapore.png
+🇯🇵 Japan = url-test,FilterJP,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Japan.png
+🇺🇸 America = url-test,FilterUS,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/United_States.png
 
 [Rule]
 # Local Rule
