@@ -6,4 +6,5 @@
 （`external-config`），套用本仓库 `Surge/RULE-SET/` 规则与统一分组结构，手动维护。
 
 两份内容基本一致，仅台湾组 emoji 不同：`config1.ini` 用 `🇨🇳 Taiwan`，
-`config2.ini` 用 `🇹🇼 Taiwan`（另有少量节点匹配关键字差异），按客户端显示偏好选用。
+`config2.ini` 用 `🇹🇼 Taiwan`（另有少量节点匹配关键字差异），按客户端显示偏好选用，
+不表明政治立场。
