@@ -143,52 +143,52 @@ function main(config) {
   // ── 策略组 ──
   const proxyGroups = [
     // Proxy
-    { name: 'Proxy', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Shield.png', proxies: ['Hong Kong', 'Taiwan', 'Singapore', 'Japan', 'America', 'England', 'Germany', 'Server', 'Direct'] },
+    { name: 'Proxy', type: 'select', proxies: ['Hong Kong', 'Taiwan', 'Singapore', 'Japan', 'America', 'England', 'Germany', 'Server', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Shield.png' },
     // Streaming Global
-    { name: 'Streaming', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Video.png', proxies: ['Proxy', 'Hong Kong', 'Taiwan', 'Singapore', 'Japan', 'America', 'England', 'Germany', 'Server'] },
+    { name: 'Streaming', type: 'select', proxies: ['Proxy', 'Hong Kong', 'Taiwan', 'Singapore', 'Japan', 'America', 'England', 'Germany', 'Server'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Video.png' },
     // CNTV APAC
-    { name: 'CNTV', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/TV.png', proxies: ['Direct', 'Taiwan', 'Hong Kong'] },
+    { name: 'CNTV', type: 'select', proxies: ['Direct', 'Taiwan', 'Hong Kong'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/TV.png' },
     // Apple
     // > Apple Services
-    { name: 'Apple', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitten%20Apple.png', proxies: ['Direct', 'Proxy', 'America', 'Japan'] },
+    { name: 'Apple', type: 'select', proxies: ['Direct', 'Proxy', 'America', 'Japan'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitten%20Apple.png' },
     // Google
-    { name: 'Google', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Google.png', proxies: ['America', 'Proxy'] },
+    { name: 'Google', type: 'select', proxies: ['America', 'Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Google.png' },
     // Microsoft
     // > OneDrive
-    { name: 'OneDrive', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png', proxies: ['Direct', 'Proxy'] },
+    { name: 'OneDrive', type: 'select', proxies: ['Direct', 'Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/OneDrive.png' },
     // > Microsoft Services
-    { name: 'Microsoft', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png', proxies: ['Direct', 'Proxy'] },
+    { name: 'Microsoft', type: 'select', proxies: ['Direct', 'Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Windows.png' },
     // Telegram
-    { name: 'Telegram', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Telegram.png', proxies: ['Proxy', 'Singapore', 'Direct'] },
+    { name: 'Telegram', type: 'select', proxies: ['Proxy', 'Singapore', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Telegram.png' },
     // AIGC
-    { name: 'AIGC', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png', proxies: ['America', 'Singapore', 'Proxy'] },
+    { name: 'AIGC', type: 'select', proxies: ['America', 'Singapore', 'Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png' },
     // Crypto
-    { name: 'Crypto', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitcoin.png', proxies: ['Germany', 'America', 'Proxy', 'Direct'] },
+    { name: 'Crypto', type: 'select', proxies: ['Germany', 'America', 'Proxy', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitcoin.png' },
     // Finance
-    { name: 'Finance', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Wallet.png', proxies: ['America', 'Germany', 'Proxy', 'Direct'] },
+    { name: 'Finance', type: 'select', proxies: ['America', 'Germany', 'Proxy', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Wallet.png' },
     // Mail
-    { name: 'Mail', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Email.png', proxies: ['Proxy', 'Direct'] },
+    { name: 'Mail', type: 'select', proxies: ['Proxy', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Email.png' },
     // Adblock
-    { name: 'AdGuard', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png', proxies: ['Direct', 'Reject'] },
+    { name: 'AdGuard', type: 'select', proxies: ['Direct', 'Reject'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png' },
     // DIRECT
-    { name: 'Direct', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png', hidden: true, proxies: ['DIRECT'] },
+    { name: 'Direct', type: 'select', proxies: ['DIRECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png' },
     // REJECT
-    { name: 'Reject', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png', hidden: true, proxies: ['REJECT'] },
-    { name: '🇸🇱 Relay', type: 'url-test', tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png', hidden: true },
-    { name: '🇭🇰 HK Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png', hidden: true },
-    { name: '🇨🇳 TW Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png', hidden: true },
-    { name: '🇯🇵 JP Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png', hidden: true },
-    { name: '🇺🇸 US Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png', hidden: true },
+    { name: 'Reject', type: 'select', proxies: ['REJECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png' },
+    { name: '🇸🇱 Relay', type: 'url-test', hidden: true, tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
+    { name: '🇭🇰 HK Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
+    { name: '🇨🇳 TW Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
+    { name: '🇯🇵 JP Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
+    { name: '🇺🇸 US Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     // Nodes
     { name: 'Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png' },
     // Area
-    { name: 'Hong Kong', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png', hidden: true },
-    { name: 'Taiwan', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png', hidden: true },
-    { name: 'Singapore', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png', hidden: true },
-    { name: 'Japan', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png', hidden: true },
-    { name: 'America', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png', hidden: true },
-    { name: 'England', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png', hidden: true },
-    { name: 'Germany', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png', hidden: true },
+    { name: 'Hong Kong', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png' },
+    { name: 'Taiwan', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png' },
+    { name: 'Singapore', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png' },
+    { name: 'Japan', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png' },
+    { name: 'America', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png' },
+    { name: 'England', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png' },
+    { name: 'Germany', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png' },
   ];
 
   // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤
