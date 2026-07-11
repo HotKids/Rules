@@ -126,3 +126,4 @@
 python .github/scripts/sync-rules.py
 python .github/scripts/sync-config.py
 ```
+
