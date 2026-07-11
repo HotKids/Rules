@@ -3123,9 +3123,8 @@ def _gen_clash_script_js(
     for key in _CLASH_SCRIPT_BASE_KEYS:
         if key not in data:
             continue
-        lines.append(f"  config[{_js_string(key)}] = {_to_js(data[key])};")
-        if isinstance(data[key], (dict, list)):
-            lines.append("")
+        # 单行紧凑输出（与 Mihomo.yaml 的 flow 单行风格对齐）
+        lines.append(f"  config[{_js_string(key)}] = {_to_js_inline(data[key])};")
 
     lines += [
         "  // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）",
@@ -3139,7 +3138,11 @@ def _gen_clash_script_js(
         "",
     ]
 
-    lines.append(f"  const proxyGroups = {_to_js(groups)};")
+    # 每组一行（与 Mihomo.yaml 的 proxy-groups 单行条目风格对齐）
+    lines.append("  const proxyGroups = [")
+    for g in groups:
+        lines.append(f"    {_to_js_inline(g)},")
+    lines.append("  ];")
     lines.append("")
     lines += [
         "  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤",

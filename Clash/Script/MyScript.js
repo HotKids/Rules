@@ -78,166 +78,13 @@ function main(config) {
   config['keep-alive-interval'] = 30;
   config['geo-auto-update'] = true;
   config['geo-update-interval'] = 24;
-  config['geox-url'] = {
-    geoip: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat',
-    geosite: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat',
-    mmdb: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb',
-    asn: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb',
-  };
-
-  config['hosts'] = {
-    '*.clash.dev': '127.0.0.1',
-    localhost: '127.0.0.1',
-  };
-
-  config['profile'] = {
-    'store-selected': true,
-    'store-fake-ip': true,
-  };
-
-  config['ntp'] = {
-    enable: true,
-    'write-to-system': false,
-    server: 'ntp.aliyun.com',
-    port: 123,
-    interval: 60,
-  };
-
-  config['sniffer'] = {
-    enable: true,
-    'override-destination': false,
-    'force-dns-mapping': true,
-    'parse-pure-ip': false,
-    sniff: {
-      HTTP: {
-        ports: [
-          80,
-          '8080-8880',
-        ],
-        'override-destination': true,
-      },
-      TLS: {
-        ports: [
-          443,
-          8443,
-        ],
-      },
-      QUIC: {
-        ports: [
-          443,
-          8443,
-        ],
-      },
-    },
-    'skip-domain': [
-      '+.push.apple.com',
-      'Mijia Cloud',
-    ],
-  };
-
-  config['dns'] = {
-    enable: true,
-    listen: '0.0.0.0:1053',
-    ipv6: false,
-    'use-system-hosts': true,
-    'cache-algorithm': 'arc',
-    'prefer-h3': false,
-    'respect-rules': false,
-    'default-nameserver': [
-      '223.5.5.5',
-      '119.29.29.29',
-    ],
-    'enhanced-mode': 'fake-ip',
-    'fake-ip-range': '198.18.0.1/16',
-    'fake-ip-range6': '',
-    'fake-ip-ttl': 1,
-    'fake-ip-filter-mode': 'blacklist',
-    'fake-ip-filter': [
-      '*.lan',
-      '+.lan',
-      '*.local',
-      '*.localdomain',
-      '*.home.arpa',
-      '*.localhost',
-      'WORKGROUP',
-      'time.*.com',
-      'time.*.gov',
-      'time.*.apple.com',
-      'ntp.*.com',
-      '+.pool.ntp.org',
-      '*.ntp.org.cn',
-      '+.stun.*',
-      '*.stun.*.*',
-      '*.turn.twilio.com',
-      '*.stun.twilio.com',
-      'stun.syncthing.net',
-      '*.srv.nintendo.net',
-      'xbox.*.microsoft.com',
-      'xbox.*.*.microsoft.com',
-      '*.xboxlive.com',
-      '*.cm.steampowered.com',
-      '*.steamcontent.com',
-      '*.battlenet.com.cn',
-      '*.battlenet.com',
-      '*.blzstatic.cn',
-      '*.battle.net',
-      '*.msftncsi.com',
-      '*.msftconnecttest.com',
-      'connectivitycheck.gstatic.com',
-      'connectivitycheck.android.com',
-      'connectivitycheck.platform.hicloud.com',
-      'connect.rom.miui.com',
-      'captive.apple.com',
-      'network-test.debian.org',
-      'detectportal.firefox.com',
-      'lens.l.google.com',
-      '+.push.apple.com',
-      '+.market.xiaomi.com',
-      '*.tailscale.com',
-      '*.zerotier.com',
-      '*.spotify.com',
-      '+.music.126.net',
-      '*.mcdn.bilivideo.cn',
-      'localhost.*.qq.com',
-    ],
-    nameserver: [
-      'https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true',
-    ],
-    fallback: [
-      'https://1.1.1.1/dns-query#proxy',
-    ],
-    'fallback-filter': {
-      geoip: true,
-      'geoip-code': 'CN',
-      ipcidr: [
-        '240.0.0.0/4',
-      ],
-    },
-    'proxy-server-nameserver': [
-      'https://doh.pub/dns-query',
-    ],
-    'direct-nameserver': [
-      'https://doh.pub/dns-query',
-    ],
-    'direct-nameserver-follow-policy': false,
-  };
-
-  config['tun'] = {
-    enable: true,
-    stack: 'mixed',
-    'dns-hijack': [
-      'any:53',
-    ],
-    'auto-route': true,
-    'auto-detect-interface': true,
-    'auto-redirect': true,
-    gso: true,
-    'gso-max-size': 65536,
-    'strict-route': true,
-    'endpoint-independent-nat': true,
-    'disable-icmp-forwarding': true,
-  };
-
+  config['geox-url'] = { geoip: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geoip.dat', geosite: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@release/geosite.dat', mmdb: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/Country.mmdb', asn: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/geoip@release/GeoLite2-ASN.mmdb' };
+  config['hosts'] = { '*.clash.dev': '127.0.0.1', localhost: '127.0.0.1' };
+  config['profile'] = { 'store-selected': true, 'store-fake-ip': true };
+  config['ntp'] = { enable: true, 'write-to-system': false, server: 'ntp.aliyun.com', port: 123, interval: 60 };
+  config['sniffer'] = { enable: true, 'override-destination': false, 'force-dns-mapping': true, 'parse-pure-ip': false, sniff: { HTTP: { ports: [80, '8080-8880'], 'override-destination': true }, TLS: { ports: [443, 8443] }, QUIC: { ports: [443, 8443] } }, 'skip-domain': ['+.push.apple.com', 'Mijia Cloud'] };
+  config['dns'] = { enable: true, listen: '0.0.0.0:1053', ipv6: false, 'use-system-hosts': true, 'cache-algorithm': 'arc', 'prefer-h3': false, 'respect-rules': false, 'default-nameserver': ['223.5.5.5', '119.29.29.29'], 'enhanced-mode': 'fake-ip', 'fake-ip-range': '198.18.0.1/16', 'fake-ip-range6': '', 'fake-ip-ttl': 1, 'fake-ip-filter-mode': 'blacklist', 'fake-ip-filter': ['*.lan', '+.lan', '*.local', '*.localdomain', '*.home.arpa', '*.localhost', 'WORKGROUP', 'time.*.com', 'time.*.gov', 'time.*.apple.com', 'ntp.*.com', '+.pool.ntp.org', '*.ntp.org.cn', '+.stun.*', '*.stun.*.*', '*.turn.twilio.com', '*.stun.twilio.com', 'stun.syncthing.net', '*.srv.nintendo.net', 'xbox.*.microsoft.com', 'xbox.*.*.microsoft.com', '*.xboxlive.com', '*.cm.steampowered.com', '*.steamcontent.com', '*.battlenet.com.cn', '*.battlenet.com', '*.blzstatic.cn', '*.battle.net', '*.msftncsi.com', '*.msftconnecttest.com', 'connectivitycheck.gstatic.com', 'connectivitycheck.android.com', 'connectivitycheck.platform.hicloud.com', 'connect.rom.miui.com', 'captive.apple.com', 'network-test.debian.org', 'detectportal.firefox.com', 'lens.l.google.com', '+.push.apple.com', '+.market.xiaomi.com', '*.tailscale.com', '*.zerotier.com', '*.spotify.com', '+.music.126.net', '*.mcdn.bilivideo.cn', 'localhost.*.qq.com'], nameserver: ['https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true'], fallback: ['https://1.1.1.1/dns-query#proxy'], 'fallback-filter': { geoip: true, 'geoip-code': 'CN', ipcidr: ['240.0.0.0/4'] }, 'proxy-server-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver-follow-policy': false };
+  config['tun'] = { enable: true, stack: 'mixed', 'dns-hijack': ['any:53'], 'auto-route': true, 'auto-detect-interface': true, 'auto-redirect': true, gso: true, 'gso-max-size': 65536, 'strict-route': true, 'endpoint-independent-nat': true, 'disable-icmp-forwarding': true };
   // 合并前面采集的机场私有 DNS / 节点域名 hosts（本仓库条目优先，私有条目垫后）
   if (privateProxyNs.length > 0) {
     config.dns['proxy-server-nameserver'] = [...(config.dns['proxy-server-nameserver'] || []), ...privateProxyNs];
@@ -248,252 +95,35 @@ function main(config) {
   Object.assign(config.hosts, proxyHosts);
 
   const proxyGroups = [
-    {
-      name: '🔰 Proxy',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png',
-      proxies: [
-        '🇭🇰 Hong Kong',
-        '🇨🇳 Taiwan',
-        '🇸🇬 Singapore',
-        '🇯🇵 Japan',
-        '🇺🇸 America',
-        '🇬🇧 England',
-        '🇩🇪 Germany',
-        '🇺🇳 Server',
-        '🔘 DIRECT',
-      ],
-    },
-    {
-      name: '🎬 Streaming',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png',
-      proxies: [
-        '🔰 Proxy',
-        '🇭🇰 Hong Kong',
-        '🇨🇳 Taiwan',
-        '🇸🇬 Singapore',
-        '🇯🇵 Japan',
-        '🇺🇸 America',
-        '🇬🇧 England',
-        '🇩🇪 Germany',
-        '🇺🇳 Server',
-      ],
-    },
-    {
-      name: '📺 CNTV',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png',
-      proxies: [
-        '🔘 DIRECT',
-        '🇨🇳 Taiwan',
-        '🇭🇰 Hong Kong',
-      ],
-    },
-    {
-      name: '🍎 Apple',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png',
-      proxies: [
-        '🔘 DIRECT',
-        '🔰 Proxy',
-        '🇺🇸 America',
-        '🇯🇵 Japan',
-      ],
-    },
-    {
-      name: '🔍 Google',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png',
-      proxies: [
-        '🇺🇸 America',
-        '🔰 Proxy',
-      ],
-    },
-    {
-      name: '☁️ OneDrive',
-      type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png',
-      proxies: [
-        '🔘 DIRECT',
-        '🔰 Proxy',
-      ],
-    },
-    {
-      name: 'Ⓜ️ Microsoft',
-      type: 'select',
-      icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png',
-      proxies: [
-        '🔘 DIRECT',
-        '🔰 Proxy',
-      ],
-    },
-    {
-      name: '📬 Telegram',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png',
-      proxies: [
-        '🔰 Proxy',
-        '🇸🇬 Singapore',
-        '🔘 DIRECT',
-      ],
-    },
-    {
-      name: '🤖 AIGC',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png',
-      proxies: [
-        '🇺🇸 America',
-        '🇸🇬 Singapore',
-        '🔰 Proxy',
-      ],
-    },
-    {
-      name: '🪙 Crypto',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png',
-      proxies: [
-        '🇩🇪 Germany',
-        '🇺🇸 America',
-        '🔰 Proxy',
-        '🔘 DIRECT',
-      ],
-    },
-    {
-      name: '💳 Finance',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png',
-      proxies: [
-        '🇺🇸 America',
-        '🇩🇪 Germany',
-        '🔰 Proxy',
-        '🔘 DIRECT',
-      ],
-    },
-    {
-      name: '📧 Mail',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png',
-      proxies: [
-        '🔰 Proxy',
-        '🔘 DIRECT',
-      ],
-    },
-    {
-      name: '🚧 AdGuard',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png',
-      proxies: [
-        '🔘 DIRECT',
-        '⛔️ REJECT',
-        '📛 REJECT-DROP',
-      ],
-    },
-    {
-      name: '🔘 DIRECT',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png',
-      hidden: true,
-      proxies: [
-        'DIRECT',
-      ],
-    },
-    {
-      name: '⛔️ REJECT',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
-      hidden: true,
-      proxies: [
-        'REJECT',
-      ],
-    },
-    {
-      name: '📛 REJECT-DROP',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png',
-      hidden: true,
-      proxies: [
-        'REJECT-DROP',
-      ],
-    },
-    {
-      name: '🇸🇱 Relay',
-      type: 'url-test',
-      tolerance: 50,
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
-      hidden: true,
-    },
-    {
-      name: '🇭🇰 HK Relay',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
-      hidden: true,
-    },
-    {
-      name: '🇨🇳 TW Relay',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
-      hidden: true,
-    },
-    {
-      name: '🇯🇵 JP Relay',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
-      hidden: true,
-    },
-    {
-      name: '🇺🇸 US Relay',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png',
-      hidden: true,
-    },
-    {
-      name: '🇺🇳 Server',
-      type: 'select',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png',
-    },
-    {
-      name: '🇭🇰 Hong Kong',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png',
-      hidden: true,
-    },
-    {
-      name: '🇨🇳 Taiwan',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png',
-      hidden: true,
-    },
-    {
-      name: '🇸🇬 Singapore',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png',
-      hidden: true,
-    },
-    {
-      name: '🇯🇵 Japan',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png',
-      hidden: true,
-    },
-    {
-      name: '🇺🇸 America',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png',
-      hidden: true,
-    },
-    {
-      name: '🇬🇧 England',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png',
-      hidden: true,
-    },
-    {
-      name: '🇩🇪 Germany',
-      type: 'fallback',
-      icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png',
-      hidden: true,
-    },
+    { name: '🔰 Proxy', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Outbound.png', proxies: ['🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇬🇧 England', '🇩🇪 Germany', '🇺🇳 Server', '🔘 DIRECT'] },
+    { name: '🎬 Streaming', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Streaming.png', proxies: ['🔰 Proxy', '🇭🇰 Hong Kong', '🇨🇳 Taiwan', '🇸🇬 Singapore', '🇯🇵 Japan', '🇺🇸 America', '🇬🇧 England', '🇩🇪 Germany', '🇺🇳 Server'] },
+    { name: '📺 CNTV', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/StreamingCN.png', proxies: ['🔘 DIRECT', '🇨🇳 Taiwan', '🇭🇰 Hong Kong'] },
+    { name: '🍎 Apple', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Apple.png', proxies: ['🔘 DIRECT', '🔰 Proxy', '🇺🇸 America', '🇯🇵 Japan'] },
+    { name: '🔍 Google', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png', proxies: ['🇺🇸 America', '🔰 Proxy'] },
+    { name: '☁️ OneDrive', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    { name: 'Ⓜ️ Microsoft', type: 'select', icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png', proxies: ['🔘 DIRECT', '🔰 Proxy'] },
+    { name: '📬 Telegram', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'] },
+    { name: '🤖 AIGC', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'] },
+    { name: '🪙 Crypto', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png', proxies: ['🇩🇪 Germany', '🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'] },
+    { name: '💳 Finance', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png', proxies: ['🇺🇸 America', '🇩🇪 Germany', '🔰 Proxy', '🔘 DIRECT'] },
+    { name: '📧 Mail', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png', proxies: ['🔰 Proxy', '🔘 DIRECT'] },
+    { name: '🚧 AdGuard', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'] },
+    { name: '🔘 DIRECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Direct.png', hidden: true, proxies: ['DIRECT'] },
+    { name: '⛔️ REJECT', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT'] },
+    { name: '📛 REJECT-DROP', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png', hidden: true, proxies: ['REJECT-DROP'] },
+    { name: '🇸🇱 Relay', type: 'url-test', tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    { name: '🇭🇰 HK Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    { name: '🇨🇳 TW Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    { name: '🇯🇵 JP Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    { name: '🇺🇸 US Relay', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png', hidden: true },
+    { name: '🇺🇳 Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
+    { name: '🇭🇰 Hong Kong', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png', hidden: true },
+    { name: '🇨🇳 Taiwan', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png', hidden: true },
+    { name: '🇸🇬 Singapore', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png', hidden: true },
+    { name: '🇯🇵 Japan', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png', hidden: true },
+    { name: '🇺🇸 America', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png', hidden: true },
+    { name: '🇬🇧 England', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png', hidden: true },
+    { name: '🇩🇪 Germany', type: 'fallback', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png', hidden: true },
   ];
 
   // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤
