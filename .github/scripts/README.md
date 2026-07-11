@@ -54,7 +54,7 @@
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 /
 规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
-不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，禁止手改。地区组 / `🇺🇳 Server`
+不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接改动会被下次同步覆盖。地区组 / `🇺🇳 Server`
 组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
 无开关可关，见 `_gen_clash_script_js` 注释）：订阅里的内联节点由运行时按
 `poolGroupFilters` 手动过滤 `config.proxies` 填入并保持订阅原始顺序；订阅只给
@@ -71,8 +71,8 @@
 删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
 `extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
 分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
-分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可，禁止手改
-这两个生成产物本体。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
+分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
+生成产物本体会被下次同步覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
 已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
 `myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。

@@ -2,7 +2,7 @@
 
 ## 完整配置 `config.json`
 
-对齐 sing-box **1.12+ 新格式**（typed DNS server、route rule action、`default_domain_resolver`、remote binary rule-set）的完整客户端配置。由 `sync-config.py` 从 `Surge/Profile.conf` 自动生成（静态基座见 `.github/scripts/sync-config/sing-box.ini`），策略组 / 路由与其他平台一致，请勿手改。
+对齐 sing-box **1.12+ 新格式**（typed DNS server、route rule action、`default_domain_resolver`、remote binary rule-set）的完整客户端配置。由 `sync-config.py` 从 `Surge/Profile.conf` 自动生成（静态基座见 `.github/scripts/sync-config/sing-box.ini`），策略组 / 路由与其他平台一致，直接改动会被下次同步覆盖。
 
 > ⚠️ 由脚本自动生成，仅做过 `sing-box check` 结构校验（CI `lint.yml`），**未实际跑过 sing-box 内核联网测试**，正式使用前请自行验证可用性。
 
@@ -19,7 +19,7 @@
 | `source/*.json` | 源码 | `source` | 人类可读、可 diff 审查 |
 | `rule-set/*.srs` | 二进制 | `binary` | 由 CI 用官方 `sing-box rule-set compile` 编译，体积更小、加载更快 |
 
-两者内容等价，均声明 `version: 2`（需 sing-box ≥ 1.10）。`.srs` 由 `source/` 下同名 `.json` 自动编译，请勿手改；规则内容改动提交到 `Surge/RULE-SET/`（经 `sync-rules.py` 同步）。
+两者内容等价，均声明 `version: 2`（需 sing-box ≥ 1.10）。`.srs` 由 `source/` 下同名 `.json` 自动编译，直接改动会被 CI 重新编译覆盖；规则内容改动提交到 `Surge/RULE-SET/`（经 `sync-rules.py` 同步）。
 
 ## 引用示例
 
