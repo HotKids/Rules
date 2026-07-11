@@ -3063,6 +3063,17 @@ def _gen_clash_script_js(
     if overlay:
         _apply_overlay(groups, pool_filters, rules, structural_pool_names, overlay, overlay_label)
 
+    # 基座 Script.js 面向任意机场订阅：内联 proxies 由运行时 JS 手动过滤（保序）；
+    # provider 形态的订阅则给节点池分组补 include-all-providers + filter，由 mihomo
+    # 运行时经 provider 路径收集（getProviders 不排序）。两路来源互不重叠、不会重复。
+    # My* 私人变体绑定固定内联节点订阅，保持纯手动过滤，不加此兼容。
+    if overlay is None:
+        for g in groups:
+            if g["name"] in pool_filters:
+                g["include-all-providers"] = True
+                if pool_filters[g["name"]]:
+                    g["filter"] = pool_filters[g["name"]]
+
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
     # 结构性池组同样视为核心组，均不纳入可选开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
@@ -3120,7 +3131,16 @@ def _gen_clash_script_js(
         "  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点",
         "  const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];",
         "  const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));",
-        "  if (!hasRealProxy) {",
+        *(
+            [
+                "  // provider 形态的订阅（无内联 proxies）同样支持：节点池分组带",
+                "  // include-all-providers + filter，由 mihomo 运行时从 provider 收集（不排序）",
+                "  const hasProviders = config['proxy-providers'] && Object.keys(config['proxy-providers']).length > 0;",
+                "  if (!hasRealProxy && !hasProviders) {",
+            ]
+            if overlay is None
+            else ["  if (!hasRealProxy) {"]
+        ),
         "    throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');",
         "  }",
         "",
@@ -3201,7 +3221,7 @@ def _gen_clash_script_js(
         "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
         "  // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，",
         "  // 过滤/全量结果追加在后面，而不是整体覆盖。",
-        "  const allProxyNames = config.proxies.map((p) => p.name);",
+        "  const allProxyNames = inputProxies.map((p) => p.name);",
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
@@ -3215,7 +3235,19 @@ def _gen_clash_script_js(
         "    const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;",
         "    const base = Array.isArray(g.proxies) ? g.proxies : [];",
         "    const merged = [...base, ...matched];",
-        "    g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];",
+        "    if (merged.length > 0) {",
+        "      g.proxies = merged;",
+        *(
+            [
+                "    } else if (g['include-all-providers'] && hasProviders) {",
+                "      delete g.proxies; // 无内联匹配且订阅带 provider：交给 provider 路径在运行时填充",
+            ]
+            if overlay is None
+            else []
+        ),
+        "    } else {",
+        "      g.proxies = ['COMPATIBLE'];",
+        "    }",
         "  }",
         "",
     ]

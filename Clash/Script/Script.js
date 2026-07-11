@@ -36,7 +36,10 @@ function main(config) {
   // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点
   const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];
   const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));
-  if (!hasRealProxy) {
+  // provider 形态的订阅（无内联 proxies）同样支持：节点池分组带
+  // include-all-providers + filter，由 mihomo 运行时从 provider 收集（不排序）
+  const hasProviders = config['proxy-providers'] && Object.keys(config['proxy-providers']).length > 0;
+  if (!hasRealProxy && !hasProviders) {
     throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');
   }
 
@@ -187,13 +190,13 @@ function main(config) {
     // REJECT-DROP
     { name: '📛 REJECT-DROP', type: 'select', proxies: ['REJECT-DROP'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png' },
     // Nodes
-    { name: '🇺🇳 Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
+    { name: '🇺🇳 Server', type: 'select', 'include-all-providers': true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
     // Area
-    { name: '🇭🇰 Hong Kong', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png' },
-    { name: '🇨🇳 Taiwan', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png' },
-    { name: '🇸🇬 Singapore', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png' },
-    { name: '🇯🇵 Japan', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png' },
-    { name: '🇺🇸 America', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png' },
+    { name: '🇭🇰 Hong Kong', type: 'select', 'include-all-providers': true, filter: '(?i)(?:🇭🇰|香港|Hong Kong|\\b(?:HK|HKG)\\d*\\b)', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png' },
+    { name: '🇨🇳 Taiwan', type: 'select', 'include-all-providers': true, filter: '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\\b(?:TW|TWN)\\d*\\b)', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png' },
+    { name: '🇸🇬 Singapore', type: 'select', 'include-all-providers': true, filter: '(?i)(?:🇸🇬|新加坡|Singapore|\\b(?:SG|SGP)\\d*\\b)', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png' },
+    { name: '🇯🇵 Japan', type: 'select', 'include-all-providers': true, filter: '(?i)(?:🇯🇵|日本|Japan|\\b(?:JP|JPN)\\d*\\b)', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png' },
+    { name: '🇺🇸 America', type: 'select', 'include-all-providers': true, filter: '(?i)(?:🇺🇸|美国|United States|\\b(?:US|USA)\\d*\\b)', icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png' },
   ];
 
   // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：按上方 poolGroupFilters
@@ -202,7 +205,7 @@ function main(config) {
   // 无条件执行、无开关可关闭，会打乱订阅原始顺序。
   // 已有静态 proxies（如 📧 Mail 原有的 🔰 Proxy/🔘 DIRECT）会保留在前面，
   // 过滤/全量结果追加在后面，而不是整体覆盖。
-  const allProxyNames = config.proxies.map((p) => p.name);
+  const allProxyNames = inputProxies.map((p) => p.name);
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
     const filter = poolGroupFilters[g.name];
@@ -216,7 +219,13 @@ function main(config) {
     const matched = re ? allProxyNames.filter((n) => re.test(n)) : allProxyNames;
     const base = Array.isArray(g.proxies) ? g.proxies : [];
     const merged = [...base, ...matched];
-    g.proxies = merged.length > 0 ? merged : ['COMPATIBLE'];
+    if (merged.length > 0) {
+      g.proxies = merged;
+    } else if (g['include-all-providers'] && hasProviders) {
+      delete g.proxies; // 无内联匹配且订阅带 provider：交给 provider 路径在运行时填充
+    } else {
+      g.proxies = ['COMPATIBLE'];
+    }
   }
 
   // ── 规则集 ──
