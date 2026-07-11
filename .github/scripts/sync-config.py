@@ -21,6 +21,8 @@ from urllib.parse import quote, unquote
 
 import yaml
 
+from _common import write_if_changed as _write_if_changed
+
 # ---------------------------------------------------------------------------
 # 路径配置
 # ---------------------------------------------------------------------------
@@ -186,13 +188,7 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
     return True
 
 
-def _write_if_changed(filepath: Path, content: str) -> bool:
-    """无 Date 行场景下的按需写入：内容相同则不写，避免无意义的 mtime/commit 刷新。"""
-    if filepath.exists() and filepath.read_text(encoding="utf-8") == content:
-        return False
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text(content, encoding="utf-8")
-    return True
+# 无 Date 行场景下的按需写入复用 _common.write_if_changed（见顶部 import _write_if_changed）
 
 
 _GIST_RAW_RE = re.compile(r"https://raw\.githubusercontent\.com/([^/\s]+)/([^/\s]+)/([^/\s]+)/")
@@ -328,11 +324,12 @@ def _process_builtin(lines: list[str]) -> tuple[str, dict | None, dict | None]:
     return proxy_providers, pg_inject, rules_inject
 
 
-def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str, str, str, str, dict]:
+def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str, str, str, str, str]:
     """从 Loon Builtin 内容解析头部和各段落块。
 
     返回：
-      loon_header     str        [Proxy Group] 之前的所有内容（含 [Remote Filter] 等静态段落）
+      loon_header     str        [Proxy Group] 之前的所有内容（含 [Remote Filter] 段头，
+                                 条目由 _gen_loon_filters 从 Profile.conf 自动生成注入）
       pg_inject_loon  dict|None  {anchor, block, names, prepend_block}
       rule_block      str        [Rule] 内容（不含段落标题）
       plugin_block    str        [Plugin] 内容（不含段落标题）
@@ -340,7 +337,6 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
       host_block      str        [Host] 内容（不含段落标题）
       rewrite_block   str        [Rewrite] 内容（不含段落标题）
       script_block    str        [Script] 内容（不含段落标题）
-      filter_defs     dict       {filter_name: filterkey_regex}（从 [Remote Filter] 扫描）
     """
     header_lines: list[str] = []
     pg_lines: list[str] = []
@@ -395,7 +391,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
         elif mode == "Mitm":
             mitm_lines.append(line)
         # RemoteRule: 忽略（由 Surge 生成）
-        # [Remote Filter] 留在 header_lines，同时用于解析 filter_defs
+        # [Remote Filter] 段头留在 header_lines，条目由 _gen_loon_filters 生成注入
 
     loon_header = "\n".join(l.rstrip() for l in header_lines).strip()
 
@@ -449,31 +445,7 @@ def _process_builtin_loon(lines: list[str]) -> tuple[str, dict | None, str, str,
     rewrite_block = "\n".join(l.rstrip() for l in rewrite_lines).strip()
     script_block = "\n".join(l.rstrip() for l in script_lines).strip()
 
-    # 从 header_lines 扫描 [Remote Filter] 段落 → {filter_name: filterkey_regex}（catch-all 排末尾）
-    filter_defs: dict[str, str] = {}
-    catchalls: dict[str, str] = {}
-    in_rf = False
-    for l in header_lines:
-        s = l.strip()
-        if s == "[Remote Filter]":
-            in_rf = True
-            continue
-        if s.startswith("[") and s.endswith("]"):
-            in_rf = False
-            continue
-        if not in_rf or not s or s.startswith("#"):
-            continue
-        m = re.match(r'^(\S+)\s*=\s*NameRegex,\s*FilterKey\s*=\s*"(.+)"', s)
-        if m:
-            fname, pattern = m.group(1), m.group(2)
-            # catch-all：positive lookahead 仅为 (?=.+)，无 (?i) 关键词
-            if re.match(r'^\^\(\?=\.\+\)', pattern):
-                catchalls[fname] = pattern
-            else:
-                filter_defs[fname] = pattern
-    filter_defs.update(catchalls)  # catch-all 排到最后
-
-    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block, filter_defs
+    return loon_header, pg_inject_loon, rule_block, plugin_block, mitm_block, host_block, rewrite_block, script_block
 
 
 def _process_builtin_qx(lines: list[str]) -> tuple[str, dict | None, dict]:
@@ -647,7 +619,6 @@ def _empty_plat() -> dict:
         "pg_inject": None,
         "rules_inject": None,
         "filter_map": {},
-        "filter_defs": {},
         "pg_inject_loon": None,
         "loon_blocks": {},
         "qx_header": "",
@@ -723,10 +694,9 @@ def parse_sync_txt() -> dict:
         if current_section == "Builtin" and current_platform and current_platform != "Surge":
             plat = result.setdefault(current_platform, _empty_plat())
             if current_platform == "Loon":
-                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk, host_blk, rewrite_blk, script_blk, fdefs = _process_builtin_loon(builtin_buf)
+                hdr, pg_inj, rule_blk, plugin_blk, mitm_blk, host_blk, rewrite_blk, script_blk = _process_builtin_loon(builtin_buf)
                 plat["loon_header"] = hdr
                 plat["pg_inject_loon"] = pg_inj
-                plat["filter_defs"] = fdefs
                 plat["loon_blocks"] = {
                     "Rule": rule_blk, "Plugin": plugin_blk, "Mitm": mitm_blk,
                     "Host": host_blk, "Rewrite": rewrite_blk, "Script": script_blk,
@@ -2929,10 +2899,11 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         "",
         "# 本地节点（订阅覆盖此处）",
         f"proxies: {_yaml_flow(cfg.get('proxies', []))}",
-        "# 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）",
-        f"proxy-providers: {_yaml_flow(cfg['proxy-providers'])}" if cfg.get("proxy-providers") else "",
-        "",
     ]
+    if cfg.get("proxy-providers"):
+        L.append("# 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）")
+        L.append(f"proxy-providers: {_yaml_flow(cfg['proxy-providers'])}")
+    L.append("")
 
     # 策略组
     L.append("# ── 策略组 ──")
@@ -2942,16 +2913,17 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         for c in gcmt.get(g["name"], []):
             L.append(f"  {c}")
         kind = grp_anchor.get(g["name"])
+        icon_part = f", icon: {_yaml_flow(g['icon'])}" if g.get("icon") else ""
         if kind and kind[0] == "server":
-            L.append(f"  - {{name: {g['name']}, <<: *Region, icon: {_yaml_flow(g['icon'])}}}")
+            L.append(f"  - {{name: {g['name']}, <<: *Region{icon_part}}}")
         elif kind and kind[0] == "region":
-            L.append(f"  - {{name: {g['name']}, <<: *Region, filter: *{kind[1]}, icon: {_yaml_flow(g['icon'])}}}")
+            L.append(f"  - {{name: {g['name']}, <<: *Region, filter: *{kind[1]}{icon_part}}}")
         else:
-            parts = [f"name: {g['name']}", f"type: {g['type']}", f"proxies: {_yaml_flow(g['proxies'])}"]
+            parts = [f"name: {g['name']}", f"type: {g['type']}",
+                     f"proxies: {_yaml_flow(g.get('proxies', []))}"]
             if g.get("hidden"):
                 parts.append("hidden: true")
-            parts.append(f"icon: {_yaml_flow(g['icon'])}")
-            L.append("  - {" + ", ".join(parts) + "}")
+            L.append("  - {" + ", ".join(parts) + icon_part + "}")
     L.append("")
 
     # 规则集
