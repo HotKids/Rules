@@ -20,62 +20,12 @@
   },
 
   "extra_pool_groups": [
-    {
-      "name": "🇬🇧 England",
-      "insert_after": "🇺🇸 America",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:UK|GBR)\\d*\\b)"
-    },
-    {
-      "name": "🇩🇪 Germany",
-      "insert_after": "🇬🇧 England",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:DE|DEU)\\d*\\b)"
-    },
-    {
-      "name": "🇸🇱 Relay",
-      "insert_after": "📛 REJECT-DROP",
-      "type": "url-test",
-      "tolerance": 50,
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*(?:GoMaMi|Neburst|Pro))"
-    },
-    {
-      "name": "🇭🇰 HK Relay",
-      "insert_after": "🇸🇱 Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))"
-    },
-    {
-      "name": "🇨🇳 TW Relay",
-      "insert_after": "🇭🇰 HK Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)"
-    },
-    {
-      "name": "🇯🇵 JP Relay",
-      "insert_after": "🇨🇳 TW Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)"
-    },
-    {
-      "name": "🇺🇸 US Relay",
-      "insert_after": "🇯🇵 JP Relay",
-      "type": "fallback",
-      "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png",
-      "hidden": true,
-      "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))"
-    }
+    { "name": "🇬🇧 England", "insert_after": "🇺🇸 America", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:UK|GBR)\\d*\\b)" },
+    { "name": "🇩🇪 Germany", "insert_after": "🇬🇧 England", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:DE|DEU)\\d*\\b)" },
+    { "name": "🇸🇱 Relay", "insert_after": "📛 REJECT-DROP", "type": "url-test", "tolerance": 50, "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png", "hidden": true, "filter": "(?i)^(?=.*(?:GoMaMi|Neburst|Pro))" },
+    { "name": "🇭🇰 HK Relay", "insert_after": "🇸🇱 Relay", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))" },
+    { "name": "🇨🇳 TW Relay", "insert_after": "🇭🇰 HK Relay", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)" },
+    { "name": "🇯🇵 JP Relay", "insert_after": "🇨🇳 TW Relay", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)" },
+    { "name": "🇺🇸 US Relay", "insert_after": "🇯🇵 JP Relay", "type": "fallback", "icon": "https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png", "hidden": true, "filter": "(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))" }
   ]
 }
