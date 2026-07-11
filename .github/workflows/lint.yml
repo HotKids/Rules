@@ -5,11 +5,19 @@ on:
     branches: [master]
     paths:
       - '.github/scripts/*.py'
+      - '.github/scripts/sync-config/**'
       - 'Surge/RULE-SET/**'
+      - 'Clash/Sample.yaml'
+      - 'Clash/Mihomo.yaml'
+      - 'Clash/Script/**'
       - 'sing-box/config.json'
   pull_request:
     paths:
       - '.github/scripts/*.py'
+      - '.github/scripts/sync-config/**'
+      - 'Clash/Sample.yaml'
+      - 'Clash/Mihomo.yaml'
+      - 'Clash/Script/**'
       - 'sing-box/config.json'
 
 jobs:
@@ -40,6 +48,53 @@ jobs:
               print('FAIL:', *errors, sep='\n')
               sys.exit(1)
           print(f'All {len(files)} Clash YAML files OK')
+          "
+
+      # 完整 Clash 配置（含 Mihomo.yaml 的锚点 / <<: 合并键）能被 PyYAML 解析即通过；
+      # Mihomo.yaml 额外与 Sample.yaml 做键序无关的深度等价校验（地区组 use↔include-all-providers 归一）
+      - name: Validate Clash Sample.yaml / Mihomo.yaml
+        run: |
+          pip install pyyaml -q
+          python3 -c "
+          import yaml, sys
+          s = yaml.safe_load(open('Clash/Sample.yaml'))
+          m = yaml.safe_load(open('Clash/Mihomo.yaml'))
+          m.pop('anchors', None)
+          for g in s['proxy-groups']:
+              if g.get('use') == ['Server']:
+                  del g['use']; g['include-all-providers'] = True
+          def canon(v):
+              if isinstance(v, dict): return {k: canon(v[k]) for k in sorted(v)}
+              if isinstance(v, list): return [canon(x) for x in v]
+              return v
+          if canon(s) != canon(m):
+              diff = [k for k in set(s) | set(m) if canon(s.get(k)) != canon(m.get(k))]
+              print('FAIL: Mihomo.yaml 与 Sample.yaml 不等价，差异键：', diff)
+              sys.exit(1)
+          print('Mihomo.yaml ≡ Sample.yaml OK')
+          "
+
+      # 生成的 mihomo 覆写脚本：语法检查 + 空跑 main()（含普通订阅与私有 DNS 订阅两种输入）
+      - name: Validate generated enhance scripts (node)
+        run: |
+          set -euo pipefail
+          for f in Clash/Script/*.js; do node --check "$f"; done
+          node -e '
+          const fs = require("fs");
+          for (const f of fs.readdirSync("Clash/Script").filter((x) => x.endsWith(".js"))) {
+            const main = new Function(fs.readFileSync("Clash/Script/" + f, "utf8") + "\nreturn main;")();
+            main({ proxies: [{ name: "HK01", type: "ss", server: "1.2.3.4" }] });
+            main({ proxies: [{ name: "US 02", type: "vmess", server: "n.example" }], dns: { "proxy-server-nameserver": ["https://p.example/dq"] }, hosts: { "n.example": "1.2.3.4" } });
+            console.log(f + ": OK");
+          }'
+
+      - name: Validate overlay JSON
+        run: |
+          python3 -c "
+          import json, pathlib
+          for f in sorted(pathlib.Path('.github/scripts/sync-config/Enhanced').glob('*.overlay.json')):
+              json.load(open(f))
+              print(f'{f}: OK')
           "
 
       - name: Validate generated sing-box JSON parseable
