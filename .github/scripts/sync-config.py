@@ -2596,12 +2596,15 @@ def _js_key(k: str) -> str:
     return k if _JS_IDENT_RE.match(k) else _js_string(k)
 
 
-def _to_js(value, indent: int = 2) -> str:
+def _to_js(value, indent: int = 2, quote_keys: bool = False) -> str:
+    """quote_keys=True 时对象键一律加引号（用于 provider/分组名这类数据映射，
+    避免'带空格的才有引号'的混排）；字段键（name/type/...）保持裸键。"""
     pad, pad_in = " " * indent, " " * (indent + 2)
+    key_fn = _js_string if quote_keys else _js_key
     if isinstance(value, dict):
         if not value:
             return "{}"
-        items = [f"{pad_in}{_js_key(str(k))}: {_to_js(v, indent + 2)}," for k, v in value.items()]
+        items = [f"{pad_in}{key_fn(str(k))}: {_to_js(v, indent + 2, quote_keys)}," for k, v in value.items()]
         return "{\n" + "\n".join(items) + f"\n{pad}}}"
     if isinstance(value, list):
         if not value:
@@ -3111,7 +3114,7 @@ def _gen_clash_script_js(
         "// 分流分组开关：true 启用 / false 关闭对应分组（连同其专属 rules /",
         "// rule-providers 一并裁剪，无需改动 Profile.conf）。默认值见下方——",
         "// 大多默认启用，个别按需默认关闭的直接标成 false，本地可随时改回 true。",
-        f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0)};",
+        f"const ruleOptionsEnable = {_to_js({name: name not in disabled_by_default for name in optional_group_names}, 0, quote_keys=True)};",
         "",
         "function main(config) {",
         "  // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点",
@@ -3191,7 +3194,7 @@ def _gen_clash_script_js(
         # poolGroupFilters 键序按组在 proxyGroups 里的出现顺序排列（与面板一致，
         # 避免 overlay 阶段追加的键——如 📧 Mail——被排到地区中间）；仅影响可读性，
         # 运行时按组名查表、与键序无关。
-        f"  const poolGroupFilters = {_to_js(_sort_by_group_order(pool_filters, groups))};",
+        f"  const poolGroupFilters = {_to_js(_sort_by_group_order(pool_filters, groups), quote_keys=True)};",
         "  for (const g of proxyGroups) {",
         "    if (!(g.name in poolGroupFilters)) continue;",
         "    const filter = poolGroupFilters[g.name];",
@@ -3227,7 +3230,7 @@ def _gen_clash_script_js(
             rest = ", ".join(
                 f"{_js_key(str(k))}: {_to_js_inline(v)}" for k, v in rp.items() if k not in rp_common
             )
-            lines.append(f"    {_js_key(str(rp_name))}: {{ ...remoteRuleProvider, {rest} }},")
+            lines.append(f"    {_js_string(str(rp_name))}: {{ ...remoteRuleProvider, {rest} }},")
         lines.append("  };")
     else:
         lines.append(f"  const ruleProviders = {_to_js(rule_providers)};")
