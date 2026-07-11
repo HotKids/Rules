@@ -2564,22 +2564,33 @@ def _to_js(value, indent: int = 2) -> str:
 
 
 def _convert_group_for_script(g: dict, pool_filters: dict[str, str | None]) -> dict:
-    """Sample.yaml 的 `use: [Server]`（引用唯一 proxy-provider，可选 filter）
-    → Script.js 场景下没有 provider，改由运行时 JS 手动过滤 config.proxies 填充
-    `proxies`（见 _gen_clash_script_js 里生成的 poolGroupFilters 循环）。
+    """节点池组（Server / 地区）→ Script.js 场景下没有 provider，改由运行时 JS 手动
+    过滤 config.proxies 填充 `proxies`（见 _gen_clash_script_js 里 poolGroupFilters 循环）。
 
-    不用 mihomo 原生 `include-all`：它对候选节点列表做隐式字母序排序
-    （mihomo config/config.go 里 `slices.Sort(AllProxies)`，无条件执行、无开关
-    可关闭），会打乱订阅的原始顺序；而 `use:`+`filter` 这条路径（真正的
-    Sample.yaml/Clash 用的）走 outboundgroup/groupbase.go，不排序。这里手动
+    池组在 Sample.yaml 里写作 `use: [Server]`（+可选 filter），在 Mihomo.yaml 里写作
+    `<<: *Region`（解析后 = `include-all-providers: true`）；两种来源都识别。
+
+    不用 mihomo 原生 `include-all`：它对候选节点列表做隐式字母序排序（mihomo
+    config/config.go 里 `slices.Sort(AllProxies)`，无条件执行、无开关可关闭），会打乱
+    订阅原始顺序；而 `use:`+`filter` 走 outboundgroup/groupbase.go，不排序。这里手动
     实现同等语义（Array.filter 保序），行为对齐真正的 Clash 输出。
 
-    pool_filters 用于记录 name → filter（无 filter 记 None），供上层生成填充代码。
+    pool_filters 记录 name → filter（无 filter 记 None），供上层生成填充代码。
+    键序统一规范化为 name, type, icon, hidden, proxies，使输出与来源（Sample.yaml /
+    Mihomo.yaml，二者键序不同）无关，切换来源不产生无谓 diff。
     """
-    if g.get("use") != ["Server"]:
-        return dict(g)
-    pool_filters[g["name"]] = g.get("filter")
-    return {k: v for k, v in g.items() if k not in ("use", "filter")}
+    is_pool = g.get("use") == ["Server"] or g.get("include-all-providers") is True
+    if is_pool:
+        pool_filters[g["name"]] = g.get("filter")
+    drop = {"use", "include-all-providers", "filter"} if is_pool else set()
+    ordered: dict = {}
+    for k in ("name", "type", "icon", "hidden", "proxies"):
+        if k in g and k not in drop:
+            ordered[k] = g[k]
+    for k, v in g.items():   # 保留任何额外键（稳定排在已知键之后）
+        if k not in ordered and k not in drop:
+            ordered[k] = v
+    return ordered
 
 
 def _rule_policy_index(parts: list[str]) -> int:
@@ -2954,14 +2965,15 @@ def _gen_clash_script_js(
     overlay_label: str = "",
     base_state: tuple[list[dict], dict[str, str | None], list[str], set[str]] | None = None,
 ) -> tuple[str, tuple[list[dict], dict[str, str | None], list[str], set[str]]]:
-    """由最终生成的 Clash/Sample.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
+    """由最终生成的 Clash/Mihomo.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
     用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
     sub.hotkids.me）生成与本仓库 Surge/Profile.conf 等效的策略组 / 规则 / 基础设置，
     不依赖本仓库自身的 proxy-providers 静态生成流程。
 
-    本函数只读 Sample.yaml 的解析结果，不重新实现转换逻辑，因此天然随
-    Surge/Profile.conf 的改动同步更新，无需手动维护。
+    本函数只读 Mihomo.yaml 的解析结果（其 <<: 合并键由 YAML 解析器展开，与
+    Sample.yaml 功能等价），不重新实现转换逻辑，因此天然随 Surge/Profile.conf 的
+    改动同步更新，无需手动维护。
 
     可选分流分组（非隐藏、非节点池/地区组、非兜底策略组）会额外生成一份
     `ruleOptionsEnable`（默认 true，但 overlay 的 disabled_by_default 声明的分组
@@ -2977,7 +2989,14 @@ def _gen_clash_script_js(
     返回值第二项就是这次 resolve 出的状态，供下一环 extends 复用。
     """
     data = yaml.safe_load(sample_yaml_text) or {}
-    rule_providers = data.get("rule-providers") or {}
+    # 规范化 rule-provider 键序（Mihomo.yaml 经 <<: *Remote 合并后键序与 Sample.yaml
+    # 不同），使 Script.js 输出与来源无关。
+    _rp_order = ("type", "behavior", "path", "url", "interval", "format", "proxy")
+    rule_providers = {
+        name: {**{k: rp[k] for k in _rp_order if k in rp},
+               **{k: v for k, v in rp.items() if k not in _rp_order}}
+        for name, rp in (data.get("rule-providers") or {}).items()
+    }
 
     if base_state is not None:
         base_groups, base_pool_filters, base_rules, base_structural = base_state
@@ -3020,7 +3039,7 @@ def _gen_clash_script_js(
     if overlay:
         source_lines = [
             " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
-            f" * Clash/Sample.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
+            f" * Clash/Mihomo.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
             " * 而来，直接改本文件会在下次同步时被覆盖。公共部分请改 Surge/Profile.conf；",
             " * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）",
             f" * 请改 {overlay_label}。",
@@ -3028,7 +3047,7 @@ def _gen_clash_script_js(
     else:
         source_lines = [
             " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
-            " * Clash/Sample.yaml）转译而来，直接改本文件会在下次同步时被覆盖；",
+            " * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；",
             " * 要改内容请改 Surge/Profile.conf。",
         ]
 
@@ -3068,7 +3087,7 @@ def _gen_clash_script_js(
     lines.append(f"  const proxyGroups = {_to_js(groups)};")
     lines.append("")
     lines += [
-        "  // 节点池分组（对应 Sample.yaml 的 use:[Server]+filter）：手动按正则过滤",
+        "  // 节点池分组（对应 Mihomo.yaml 的 <<: *Region + filter）：手动按正则过滤",
         "  // config.proxies 并保持原始顺序，不用 mihomo 的 include-all —— 它对候选",
         "  // 节点做隐式字母序排序（mihomo config/config.go: slices.Sort(AllProxies)），",
         "  // 无条件执行、无开关可关闭，会打乱订阅原始顺序。",
@@ -3182,14 +3201,16 @@ def _sync_clash(
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 
-    # 锚点/flow 版：从刚生成的 Sample.yaml 转译出 Mihomo.yaml（同层级，功能等价）
+    # 锚点/flow 版：从刚生成的 Sample.yaml 转译出 Mihomo.yaml（同层级，功能等价）；
+    # 下方 Script.js 系列再由 Mihomo.yaml 转译（Mihomo.yaml 作为 Clash 侧的规范中间产物）
     mihomo_out = str(Path(clash_out).with_name("Mihomo.yaml"))
-    mihomo_changed = _write_stamped_if_changed(REPO_ROOT / mihomo_out, _gen_mihomo_yaml(body))
+    mihomo_body = _gen_mihomo_yaml(body)
+    mihomo_changed = _write_stamped_if_changed(REPO_ROOT / mihomo_out, mihomo_body)
     print(f"  {'✓ ' + mihomo_out + ' 已更新' if mihomo_changed else '✓ ' + mihomo_out + ' 无变化'}")
 
     script_dir = Path(clash_out).parent / "Script"
     script_path = script_dir / "Script.js"
-    script_body, _ = _gen_clash_script_js(body)
+    script_body, _ = _gen_clash_script_js(mihomo_body)
     script_changed = _write_if_changed(REPO_ROOT / script_path, script_body)
     print(f"  {'✓ ' + str(script_path) + ' 已更新' if script_changed else '✓ ' + str(script_path) + ' 无变化'}")
 
@@ -3243,7 +3264,7 @@ def _sync_clash(
             _resolve_overlay(extends, chain + [label])
             base_state = resolved_states[extends]
         out_body, state = _gen_clash_script_js(
-            body, overlay=overlay, overlay_label=label, base_state=base_state
+            mihomo_body, overlay=overlay, overlay_label=label, base_state=base_state
         )
         resolved_states[label] = state
         out_rel = overlay["output"]
