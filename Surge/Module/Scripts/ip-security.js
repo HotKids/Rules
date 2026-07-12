@@ -15,7 +15,7 @@
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https)
+ * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https) / dbip DB-IP(en, https)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -26,7 +26,7 @@
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)
+ * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)，dbip=DB-IP(英文, https, 免 key 约 1000 次/天)
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -66,6 +66,7 @@ const CONFIG = {
   urls: {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
     baiduGeo: (ip) => `https://opendata.baidu.com/api.php?query=${ip}&co=&resource_id=6006&oe=utf8`,
+    dbipGeo: (ip) => `https://api.db-ip.com/v2/free/${ip}`,
     // Cloudflare 官方端点，证书含 IP SAN，可直连（不经 DNS）；失败回落 ip.sb
     outboundTrace: "https://1.1.1.1/cdn-cgi/trace",
     outboundTrace6: "https://[2606:4700:4700::1111]/cdn-cgi/trace",
@@ -289,6 +290,22 @@ function normalizeOpendata(data) {
   };
 }
 
+/**
+ * 将 DB-IP 免费接口返回归一化为内部格式
+ * db-ip v2/free: { ipAddress, countryCode, countryName, stateProv, city }
+ * 免费档不含运营商，org 由 ipinfo 补齐
+ */
+function normalizeDbip(data) {
+  if (!data || !data.countryCode || data.errorCode) return null;
+  return {
+    country_code: data.countryCode,
+    country_name: data.countryName,
+    city: data.city || "",
+    region: data.stateProv || "",
+    org: ""
+  };
+}
+
 function normalizeBilibili(data) {
   const d = data?.data;
   if (!d || !d.country) return null;
@@ -314,7 +331,7 @@ function parseScamalyticsScore(html) {
  * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
 async function getPolicyAndEntrance() {
-  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com)/i;
+  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com|api\.db-ip\.com)/i;
 
   async function findInRecent(limit) {
     const res = await surgeAPI("GET", "/v1/requests/recent");
@@ -763,18 +780,21 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const localZh = useBilibili; // 本地地理为中文源 → 显示中文国名
 
   // 入口/出口地理数据源：remote_geoapi=ipinfo → ipinfo.io, ipapi → ip-api.com(en),
-  // ipapi-zh → ip-api.com(zh-CN, http 明文), baidu → 百度 opendata(zh, https)
+  // ipapi-zh → ip-api.com(zh-CN, http 明文), baidu → 百度 opendata(zh, https), dbip → DB-IP(en, https)
   const useIpApi = args.remoteGeoApi.startsWith("ipapi");
   const useBaidu = args.remoteGeoApi === "baidu";
+  const useDbip = args.remoteGeoApi === "dbip";
   const ipApiLang = args.remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
   // 非 ipinfo 数据源时需单独请求 ipinfo：运营商始终用 ipinfo + rDNS 取自 hostname
-  const needExtraOrg = useIpApi || useBaidu;
+  const needExtraOrg = useIpApi || useBaidu || useDbip;
   function geoUrl(ip) {
     if (useBaidu) return CONFIG.urls.baiduGeo(ip);
+    if (useDbip) return CONFIG.urls.dbipGeo(ip);
     return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
   }
   function normalizeGeo(data) {
     if (useBaidu) return normalizeOpendata(data);
+    if (useDbip) return normalizeDbip(data);
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
