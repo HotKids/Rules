@@ -1,7 +1,7 @@
 # Clash & mihomo
 
 本目录下除 `General.yaml` 外均为自动生成产物，**直接编辑会在下次同步时被覆盖**。
-Clash 客户端**建议使用 [Bettbox](https://github.com/appshubcc/Bettbox)**。
+mihomo 客户端**建议使用 [Bettbox](https://github.com/appshubcc/Bettbox)**。
 
 | 文件 / 目录 | 说明 |
 |---|---|
