@@ -14,6 +14,7 @@
 //   · 名称或正则;名称或正则 → 只显示匹配的节点，顺序跟随条目（条目内按权重）
 //   · "!" 开头 → 整体视作单个正则，匹配的不显示
 // - 显示项开关（各自独立参数）：
+//   · overview 顶部概览：在线数/点亮地区/全站流量总和，统计全部节点不受 nodes 筛选影响（默认 true）
 //   · traffic 总流量↑↓（默认 true）/ expire 到期（默认 true）
 //   · usage 用量对比配额，三态（默认 true）：true=累计口径 / false=隐藏 /
 //     cycle=本计费周期精确用量（跨重启；周期起点取 expired_at 的每月对应日，
@@ -50,6 +51,7 @@ const showFlag = (v, def) => {
 // usage 三态：true=累计口径 / false=隐藏 / cycle=周期口径
 const wantCycle = clean(args.usage).toLowerCase() === "cycle";
 const show = {
+  overview: showFlag(args.overview, true),
   traffic: showFlag(args.traffic, true),
   usage: wantCycle || showFlag(args.usage, true),
   expire: showFlag(args.expire, true),
@@ -244,6 +246,23 @@ if (!base) {
       } catch (e) {}
     }
 
+    // 顶部概览：与 Komari 首页口径一致，统计全部节点（不受 nodes 筛选影响）
+    let overview = "";
+    if (show.overview && statusMap) {
+      let online = 0, up = 0, down = 0;
+      const regions = new Set();
+      nodes.forEach(n => {
+        if (n.region && String(n.region).trim()) regions.add(String(n.region).trim());
+        const r = statusMap[n.uuid];
+        if (r) {
+          if (r.online) online++;
+          up += r.net_total_up || 0;
+          down += r.net_total_down || 0;
+        }
+      });
+      overview = `在线 ${online}/${nodes.length}｜点亮地区 ${regions.size}\n总量 ↑ ${formatGB(up)} ↓ ${formatGB(down)}`;
+    }
+
     // 与 Komari 面板一致：weight 升序（数值小的靠前），同权重按名称
     const byWeight = (a, b) => (a.weight || 0) - (b.weight || 0) || String(a.name).localeCompare(String(b.name));
 
@@ -361,7 +380,8 @@ if (!base) {
       return lines.join("\n");
     });
 
-    done({ title, content: blocks.join("\n\n"), icon: "server.rack", "icon-color": "#32CD32" });
+    const content = (overview ? overview + "\n\n" : "") + blocks.join("\n\n");
+    done({ title, content, icon: "server.rack", "icon-color": "#32CD32" });
     }); // cycle 预取 then 结束
   }).catch(err => {
     done({
