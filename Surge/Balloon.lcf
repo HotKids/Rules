@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-12 16:19:04
+# Date: 2026-07-12 16:19:57
 # Author: @HotKids
 
 [General]
@@ -122,7 +122,7 @@ https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, p
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list, policy=🚧 AdGuard, tag=Adblock, enabled=true
 # Phishing 钓鱼网站
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Phishing.list, policy=🚧 AdGuard, tag=Phishing, enabled=true
-# Bogus NXDOMAIN 劫持/僵尸网络 C2
+# Bogus IP NXDOMAIN 劫持/僵尸网络 C2
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bogus.list, policy=REJECT-DROP, tag=Bogus, enabled=true
 # Global Area Network
 # > Streaming by Region

@@ -283,7 +283,7 @@ function main(config) {
     'RULE-SET,AdBlock,🚧 AdGuard',
     // Phishing 钓鱼网站
     'RULE-SET,Phishing,🚧 AdGuard',
-    // Bogus NXDOMAIN 劫持/僵尸网络 C2
+    // Bogus IP NXDOMAIN 劫持/僵尸网络 C2
     'RULE-SET,Bogus,📛 REJECT-DROP,no-resolve',
     // Global Area Network
     // > Streaming by Region
