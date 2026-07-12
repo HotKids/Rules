@@ -58,7 +58,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 保序路径，功能一致）。
 
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
-脚本（Enhance Script），供 Clash Verge 等客户端直接对任意订阅动态生成同一套策略组 /
+脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
 规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
 不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接改动会被下次同步覆盖。地区组 / `🇺🇳 Server`
 组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
