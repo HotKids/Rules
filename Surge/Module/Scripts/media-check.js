@@ -56,6 +56,9 @@ const CONFIG = {
 // 检测状态码定义
 const STATUS = { OK: 1, COMING: 2, FAIL: 0, TIMEOUT: -1, ERROR: -2 };
 
+// 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
+let ARGS = {};
+
 // 显示图标和颜色配置
 const ICONS = { SUCCESS: "🟢", WARNING: "🟡", COLORS: { SUCCESS: "#3CB371", WARNING: "#DAA520" } };
 
@@ -222,14 +225,45 @@ class ServiceChecker {
   }
 
   /**
-   * Netflix 价格查询（辅助方法）
+   * Netflix 价格表预取（与各服务检测并行发起，避免检测完成后再串行等一个 RTT）
+   * 价格表更新频率低，本地缓存 24 小时；请求失败时回退过期缓存
+   * @returns {Promise<Object|null>} 价格表 HTTP 响应（或缓存等价物）
+   */
+  static fetchNetflixPrices() {
+    const CACHE_KEY = "media_check_nf_prices";
+    const TTL = 86400000; // 24h
+
+    let cached = null;
+    try {
+      cached = JSON.parse($persistentStore.read(CACHE_KEY));
+    } catch { /* 无缓存或缓存损坏 */ }
+
+    if (cached?.body && Date.now() - cached.ts < TTL) {
+      return Promise.resolve({ status: 200, body: cached.body });
+    }
+
+    return Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json" })
+      .then(res => {
+        if (res?.status === 200 && res.body) {
+          $persistentStore.write(JSON.stringify({ ts: Date.now(), body: res.body }), CACHE_KEY);
+          return res;
+        }
+        // 非 200 → 回退过期缓存
+        return cached?.body ? { status: 200, body: cached.body } : res;
+      })
+      .catch(() => (cached?.body ? { status: 200, body: cached.body } : null));
+  }
+
+  /**
+   * Netflix 价格查询（从预取的价格表中查找）
+   * @param {Promise<Object|null>} pricesPromise - fetchNetflixPrices() 返回的 Promise
    * @param {string} region - 地区代码
    * @returns {Promise<string>} 价格字符串
    */
-  static async getNetflixPrice(region) {
+  static async getNetflixPrice(pricesPromise, region) {
     try {
-      const res = await Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json" });
-      if (res.status !== 200) return "";
+      const res = await pricesPromise;
+      if (!res || res.status !== 200) return "";
       const country = JSON.parse(res.body).find(i => i.country_code === region);
       const plan = country?.plans?.find(p => p.name === "premium");
       return plan ? `${plan.price} ${country.currency}` : "";
@@ -359,21 +393,21 @@ class ServiceChecker {
    */
   static async checkYoutube() {
     try {
-      // 第一次请求：带 Cookie
-      const tmpresult1 = await Utils.request({
-        url: "https://www.youtube.com/premium",
-        headers: {
-          "Cookie": "YSC=BiCUU3-5Gdk; CONSENT=YES+cb.20220301-11-p0.en+FX+700; GPS=1; VISITOR_INFO1_LIVE=4VwPMkB7W5A; PREF=tz=Asia.Shanghai; _gcl_au=1.1.1809531354.1646633279",
-          "Accept-Language": "en"
-        }
-      });
+      // 带 Cookie / 不带 Cookie 两次请求互相独立，并行发起
+      const [tmpresult1, tmpresult2] = await Promise.all([
+        Utils.request({
+          url: "https://www.youtube.com/premium",
+          headers: {
+            "Cookie": "YSC=BiCUU3-5Gdk; CONSENT=YES+cb.20220301-11-p0.en+FX+700; GPS=1; VISITOR_INFO1_LIVE=4VwPMkB7W5A; PREF=tz=Asia.Shanghai; _gcl_au=1.1.1809531354.1646633279",
+            "Accept-Language": "en"
+          }
+        }),
+        Utils.request({
+          url: "https://www.youtube.com/premium",
+          headers: { "Accept-Language": "en" }
+        })
+      ]);
 
-      // 第二次请求：不带 Cookie
-      const tmpresult2 = await Utils.request({
-        url: "https://www.youtube.com/premium",
-        headers: { "Accept-Language": "en" }
-      });
-      
       // 合并两次结果
       const combinedBody = tmpresult1.body + ":" + tmpresult2.body;
       
@@ -495,8 +529,7 @@ class ServiceChecker {
     } catch {}
 
     // API 检测 fallback（需要 Key）
-    const args = Utils.parseArgs($argument);
-    const apiKey = (args.geminiapikey || "").trim();
+    const apiKey = (ARGS.geminiapikey || "").trim();
     if (apiKey && !["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) {
       try {
         const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
@@ -556,7 +589,9 @@ class ServiceChecker {
  */
 (async () => {
   try {
-    const args = Utils.parseArgs($argument);
+    const args = ARGS = Utils.parseArgs($argument);
+    // Netflix 价格表与各服务检测并行预取（仅在开启价格显示时）
+    const pricesPromise = args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
     const results = await Promise.all([
       ServiceChecker.checkNetflix(),
       ServiceChecker.checkDisney(),
@@ -572,8 +607,8 @@ class ServiceChecker {
     ]);
 
     const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, viu] = results;
-    const netflixPrice = (netflix.status === STATUS.OK && args.nfprice !== "false")
-      ? await ServiceChecker.getNetflixPrice(netflix.region)
+    const netflixPrice = (netflix.status === STATUS.OK && pricesPromise)
+      ? await ServiceChecker.getNetflixPrice(pricesPromise, netflix.region)
       : "";
 
     const services = [

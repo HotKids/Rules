@@ -1,24 +1,32 @@
 /******************************************************
  * Surge Panel - 机场流量监控
- * 
+ *
  * 作者: HotKids&Claude
  * 参考: @mieqq 的优秀实现
- * 
+ *
  * 功能特性:
  * - 支持单机场/多机场并发查询
- * - 使用 emoji 数字(1️⃣2️⃣3️⃣)分隔多机场配置
+ * - 与 vps-traffic 同款配置语法（; 分隔多机场，名称:值 逐机覆盖）
  * - 自动从订阅获取流量和到期信息
  * - 支持手动配置到期日期和重置日
- * 
+ *
  * 配置参数:
- * - name: 机场名称
- * - sub: 订阅链接(必须 URL encode)
- * - expire: 到期日期(YYYYMMDD/YYYY-MM-DD/Unix时间戳)
- * - reset: 每月重置日(1-31)
+ * - sub: 订阅列表，格式：名称#订阅URL;名称#订阅URL（URL 需单独 URL encode；名称省略时自动编号）
+ * - expire: 到期日期(YYYYMMDD/YYYY-MM-DD/Unix时间戳)，默认值;名称:值 逐机覆盖
+ * - reset: 每月重置日(1-31)，默认值;名称:值 逐机覆盖
  * - title: 面板标题(默认:机场流量信息)
  * - icon: 图标(默认:airplane.departure)
  * - color: 颜色(默认:#007AFF)
  *****************************************************/
+
+// 输出去重 + 超时兜底：任一订阅请求挂起时，看门狗先于 Surge 的脚本超时输出面板，
+// 未返回的机场标注超时、其余正常显示
+let finished = false;
+function done(o) {
+  if (finished) return;
+  finished = true;
+  $done(o);
+}
 
 (async () => {
   const args = getArgs();
@@ -26,16 +34,16 @@
   const icon = args.icon || "airplane.departure";
   const color = args.color || "#007AFF";
 
-  // 解析所有参数
-  const nameMap = parseSmartMap(toStr(args.name));
-  const subMap = parseSmartMap(toStr(args.sub));
-  const expireMap = parseSmartMap(toStr(args.expire));
-  const resetMap = parseSmartMap(toStr(args.reset));
+  // 订阅列表: 名称#URL;名称#URL（名称省略时自动编号）
+  const entries = toStr(args.sub).split(";").map(s => s.trim()).filter(Boolean).map((raw, i) => {
+    const at = raw.indexOf("#");
+    const name = at === -1 ? "" : raw.slice(0, at).trim();
+    const url = at === -1 ? raw : raw.slice(at + 1).trim();
+    return { name: name || `Airport-${i + 1}`, url };
+  });
 
-  const indexes = Object.keys(subMap).sort((a, b) => Number(a) - Number(b));
-
-  if (!indexes.length) {
-    $done({
+  if (!entries.length) {
+    done({
       title: title,
       content: "未配置订阅链接",
       icon: "antenna.radiowaves.left.and.right",
@@ -44,33 +52,28 @@
     return;
   }
 
-  // 并发请求所有机场
-  const promises = indexes.map(idx => 
-    fetchAirportInfo(idx, subMap, nameMap, expireMap, resetMap)
-  );
-  const results = await Promise.all(promises);
-  const validResults = results.filter(r => r !== null);
+  const expireMap = parseKeyedMap(toStr(args.expire));
+  const resetMap = parseKeyedMap(toStr(args.reset));
 
-  if (!validResults.length) {
-    $done({
-      title: title,
-      content: "所有机场获取失败",
-      icon: "exclamationmark.triangle",
-      "icon-color": "#FA8072"
+  const results = new Array(entries.length);
+  const finish = () => {
+    entries.forEach((e, i) => { if (results[i] === undefined) results[i] = `${e.name}\n用量：请求超时`; });
+    const now = new Date();
+    const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    done({
+      title: `${title} | ${time}`,
+      content: "\n" + results.join("\n\n"),
+      icon: icon,
+      "icon-color": color
     });
-    return;
-  }
+  };
+  setTimeout(finish, 9000);
 
-  // 生成显示内容
-  const now = new Date();
-  const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-
-  $done({
-    title: `${title} | ${time}`,
-    content: "\n" + validResults.join("\n\n"),
-    icon: icon,
-    "icon-color": color
-  });
+  // 并发请求所有机场
+  await Promise.all(entries.map((entry, i) =>
+    fetchAirportInfo(entry, expireMap, resetMap).then(r => { results[i] = r; })
+  ));
+  finish();
 })();
 
 // ========================================
@@ -80,22 +83,16 @@
 /**
  * 获取单个机场的流量信息
  */
-function fetchAirportInfo(idx, subMap, nameMap, expireMap, resetMap) {
+function fetchAirportInfo(entry, expireMap, resetMap) {
   return new Promise((resolve) => {
-    const subURL = subMap[idx];
-    if (!subURL) {
-      resolve(null);
-      return;
-    }
-
-    const name = nameMap[idx] || `Airport-${idx}`;
-    const expire = expireMap[idx] || "";
-    const resetDay = resetMap[idx] || "";
+    const name = entry.name;
+    const expire = expireMap[name] !== undefined ? expireMap[name] : (expireMap.default || "");
+    const resetDay = resetMap[name] !== undefined ? resetMap[name] : (resetMap.default || "");
 
     // 发起请求
     $httpClient.get(
       {
-        url: subURL,
+        url: entry.url,
         headers: { "User-Agent": "Quantumult%20X" },
         timeout: 10000
       },
@@ -188,42 +185,26 @@ function toStr(v) {
 }
 
 /**
- * 智能解析参数映射
- * - 单机场: 直接填值 → {1: value}
- * - 多机场: emoji 数字分隔 → {1: value1, 2: value2}
+ * 解析「默认值;名称:值」式参数映射（与 vps-traffic 同款语法）
+ * - 不含 ":" 的片段视为默认值 → map.default
+ * - "名称:值" 逐机覆盖 → map[名称]
  */
-function parseSmartMap(str) {
+function parseKeyedMap(str) {
   const map = {};
   if (!str) return map;
 
-  const emojiNumbers = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟'];
-  const hasEmoji = emojiNumbers.some(emoji => str.includes(emoji));
-
-  if (hasEmoji) {
-    // 多机场模式
-    emojiNumbers.forEach((emoji, index) => {
-      const emojiIndex = str.indexOf(emoji);
-      if (emojiIndex === -1) return;
-
-      const startPos = emojiIndex + emoji.length;
-      let endPos = str.length;
-
-      // 查找下一个 emoji 位置
-      for (let i = index + 1; i < emojiNumbers.length; i++) {
-        const nextPos = str.indexOf(emojiNumbers[i], startPos);
-        if (nextPos !== -1) {
-          endPos = nextPos;
-          break;
-        }
-      }
-
-      const value = str.substring(startPos, endPos).trim();
-      if (value) map[String(index + 1)] = value;
-    });
-  } else {
-    // 单机场模式
-    map["1"] = str.trim();
-  }
+  str.split(";").forEach(item => {
+    item = item.trim();
+    if (!item) return;
+    const at = item.indexOf(":");
+    if (at === -1) {
+      map.default = item;
+    } else {
+      const k = item.slice(0, at).trim();
+      const v = item.slice(at + 1).trim();
+      if (k && v) map[k] = v;
+    }
+  });
 
   return map;
 }
@@ -285,6 +266,7 @@ function getExpireTimestamp(expire, infoExpire) {
 
 /**
  * 计算距离重置日的剩余天数
+ * 重置日超过当月天数时按当月最后一天计（如 31 号重置遇 2 月 → 28/29 号）
  */
 function getRemainingDays(resetDay) {
   if (!resetDay || resetDay < 1 || resetDay > 31) return;
@@ -293,14 +275,16 @@ function getRemainingDays(resetDay) {
   const today = now.getDate();
   const month = now.getMonth();
   const year = now.getFullYear();
+  const clampToMonth = (y, m) => Math.min(resetDay, new Date(y, m + 1, 0).getDate());
 
-  if (resetDay > today) {
+  const thisMonthReset = clampToMonth(year, month);
+  if (thisMonthReset > today) {
     // 重置日在本月
-    return resetDay - today;
+    return thisMonthReset - today;
   } else {
     // 重置日在下月
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return daysInMonth - today + resetDay;
+    return daysInMonth - today + clampToMonth(year, month + 1);
   }
 }
 

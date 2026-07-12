@@ -121,11 +121,13 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 - `[Remote Filter]` 条目全部自动生成（单点源 Profile.conf）：smart 组的
   `policy-regex-filter` → `Filter<码>`（如 FilterHK），`include-all-proxies` 组 →
   全节点 FilterUN；`loon.ini` 只留段头，`sync-config.txt` 的 FilterMap 仅作手动覆盖
-- 跳过：`include-other-group`、`policy-path` 参数；非 HTTP URL 的本地规则
+- 无静态候选的 select + `include-other-group` 组（如 ⏱️ Speedtest）→ 全节点 FilterUN
+- 跳过：其余 `include-other-group`、`policy-path` 参数；非 HTTP URL 的本地规则
 
 **QX**
 - `Surge/RULE-SET/` URL 自动重映射为 `Quantumult/X/Filter/`
 - icon-url 保留；组名默认剥除 emoji
+- 无静态候选的 select + `include-other-group` 组（如 ⏱️ Speedtest）→ `server-tag-regex=.*`
 - 跳过：`include-all-proxies=true` 类 group；GEOIP CN
 
 **Surfboard**

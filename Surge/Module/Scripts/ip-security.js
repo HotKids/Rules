@@ -31,6 +31,8 @@
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送
+ * - panel_interval: 面板 update-interval（秒），默认 600；改了 [Panel] 的 update-interval 需同步此参数，
+ *   否则打码点击切换的自动刷新判定会失准
  *
  * 配置示例：
  * [Panel]
@@ -38,10 +40,10 @@
  *
  * [Script]
  * # 手动触发（面板）- ipqs_key 可选，不填自动回落
- * ip-security-panel = type=generic,timeout=10,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY
+ * ip-security-panel = type=generic,timeout=15,script-path=ip-security.js,argument=ipqs_key=YOUR_API_KEY&panel_interval=600
  *
  * # 网络变化自动触发
- * ip-security-event = type=event,event-name=network-changed,timeout=10,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
+ * ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
  *
  * @author HotKids&Claude
  * @version 6.0.0
@@ -50,7 +52,7 @@
 
 // ==================== 全局配置 ====================
 const CONFIG = {
-  timeout: 10000,
+  timeout: 10000, // 内部看门狗：须小于 sgmodule 的 timeout=15（15s），留 5s 余量给兜底面板输出，否则 Surge 先杀脚本
   riskCacheTTL: 86400, // 风险评分缓存有效期（秒）：出口 IP 未变化时，此时长内复用缓存，
                        // 避免面板自动刷新（update-interval，默认 600s）反复消耗 IPQS 等按次计费额度
   storeKeys: {
@@ -92,7 +94,7 @@ function parseArguments() {
   let arg = {};
 
   if (typeof $argument !== "undefined") {
-    console.log("原始 $argument: " + $argument);
+    // 不打印 $argument 原文：其中可能含 ipqs_key 等敏感凭据
     arg = Object.fromEntries($argument.split("&").map(i => {
       const idx = i.indexOf("=");
       return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decodeURIComponent(i.slice(idx + 1)).trim()];
@@ -126,7 +128,8 @@ function parseArguments() {
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
     twFlag: clean(arg.tw_flag) || "cn",
     eventDelay: parseFloat(arg.event_delay) || 2,
-    notify: notify
+    notify: notify,
+    panelInterval: parseInt(clean(arg.panel_interval), 10) || 600
   };
 }
 
@@ -775,7 +778,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
     const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
     $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
     const elapsed = now - lastRun;
-    const interval = 600; // 需与 sgmodule update-interval 一致
+    const interval = args.panelInterval; // 需与 [Panel] update-interval 一致，经 panel_interval 参数传入（默认 600）
     const tolerance = 15;
     const remainder = elapsed % interval;
     const isAutoRefresh = lastRun > 0 && elapsed > tolerance
@@ -785,9 +788,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
       $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
     }
   }
-  const dnsLeak = dnsLeakResult;
-  const traffic = trafficResult;
-  const context = { useBilibili, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic };
+  const context = { useBilibili, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak: dnsLeakResult, reverseDNS, traffic: trafficResult };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
