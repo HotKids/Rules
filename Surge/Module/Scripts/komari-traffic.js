@@ -438,7 +438,7 @@ if (!base) {
       if (!statusMap) lines.push(displayName, "状态获取失败");
       else {
         let nameLine = rec && rec.online ? displayName : `${displayName} ｜ 离线`;
-        if (show.uptime && rec && rec.online && rec.uptime > 0) nameLine += ` ｜ 在线 ${formatUptime(rec.uptime)}`;
+        if (show.uptime && rec && rec.online && rec.uptime > 0) nameLine += ` · 在线 ${formatUptime(rec.uptime)}`;
         lines.push(nameLine);
       }
 
