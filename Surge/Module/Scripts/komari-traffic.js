@@ -26,7 +26,7 @@
 //       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
 // - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
 //   否则 IP 打码点击切换的判定会失准
-//   行序固定：名称·在线（同一行） → IP → 流量 → 用量 → 系统 → 价格 → 到期 → 延迟
+//   行序固定：名称·在线（同一行） → IP → 流量 → 用量 → 价格 → 到期 → 系统 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -66,7 +66,7 @@ const show = {
   price: showFlag(args.price, false),
   ip: showFlag(args.ip, false)
 };
-const infoItems = ["ip", "traffic", "usage", "sys", "price", "expire", "ping"].filter(k => show[k]);
+const infoItems = ["ip", "traffic", "usage", "price", "expire", "sys", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
 
 // IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
@@ -437,7 +437,7 @@ if (!base) {
       const lines = [];
       if (!statusMap) lines.push(displayName, "状态获取失败");
       else {
-        let nameLine = rec && rec.online ? displayName : `${displayName} ｜ 离线`;
+        let nameLine = rec && rec.online ? displayName : `${displayName} · 离线`;
         if (show.uptime && rec && rec.online && rec.uptime > 0) nameLine += ` · 在线 ${formatUptime(rec.uptime)}`;
         lines.push(nameLine);
       }
