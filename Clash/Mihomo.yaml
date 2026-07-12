@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-12 16:19:04
+# Date: 2026-07-12 16:19:57
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -202,7 +202,7 @@ rules:
   - 'RULE-SET,AdBlock,🚧 AdGuard'
   # Phishing 钓鱼网站
   - 'RULE-SET,Phishing,🚧 AdGuard'
-  # Bogus NXDOMAIN 劫持/僵尸网络 C2
+  # Bogus IP NXDOMAIN 劫持/僵尸网络 C2
   - 'RULE-SET,Bogus,📛 REJECT-DROP,no-resolve'
   # Global Area Network
   # > Streaming by Region
