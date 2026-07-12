@@ -3741,8 +3741,6 @@ _SB_EXTERNAL_SETS = {
         "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
     "ruleset/ASN.China": (
         "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
-    "ruleset.skk.moe/master/List/domainset/reject_phishing.conf": (
-        "Phishing", "https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/sing-box/domainset/reject_phishing.json", "source"),
 }
 # Loyalsoldier private.txt → sing-box 内建 ip_is_private（非 rule_set）
 _SB_PRIVATE_TOKEN = "surge-rules/release/private.txt"

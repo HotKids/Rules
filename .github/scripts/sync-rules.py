@@ -571,7 +571,60 @@ def _groups_to_singbox_rules(
     return rules
 
 
-def process_file(surge_file: Path, clash_override: set[str] | None = None) -> int:
+def convert_qx_domainset(lines: list[str], policy: str) -> str:
+    """DOMAIN-SET 文件 → QX filter（QX 无 domain-set 概念，展开为带类型的规则行）：
+    `.foo` →（含自身与子域）DOMAIN-SUFFIX,foo,policy；裸域名 → DOMAIN,foo,policy。"""
+    out: list[str] = []
+    for line in lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            out.append(s)
+        elif s.startswith("."):
+            out.append(f"DOMAIN-SUFFIX,{s[1:]},{policy}")
+        else:
+            out.append(f"DOMAIN,{s},{policy}")
+    return "\n".join(out) + "\n"
+
+
+def convert_clash_domainset(lines: list[str]) -> str:
+    """DOMAIN-SET 文件 → Clash domain-behavior payload：`.foo` → '+.foo'，裸域名原样。"""
+    out = ["payload:"]
+    for line in lines:
+        s = line.strip()
+        if not s:
+            continue
+        if s.startswith("#"):
+            out.append(f"  {s}")
+        elif s.startswith("."):
+            out.append(f"  - '+.{s[1:]}'")
+        else:
+            out.append(f"  - {s}")
+    return "\n".join(out) + "\n"
+
+
+def convert_domain_payload_to_singbox(text: str) -> str | None:
+    """Clash domain-behavior payload → sing-box JSON（domain / domain_suffix）。"""
+    groups: dict[str, list[str]] = {}
+    for line in _iter_clash_payload_rules(text):
+        if line.startswith("#") or line.startswith("//"):
+            continue
+        v = line.strip().strip("'\"")
+        if not v:
+            continue
+        if v.startswith("+."):
+            groups.setdefault("domain_suffix", []).append(v[2:])
+        else:
+            groups.setdefault("domain", []).append(v)
+    if not groups:
+        return None
+    rules = _groups_to_singbox_rules(groups)
+    return json.dumps({"version": 2, "rules": rules}, indent=2, ensure_ascii=False) + "\n"
+
+
+def process_file(surge_file: Path, clash_override: set[str] | None = None,
+                 domainset_stems: set[str] | None = None) -> int:
     text = surge_file.read_text(encoding="utf-8")
     lines = text.splitlines()
     stem = surge_file.stem                                           # 文件名，用作输出文件名及 QX policy
@@ -579,32 +632,38 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None) -> in
     updated = 0
     # sync-rules.txt # >> Clash 条目已由 Step 1 直接写入 Clash/sing-box，跳过自动转换
     skip_clash_singbox = clash_override is not None and rel in clash_override
+    # sync-rules.txt # >> Surge Domain-Set 条目：镜像保持 DOMAIN-SET 原格式，按 domain 语义派生
+    is_domainset = domainset_stems is not None and stem in domainset_stems
 
     # QX / Clash / sing-box 输出全部摊平（不保留子目录结构）
-    qx_content = convert_qx(lines, stem)
+    qx_content = (convert_qx_domainset if is_domainset else convert_qx)(lines, stem)
     if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
         print(f"    ✓ QX:      {stem}.list")
         updated += 1
 
     if not skip_clash_singbox:
-        # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
-        preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
+        if is_domainset:
+            # domain-behavior payload：纯域名，无 Clash 专属 preserve / CIDR 伴生可言
+            clash_body = convert_clash_domainset(lines)
+        else:
+            # 读取现有 Clash YAML 中手动添加的 Clash 专属规则（PROCESS-NAME / PROCESS-NAME-REGEX）
+            preserved = _extract_preserved_clash_rules(CLASH_DIR / f"{stem}.yaml")
 
-        # Surge → Clash：只追加 Surge 源中没有的手动规则（末尾），防止重复
-        clash_body = convert_clash(lines)
-        if preserved:
-            existing = {l.strip()[2:].strip() for l in clash_body.splitlines()
-                        if l.strip().startswith("- ")}
-            extra = [(t, v) for t, v in preserved if f"{t},{v}" not in existing]
-            if extra:
-                lines_extra = "\n".join(f"  - {t},{v}" for t, v in extra)
-                clash_body = clash_body.rstrip("\n") + "\n" + lines_extra + "\n"
+            # Surge → Clash：只追加 Surge 源中没有的手动规则（末尾），防止重复
+            clash_body = convert_clash(lines)
+            if preserved:
+                existing = {l.strip()[2:].strip() for l in clash_body.splitlines()
+                            if l.strip().startswith("- ")}
+                extra = [(t, v) for t, v in preserved if f"{t},{v}" not in existing]
+                if extra:
+                    lines_extra = "\n".join(f"  - {t},{v}" for t, v in extra)
+                    clash_body = clash_body.rstrip("\n") + "\n" + lines_extra + "\n"
         if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
 
         # Clash CIDR 伴生文件（如 LAN → lancidr.txt）：仅提取 IP-CIDR，输出 ipcidr payload
-        companion = CLASH_CIDR_COMPANION.get(stem)
+        companion = None if is_domainset else CLASH_CIDR_COMPANION.get(stem)
         if companion:
             cidr_body = convert_ipcidr_to_clash(text)
             if cidr_body and write_if_changed(CLASH_DIR / companion, cidr_body):
@@ -612,7 +671,8 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None) -> in
                 updated += 1
 
         # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
-        sb_content = convert_classical_payload_to_singbox(clash_body)
+        sb_content = (convert_domain_payload_to_singbox if is_domainset
+                      else convert_classical_payload_to_singbox)(clash_body)
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
                 print(f"    ✓ sing-box: {stem}.json")
@@ -626,7 +686,10 @@ def convert_all():
     print("\n── Step 4: Surge → QX / Clash / sing-box ──")
 
     # # >> Clash 条目优先级高于 Surge 自动转换（Clash/sing-box 已由 Step 1 写入）
-    clash_override = {e["name"] for e in parse_sync_rules()["clash"]}
+    rules_txt = parse_sync_rules()
+    clash_override = {e["name"] for e in rules_txt["clash"]}
+    # # >> Surge Domain-Set 条目按 domain 语义派生（文件名 stem 匹配，与输出摊平规则一致）
+    domainset_stems = {e["name"].rsplit("/", 1)[-1] for e in rules_txt["surge_domainset"]}
 
     surge_files = sorted(SURGE_DIR.rglob("*.list"))
     if not surge_files:
@@ -637,7 +700,7 @@ def convert_all():
     for sf in surge_files:
         rel = sf.relative_to(SURGE_DIR)
         print(f"  [{rel}]")
-        total += process_file(sf, clash_override)
+        total += process_file(sf, clash_override, domainset_stems)
 
     print(f"  更新 {total} 个文件")
 
@@ -654,8 +717,8 @@ def cleanup_stale():
     print("\n── Step 5: 清理已删除的文件 ──")
 
     sync_rules = parse_sync_rules()
-    # 当前 sync-rules.txt 管理的 stems
-    surge_managed = {e["name"] for e in sync_rules["surge"]}
+    # 当前 sync-rules.txt 管理的 stems（含 Domain-Set 段）
+    surge_managed = {e["name"] for e in sync_rules["surge"] + sync_rules["surge_domainset"]}
     clash_managed = {e["name"] for e in sync_rules["clash"]}
 
     # 清理 Surge/RULE-SET/ 中不再被 # >> Surge 管理的外部拉取文件
@@ -695,8 +758,10 @@ def cleanup_stale():
 # ═══════════════════════════════════════════════════════════════════════
 
 def parse_sync_rules() -> dict:
-    """解析 sync-rules.txt，返回 {"surge": [{url, name}], "clash": [{url, name}], "module": [{url, name}]}。"""
-    result: dict[str, list[dict]] = {"surge": [], "clash": [], "module": []}
+    """解析 sync-rules.txt，返回 {"surge": [...], "surge_domainset": [...], "clash": [...], "module": [...]}，
+    条目均为 {url, name, overrides}。# >> Surge Domain-Set 段声明 DOMAIN-SET 格式来源
+    （裸域名 / `.` 前缀域名），落库保持原格式、Step 4 按各平台原生 domain 语义派生。"""
+    result: dict[str, list[dict]] = {"surge": [], "surge_domainset": [], "clash": [], "module": []}
     if not SYNC_RULES_TXT.exists():
         return result
     section = None
@@ -704,6 +769,8 @@ def parse_sync_rules() -> dict:
         s = line.strip()
         if s == "# >> Surge":
             section = "surge"
+        elif s == "# >> Surge Domain-Set":
+            section = "surge_domainset"
         elif s == "# >> Clash":
             section = "clash"
         elif s == "# >> Module":
@@ -893,20 +960,21 @@ def fetch_external_rules():
     print("\n── Step 1: 拉取外部规则 ──")
     rules = parse_sync_rules()
 
-    if not rules["surge"] and not rules["clash"]:
+    if not rules["surge"] and not rules["surge_domainset"] and not rules["clash"]:
         print("  sync-rules.txt 无规则条目")
         return
 
     # 预先并发拉取所有 URL（去重后并发，避免同 URL 重复下载）
-    all_urls = list({e["url"] for e in rules["surge"] + rules["clash"]})
+    all_urls = list({e["url"] for e in rules["surge"] + rules["surge_domainset"] + rules["clash"]})
     if all_urls:
         print(f"  并发下载 {len(all_urls)} 个 URL …")
     prefetched = prefetch_urls(all_urls, _UA) if all_urls else {}
 
-    # ── # >> Surge section（同名多 URL 合并去重）──────────────────────
+    # ── # >> Surge / # >> Surge Domain-Set section（同名多 URL 合并去重）──
     surge_groups: dict[str, list[str]] = defaultdict(list)
-    for e in rules["surge"]:
+    for e in rules["surge"] + rules["surge_domainset"]:
         surge_groups[e["name"]].append(e["url"])
+    domainset_names = {e["name"] for e in rules["surge_domainset"]}
 
     for name, urls in surge_groups.items():
         fork_urls: list[str] = []
@@ -919,7 +987,7 @@ def fetch_external_rules():
             text = prefetched.get(url)
             if text is None:
                 continue
-            if _is_clash_payload(text):
+            if name not in domainset_names and _is_clash_payload(text):
                 text = convert_clash_payload_to_surge(text)
                 if text is None:
                     print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
