@@ -229,7 +229,8 @@ if (!base) {
       } catch (e) {}
     }
 
-    const byWeight = (a, b) => (b.weight || 0) - (a.weight || 0) || String(a.name).localeCompare(String(b.name));
+    // 与 Komari 面板一致：weight 升序（数值小的靠前），同权重按名称
+    const byWeight = (a, b) => (a.weight || 0) - (b.weight || 0) || String(a.name).localeCompare(String(b.name));
 
     if (nodeItems.length) {
       // 逐条目匹配：正则命中或名称完全相等（兼容含元字符的精确名称），
@@ -251,7 +252,6 @@ if (!base) {
       nodes = picked;
     } else {
       if (excludeRe) nodes = nodes.filter(n => !excludeRe.test(String(n.name)));
-      // 与 Komari 面板一致：权重大的靠前，同权重按名称
       nodes.sort(byWeight);
     }
 
