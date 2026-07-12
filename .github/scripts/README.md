@@ -17,7 +17,15 @@
 则声明为 DOMAIN-SET 格式来源（裸域名 / `.` 前缀，如 Sukka 的 `reject_phishing`、`speedtest`）
 ——镜像保持原格式（Surge/Loon/Surfboard 直接以 DOMAIN-SET 语义消费），派生时按各平台原生
 domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 domain-behavior payload
-（`+.` 前缀）、sing-box 出 `domain` / `domain_suffix`。
+（`+.` 前缀）、sing-box 出 `domain` / `domain_suffix`。`# >> Clash` 段同样支持 `DOMAIN-SET,`
+前缀（如 Loyalsoldier `reject.txt`），只产出 Clash payload + sing-box source，不落 Surge/QX。
+
+> Clash 二进制规则集 `Clash/RuleSet/*.mrs` 不由本脚本生成：mihomo 的 mrs 只支持
+> domain / ipcidr 两种 behavior，故在 `sync-rules.yml` workflow 里下载 mihomo 后扫描
+> `Clash/RuleSet/` 产物（payload 无逗号 → domain / CIDR → ipcidr，classical 跳过），
+> 用 `convert-ruleset` 编译出同名 `.mrs` 与源文件并存一同提交；`sync-config.py` 里
+> 自有 domain/ipcidr provider 已指向 `.mrs`（`format: mrs`），外部 Private/China/
+> Global/CNCIDR 则指向 MetaCubeX meta-rules-dat 官方 mrs。
 
 > sing-box 二进制规则集 `sing-box/rule-set/*.srs` 不由本脚本生成：`.srs` 只能用官方 sing-box CLI 编译，故在 `sync-rules.yml` workflow 里下载 sing-box 后对 `source/*.json` 执行 `rule-set compile` 得到，与 `.json` 并存一同提交。
 

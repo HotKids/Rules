@@ -235,11 +235,11 @@ function main(config) {
   const ruleProviders = {
     'Bypass': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Bypass.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml' },
     'Reroute': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Reroute.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml' },
-    'Private': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Private.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt' },
+    'Private': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Private.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs', format: 'mrs' },
     'HTTPDNS': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/HTTPDNS.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml' },
-    'Reject': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Reject.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt' },
+    'Reject': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Reject.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs', format: 'mrs' },
     'AdBlock': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/AdBlock.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml' },
-    'Phishing': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Phishing.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml' },
+    'Phishing': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Phishing.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs', format: 'mrs' },
     'Bogus': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Bogus.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bogus.yaml' },
     'Streaming_TW': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_TW.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml' },
     'Streaming_JP': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_JP.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml' },
@@ -257,11 +257,11 @@ function main(config) {
     'Crypto': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Crypto.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml' },
     'Finance': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Finance.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml' },
     'Spark': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Spark.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml' },
-    'Global': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Global.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt' },
-    'China': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/China.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt' },
+    'Global': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Global.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs', format: 'mrs' },
+    'China': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs', format: 'mrs' },
     'CNASN': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/CNASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
-    'CNCIDR': { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/CNCIDR.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt' },
-    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/LANCIDR.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt' },
+    'CNCIDR': { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/CNCIDR.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs', format: 'mrs' },
+    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', path: './Provider/RuleSet/LAN.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs', format: 'mrs' },
   };
 
   // ── 规则 ──

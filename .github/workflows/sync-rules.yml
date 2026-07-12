@@ -8,6 +8,8 @@ on:
       - '.github/scripts/sync-rules.txt'
       - '.github/scripts/sync-rules.py'
       - '.github/scripts/_common.py'
+      # 编译步骤（.srs / .mrs）改动后立即重编译
+      - '.github/workflows/sync-rules.yml'
   schedule:
     - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:
@@ -56,6 +58,41 @@ jobs:
             stem="$(basename "$s" .srs)"
             [ -f "sing-box/source/${stem}.json" ] || rm -f "$s"
           done
+
+      - name: Compile mihomo binary rule-sets (.mrs)
+        run: |
+          set -euo pipefail
+          # mihomo 官方 CLI（用于 convert-ruleset）：mrs 只支持 domain / ipcidr 两种
+          # behavior，取 latest release（版本号经 version.txt 资产解析）
+          VER=$(curl -fsSL https://github.com/MetaCubeX/mihomo/releases/latest/download/version.txt)
+          curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/latest/download/mihomo-linux-amd64-${VER}.gz" | gunzip > /tmp/mihomo
+          chmod +x /tmp/mihomo
+          /tmp/mihomo -v
+
+          # 扫描 Clash/RuleSet 产物：payload 条目无逗号 → domain / 含 CIDR → ipcidr，
+          # classical（带规则类型前缀）跳过；同名 .mrs 与源文件并存，孤儿 .mrs 清理
+          python3 - <<'EOF'
+          import re, subprocess, sys
+          from pathlib import Path
+
+          d = Path("Clash/RuleSet")
+          compiled = set()
+          for src in sorted([*d.glob("*.yaml"), *d.glob("*.txt")]):
+              first = next((l.strip()[2:].strip() for l in src.read_text(encoding="utf-8").splitlines()
+                            if l.strip().startswith("- ")), None)
+              if first is None or "," in first:
+                  continue  # 空文件或 classical（TYPE,value）
+              behavior = "ipcidr" if re.match(r"^[0-9a-fA-F:.]+/\d+$", first.strip("'\"")) else "domain"
+              out = d / f"{src.stem}.mrs"
+              subprocess.run(["/tmp/mihomo", "convert-ruleset", behavior, "yaml", str(src), str(out)],
+                             check=True)
+              compiled.add(out.name)
+              print(f"  ✓ {out} ({behavior})")
+          for orphan in d.glob("*.mrs"):
+              if orphan.name not in compiled:
+                  orphan.unlink()
+                  print(f"  ✗ 删除孤儿 {orphan}")
+          EOF
 
       - name: Commit & push
         run: |
