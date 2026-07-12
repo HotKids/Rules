@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 16:14:16
+# Date: 2026-07-12 16:16:26
 # Author: @HotKids
 
 # 通用设置
@@ -758,7 +758,7 @@ rules:
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AdBlock,🚧 AdGuard
 
-  # Malicious 恶意网站（钓鱼 / 恶意软件分发 / 僵尸网络）
+  # Malicious 恶意网站（钓鱼 / NXDOMAIN 劫持 / 僵尸网络 C2）
   - RULE-SET,Phishing,🚧 AdGuard
   - RULE-SET,Bogus,📛 REJECT-DROP,no-resolve
 
