@@ -25,7 +25,7 @@
 - **其余 `*.sgmodule`**（APNs / Client / GeoLoc / Profile / Rewrite / Task / VoWiFi /
   WeChat 等）— ✏️ 手动维护。
 - **`Pannel/` + `Scripts/`** — ✏️ 手动维护的面板模块（机场流量 / IP 风险 / 流媒体解锁 /
-  VPS 流量）及其配套脚本。
+  Komari 节点流量）及其配套脚本。
 
 同步机制详见 [`.github/scripts/README.md`](../.github/scripts/README.md)。
 
