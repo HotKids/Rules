@@ -82,6 +82,11 @@ const CONFIG = {
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`,
     dnsLeakEdns: (id) => `http://${id}.edns.ip-api.com/json`
   },
+  // qifu API 有 Referer 防盗链（直接访问 403），需伪装成官网前端请求
+  qifuHeaders: {
+    "Referer": "https://qifu.baidu.com/",
+    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
+  },
   ipv6Timeout: 3000,
   policyRetryDelay: 500,
   riskLevels: [
@@ -155,9 +160,12 @@ setTimeout(() => {
 }, CONFIG.timeout);
 
 // ==================== HTTP 工具 ====================
-function httpJSON(url, policy) {
+function httpJSON(url, policy, headers) {
   return new Promise(r => {
-    $httpClient.get(policy ? { url, policy } : { url }, (_, __, d) => {
+    const req = { url };
+    if (policy) req.policy = policy;
+    if (headers) req.headers = headers;
+    $httpClient.get(req, (_, __, d) => {
       try { r(JSON.parse(d)); } catch { r(null); }
     });
   });
@@ -582,7 +590,9 @@ async function fetchOutbound6() {
 async function fetchIPs() {
   const useQifuLocal = args.localGeoApi === "qifu";
   const [local, exit, exit6ip] = await Promise.all([
-    httpJSON(useQifuLocal ? CONFIG.urls.qifuLocal : CONFIG.urls.localIP, "DIRECT"),
+    useQifuLocal
+      ? httpJSON(CONFIG.urls.qifuLocal, "DIRECT", CONFIG.qifuHeaders)
+      : httpJSON(CONFIG.urls.localIP, "DIRECT"),
     fetchOutbound4(),
     Promise.race([
       fetchOutbound6(),
@@ -766,6 +776,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const ipApiLang = args.remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
   // 非 ipinfo 数据源时需单独请求 ipinfo：运营商始终用 ipinfo + rDNS 取自 hostname
   const needExtraOrg = useIpApi || useQifu;
+  const geoHeaders = useQifu ? CONFIG.qifuHeaders : undefined;
   function geoUrl(ip) {
     if (useQifu) return CONFIG.urls.qifuGeo(ip);
     return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
@@ -781,7 +792,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
     getRiskScore(outIP),                     // 0
     getIPType(outIP),                        // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
-    httpJSON(geoUrl(outIP)),                 // 3: 出口地理
+    httpJSON(geoUrl(outIP), null, geoHeaders),  // 3: 出口地理
     needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（ip-api/qifu 模式）+ hostname
     getTrafficStats(),                       // 5: 流量统计
   ]);
@@ -833,7 +844,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   let entranceInfo = null;
   if (entranceIP && entranceIP !== outIP) {
     console.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
-    const entrQueries = [httpJSON(geoUrl(entranceIP))];
+    const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
     if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
     const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
     entranceInfo = normalizeGeo(entrGeoRaw);
