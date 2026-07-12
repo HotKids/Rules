@@ -29,6 +29,22 @@ const modeMap = {};
   }
 });
 
+// API Token 配置，格式: token=默认token;VPS1:token1（配置后以 Authorization: Bearer 请求）
+let defaultToken = "";
+const tokenMap = {};
+(args.token || "").split(";").forEach(item => {
+  item = item.trim();
+  if (!item || item.toLowerCase() === "null") return;
+  const at = item.indexOf(":");
+  if (at === -1) {
+    defaultToken = item;
+  } else {
+    const k = item.slice(0, at).trim();
+    const v = item.slice(at + 1).trim();
+    if (k && v) tokenMap[k] = v;
+  }
+});
+
 // 到期时间配置，格式: expire=2025-12-31;VPS1:2025-06-30;VPS2:2026-01-15
 let defaultExpire = "";
 const expireMap = {};
@@ -125,16 +141,23 @@ if (!rawList.length) {
 
   // 先解析全部条目，看门狗超时时能按名字标注未返回的 VPS
   const servers = rawList.map(raw => {
-    let name = "", ip = "", port = "8686", iface = "eth0";
+    let name = "", ip = "", port = "", iface = "eth0", scheme = "http";
 
-    // 解析: 名称#地址@网卡:端口
+    // 解析: 名称#[http(s)://]地址:端口@网卡
     let item = raw;
     if (item.includes("#")) [name, item] = item.split("#").map(s => s.trim());
+    const m = item.match(/^(https?):\/\//i);
+    if (m) {
+      scheme = m[1].toLowerCase();
+      item = item.slice(m[0].length);
+    }
     if (item.includes("@")) [item, iface] = item.split("@").map(s => s.trim());
     if (item.includes(":")) [ip, port] = item.split(":").map(s => s.trim());
     else ip = item.trim();
     if (!name) name = ip;
-    return { name, ip, port: port || "8686", iface: iface || "eth0" };
+    // http 默认 8686 端口；https 不指定端口则省略（走 443），适配反代场景
+    if (!port && scheme === "http") port = "8686";
+    return { name, ip, port, iface: iface || "eth0", scheme };
   });
 
   // 输出去重 + 超时兜底：任一探针挂起时输出已有结果，未返回的标注超时
@@ -148,9 +171,12 @@ if (!rawList.length) {
   };
   setTimeout(finish, 9000);
 
-  servers.forEach(({ name, ip, port, iface }, index) => {
+  servers.forEach(({ name, ip, port, iface, scheme }, index) => {
+    const url = `${scheme}://${ip}${port ? `:${port}` : ""}`;
+    const token = tokenMap[name] || defaultToken;
+    const req = token ? { url, headers: { Authorization: `Bearer ${token}` } } : url;
 
-    $httpClient.get(`http://${ip}:${port}`, (err, resp, data) => {
+    $httpClient.get(req, (err, resp, data) => {
       if (err || !data) {
         results[index] = `${name}\n连接失败`;
       } else {
