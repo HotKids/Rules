@@ -21,7 +21,7 @@
 //     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
 //     每节点多一次请求，失败自动回退累计口径）
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
-//   行序固定：总流量 → 用量 → 系统 → 延迟 → 价格·在线（同一行） → 到期
+//   行序固定：总流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -62,7 +62,7 @@ const show = {
 };
 // meta 行 = 价格·在线合并一行
 show.meta = show.price || show.uptime;
-const infoItems = ["traffic", "usage", "sys", "ping", "meta", "expire"].filter(k => show[k]);
+const infoItems = ["traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
@@ -80,7 +80,8 @@ if (rawNodes.startsWith("!")) {
 let base = clean(args.url).replace(/\/+$/, "");
 if (base && !/^https?:\/\//i.test(base)) base = "https://" + base;
 
-// 输出去重 + 超时兜底（须小于 sgmodule 的 timeout，避免 Surge 先杀脚本导致面板空白）
+// 输出去重 + 超时兜底：须小于 sgmodule 的 timeout=30，留 5s 余量，
+// 避免 Surge 先杀脚本导致面板空白（cycle 模式有两段串行请求，需要宽松的窗口）
 let finished = false;
 const done = o => {
   if (finished) return;
@@ -89,7 +90,7 @@ const done = o => {
 };
 setTimeout(() => {
   done({ title, content: "请求超时", icon: "server.rack", "icon-color": "#9E9E9E" });
-}, 9000);
+}, 25000);
 
 const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -324,6 +325,7 @@ if (!base) {
         const cyc = cycleMap[node.uuid];
         const label = cyc ? "周期" : "用量";
         const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
+        // 累计口径下无配额不显示（与总流量行重复）；周期口径无配额仍有意义
         if (!src || (!cyc && !hasQuota)) return "";
         const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
         if (!hasQuota) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
