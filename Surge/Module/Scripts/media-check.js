@@ -82,7 +82,7 @@ function notifyUnlockChanges(services) {
     if (old === undefined || old === cur) return;
     const oldAvail = old.charAt(0) === "1";
     const oldRegion = old.slice(2);
-    if (!avail) changes.push(`🔴 ${s.name} 不再解锁`);
+    if (!avail) changes.push(`🔴 ${s.name} 解锁失效`);
     else if (!oldAvail) changes.push(`🟢 ${s.name} 已解锁${region ? `（${region}）` : ""}`);
     else changes.push(`🔀 ${s.name} 区域变化 ${oldRegion || "?"} → ${region || "?"}`);
   });
