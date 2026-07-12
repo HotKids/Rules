@@ -1,8 +1,8 @@
 // komari-traffic.js - Komari 节点流量监控（单面板聚合：累计流量 + 用量/配额 + 到期）
 //
 // 数据来源（Komari 公开 API，两次请求出全部节点）:
-//   GET  /api/nodes  → 节点名称 / traffic_limit / traffic_limit_type / expired_at / weight
-//   POST /api/rpc2 common:getNodesLatestStatus → net_total_up/down(累计流量) + online
+//   GET  /api/nodes  → 名称 / 地区 / 配额 / 用量口径 / 到期 / 价格 / 权重
+//   POST /api/rpc2 common:getNodesLatestStatus → 累计流量 / CPU / 内存 / 磁盘 / 在线时长 / ping 统计
 // 配额、到期日、用量口径均由 Komari 后台维护，无需在参数里逐台配置。
 //
 // 用量口径与 Komari 面板一致：自开机累计流量对比 traffic_limit（重启后计数器清零）。
@@ -13,6 +13,10 @@
 // - nodes: 节点筛选（可选，不填显示全部并按权重排序）
 //   · 名称或正则;名称或正则 → 只显示匹配的节点，顺序跟随条目（条目内按权重）
 //   · "!" 开头 → 整体视作单个正则，匹配的不显示
+// - 显示项开关（各自独立参数，true/false）：
+//   · traffic 累计↓↑（默认 true）/ usage 用量对比配额（默认 true）/ expire 到期（默认 true）
+//   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
+//   行序固定：累计 → 用量 → 系统 → 在线 → 延迟 → 价格 → 到期
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -33,6 +37,23 @@ const clean = v => {
 
 const title = clean(args.title) || "📊 Komari 流量统计";
 const token = clean(args.token);
+
+// 显示项开关（各自独立参数）；region 不是独立行，作用于名称行
+const showFlag = (v, def) => {
+  const s = clean(v).toLowerCase();
+  return (s === "true" || s === "1") ? true : (s === "false" || s === "0") ? false : def;
+};
+const show = {
+  traffic: showFlag(args.traffic, true),
+  usage: showFlag(args.usage, true),
+  expire: showFlag(args.expire, true),
+  sys: showFlag(args.sys, false),
+  uptime: showFlag(args.uptime, false),
+  ping: showFlag(args.ping, false),
+  price: showFlag(args.price, false)
+};
+const infoItems = ["traffic", "usage", "sys", "uptime", "ping", "price", "expire"].filter(k => show[k]);
+const showRegion = showFlag(args.region, false);
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
 let excludeRe = null, nodeItems = [], nodesError = "";
@@ -96,6 +117,21 @@ const calcUsage = (up, down, type) => {
 
 const usageLabel = type =>
   ({ sum: "⇅", up: "↑", down: "↓", min: "min" }[type] || "max");
+
+const formatUptime = sec => {
+  if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
+  if (sec >= 3600) return `${Math.floor(sec / 3600)} 小时`;
+  return `${Math.max(1, Math.floor(sec / 60))} 分钟`;
+};
+
+// billing_cycle（天）→ 周期文案
+const cycleLabel = days => {
+  if (days >= 360) return "年";
+  if (days >= 175) return "半年";
+  if (days >= 85) return "季";
+  if (days >= 27) return "月";
+  return days > 0 ? `${days}天` : "";
+};
 
 // expired_at 零值（0001-01-01）或无效日期视为未设置
 const formatExpire = raw => {
@@ -174,27 +210,57 @@ if (!base) {
       return;
     }
 
+    const pct = (used, total) => total > 0 ? Math.round(used / total * 100) + "%" : "-";
+
+    // 各内容行构造器；返回空则跳过该行。
+    // 静态信息（expire/price）离线也显示；累计/用量取最后一次上报，离线仍有意义；
+    // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
+    const lineBuilders = {
+      traffic: (node, rec) => rec &&
+        `累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`,
+      usage: (node, rec) => {
+        if (!rec || !(node.traffic_limit > 0)) return "";
+        const type = String(node.traffic_limit_type || "max").toLowerCase();
+        const usedGB = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type) / 1073741824;
+        const quotaGB = node.traffic_limit / 1073741824;
+        return `用量 ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
+      },
+      expire: node => {
+        const s = formatExpire(node.expired_at);
+        return s && `到期 ${s}`;
+      },
+      sys: (node, rec) => rec && rec.online &&
+        `CPU ${Math.round(rec.cpu || 0)}% ｜ 内存 ${pct(rec.ram, rec.ram_total)} ｜ 磁盘 ${pct(rec.disk, rec.disk_total)}`,
+      uptime: (node, rec) => rec && rec.online && rec.uptime > 0 &&
+        `在线 ${formatUptime(rec.uptime)}`,
+      price: node => {
+        if (!(node.price > 0)) return "";
+        const unit = cycleLabel(node.billing_cycle);
+        return `价格 ${node.price} ${node.currency || "$"}${unit ? " / " + unit : ""}`;
+      },
+      ping: (node, rec) => {
+        if (!rec || !rec.online || !rec.ping) return "";
+        const parts = Object.values(rec.ping)
+          .filter(p => p && p.latest >= 0)
+          .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? `(丢${Math.round(p.loss)}%)` : ""}`);
+        return parts.length ? `延迟 ${parts.join(" ｜ ")}` : "";
+      }
+    };
+
     const blocks = nodes.map(node => {
       if (node.missing) return `${node.name}\n无匹配节点`;
       const rec = statusMap ? statusMap[node.uuid] : null;
+      const displayName = showRegion && node.region ? `${node.region} ${node.name}` : node.name;
 
-      if (!statusMap) {
-        var lines = [node.name, "状态获取失败"];
-      } else if (!rec) {
-        lines = [`${node.name} ｜ 离线`];
-      } else {
-        lines = [rec.online ? node.name : `${node.name} ｜ 离线`];
-        lines.push(`累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`);
-        if (node.traffic_limit > 0) {
-          const type = String(node.traffic_limit_type || "max").toLowerCase();
-          const usedGB = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type) / 1073741824;
-          const quotaGB = node.traffic_limit / 1073741824;
-          lines.push(`用量 ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`);
-        }
-      }
+      const lines = [];
+      if (!statusMap) lines.push(displayName, "状态获取失败");
+      else lines.push(rec && rec.online ? displayName : `${displayName} ｜ 离线`);
 
-      const expireStr = formatExpire(node.expired_at);
-      if (expireStr) lines.push(`到期 ${expireStr}`);
+      infoItems.forEach(key => {
+        const build = lineBuilders[key];
+        const line = build && build(node, rec);
+        if (line) lines.push(line);
+      });
       return lines.join("\n");
     });
 
