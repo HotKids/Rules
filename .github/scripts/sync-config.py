@@ -37,7 +37,7 @@ HOTKIDS_QX_FILTER_PREFIX = "https://raw.githubusercontent.com/HotKids/Rules/mast
 CLASH_UNSUPPORTED_RULE_TYPES = {"URL-REGEX", "USER-AGENT"}
 # 注释掉的规则中，这些类型在 Clash 里同样不支持，直接丢弃（不入待输出缓冲区）
 _COMMENT_DROP_TYPES = CLASH_UNSUPPORTED_RULE_TYPES | {"AND", "OR", "NOT"}
-_SURGE_FLAGS = {"extended-matching", "force-remote-dns", "no-alert", "enhanced-mode"}
+_SURGE_FLAGS = {"extended-matching", "pre-matching", "force-remote-dns", "no-alert", "enhanced-mode"}
 RAW_PREFIX = "https://raw.githubusercontent.com/"
 
 # Surfboard 不支持的规则类型（Android 无 MITM，无 IPv6 实现；DOMAIN-REGEX 未记录）
