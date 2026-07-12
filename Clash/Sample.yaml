@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-11 11:28:05
+# Date: 2026-07-12 16:19:57
 # Author: @HotKids
 
 # 通用设置
@@ -79,7 +79,6 @@ geox-url:
 
 # 静态域名映射，优先级高于 DNS 解析
 hosts:
-  '*.clash.dev': 127.0.0.1
   'localhost': 127.0.0.1
 
 # ── 配置持久化 ──
@@ -138,14 +137,14 @@ dns:
   use-system-hosts: true
   # DNS 缓存淘汰算法（arc 兼顾命中率与性能）
   cache-algorithm: arc
-  # DoH 是否启用 HTTP/3 并发尝试
+  # DoH 是否启用 HTTP/3 并发尝试（本配置的 QUIC 拦截规则会拦掉走代理的 UDP 443，保持关闭）
   prefer-h3: false
 
-  # nameserver / fallback 连接始终直连，不遵守路由规则
-  # 各条目通过 #proxy 后缀单独指定走代理
+  # DNS 连接默认直连，不遵守路由规则
+  # 各条目通过 #RULES / #策略名 后缀单独指定出站
   respect-rules: false
 
-  # 引导 DNS：仅用于解析 nameserver / fallback 服务器的域名
+  # 引导 DNS：仅用于解析 nameserver 服务器的域名
   # 只能填纯 IP 地址
   default-nameserver:
     - 223.5.5.5
@@ -221,31 +220,33 @@ dns:
     # 其他需要真实 IP 解析的域名
     - "localhost.*.qq.com"
 
-  # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
-  # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
+  # 主 DNS：经代理查询干净结果，防止境外域名请求泄露至国内 DNS 服务商
   nameserver:
-    - "https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
+    - "https://1.1.1.1/dns-query#RULES"
 
-  # 兜底 DNS：nameserver 返回非 CN IP 或保留地址段时触发，同样走代理
-  fallback:
-    - "https://1.1.1.1/dns-query#proxy"
-
-  # 污染检测规则：符合以下任一条件时使用 fallback 结果
-  fallback-filter:
-    # 返回 IP 的 GeoIP 归属地非 CN
-    geoip: true
-    geoip-code: CN
-    # 返回 IP 落在保留地址段（明显污染）
-    ipcidr:
-      - 240.0.0.0/4
+  # 分域名 DNS 策略：按声明顺序匹配，先窄后宽
+  nameserver-policy:
+    # 内网/本地域名交给系统解析器（路由器/DHCP 下发的 DNS），可解析局域网设备名
+    "geosite:private":
+      - system
+    # NTP 校时域名用裸 IP UDP 解析：时间偏差会让 DoH 证书验证失败，校时链路须独立于任何 TLS/代理
+    "time.*.com,time.*.gov,time.*.apple.com,ntp.*.com,+.pool.ntp.org,*.ntp.org.cn":
+      - 223.5.5.5
+      - 119.29.29.29
+    # 国内域名直接用国内 DoH 就近解析，不绕代理（geosite 数据规则段已在用，零额外开销）
+    "geosite:cn":
+      - https://doh.pub/dns-query
+      - https://dns.alidns.com/dns-query
 
   # 代理节点域名解析：国内 DoH，节点 IP 不会被 CN DNS 污染，速度更快
   proxy-server-nameserver:
     - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
 
   # DIRECT 流量专用 DNS，与代理流量语义分离
   direct-nameserver:
     - https://doh.pub/dns-query
+    - https://dns.alidns.com/dns-query
   # DIRECT DNS 连接本身不走路由规则，始终直连
   direct-nameserver-follow-policy: false
 
@@ -388,7 +389,7 @@ proxy-groups:
   # > OneDrive
   - name: "☁️ OneDrive"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -396,7 +397,7 @@ proxy-groups:
   # > Microsoft Services
   - name: "Ⓜ️ Microsoft"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -573,6 +574,20 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml
     interval: 86400
 
+  Phishing:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Phishing.yaml
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml
+    interval: 86400
+
+  Bogus:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Bogus.yaml
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bogus.yaml
+    interval: 86400
+
   Streaming_TW:
     type: http
     behavior: classical
@@ -743,6 +758,12 @@ rules:
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AdBlock,🚧 AdGuard
 
+  # Phishing 钓鱼网站
+  - RULE-SET,Phishing,🚧 AdGuard
+
+  # Bogus IP NXDOMAIN 劫持/僵尸网络 C2
+  - RULE-SET,Bogus,📛 REJECT-DROP,no-resolve
+
   # Global Area Network
   # > Streaming by Region
   # >> Streaming TW
@@ -792,11 +813,11 @@ rules:
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,CNASN,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
+  - RULE-SET,CNASN,🔘 DIRECT,no-resolve
+  - RULE-SET,CNCIDR,🔘 DIRECT,no-resolve
 
   # Local Area Network
-  - RULE-SET,LAN,🔘 DIRECT
+  - RULE-SET,LAN,🔘 DIRECT,no-resolve
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT

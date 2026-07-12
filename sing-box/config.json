@@ -294,6 +294,15 @@
         "action": "reject"
       },
       {
+        "rule_set": "Phishing",
+        "action": "reject"
+      },
+      {
+        "rule_set": "Bogus",
+        "action": "reject",
+        "method": "drop"
+      },
+      {
         "rule_set": "Streaming_TW",
         "outbound": "🇨🇳 Taiwan"
       },
@@ -388,6 +397,22 @@
         "tag": "Block",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Block.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "Phishing",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Phishing.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "Bogus",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Bogus.srs",
         "download_detour": "🔘 Direct",
         "update_interval": "1440m"
       },
