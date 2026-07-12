@@ -1,4 +1,4 @@
-# Quantumult
+# Quantumult X
 
 | 文件 / 目录 | 维护方式 | 说明 |
 |---|---|---|
