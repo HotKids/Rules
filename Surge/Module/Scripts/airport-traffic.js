@@ -20,11 +20,29 @@
  * - color: 颜色(默认:#007AFF)
  *****************************************************/
 
+// 输出去重 + 超时兜底：任一订阅请求挂起时，看门狗先于 Surge 的脚本超时输出面板，
+// 避免整个面板空白无提示（须小于 sgmodule 的 timeout）
+let finished = false;
+function done(o) {
+  if (finished) return;
+  finished = true;
+  $done(o);
+}
+
 (async () => {
   const args = getArgs();
   const title = args.title || "机场流量信息";
   const icon = args.icon || "airplane.departure";
   const color = args.color || "#007AFF";
+
+  setTimeout(() => {
+    done({
+      title: title,
+      content: "请求超时，请检查订阅链接",
+      icon: "exclamationmark.triangle",
+      "icon-color": "#FA8072"
+    });
+  }, 9000);
 
   // 解析所有参数
   const nameMap = parseSmartMap(toStr(args.name));
@@ -35,7 +53,7 @@
   const indexes = Object.keys(subMap).sort((a, b) => Number(a) - Number(b));
 
   if (!indexes.length) {
-    $done({
+    done({
       title: title,
       content: "未配置订阅链接",
       icon: "antenna.radiowaves.left.and.right",
@@ -52,7 +70,7 @@
   const validResults = results.filter(r => r !== null);
 
   if (!validResults.length) {
-    $done({
+    done({
       title: title,
       content: "所有机场获取失败",
       icon: "exclamationmark.triangle",
@@ -65,7 +83,7 @@
   const now = new Date();
   const time = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
-  $done({
+  done({
     title: `${title} | ${time}`,
     content: "\n" + validResults.join("\n\n"),
     icon: icon,
@@ -285,6 +303,7 @@ function getExpireTimestamp(expire, infoExpire) {
 
 /**
  * 计算距离重置日的剩余天数
+ * 重置日超过当月天数时按当月最后一天计（如 31 号重置遇 2 月 → 28/29 号）
  */
 function getRemainingDays(resetDay) {
   if (!resetDay || resetDay < 1 || resetDay > 31) return;
@@ -293,14 +312,16 @@ function getRemainingDays(resetDay) {
   const today = now.getDate();
   const month = now.getMonth();
   const year = now.getFullYear();
+  const clampToMonth = (y, m) => Math.min(resetDay, new Date(y, m + 1, 0).getDate());
 
-  if (resetDay > today) {
+  const thisMonthReset = clampToMonth(year, month);
+  if (thisMonthReset > today) {
     // 重置日在本月
-    return resetDay - today;
+    return thisMonthReset - today;
   } else {
     // 重置日在下月
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return daysInMonth - today + resetDay;
+    return daysInMonth - today + clampToMonth(year, month + 1);
   }
 }
 

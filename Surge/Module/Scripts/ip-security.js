@@ -50,7 +50,7 @@
 
 // ==================== 全局配置 ====================
 const CONFIG = {
-  timeout: 10000,
+  timeout: 9000, // 内部看门狗：须小于 sgmodule 的 timeout=10（10s），否则 Surge 先杀脚本，兜底面板没机会输出
   riskCacheTTL: 86400, // 风险评分缓存有效期（秒）：出口 IP 未变化时，此时长内复用缓存，
                        // 避免面板自动刷新（update-interval，默认 600s）反复消耗 IPQS 等按次计费额度
   storeKeys: {
@@ -92,7 +92,7 @@ function parseArguments() {
   let arg = {};
 
   if (typeof $argument !== "undefined") {
-    console.log("原始 $argument: " + $argument);
+    // 不打印 $argument 原文：其中可能含 ipqs_key 等敏感凭据
     arg = Object.fromEntries($argument.split("&").map(i => {
       const idx = i.indexOf("=");
       return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decodeURIComponent(i.slice(idx + 1)).trim()];
@@ -785,9 +785,7 @@ function sendNetworkChangeNotification({ useBilibili, policy, localIP, outIP, en
       $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
     }
   }
-  const dnsLeak = dnsLeakResult;
-  const traffic = trafficResult;
-  const context = { useBilibili, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic };
+  const context = { useBilibili, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak: dnsLeakResult, reverseDNS, traffic: trafficResult };
 
   if (args.isEvent) {
     sendNetworkChangeNotification(context);

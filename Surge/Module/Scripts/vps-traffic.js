@@ -95,10 +95,14 @@ if (!rawList.length) {
   };
 
   // 获取计费周期起始日期
+  // 重置日超过目标月天数时按该月最后一天计（如 31 号遇 2 月 → 28/29 号），
+  // 避免 new Date(y, m, 31) 溢出翻滚到下月导致周期起点漂移
   const getBillingStart = () => {
     const now = new Date();
     const y = now.getFullYear(), m = now.getMonth(), d = now.getDate();
-    return new Date(y, d >= resetDay ? m : m - 1, resetDay);
+    const thisMonthReset = Math.min(resetDay, new Date(y, m + 1, 0).getDate());
+    const tm = d >= thisMonthReset ? m : m - 1;
+    return new Date(y, tm, Math.min(resetDay, new Date(y, tm + 1, 0).getDate()));
   };
 
   // 计算计费周期内流量
@@ -119,7 +123,8 @@ if (!rawList.length) {
   let finished = 0;
   const results = new Array(rawList.length);
 
-  rawList.forEach((raw, index) => {
+  // 先解析全部条目，看门狗超时时能按名字标注未返回的 VPS
+  const servers = rawList.map(raw => {
     let name = "", ip = "", port = "8686", iface = "eth0";
 
     // 解析: 名称#地址@网卡:端口
@@ -129,8 +134,21 @@ if (!rawList.length) {
     if (item.includes(":")) [ip, port] = item.split(":").map(s => s.trim());
     else ip = item.trim();
     if (!name) name = ip;
-    iface = iface || "eth0";
-    port = port || "8686";
+    return { name, ip, port: port || "8686", iface: iface || "eth0" };
+  });
+
+  // 输出去重 + 超时兜底：任一探针挂起时输出已有结果，未返回的标注超时
+  // （须小于 sgmodule 的 timeout，避免 Surge 先杀脚本导致面板空白）
+  let done = false;
+  const finish = () => {
+    if (done) return;
+    done = true;
+    servers.forEach((s, i) => { if (results[i] === undefined) results[i] = `${s.name}\n请求超时`; });
+    $done({ title, content: results.join("\n\n"), icon: "server.rack", "icon-color": "#32CD32" });
+  };
+  setTimeout(finish, 9000);
+
+  servers.forEach(({ name, ip, port, iface }, index) => {
 
     $httpClient.get(`http://${ip}:${port}`, (err, resp, data) => {
       if (err || !data) {
@@ -168,9 +186,7 @@ if (!rawList.length) {
         }
       }
 
-      if (++finished === rawList.length) {
-        $done({ title, content: results.join("\n\n"), icon: "server.rack", "icon-color": "#32CD32" });
-      }
+      if (++finished === servers.length) finish();
     });
   });
 }
