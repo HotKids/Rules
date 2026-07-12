@@ -26,7 +26,6 @@
 >> Surge/Profile.conf
 # > Skip
 Gateway
-Speedtest
 
 # Clash
 >> Clash/Sample.yaml
