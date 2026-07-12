@@ -17,6 +17,9 @@
 //   · traffic 累计↓↑（默认 true）/ usage 用量对比配额（默认 true）/ expire 到期（默认 true）
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
 //   行序固定：累计 → 用量 → 系统 → 在线 → 延迟 → 价格 → 到期
+// - cycle: 周期用量（默认 false）。开启后用量行改为本计费周期精确用量（跨重启）：
+//   周期起点取 expired_at 的每月对应日（无到期日按每月 1 号），从 /api/records/load
+//   历史正增量累加得出；每节点多一次请求，失败自动回退累计口径
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -54,6 +57,7 @@ const show = {
 };
 const infoItems = ["traffic", "usage", "sys", "uptime", "ping", "price", "expire"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
+const wantCycle = showFlag(args.cycle, false);
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
 let excludeRe = null, nodeItems = [], nodesError = "";
@@ -133,6 +137,57 @@ const cycleLabel = days => {
   return days > 0 ? `${days}天` : "";
 };
 
+// 计费周期起点：expired_at 的每月对应日（到期日即周年日，流量按月在该日重置的惯例），
+// 无有效到期日按每月 1 号；重置日超过当月天数时按当月最后一天计
+const getCycleStart = node => {
+  let day = 1;
+  const m = String(node.expired_at || "").match(/^\d{4}-\d{2}-(\d{2})/);
+  if (m) day = parseInt(m[1], 10);
+  const now = new Date();
+  const y = now.getFullYear(), mo = now.getMonth();
+  const clamp = (yy, mm) => Math.min(day, new Date(yy, mm + 1, 0).getDate());
+  return now.getDate() >= clamp(y, mo)
+    ? new Date(y, mo, clamp(y, mo))
+    : new Date(y, mo - 1, clamp(y, mo - 1));
+};
+
+// 本周期精确用量：历史 net_total 序列逐点正增量累加（计数器重启清零时增量为负 →
+// 跳过并从新值继续，故跨重启准确），失败返回 null 由调用方回退累计口径
+const fetchCycleUsage = (node, rec) => {
+  const start = getCycleStart(node).getTime();
+  // 多取 1 小时，用周期起点前最后一个采样做增量基线
+  const hours = Math.max(1, Math.ceil((Date.now() - start) / 3600000) + 1);
+  const url = `${base}/api/records/load?uuid=${encodeURIComponent(node.uuid)}&load_type=network&hours=${hours}`;
+  return httpGet(url).then(raw => {
+    const j = JSON.parse(raw);
+    const body = j && typeof j === "object" && j.data ? j.data : j;
+    const recs = body && Array.isArray(body.records) ? body.records : null;
+    if (!recs || !recs.length) return null;
+
+    let pts = recs
+      .map(r => ({
+        t: Date.parse(String(r.time).replace(" ", "T")) || 0,
+        up: r.net_total_up || 0,
+        down: r.net_total_down || 0
+      }))
+      .sort((a, b) => a.t - b.t);
+    const pre = pts.filter(p => p.t < start);
+    pts = pts.filter(p => p.t >= start);
+    if (pre.length) pts.unshift(pre[pre.length - 1]);
+    if (rec) pts.push({ t: Date.now(), up: rec.net_total_up || 0, down: rec.net_total_down || 0 });
+    if (pts.length < 2) return null;
+
+    let up = 0, down = 0;
+    for (let i = 1; i < pts.length; i++) {
+      const du = pts[i].up - pts[i - 1].up;
+      const dd = pts[i].down - pts[i - 1].down;
+      up += du >= 0 ? du : pts[i].up;
+      down += dd >= 0 ? dd : pts[i].down;
+    }
+    return { up, down };
+  }).catch(() => null);
+};
+
 // expired_at 零值（0001-01-01）或无效日期视为未设置
 const formatExpire = raw => {
   if (!raw) return "";
@@ -210,6 +265,14 @@ if (!base) {
       return;
     }
 
+    // 周期用量预取：仅对显示中的节点发起，单节点失败回退累计口径
+    const cycleTargets = wantCycle && show.usage ? nodes.filter(n => !n.missing) : [];
+    return Promise.all(cycleTargets.map(n =>
+      fetchCycleUsage(n, statusMap ? statusMap[n.uuid] : null).then(v => [n.uuid, v])
+    )).then(cycleEntries => {
+    const cycleMap = {};
+    cycleEntries.forEach(([uuid, v]) => { if (v) cycleMap[uuid] = v; });
+
     const pct = (used, total) => total > 0 ? Math.round(used / total * 100) + "%" : "-";
 
     // 各内容行构造器；返回空则跳过该行。
@@ -219,11 +282,16 @@ if (!base) {
       traffic: (node, rec) => rec &&
         `累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`,
       usage: (node, rec) => {
-        if (!rec || !(node.traffic_limit > 0)) return "";
         const type = String(node.traffic_limit_type || "max").toLowerCase();
-        const usedGB = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type) / 1073741824;
+        const cyc = cycleMap[node.uuid];
+        // 周期口径：本计费周期精确用量（无配额也有意义）；否则累计口径，仅设有配额时显示
+        const label = cyc ? "周期" : "用量";
+        const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
+        if (!src || (!cyc && !(node.traffic_limit > 0))) return "";
+        const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
+        if (!(node.traffic_limit > 0)) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
         const quotaGB = node.traffic_limit / 1073741824;
-        return `用量 ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
+        return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
       },
       expire: node => {
         const s = formatExpire(node.expired_at);
@@ -265,6 +333,7 @@ if (!base) {
     });
 
     done({ title, content: blocks.join("\n\n"), icon: "server.rack", "icon-color": "#32CD32" });
+    }); // cycle 预取 then 结束
   }).catch(err => {
     done({
       title,
