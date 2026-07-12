@@ -1,4 +1,4 @@
-# Clash
+# Clash & mihomo
 
 本目录下除 `General.yaml` 外均为自动生成产物，**直接编辑会在下次同步时被覆盖**。
 
