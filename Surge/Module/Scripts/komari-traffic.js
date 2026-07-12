@@ -190,11 +190,11 @@ const regionFlag = raw => {
   return s;
 };
 
+// 单级精度：面板场景只需分辨「是否最近重启」，同时控制名称行宽度
 const formatUptime = sec => {
-  const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
-  if (d > 0) return `${d} 天${h ? ` ${h} 时` : ""}`;
-  if (h > 0) return `${h} 时${m ? ` ${m} 分` : ""}`;
-  return `${Math.max(1, m)} 分`;
+  if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
+  if (sec >= 3600) return `${Math.floor(sec / 3600)} 时`;
+  return `${Math.max(1, Math.floor(sec / 60))} 分`;
 };
 
 // billing_cycle（天）→ 周期文案
@@ -376,10 +376,14 @@ if (!base) {
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
       // 完整 IP 需 token；访客视后台开关为打码形式或空（空则该行隐藏）
+      // 双栈分行显示，上标角标区分（对齐 ip-security 的 IP⁴/IP⁶）；单栈不带角标
       ip: node => {
-        const parts = [node.ipv4, node.ipv6].filter(Boolean)
-          .map(v => ipMask ? maskIPAddr(v) : v);
-        return parts.length ? `IP 地址 ${parts.join("｜")}` : "";
+        const m = v => ipMask ? maskIPAddr(v) : v;
+        const v4 = node.ipv4 ? m(node.ipv4) : "";
+        const v6 = node.ipv6 ? m(node.ipv6) : "";
+        if (v4 && v6) return `IP 地址⁴ ${v4}\nIP 地址⁶ ${v6}`;
+        const one = v4 || v6;
+        return one ? `IP 地址 ${one}` : "";
       },
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
