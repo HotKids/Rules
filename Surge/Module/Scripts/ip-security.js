@@ -365,7 +365,7 @@ function parseScamalyticsScore(html) {
  * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
 async function getPolicyAndEntrance() {
-  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com|api\.db-ip\.com|geolite\.info)/i;
+  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|\b1\.1\.1\.1\b|2606:4700|opendata\.baidu\.com|api\.db-ip\.com|geolite\.info)/i;
 
   async function findInRecent(limit) {
     const res = await surgeAPI("GET", "/v1/requests/recent");
@@ -813,8 +813,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const useBilibili = args.localGeoApi === "bilibili";
   const localZh = useBilibili; // 本地地理为中文源 → 显示中文国名
 
-  // 入口/出口地理数据源：remote_geoapi=ipinfo → ipinfo.io, ipapi → ip-api.com(en),
-  // ipapi-zh → ip-api.com(zh-CN, http 明文), baidu → 百度 opendata(zh, https), dbip → DB-IP(en, https)
+  // 入口/出口地理数据源：remote_geoapi=ipinfo → ipinfo.io, ipapi/ipapi-zh → ip-api.com(en/zh, http 明文),
+  // baidu → 百度 opendata(zh, https), dbip → DB-IP(en, https), maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
   const useIpApi = args.remoteGeoApi.startsWith("ipapi");
   const useBaidu = args.remoteGeoApi === "baidu";
   const useDbip = args.remoteGeoApi === "dbip";
@@ -848,7 +848,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
     getIPType(outIP),                        // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
     httpJSON(geoUrl(outIP), null, geoHeaders),  // 3: 出口地理
-    needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（ip-api/baidu 模式）+ hostname
+    needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（非 ipinfo 数据源时）+ hostname
     getTrafficStats(),                       // 5: 流量统计
   ]);
 
@@ -880,7 +880,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   // IPv6 只显示 IP 地址，不单独查询地区和运营商
   let outInfo = normalizeGeo(outGeoRaw) || normalizeIpSb(outRaw);
   // 反向 DNS：从 ipinfo.io 响应中提取 hostname
-  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; ipapi/baidu 模式: outOrgRaw 来自 ipinfo.io
+  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; 其余数据源: outOrgRaw 来自 ipinfo.io
   const ipinfoRaw = needExtraOrg ? outOrgRaw : outGeoRaw;
   const reverseDNS = ipinfoRaw?.hostname || null;
   if (reverseDNS) console.log("反向 DNS: " + reverseDNS);
@@ -910,8 +910,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const { ipType, ipSrc } = ipTypeResult;
 
   // 5. IP 打码：mask_ip=2 锁定全隐藏；0/1 手动点击切换
-  const maskStored = $persistentStore.read(CONFIG.storeKeys.maskToggle);
-  let maskMode = args.maskIP === 2 ? 2 : (maskStored !== null ? parseInt(maskStored, 10) : args.maskIP);
+  const maskStored = parseInt($persistentStore.read(CONFIG.storeKeys.maskToggle), 10);
+  let maskMode = args.maskIP === 2 ? 2 : (Number.isInteger(maskStored) ? maskStored : args.maskIP);
   if (args.maskIP !== 2 && !args.isEvent) {
     const now = Math.floor(Date.now() / 1000);
     const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
