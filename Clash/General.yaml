@@ -220,7 +220,7 @@ dns:
   # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
   # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
   nameserver:
-    - "https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
+    - "https://8.8.8.8/dns-query#RULES&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
 
   # 兜底 DNS：nameserver 返回非 CN IP 或保留地址段时触发，同样走代理
   fallback:
