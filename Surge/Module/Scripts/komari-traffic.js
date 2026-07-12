@@ -325,7 +325,8 @@ if (!base) {
         const cyc = cycleMap[node.uuid];
         const label = cyc ? "周期" : "用量";
         const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
-        if (!src) return "";
+        // 累计口径下无配额不显示（与总流量行重复）；周期口径无配额仍有意义
+        if (!src || (!cyc && !hasQuota)) return "";
         const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
         if (!hasQuota) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
         const quotaGB = node.traffic_limit / 1073741824;
