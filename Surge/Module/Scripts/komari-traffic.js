@@ -1,7 +1,8 @@
 // komari-traffic.js - Komari 节点流量监控（单面板聚合：累计流量 + 用量/配额 + 到期）
 //
 // 数据来源（Komari 公开 API，两次请求出全部节点）:
-//   GET  /api/nodes  → 名称 / 地区 / 配额 / 用量口径 / 到期 / 价格 / 权重
+//   POST /api/rpc2 common:getNodes → 名称 / 地区 / IP / 配额 / 用量口径 / 到期 / 价格 / 权重
+//     （失败回退 GET /api/nodes，该接口不含 IP；IP 完整值需 token，访客视后台开关为打码或空）
 //   POST /api/rpc2 common:getNodesLatestStatus → 累计流量 / CPU / 内存 / 磁盘 / 在线时长 / ping 统计
 // 配额、到期日、用量口径均由 Komari 后台维护，无需在参数里逐台配置。
 //
@@ -20,8 +21,9 @@
 //     cycle=本计费周期精确用量（跨重启；周期起点取 expired_at 的每月对应日，
 //     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
 //     每节点多一次请求，失败自动回退累计口径）
-//   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
-//   行序固定：流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
+//   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀 /
+//     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏）
+//   行序固定：IP → 流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -58,11 +60,12 @@ const show = {
   sys: showFlag(args.sys, false),
   uptime: showFlag(args.uptime, false),
   ping: showFlag(args.ping, false),
-  price: showFlag(args.price, false)
+  price: showFlag(args.price, false),
+  ip: showFlag(args.ip, false)
 };
 // meta 行 = 价格·在线合并一行
 show.meta = show.price || show.uptime;
-const infoItems = ["traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
+const infoItems = ["ip", "traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
@@ -227,17 +230,27 @@ if (!base) {
 } else if (nodesError) {
   done({ title, content: nodesError, icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
 } else {
-  const rpcBody = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "common:getNodesLatestStatus", params: {} });
+  const rpcBody = method => JSON.stringify({ jsonrpc: "2.0", id: 1, method, params: {} });
+
+  // 节点列表：rpc2 getNodes 优先（带 IP 字段），失败回退 REST /api/nodes（无 IP）
+  const fetchNodes = () =>
+    httpPost(`${base}/api/rpc2`, rpcBody("common:getNodes")).then(raw => {
+      const rpc = JSON.parse(raw);
+      if (rpc.result && typeof rpc.result === "object") return Object.values(rpc.result);
+      throw new Error("getNodes 返回异常");
+    }).catch(() => httpGet(`${base}/api/nodes`).then(raw => {
+      const j = JSON.parse(raw);
+      // 兼容 {status,data:[…]} 包装与裸数组两种返回
+      const list = Array.isArray(j) ? j : (Array.isArray(j.data) ? j.data : null);
+      if (!list) throw new Error(j.message || "节点列表格式异常");
+      return list;
+    }));
 
   Promise.all([
-    httpGet(`${base}/api/nodes`),
-    httpPost(`${base}/api/rpc2`, rpcBody).catch(() => null) // 状态拉取失败时仍显示节点基础信息
-  ]).then(([nodesRaw, statusRaw]) => {
-    const nodesJson = JSON.parse(nodesRaw);
-    // 兼容 {status,data:[…]} 包装与裸数组两种返回
-    let nodes = Array.isArray(nodesJson) ? nodesJson
-      : (Array.isArray(nodesJson.data) ? nodesJson.data : null);
-    if (!nodes) throw new Error(nodesJson.message || "节点列表格式异常");
+    fetchNodes(),
+    httpPost(`${base}/api/rpc2`, rpcBody("common:getNodesLatestStatus")).catch(() => null) // 状态拉取失败时仍显示节点基础信息
+  ]).then(([nodesList, statusRaw]) => {
+    let nodes = nodesList;
 
     let statusMap = null;
     if (statusRaw) {
@@ -314,6 +327,11 @@ if (!base) {
     // 静态信息（expire/price）离线也显示；累计/用量取最后一次上报，离线仍有意义；
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
+      // 完整 IP 需 token；访客视后台开关为打码形式或空（空则该行隐藏）
+      ip: node => {
+        const parts = [node.ipv4, node.ipv6].filter(Boolean);
+        return parts.length ? `IP ${parts.join("｜")}` : "";
+      },
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
         `流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
