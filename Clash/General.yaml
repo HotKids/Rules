@@ -75,7 +75,6 @@ geox-url:
 
 # 静态域名映射，优先级高于 DNS 解析
 hosts:
-  '*.clash.dev': 127.0.0.1
   'localhost': 127.0.0.1
 
 # ── 配置持久化 ──

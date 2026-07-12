@@ -2952,9 +2952,9 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         L.append(f"  - &{anchor} {_yaml_sq(val)}")
     L += [
         "  # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——",
-        "  - &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &FallBack {type: fallback, interval: 6, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &LoadBalance {type: load-balance, interval: 6, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
         "",
         "# 本地节点（订阅覆盖此处）",
         f"proxies: {_yaml_flow(cfg.get('proxies', []))}",

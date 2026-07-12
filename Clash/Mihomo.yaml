@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-12 15:10:14
+# Date: 2026-07-12 15:16:11
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -48,7 +48,7 @@ geox-url: {geoip: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/v2ray-rules-dat@r
 # ── Hosts ──
 
 # 静态域名映射，优先级高于 DNS 解析
-hosts: {'*.clash.dev': 127.0.0.1, localhost: 127.0.0.1}
+hosts: {localhost: 127.0.0.1}
 
 # ── 配置持久化 ──
 
@@ -96,9 +96,9 @@ anchors:
   - &FilterJP '(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)'
   - &FilterUS '(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)'
   # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——
-  - &UrlTest {type: url-test, interval: 6, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &FallBack {type: fallback, interval: 6, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &LoadBalance {type: load-balance, interval: 6, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
 
 # 本地节点（订阅覆盖此处）
 proxies: []
