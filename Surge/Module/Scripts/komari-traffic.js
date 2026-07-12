@@ -26,7 +26,7 @@
 //       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
 // - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
 //   否则 IP 打码点击切换的判定会失准
-//   行序固定：IP → 流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
+//   行序固定：名称·在线（同一行） → IP → 流量 → 用量 → 价格 → 到期 → 系统 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -66,9 +66,7 @@ const show = {
   price: showFlag(args.price, false),
   ip: showFlag(args.ip, false)
 };
-// meta 行 = 价格·在线合并一行
-show.meta = show.price || show.uptime;
-const infoItems = ["ip", "traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
+const infoItems = ["ip", "traffic", "usage", "price", "expire", "sys", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
 
 // IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
@@ -192,11 +190,11 @@ const regionFlag = raw => {
   return s;
 };
 
+// 单级精度：面板场景只需分辨「是否最近重启」，同时控制名称行宽度
 const formatUptime = sec => {
-  const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
-  if (d > 0) return `${d} 天${h ? ` ${h} 时` : ""}`;
-  if (h > 0) return `${h} 时${m ? ` ${m} 分` : ""}`;
-  return `${Math.max(1, m)} 分`;
+  if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
+  if (sec >= 3600) return `${Math.floor(sec / 3600)} 时`;
+  return `${Math.max(1, Math.floor(sec / 60))} 分`;
 };
 
 // billing_cycle（天）→ 周期文案
@@ -378,10 +376,14 @@ if (!base) {
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
       // 完整 IP 需 token；访客视后台开关为打码形式或空（空则该行隐藏）
+      // 双栈分行显示，上标角标区分（对齐 ip-security 的 IP⁴/IP⁶）；单栈不带角标
       ip: node => {
-        const parts = [node.ipv4, node.ipv6].filter(Boolean)
-          .map(v => ipMask ? maskIPAddr(v) : v);
-        return parts.length ? `IP 地址 ${parts.join("｜")}` : "";
+        const m = v => ipMask ? maskIPAddr(v) : v;
+        const v4 = node.ipv4 ? m(node.ipv4) : "";
+        const v6 = node.ipv6 ? m(node.ipv6) : "";
+        if (v4 && v6) return `IP 地址⁴ ${v4}\nIP 地址⁶ ${v6}`;
+        const one = v4 || v6;
+        return one ? `IP 地址 ${one}` : "";
       },
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
@@ -407,20 +409,13 @@ if (!base) {
       },
       sys: (node, rec) => rec && rec.online &&
         `CPU ${Math.round(rec.cpu || 0)}%｜内存 ${pct(rec.ram, rec.ram_total)}｜磁盘 ${pct(rec.disk, rec.disk_total)}`,
-      // 价格·在线合并一行（各自开关独立，缺一项时单独显示另一项）
-      meta: (node, rec) => {
-        const parts = [];
-        if (show.price && node.price > 0) {
-          const unit = cycleLabel(node.billing_cycle);
-          // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
-          const cur = node.currency || "$";
-          const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
-          parts.push(`价格 ${amount}${unit ? "/" + unit : ""}`);
-        }
-        if (show.uptime && rec && rec.online && rec.uptime > 0) {
-          parts.push(`在线 ${formatUptime(rec.uptime)}`);
-        }
-        return parts.join("｜");
+      price: node => {
+        if (!(node.price > 0)) return "";
+        const unit = cycleLabel(node.billing_cycle);
+        // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
+        const cur = node.currency || "$";
+        const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
+        return `价格 ${amount}${unit ? "/" + unit : ""}`;
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
@@ -441,7 +436,11 @@ if (!base) {
 
       const lines = [];
       if (!statusMap) lines.push(displayName, "状态获取失败");
-      else lines.push(rec && rec.online ? displayName : `${displayName} ｜ 离线`);
+      else {
+        let nameLine = rec && rec.online ? displayName : `${displayName} · 离线`;
+        if (show.uptime && rec && rec.online && rec.uptime > 0) nameLine += ` · 在线 ${formatUptime(rec.uptime)}`;
+        lines.push(nameLine);
+      }
 
       infoItems.forEach(key => {
         const build = lineBuilders[key];
