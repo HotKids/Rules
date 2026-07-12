@@ -226,11 +226,32 @@ class ServiceChecker {
 
   /**
    * Netflix 价格表预取（与各服务检测并行发起，避免检测完成后再串行等一个 RTT）
-   * @returns {Promise<Object|null>} 价格表 HTTP 响应
+   * 价格表更新频率低，本地缓存 24 小时；请求失败时回退过期缓存
+   * @returns {Promise<Object|null>} 价格表 HTTP 响应（或缓存等价物）
    */
   static fetchNetflixPrices() {
+    const CACHE_KEY = "media_check_nf_prices";
+    const TTL = 86400000; // 24h
+
+    let cached = null;
+    try {
+      cached = JSON.parse($persistentStore.read(CACHE_KEY));
+    } catch { /* 无缓存或缓存损坏 */ }
+
+    if (cached?.body && Date.now() - cached.ts < TTL) {
+      return Promise.resolve({ status: 200, body: cached.body });
+    }
+
     return Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json" })
-      .catch(() => null);
+      .then(res => {
+        if (res?.status === 200 && res.body) {
+          $persistentStore.write(JSON.stringify({ ts: Date.now(), body: res.body }), CACHE_KEY);
+          return res;
+        }
+        // 非 200 → 回退过期缓存
+        return cached?.body ? { status: 200, body: cached.body } : res;
+      })
+      .catch(() => (cached?.body ? { status: 200, body: cached.body } : null));
   }
 
   /**
