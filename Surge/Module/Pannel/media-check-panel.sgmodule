@@ -4,7 +4,7 @@
 #!category=HotKids
 #!system=ios
 #!arguments=geminiapikey:null,nfprice:true,viu:false
-#!arguments-desc=参数说明：\ngeminiapikey: Google Gemini API Key（可选，无 Key 时通过网页检测，有 Key 时增加 API 检测作为 fallback）\nnfprice: 显示 Netflix 价格（默认 true 开启，设置为 false 可关闭以提升速度）\nviu: 检测 Viu（HK/东南亚流媒体，默认 false 关闭；设为 true 开启，且仅在可用时显示）
+#!arguments-desc=【参数说明】\n\n· [geminiapikey]: Google Gemini API Key（可选）\n无 Key 时通过网页检测，有 Key 时增加 API 检测作为回落\n\n· [nfprice]: Netflix 价格显示（默认 true）\n价格表本地缓存 24 小时；设为 false 关闭以提升速度\n\n· [viu]: 检测 Viu（默认 false）\nHK / 东南亚流媒体；设为 true 开启，且仅在可用时显示
 
 [Panel]
 media-check-panel = type=generic,script-name=media-check,update-interval=600,icon=play.circle.fill

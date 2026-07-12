@@ -4,7 +4,7 @@
 #!category=HotKids
 #!system=ios
 #!arguments=sub:null,expire:null,reset:null,title:机场流量信息,icon:airplane.departure,color:#007AFF
-#!arguments-desc=【必填参数】\nsub: 订阅列表，格式：名称#订阅URL;名称#订阅URL\n  - URL 需单独 URL encode（在线工具: https://www.urlencoder.org/）\n  - 名称省略时自动编号（Airport-1、Airport-2...）\n  - 示例：机场A#链接1;机场B#链接2\n\n【可选参数】\nexpire: 到期日期（优先使用此值，否则从订阅读取）\n  - 格式：YYYYMMDD / YYYY-MM-DD / Unix时间戳\n  - 写法1：expire=20261231（全部同一到期日）\n  - 写法2：expire=20261231;机场B:20260630（默认值;名称:值 逐机覆盖）\n\nreset: 每月流量重置日（1-31）\n  - 写法1：reset=1（全部每月 1 号重置）\n  - 写法2：reset=1;机场B:15（默认值;名称:值 逐机覆盖）\n\ntitle: 面板标题（默认：机场流量信息）\n\nicon: 面板图标（默认：airplane.departure）\n\ncolor: 图标颜色（默认：#007AFF）
+#!arguments-desc=【必填】\n\n· [sub]: 订阅列表\n格式：名称#订阅URL;名称#订阅URL（多机场用 ; 分隔）\nURL 需单独 URL encode（在线工具：https://www.urlencoder.org/）\n名称省略时自动编号（Airport-1、Airport-2…）\n示例：机场A#链接1;机场B#链接2\n\n【可选】\n\n· [expire]: 到期日期（优先使用此值，否则从订阅读取）\n格式：YYYYMMDD / YYYY-MM-DD / Unix 时间戳\n写法1：expire=20261231（全部同一到期日）\n写法2：expire=20261231;机场B:20260630（默认值;名称:值 逐机覆盖）\n\n· [reset]: 每月流量重置日（1-31）\n写法1：reset=1（全部每月 1 号重置）\n写法2：reset=1;机场B:15（默认值;名称:值 逐机覆盖）\n\n【显示】\n\n· [title]: 面板标题（默认：机场流量信息）\n\n· [icon]: 面板图标（默认：airplane.departure）\n\n· [color]: 图标颜色（默认：#007AFF）
 
 [Panel]
 airport-traffic-panel = type=generic,script-name=airport-traffic,update-interval=600,icon={{{icon}}}
