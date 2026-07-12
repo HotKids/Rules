@@ -24,6 +24,8 @@
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀 /
 //     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏；
 //       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
+// - notify: 节点离线/恢复推送（默认 false）。每次面板刷新对比上次在线状态，变化即通知；
+//   统计全部节点（与顶部概览一致，不受 nodes 筛选影响）；依赖面板刷新时机，非实时保证
 // - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
 //   否则 IP 打码点击切换的判定会失准
 //   行序固定：名称·在线（同一行） → IP → 流量 → 用量 → 价格 → 到期 → 系统 → 延迟
@@ -68,6 +70,7 @@ const show = {
 };
 const infoItems = ["ip", "traffic", "usage", "price", "expire", "sys", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
+const wantNotify = showFlag(args.notify, false);
 
 // IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
 // 与 ip-security 同款时间判定，misfire 容忍 15s
@@ -323,6 +326,26 @@ if (!base) {
         }
       });
       overview = `在线 ${online}/${nodes.length}｜点亮地区 ${regions.size}\n总量 ↑ ${formatGB(up)} ↓ ${formatGB(down)}`;
+    }
+
+    // 离线/恢复推送：对比上次刷新的在线状态，变化即通知（首次运行仅记录基线）
+    // 统计全部节点，与概览口径一致，不受 nodes 筛选影响
+    if (wantNotify && statusMap) {
+      let prev = null;
+      try { prev = JSON.parse(store.read("komariOnlineState")); } catch (e) {}
+      const cur = {};
+      const changes = [];
+      nodes.forEach(n => {
+        const online = !!(statusMap[n.uuid] && statusMap[n.uuid].online);
+        cur[n.uuid] = online;
+        if (prev && n.uuid in prev && prev[n.uuid] !== online) {
+          changes.push(online ? `🟢 ${n.name} 恢复上线` : `🔴 ${n.name} 离线`);
+        }
+      });
+      store.write(JSON.stringify(cur), "komariOnlineState");
+      if (changes.length && typeof $notification !== "undefined") {
+        $notification.post(title, "", changes.join("\n"));
+      }
     }
 
     // 与 Komari 面板一致：weight 升序（数值小的靠前），同权重按名称
