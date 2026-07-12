@@ -10,8 +10,9 @@
 // 参数:
 // - url: Komari 面板地址（必填，如 https://mon.example.com；无协议前缀默认 https）
 // - token: 后台 API Key（可选；私有站点或需显示隐藏节点时以 Authorization: Bearer 发送）
-// - nodes: 节点过滤，名称;名称（可选；顺序即显示顺序，不填显示全部并按权重排序）
-// - filter: 节点名称正则筛选（可选；匹配的才显示，"!" 开头则反转为匹配的不显示；nodes 已填时忽略）
+// - nodes: 节点筛选（可选，不填显示全部并按权重排序）
+//   · 名称或正则;名称或正则 → 只显示匹配的节点，顺序跟随条目（条目内按权重）
+//   · "!" 开头 → 整体视作单个正则，匹配的不显示
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -32,18 +33,17 @@ const clean = v => {
 
 const title = clean(args.title) || "📊 Komari 流量统计";
 const token = clean(args.token);
-const nodeFilter = clean(args.nodes).split(";").map(s => s.trim()).filter(Boolean);
-
-// 名称正则筛选："!" 开头 → 匹配的不显示，否则 → 只显示匹配的
-const rawPattern = clean(args.filter);
-const filterNegate = rawPattern.startsWith("!");
-let filterRe = null, filterError = "";
-if (rawPattern) {
+// 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
+const rawNodes = clean(args.nodes);
+let excludeRe = null, nodeItems = [], nodesError = "";
+if (rawNodes.startsWith("!")) {
   try {
-    filterRe = new RegExp(filterNegate ? rawPattern.slice(1) : rawPattern);
+    excludeRe = new RegExp(rawNodes.slice(1));
   } catch (e) {
-    filterError = `filter 正则无效：${e.message || e}`;
+    nodesError = `nodes 排除正则无效：${e.message || e}`;
   }
+} else if (rawNodes) {
+  nodeItems = rawNodes.split(";").map(s => s.trim()).filter(Boolean);
 }
 
 let base = clean(args.url).replace(/\/+$/, "");
@@ -122,8 +122,8 @@ const formatExpire = raw => {
 
 if (!base) {
   done({ title, content: "未填写 url 参数", icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
-} else if (filterError) {
-  done({ title, content: filterError, icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
+} else if (nodesError) {
+  done({ title, content: nodesError, icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
 } else {
   const rpcBody = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "common:getNodesLatestStatus", params: {} });
 
@@ -145,21 +145,36 @@ if (!base) {
       } catch (e) {}
     }
 
-    if (nodeFilter.length) {
-      // 按参数顺序显示
-      const byName = {};
-      nodes.forEach(n => { byName[n.name] = n; });
-      nodes = nodeFilter.map(name => byName[name] || { name, missing: true });
+    const byWeight = (a, b) => (b.weight || 0) - (a.weight || 0) || String(a.name).localeCompare(String(b.name));
+
+    if (nodeItems.length) {
+      // 逐条目匹配：正则命中或名称完全相等（兼容含元字符的精确名称），
+      // 顺序跟随条目，条目内按权重
+      const seen = new Set();
+      const picked = [];
+      nodeItems.forEach(pat => {
+        let re = null;
+        try { re = new RegExp(pat); } catch (e) {}
+        const matched = nodes
+          .filter(n => ((re && re.test(String(n.name))) || String(n.name) === pat) && !seen.has(n.uuid))
+          .sort(byWeight);
+        if (!matched.length) {
+          picked.push({ name: pat, missing: true });
+          return;
+        }
+        matched.forEach(n => { seen.add(n.uuid); picked.push(n); });
+      });
+      nodes = picked;
     } else {
-      if (filterRe) nodes = nodes.filter(n => filterNegate !== filterRe.test(String(n.name)));
+      if (excludeRe) nodes = nodes.filter(n => !excludeRe.test(String(n.name)));
       // 与 Komari 面板一致：权重大的靠前，同权重按名称
-      nodes.sort((a, b) => (b.weight || 0) - (a.weight || 0) || String(a.name).localeCompare(String(b.name)));
+      nodes.sort(byWeight);
     }
 
     if (!nodes.length) {
       done({
         title,
-        content: filterRe ? "无匹配 filter 的节点" : "面板暂无节点",
+        content: excludeRe ? "无匹配 nodes 的节点" : "面板暂无节点",
         icon: "server.rack",
         "icon-color": "#9E9E9E"
       });
@@ -167,7 +182,7 @@ if (!base) {
     }
 
     const blocks = nodes.map(node => {
-      if (node.missing) return `${node.name}\n节点不存在`;
+      if (node.missing) return `${node.name}\n无匹配节点`;
       const rec = statusMap ? statusMap[node.uuid] : null;
 
       if (!statusMap) {
