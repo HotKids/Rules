@@ -292,15 +292,16 @@ if (!base) {
       traffic: (node, rec) => rec &&
         `累计 ↓ ${formatGB(rec.net_total_down || 0)} ↑ ${formatGB(rec.net_total_up || 0)}`,
       usage: (node, rec) => {
-        const type = String(node.traffic_limit_type || "max").toLowerCase();
+        const hasQuota = node.traffic_limit > 0;
+        // 有配额：口径严格跟随 Komari 的流量阈值类型（与后台告警一致）；
+        // 无配额：Komari 默认的 max 没有对比意义，固定按 sum 显示总流量
+        const type = hasQuota ? String(node.traffic_limit_type || "max").toLowerCase() : "sum";
         const cyc = cycleMap[node.uuid];
-        // 周期口径：本计费周期精确用量（无配额也有意义）；否则累计口径，仅设有配额时显示
         const label = cyc ? "周期" : "用量";
         const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
-        if (!src || (!cyc && !(node.traffic_limit > 0))) return "";
+        if (!src || (!cyc && !hasQuota)) return "";
         const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
-        // 无配额时口径标签没有对比意义，省掉
-        if (!(node.traffic_limit > 0)) return `${label} ${usedGB.toFixed(2)} GB`;
+        if (!hasQuota) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
         const quotaGB = node.traffic_limit / 1073741824;
         return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
       },
