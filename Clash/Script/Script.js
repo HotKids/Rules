@@ -145,6 +145,7 @@ function main(config) {
   // 节点池筛选正则（对应 Mihomo.yaml 的 &Region / &Filter* 锚点）：
   // null = 不过滤、取全量节点；下方策略组生成后按此表运行时填充候选。
   const poolGroupFilters = {
+    '⏱️ Speedtest': null,
     '🇺🇳 Server': null,
     '🇭🇰 Hong Kong': '(?i)(?:🇭🇰|香港|Hong Kong|\\b(?:HK|HKG)\\d*\\b)',
     '🇨🇳 Taiwan': '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\\b(?:TW|TWN)\\d*\\b)',
@@ -181,6 +182,8 @@ function main(config) {
     { name: '💳 Finance', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png' },
     // Mail
     { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png' },
+    // Speedtest
+    { name: '⏱️ Speedtest', type: 'select', 'include-all-providers': true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png' },
     // Adblock
     { name: '🚧 AdGuard', type: 'select', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png' },
     // DIRECT
@@ -257,6 +260,7 @@ function main(config) {
     'Crypto': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/Crypto.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml' },
     'Finance': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/Finance.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml' },
     'Spark': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/Spark.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml' },
+    'Speedtest': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Speedtest.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Speedtest.mrs' },
     'Global': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Global.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs' },
     'China': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs' },
     'CNASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/CNASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
@@ -318,6 +322,8 @@ function main(config) {
     'RULE-SET,Finance,💳 Finance',
     // > Mail
     'RULE-SET,Spark,📧 Mail',
+    // > Speedtest
+    'RULE-SET,Speedtest,⏱️ Speedtest',
     // Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
     'RULE-SET,Global,🔰 Proxy',
     // China Area Network

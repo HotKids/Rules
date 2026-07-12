@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 18:17:12
+# Date: 2026-07-12 18:28:41
 # Author: @HotKids
 
 # 通用设置
@@ -446,6 +446,13 @@ proxy-groups:
       - 🔰 Proxy
       - 🔘 DIRECT
 
+  # Speedtest
+  - name: "⏱️ Speedtest"
+    type: select
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
+    use:
+      - Server
+
   # Adblock
   - name: "🚧 AdGuard"
     type: select
@@ -724,6 +731,14 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml
     interval: 86400
 
+  Speedtest:
+    type: http
+    behavior: domain
+    format: mrs
+    path: ./Provider/RuleSet/Speedtest.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Speedtest.mrs
+    interval: 86400
+
   Global:
     type: http
     behavior: domain
@@ -836,6 +851,9 @@ rules:
 
   # > Mail
   - RULE-SET,Spark,📧 Mail
+
+  # > Speedtest
+  - RULE-SET,Speedtest,⏱️ Speedtest
 
   # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
   - RULE-SET,Global,🔰 Proxy

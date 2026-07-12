@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-12 16:42:11
+# Date: 2026-07-12 18:32:14
 # Author: @HotKids
 
 [General]
@@ -88,6 +88,8 @@ FilterUS = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b
 💳 Finance = select,🇺🇸 America,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Finance.png
 # Mail
 📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Mail.png
+# Speedtest
+⏱️ Speedtest = select,FilterUN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Speed.png
 # Adblock
 🚧 AdGuard = select,🔘 DIRECT,⛔️ REJECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Block.png
 # Nodes
@@ -160,6 +162,8 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Crypto.lis
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Finance.list, policy=💳 Finance, tag=Finance, enabled=true
 # > Mail
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Spark.list, policy=📧 Mail, tag=Mail, enabled=true
+# > Speedtest
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Speedtest.list, policy=⏱️ Speedtest, tag=Speedtest, enabled=true
 # Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=Global, enabled=true
 # China Area Network

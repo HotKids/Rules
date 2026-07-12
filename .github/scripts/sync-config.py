@@ -215,6 +215,7 @@ def strip_emoji(name: str) -> str:
         cp = ord(result[0])
         if (
             0x1F000 <= cp <= 0x1FFFF  # 杂项符号和象形文字
+            or 0x2300 <= cp <= 0x23FF  # 杂项技术符号（如 ⏱）
             or 0x2600 <= cp <= 0x27BF  # 杂项符号
             or 0xFE00 <= cp <= 0xFE0F  # 变体选择符
             or 0x1F1E0 <= cp <= 0x1F1FF  # 区域指示符（国旗）
@@ -1778,7 +1779,12 @@ def _fmt_loon_group(
         return f"{name} = select,{filter_name}{icon_part}"
 
     if params.get("include-other-group", ""):
-        return None  # Loon 不直接支持，由 builtin inject_names 或 FilterMap 覆盖
+        # select + 借全量节点池（如 ⏱️ Speedtest ← 🇺🇳 Server）→ 全节点 Filter
+        if gtype == "select" and not params.get("policy-regex-filter"):
+            fm_val = filter_map.get(name, "FilterUN")
+            filter_name = fm_val.split(",")[0].strip()
+            return f"{name} = select,{filter_name}{icon_part}"
+        return None  # 其余由 builtin inject_names 或 FilterMap 覆盖
 
     if params.get("policy-path", ""):
         return None  # 由 Builtin inject_names 替换
@@ -2020,6 +2026,10 @@ def _fmt_qx_policy(
     # smart + policy-regex-filter → static with server-tag-regex（必须先于 include-other-group 检查）
     if gtype == "smart" and (regex := params.get("policy-regex-filter", "")):
         return f"static={emit_name}, server-tag-regex={regex}{icon_part}"
+
+    # select + 借全量节点池（如 ⏱️ Speedtest ← 🇺🇳 Server）→ 全节点 server-tag-regex
+    if gtype == "select" and "include-other-group" in params and not params.get("policy-regex-filter"):
+        return f"static={emit_name}, server-tag-regex=.*{icon_part}"
 
     # include-all-proxies / include-other-group / policy-path → 跳过
     if (
@@ -2392,7 +2402,7 @@ def _gen_surfboard_general(lines: list[str]) -> str:
     return "\n".join(out)
 
 
-_SURFBOARD_SKIP_PARAMS = {"icon-url", "evaluate-before-use", "no-alert"}
+_SURFBOARD_SKIP_PARAMS = {"icon-url", "evaluate-before-use", "no-alert", "include-other-group"}
 
 
 def _gen_surfboard_proxy_groups(
@@ -2460,7 +2470,11 @@ def _gen_surfboard_proxy_groups(
             continue
 
         gtype = "url-test" if g["type"] == "smart" else g["type"]
-        tokens = [gtype] + g["proxies"]
+        members = list(g["proxies"])
+        # Surfboard 无 include-other-group：无静态候选时嵌套目标组（如 ⏱️ Speedtest ← 🇺🇳 Server）
+        if not members and (other := g["params"].get("include-other-group", "")):
+            members = [other]
+        tokens = [gtype] + members
         params = dict(g["params"])
         # smart → url-test 降级时显式补 Surge 系默认容差，避免依赖 Surfboard 的隐式默认
         if g["type"] == "smart":
@@ -3715,7 +3729,7 @@ SB_DIRECT_TAG = "🔘 Direct"
 # 仅当出现无法识别的新地区组时才会引用，此时仍需手动订阅工具注入节点）
 SB_PLACEHOLDER = "🚀 Proxy（请用订阅工具注入节点）"
 # 组名含这些关键词的策略组不生成 outbound（与其他平台的 skip 语义一致）
-SB_SKIP_GROUP_KW = ("Speedtest", "Gateway", "Apple TV")
+SB_SKIP_GROUP_KW = ("Gateway", "Apple TV")
 
 # 各地区示例节点（占位用途：sing-box 无订阅机制，先内置一份可直接连通的示例
 # Shadowsocks 节点，方便直接改 server/password 试用；真实使用请用订阅工具替换）
@@ -3852,6 +3866,9 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
                     continue
                 else:
                     outs.append(p)
+            # 无静态候选的 include-other-group 组（如 ⏱️ Speedtest ← 🇺🇳 Server）→ 嵌套目标组
+            if not outs and (other := params.get("include-other-group", "")):
+                outs = [other]
             selectors.append({"type": "selector", "tag": name, "outbounds": outs})
 
     for s in server:                                       # Server 组候选 = 全部示例节点
