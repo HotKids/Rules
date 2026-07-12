@@ -122,17 +122,14 @@ const calcUsage = (up, down, type) => {
 const usageLabel = type =>
   ({ sum: "⇅", up: "↑", down: "↓", min: "min" }[type] || "max");
 
-// region 字段清洗：ISO 两字母代码转国旗（JP → 🇯🇵），已是国旗则保留，
-// 其余内容（渲染不了的占位字符、乱码）丢弃，避免面板出现黑块
+// region 字段：ISO 两字母代码转国旗（JP → 🇯🇵），其余原样显示
 const regionFlag = raw => {
   const s = String(raw || "").trim();
-  if (!s) return "";
   if (/^[A-Za-z]{2}$/.test(s)) {
     const up = s.toUpperCase();
     return String.fromCodePoint(0x1F1E6 + up.charCodeAt(0) - 65, 0x1F1E6 + up.charCodeAt(1) - 65);
   }
-  const m = s.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u);
-  return m ? m[0] : "";
+  return s;
 };
 
 const formatUptime = sec => {
