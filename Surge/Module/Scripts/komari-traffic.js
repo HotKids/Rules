@@ -122,6 +122,19 @@ const calcUsage = (up, down, type) => {
 const usageLabel = type =>
   ({ sum: "⇅", up: "↑", down: "↓", min: "min" }[type] || "max");
 
+// region 字段清洗：ISO 两字母代码转国旗（JP → 🇯🇵），已是国旗则保留，
+// 其余内容（渲染不了的占位字符、乱码）丢弃，避免面板出现黑块
+const regionFlag = raw => {
+  const s = String(raw || "").trim();
+  if (!s) return "";
+  if (/^[A-Za-z]{2}$/.test(s)) {
+    const up = s.toUpperCase();
+    return String.fromCodePoint(0x1F1E6 + up.charCodeAt(0) - 65, 0x1F1E6 + up.charCodeAt(1) - 65);
+  }
+  const m = s.match(/[\u{1F1E6}-\u{1F1FF}]{2}/u);
+  return m ? m[0] : "";
+};
+
 const formatUptime = sec => {
   if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
   if (sec >= 3600) return `${Math.floor(sec / 3600)} 小时`;
@@ -280,7 +293,7 @@ if (!base) {
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
       traffic: (node, rec) => rec &&
-        `累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`,
+        `累计 ↓ ${formatGB(rec.net_total_down || 0)} ↑ ${formatGB(rec.net_total_up || 0)}`,
       usage: (node, rec) => {
         const type = String(node.traffic_limit_type || "max").toLowerCase();
         const cyc = cycleMap[node.uuid];
@@ -289,7 +302,8 @@ if (!base) {
         const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
         if (!src || (!cyc && !(node.traffic_limit > 0))) return "";
         const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
-        if (!(node.traffic_limit > 0)) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
+        // 无配额时口径标签没有对比意义，省掉
+        if (!(node.traffic_limit > 0)) return `${label} ${usedGB.toFixed(2)} GB`;
         const quotaGB = node.traffic_limit / 1073741824;
         return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
       },
@@ -298,27 +312,32 @@ if (!base) {
         return s && `到期 ${s}`;
       },
       sys: (node, rec) => rec && rec.online &&
-        `CPU ${Math.round(rec.cpu || 0)}% ｜ 内存 ${pct(rec.ram, rec.ram_total)} ｜ 磁盘 ${pct(rec.disk, rec.disk_total)}`,
+        `CPU ${Math.round(rec.cpu || 0)}%｜内存 ${pct(rec.ram, rec.ram_total)}｜磁盘 ${pct(rec.disk, rec.disk_total)}`,
       uptime: (node, rec) => rec && rec.online && rec.uptime > 0 &&
         `在线 ${formatUptime(rec.uptime)}`,
       price: node => {
         if (!(node.price > 0)) return "";
         const unit = cycleLabel(node.billing_cycle);
-        return `价格 ${node.price} ${node.currency || "$"}${unit ? " / " + unit : ""}`;
+        return `价格 ${node.price} ${node.currency || "$"}${unit ? "/" + unit : ""}`;
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
         const parts = Object.values(rec.ping)
           .filter(p => p && p.latest >= 0)
-          .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? `(丢${Math.round(p.loss)}%)` : ""}`);
-        return parts.length ? `延迟 ${parts.join(" ｜ ")}` : "";
+          .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? ` 丢${Math.round(p.loss)}%` : ""}`);
+        if (!parts.length) return "";
+        // 每行两项，避免任务多时折行成一大段
+        const rows = [];
+        for (let i = 0; i < parts.length; i += 2) rows.push(parts.slice(i, i + 2).join("｜"));
+        return `延迟 ${rows.join("\n")}`;
       }
     };
 
     const blocks = nodes.map(node => {
       if (node.missing) return `${node.name}\n无匹配节点`;
       const rec = statusMap ? statusMap[node.uuid] : null;
-      const displayName = showRegion && node.region ? `${node.region} ${node.name}` : node.name;
+      const flag = showRegion ? regionFlag(node.region) : "";
+      const displayName = flag ? `${flag} ${node.name}` : node.name;
 
       const lines = [];
       if (!statusMap) lines.push(displayName, "状态获取失败");
