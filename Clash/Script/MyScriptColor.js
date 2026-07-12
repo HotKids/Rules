@@ -1,7 +1,7 @@
 /**
  * mihomo 覆写脚本（Enhance Script）· HotKids/Rules
  *
- * 用途：在 Clash Verge 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅
+ * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅
  * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的
  * 策略组、分流规则与基础设置，不必依赖机场自带配置。
  *
@@ -121,8 +121,8 @@ function main(config) {
 
   // ── DNS ──
   // fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；
-  // nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；
-  // fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH
+  // 主 DNS 经 #RULES 走代理拿干净结果，防境外域名泄露给国内 DNS；nameserver-policy 按声明顺序先窄后宽：
+  // 内网域名交系统解析器、NTP 用裸 IP UDP（校时不依赖 TLS）、国内域名国内 DoH 就近解析；代理节点/DIRECT 域名同走国内 DoH
   config['dns'] = { enable: true, listen: '0.0.0.0:1053', ipv6: false, 'use-system-hosts': true, 'cache-algorithm': 'arc', 'prefer-h3': false, 'respect-rules': false, 'default-nameserver': ['223.5.5.5', '119.29.29.29'], 'enhanced-mode': 'fake-ip', 'fake-ip-range': '198.18.0.1/16', 'fake-ip-range6': '', 'fake-ip-ttl': 1, 'fake-ip-filter-mode': 'blacklist', 'fake-ip-filter': ['*.lan', '+.lan', '*.local', '*.localdomain', '*.home.arpa', '*.localhost', 'WORKGROUP', 'time.*.com', 'time.*.gov', 'time.*.apple.com', 'ntp.*.com', '+.pool.ntp.org', '*.ntp.org.cn', '+.stun.*', '*.stun.*.*', '*.turn.twilio.com', '*.stun.twilio.com', 'stun.syncthing.net', '*.srv.nintendo.net', 'xbox.*.microsoft.com', 'xbox.*.*.microsoft.com', '*.xboxlive.com', '*.cm.steampowered.com', '*.steamcontent.com', '*.battlenet.com.cn', '*.battlenet.com', '*.blzstatic.cn', '*.battle.net', '*.msftncsi.com', '*.msftconnecttest.com', 'connectivitycheck.gstatic.com', 'connectivitycheck.android.com', 'connectivitycheck.platform.hicloud.com', 'connect.rom.miui.com', 'captive.apple.com', 'network-test.debian.org', 'detectportal.firefox.com', 'lens.l.google.com', '+.push.apple.com', '+.market.xiaomi.com', '*.tailscale.com', '*.zerotier.com', '*.spotify.com', '+.music.126.net', '*.mcdn.bilivideo.cn', 'localhost.*.qq.com'], nameserver: ['https://1.1.1.1/dns-query#RULES'], 'nameserver-policy': { 'geosite:private': ['system'], 'time.*.com,time.*.gov,time.*.apple.com,ntp.*.com,+.pool.ntp.org,*.ntp.org.cn': ['223.5.5.5', '119.29.29.29'], 'geosite:cn': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'] }, 'proxy-server-nameserver': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'], 'direct-nameserver': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'], 'direct-nameserver-follow-policy': false };
 
   // ── TUN ──
