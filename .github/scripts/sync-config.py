@@ -2447,7 +2447,11 @@ def _gen_surfboard_proxy_groups(
 
         gtype = "url-test" if g["type"] == "smart" else g["type"]
         tokens = [gtype] + g["proxies"]
-        for k, v in g["params"].items():
+        params = dict(g["params"])
+        # smart → url-test 降级时显式补 Surge 系默认容差，避免依赖 Surfboard 的隐式默认
+        if g["type"] == "smart":
+            params.setdefault("tolerance", "100")
+        for k, v in params.items():
             if k in _SURFBOARD_SKIP_PARAMS:
                 continue
             tokens.append(f"{k}={v}")
@@ -3048,7 +3052,7 @@ def _gen_clash_script_js(
 ) -> tuple[str, tuple[list[dict], dict[str, str | None], list[str], set[str]]]:
     """由最终生成的 Clash/Mihomo.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
-    用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
+    用于 Clash Verge Rev / FlClash / Bettbox 等支持「Enhance Script」的客户端：直接对任意订阅（如
     sub.hotkids.me）生成与本仓库 Surge/Profile.conf 等效的策略组 / 规则 / 基础设置，
     不依赖本仓库自身的 proxy-providers 静态生成流程。
 
@@ -3147,7 +3151,7 @@ def _gen_clash_script_js(
         "/**",
         " * mihomo 覆写脚本（Enhance Script）· HotKids/Rules",
         " *",
-        " * 用途：在 Clash Verge 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
+        " * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
         " * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的",
         " * 策略组、分流规则与基础设置，不必依赖机场自带配置。",
         " *",
