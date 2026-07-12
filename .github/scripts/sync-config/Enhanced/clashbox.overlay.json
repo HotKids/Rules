@@ -8,7 +8,7 @@
   "rule_policy_redirect": { "📛 REJECT-DROP": "⛔️ REJECT" },
   "remove_groups": ["📛 REJECT-DROP"],
 
-  "disabled_by_default": ["OneDrive", "Microsoft"],
+  "disabled_by_default": ["OneDrive", "Microsoft", "Speedtest"],
 
   "rename_map": {
     "🔰 Proxy": "Proxy",
@@ -23,6 +23,7 @@
     "🪙 Crypto": "Crypto",
     "💳 Finance": "Finance",
     "📧 Mail": "Mail",
+    "⏱️ Speedtest": "Speedtest",
     "🚧 AdGuard": "AdGuard",
     "🔘 DIRECT": "Direct",
     "⛔️ REJECT": "Reject",
