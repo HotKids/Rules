@@ -103,7 +103,7 @@ function main(config) {
 
   // ── Hosts ──
   // 静态域名映射，优先级高于 DNS 解析
-  config['hosts'] = { '*.clash.dev': '127.0.0.1', localhost: '127.0.0.1' };
+  config['hosts'] = { localhost: '127.0.0.1' };
 
   // ── 配置持久化 ──
   // store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）
@@ -123,7 +123,7 @@ function main(config) {
   // fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；
   // nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；
   // fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH
-  config['dns'] = { enable: true, listen: '0.0.0.0:1053', ipv6: false, 'use-system-hosts': true, 'cache-algorithm': 'arc', 'prefer-h3': false, 'respect-rules': false, 'default-nameserver': ['223.5.5.5', '119.29.29.29'], 'enhanced-mode': 'fake-ip', 'fake-ip-range': '198.18.0.1/16', 'fake-ip-range6': '', 'fake-ip-ttl': 1, 'fake-ip-filter-mode': 'blacklist', 'fake-ip-filter': ['*.lan', '+.lan', '*.local', '*.localdomain', '*.home.arpa', '*.localhost', 'WORKGROUP', 'time.*.com', 'time.*.gov', 'time.*.apple.com', 'ntp.*.com', '+.pool.ntp.org', '*.ntp.org.cn', '+.stun.*', '*.stun.*.*', '*.turn.twilio.com', '*.stun.twilio.com', 'stun.syncthing.net', '*.srv.nintendo.net', 'xbox.*.microsoft.com', 'xbox.*.*.microsoft.com', '*.xboxlive.com', '*.cm.steampowered.com', '*.steamcontent.com', '*.battlenet.com.cn', '*.battlenet.com', '*.blzstatic.cn', '*.battle.net', '*.msftncsi.com', '*.msftconnecttest.com', 'connectivitycheck.gstatic.com', 'connectivitycheck.android.com', 'connectivitycheck.platform.hicloud.com', 'connect.rom.miui.com', 'captive.apple.com', 'network-test.debian.org', 'detectportal.firefox.com', 'lens.l.google.com', '+.push.apple.com', '+.market.xiaomi.com', '*.tailscale.com', '*.zerotier.com', '*.spotify.com', '+.music.126.net', '*.mcdn.bilivideo.cn', 'localhost.*.qq.com'], nameserver: ['https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true'], fallback: ['https://1.1.1.1/dns-query#proxy'], 'fallback-filter': { geoip: true, 'geoip-code': 'CN', ipcidr: ['240.0.0.0/4'] }, 'proxy-server-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver': ['https://doh.pub/dns-query'], 'direct-nameserver-follow-policy': false };
+  config['dns'] = { enable: true, listen: '0.0.0.0:1053', ipv6: false, 'use-system-hosts': true, 'cache-algorithm': 'arc', 'prefer-h3': false, 'respect-rules': false, 'default-nameserver': ['223.5.5.5', '119.29.29.29'], 'enhanced-mode': 'fake-ip', 'fake-ip-range': '198.18.0.1/16', 'fake-ip-range6': '', 'fake-ip-ttl': 1, 'fake-ip-filter-mode': 'blacklist', 'fake-ip-filter': ['*.lan', '+.lan', '*.local', '*.localdomain', '*.home.arpa', '*.localhost', 'WORKGROUP', 'time.*.com', 'time.*.gov', 'time.*.apple.com', 'ntp.*.com', '+.pool.ntp.org', '*.ntp.org.cn', '+.stun.*', '*.stun.*.*', '*.turn.twilio.com', '*.stun.twilio.com', 'stun.syncthing.net', '*.srv.nintendo.net', 'xbox.*.microsoft.com', 'xbox.*.*.microsoft.com', '*.xboxlive.com', '*.cm.steampowered.com', '*.steamcontent.com', '*.battlenet.com.cn', '*.battlenet.com', '*.blzstatic.cn', '*.battle.net', '*.msftncsi.com', '*.msftconnecttest.com', 'connectivitycheck.gstatic.com', 'connectivitycheck.android.com', 'connectivitycheck.platform.hicloud.com', 'connect.rom.miui.com', 'captive.apple.com', 'network-test.debian.org', 'detectportal.firefox.com', 'lens.l.google.com', '+.push.apple.com', '+.market.xiaomi.com', '*.tailscale.com', '*.zerotier.com', '*.spotify.com', '+.music.126.net', '*.mcdn.bilivideo.cn', 'localhost.*.qq.com'], nameserver: ['https://1.1.1.1/dns-query#RULES'], 'nameserver-policy': { 'geosite:private': ['system'], 'time.*.com,time.*.gov,time.*.apple.com,ntp.*.com,+.pool.ntp.org,*.ntp.org.cn': ['223.5.5.5', '119.29.29.29'], 'geosite:cn': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'] }, 'proxy-server-nameserver': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'], 'direct-nameserver': ['https://doh.pub/dns-query', 'https://dns.alidns.com/dns-query'], 'direct-nameserver-follow-policy': false };
 
   // ── TUN ──
   // 接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；
@@ -249,6 +249,8 @@ function main(config) {
     'HTTPDNS': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/HTTPDNS.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml' },
     'Reject': { ...remoteRuleProvider, behavior: 'domain', path: './Provider/RuleSet/Reject.yaml', url: 'https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt' },
     'AdBlock': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/AdBlock.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml' },
+    'Phishing': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Phishing.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml' },
+    'Bogus': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Bogus.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bogus.yaml' },
     'Streaming_TW': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_TW.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml' },
     'Streaming_JP': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_JP.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml' },
     'Streaming_US': { ...remoteRuleProvider, behavior: 'classical', path: './Provider/RuleSet/Streaming_US.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml' },
@@ -289,6 +291,10 @@ function main(config) {
     // Advertising 广告
     'RULE-SET,Reject,AdGuard',
     'RULE-SET,AdBlock,AdGuard',
+    // Phishing 钓鱼网站
+    'RULE-SET,Phishing,AdGuard',
+    // Bogus IP NXDOMAIN 劫持/僵尸网络 C2
+    'RULE-SET,Bogus,Reject,no-resolve',
     // Global Area Network
     // > Streaming by Region
     // >> Streaming TW
@@ -326,10 +332,10 @@ function main(config) {
     'RULE-SET,Global,Proxy',
     // China Area Network
     'RULE-SET,China,Direct',
-    'RULE-SET,CNASN,Direct',
-    'RULE-SET,CNCIDR,Direct',
+    'RULE-SET,CNASN,Direct,no-resolve',
+    'RULE-SET,CNCIDR,Direct,no-resolve',
     // Local Area Network
-    'RULE-SET,LAN,Direct',
+    'RULE-SET,LAN,Direct,no-resolve',
     // GeoIP
     'GEOSITE,cn,Direct',
     'GEOIP,CN,Direct,no-resolve',
