@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 15:10:14
+# Date: 2026-07-12 15:16:11
 # Author: @HotKids
 
 # 通用设置
@@ -79,7 +79,6 @@ geox-url:
 
 # 静态域名映射，优先级高于 DNS 解析
 hosts:
-  '*.clash.dev': 127.0.0.1
   'localhost': 127.0.0.1
 
 # ── 配置持久化 ──

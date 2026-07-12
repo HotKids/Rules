@@ -103,7 +103,7 @@ function main(config) {
 
   // ── Hosts ──
   // 静态域名映射，优先级高于 DNS 解析
-  config['hosts'] = { '*.clash.dev': '127.0.0.1', localhost: '127.0.0.1' };
+  config['hosts'] = { localhost: '127.0.0.1' };
 
   // ── 配置持久化 ──
   // store-selected 记住策略组选择；store-fake-ip 持久化 fake-ip 映射（重启后 IP 不变）
