@@ -338,10 +338,8 @@ if (!base) {
           .filter(p => p && p.latest >= 0)
           .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? ` 丢${Math.round(p.loss)}%` : ""}`);
         if (!parts.length) return "";
-        // 每行两项，避免任务多时折行成一大段
-        const rows = [];
-        for (let i = 0; i < parts.length; i += 2) rows.push(parts.slice(i, i + 2).join("｜"));
-        return `延迟 ${rows.join("\n")}`;
+        // 一行一项，避免折行错位
+        return `延迟 ${parts.join("\n")}`;
       }
     };
 
