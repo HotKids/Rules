@@ -15,13 +15,13 @@
 //   · "!" 开头 → 整体视作单个正则，匹配的不显示
 // - 显示项开关（各自独立参数）：
 //   · overview 顶部概览：在线数/点亮地区/全站流量总和，统计全部节点不受 nodes 筛选影响（默认 true）
-//   · traffic 总流量↑↓（默认 true）/ expire 到期（默认 true）
+//   · traffic 流量↑↓（默认 true）/ expire 到期（默认 true）
 //   · usage 用量对比配额，三态（默认 true）：true=累计口径 / false=隐藏 /
 //     cycle=本计费周期精确用量（跨重启；周期起点取 expired_at 的每月对应日，
 //     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
 //     每节点多一次请求，失败自动回退累计口径）
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
-//   行序固定：总流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
+//   行序固定：流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -316,7 +316,7 @@ if (!base) {
     const lineBuilders = {
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
-        `总流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
+        `流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
       usage: (node, rec) => {
         const hasQuota = node.traffic_limit > 0;
         // 有配额：口径严格跟随 Komari 的流量阈值类型（与后台告警一致）；
