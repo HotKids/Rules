@@ -1,7 +1,8 @@
 // komari-traffic.js - Komari 节点流量监控（单面板聚合：累计流量 + 用量/配额 + 到期）
 //
 // 数据来源（Komari 公开 API，两次请求出全部节点）:
-//   GET  /api/nodes  → 名称 / 地区 / 配额 / 用量口径 / 到期 / 价格 / 权重
+//   POST /api/rpc2 common:getNodes → 名称 / 地区 / IP / 配额 / 用量口径 / 到期 / 价格 / 权重
+//     （失败回退 GET /api/nodes，该接口不含 IP；IP 完整值需 token，访客视后台开关为打码或空）
 //   POST /api/rpc2 common:getNodesLatestStatus → 累计流量 / CPU / 内存 / 磁盘 / 在线时长 / ping 统计
 // 配额、到期日、用量口径均由 Komari 后台维护，无需在参数里逐台配置。
 //
@@ -15,13 +16,17 @@
 //   · "!" 开头 → 整体视作单个正则，匹配的不显示
 // - 显示项开关（各自独立参数）：
 //   · overview 顶部概览：在线数/点亮地区/全站流量总和，统计全部节点不受 nodes 筛选影响（默认 true）
-//   · traffic 总流量↑↓（默认 true）/ expire 到期（默认 true）
+//   · traffic 流量↑↓（默认 true）/ expire 到期（默认 true）
 //   · usage 用量对比配额，三态（默认 true）：true=累计口径 / false=隐藏 /
 //     cycle=本计费周期精确用量（跨重启；周期起点取 expired_at 的每月对应日，
 //     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
 //     每节点多一次请求，失败自动回退累计口径）
-//   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
-//   行序固定：总流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
+//   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀 /
+//     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏；
+//       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
+// - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
+//   否则 IP 打码点击切换的判定会失准
+//   行序固定：IP → 流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -58,12 +63,59 @@ const show = {
   sys: showFlag(args.sys, false),
   uptime: showFlag(args.uptime, false),
   ping: showFlag(args.ping, false),
-  price: showFlag(args.price, false)
+  price: showFlag(args.price, false),
+  ip: showFlag(args.ip, false)
 };
 // meta 行 = 价格·在线合并一行
 show.meta = show.price || show.uptime;
-const infoItems = ["traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
+const infoItems = ["ip", "traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
+
+// IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
+// 与 ip-security 同款时间判定，misfire 容忍 15s
+const store = typeof $persistentStore !== "undefined"
+  ? $persistentStore
+  : { read: () => null, write: () => {} };
+let ipMask = 1;
+if (show.ip) {
+  const stored = parseInt(store.read("komariIpMask"), 10);
+  ipMask = Number.isInteger(stored) ? stored : 1;
+  const now = Math.floor(Date.now() / 1000);
+  const lastRun = parseInt(store.read("komariIpLastRun"), 10) || 0;
+  store.write(String(now), "komariIpLastRun");
+  const interval = parseInt(clean(args.panel_interval), 10) || 300;
+  const tolerance = 15;
+  const elapsed = now - lastRun;
+  const remainder = elapsed % interval;
+  const isAutoRefresh = lastRun > 0 && elapsed > tolerance
+    && (remainder <= tolerance || remainder >= interval - tolerance);
+  if (lastRun > 0 && !isAutoRefresh) {
+    ipMask = ipMask === 1 ? 0 : 1;
+    store.write(String(ipMask), "komariIpMask");
+  }
+}
+
+// IPv4: a.***.***.d；IPv6: 首尾段保留，中间打码
+const maskIPAddr = ip => {
+  if (!ip) return ip;
+  if (ip.includes(":")) {
+    if (ip.includes("::")) {
+      const [left = "", right = ""] = ip.split("::");
+      const lg = left ? left.split(":") : [];
+      const rg = right ? right.split(":") : [];
+      const first = lg[0] || rg[0];
+      const last = rg[rg.length - 1] || lg[lg.length - 1];
+      if (!first || !last) return ip;
+      return first === last ? "::" + first : first + "::**:" + last;
+    }
+    const parts = ip.split(":");
+    if (parts.length <= 2) return ip;
+    return parts[0] + ":" + parts.slice(1, -1).map(() => "**").join(":") + ":" + parts[parts.length - 1];
+  }
+  const parts = ip.split(".");
+  if (parts.length !== 4) return ip;
+  return parts[0] + ".***.***." + parts[3];
+};
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
 let excludeRe = null, nodeItems = [], nodesError = "";
@@ -227,17 +279,27 @@ if (!base) {
 } else if (nodesError) {
   done({ title, content: nodesError, icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
 } else {
-  const rpcBody = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "common:getNodesLatestStatus", params: {} });
+  const rpcBody = method => JSON.stringify({ jsonrpc: "2.0", id: 1, method, params: {} });
+
+  // 节点列表：rpc2 getNodes 优先（带 IP 字段），失败回退 REST /api/nodes（无 IP）
+  const fetchNodes = () =>
+    httpPost(`${base}/api/rpc2`, rpcBody("common:getNodes")).then(raw => {
+      const rpc = JSON.parse(raw);
+      if (rpc.result && typeof rpc.result === "object") return Object.values(rpc.result);
+      throw new Error("getNodes 返回异常");
+    }).catch(() => httpGet(`${base}/api/nodes`).then(raw => {
+      const j = JSON.parse(raw);
+      // 兼容 {status,data:[…]} 包装与裸数组两种返回
+      const list = Array.isArray(j) ? j : (Array.isArray(j.data) ? j.data : null);
+      if (!list) throw new Error(j.message || "节点列表格式异常");
+      return list;
+    }));
 
   Promise.all([
-    httpGet(`${base}/api/nodes`),
-    httpPost(`${base}/api/rpc2`, rpcBody).catch(() => null) // 状态拉取失败时仍显示节点基础信息
-  ]).then(([nodesRaw, statusRaw]) => {
-    const nodesJson = JSON.parse(nodesRaw);
-    // 兼容 {status,data:[…]} 包装与裸数组两种返回
-    let nodes = Array.isArray(nodesJson) ? nodesJson
-      : (Array.isArray(nodesJson.data) ? nodesJson.data : null);
-    if (!nodes) throw new Error(nodesJson.message || "节点列表格式异常");
+    fetchNodes(),
+    httpPost(`${base}/api/rpc2`, rpcBody("common:getNodesLatestStatus")).catch(() => null) // 状态拉取失败时仍显示节点基础信息
+  ]).then(([nodesList, statusRaw]) => {
+    let nodes = nodesList;
 
     let statusMap = null;
     if (statusRaw) {
@@ -314,9 +376,15 @@ if (!base) {
     // 静态信息（expire/price）离线也显示；累计/用量取最后一次上报，离线仍有意义；
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
+      // 完整 IP 需 token；访客视后台开关为打码形式或空（空则该行隐藏）
+      ip: node => {
+        const parts = [node.ipv4, node.ipv6].filter(Boolean)
+          .map(v => ipMask ? maskIPAddr(v) : v);
+        return parts.length ? `IP ${parts.join("｜")}` : "";
+      },
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
-        `总流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
+        `流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
       usage: (node, rec) => {
         const hasQuota = node.traffic_limit > 0;
         // 有配额：口径严格跟随 Komari 的流量阈值类型（与后台告警一致）；
