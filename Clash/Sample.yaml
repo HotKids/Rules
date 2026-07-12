@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 15:34:28
+# Date: 2026-07-12 15:41:37
 # Author: @HotKids
 
 # 通用设置
@@ -224,9 +224,16 @@ dns:
   nameserver:
     - "https://1.1.1.1/dns-query#RULES"
 
-  # 分域名 DNS 策略：国内域名直接用国内 DoH 就近解析，不绕代理
-  # geosite 数据规则段已在用（GEOSITE,cn），此处零额外开销
+  # 分域名 DNS 策略：按声明顺序匹配，先窄后宽
   nameserver-policy:
+    # 内网/本地域名交给系统解析器（路由器/DHCP 下发的 DNS），可解析局域网设备名
+    "geosite:private":
+      - system
+    # NTP 校时域名用裸 IP UDP 解析：时间偏差会让 DoH 证书验证失败，校时链路须独立于任何 TLS/代理
+    "time.*.com,time.*.gov,time.*.apple.com,ntp.*.com,+.pool.ntp.org,*.ntp.org.cn":
+      - 223.5.5.5
+      - 119.29.29.29
+    # 国内域名直接用国内 DoH 就近解析，不绕代理（geosite 数据规则段已在用，零额外开销）
     "geosite:cn":
       - https://doh.pub/dns-query
       - https://dns.alidns.com/dns-query
