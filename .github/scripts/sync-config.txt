@@ -35,7 +35,6 @@ Speedtest
 # > Gist
 ReverseProxy => fastly.jsdelivr.net
 # > Skip
-ConnersHua
 iCloud
 Apple News
 Apple TV
@@ -62,7 +61,6 @@ rule-providers:
 # > Skip
 iCloud
 Apple News
-Speedtest
 # > Rename
 [policy]
   Proxy => Outbound
