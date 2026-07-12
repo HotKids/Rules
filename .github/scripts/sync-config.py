@@ -2592,8 +2592,8 @@ _CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
     ("DNS", [
         ("dns", [
             "fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；",
-            "nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；",
-            "fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH",
+            "主 DNS 经 #RULES 走代理拿干净结果，防境外域名泄露给国内 DNS；nameserver-policy 按声明顺序先窄后宽：",
+            "内网域名交系统解析器、NTP 用裸 IP UDP（校时不依赖 TLS）、国内域名国内 DoH 就近解析；代理节点/DIRECT 域名同走国内 DoH",
         ]),
     ]),
     ("TUN", [
