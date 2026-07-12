@@ -359,7 +359,7 @@ if (!base) {
         if (up) next.uptime[n.uuid] = up;
         const prevUp = prev.uptime ? prev.uptime[n.uuid] : 0;
         if (online && up && prevUp && up < prevUp - 60) {
-          changes.push(`⟳ ${n.name} 已重启（在线 ${formatUptime(up)}）`);
+          changes.push(`🔄 ${n.name} 已重启（在线 ${formatUptime(up)}）`);
         }
 
         // 用量阈值：80% / 95% 跨档各推一次；回落（重启清零/新周期）后重新武装
