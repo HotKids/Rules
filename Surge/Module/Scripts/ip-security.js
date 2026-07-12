@@ -15,7 +15,7 @@
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https) / dbip DB-IP(en, https)
+ * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https) / dbip DB-IP(en, https) / maxmind GeoLite2(zh 优先, 需 maxmind_key)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -26,7 +26,8 @@
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)，dbip=DB-IP(英文, https, 免 key 约 1000 次/天)
+ * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)，dbip=DB-IP(英文, https, 免 key 约 1000 次/天)，maxmind=GeoLite2(中文优先, 需 maxmind_key)
+ * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind 需要，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -67,6 +68,7 @@ const CONFIG = {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
     baiduGeo: (ip) => `https://opendata.baidu.com/api.php?query=${ip}&co=&resource_id=6006&oe=utf8`,
     dbipGeo: (ip) => `https://api.db-ip.com/v2/free/${ip}`,
+    maxmindGeo: (ip) => `https://geolite.info/geoip/v2.1/city/${ip}`,
     // Cloudflare 官方端点，证书含 IP SAN，可直连（不经 DNS）；失败回落 ip.sb
     outboundTrace: "https://1.1.1.1/cdn-cgi/trace",
     outboundTrace6: "https://[2606:4700:4700::1111]/cdn-cgi/trace",
@@ -128,6 +130,7 @@ function parseArguments() {
     isEvent: arg.TYPE === "EVENT",
     ipqsKey: clean(arg.ipqs_key),
     riskApi: clean(arg.risk_api).toLowerCase(),
+    maxmindKey: clean(arg.maxmind_key),
     localGeoApi: clean(arg.local_geoapi) || "bilibili",
     remoteGeoApi: clean(arg.remote_geoapi) || "ipinfo",
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
@@ -290,6 +293,36 @@ function normalizeOpendata(data) {
   };
 }
 
+// Basic Auth 用 base64（Surge JSC 无内建 btoa，凭据为 ASCII）
+function b64(s) {
+  if (typeof btoa !== "undefined") return btoa(s);
+  const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+  let out = "";
+  for (let i = 0; i < s.length; i += 3) {
+    const c1 = s.charCodeAt(i), c2 = s.charCodeAt(i + 1), c3 = s.charCodeAt(i + 2);
+    out += c[c1 >> 2] + c[((c1 & 3) << 4) | (isNaN(c2) ? 0 : c2 >> 4)]
+      + (isNaN(c2) ? "=" : c[((c2 & 15) << 2) | (isNaN(c3) ? 0 : c3 >> 6)])
+      + (isNaN(c3) ? "=" : c[c3 & 63]);
+  }
+  return out;
+}
+
+/**
+ * 将 MaxMind GeoLite2 city 返回归一化为内部格式（中文名优先，缺失回落英文）
+ * geolite.info/geoip/v2.1/city: { country:{iso_code,names}, city:{names}, subdivisions:[{names}] }
+ */
+function normalizeMaxmind(data) {
+  if (!data || !data.country?.iso_code) return null;
+  const zh = n => n?.["zh-CN"] || n?.en || "";
+  return {
+    country_code: data.country.iso_code,
+    country_name: zh(data.country.names),
+    city: zh(data.city?.names),
+    region: zh(data.subdivisions?.[0]?.names),
+    org: ""
+  };
+}
+
 /**
  * 将 DB-IP 免费接口返回归一化为内部格式
  * db-ip v2/free: { ipAddress, countryCode, countryName, stateProv, city }
@@ -331,7 +364,7 @@ function parseScamalyticsScore(html) {
  * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
 async function getPolicyAndEntrance() {
-  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com|api\.db-ip\.com)/i;
+  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com|api\.db-ip\.com|geolite\.info)/i;
 
   async function findInRecent(limit) {
     const res = await surgeAPI("GET", "/v1/requests/recent");
@@ -784,17 +817,25 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const useIpApi = args.remoteGeoApi.startsWith("ipapi");
   const useBaidu = args.remoteGeoApi === "baidu";
   const useDbip = args.remoteGeoApi === "dbip";
+  let useMaxmind = args.remoteGeoApi === "maxmind";
+  if (useMaxmind && !args.maxmindKey) {
+    console.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
+    useMaxmind = false;
+  }
   const ipApiLang = args.remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
   // 非 ipinfo 数据源时需单独请求 ipinfo：运营商始终用 ipinfo + rDNS 取自 hostname
-  const needExtraOrg = useIpApi || useBaidu || useDbip;
+  const needExtraOrg = useIpApi || useBaidu || useDbip || useMaxmind;
+  const geoHeaders = useMaxmind ? { "Authorization": "Basic " + b64(args.maxmindKey) } : undefined;
   function geoUrl(ip) {
     if (useBaidu) return CONFIG.urls.baiduGeo(ip);
     if (useDbip) return CONFIG.urls.dbipGeo(ip);
+    if (useMaxmind) return CONFIG.urls.maxmindGeo(ip);
     return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
   }
   function normalizeGeo(data) {
     if (useBaidu) return normalizeOpendata(data);
     if (useDbip) return normalizeDbip(data);
+    if (useMaxmind) return normalizeMaxmind(data);
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
@@ -804,7 +845,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
     getRiskScore(outIP),                     // 0
     getIPType(outIP),                        // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
-    httpJSON(geoUrl(outIP)),                 // 3: 出口地理
+    httpJSON(geoUrl(outIP), null, geoHeaders),  // 3: 出口地理
     needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（ip-api/baidu 模式）+ hostname
     getTrafficStats(),                       // 5: 流量统计
   ]);
@@ -852,7 +893,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   let entranceInfo = null;
   if (entranceIP && entranceIP !== outIP) {
     console.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
-    const entrQueries = [httpJSON(geoUrl(entranceIP))];
+    const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
     if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
     const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
     entranceInfo = normalizeGeo(entrGeoRaw);
