@@ -1404,13 +1404,14 @@ def gen_rules_and_providers(
         else:
             name = _derive_provider_name(clash_url, seen, rename_map)
         entry = {"name": name, "behavior": behavior}
-        # 二进制 mrs 产物（MetaCubeX 官方 / 本仓库 CI 编译）需显式声明 format
+        # format 显式声明：二进制 mrs 产物（MetaCubeX 官方 / 本仓库 CI 编译）；
+        # Sukka Ruleset（ruleset.skk.moe 及其镜像）的 Clash 产物为纯文本；其余 yaml
         if clash_url.endswith(".mrs"):
             entry["format"] = "mrs"
-        # Sukka Ruleset（ruleset.skk.moe 及其 SukkaLab GitHub 镜像）的 Clash 产物
-        # 均为纯文本格式（每行一条规则），mihomo 默认按 yaml 解析会失败，需显式声明
         elif "ruleset.skk.moe" in clash_url:
             entry["format"] = "text"
+        else:
+            entry["format"] = "yaml"
         providers[clash_url] = entry
         seen[name] = clash_url
         return name
@@ -1674,13 +1675,12 @@ def gen_rules_and_providers(
             f"  {pname}:",
             "    type: http",
             f"    behavior: {behavior}",
+            f"    format: {info.get('format', 'yaml')}",
             f"    path: ./Provider/RuleSet/{path_file}",
             f"    url: {clash_url}",
             "    interval: 86400",
+            "",
         ]
-        if info.get("format"):
-            rp_lines.append(f"    format: {info['format']}")
-        rp_lines.append("")
 
     # 在 # / # > 注释行前插入空行（# >> 子项不加），改善可读性
     formatted: list[str] = []
@@ -3033,9 +3033,8 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
     L.append("# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/")
     L.append("rule-providers:")
     for name, rp in cfg.get("rule-providers", {}).items():
-        fmt = f", format: {rp['format']}" if rp.get("format") else ""
-        L.append(f"  {name}: {{<<: *Remote, behavior: {rp['behavior']}, "
-                 f"path: {_yaml_flow(rp['path'])}, url: {_yaml_flow(rp['url'])}{fmt}}}")
+        L.append(f"  {name}: {{<<: *Remote, behavior: {rp['behavior']}, format: {rp.get('format', 'yaml')}, "
+                 f"path: {_yaml_flow(rp['path'])}, url: {_yaml_flow(rp['url'])}}}")
     L.append("")
 
     # 规则
@@ -3083,7 +3082,7 @@ def _gen_clash_script_js(
     data = yaml.safe_load(sample_yaml_text) or {}
     # 规范化 rule-provider 键序（Mihomo.yaml 经 <<: *Remote 合并后键序与 Sample.yaml
     # 不同），使 Script.js 输出与来源无关。
-    _rp_order = ("type", "behavior", "path", "url", "interval", "format", "proxy")
+    _rp_order = ("type", "behavior", "format", "path", "url", "interval", "proxy")
     rule_providers = {
         name: {**{k: rp[k] for k in _rp_order if k in rp},
                **{k: v for k, v in rp.items() if k not in _rp_order}}
