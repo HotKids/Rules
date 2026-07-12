@@ -224,7 +224,7 @@ dns:
 
   # 兜底 DNS：nameserver 返回非 CN IP 或保留地址段时触发，同样走代理
   fallback:
-    - "https://1.1.1.1/dns-query#proxy"
+    - "https://1.1.1.1/dns-query#RULES"
 
   # 污染检测规则：符合以下任一条件时使用 fallback 结果
   fallback-filter:
