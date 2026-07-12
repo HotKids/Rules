@@ -13,6 +13,12 @@
 
 执行顺序：① 拉取 `sync-rules.txt` 中的外部 URL → ② 地区流媒体合集双向同步（按 git diff 决定方向：HEAD commit + 工作区变更） → ③ 重建 `Streaming.list` → ④ 格式转换 → ⑤ 清理孤立文件
 
+`sync-rules.txt` 的 `# >> Surge` 段收编 RULE-SET 格式来源；`# >> Surge Domain-Set` 段收编
+DOMAIN-SET 格式来源（裸域名 / `.` 前缀，如 Sukka 的 `reject_phishing`）——镜像保持原格式
+（Surge/Loon/Surfboard 直接以 DOMAIN-SET 语义消费），派生时按各平台原生 domain 语义转换：
+QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 domain-behavior payload（`+.` 前缀）、
+sing-box 出 `domain` / `domain_suffix`。
+
 > sing-box 二进制规则集 `sing-box/rule-set/*.srs` 不由本脚本生成：`.srs` 只能用官方 sing-box CLI 编译，故在 `sync-rules.yml` workflow 里下载 sing-box 后对 `source/*.json` 执行 `rule-set compile` 得到，与 `.json` 并存一同提交。
 
 **规则类型兼容性**

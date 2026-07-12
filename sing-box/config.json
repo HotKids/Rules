@@ -403,8 +403,8 @@
       {
         "type": "remote",
         "tag": "Phishing",
-        "format": "source",
-        "url": "https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/sing-box/domainset/reject_phishing.json",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Phishing.srs",
         "download_detour": "🔘 Direct",
         "update_interval": "1440m"
       },
