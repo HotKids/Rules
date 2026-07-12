@@ -66,9 +66,7 @@ const show = {
   price: showFlag(args.price, false),
   ip: showFlag(args.ip, false)
 };
-// meta 行 = 价格·在线合并一行
-show.meta = show.price || show.uptime;
-const infoItems = ["ip", "traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
+const infoItems = ["ip", "traffic", "usage", "sys", "price", "expire", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
 
 // IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
@@ -407,20 +405,13 @@ if (!base) {
       },
       sys: (node, rec) => rec && rec.online &&
         `CPU ${Math.round(rec.cpu || 0)}%｜内存 ${pct(rec.ram, rec.ram_total)}｜磁盘 ${pct(rec.disk, rec.disk_total)}`,
-      // 价格·在线合并一行（各自开关独立，缺一项时单独显示另一项）
-      meta: (node, rec) => {
-        const parts = [];
-        if (show.price && node.price > 0) {
-          const unit = cycleLabel(node.billing_cycle);
-          // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
-          const cur = node.currency || "$";
-          const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
-          parts.push(`价格 ${amount}${unit ? "/" + unit : ""}`);
-        }
-        if (show.uptime && rec && rec.online && rec.uptime > 0) {
-          parts.push(`在线 ${formatUptime(rec.uptime)}`);
-        }
-        return parts.join("｜");
+      price: node => {
+        if (!(node.price > 0)) return "";
+        const unit = cycleLabel(node.billing_cycle);
+        // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
+        const cur = node.currency || "$";
+        const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
+        return `价格 ${amount}${unit ? "/" + unit : ""}`;
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
@@ -441,7 +432,11 @@ if (!base) {
 
       const lines = [];
       if (!statusMap) lines.push(displayName, "状态获取失败");
-      else lines.push(rec && rec.online ? displayName : `${displayName} ｜ 离线`);
+      else {
+        let nameLine = rec && rec.online ? displayName : `${displayName} ｜ 离线`;
+        if (show.uptime && rec && rec.online && rec.uptime > 0) nameLine += ` ｜ 在线 ${formatUptime(rec.uptime)}`;
+        lines.push(nameLine);
+      }
 
       infoItems.forEach(key => {
         const build = lineBuilders[key];
