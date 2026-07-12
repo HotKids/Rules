@@ -15,7 +15,7 @@
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https) / dbip DB-IP(en, https) / maxmind GeoLite2(zh 优先, 需 maxmind_key)
+ * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https) / dbip DB-IP(en, https) / maxmind GeoLite2(en) · maxmind-zh(zh 优先)（均需 maxmind_key）
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -26,8 +26,8 @@
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
  * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)，dbip=DB-IP(英文, https, 免 key 约 1000 次/天)，maxmind=GeoLite2(中文优先, 需 maxmind_key)
- * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind 需要，免费注册 1000 次/天）
+ * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)，dbip=DB-IP(英文, https, 免 key 约 1000 次/天)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
+ * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind/maxmind-zh 需要，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -308,17 +308,18 @@ function b64(s) {
 }
 
 /**
- * 将 MaxMind GeoLite2 city 返回归一化为内部格式（中文名优先，缺失回落英文）
+ * 将 MaxMind GeoLite2 city 返回归一化为内部格式
  * geolite.info/geoip/v2.1/city: { country:{iso_code,names}, city:{names}, subdivisions:[{names}] }
+ * zhFirst=true 时中文名优先、缺失回落英文（maxmind-zh），否则英文（maxmind）
  */
-function normalizeMaxmind(data) {
+function normalizeMaxmind(data, zhFirst) {
   if (!data || !data.country?.iso_code) return null;
-  const zh = n => n?.["zh-CN"] || n?.en || "";
+  const pick = n => (zhFirst ? (n?.["zh-CN"] || n?.en) : n?.en) || "";
   return {
     country_code: data.country.iso_code,
-    country_name: zh(data.country.names),
-    city: zh(data.city?.names),
-    region: zh(data.subdivisions?.[0]?.names),
+    country_name: pick(data.country.names),
+    city: pick(data.city?.names),
+    region: pick(data.subdivisions?.[0]?.names),
     org: ""
   };
 }
@@ -817,7 +818,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   const useIpApi = args.remoteGeoApi.startsWith("ipapi");
   const useBaidu = args.remoteGeoApi === "baidu";
   const useDbip = args.remoteGeoApi === "dbip";
-  let useMaxmind = args.remoteGeoApi === "maxmind";
+  let useMaxmind = args.remoteGeoApi.startsWith("maxmind");
+  const maxmindZh = args.remoteGeoApi === "maxmind-zh";
   if (useMaxmind && !args.maxmindKey) {
     console.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
     useMaxmind = false;
@@ -835,7 +837,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   function normalizeGeo(data) {
     if (useBaidu) return normalizeOpendata(data);
     if (useDbip) return normalizeDbip(data);
-    if (useMaxmind) return normalizeMaxmind(data);
+    if (useMaxmind) return normalizeMaxmind(data, maxmindZh);
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
