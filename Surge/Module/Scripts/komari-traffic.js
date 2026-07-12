@@ -133,9 +133,10 @@ const regionFlag = raw => {
 };
 
 const formatUptime = sec => {
-  if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
-  if (sec >= 3600) return `${Math.floor(sec / 3600)} 小时`;
-  return `${Math.max(1, Math.floor(sec / 60))} 分钟`;
+  const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
+  if (d > 0) return `${d} 天${h ? ` ${h} 时` : ""}`;
+  if (h > 0) return `${h} 时${m ? ` ${m} 分` : ""}`;
+  return `${Math.max(1, m)} 分`;
 };
 
 // billing_cycle（天）→ 周期文案
@@ -209,9 +210,9 @@ const formatExpire = raw => {
   const dateStr = m ? m[1]
     : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const days = Math.ceil((d - new Date()) / 86400000);
-  if (days < 0) return `${dateStr}（已过期 ${-days} 天）`;
-  if (days === 0) return `${dateStr}（今日到期）`;
-  return `${dateStr}（剩余 ${days} 天）`;
+  if (days < 0) return `${dateStr} 已过期 ${-days} 天`;
+  if (days === 0) return `${dateStr} 今日到期`;
+  return `${dateStr} 余 ${days} 天`;
 };
 
 if (!base) {
@@ -289,8 +290,9 @@ if (!base) {
     // 静态信息（expire/price）离线也显示；累计/用量取最后一次上报，离线仍有意义；
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
+      // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
-        `累计 ↓ ${formatGB(rec.net_total_down || 0)} ↑ ${formatGB(rec.net_total_up || 0)}`,
+        `总流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
       usage: (node, rec) => {
         const hasQuota = node.traffic_limit > 0;
         // 有配额：口径严格跟随 Komari 的流量阈值类型（与后台告警一致）；
@@ -316,7 +318,10 @@ if (!base) {
       price: node => {
         if (!(node.price > 0)) return "";
         const unit = cycleLabel(node.billing_cycle);
-        return `价格 ${node.price} ${node.currency || "$"}${unit ? "/" + unit : ""}`;
+        // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
+        const cur = node.currency || "$";
+        const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
+        return `价格 ${amount}${unit ? "/" + unit : ""}`;
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
