@@ -24,7 +24,9 @@
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀 /
 //     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏；
 //       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
-// - notify: 节点离线/恢复推送（默认 false）。每次面板刷新对比上次在线状态，变化即通知；
+// - notify: 推送开关（默认 false），一个开关管五类事件，多条变化合并一条通知：
+//   · 离线/恢复（对比上次在线状态） · 重启（uptime 回落） · 用量超 80%/95% 阈值（跨档各一次）
+//   · IP 变化（仅 token 明文形态可检测，通知内容打码） · 到期 ≤7 天（含已过期，每天一次）
 //   统计全部节点（与顶部概览一致，不受 nodes 筛选影响）；依赖面板刷新时机，非实时保证
 // - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
 //   否则 IP 打码点击切换的判定会失准
@@ -260,17 +262,23 @@ const fetchCycleUsage = (node, rec) => {
   }).catch(() => null);
 };
 
-// expired_at 零值（0001-01-01）或无效日期视为未设置
+// expired_at 零值（0001-01-01）或无效日期视为未设置；返回剩余天数（可为负）或 null
+const expireDays = raw => {
+  if (!raw) return null;
+  const d = new Date(String(raw).replace(" ", "T"));
+  if (isNaN(d) || d.getFullYear() < 2001) return null;
+  return Math.ceil((d - new Date()) / 86400000);
+};
+
 const formatExpire = raw => {
-  if (!raw) return "";
+  const days = expireDays(raw);
+  if (days === null) return "";
   const s = String(raw);
   const d = new Date(s.replace(" ", "T"));
-  if (isNaN(d) || d.getFullYear() < 2001) return "";
   // 日期部分直接取原文，避免跨时区换算偏移一天
   const m = s.match(/^(\d{4}-\d{2}-\d{2})/);
   const dateStr = m ? m[1]
     : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  const days = Math.ceil((d - new Date()) / 86400000);
   if (days < 0) return `${dateStr} 已过期 ${-days} 天`;
   if (days === 0) return `${dateStr} 今日到期`;
   return `${dateStr} 余 ${days} 天`;
@@ -328,21 +336,64 @@ if (!base) {
       overview = `在线 ${online}/${nodes.length}｜点亮地区 ${regions.size}\n总量 ↑ ${formatGB(up)} ↓ ${formatGB(down)}`;
     }
 
-    // 离线/恢复推送：对比上次刷新的在线状态，变化即通知（首次运行仅记录基线）
-    // 统计全部节点，与概览口径一致，不受 nodes 筛选影响
+    // 推送（notify=true）：离线/恢复、重启、用量阈值、IP 变化、到期提醒
+    // 统计全部节点，与概览口径一致，不受 nodes 筛选影响；多条变化合并为一条通知
     if (wantNotify && statusMap) {
-      let prev = null;
-      try { prev = JSON.parse(store.read("komariOnlineState")); } catch (e) {}
-      const cur = {};
+      let prev = {};
+      try { prev = JSON.parse(store.read("komariNotifyState")) || {}; } catch (e) {}
+      const next = { online: {}, uptime: {}, usageTier: {}, ip: {}, expire: prev.expire || {} };
       const changes = [];
+      const today = new Date().toISOString().slice(0, 10);
       nodes.forEach(n => {
-        const online = !!(statusMap[n.uuid] && statusMap[n.uuid].online);
-        cur[n.uuid] = online;
-        if (prev && n.uuid in prev && prev[n.uuid] !== online) {
+        const rec = statusMap[n.uuid];
+        const online = !!(rec && rec.online);
+        next.online[n.uuid] = online;
+
+        // 离线/恢复（首次运行仅记录基线）
+        if (prev.online && n.uuid in prev.online && prev.online[n.uuid] !== online) {
           changes.push(online ? `🟢 ${n.name} 恢复上线` : `🔴 ${n.name} 离线`);
         }
+
+        // 重启检测：uptime 明显回落（补离线推送因刷新间隔漏掉的快速重启）
+        const up = rec && rec.uptime > 0 ? rec.uptime : 0;
+        if (up) next.uptime[n.uuid] = up;
+        const prevUp = prev.uptime ? prev.uptime[n.uuid] : 0;
+        if (online && up && prevUp && up < prevUp - 60) {
+          changes.push(`⟳ ${n.name} 已重启（在线 ${formatUptime(up)}）`);
+        }
+
+        // 用量阈值：80% / 95% 跨档各推一次；回落（重启清零/新周期）后重新武装
+        if (rec && n.traffic_limit > 0) {
+          const type = String(n.traffic_limit_type || "max").toLowerCase();
+          const pctUsed = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type) / n.traffic_limit * 100;
+          const tier = pctUsed >= 95 ? 95 : pctUsed >= 80 ? 80 : 0;
+          next.usageTier[n.uuid] = tier;
+          const prevTier = prev.usageTier ? (prev.usageTier[n.uuid] || 0) : 0;
+          if (tier > prevTier) changes.push(`📈 ${n.name} 用量 ${Math.round(pctUsed)}%（超 ${tier}% 阈值）`);
+        }
+
+        // IP 变化：仅比较双方均为完整明文的值（跳过打码/空，避免访客形态误报），通知内容打码
+        const ipPair = { v4: n.ipv4 || "", v6: n.ipv6 || "" };
+        next.ip[n.uuid] = ipPair;
+        const prevIp = prev.ip ? prev.ip[n.uuid] : null;
+        if (prevIp) {
+          [["v4", "IPv4"], ["v6", "IPv6"]].forEach(([k, label]) => {
+            const a = prevIp[k], b = ipPair[k];
+            if (a && b && a !== b && !a.includes("*") && !b.includes("*")) {
+              changes.push(`🔀 ${n.name} ${label} 变更 ${maskIPAddr(a)} → ${maskIPAddr(b)}`);
+            }
+          });
+        }
+
+        // 到期提醒：剩余 ≤7 天（含已过期）每天提醒一次
+        const days = expireDays(n.expired_at);
+        if (days !== null && days <= 7 && next.expire[n.uuid] !== today) {
+          next.expire[n.uuid] = today;
+          changes.push(days < 0 ? `⏳ ${n.name} 已过期 ${-days} 天`
+            : days === 0 ? `⏳ ${n.name} 今日到期` : `⏳ ${n.name} 剩 ${days} 天到期`);
+        }
       });
-      store.write(JSON.stringify(cur), "komariOnlineState");
+      store.write(JSON.stringify(next), "komariNotifyState");
       if (changes.length && typeof $notification !== "undefined") {
         $notification.post(title, "", changes.join("\n"));
       }
