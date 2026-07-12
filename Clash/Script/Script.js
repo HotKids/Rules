@@ -168,9 +168,9 @@ function main(config) {
     { name: '🔍 Google', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png' },
     // Microsoft
     // > OneDrive
-    { name: '☁️ OneDrive', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png' },
+    { name: '☁️ OneDrive', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png' },
     // > Microsoft Services
-    { name: 'Ⓜ️ Microsoft', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png' },
+    { name: 'Ⓜ️ Microsoft', type: 'select', proxies: ['🔘 DIRECT', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png' },
     // Telegram
     { name: '📬 Telegram', type: 'select', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png' },
     // AIGC
@@ -316,10 +316,10 @@ function main(config) {
     'RULE-SET,Global,🔰 Proxy',
     // China Area Network
     'RULE-SET,China,🔘 DIRECT',
-    'RULE-SET,CNASN,🔘 DIRECT',
-    'RULE-SET,CNCIDR,🔘 DIRECT',
+    'RULE-SET,CNASN,🔘 DIRECT,no-resolve',
+    'RULE-SET,CNCIDR,🔘 DIRECT,no-resolve',
     // Local Area Network
-    'RULE-SET,LAN,🔘 DIRECT',
+    'RULE-SET,LAN,🔘 DIRECT,no-resolve',
     // GeoIP
     'GEOSITE,cn,🔘 DIRECT',
     'GEOIP,CN,🔘 DIRECT,no-resolve',

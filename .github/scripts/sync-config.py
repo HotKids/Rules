@@ -1463,6 +1463,9 @@ def gen_rules_and_providers(
                 continue
 
             url_or_builtin, policy = parts[1], parts[2]
+            # mihomo 的 RULE-SET 支持 no-resolve（rules/parser.go ParseParams），
+            # 源行带上时透传，避免 ipcidr 规则集对域名连接触发多余 DNS 解析
+            nr = ",no-resolve" if any(p.lower() == "no-resolve" for p in parts[3:]) else ""
 
             if not url_or_builtin.startswith("http"):
                 # 内置规则集：显式 mapping > 仓库自动探测
@@ -1483,7 +1486,7 @@ def gen_rules_and_providers(
                     seen.pop(pname, None)
                     ph.skip()
                     continue
-                emit.append(f"  - RULE-SET,{pname},{policy}")
+                emit.append(f"  - RULE-SET,{pname},{policy}{nr}")
 
             else:
                 # 外部 URL
@@ -1517,7 +1520,7 @@ def gen_rules_and_providers(
                     ph.skip()
                     continue
 
-                emit.append(f"  - RULE-SET,{pname},{policy}")
+                emit.append(f"  - RULE-SET,{pname},{policy}{nr}")
 
         # 规则会被输出：先刷缓冲注释，再写规则行
         rules_out.extend(ph.flush())

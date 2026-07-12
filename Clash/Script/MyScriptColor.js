@@ -328,10 +328,10 @@ function main(config) {
     'RULE-SET,Global,🔰 Proxy',
     // China Area Network
     'RULE-SET,China,🔘 DIRECT',
-    'RULE-SET,CNASN,🔘 DIRECT',
-    'RULE-SET,CNCIDR,🔘 DIRECT',
+    'RULE-SET,CNASN,🔘 DIRECT,no-resolve',
+    'RULE-SET,CNCIDR,🔘 DIRECT,no-resolve',
     // Local Area Network
-    'RULE-SET,LAN,🔘 DIRECT',
+    'RULE-SET,LAN,🔘 DIRECT,no-resolve',
     // GeoIP
     'GEOSITE,cn,🔘 DIRECT',
     'GEOIP,CN,🔘 DIRECT,no-resolve',

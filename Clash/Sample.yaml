@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 15:07:33
+# Date: 2026-07-12 15:10:14
 # Author: @HotKids
 
 # 通用设置
@@ -388,7 +388,7 @@ proxy-groups:
   # > OneDrive
   - name: "☁️ OneDrive"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -396,7 +396,7 @@ proxy-groups:
   # > Microsoft Services
   - name: "Ⓜ️ Microsoft"
     type: select
-    icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png
     proxies:
       - 🔘 DIRECT
       - 🔰 Proxy
@@ -792,11 +792,11 @@ rules:
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,CNASN,🔘 DIRECT
-  - RULE-SET,CNCIDR,🔘 DIRECT
+  - RULE-SET,CNASN,🔘 DIRECT,no-resolve
+  - RULE-SET,CNCIDR,🔘 DIRECT,no-resolve
 
   # Local Area Network
-  - RULE-SET,LAN,🔘 DIRECT
+  - RULE-SET,LAN,🔘 DIRECT,no-resolve
 
   # GeoIP
   - GEOSITE,cn,🔘 DIRECT
