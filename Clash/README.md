@@ -8,7 +8,7 @@ mihomo 客户端**建议使用 [Bettbox](https://github.com/appshubcc/Bettbox)**
 | `Sample.yaml` | 由 `sync-config.py` 从 `Surge/Profile.conf` 自动生成的完整示例配置（`proxy-providers` 订阅版） |
 | `Mihomo.yaml` | `Sample.yaml` 的锚点 / flow 紧凑改写版，功能等价，同样自动生成 |
 | `General.yaml` | 通用基础设置参考（手动维护，带逐项中文注释） |
-| `RuleSet/` | 由 `sync-rules.py` 从 `Surge/RULE-SET/` 自动转换的规则集 |
+| `RuleSet/` | 由 `sync-rules.py` 从 `Surge/RULE-SET/` 自动转换的规则集；domain / ipcidr 清单另有 CI 编译的同名 `.mrs` 二进制版 |
 | `Script/` | mihomo 覆写脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端使用 |
 
 ## Script/
