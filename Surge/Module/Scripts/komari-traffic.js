@@ -1,8 +1,8 @@
-// komari-traffic.js - Komari 节点流量监控（单面板聚合：实时速率 + 用量/配额 + 到期）
+// komari-traffic.js - Komari 节点流量监控（单面板聚合：累计流量 + 用量/配额 + 到期）
 //
 // 数据来源（Komari 公开 API，两次请求出全部节点）:
 //   GET  /api/nodes  → 节点名称 / traffic_limit / traffic_limit_type / expired_at / weight
-//   POST /api/rpc2 common:getNodesLatestStatus → net_in/net_out(实时速率) + net_total_up/down(累计流量) + online
+//   POST /api/rpc2 common:getNodesLatestStatus → net_total_up/down(累计流量) + online
 // 配额、到期日、用量口径均由 Komari 后台维护，无需在参数里逐台配置。
 //
 // 用量口径与 Komari 面板一致：自开机累计流量对比 traffic_limit（重启后计数器清零）。
@@ -82,13 +82,6 @@ const httpPost = (url, body) => new Promise((resolve, reject) => {
 });
 
 const formatGB = bytes => (bytes / 1073741824).toFixed(2) + " GB";
-
-const formatSpeed = bps => {
-  if (!bps || bps < 0) bps = 0;
-  if (bps >= 1048576) return (bps / 1048576).toFixed(2) + " MB/s";
-  if (bps >= 1024) return (bps / 1024).toFixed(1) + " KB/s";
-  return bps.toFixed(0) + " B/s";
-};
 
 // traffic_limit_type: sum / max / min / up / down（Komari 默认 max）
 const calcUsage = (up, down, type) => {
@@ -191,15 +184,12 @@ if (!base) {
         lines = [`${node.name} ｜ 离线`];
       } else {
         lines = [rec.online ? node.name : `${node.name} ｜ 离线`];
-        if (rec.online) lines.push(`实时 ↓ ${formatSpeed(rec.net_in)}  ↑ ${formatSpeed(rec.net_out)}`);
-        const type = String(node.traffic_limit_type || "max").toLowerCase();
-        const used = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type);
-        const usedGB = used / 1073741824;
+        lines.push(`累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`);
         if (node.traffic_limit > 0) {
+          const type = String(node.traffic_limit_type || "max").toLowerCase();
+          const usedGB = calcUsage(rec.net_total_up || 0, rec.net_total_down || 0, type) / 1073741824;
           const quotaGB = node.traffic_limit / 1073741824;
           lines.push(`用量 ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`);
-        } else {
-          lines.push(`用量 ${usageLabel(type)} ${formatGB(used)}`);
         }
       }
 
