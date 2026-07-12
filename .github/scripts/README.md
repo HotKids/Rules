@@ -89,7 +89,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 即可自动生成对应脚本，无需改动 `sync-config.py`**。改某份 overlay 的 `output` 后，旧路径上
 遗留的脚本会在下次同步时自动清理（仅删带生成标记的产物，不碰手放的其它 `.js`）。
 
-**触发**：`Profile.conf`、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
+**触发**：`Profile.conf`、`Clash/General.yaml`（clash.ini 经 `<<` 内嵌）、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
 
 ### 各平台同步内容
 
