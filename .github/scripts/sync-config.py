@@ -855,12 +855,13 @@ def _expand_shorthand(s: str) -> str:
     return RAW_PREFIX + s.rstrip("/") + "/"
 
 
-def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
+def map_surge_url(url: str, url_maps: list[tuple[str, str]], prefer_mrs: bool = False) -> str | None:
     """将 Surge 规则 URL 转换为 Clash URL。
 
     优先级：
-    1. 完整 URL 精确匹配（显式声明最优先，可覆盖 HotKids 自动映射，如指向 .mrs 产物）
-    2. HotKids 自动映射
+    1. 完整 URL 精确匹配（显式声明最优先，可覆盖 HotKids 自动映射）
+    2. HotKids 自动映射（prefer_mrs=True 时指向 CI 编译的 .mrs——DOMAIN-SET 源
+       必为 domain payload，mrs 编译步必然覆盖）
     3. 最长前缀匹配
     4. 仓库简写（非 http 左侧）匹配
     返回 None 表示无法映射。
@@ -874,9 +875,11 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     if HOTKIDS_SURGE_PREFIX in url:
         rest = url[url.index(HOTKIDS_SURGE_PREFIX) + len(HOTKIDS_SURGE_PREFIX):]
         basename = rest.rsplit("/", 1)[-1] if "/" in rest else rest
-        if basename.endswith(".list"):
-            basename = basename[:-5] + ".yaml"
-        return HOTKIDS_CLASH_PREFIX + basename
+        for ext in (".list", ".yaml"):
+            if basename.endswith(ext):
+                basename = basename[: -len(ext)]
+                break
+        return HOTKIDS_CLASH_PREFIX + basename + (".mrs" if prefer_mrs else ".yaml")
 
     # 3. 最长前缀匹配
     best_len = 0
@@ -1500,6 +1503,9 @@ def gen_rules_and_providers(
                         ph.skip()
                         continue
                     clash_url, behavior = resolved
+                    # 纯 ipcidr payload 的自有产物（如 LAN → lancidr）必有 CI 编译的 .mrs
+                    if behavior == "ipcidr" and clash_url.startswith(HOTKIDS_CLASH_PREFIX):
+                        clash_url = clash_url.rsplit(".", 1)[0] + ".mrs"
                 pname = register(clash_url, behavior, prefer_name=url_or_builtin)
                 if skip := _should_skip([url_or_builtin, clash_url, pname, policy], skips):
                     print(f"  [SKIP rule] skip={skip}: {url_or_builtin} -> {policy}")
@@ -1516,7 +1522,8 @@ def gen_rules_and_providers(
                     ph.skip()
                     continue
 
-                clash_url = map_surge_url(url_or_builtin, url_maps)
+                clash_url = map_surge_url(url_or_builtin, url_maps,
+                                          prefer_mrs=(rule_type == "DOMAIN-SET"))
                 if clash_url is None:
                     print(f"  [WARN] 无 Clash URL 映射，跳过: {url_or_builtin}")
                     ph.skip()
