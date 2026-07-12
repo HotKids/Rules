@@ -96,8 +96,9 @@ if (show.ip) {
 }
 
 // IPv4: a.***.***.d；IPv6: 首尾段保留，中间打码
+// 访客模式下服务端已给打码形式（203.*.*.*），不再二次打码
 const maskIPAddr = ip => {
-  if (!ip) return ip;
+  if (!ip || ip.includes("*")) return ip;
   if (ip.includes(":")) {
     if (ip.includes("::")) {
       const [left = "", right = ""] = ip.split("::");
@@ -380,7 +381,7 @@ if (!base) {
       ip: node => {
         const parts = [node.ipv4, node.ipv6].filter(Boolean)
           .map(v => ipMask ? maskIPAddr(v) : v);
-        return parts.length ? `IP ${parts.join("｜")}` : "";
+        return parts.length ? `IP 地址 ${parts.join("｜")}` : "";
       },
       // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
