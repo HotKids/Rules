@@ -31,6 +31,7 @@ const ruleOptionsEnable = {
   'Crypto': true,
   'Finance': true,
   'Mail': true,
+  'Speedtest': false,
   'AdGuard': true,
 };
 
@@ -145,7 +146,7 @@ function main(config) {
   // null = 不过滤、取全量节点；下方策略组生成后按此表运行时填充候选。
   const poolGroupFilters = {
     'Mail': null,
-    '⏱️ Speedtest': null,
+    'Speedtest': null,
     '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
     '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)',
@@ -190,7 +191,7 @@ function main(config) {
     // Mail
     { name: 'Mail', type: 'select', proxies: ['Proxy', 'Direct'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Email.png' },
     // Speedtest
-    { name: '⏱️ Speedtest', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png' },
+    { name: 'Speedtest', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Speed.png' },
     // Adblock
     { name: 'AdGuard', type: 'select', proxies: ['Direct', 'Reject'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png' },
     // DIRECT
@@ -333,7 +334,7 @@ function main(config) {
     // > Mail
     'RULE-SET,Spark,Mail',
     // > Speedtest
-    'RULE-SET,Speedtest,⏱️ Speedtest',
+    'RULE-SET,Speedtest,Speedtest',
     // Global (DNS Cache Pollution) / (IP Blackhole) / (Region-Restricted Access Denied) / (Network Jitter)
     'RULE-SET,Global,Proxy',
     // China Area Network

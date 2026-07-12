@@ -31,6 +31,7 @@ const ruleOptionsEnable = {
   '🪙 Crypto': true,
   '💳 Finance': true,
   '📧 Mail': true,
+  '⏱️ Speedtest': true,
   '🚧 AdGuard': true,
 };
 
