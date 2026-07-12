@@ -291,7 +291,7 @@ function main(config) {
     // Advertising 广告
     'RULE-SET,Reject,AdGuard',
     'RULE-SET,AdBlock,AdGuard',
-    // Malicious 恶意网站（钓鱼 / 恶意软件分发 / 僵尸网络）
+    // Malicious 恶意网站（钓鱼 / NXDOMAIN 劫持 / 僵尸网络 C2）
     'RULE-SET,Phishing,AdGuard',
     // Global Area Network
     // > Streaming by Region
