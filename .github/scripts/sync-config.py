@@ -3142,11 +3142,14 @@ def _gen_clash_script_js(
                     g["filter"] = pool_filters[g["name"]]
 
     # 兜底策略组（MATCH 的目标）视为核心组，始终保留；隐藏的动作包装组、
-    # 结构性池组同样视为核心组，均不纳入可选开关。
+    # 被其他分组引用的结构性池组（Server / 地区）同样视为核心组，均不纳入可选开关。
+    # 无人引用的叶子池组（如 ⏱️ Speedtest，仅自身规则使用）可以开关。
     main_group_name = next((r.split(",", 1)[1] for r in rules if r.startswith("MATCH,")), None)
+    referenced_names = {p for g in groups for p in (g.get("proxies") or [])}
     optional_group_names = [
         g["name"] for g in groups
-        if not g.get("hidden") and g["name"] not in structural_pool_names and g["name"] != main_group_name
+        if not g.get("hidden") and g["name"] != main_group_name
+        and (g["name"] not in structural_pool_names or g["name"] not in referenced_names)
     ]
 
     # overlay 可声明 disabled_by_default，让某些可选分组默认关闭（仍可随时手动改回

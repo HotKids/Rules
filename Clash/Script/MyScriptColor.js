@@ -31,6 +31,7 @@ const ruleOptionsEnable = {
   '🪙 Crypto': true,
   '💳 Finance': true,
   '📧 Mail': true,
+  '⏱️ Speedtest': true,
   '🚧 AdGuard': true,
 };
 
@@ -190,7 +191,7 @@ function main(config) {
     // Mail
     { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Email.png' },
     // Speedtest
-    { name: '⏱️ Speedtest', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png' },
+    { name: '⏱️ Speedtest', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Speed.png' },
     // Adblock
     { name: '🚧 AdGuard', type: 'select', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png' },
     // DIRECT

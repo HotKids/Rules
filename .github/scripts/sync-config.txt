@@ -100,3 +100,5 @@ Apple News
 >> Surge/Surfboard.conf
 # > Builtin
 << .github/scripts/sync-config/surfboard.ini
+# > Skip
+Speedtest
