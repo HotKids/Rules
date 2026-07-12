@@ -22,7 +22,10 @@
 //     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
 //     每节点多一次请求，失败自动回退累计口径）
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀 /
-//     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏）
+//     ip 节点 IP（默认 false；完整 IP 需 token，无 token 时视后台「向访客发送 IP」开关显示打码或隐藏；
+//       显示时默认打码，点击面板刷新在明文/打码间切换，自动刷新不切换——判定依赖 panel_interval）
+// - panel_interval: 面板 update-interval（秒），默认 300；改了 [Panel] 的刷新间隔需同步，
+//   否则 IP 打码点击切换的判定会失准
 //   行序固定：IP → 流量 → 用量 → 系统 → 价格·在线（同一行） → 到期 → 延迟
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
@@ -67,6 +70,52 @@ const show = {
 show.meta = show.price || show.uptime;
 const infoItems = ["ip", "traffic", "usage", "sys", "meta", "expire", "ping"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
+
+// IP 打码：默认打码；点击面板刷新切换明文/打码，自动刷新（update-interval 整数倍间隔）不切换
+// 与 ip-security 同款时间判定，misfire 容忍 15s
+const store = typeof $persistentStore !== "undefined"
+  ? $persistentStore
+  : { read: () => null, write: () => {} };
+let ipMask = 1;
+if (show.ip) {
+  const stored = parseInt(store.read("komariIpMask"), 10);
+  ipMask = Number.isInteger(stored) ? stored : 1;
+  const now = Math.floor(Date.now() / 1000);
+  const lastRun = parseInt(store.read("komariIpLastRun"), 10) || 0;
+  store.write(String(now), "komariIpLastRun");
+  const interval = parseInt(clean(args.panel_interval), 10) || 300;
+  const tolerance = 15;
+  const elapsed = now - lastRun;
+  const remainder = elapsed % interval;
+  const isAutoRefresh = lastRun > 0 && elapsed > tolerance
+    && (remainder <= tolerance || remainder >= interval - tolerance);
+  if (lastRun > 0 && !isAutoRefresh) {
+    ipMask = ipMask === 1 ? 0 : 1;
+    store.write(String(ipMask), "komariIpMask");
+  }
+}
+
+// IPv4: a.***.***.d；IPv6: 首尾段保留，中间打码
+const maskIPAddr = ip => {
+  if (!ip) return ip;
+  if (ip.includes(":")) {
+    if (ip.includes("::")) {
+      const [left = "", right = ""] = ip.split("::");
+      const lg = left ? left.split(":") : [];
+      const rg = right ? right.split(":") : [];
+      const first = lg[0] || rg[0];
+      const last = rg[rg.length - 1] || lg[lg.length - 1];
+      if (!first || !last) return ip;
+      return first === last ? "::" + first : first + "::**:" + last;
+    }
+    const parts = ip.split(":");
+    if (parts.length <= 2) return ip;
+    return parts[0] + ":" + parts.slice(1, -1).map(() => "**").join(":") + ":" + parts[parts.length - 1];
+  }
+  const parts = ip.split(".");
+  if (parts.length !== 4) return ip;
+  return parts[0] + ".***.***." + parts[3];
+};
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
 let excludeRe = null, nodeItems = [], nodesError = "";
@@ -329,7 +378,8 @@ if (!base) {
     const lineBuilders = {
       // 完整 IP 需 token；访客视后台开关为打码形式或空（空则该行隐藏）
       ip: node => {
-        const parts = [node.ipv4, node.ipv6].filter(Boolean);
+        const parts = [node.ipv4, node.ipv6].filter(Boolean)
+          .map(v => ipMask ? maskIPAddr(v) : v);
         return parts.length ? `IP ${parts.join("｜")}` : "";
       },
       // 对齐 Komari 卡片：↑ 在前
