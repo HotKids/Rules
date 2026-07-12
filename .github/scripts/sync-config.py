@@ -3730,18 +3730,19 @@ def _sb_example_outbound(tag: str, domain: str) -> dict:
         "tcp_fast_open": True,
     }
 
-# 外部规则集（Loyalsoldier / VirgilClyne）→ SagerNet 官方 sing-box 规则集。
-# 这是跨项目等价映射（非机械转换），故显式列出；token 用子串匹配。
-_SB_SAGER_URL = {
-    "geosite-cn": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs",
-    "geoip-cn": "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs",
-    "geolocation-!cn": "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs",
-}
-_SB_EXTERNAL_TO_SAGER = {
-    "surge-rules/release/proxy.txt": "geolocation-!cn",
-    "surge-rules/release/direct.txt": "geosite-cn",
-    "surge-rules/release/cncidr.txt": "geoip-cn",
-    "ruleset/ASN.China": "geoip-cn",
+# 外部规则集 → 官方 sing-box 规则集（SagerNet 二进制 srs / Sukka source json）。
+# 这是跨项目等价映射（非机械转换），故显式列出；token 用子串匹配，值为 (tag, url, format)。
+_SB_EXTERNAL_SETS = {
+    "surge-rules/release/proxy.txt": (
+        "geolocation-!cn", "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-geolocation-!cn.srs", "binary"),
+    "surge-rules/release/direct.txt": (
+        "geosite-cn", "https://raw.githubusercontent.com/SagerNet/sing-geosite/rule-set/geosite-cn.srs", "binary"),
+    "surge-rules/release/cncidr.txt": (
+        "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
+    "ruleset/ASN.China": (
+        "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
+    "ruleset.skk.moe/master/List/domainset/reject_phishing.conf": (
+        "Phishing", "https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/sing-box/domainset/reject_phishing.json", "source"),
 }
 # Loyalsoldier private.txt → sing-box 内建 ip_is_private（非 rule_set）
 _SB_PRIVATE_TOKEN = "surge-rules/release/private.txt"
@@ -3874,10 +3875,10 @@ def _gen_singbox_rules(
     sets: list[dict] = []
     seen_sets: set[str] = set()
 
-    def add_set(tag: str, url: str) -> None:
+    def add_set(tag: str, url: str, fmt: str = "binary") -> None:
         if tag not in seen_sets:
             seen_sets.add(tag)
-            sets.append({"type": "remote", "tag": tag, "format": "binary",
+            sets.append({"type": "remote", "tag": tag, "format": fmt,
                          "url": url, "download_detour": SB_DIRECT_TAG, "update_interval": "1440m"})
 
     for line in rule_lines:
@@ -3911,12 +3912,12 @@ def _gen_singbox_rules(
             rules.append({"rule_set": stem, **target})
         elif _SB_PRIVATE_TOKEN in token:                   # 私有网络 → 内建规则
             rules.append({"ip_is_private": True, **target})
-        else:                                              # 外部规则集 → SagerNet 或跳过
-            sager = next((v for k, v in _SB_EXTERNAL_TO_SAGER.items() if k in token), None)
-            if not sager or sager in seen_sets:
+        else:                                              # 外部规则集 → 官方等价规则集或跳过
+            ext = next((v for k, v in _SB_EXTERNAL_SETS.items() if k in token), None)
+            if not ext or ext[0] in seen_sets:
                 continue
-            add_set(sager, _SB_SAGER_URL[sager])
-            rules.append({"rule_set": sager, **target})
+            add_set(*ext)
+            rules.append({"rule_set": ext[0], **target})
 
     return rules, sets
 
