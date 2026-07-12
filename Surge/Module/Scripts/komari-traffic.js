@@ -122,10 +122,21 @@ const calcUsage = (up, down, type) => {
 const usageLabel = type =>
   ({ sum: "⇅", up: "↑", down: "↓", min: "min" }[type] || "max");
 
+// region 字段：ISO 两字母代码转国旗（JP → 🇯🇵），其余原样显示
+const regionFlag = raw => {
+  const s = String(raw || "").trim();
+  if (/^[A-Za-z]{2}$/.test(s)) {
+    const up = s.toUpperCase();
+    return String.fromCodePoint(0x1F1E6 + up.charCodeAt(0) - 65, 0x1F1E6 + up.charCodeAt(1) - 65);
+  }
+  return s;
+};
+
 const formatUptime = sec => {
-  if (sec >= 86400) return `${Math.floor(sec / 86400)} 天`;
-  if (sec >= 3600) return `${Math.floor(sec / 3600)} 小时`;
-  return `${Math.max(1, Math.floor(sec / 60))} 分钟`;
+  const d = Math.floor(sec / 86400), h = Math.floor(sec % 86400 / 3600), m = Math.floor(sec % 3600 / 60);
+  if (d > 0) return `${d} 天${h ? ` ${h} 时` : ""}`;
+  if (h > 0) return `${h} 时${m ? ` ${m} 分` : ""}`;
+  return `${Math.max(1, m)} 分`;
 };
 
 // billing_cycle（天）→ 周期文案
@@ -199,9 +210,9 @@ const formatExpire = raw => {
   const dateStr = m ? m[1]
     : `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const days = Math.ceil((d - new Date()) / 86400000);
-  if (days < 0) return `${dateStr}（已过期 ${-days} 天）`;
-  if (days === 0) return `${dateStr}（今日到期）`;
-  return `${dateStr}（剩余 ${days} 天）`;
+  if (days < 0) return `${dateStr} 已过期 ${-days} 天`;
+  if (days === 0) return `${dateStr} 今日到期`;
+  return `${dateStr} 余 ${days} 天`;
 };
 
 if (!base) {
@@ -229,7 +240,8 @@ if (!base) {
       } catch (e) {}
     }
 
-    const byWeight = (a, b) => (b.weight || 0) - (a.weight || 0) || String(a.name).localeCompare(String(b.name));
+    // 与 Komari 面板一致：weight 升序（数值小的靠前），同权重按名称
+    const byWeight = (a, b) => (a.weight || 0) - (b.weight || 0) || String(a.name).localeCompare(String(b.name));
 
     if (nodeItems.length) {
       // 逐条目匹配：正则命中或名称完全相等（兼容含元字符的精确名称），
@@ -251,7 +263,6 @@ if (!base) {
       nodes = picked;
     } else {
       if (excludeRe) nodes = nodes.filter(n => !excludeRe.test(String(n.name)));
-      // 与 Komari 面板一致：权重大的靠前，同权重按名称
       nodes.sort(byWeight);
     }
 
@@ -279,17 +290,20 @@ if (!base) {
     // 静态信息（expire/price）离线也显示；累计/用量取最后一次上报，离线仍有意义；
     // sys/uptime/ping 是瞬时数据，仅在线显示，避免陈旧值误导
     const lineBuilders = {
+      // 对齐 Komari 卡片：↑ 在前
       traffic: (node, rec) => rec &&
-        `累计 ↓ ${formatGB(rec.net_total_down || 0)}  ↑ ${formatGB(rec.net_total_up || 0)}`,
+        `总流量 ↑ ${formatGB(rec.net_total_up || 0)} ↓ ${formatGB(rec.net_total_down || 0)}`,
       usage: (node, rec) => {
-        const type = String(node.traffic_limit_type || "max").toLowerCase();
+        const hasQuota = node.traffic_limit > 0;
+        // 有配额：口径严格跟随 Komari 的流量阈值类型（与后台告警一致）；
+        // 无配额：Komari 默认的 max 没有对比意义，固定按 sum 显示总流量
+        const type = hasQuota ? String(node.traffic_limit_type || "max").toLowerCase() : "sum";
         const cyc = cycleMap[node.uuid];
-        // 周期口径：本计费周期精确用量（无配额也有意义）；否则累计口径，仅设有配额时显示
         const label = cyc ? "周期" : "用量";
         const src = cyc ? cyc : (rec ? { up: rec.net_total_up || 0, down: rec.net_total_down || 0 } : null);
-        if (!src || (!cyc && !(node.traffic_limit > 0))) return "";
+        if (!src || (!cyc && !hasQuota)) return "";
         const usedGB = calcUsage(src.up, src.down, type) / 1073741824;
-        if (!(node.traffic_limit > 0)) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
+        if (!hasQuota) return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} GB`;
         const quotaGB = node.traffic_limit / 1073741824;
         return `${label} ${usageLabel(type)} ${usedGB.toFixed(2)} / ${quotaGB.toFixed(0)}GB (${(usedGB / quotaGB * 100).toFixed(1)}%)`;
       },
@@ -298,27 +312,35 @@ if (!base) {
         return s && `到期 ${s}`;
       },
       sys: (node, rec) => rec && rec.online &&
-        `CPU ${Math.round(rec.cpu || 0)}% ｜ 内存 ${pct(rec.ram, rec.ram_total)} ｜ 磁盘 ${pct(rec.disk, rec.disk_total)}`,
+        `CPU ${Math.round(rec.cpu || 0)}%｜内存 ${pct(rec.ram, rec.ram_total)}｜磁盘 ${pct(rec.disk, rec.disk_total)}`,
       uptime: (node, rec) => rec && rec.online && rec.uptime > 0 &&
         `在线 ${formatUptime(rec.uptime)}`,
       price: node => {
         if (!(node.price > 0)) return "";
         const unit = cycleLabel(node.billing_cycle);
-        return `价格 ${node.price} ${node.currency || "$"}${unit ? " / " + unit : ""}`;
+        // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
+        const cur = node.currency || "$";
+        const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
+        return `价格 ${amount}${unit ? "/" + unit : ""}`;
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
         const parts = Object.values(rec.ping)
           .filter(p => p && p.latest >= 0)
-          .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? `(丢${Math.round(p.loss)}%)` : ""}`);
-        return parts.length ? `延迟 ${parts.join(" ｜ ")}` : "";
+          .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? ` 丢${Math.round(p.loss)}%` : ""}`);
+        if (!parts.length) return "";
+        // 每行两项，避免任务多时折行成一大段
+        const rows = [];
+        for (let i = 0; i < parts.length; i += 2) rows.push(parts.slice(i, i + 2).join("｜"));
+        return `延迟 ${rows.join("\n")}`;
       }
     };
 
     const blocks = nodes.map(node => {
       if (node.missing) return `${node.name}\n无匹配节点`;
       const rec = statusMap ? statusMap[node.uuid] : null;
-      const displayName = showRegion && node.region ? `${node.region} ${node.name}` : node.name;
+      const flag = showRegion ? regionFlag(node.region) : "";
+      const displayName = flag ? `${flag} ${node.name}` : node.name;
 
       const lines = [];
       if (!statusMap) lines.push(displayName, "状态获取失败");
