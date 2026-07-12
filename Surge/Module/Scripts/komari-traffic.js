@@ -13,13 +13,15 @@
 // - nodes: 节点筛选（可选，不填显示全部并按权重排序）
 //   · 名称或正则;名称或正则 → 只显示匹配的节点，顺序跟随条目（条目内按权重）
 //   · "!" 开头 → 整体视作单个正则，匹配的不显示
-// - 显示项开关（各自独立参数，true/false）：
-//   · traffic 累计↓↑（默认 true）/ usage 用量对比配额（默认 true）/ expire 到期（默认 true）
+// - 显示项开关（各自独立参数）：
+//   · overview 顶部概览：在线数/点亮地区/全站流量总和，统计全部节点不受 nodes 筛选影响（默认 true）
+//   · traffic 总流量↑↓（默认 true）/ expire 到期（默认 true）
+//   · usage 用量对比配额，三态（默认 true）：true=累计口径 / false=隐藏 /
+//     cycle=本计费周期精确用量（跨重启；周期起点取 expired_at 的每月对应日，
+//     无到期日按每月 1 号，从 /api/records/load 历史正增量累加，
+//     每节点多一次请求，失败自动回退累计口径）
 //   · sys CPU·内存·磁盘 / uptime 在线时长 / ping 延迟 / price 价格 / region 名称行加地区前缀（默认 false）
-//   行序固定：累计 → 用量 → 系统 → 在线 → 延迟 → 价格 → 到期
-// - cycle: 周期用量（默认 false）。开启后用量行改为本计费周期精确用量（跨重启）：
-//   周期起点取 expired_at 的每月对应日（无到期日按每月 1 号），从 /api/records/load
-//   历史正增量累加得出；每节点多一次请求，失败自动回退累计口径
+//   行序固定：总流量 → 用量 → 系统 → 延迟 → 价格·在线（同一行） → 到期
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -46,18 +48,22 @@ const showFlag = (v, def) => {
   const s = clean(v).toLowerCase();
   return (s === "true" || s === "1") ? true : (s === "false" || s === "0") ? false : def;
 };
+// usage 三态：true=累计口径 / false=隐藏 / cycle=周期口径
+const wantCycle = clean(args.usage).toLowerCase() === "cycle";
 const show = {
+  overview: showFlag(args.overview, true),
   traffic: showFlag(args.traffic, true),
-  usage: showFlag(args.usage, true),
+  usage: wantCycle || showFlag(args.usage, true),
   expire: showFlag(args.expire, true),
   sys: showFlag(args.sys, false),
   uptime: showFlag(args.uptime, false),
   ping: showFlag(args.ping, false),
   price: showFlag(args.price, false)
 };
-const infoItems = ["traffic", "usage", "sys", "uptime", "ping", "price", "expire"].filter(k => show[k]);
+// meta 行 = 价格·在线合并一行
+show.meta = show.price || show.uptime;
+const infoItems = ["traffic", "usage", "sys", "ping", "meta", "expire"].filter(k => show[k]);
 const showRegion = showFlag(args.region, false);
-const wantCycle = showFlag(args.cycle, false);
 // 节点筛选："!" 开头 → 整体为排除正则；否则按 ";" 拆成逐条正则/名称
 const rawNodes = clean(args.nodes);
 let excludeRe = null, nodeItems = [], nodesError = "";
@@ -240,6 +246,23 @@ if (!base) {
       } catch (e) {}
     }
 
+    // 顶部概览：与 Komari 首页口径一致，统计全部节点（不受 nodes 筛选影响）
+    let overview = "";
+    if (show.overview && statusMap) {
+      let online = 0, up = 0, down = 0;
+      const regions = new Set();
+      nodes.forEach(n => {
+        if (n.region && String(n.region).trim()) regions.add(String(n.region).trim());
+        const r = statusMap[n.uuid];
+        if (r) {
+          if (r.online) online++;
+          up += r.net_total_up || 0;
+          down += r.net_total_down || 0;
+        }
+      });
+      overview = `在线 ${online}/${nodes.length}｜点亮地区 ${regions.size}\n总量 ↑ ${formatGB(up)} ↓ ${formatGB(down)}`;
+    }
+
     // 与 Komari 面板一致：weight 升序（数值小的靠前），同权重按名称
     const byWeight = (a, b) => (a.weight || 0) - (b.weight || 0) || String(a.name).localeCompare(String(b.name));
 
@@ -313,15 +336,20 @@ if (!base) {
       },
       sys: (node, rec) => rec && rec.online &&
         `CPU ${Math.round(rec.cpu || 0)}%｜内存 ${pct(rec.ram, rec.ram_total)}｜磁盘 ${pct(rec.disk, rec.disk_total)}`,
-      uptime: (node, rec) => rec && rec.online && rec.uptime > 0 &&
-        `在线 ${formatUptime(rec.uptime)}`,
-      price: node => {
-        if (!(node.price > 0)) return "";
-        const unit = cycleLabel(node.billing_cycle);
-        // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
-        const cur = node.currency || "$";
-        const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
-        return `价格 ${amount}${unit ? "/" + unit : ""}`;
+      // 价格·在线合并一行（各自开关独立，缺一项时单独显示另一项）
+      meta: (node, rec) => {
+        const parts = [];
+        if (show.price && node.price > 0) {
+          const unit = cycleLabel(node.billing_cycle);
+          // 符号型货币前置（$36.9），字母代码后置（36.9 CNY）
+          const cur = node.currency || "$";
+          const amount = /^[A-Za-z]/.test(cur) ? `${node.price} ${cur}` : `${cur}${node.price}`;
+          parts.push(`价格 ${amount}${unit ? "/" + unit : ""}`);
+        }
+        if (show.uptime && rec && rec.online && rec.uptime > 0) {
+          parts.push(`在线 ${formatUptime(rec.uptime)}`);
+        }
+        return parts.join("｜");
       },
       ping: (node, rec) => {
         if (!rec || !rec.online || !rec.ping) return "";
@@ -329,10 +357,8 @@ if (!base) {
           .filter(p => p && p.latest >= 0)
           .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? ` 丢${Math.round(p.loss)}%` : ""}`);
         if (!parts.length) return "";
-        // 每行两项，避免任务多时折行成一大段
-        const rows = [];
-        for (let i = 0; i < parts.length; i += 2) rows.push(parts.slice(i, i + 2).join("｜"));
-        return `延迟 ${rows.join("\n")}`;
+        // 一行一项；后续行用全角空格缩进，与「延迟 」前缀对齐
+        return `延迟 ${parts.join("\n　　 ")}`;
       }
     };
 
@@ -354,7 +380,8 @@ if (!base) {
       return lines.join("\n");
     });
 
-    done({ title, content: blocks.join("\n\n"), icon: "server.rack", "icon-color": "#32CD32" });
+    const content = (overview ? overview + "\n\n" : "") + blocks.join("\n\n");
+    done({ title, content, icon: "server.rack", "icon-color": "#32CD32" });
     }); // cycle 预取 then 结束
   }).catch(err => {
     done({
