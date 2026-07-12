@@ -34,6 +34,8 @@
  *
  * • geminiapikey=YOUR_KEY    Gemini API Key（可选，增强检测准确性）
  * • nfprice=false            关闭 Netflix 价格显示（默认开启）
+ * • notify=true              解锁状态变化推送（默认关闭）：可用性或区域变化时通知，
+ *                            超时/错误视为未知不触发，首次运行仅记录基线
  * • viu=true                 开启 Viu 检测（默认关闭；开启后仅在可用时显示）
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -58,6 +60,35 @@ const STATUS = { OK: 1, COMING: 2, FAIL: 0, TIMEOUT: -1, ERROR: -2 };
 
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
+
+/**
+ * 解锁状态变化推送（notify=true）：与上次快照对比，变化合并为一条通知
+ * 超时/错误视为未知态：不通知也不更新该服务基线，避免网络抖动刷屏
+ * 首次运行仅记录基线
+ */
+function notifyUnlockChanges(services) {
+  let prev = {};
+  try { prev = JSON.parse($persistentStore.read("mediaCheckNotifyState")) || {}; } catch (e) {}
+  const next = { ...prev };
+  const changes = [];
+  services.forEach(s => {
+    const st = s.result.status;
+    if (st === STATUS.TIMEOUT || st === STATUS.ERROR) return;
+    const avail = st === STATUS.OK || st === STATUS.COMING;
+    const region = s.result.region || "";
+    const cur = avail ? `1:${region}` : "0";
+    const old = prev[s.name];
+    next[s.name] = cur;
+    if (old === undefined || old === cur) return;
+    const oldAvail = old.charAt(0) === "1";
+    const oldRegion = old.slice(2);
+    if (!avail) changes.push(`🔴 ${s.name} 不再解锁`);
+    else if (!oldAvail) changes.push(`🟢 ${s.name} 已解锁${region ? `（${region}）` : ""}`);
+    else changes.push(`🔀 ${s.name} 区域变化 ${oldRegion || "?"} → ${region || "?"}`);
+  });
+  $persistentStore.write(JSON.stringify(next), "mediaCheckNotifyState");
+  if (changes.length) $notification.post("🎬 解锁状态变化", "", changes.join("\n"));
+}
 
 // 显示图标和颜色配置
 const ICONS = { SUCCESS: "🟢", WARNING: "🟡", COLORS: { SUCCESS: "#3CB371", WARNING: "#DAA520" } };
@@ -629,6 +660,8 @@ class ServiceChecker {
       const at = services.findIndex(s => s.name === "Spotify");
       services.splice(at < 0 ? services.length : at, 0, { name: "Viu", result: viu });
     }
+
+    if (args.notify === "true") notifyUnlockChanges(services);
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
     const totalCount = services.length;
