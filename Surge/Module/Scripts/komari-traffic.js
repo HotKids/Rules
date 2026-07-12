@@ -11,6 +11,7 @@
 // - url: Komari 面板地址（必填，如 https://mon.example.com；无协议前缀默认 https）
 // - token: 后台 API Key（可选；私有站点或需显示隐藏节点时以 Authorization: Bearer 发送）
 // - nodes: 节点过滤，名称;名称（可选；顺序即显示顺序，不填显示全部并按权重排序）
+// - filter: 节点名称正则筛选（可选；匹配的才显示，"!" 开头则反转为匹配的不显示；nodes 已填时忽略）
 // - title: 面板标题（默认:📊 Komari 流量统计）
 
 const args = (() => {
@@ -32,6 +33,18 @@ const clean = v => {
 const title = clean(args.title) || "📊 Komari 流量统计";
 const token = clean(args.token);
 const nodeFilter = clean(args.nodes).split(";").map(s => s.trim()).filter(Boolean);
+
+// 名称正则筛选："!" 开头 → 匹配的不显示，否则 → 只显示匹配的
+const rawPattern = clean(args.filter);
+const filterNegate = rawPattern.startsWith("!");
+let filterRe = null, filterError = "";
+if (rawPattern) {
+  try {
+    filterRe = new RegExp(filterNegate ? rawPattern.slice(1) : rawPattern);
+  } catch (e) {
+    filterError = `filter 正则无效：${e.message || e}`;
+  }
+}
 
 let base = clean(args.url).replace(/\/+$/, "");
 if (base && !/^https?:\/\//i.test(base)) base = "https://" + base;
@@ -109,6 +122,8 @@ const formatExpire = raw => {
 
 if (!base) {
   done({ title, content: "未填写 url 参数", icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
+} else if (filterError) {
+  done({ title, content: filterError, icon: "xmark.shield.fill", "icon-color": "#CD5C5C" });
 } else {
   const rpcBody = JSON.stringify({ jsonrpc: "2.0", id: 1, method: "common:getNodesLatestStatus", params: {} });
 
@@ -136,12 +151,18 @@ if (!base) {
       nodes.forEach(n => { byName[n.name] = n; });
       nodes = nodeFilter.map(name => byName[name] || { name, missing: true });
     } else {
+      if (filterRe) nodes = nodes.filter(n => filterNegate !== filterRe.test(String(n.name)));
       // 与 Komari 面板一致：权重大的靠前，同权重按名称
       nodes.sort((a, b) => (b.weight || 0) - (a.weight || 0) || String(a.name).localeCompare(String(b.name)));
     }
 
     if (!nodes.length) {
-      done({ title, content: "面板暂无节点", icon: "server.rack", "icon-color": "#9E9E9E" });
+      done({
+        title,
+        content: filterRe ? "无匹配 filter 的节点" : "面板暂无节点",
+        icon: "server.rack",
+        "icon-color": "#9E9E9E"
+      });
       return;
     }
 
