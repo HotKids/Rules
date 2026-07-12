@@ -2724,6 +2724,10 @@ def _apply_overlay(
     clashbox.overlay.json）叠加到自动生成的基座上，就地修改 groups / pool_filters /
     rules / structural_pool_names。各类差异对应 overlay 里的字段（按此处的处理顺序）：
 
+    - rule_policy_redirect：把 rules 里以某分组为策略目标的行改指另一分组
+      （{旧落点: 新落点}，用改名前的基座名字）。先于 remove_groups 执行，
+      因此「删掉某组但保留其规则」可以两者搭配（如 📛 REJECT-DROP 组删掉、
+      其规则落点改指 ⛔️ REJECT）。
     - remove_groups：整组删掉（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
       里剔除对它的引用、删掉 rules 里以它为策略目标的行。
     - rename_map：批量改名（{旧名: 新名}），同步更新其余分组 proxies 候选里的旧名
@@ -2774,6 +2778,15 @@ def _apply_overlay(
                 rules[i] = ",".join(parts)
         del by_name[old_name]
         by_name[new_name] = group
+
+    for old_policy, new_policy in overlay.get("rule_policy_redirect", {}).items():
+        _get_group(new_policy, f"rule_policy_redirect[{old_policy!r}] 的新落点")
+        for i, r in enumerate(rules):
+            parts = r.split(",")
+            idx = _rule_policy_index(parts)
+            if idx < len(parts) and parts[idx] == old_policy:
+                parts[idx] = new_policy
+                rules[i] = ",".join(parts)
 
     for name in overlay.get("remove_groups", []):
         _get_group(name, f"remove_groups[{name!r}]")

@@ -67,8 +67,8 @@
 `Clash/Script/MyScript.js`、`Clash/Script/MyClashBox.js`、`Clash/Script/MyScriptColor.js`
 都是 `Script.js` 的私人定制版：
 在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
-声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`remove_groups` 整组
-删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
+声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`rule_policy_redirect`
+规则落点重定向、`remove_groups` 整组删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
 `extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
 分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
 分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
