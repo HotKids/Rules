@@ -2447,7 +2447,11 @@ def _gen_surfboard_proxy_groups(
 
         gtype = "url-test" if g["type"] == "smart" else g["type"]
         tokens = [gtype] + g["proxies"]
-        for k, v in g["params"].items():
+        params = dict(g["params"])
+        # smart → url-test 降级时显式补 Surge 系默认容差，避免依赖 Surfboard 的隐式默认
+        if g["type"] == "smart":
+            params.setdefault("tolerance", "100")
+        for k, v in params.items():
             if k in _SURFBOARD_SKIP_PARAMS:
                 continue
             tokens.append(f"{k}={v}")
@@ -2592,8 +2596,8 @@ _CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
     ("DNS", [
         ("dns", [
             "fake-ip（blacklist）：fake-ip-filter 内域名返回真实 IP，其余走 fake-ip；default-nameserver 仅解析上游域名（纯 IP）；",
-            "nameserver/fallback 经代理（#proxy）防境外域名泄露给国内 DNS，ECS 携带国内 IP 取 CDN 最优节点；",
-            "fallback-filter 命中（GeoIP 非 CN 或落保留段）判定污染改用 fallback；代理节点/DIRECT 域名走国内 DoH",
+            "主 DNS 经 #RULES 走代理拿干净结果，防境外域名泄露给国内 DNS；nameserver-policy 按声明顺序先窄后宽：",
+            "内网域名交系统解析器、NTP 用裸 IP UDP（校时不依赖 TLS）、国内域名国内 DoH 就近解析；代理节点/DIRECT 域名同走国内 DoH",
         ]),
     ]),
     ("TUN", [
@@ -3048,7 +3052,7 @@ def _gen_clash_script_js(
 ) -> tuple[str, tuple[list[dict], dict[str, str | None], list[str], set[str]]]:
     """由最终生成的 Clash/Mihomo.yaml 转译出等效的 mihomo 覆写脚本（Script.js）。
 
-    用于 Clash Verge 等支持「Enhance Script」的客户端：直接对任意订阅（如
+    用于 Clash Verge Rev / FlClash / Bettbox 等支持「Enhance Script」的客户端：直接对任意订阅（如
     sub.hotkids.me）生成与本仓库 Surge/Profile.conf 等效的策略组 / 规则 / 基础设置，
     不依赖本仓库自身的 proxy-providers 静态生成流程。
 
@@ -3147,7 +3151,7 @@ def _gen_clash_script_js(
         "/**",
         " * mihomo 覆写脚本（Enhance Script）· HotKids/Rules",
         " *",
-        " * 用途：在 Clash Verge 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
+        " * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
         " * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的",
         " * 策略组、分流规则与基础设置，不必依赖机场自带配置。",
         " *",
