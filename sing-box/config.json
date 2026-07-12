@@ -290,6 +290,10 @@
         "outbound": "🔘 Direct"
       },
       {
+        "rule_set": "Reject",
+        "action": "reject"
+      },
+      {
         "rule_set": "Block",
         "action": "reject"
       },
@@ -389,6 +393,14 @@
         "tag": "Reroute",
         "format": "binary",
         "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Reroute.srs",
+        "download_detour": "🔘 Direct",
+        "update_interval": "1440m"
+      },
+      {
+        "type": "remote",
+        "tag": "Reject",
+        "format": "binary",
+        "url": "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Reject.srs",
         "download_detour": "🔘 Direct",
         "update_interval": "1440m"
       },

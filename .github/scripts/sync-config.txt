@@ -40,7 +40,13 @@ Apple News
 Apple TV
 # > Mapping
 VirgilClyne/GetSomeFries =>
-Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
+https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt => https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs
+https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Phishing.list => https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs
+LAN => https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
 # > Rename
 rule-providers:
   Block => AdBlock
@@ -48,11 +54,10 @@ rule-providers:
   ASN.China => CNASN
   Gemini => Google AI Studio
   GenAI => AIGC
-  proxy => Global
-  direct => China
+  geolocation-!cn => Global
+  geosite/cn => China
   private => Private
-  reject => Reject
-  cncidr => CNCIDR
+  geoip/cn => CNCIDR
 
 # Quantumult X
 >> Quantumult/Sample.conf
