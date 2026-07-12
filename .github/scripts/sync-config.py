@@ -3831,11 +3831,13 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
 
 
 def _sb_policy_target(policy: str, out_tags: set[str]) -> dict | None:
-    """Surge 策略 → sing-box 规则动作字段：DIRECT/AdGuard/已生成出站，否则 None（跳过）。"""
+    """Surge 策略 → sing-box 规则动作字段：DIRECT/拦截包装策略/已生成出站，否则 None（跳过）。"""
     if policy == "🔘 DIRECT":
         return {"outbound": SB_DIRECT_TAG}
-    if policy == "🚧 AdGuard":
+    if policy in ("🚧 AdGuard", "⛔️ REJECT"):
         return {"action": "reject"}
+    if policy == "📛 REJECT-DROP":
+        return {"action": "reject", "method": "drop"}
     if policy in out_tags:
         return {"outbound": policy}
     return None
