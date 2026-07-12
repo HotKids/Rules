@@ -8,14 +8,14 @@
  * - 支持网络变化自动检测和通知
  *
  * 数据来源：
- * ① 本地 IP: bilibili API / 百度企服 qifu (DIRECT)
+ * ① 本地 IP: bilibili API (DIRECT)
  * ② 出口 IP: Cloudflare cdn-cgi/trace（官方端点，IP 直连不受 DNS 污染影响；失败回落 ip.sb）(IPv4/IPv6)
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili / qifu 百度企服(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / qifu 百度企服(zh, https)
+ * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / baidu 百度 opendata(zh, https)
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -25,8 +25,8 @@
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
- * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，qifu=百度企服(中文)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，qifu=百度企服(中文, https)
+ * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，ipsb=ip.sb(英文)
+ * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，baidu=百度 opendata(中文, https)
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -65,8 +65,7 @@ const CONFIG = {
   },
   urls: {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
-    qifuLocal: "https://qifu-api.baidubce.com/ip/local/geo/v1/district",
-    qifuGeo: (ip) => `https://qifu-api.baidubce.com/ip/geo/v1/district?ip=${ip}`,
+    baiduGeo: (ip) => `https://opendata.baidu.com/api.php?query=${ip}&co=&resource_id=6006&oe=utf8`,
     // Cloudflare 官方端点，证书含 IP SAN，可直连（不经 DNS）；失败回落 ip.sb
     outboundTrace: "https://1.1.1.1/cdn-cgi/trace",
     outboundTrace6: "https://[2606:4700:4700::1111]/cdn-cgi/trace",
@@ -81,11 +80,6 @@ const CONFIG = {
     proxyCheck: (ip) => `https://proxycheck.io/v2/${ip}?risk=1&vpn=1`,
     scamalytics: (ip) => `https://scamalytics.com/ip/${ip}`,
     dnsLeakEdns: (id) => `http://${id}.edns.ip-api.com/json`
-  },
-  // qifu API 有 Referer 防盗链（直接访问 403），需伪装成官网前端请求
-  qifuHeaders: {
-    "Referer": "https://qifu.baidu.com/",
-    "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1"
   },
   ipv6Timeout: 3000,
   policyRetryDelay: 500,
@@ -277,18 +271,21 @@ function normalizeIpApi(data) {
 }
 
 /**
- * 将百度企服 qifu 返回字段归一化为内部格式
- * qifu: { code:"Success", data:{ country, areacode, prov, city, district, isp, owner } }
+ * 将百度 opendata 返回归一化为内部格式
+ * opendata 6006: { status:"0", data:[{ location:"广东省深圳市 移动" }] }
+ * location 首段为地理（整体放 country_name 供中文显示），其余为运营商；
+ * country_code 无法提供，由调用方从 ipinfo 响应回填（用于国旗）
  */
-function normalizeQifu(data) {
-  const d = data?.data;
-  if (!d || (data.code && data.code !== "Success") || !d.country) return null;
+function normalizeOpendata(data) {
+  const loc = data?.data?.[0]?.location;
+  if (!loc) return null;
+  const parts = String(loc).trim().split(/\s+/);
   return {
-    country_code: d.areacode || null,
-    country_name: d.country,
-    city: d.city || "",
-    region: d.prov || "",
-    org: d.isp || d.owner || ""
+    country_code: null,
+    country_name: parts[0] || "",
+    city: "",
+    region: "",
+    org: parts.slice(1).join(" ")
   };
 }
 
@@ -317,7 +314,7 @@ function parseScamalyticsScore(html) {
  * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
 async function getPolicyAndEntrance() {
-  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|qifu-api\.baidubce\.com)/i;
+  const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|1\.1\.1\.1|2606:4700|opendata\.baidu\.com)/i;
 
   async function findInRecent(limit) {
     const res = await surgeAPI("GET", "/v1/requests/recent");
@@ -588,11 +585,8 @@ async function fetchOutbound6() {
 }
 
 async function fetchIPs() {
-  const useQifuLocal = args.localGeoApi === "qifu";
   const [local, exit, exit6ip] = await Promise.all([
-    useQifuLocal
-      ? httpJSON(CONFIG.urls.qifuLocal, "DIRECT", CONFIG.qifuHeaders)
-      : httpJSON(CONFIG.urls.localIP, "DIRECT"),
+    httpJSON(CONFIG.urls.localIP, "DIRECT"),
     fetchOutbound4(),
     Promise.race([
       fetchOutbound6(),
@@ -603,7 +597,7 @@ async function fetchIPs() {
   const hasIPv6 = exit6ip && exit6ip.includes(":");
 
   return {
-    localIP: (useQifuLocal ? (local?.ip || local?.data?.ip) : local?.data?.addr) || null,
+    localIP: local?.data?.addr || null,
     outIP: exit?.ip || null,
     outIPv6: hasIPv6 ? exit6ip : null,
     localRaw: local,
@@ -766,23 +760,21 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
 
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
   const useBilibili = args.localGeoApi === "bilibili";
-  const useQifuLocal = args.localGeoApi === "qifu";
-  const localZh = useBilibili || useQifuLocal; // 本地地理为中文源 → 显示中文国名
+  const localZh = useBilibili; // 本地地理为中文源 → 显示中文国名
 
   // 入口/出口地理数据源：remote_geoapi=ipinfo → ipinfo.io, ipapi → ip-api.com(en),
-  // ipapi-zh → ip-api.com(zh-CN, http 明文), qifu → 百度企服(zh, https)
+  // ipapi-zh → ip-api.com(zh-CN, http 明文), baidu → 百度 opendata(zh, https)
   const useIpApi = args.remoteGeoApi.startsWith("ipapi");
-  const useQifu = args.remoteGeoApi === "qifu";
+  const useBaidu = args.remoteGeoApi === "baidu";
   const ipApiLang = args.remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
   // 非 ipinfo 数据源时需单独请求 ipinfo：运营商始终用 ipinfo + rDNS 取自 hostname
-  const needExtraOrg = useIpApi || useQifu;
-  const geoHeaders = useQifu ? CONFIG.qifuHeaders : undefined;
+  const needExtraOrg = useIpApi || useBaidu;
   function geoUrl(ip) {
-    if (useQifu) return CONFIG.urls.qifuGeo(ip);
+    if (useBaidu) return CONFIG.urls.baiduGeo(ip);
     return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
   }
   function normalizeGeo(data) {
-    if (useQifu) return normalizeQifu(data);
+    if (useBaidu) return normalizeOpendata(data);
     return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
   }
 
@@ -792,8 +784,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
     getRiskScore(outIP),                     // 0
     getIPType(outIP),                        // 1
     httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
-    httpJSON(geoUrl(outIP), null, geoHeaders),  // 3: 出口地理
-    needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（ip-api/qifu 模式）+ hostname
+    httpJSON(geoUrl(outIP)),                 // 3: 出口地理
+    needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 4: 出口运营商（ip-api/baidu 模式）+ hostname
     getTrafficStats(),                       // 5: 流量统计
   ]);
 
@@ -809,15 +801,9 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
     console.log("当前为直连，跳过 DNS 泄露检测");
   }
 
-  // 本地 IP 地理信息：zh 用 bilibili/qifu（默认中国），en 用 ip.sb
+  // 本地 IP 地理信息：zh 用 bilibili（默认中国），en 用 ip.sb
   let localInfo;
-  if (useQifuLocal) {
-    const qf = normalizeQifu(localRaw);
-    const sb = normalizeIpSb(localSbRaw);
-    localInfo = qf
-      ? { ...qf, country_code: qf.country_code || sb?.country_code || "CN" }
-      : sb;
-  } else if (useBilibili) {
+  if (useBilibili) {
     const bili = normalizeBilibili(localRaw);
     const sb = normalizeIpSb(localSbRaw);
     localInfo = bili
@@ -831,26 +817,29 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   // IPv6 只显示 IP 地址，不单独查询地区和运营商
   let outInfo = normalizeGeo(outGeoRaw) || normalizeIpSb(outRaw);
   // 反向 DNS：从 ipinfo.io 响应中提取 hostname
-  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; ipapi/qifu 模式: outOrgRaw 来自 ipinfo.io
+  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; ipapi/baidu 模式: outOrgRaw 来自 ipinfo.io
   const ipinfoRaw = needExtraOrg ? outOrgRaw : outGeoRaw;
   const reverseDNS = ipinfoRaw?.hostname || null;
   if (reverseDNS) console.log("反向 DNS: " + reverseDNS);
   if (needExtraOrg && outInfo) {
     const orgData = normalizeIpInfo(outOrgRaw);
     if (orgData?.org) outInfo.org = orgData.org;
+    // baidu opendata 不含国家代码，用 ipinfo 的回填以显示国旗
+    if (!outInfo.country_code && orgData?.country_code) outInfo.country_code = orgData.country_code;
   }
 
   // 入口 IP 地理信息：与出口不同时才查询
   let entranceInfo = null;
   if (entranceIP && entranceIP !== outIP) {
     console.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
-    const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
+    const entrQueries = [httpJSON(geoUrl(entranceIP))];
     if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
     const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
     entranceInfo = normalizeGeo(entrGeoRaw);
     if (needExtraOrg && entranceInfo && entrOrgRaw) {
       const orgData = normalizeIpInfo(entrOrgRaw);
       if (orgData?.org) entranceInfo.org = orgData.org;
+      if (!entranceInfo.country_code && orgData?.country_code) entranceInfo.country_code = orgData.country_code;
     }
   }
 
