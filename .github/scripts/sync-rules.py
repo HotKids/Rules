@@ -775,10 +775,10 @@ def parse_sync_rules() -> dict:
         elif s == "# >> Module":
             section = "module"
         elif section and s and not s.startswith("#") and "," in s:
-            if section == "surge" and s.upper().startswith("DOMAIN-SET,"):
-                section_key, s = "surge_domainset", s[len("DOMAIN-SET,"):].strip()
-            else:
-                section_key = section
+            is_domainset = False
+            if section in ("surge", "clash") and s.upper().startswith("DOMAIN-SET,"):
+                is_domainset, s = True, s[len("DOMAIN-SET,"):].strip()
+            section_key = "surge_domainset" if (section == "surge" and is_domainset) else section
             url, rest = s.split(",", 1)
             # rest = "name" 或 "name #!key=value #!key=value ..."（空格+#! 分隔）
             parts = rest.split(" #!")
@@ -788,7 +788,10 @@ def parse_sync_rules() -> dict:
                 if "=" in part:
                     k, v = part.split("=", 1)
                     overrides[k.strip()] = v.strip()
-            result[section_key].append({"url": url.strip(), "name": name, "overrides": overrides})
+            entry = {"url": url.strip(), "name": name, "overrides": overrides}
+            if section == "clash":
+                entry["domainset"] = is_domainset
+            result[section_key].append(entry)
     return result
 
 
@@ -1023,6 +1026,7 @@ def fetch_external_rules():
 
     # ── # >> Clash section（同名多 URL 合并去重）──────────────────────
     clash_groups: dict[str, list[str]] = defaultdict(list)
+    clash_domainset_names = {e["name"] for e in rules["clash"] if e.get("domainset")}
     for e in rules["clash"]:
         clash_groups[e["name"]].append(e["url"])
 
@@ -1053,7 +1057,10 @@ def fetch_external_rules():
         else:
             print(f"    ✓ Clash:    {name}.yaml 无变化")
 
-        sb_content = convert_classical_payload_to_singbox(body)
+        # DOMAIN-SET, 前缀条目为 domain payload（裸域名 / +. 前缀），按 domain 语义转换
+        sb_convert = (convert_domain_payload_to_singbox if name in clash_domainset_names
+                      else convert_classical_payload_to_singbox)
+        sb_content = sb_convert(body)
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")

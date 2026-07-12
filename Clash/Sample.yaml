@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 16:42:11
+# Date: 2026-07-12 18:17:12
 # Author: @HotKids
 
 # 通用设置
@@ -535,6 +535,7 @@ rule-providers:
   Bypass:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Bypass.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml
     interval: 86400
@@ -542,6 +543,7 @@ rule-providers:
   Reroute:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Reroute.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml
     interval: 86400
@@ -549,13 +551,15 @@ rule-providers:
   Private:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Private.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    format: mrs
+    path: ./Provider/RuleSet/Private.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
     interval: 86400
 
   HTTPDNS:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/HTTPDNS.yaml
     url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml
     interval: 86400
@@ -563,13 +567,15 @@ rule-providers:
   Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Reject.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
+    format: mrs
+    path: ./Provider/RuleSet/Reject.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs
     interval: 86400
 
   AdBlock:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/AdBlock.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml
     interval: 86400
@@ -577,13 +583,15 @@ rule-providers:
   Phishing:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Phishing.yaml
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml
+    format: mrs
+    path: ./Provider/RuleSet/Phishing.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs
     interval: 86400
 
   Bogus:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Bogus.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bogus.yaml
     interval: 86400
@@ -591,6 +599,7 @@ rule-providers:
   Streaming_TW:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Streaming_TW.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml
     interval: 86400
@@ -598,6 +607,7 @@ rule-providers:
   Streaming_JP:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Streaming_JP.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml
     interval: 86400
@@ -605,6 +615,7 @@ rule-providers:
   Streaming_US:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Streaming_US.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_US.yaml
     interval: 86400
@@ -612,6 +623,7 @@ rule-providers:
   Streaming:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Streaming.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming.yaml
     interval: 86400
@@ -619,6 +631,7 @@ rule-providers:
   CNTV:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/CNTV.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/CNTV.yaml
     interval: 86400
@@ -626,6 +639,7 @@ rule-providers:
   Google AI Studio:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Google_AI_Studio.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Gemini.yaml
     interval: 86400
@@ -633,6 +647,7 @@ rule-providers:
   AIGC:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/AIGC.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/GenAI.yaml
     interval: 86400
@@ -640,6 +655,7 @@ rule-providers:
   Apple CN:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Apple_CN.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple%20CN.yaml
     interval: 86400
@@ -647,6 +663,7 @@ rule-providers:
   Apple:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Apple.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Apple.yaml
     interval: 86400
@@ -654,6 +671,7 @@ rule-providers:
   Google:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Google.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Google.yaml
     interval: 86400
@@ -661,6 +679,7 @@ rule-providers:
   OneDrive:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/OneDrive.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/OneDrive.yaml
     interval: 86400
@@ -668,6 +687,7 @@ rule-providers:
   Microsoft:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Microsoft.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Microsoft.yaml
     interval: 86400
@@ -675,6 +695,7 @@ rule-providers:
   Telegram:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Telegram.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Telegram.yaml
     interval: 86400
@@ -682,6 +703,7 @@ rule-providers:
   Crypto:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Crypto.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml
     interval: 86400
@@ -689,6 +711,7 @@ rule-providers:
   Finance:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Finance.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml
     interval: 86400
@@ -696,6 +719,7 @@ rule-providers:
   Spark:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/Spark.yaml
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml
     interval: 86400
@@ -703,20 +727,23 @@ rule-providers:
   Global:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Global.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
+    format: mrs
+    path: ./Provider/RuleSet/Global.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs
     interval: 86400
 
   China:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/China.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
+    format: mrs
+    path: ./Provider/RuleSet/China.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
     interval: 86400
 
   CNASN:
     type: http
     behavior: classical
+    format: yaml
     path: ./Provider/RuleSet/CNASN.yaml
     url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
     interval: 86400
@@ -724,15 +751,17 @@ rule-providers:
   CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    format: mrs
+    path: ./Provider/RuleSet/CNCIDR.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
     interval: 86400
 
   LAN:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/LANCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt
+    format: mrs
+    path: ./Provider/RuleSet/LAN.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
     interval: 86400
 
 # 规则
