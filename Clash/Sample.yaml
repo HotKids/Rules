@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 16:19:57
+# Date: 2026-07-12 16:33:28
 # Author: @HotKids
 
 # 通用设置
@@ -576,10 +576,11 @@ rule-providers:
 
   Phishing:
     type: http
-    behavior: classical
+    behavior: domain
     path: ./Provider/RuleSet/Phishing.yaml
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml
+    url: https://fastly.jsdelivr.net/gh/SukkaLab/ruleset.skk.moe@master/Clash/domainset/reject_phishing.txt
     interval: 86400
+    format: text
 
   Bogus:
     type: http

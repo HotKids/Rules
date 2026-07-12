@@ -730,34 +730,6 @@ def _is_clash_payload(text: str) -> bool:
     return False
 
 
-def _is_domainset(text: str) -> bool:
-    """检测文本是否为 Surge DOMAIN-SET 格式（非注释行均为裸域名 / `.` 前缀域名，无逗号）。"""
-    saw_rule = False
-    for line in text.splitlines():
-        s = line.strip()
-        if not s or s.startswith("#") or s.startswith("//"):
-            continue
-        if "," in s or " " in s:
-            return False
-        saw_rule = True
-    return saw_rule
-
-
-def convert_domainset_to_surge(text: str) -> str:
-    """Surge DOMAIN-SET → RULE-SET 规则行：`.foo` →（含自身与子域）DOMAIN-SUFFIX,foo；裸域名 → DOMAIN,foo。
-    注释行原样保留，交由 normalize_surge_rules 统一处理。"""
-    out = []
-    for line in text.splitlines():
-        s = line.strip()
-        if not s or s.startswith("#") or s.startswith("//"):
-            out.append(line)
-        elif s.startswith("."):
-            out.append(f"DOMAIN-SUFFIX,{s[1:]}")
-        else:
-            out.append(f"DOMAIN,{s}")
-    return "\n".join(out) + "\n"
-
-
 def normalize_surge_rules(text: str) -> str | None:
     """规范化 Surge 规则文本为项目风格。
     保留 '# > Section' header，剥掉其他来源注释，输出干净规则行。
@@ -952,8 +924,6 @@ def fetch_external_rules():
                 if text is None:
                     print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
                     continue
-            elif _is_domainset(text):
-                text = convert_domainset_to_surge(text)
             normalized = normalize_surge_rules(text)
             if not normalized:
                 continue
