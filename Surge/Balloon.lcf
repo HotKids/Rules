@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-11 11:49:35
+# Date: 2026-07-12 16:04:58
 # Author: @HotKids
 
 [General]
@@ -120,11 +120,9 @@ https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.
 # Advertising 广告
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Reject, enabled=true
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list, policy=🚧 AdGuard, tag=Adblock, enabled=true
-https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list, policy=🚧 AdGuard, tag=Advertising, enabled=true
-# Privacy 隐私
-https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list, policy=🚧 AdGuard, tag=Tracking, enabled=true
-# Hijacking 运营商劫持或恶意网站
-https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list, policy=🚧 AdGuard, tag=Malicious, enabled=true
+# Malicious 恶意网站（钓鱼 / 恶意软件分发 / 僵尸网络）
+https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/domainset/reject_phishing.conf, policy=🚧 AdGuard, tag=Phishing, enabled=true
+https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/ip/reject.conf, policy=REJECT-DROP, tag=Bogus, enabled=true
 # Global Area Network
 # > Streaming by Region
 # >> Streaming TW

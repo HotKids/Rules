@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 15:41:37
+# Date: 2026-07-12 16:04:58
 # Author: @HotKids
 
 # 通用设置
@@ -574,6 +574,22 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml
     interval: 86400
 
+  Phishing:
+    type: http
+    behavior: domain
+    path: ./Provider/RuleSet/Phishing.yaml
+    url: https://fastly.jsdelivr.net/gh/SukkaLab/ruleset.skk.moe@master/Clash/domainset/reject_phishing.txt
+    interval: 86400
+    format: text
+
+  Bogus:
+    type: http
+    behavior: classical
+    path: ./Provider/RuleSet/Bogus.yaml
+    url: https://fastly.jsdelivr.net/gh/SukkaLab/ruleset.skk.moe@master/Clash/ip/reject.txt
+    interval: 86400
+    format: text
+
   Streaming_TW:
     type: http
     behavior: classical
@@ -743,6 +759,10 @@ rules:
   # Advertising 广告
   - RULE-SET,Reject,🚧 AdGuard
   - RULE-SET,AdBlock,🚧 AdGuard
+
+  # Malicious 恶意网站（钓鱼 / 恶意软件分发 / 僵尸网络）
+  - RULE-SET,Phishing,🚧 AdGuard
+  - RULE-SET,Bogus,📛 REJECT-DROP,no-resolve
 
   # Global Area Network
   # > Streaming by Region

@@ -1208,6 +1208,16 @@ def _anchor_matches(anchor: str | None, target: str) -> bool:
 # Provider 命名
 # ---------------------------------------------------------------------------
 
+def _rename_lookup(url: str, stem: str, rename_map: dict[str, str] | None) -> str:
+    """Rename 查表：优先 `父目录/词干` 复合键（区分不同上游的同名文件，如
+    Sukka 的 ip/reject 与 Loyalsoldier 的 reject），其次裸词干。"""
+    if not rename_map:
+        return stem
+    parts = url.rstrip("/").rsplit("/", 2)
+    parent = parts[-2] if len(parts) >= 2 else ""
+    return rename_map.get(f"{parent}/{stem}", rename_map.get(stem, stem))
+
+
 def _derive_provider_name(
     clash_url: str, seen: dict[str, str], rename_map: dict[str, str] | None = None
 ) -> str:
@@ -1218,8 +1228,7 @@ def _derive_provider_name(
             stem = stem[: -len(ext)]
             break
     stem = stem.replace("%20", " ")
-    if rename_map:
-        stem = rename_map.get(stem, stem)
+    stem = _rename_lookup(clash_url, stem, rename_map)
     name, counter = stem, 2
     while name in seen and seen[name] != clash_url:
         name = f"{stem}_{counter}"
@@ -1391,7 +1400,12 @@ def gen_rules_and_providers(
                 counter += 1
         else:
             name = _derive_provider_name(clash_url, seen, rename_map)
-        providers[clash_url] = {"name": name, "behavior": behavior}
+        entry = {"name": name, "behavior": behavior}
+        # Sukka Ruleset（ruleset.skk.moe 及其 SukkaLab GitHub 镜像）的 Clash 产物
+        # 均为纯文本格式（每行一条规则），mihomo 默认按 yaml 解析会失败，需显式声明
+        if "ruleset.skk.moe" in clash_url:
+            entry["format"] = "text"
+        providers[clash_url] = entry
         seen[name] = clash_url
         return name
 
@@ -1656,8 +1670,10 @@ def gen_rules_and_providers(
             f"    path: ./Provider/RuleSet/{path_file}",
             f"    url: {clash_url}",
             "    interval: 86400",
-            "",
         ]
+        if info.get("format"):
+            rp_lines.append(f"    format: {info['format']}")
+        rp_lines.append("")
 
     # 在 # / # > 注释行前插入空行（# >> 子项不加），改善可读性
     formatted: list[str] = []
@@ -1892,11 +1908,11 @@ def gen_loon_remote_rules(
             ph.skip()
             continue
 
-        tag = _derive_tag(url)
-        if rename_map:
-            tag = rename_map.get(tag, tag)
+        tag = _rename_lookup(url, _derive_tag(url), rename_map)
         out.extend(ph.flush())
-        out.append(f"{url}, policy={policy}, tag={tag}, enabled=true")
+        # 拦截包装策略（policy-path 定义，Loon 不加载）→ Loon 内建动作
+        emit_policy = {"📛 REJECT-DROP": "REJECT-DROP"}.get(policy, policy)
+        out.append(f"{url}, policy={emit_policy}, tag={tag}, enabled=true")
 
     return "\n".join(out)
 
@@ -1905,7 +1921,9 @@ def gen_loon_remote_rules(
 # 生成 QX [policy]
 # ---------------------------------------------------------------------------
 
-_QX_PROXY_MAP = {"🚫 REJECT": "reject", "🔘 DIRECT": "direct"}
+# QX 无 reject-drop 变体，拦截包装策略统一落到内建 reject
+_QX_PROXY_MAP = {"🚫 REJECT": "reject", "⛔️ REJECT": "reject",
+                 "📛 REJECT-DROP": "reject", "🔘 DIRECT": "direct"}
 
 
 def _qx_normalize_text(text: str, policy_rename: dict[str, str] | None = None) -> str:
@@ -2193,8 +2211,7 @@ def gen_qx_filter_remote(
             ph.skip()
             continue
 
-        if rename_map:
-            tag = rename_map.get(tag, tag)
+        tag = _rename_lookup(url, tag, rename_map)
         # _QX_PROXY_MAP 优先（🔘 DIRECT→direct 等 QX 内建值），其余按 strip_names 处理
         stripped_policy = _QX_PROXY_MAP.get(policy, strip_emoji(policy) if strip_names else policy)
         emit_policy = policy_rename_map.get(stripped_policy, stripped_policy) if policy_rename_map else stripped_policy
@@ -2487,6 +2504,8 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             continue
 
         keep = [p for p in parts if p not in _SURGE_FLAGS]
+        # policy-path 定义的拦截包装策略 → 内建 REJECT（策略可能不在行尾，如后接 no-resolve）
+        keep = [{"📛 REJECT-DROP": "REJECT"}.get(p, p) for p in keep]
         # Surge-specific actions in policy position → REJECT
         if keep:
             keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT"}.get(keep[-1].upper(), keep[-1])
@@ -2990,8 +3009,9 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
     L.append("# 关于 Rule Provider 请查阅：https://wiki.metacubex.one/en/config/rule-providers/")
     L.append("rule-providers:")
     for name, rp in cfg.get("rule-providers", {}).items():
+        fmt = f", format: {rp['format']}" if rp.get("format") else ""
         L.append(f"  {name}: {{<<: *Remote, behavior: {rp['behavior']}, "
-                 f"path: {_yaml_flow(rp['path'])}, url: {_yaml_flow(rp['url'])}}}")
+                 f"path: {_yaml_flow(rp['path'])}, url: {_yaml_flow(rp['url'])}{fmt}}}")
     L.append("")
 
     # 规则

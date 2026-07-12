@@ -42,6 +42,8 @@ Apple TV
 # > Mapping
 VirgilClyne/GetSomeFries =>
 Loyalsoldier/surge-rules => Loyalsoldier/clash-rules
+https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/domainset/reject_phishing.conf => https://fastly.jsdelivr.net/gh/SukkaLab/ruleset.skk.moe@master/Clash/domainset/reject_phishing.txt
+https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/ip/reject.conf => https://fastly.jsdelivr.net/gh/SukkaLab/ruleset.skk.moe@master/Clash/ip/reject.txt
 # > Rename
 rule-providers:
   Block => AdBlock
@@ -53,6 +55,8 @@ rule-providers:
   direct => China
   private => Private
   reject => Reject
+  reject_phishing => Phishing
+  ip/reject => Bogus
   cncidr => CNCIDR
 
 # Quantumult X
@@ -77,6 +81,8 @@ Speedtest
   direct => China
   private => Private
   reject => Reject
+  reject_phishing => Phishing
+  ip/reject => Bogus
   cncidr => CNCIDR
 
 # Loon
@@ -94,6 +100,8 @@ Speedtest
   direct => China
   private => Private
   reject => Reject
+  reject_phishing => Phishing
+  ip/reject => Bogus
   cncidr => CNCIDR
 
 # Surfboard
