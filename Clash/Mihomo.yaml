@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-12 17:10:00
+# Date: 2026-07-12 18:08:12
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -155,11 +155,11 @@ proxy-groups:
 rule-providers:
   Bypass: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Bypass.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml}
   Reroute: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Reroute.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml}
-  Private: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Private.yaml, url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt}
+  Private: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Private.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs, format: mrs}
   HTTPDNS: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/HTTPDNS.yaml, url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml}
-  Reject: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Reject.yaml, url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt}
+  Reject: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Reject.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs, format: mrs}
   AdBlock: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/AdBlock.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml}
-  Phishing: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Phishing.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml}
+  Phishing: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Phishing.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs, format: mrs}
   Bogus: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Bogus.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bogus.yaml}
   Streaming_TW: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Streaming_TW.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_TW.yaml}
   Streaming_JP: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Streaming_JP.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Streaming_JP.yaml}
@@ -177,11 +177,11 @@ rule-providers:
   Crypto: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Crypto.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Crypto.yaml}
   Finance: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Finance.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Finance.yaml}
   Spark: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/Spark.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Spark.yaml}
-  Global: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Global.yaml, url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt}
-  China: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/China.yaml, url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt}
+  Global: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/Global.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs, format: mrs}
+  China: {<<: *Remote, behavior: domain, path: ./Provider/RuleSet/China.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs, format: mrs}
   CNASN: {<<: *Remote, behavior: classical, path: ./Provider/RuleSet/CNASN.yaml, url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml}
-  CNCIDR: {<<: *Remote, behavior: ipcidr, path: ./Provider/RuleSet/CNCIDR.yaml, url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt}
-  LAN: {<<: *Remote, behavior: ipcidr, path: ./Provider/RuleSet/LANCIDR.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt}
+  CNCIDR: {<<: *Remote, behavior: ipcidr, path: ./Provider/RuleSet/CNCIDR.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs, format: mrs}
+  LAN: {<<: *Remote, behavior: ipcidr, path: ./Provider/RuleSet/LAN.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs, format: mrs}
 
 # ── 规则 ──
 rules:

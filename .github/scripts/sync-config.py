@@ -859,13 +859,18 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
     """将 Surge 规则 URL 转换为 Clash URL。
 
     优先级：
-    1. HotKids 自动映射
-    2. 完整 URL 精确匹配
+    1. 完整 URL 精确匹配（显式声明最优先，可覆盖 HotKids 自动映射，如指向 .mrs 产物）
+    2. HotKids 自动映射
     3. 最长前缀匹配
     4. 仓库简写（非 http 左侧）匹配
     返回 None 表示无法映射。
     """
-    # 1. HotKids 自动映射（摊平子目录，与 sync-rules.py 输出一致）
+    # 1. 完整 URL 精确匹配
+    for left, right in url_maps:
+        if left.startswith("http") and url == left:
+            return right
+
+    # 2. HotKids 自动映射（摊平子目录，与 sync-rules.py 输出一致）
     if HOTKIDS_SURGE_PREFIX in url:
         rest = url[url.index(HOTKIDS_SURGE_PREFIX) + len(HOTKIDS_SURGE_PREFIX):]
         basename = rest.rsplit("/", 1)[-1] if "/" in rest else rest
@@ -873,14 +878,12 @@ def map_surge_url(url: str, url_maps: list[tuple[str, str]]) -> str | None:
             basename = basename[:-5] + ".yaml"
         return HOTKIDS_CLASH_PREFIX + basename
 
-    # 2 & 3. 精确 URL 或前缀匹配
+    # 3. 最长前缀匹配
     best_len = 0
     best_result: str | None = None
     for left, right in url_maps:
         if not left.startswith("http"):
             continue
-        if url == left:
-            return right
         if url.startswith(left) and len(left) > best_len:
             best_len = len(left)
             best_result = right.rstrip("/") + "/" + url[len(left):]
@@ -1223,7 +1226,7 @@ def _derive_provider_name(
 ) -> str:
     """从 Clash URL 文件名派生 provider 名，处理冲突。"""
     stem = clash_url.rstrip("/").rsplit("/", 1)[-1]
-    for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
+    for ext in (".yaml", ".yml", ".txt", ".list", ".conf", ".mrs"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
@@ -1356,15 +1359,15 @@ def _merge_action_lines(base: list[str], extra: list[str]) -> list[str]:
 def _behavior_from_url(url: str) -> str:
     """从 URL 文件名推断 rule-provider behavior（兜底检测）。
 
-    优先级：cidr（文件名含）→ ipcidr；.txt → domain；其他 → classical
+    优先级：cidr（文件名含）/ geoip（路径含）→ ipcidr；.txt → domain；其他 → classical
     """
     filename = url.rstrip("/").rsplit("/", 1)[-1].lower()
     stem = filename
-    for ext in (".yaml", ".yml", ".txt", ".list", ".conf"):
+    for ext in (".yaml", ".yml", ".txt", ".list", ".conf", ".mrs"):
         if stem.endswith(ext):
             stem = stem[: -len(ext)]
             break
-    if "cidr" in stem:
+    if "cidr" in stem or "/geoip/" in url.lower():
         return "ipcidr"
     if filename.endswith(".txt"):
         return "domain"
@@ -1401,9 +1404,12 @@ def gen_rules_and_providers(
         else:
             name = _derive_provider_name(clash_url, seen, rename_map)
         entry = {"name": name, "behavior": behavior}
+        # 二进制 mrs 产物（MetaCubeX 官方 / 本仓库 CI 编译）需显式声明 format
+        if clash_url.endswith(".mrs"):
+            entry["format"] = "mrs"
         # Sukka Ruleset（ruleset.skk.moe 及其 SukkaLab GitHub 镜像）的 Clash 产物
         # 均为纯文本格式（每行一条规则），mihomo 默认按 yaml 解析会失败，需显式声明
-        if "ruleset.skk.moe" in clash_url:
+        elif "ruleset.skk.moe" in clash_url:
             entry["format"] = "text"
         providers[clash_url] = entry
         seen[name] = clash_url
@@ -1662,7 +1668,8 @@ def gen_rules_and_providers(
         if path_override:
             path_file = path_override
         else:
-            path_file = f"{pname.replace(' ', '_')}.yaml"
+            ext = ".mrs" if info.get("format") == "mrs" else ".yaml"
+            path_file = f"{pname.replace(' ', '_')}{ext}"
         rp_lines += [
             f"  {pname}:",
             "    type: http",
@@ -3745,6 +3752,10 @@ _SB_EXTERNAL_SETS = {
         "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
     "ruleset/ASN.China": (
         "geoip-cn", "https://raw.githubusercontent.com/SagerNet/sing-geoip/rule-set/geoip-cn.srs", "binary"),
+    # Loyalsoldier reject 已由 sync-rules # >> Clash 收编（Clash/RuleSet/Reject.yaml +
+    # sing-box/source/Reject.json），此处映射到本仓库编译的 .srs
+    "surge-rules/release/reject.txt": (
+        "Reject", "https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/rule-set/Reject.srs", "binary"),
 }
 # Loyalsoldier private.txt → sing-box 内建 ip_is_private（非 rule_set）
 _SB_PRIVATE_TOKEN = "surge-rules/release/private.txt"

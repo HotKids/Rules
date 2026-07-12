@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-12 16:42:11
+# Date: 2026-07-12 18:08:12
 # Author: @HotKids
 
 # 通用设置
@@ -549,9 +549,10 @@ rule-providers:
   Private:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Private.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/private.txt
+    path: ./Provider/RuleSet/Private.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
     interval: 86400
+    format: mrs
 
   HTTPDNS:
     type: http
@@ -563,9 +564,10 @@ rule-providers:
   Reject:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Reject.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
+    path: ./Provider/RuleSet/Reject.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs
     interval: 86400
+    format: mrs
 
   AdBlock:
     type: http
@@ -577,9 +579,10 @@ rule-providers:
   Phishing:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Phishing.yaml
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.yaml
+    path: ./Provider/RuleSet/Phishing.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs
     interval: 86400
+    format: mrs
 
   Bogus:
     type: http
@@ -703,16 +706,18 @@ rule-providers:
   Global:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/Global.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
+    path: ./Provider/RuleSet/Global.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs
     interval: 86400
+    format: mrs
 
   China:
     type: http
     behavior: domain
-    path: ./Provider/RuleSet/China.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/direct.txt
+    path: ./Provider/RuleSet/China.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
     interval: 86400
+    format: mrs
 
   CNASN:
     type: http
@@ -724,16 +729,18 @@ rule-providers:
   CNCIDR:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/CNCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/cncidr.txt
+    path: ./Provider/RuleSet/CNCIDR.mrs
+    url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
     interval: 86400
+    format: mrs
 
   LAN:
     type: http
     behavior: ipcidr
-    path: ./Provider/RuleSet/LANCIDR.yaml
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.txt
+    path: ./Provider/RuleSet/LAN.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
     interval: 86400
+    format: mrs
 
 # 规则
 rules:
