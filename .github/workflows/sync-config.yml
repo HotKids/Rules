@@ -5,6 +5,8 @@ on:
     branches: [master]
     paths:
       - 'Surge/Profile.conf'
+      # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
+      - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
       - '.github/scripts/sync-config.txt'
       - '.github/scripts/sync-config/**'

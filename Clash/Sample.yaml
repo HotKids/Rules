@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-11 11:28:05
+# Date: 2026-07-12 15:07:33
 # Author: @HotKids
 
 # 通用设置
@@ -224,11 +224,11 @@ dns:
   # 主 DNS：经代理查询，防止境外域名请求泄露至国内 DNS 服务商
   # ECS 附带国内 IP，使 Google DNS 返回 CDN 最优节点
   nameserver:
-    - "https://8.8.8.8/dns-query#proxy&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
+    - "https://8.8.8.8/dns-query#RULES&disable-ipv6=true&ecs=114.114.114.114/24&ecs-override=true"
 
   # 兜底 DNS：nameserver 返回非 CN IP 或保留地址段时触发，同样走代理
   fallback:
-    - "https://1.1.1.1/dns-query#proxy"
+    - "https://1.1.1.1/dns-query#RULES"
 
   # 污染检测规则：符合以下任一条件时使用 fallback 结果
   fallback-filter:
