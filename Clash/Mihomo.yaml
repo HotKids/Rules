@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-12 15:07:33
+# Date: 2026-07-12 15:10:14
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -120,9 +120,9 @@ proxy-groups:
   - {name: 🔍 Google, type: select, proxies: [🇺🇸 America, 🔰 Proxy], icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Google.png}
   # Microsoft
   # > OneDrive
-  - {name: ☁️ OneDrive, type: select, proxies: [🔘 DIRECT, 🔰 Proxy], icon: https://testingcf.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png}
+  - {name: ☁️ OneDrive, type: select, proxies: [🔘 DIRECT, 🔰 Proxy], icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/OneDrive.png}
   # > Microsoft Services
-  - {name: Ⓜ️ Microsoft, type: select, proxies: [🔘 DIRECT, 🔰 Proxy], icon: https://testingcf.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png}
+  - {name: Ⓜ️ Microsoft, type: select, proxies: [🔘 DIRECT, 🔰 Proxy], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Microsoft.png}
   # Telegram
   - {name: 📬 Telegram, type: select, proxies: [🔰 Proxy, 🇸🇬 Singapore, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png}
   # AIGC
@@ -235,10 +235,10 @@ rules:
   - 'RULE-SET,Global,🔰 Proxy'
   # China Area Network
   - 'RULE-SET,China,🔘 DIRECT'
-  - 'RULE-SET,CNASN,🔘 DIRECT'
-  - 'RULE-SET,CNCIDR,🔘 DIRECT'
+  - 'RULE-SET,CNASN,🔘 DIRECT,no-resolve'
+  - 'RULE-SET,CNCIDR,🔘 DIRECT,no-resolve'
   # Local Area Network
-  - 'RULE-SET,LAN,🔘 DIRECT'
+  - 'RULE-SET,LAN,🔘 DIRECT,no-resolve'
   # GeoIP
   - 'GEOSITE,cn,🔘 DIRECT'
   - 'GEOIP,CN,🔘 DIRECT,no-resolve'
