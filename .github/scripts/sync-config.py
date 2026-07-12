@@ -3153,7 +3153,7 @@ def _gen_clash_script_js(
         " *",
         " * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
         " * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的",
-        " * 策略组、分流规则与基础设置，不必依赖机场自带配置。",
+        " * 策略组、分流规则与基础设置，不必依赖机场自带配置。建议使用 Bettbox。",
         " *",
         *source_lines,
         " *",
