@@ -759,8 +759,9 @@ def cleanup_stale():
 
 def parse_sync_rules() -> dict:
     """解析 sync-rules.txt，返回 {"surge": [...], "surge_domainset": [...], "clash": [...], "module": [...]}，
-    条目均为 {url, name, overrides}。# >> Surge Domain-Set 段声明 DOMAIN-SET 格式来源
-    （裸域名 / `.` 前缀域名），落库保持原格式、Step 4 按各平台原生 domain 语义派生。"""
+    条目均为 {url, name, overrides}。# >> Surge 段内以 `DOMAIN-SET,` 前缀标注的条目
+    为 DOMAIN-SET 格式来源（裸域名 / `.` 前缀域名），落库保持原格式、
+    Step 4 按各平台原生 domain 语义派生；无前缀条目为 RULE-SET 格式来源。"""
     result: dict[str, list[dict]] = {"surge": [], "surge_domainset": [], "clash": [], "module": []}
     if not SYNC_RULES_TXT.exists():
         return result
@@ -769,13 +770,15 @@ def parse_sync_rules() -> dict:
         s = line.strip()
         if s == "# >> Surge":
             section = "surge"
-        elif s == "# >> Surge Domain-Set":
-            section = "surge_domainset"
         elif s == "# >> Clash":
             section = "clash"
         elif s == "# >> Module":
             section = "module"
         elif section and s and not s.startswith("#") and "," in s:
+            if section == "surge" and s.upper().startswith("DOMAIN-SET,"):
+                section_key, s = "surge_domainset", s[len("DOMAIN-SET,"):].strip()
+            else:
+                section_key = section
             url, rest = s.split(",", 1)
             # rest = "name" 或 "name #!key=value #!key=value ..."（空格+#! 分隔）
             parts = rest.split(" #!")
@@ -785,7 +788,7 @@ def parse_sync_rules() -> dict:
                 if "=" in part:
                     k, v = part.split("=", 1)
                     overrides[k.strip()] = v.strip()
-            result[section].append({"url": url.strip(), "name": name, "overrides": overrides})
+            result[section_key].append({"url": url.strip(), "name": name, "overrides": overrides})
     return result
 
 
