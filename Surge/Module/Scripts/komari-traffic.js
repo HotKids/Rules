@@ -338,8 +338,8 @@ if (!base) {
           .filter(p => p && p.latest >= 0)
           .map(p => `${p.name} ${p.latest}ms${p.loss > 0 ? ` 丢${Math.round(p.loss)}%` : ""}`);
         if (!parts.length) return "";
-        // 一行一项，避免折行错位
-        return `延迟 ${parts.join("\n")}`;
+        // 一行一项；后续行用全角空格缩进，与「延迟 」前缀对齐
+        return `延迟 ${parts.join("\n　　 ")}`;
       }
     };
 
