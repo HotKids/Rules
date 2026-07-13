@@ -3857,7 +3857,7 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-regex-filter" in params:               # 地区组
             urltests.append({"type": "urltest", "tag": name,
                              "outbounds": [use_example(params["policy-regex-filter"])],
-                             "url": "https://www.gstatic.com/generate_204", "interval": "180s",
+                             "url": "https://cp.cloudflare.com/generate_204", "interval": "180s",
                              "tolerance": 50})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
             server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
