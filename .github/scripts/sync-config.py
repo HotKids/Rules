@@ -3857,7 +3857,8 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-regex-filter" in params:               # 地区组
             urltests.append({"type": "urltest", "tag": name,
                              "outbounds": [use_example(params["policy-regex-filter"])],
-                             "url": "https://www.gstatic.com/generate_204", "interval": "180s"})
+                             "url": "https://www.gstatic.com/generate_204", "interval": "180s",
+                             "tolerance": 50})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
             server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
         else:
@@ -3928,7 +3929,17 @@ def _gen_singbox_rules(
         rtype = parts[0].upper()
 
         if rtype == "PROTOCOL" and len(parts) > 1 and parts[1].upper() == "QUIC":
-            rules.append({"protocol": "quic", "action": "reject"})
+            # 只拦境外 QUIC、国内放行（对齐 Clash 的 mihomo 逻辑规则口径；
+            # 借 geosite-cn/geoip-cn 反选，reject 默认方式回 RST/ICMP 促使快速回退 TCP）
+            rules.append({
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {"protocol": "quic"},
+                    {"rule_set": ["geosite-cn", "geoip-cn"], "invert": True},
+                ],
+                "action": "reject",
+            })
             continue
         if rtype == "AND" and "DEST-PORT,22" in s.replace(" ", "") and "PROTOCOL,TCP" in s.replace(" ", ""):
             rules.append({"network": "tcp", "port": 22, "outbound": SB_DIRECT_TAG})
