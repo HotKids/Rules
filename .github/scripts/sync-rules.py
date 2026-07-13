@@ -795,6 +795,35 @@ def parse_sync_rules() -> dict:
     return result
 
 
+def _removal_domain(line: str) -> str | None:
+    """取规则行的域名用于 #!remove 匹配：DOMAIN-SET 行 = 整行；
+    RULE-SET / payload 行（TYPE,value,… 或 '+.x' / '.x'）= 域名值。
+    去前导 '+'/'.'、小写；注释 / 空行返回 None。"""
+    s = line.strip().strip("'\"")
+    if not s or s.startswith(("#", "//")):
+        return None
+    parts = [p.strip().strip("'\"") for p in s.split(",")]
+    cand = parts[1] if len(parts) >= 2 else parts[0]
+    cand = cand.lstrip("+").lstrip(".").lower()
+    return cand or None
+
+
+def _build_removals(entries: list[dict]) -> dict[str, set[str]]:
+    """从条目的 `#!remove=a.com,b.com` 覆盖构造 {name: {去点小写域名}}。
+    匹配忽略前导 '.'/'+.'，故 remove=.sellfox.com 同时命中 sellfox.com /
+    .sellfox.com / +.sellfox.com / DOMAIN-SUFFIX,sellfox.com。"""
+    rem: dict[str, set[str]] = defaultdict(set)
+    for e in entries:
+        raw = e["overrides"].get("remove")
+        if not raw:
+            continue
+        for tok in raw.split(","):
+            tok = tok.strip().lstrip("+").lstrip(".").lower()
+            if tok:
+                rem[e["name"]].add(tok)
+    return rem
+
+
 def _is_clash_payload(text: str) -> bool:
     """检测文本是否为 Clash payload: 格式（前 10 行内含 'payload:'）。"""
     for line in text.splitlines()[:10]:
@@ -981,12 +1010,14 @@ def fetch_external_rules():
     for e in rules["surge"] + rules["surge_domainset"]:
         surge_groups[e["name"]].append(e["url"])
     domainset_names = {e["name"] for e in rules["surge_domainset"]}
+    surge_removals = _build_removals(rules["surge"] + rules["surge_domainset"])
 
     for name, urls in surge_groups.items():
         fork_urls: list[str] = []
         rule_lines: list[str] = []
         seen_rules: set[str] = set()
         section_names: list[str] = []  # 各来源的 # > Name，最终拼成 A & B
+        removal = surge_removals.get(name, set())  # #!remove= 要剔除的域名
 
         for url in urls:
             print(f"  [Surge] {name} ← {url}")
@@ -1008,6 +1039,8 @@ def fetch_external_rules():
                     if display not in section_names:
                         section_names.append(display)
                 elif line not in seen_rules:
+                    if removal and _removal_domain(line) in removal:
+                        continue  # #!remove= 命中，剔除该域名
                     seen_rules.add(line)
                     rule_lines.append(line)
 
@@ -1027,6 +1060,7 @@ def fetch_external_rules():
     # ── # >> Clash section（同名多 URL 合并去重）──────────────────────
     clash_groups: dict[str, list[str]] = defaultdict(list)
     clash_domainset_names = {e["name"] for e in rules["clash"] if e.get("domainset")}
+    clash_removals = _build_removals(rules["clash"])
     for e in rules["clash"]:
         clash_groups[e["name"]].append(e["url"])
 
@@ -1034,6 +1068,7 @@ def fetch_external_rules():
         fork_urls = []
         all_rules: list[str] = []
         seen_rules = set()
+        removal = clash_removals.get(name, set())  # #!remove= 要剔除的域名
 
         for url in urls:
             print(f"  [Clash] {name} ← {url}")
@@ -1043,6 +1078,8 @@ def fetch_external_rules():
             fork_urls.append(url)
             for rule in _clash_body_rules(text):
                 if rule not in seen_rules:
+                    if removal and _removal_domain(rule) in removal:
+                        continue  # #!remove= 命中，剔除该域名
                     seen_rules.add(rule)
                     all_rules.append(rule)
 
