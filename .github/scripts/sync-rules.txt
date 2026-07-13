@@ -1,3 +1,17 @@
+# ════════════════════════════════════════════════════════════════
+# sync-rules.txt — 外部规则来源清单
+# ════════════════════════════════════════════════════════════════
+# 用途：拉取第三方规则集，规范化后落库为各平台原生格式
+# 消费：.github/scripts/sync-rules.py
+# 输出：Surge/RULE-SET · Clash/RuleSet · sing-box/source（按段派生）
+#
+# 格式：
+#   # >> 段              段落（Surge / Clash / Module）
+#   URL,名称            RULE-SET 来源与落库名（Apple/Apple News = 子目录/名）
+#   DOMAIN-SET,URL,名称  DOMAIN-SET 格式来源（裸域名 / . 前缀域名）
+#   URL,名称 #!key=value 行内覆盖（Module 段 name/desc/author/category 等）
+# ════════════════════════════════════════════════════════════════
+
 # >> Surge
 https://raw.githubusercontent.com/LM-Firefly/Rules/master/PROXY/Dropbox.list,Dropbox
 https://raw.githubusercontent.com/ACL4SSR/ACL4SSR/master/Clash/Ruleset/Google.list,Google

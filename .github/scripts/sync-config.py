@@ -159,7 +159,9 @@ _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 # ---------------------------------------------------------------------------
 
 _CST = timezone(timedelta(hours=8))
-_DATE_LINE_RE = re.compile(r"^# Date: .*$", re.MULTILINE)
+# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会吃掉
+# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并打戳。
+_DATE_LINE_RE = re.compile(r"^# Date:.*$", re.MULTILINE)
 
 
 def _stamp_date(text: str) -> str:
@@ -175,6 +177,7 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
     - 文件存在且内容（忽略 Date 行）与 content 相同 → 不写（保留既有 Date），返回 False
     - 否则 → 写入（当前时间）
     """
+    content = _inject_general(content)
     now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
     stamped = _DATE_LINE_RE.sub(f"# Date: {now}", content, count=1)
     if filepath.exists():
@@ -949,6 +952,62 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         clean(sections.get("MITM", [])),
         sections.get("General", []),  # raw lines，含注释，不经 clean() 处理
     )
+
+
+# ── [General] 跨平台设置的单一来源注入 ──────────────────────────────
+# 各平台基座（loon.ini / qx.ini）用 @@占位符@@ 引用 Profile.conf [General] 的规范值，
+# 生成时统一替换，避免同一设置在多个基座里手工维护/漂移。
+_GENERAL_INJECT: dict[str, str] = {}
+
+
+def _general_value(general_lines: list[str], key: str) -> str:
+    """从 Profile.conf [General] 提取 `key = value` 的 value（忽略注释行）。"""
+    for line in general_lines:
+        s = line.strip()
+        if s.startswith("#") or "=" not in s:
+            continue
+        k, _, v = s.partition("=")
+        if k.strip() == key:
+            return v.strip()
+    return ""
+
+
+def _build_general_inject(general_lines: list[str]) -> dict[str, str]:
+    """从 Profile.conf [General] 构造占位符 → 规范值映射。
+
+    单一来源的作用域是「受限的」：只覆盖真正跨平台同构、可扁平复用的项
+    （测速 url、超时、fallback-dns、geoip mmdb），注入进扁平配置的
+    Loon / QX / Surfboard / sing-box 基座，以及 clash.ini 里 provider 的
+    health-check.url（Clash 全局唯一的测速 url，同样单一来源）。
+
+    刻意不覆盖 Clash 的 DNS / geox-url：这些由 Clash/General.yaml 自管。
+    Clash 的 DNS 模型（nameserver-policy / fallback / fake-ip /
+    proxy-server-nameserver）远比 Surge 扁平的 `dns-server` 丰富，
+    geox-url 还含 geoip.dat/geosite.dat/asn 等 Surge 无对应的项，
+    强行用占位符注入只会破坏而非改善。因此二者是互补边界、非冲突：
+    任何一份产物里同一 key 都只有一处定义，不存在竞争。
+    """
+    dns = _general_value(general_lines, "dns-server")
+    dns_lines = "\n".join(f"server={x.strip()}" for x in dns.split(",") if x.strip())
+    return {
+        "@@PROXY_TEST_URL@@": _general_value(general_lines, "proxy-test-url"),
+        "@@DIRECT_TEST_URL@@": _general_value(general_lines, "internet-test-url"),
+        "@@TEST_TIMEOUT@@": _general_value(general_lines, "test-timeout"),
+        "@@GEOIP_MMDB@@": _general_value(general_lines, "geoip-maxmind-url"),
+        "@@FALLBACK_DNS@@": dns,               # 逗号分隔（Loon dns-server 形式）
+        "@@FALLBACK_DNS_LINES@@": dns_lines,   # server=X 逐行（QX [dns] 形式）
+    }
+
+
+def _inject_general(text: str) -> str:
+    """把基座里的 @@占位符@@ 替换为 Profile.conf [General] 规范值。
+    占位符被引用但源值缺失 → 报错，避免静默生成空值坏配置。"""
+    for ph, val in _GENERAL_INJECT.items():
+        if ph in text:
+            if not val:
+                raise ValueError(f"占位符 {ph} 被引用，但 Profile.conf [General] 缺少对应值")
+            text = text.replace(ph, val)
+    return text
 
 
 def _parse_surge_alt_groups(profile_path: Path) -> dict[str, dict]:
@@ -3016,9 +3075,9 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         L.append(f"  - &{anchor} {_yaml_sq(val)}")
     L += [
         "  # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——",
-        "  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &FallBack {type: fallback, interval: 300, lazy: true, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
         "",
         "# 本地节点（订阅覆盖此处）",
         f"proxies: {_yaml_flow(cfg.get('proxies', []))}",
@@ -3857,7 +3916,8 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-regex-filter" in params:               # 地区组
             urltests.append({"type": "urltest", "tag": name,
                              "outbounds": [use_example(params["policy-regex-filter"])],
-                             "url": "https://www.gstatic.com/generate_204", "interval": "180s"})
+                             "url": "@@PROXY_TEST_URL@@", "interval": "180s",
+                             "tolerance": 50})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
             server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
         else:
@@ -3928,7 +3988,17 @@ def _gen_singbox_rules(
         rtype = parts[0].upper()
 
         if rtype == "PROTOCOL" and len(parts) > 1 and parts[1].upper() == "QUIC":
-            rules.append({"protocol": "quic", "action": "reject"})
+            # 境外 QUIC 拦截、国内放行（geosite-cn/geoip-cn 反选；
+            # reject 默认方式回 RST/ICMP 促使快速回退 TCP）
+            rules.append({
+                "type": "logical",
+                "mode": "and",
+                "rules": [
+                    {"protocol": "quic"},
+                    {"rule_set": ["geosite-cn", "geoip-cn"], "invert": True},
+                ],
+                "action": "reject",
+            })
             continue
         if rtype == "AND" and "DEST-PORT,22" in s.replace(" ", "") and "PROTOCOL,TCP" in s.replace(" ", ""):
             rules.append({"network": "tcp", "port": 22, "outbound": SB_DIRECT_TAG})
@@ -3996,7 +4066,7 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
         if "detour" in srv:
             assert srv["detour"] in out_tags, f"dns server {srv['tag']} detour 引用不存在: {srv['detour']}"
 
-    body = json.dumps(base, ensure_ascii=False, indent=2) + "\n"
+    body = _inject_general(json.dumps(base, ensure_ascii=False, indent=2) + "\n")
     changed = _write_if_changed(SB_CONFIG_OUT, body)
     print(f"  outbounds={len(outbounds)} | rules={len(gen_rules)} | rule_set={len(gen_sets)}")
     print(f"  {'✓ sing-box/config.json 已更新' if changed else '✓ sing-box/config.json 无变化'}")
@@ -4016,6 +4086,10 @@ def main() -> None:
     proxy_lines, group_lines, rule_lines, surge_mitm_lines, general_lines = \
         parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
+
+    # [General] 跨平台规范值：供各基座 @@占位符@@ 注入（单一来源）
+    global _GENERAL_INJECT
+    _GENERAL_INJECT = _build_general_inject(general_lines)
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)

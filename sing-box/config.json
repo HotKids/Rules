@@ -16,10 +16,6 @@
         "tag": "dns-direct",
         "server": "223.5.5.5",
         "detour": "🔘 Direct"
-      },
-      {
-        "type": "local",
-        "tag": "dns-local"
       }
     ],
     "rules": [
@@ -35,7 +31,8 @@
     "enabled": true,
     "server": "time.apple.com",
     "server_port": 123,
-    "interval": "30m"
+    "interval": "30m",
+    "detour": "🔘 Direct"
   },
   "inbounds": [
     {
@@ -177,8 +174,9 @@
       "outbounds": [
         "🇭🇰 HK"
       ],
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": "180s"
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "180s",
+      "tolerance": 50
     },
     {
       "type": "urltest",
@@ -186,8 +184,9 @@
       "outbounds": [
         "🇨🇳 TW"
       ],
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": "180s"
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "180s",
+      "tolerance": 50
     },
     {
       "type": "urltest",
@@ -195,8 +194,9 @@
       "outbounds": [
         "🇸🇬 SG"
       ],
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": "180s"
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "180s",
+      "tolerance": 50
     },
     {
       "type": "urltest",
@@ -204,8 +204,9 @@
       "outbounds": [
         "🇯🇵 JP"
       ],
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": "180s"
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "180s",
+      "tolerance": 50
     },
     {
       "type": "urltest",
@@ -213,8 +214,9 @@
       "outbounds": [
         "🇺🇸 US"
       ],
-      "url": "https://www.gstatic.com/generate_204",
-      "interval": "180s"
+      "url": "https://cp.cloudflare.com/generate_204",
+      "interval": "180s",
+      "tolerance": 50
     },
     {
       "type": "shadowsocks",
@@ -276,7 +278,20 @@
         "action": "hijack-dns"
       },
       {
-        "protocol": "quic",
+        "type": "logical",
+        "mode": "and",
+        "rules": [
+          {
+            "protocol": "quic"
+          },
+          {
+            "rule_set": [
+              "geosite-cn",
+              "geoip-cn"
+            ],
+            "invert": true
+          }
+        ],
         "action": "reject"
       },
       {
