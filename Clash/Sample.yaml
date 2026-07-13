@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-07-13 11:43:31
+# Date: 2026-07-13 11:56:08
 # Author: @HotKids
 
 # 通用设置
@@ -319,7 +319,7 @@ proxy-providers:
       - "mihomo/1.18.3"
     health-check:
       enable: true
-      url: 'https://cp.cloudflare.com/generate_204'
+      url: 'http://cp.cloudflare.com/generate_204'
       interval: 600
       timeout: 5000
       expected-status: 204

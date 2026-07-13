@@ -174,7 +174,7 @@
       "outbounds": [
         "🇭🇰 HK"
       ],
-      "url": "https://cp.cloudflare.com/generate_204",
+      "url": "http://cp.cloudflare.com/generate_204",
       "interval": "180s",
       "tolerance": 50
     },
@@ -184,7 +184,7 @@
       "outbounds": [
         "🇨🇳 TW"
       ],
-      "url": "https://cp.cloudflare.com/generate_204",
+      "url": "http://cp.cloudflare.com/generate_204",
       "interval": "180s",
       "tolerance": 50
     },
@@ -194,7 +194,7 @@
       "outbounds": [
         "🇸🇬 SG"
       ],
-      "url": "https://cp.cloudflare.com/generate_204",
+      "url": "http://cp.cloudflare.com/generate_204",
       "interval": "180s",
       "tolerance": 50
     },
@@ -204,7 +204,7 @@
       "outbounds": [
         "🇯🇵 JP"
       ],
-      "url": "https://cp.cloudflare.com/generate_204",
+      "url": "http://cp.cloudflare.com/generate_204",
       "interval": "180s",
       "tolerance": 50
     },
@@ -214,7 +214,7 @@
       "outbounds": [
         "🇺🇸 US"
       ],
-      "url": "https://cp.cloudflare.com/generate_204",
+      "url": "http://cp.cloudflare.com/generate_204",
       "interval": "180s",
       "tolerance": 50
     },
