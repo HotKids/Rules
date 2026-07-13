@@ -28,7 +28,7 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Syntax check Python
         # glob 覆盖全部脚本（含 _common.py 及以后新增文件）；py_compile 不追 import，逐文件列举容易漏
