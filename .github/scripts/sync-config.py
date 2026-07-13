@@ -1496,6 +1496,8 @@ def gen_rules_and_providers(
             continue
 
         parts = [p.strip() for p in s.split(",")]
+        # Clash 无 REJECT-TINYGIF 内建/wrapper 组，策略降级到 ⛔️ REJECT（有 wrapper group）
+        parts = ["⛔️ REJECT" if p == "💢 REJECT-TINYGIF" else p for p in parts]
         rule_type = parts[0].upper()
         emit: list[str] = []  # 本次迭代要写入 rules_out 的行
 
@@ -1990,7 +1992,8 @@ def gen_loon_remote_rules(
         tag = _rename_lookup(url, _derive_tag(url), rename_map)
         out.extend(ph.flush())
         # 拦截包装策略（policy-path 定义，Loon 不加载）→ Loon 内建动作
-        emit_policy = {"📛 REJECT-DROP": "REJECT-DROP"}.get(policy, policy)
+        # Loon 支持 REJECT-DROP；无 REJECT-TINYGIF，降级到 REJECT
+        emit_policy = {"📛 REJECT-DROP": "REJECT-DROP", "💢 REJECT-TINYGIF": "REJECT"}.get(policy, policy)
         out.append(f"{url}, policy={emit_policy}, tag={tag}, enabled=true")
 
     return "\n".join(out)
@@ -2000,9 +2003,10 @@ def gen_loon_remote_rules(
 # 生成 QX [policy]
 # ---------------------------------------------------------------------------
 
-# QX 无 reject-drop 变体，拦截包装策略统一落到内建 reject
+# QX 无 reject-drop 变体（→ reject）；有 reject-tinygif 原生支持（保留）
 _QX_PROXY_MAP = {"🚫 REJECT": "reject", "⛔️ REJECT": "reject",
-                 "📛 REJECT-DROP": "reject", "🔘 DIRECT": "direct"}
+                 "📛 REJECT-DROP": "reject", "💢 REJECT-TINYGIF": "reject-tinygif",
+                 "🔘 DIRECT": "direct"}
 
 
 def _qx_normalize_text(text: str, policy_rename: dict[str, str] | None = None) -> str:
@@ -2595,8 +2599,9 @@ def _gen_surfboard_rules(rule_lines: list[str], skips: list[str]) -> str:
             continue
 
         keep = [p for p in parts if p not in _SURGE_FLAGS]
-        # policy-path 定义的拦截包装策略 → 内建 REJECT（策略可能不在行尾，如后接 no-resolve）
-        keep = [{"📛 REJECT-DROP": "REJECT"}.get(p, p) for p in keep]
+        # policy-path 定义的拦截包装策略 → 内建动作（策略可能不在行尾，如后接 no-resolve）
+        # REJECT-DROP → REJECT（Surfboard 无 DROP）；REJECT-TINYGIF 为 Surfboard 原生支持，保留
+        keep = [{"📛 REJECT-DROP": "REJECT", "💢 REJECT-TINYGIF": "REJECT-TINYGIF"}.get(p, p) for p in keep]
         # Surge-specific actions in policy position → REJECT
         if keep:
             keep[-1] = {"REJECT-NO-DROP": "REJECT", "REJECT-DROP": "REJECT"}.get(keep[-1].upper(), keep[-1])
@@ -3925,7 +3930,7 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
             for p in g["proxies"]:
                 if p == "🔘 DIRECT":
                     outs.append(SB_DIRECT_TAG)
-                elif p in ("⛔️ REJECT", "📛 REJECT-DROP"):
+                elif p in ("⛔️ REJECT", "📛 REJECT-DROP", "💢 REJECT-TINYGIF"):
                     continue
                 else:
                     outs.append(p)
@@ -3947,8 +3952,8 @@ def _sb_policy_target(policy: str, out_tags: set[str]) -> dict | None:
     """Surge 策略 → sing-box 规则动作字段：DIRECT/拦截包装策略/已生成出站，否则 None（跳过）。"""
     if policy == "🔘 DIRECT":
         return {"outbound": SB_DIRECT_TAG}
-    if policy in ("🚧 AdGuard", "⛔️ REJECT"):
-        return {"action": "reject"}
+    if policy in ("🚧 AdGuard", "⛔️ REJECT", "💢 REJECT-TINYGIF"):
+        return {"action": "reject"}  # sing-box 无 tinygif，REJECT-TINYGIF 降级为 reject
     if policy == "📛 REJECT-DROP":
         return {"action": "reject", "method": "drop"}
     if policy in out_tags:
