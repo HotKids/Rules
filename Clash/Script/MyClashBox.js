@@ -193,11 +193,13 @@ function main(config) {
     // Speedtest
     { name: 'Speedtest', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Speed.png' },
     // Adblock
-    { name: 'AdGuard', type: 'select', proxies: ['Direct', 'Reject'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png' },
+    { name: 'AdGuard', type: 'select', proxies: ['Direct', 'Reject', 'Reject-Drop'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/AdBlock.png' },
     // DIRECT
     { name: 'Direct', type: 'select', proxies: ['DIRECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Direct.png' },
     // REJECT
     { name: 'Reject', type: 'select', proxies: ['REJECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png' },
+    // REJECT-DROP
+    { name: 'Reject-Drop', type: 'select', proxies: ['REJECT-DROP'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png' },
     { name: '🇸🇱 Relay', type: 'url-test', hidden: true, tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇭🇰 HK Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇨🇳 TW Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
@@ -298,7 +300,7 @@ function main(config) {
     // Phishing 钓鱼网站
     'RULE-SET,Phishing,AdGuard',
     // Bogus IP NXDOMAIN 劫持/僵尸网络 C2
-    'RULE-SET,Bogus,Reject,no-resolve',
+    'RULE-SET,Bogus,Reject-Drop,no-resolve',
     // Global Area Network
     // > Streaming by Region
     // >> Streaming TW
