@@ -276,8 +276,8 @@ function main(config) {
     'Speedtest': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Speedtest.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Speedtest.mrs' },
     'Global': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Global.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs' },
     'China': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs' },
-    'CNASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/CNASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
-    'CNCIDR': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/CNCIDR.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs' },
+    'China ASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/China_ASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
+    'China IP': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/China_IP.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs' },
     'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs' },
   };
 
@@ -340,8 +340,8 @@ function main(config) {
     'RULE-SET,Global,🔰 Proxy',
     // China Area Network
     'RULE-SET,China,🔘 DIRECT',
-    'RULE-SET,CNASN,🔘 DIRECT,no-resolve',
-    'RULE-SET,CNCIDR,🔘 DIRECT,no-resolve',
+    'RULE-SET,China ASN,🔘 DIRECT,no-resolve',
+    'RULE-SET,China IP,🔘 DIRECT,no-resolve',
     // Local Area Network
     'RULE-SET,LAN,🔘 DIRECT,no-resolve',
     // GeoIP

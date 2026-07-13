@@ -25,7 +25,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 > `Clash/RuleSet/` 产物（payload 无逗号 → domain / CIDR → ipcidr，classical 跳过），
 > 用 `convert-ruleset` 编译出同名 `.mrs` 与源文件并存一同提交；`sync-config.py` 里
 > 自有 domain/ipcidr provider 已指向 `.mrs`（`format: mrs`），外部 Private/China/
-> Global/CNCIDR 则指向 MetaCubeX meta-rules-dat 官方 mrs。
+> Global/China IP 则指向 MetaCubeX meta-rules-dat 官方 mrs。
 
 > sing-box 二进制规则集 `sing-box/rule-set/*.srs` 不由本脚本生成：`.srs` 只能用官方 sing-box CLI 编译，故在 `sync-rules.yml` workflow 里下载 sing-box 后对 `source/*.json` 执行 `rule-set compile` 得到，与 `.json` 并存一同提交。
 
