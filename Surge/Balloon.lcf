@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-13 10:25:12
+# Date: 2026-07-13 10:34:48
 # Author: @HotKids
 
 [General]
@@ -34,7 +34,7 @@ disconnect-on-policy-change = false
 # 直连延迟测试 URL
 internet-test-url = http://connectivitycheck.platform.hicloud.com/generate_204
 # 代理延迟测试 URL
-proxy-test-url = http://cp.cloudflare.com/generate_204
+proxy-test-url = https://cp.cloudflare.com/generate_204
 # 资源解析器
 resource-parser = https://raw.githubusercontent.com/sub-store-org/Sub-Store/release/sub-store-parser.loon.min.js
 # GeoIP 数据库

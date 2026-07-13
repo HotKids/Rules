@@ -3057,9 +3057,9 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         L.append(f"  - &{anchor} {_yaml_sq(val)}")
     L += [
         "  # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——",
-        "  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
-        "  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &FallBack {type: fallback, interval: 300, lazy: true, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
+        "  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: '@@PROXY_TEST_URL@@', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}",
         "",
         "# 本地节点（订阅覆盖此处）",
         f"proxies: {_yaml_flow(cfg.get('proxies', []))}",
@@ -3898,7 +3898,7 @@ def _gen_singbox_outbounds(group_lines: list[str], skips: list[str]) -> list[dic
         if "policy-regex-filter" in params:               # 地区组
             urltests.append({"type": "urltest", "tag": name,
                              "outbounds": [use_example(params["policy-regex-filter"])],
-                             "url": "https://cp.cloudflare.com/generate_204", "interval": "180s",
+                             "url": "@@PROXY_TEST_URL@@", "interval": "180s",
                              "tolerance": 50})
         elif params.get("include-all-proxies", "").lower() in ("true", "1"):
             server.append({"type": "selector", "tag": name, "outbounds": []})  # 候选下方回填
@@ -4048,7 +4048,7 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
         if "detour" in srv:
             assert srv["detour"] in out_tags, f"dns server {srv['tag']} detour 引用不存在: {srv['detour']}"
 
-    body = json.dumps(base, ensure_ascii=False, indent=2) + "\n"
+    body = _inject_general(json.dumps(base, ensure_ascii=False, indent=2) + "\n")
     changed = _write_if_changed(SB_CONFIG_OUT, body)
     print(f"  outbounds={len(outbounds)} | rules={len(gen_rules)} | rule_set={len(gen_sets)}")
     print(f"  {'✓ sing-box/config.json 已更新' if changed else '✓ sing-box/config.json 无变化'}")
