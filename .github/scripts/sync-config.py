@@ -159,7 +159,9 @@ _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 # ---------------------------------------------------------------------------
 
 _CST = timezone(timedelta(hours=8))
-_DATE_LINE_RE = re.compile(r"^# Date: .*$", re.MULTILINE)
+# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会吃掉
+# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并打戳。
+_DATE_LINE_RE = re.compile(r"^# Date:.*$", re.MULTILINE)
 
 
 def _stamp_date(text: str) -> str:
