@@ -1,0 +1,49 @@
+name: 🐳
+
+# 手动触发：把指定分支的所有提交信息（含 merge commit）统一改写成 🐳，然后 force-push。
+#
+# ⚠️ 这是「历史改写 + 强制推送」，请知悉后果：
+#   - 该分支上所有提交的 SHA 都会改变；
+#   - 原始提交信息被 🐳 覆盖、不可找回；
+#   - 已 clone / fork 的副本需要重新同步（旧历史失效）；
+#   - 若目标分支开启了「禁止 force-push」保护，本 workflow 会失败；
+#   - 若有基于该分支的开启中 PR，其 diff 基线会变动。
+#   仅在自己的仓库、明确知道后果时使用。
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 要改写提交信息的分支
+        required: true
+        default: master
+
+permissions:
+  contents: write
+
+jobs:
+  whale:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout（完整历史，force-push 需要全量提交）
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: 提交信息全部改成 🐳
+        env:
+          # filter-branch 已被 git 标记为不推荐，此处仅改 message、无需装 git-filter-repo；
+          # 设此环境变量抑制那条警告横幅。
+          FILTER_BRANCH_SQUELCH_WARNING: "1"
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B whale-work
+          # --msg-filter 从 stdin 读原始信息、输出新信息；这里忽略原文、每个提交都输出 🐳。
+          # 对 root 提交与 merge 提交同样生效。已是 🐳 的提交结果不变（幂等）。
+          git filter-branch -f --msg-filter 'printf "🐳\n"' -- HEAD
+
+      - name: Force-push 回目标分支
+        run: git push --force origin "HEAD:${{ inputs.branch }}"
