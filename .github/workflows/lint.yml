@@ -6,7 +6,9 @@ on:
     paths:
       - '.github/scripts/*.py'
       - '.github/scripts/sync-config/**'
+      - 'Surge/Profile.conf'
       - 'Surge/RULE-SET/**'
+      - 'Clash/General.yaml'
       - 'Clash/Sample.yaml'
       - 'Clash/Mihomo.yaml'
       - 'Clash/Script/**'
@@ -15,6 +17,8 @@ on:
     paths:
       - '.github/scripts/*.py'
       - '.github/scripts/sync-config/**'
+      - 'Surge/Profile.conf'
+      - 'Clash/General.yaml'
       - 'Clash/Sample.yaml'
       - 'Clash/Mihomo.yaml'
       - 'Clash/Script/**'
@@ -29,6 +33,16 @@ jobs:
       - name: Syntax check Python
         # glob 覆盖全部脚本（含 _common.py 及以后新增文件）；py_compile 不追 import，逐文件列举容易漏
         run: python3 -m py_compile .github/scripts/*.py
+
+      - name: Dry-run sync-config.py（防「源坏但产物对」）
+        # 从源头（Profile.conf + sync-config/ 基座）完整重生一遍并断言 exit 0——
+        # 抓住会让 regen 崩溃的坏源（如占位符 @@ 未加引号触发 YAML ScannerError），
+        # 这类问题只校验已提交产物是发现不了的。不做 git diff：sync-config.py 会拉
+        # 少量远程片段（QX DNS snippet / Surfboard remote），上游变动会导致误报。
+        run: |
+          pip install pyyaml -q
+          python3 .github/scripts/sync-config.py
+          echo "✓ sync-config.py 能从源头干净重生"
 
       # 注意：run 块内嵌 Python 必须与块基准缩进对齐（YAML 会剥除公共缩进）。
       # 此前 Python 顶格书写导致整个 workflow 文件无法被 GitHub 解析，
