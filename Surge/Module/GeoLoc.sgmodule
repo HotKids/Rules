@@ -38,7 +38,7 @@ URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/answers,{{{SNS}}}
 URL-REGEX,https:\/\/api\.{{{Zhihu}}}\.com\/comment_v\d\/answers\/\d+\/comment,{{{SNS}}}
 
 # Twitter/X
-{{{Twitter 开关 }}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter 代理}}},extended-matching
+{{{Twitter 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Twitter.list,{{{Twitter 代理}}},extended-matching
 
 [MITM]
 hostname = %INSERT% api.{{{Bilibili}}}.com, api.{{{Weibo}}}.cn, {{{Weibo}}}.com, api.{{{Zhihu}}}.com
