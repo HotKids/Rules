@@ -971,7 +971,20 @@ def _general_value(general_lines: list[str], key: str) -> str:
 
 
 def _build_general_inject(general_lines: list[str]) -> dict[str, str]:
-    """从 Profile.conf [General] 构造占位符 → 规范值映射。"""
+    """从 Profile.conf [General] 构造占位符 → 规范值映射。
+
+    单一来源的作用域是「受限的」：只覆盖真正跨平台同构、可扁平复用的项
+    （测速 url、超时、fallback-dns、geoip mmdb），注入进扁平配置的
+    Loon / QX / Surfboard / sing-box 基座，以及 clash.ini 里 provider 的
+    health-check.url（Clash 全局唯一的测速 url，同样单一来源）。
+
+    刻意不覆盖 Clash 的 DNS / geox-url：这些由 Clash/General.yaml 自管。
+    Clash 的 DNS 模型（nameserver-policy / fallback / fake-ip /
+    proxy-server-nameserver）远比 Surge 扁平的 `dns-server` 丰富，
+    geox-url 还含 geoip.dat/geosite.dat/asn 等 Surge 无对应的项，
+    强行用占位符注入只会破坏而非改善。因此二者是互补边界、非冲突：
+    任何一份产物里同一 key 都只有一处定义，不存在竞争。
+    """
     dns = _general_value(general_lines, "dns-server")
     dns_lines = "\n".join(f"server={x.strip()}" for x in dns.split(",") if x.strip())
     return {
