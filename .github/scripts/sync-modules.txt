@@ -1,8 +1,15 @@
-# Surge sgmodule 聚合列表
-# 每行一个 URL，以 # 开头的行为注释
-# 输出文件: Surge/Module/BlockAds.sgmodule
-# name/desc 在输出文件中手动维护，脚本不覆盖
-# 需搭配使用: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
+# ════════════════════════════════════════════════════════════════
+# sync-modules.txt — 去广告 sgmodule 聚合列表
+# ════════════════════════════════════════════════════════════════
+# 用途：聚合多个第三方去广告 sgmodule 为单一模块
+# 消费：.github/scripts/sync-modules.py
+# 输出：Surge/Module/BlockAds.sgmodule（name/desc 手动维护，脚本不覆盖）
+# 依赖：需搭配 BlockAdsBase.sgmodule 使用
+#
+# 格式：
+#   URL,别名            规则来源与域名关键词（用于 MITM hostname 去重替换）
+#   # URL,别名          行首 # 表示停用该条
+# ════════════════════════════════════════════════════════════════
 
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/12306去广告.sgmodule,12306
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/refs/heads/main/Surge/123云盘去广告.sgmodule,123pan
