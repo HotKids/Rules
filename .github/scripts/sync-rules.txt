@@ -9,7 +9,9 @@
 #   # >> 段              段落（Surge / Clash / Module）
 #   URL,名称            RULE-SET 来源与落库名（Apple/Apple News = 子目录/名）
 #   DOMAIN-SET,URL,名称  DOMAIN-SET 格式来源（裸域名 / . 前缀域名）
-#   URL,名称 #!key=value 行内覆盖（Module 段 name/desc/author/category 等）
+#   URL,名称 #!key=value 行内覆盖：Module 段 name/desc/author/category；
+#                       Surge/Clash 段 #!remove=a.com,b.com 剔除来源里的指定域名
+#                       （多个逗号分隔，匹配忽略 . / +. 前缀与 DOMAIN-* 类型）
 # ════════════════════════════════════════════════════════════════
 
 # >> Surge
@@ -25,7 +27,7 @@ https://raw.githubusercontent.com/SukkaW/Surge/master/Source/non_ip/apple_cn.con
 https://raw.githubusercontent.com/NSRingo/News/main/rulesets/News.list,Apple/Apple News
 https://raw.githubusercontent.com/QuixoticHeart/rule-set/ruleset/loon/apns.list,Apple/APNS
 https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/ip/reject.conf,Bogus
-DOMAIN-SET,https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/domainset/reject_phishing.conf,Phishing
+DOMAIN-SET,https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/domainset/reject_phishing.conf,Phishing #!remove=.sellfox.com
 DOMAIN-SET,https://raw.githubusercontent.com/SukkaW/Surge/master/Source/domainset/speedtest.conf,Speedtest
 
 # >> Clash
