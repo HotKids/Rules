@@ -985,9 +985,12 @@ def _build_general_inject(general_lines: list[str]) -> dict[str, str]:
 
 
 def _inject_general(text: str) -> str:
-    """把基座里的 @@占位符@@ 替换为 Profile.conf [General] 规范值。"""
+    """把基座里的 @@占位符@@ 替换为 Profile.conf [General] 规范值。
+    占位符被引用但源值缺失 → 报错，避免静默生成空值坏配置。"""
     for ph, val in _GENERAL_INJECT.items():
         if ph in text:
+            if not val:
+                raise ValueError(f"占位符 {ph} 被引用，但 Profile.conf [General] 缺少对应值")
             text = text.replace(ph, val)
     return text
 
@@ -3970,8 +3973,8 @@ def _gen_singbox_rules(
         rtype = parts[0].upper()
 
         if rtype == "PROTOCOL" and len(parts) > 1 and parts[1].upper() == "QUIC":
-            # 只拦境外 QUIC、国内放行（对齐 Clash 的 mihomo 逻辑规则口径；
-            # 借 geosite-cn/geoip-cn 反选，reject 默认方式回 RST/ICMP 促使快速回退 TCP）
+            # 境外 QUIC 拦截、国内放行（geosite-cn/geoip-cn 反选；
+            # reject 默认方式回 RST/ICMP 促使快速回退 TCP）
             rules.append({
                 "type": "logical",
                 "mode": "and",
