@@ -175,6 +175,7 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
     - 文件存在且内容（忽略 Date 行）与 content 相同 → 不写（保留既有 Date），返回 False
     - 否则 → 写入（当前时间）
     """
+    content = _inject_general(content)
     now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
     stamped = _DATE_LINE_RE.sub(f"# Date: {now}", content, count=1)
     if filepath.exists():
@@ -949,6 +950,46 @@ def parse_surge_profile(profile_path: Path) -> tuple[list[str], list[str], list[
         clean(sections.get("MITM", [])),
         sections.get("General", []),  # raw lines，含注释，不经 clean() 处理
     )
+
+
+# ── [General] 跨平台设置的单一来源注入 ──────────────────────────────
+# 各平台基座（loon.ini / qx.ini）用 @@占位符@@ 引用 Profile.conf [General] 的规范值，
+# 生成时统一替换，避免同一设置在多个基座里手工维护/漂移。
+_GENERAL_INJECT: dict[str, str] = {}
+
+
+def _general_value(general_lines: list[str], key: str) -> str:
+    """从 Profile.conf [General] 提取 `key = value` 的 value（忽略注释行）。"""
+    for line in general_lines:
+        s = line.strip()
+        if s.startswith("#") or "=" not in s:
+            continue
+        k, _, v = s.partition("=")
+        if k.strip() == key:
+            return v.strip()
+    return ""
+
+
+def _build_general_inject(general_lines: list[str]) -> dict[str, str]:
+    """从 Profile.conf [General] 构造占位符 → 规范值映射。"""
+    dns = _general_value(general_lines, "dns-server")
+    dns_lines = "\n".join(f"server={x.strip()}" for x in dns.split(",") if x.strip())
+    return {
+        "@@PROXY_TEST_URL@@": _general_value(general_lines, "proxy-test-url"),
+        "@@DIRECT_TEST_URL@@": _general_value(general_lines, "internet-test-url"),
+        "@@TEST_TIMEOUT@@": _general_value(general_lines, "test-timeout"),
+        "@@GEOIP_MMDB@@": _general_value(general_lines, "geoip-maxmind-url"),
+        "@@FALLBACK_DNS@@": dns,               # 逗号分隔（Loon dns-server 形式）
+        "@@FALLBACK_DNS_LINES@@": dns_lines,   # server=X 逐行（QX [dns] 形式）
+    }
+
+
+def _inject_general(text: str) -> str:
+    """把基座里的 @@占位符@@ 替换为 Profile.conf [General] 规范值。"""
+    for ph, val in _GENERAL_INJECT.items():
+        if ph in text:
+            text = text.replace(ph, val)
+    return text
 
 
 def _parse_surge_alt_groups(profile_path: Path) -> dict[str, dict]:
@@ -4027,6 +4068,10 @@ def main() -> None:
     proxy_lines, group_lines, rule_lines, surge_mitm_lines, general_lines = \
         parse_surge_profile(REPO_ROOT / surge_src)
     print(f"  Surge: {len(group_lines)} groups, {len(rule_lines)} rules")
+
+    # [General] 跨平台规范值：供各基座 @@占位符@@ 注入（单一来源）
+    global _GENERAL_INJECT
+    _GENERAL_INJECT = _build_general_inject(general_lines)
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
