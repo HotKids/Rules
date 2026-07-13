@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-13 11:43:31
+# Date: 2026-07-13 11:56:08
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -96,14 +96,14 @@ anchors:
   - &FilterJP '(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)'
   - &FilterUS '(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)'
   # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——
-  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
 
 # 本地节点（订阅覆盖此处）
 proxies: []
 # 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）
-proxy-providers: {Server: {type: http, path: ./Provider/Proxy/Server.yaml, url: 'https://sub.hotkids.me', interval: 3600, proxy: DIRECT, header: {User-Agent: [Clash/v1.18.0, mihomo/1.18.3]}, health-check: {enable: true, url: 'https://cp.cloudflare.com/generate_204', interval: 600, timeout: 5000, expected-status: 204}}}
+proxy-providers: {Server: {type: http, path: ./Provider/Proxy/Server.yaml, url: 'https://sub.hotkids.me', interval: 3600, proxy: DIRECT, header: {User-Agent: [Clash/v1.18.0, mihomo/1.18.3]}, health-check: {enable: true, url: 'http://cp.cloudflare.com/generate_204', interval: 600, timeout: 5000, expected-status: 204}}}
 
 # ── 策略组 ──
 proxy-groups:
