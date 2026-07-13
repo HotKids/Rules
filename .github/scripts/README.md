@@ -55,7 +55,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyClashBox.js`、`Clash/Script/MyScriptColor.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
@@ -78,7 +78,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 （覆盖 dns/hosts 前采集、覆盖后合并），规则集公共参数抽成 `remoteRuleProvider` 常量以
 `...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。
 
-`Clash/Script/MyScript.js`、`Clash/Script/MyClashBox.js`、`Clash/Script/MyScriptColor.js`
+`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`
 都是 `Script.js` 的私人定制版：
 在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
 声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`rule_policy_redirect`
