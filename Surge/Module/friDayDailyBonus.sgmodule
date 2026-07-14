@@ -1,0 +1,19 @@
+#!name=🎬 friDay影音 [签到]
+#!desc=每日定时签到 friDay 影音(台湾)。开 MITM 后，打开 App 任意页面即「当场签到」并抓取授权；若抓到 fet-token，则数天内不开 App 也能由 cron 自动签。\n签到 Bearer 仅 3 小时有效，故采用：开 App 即签 + fet-token 自动续期 的混合策略。
+#!arguments=签到时间:0 10 * * *,禁用脚本:friday
+#!arguments-desc=签到时间：Cron 表达式，默认每日 10:00。\n\n禁用脚本：填 friday 启用捕获/当场签到；不想再抓时改为 # 即可一次性禁用全部捕获脚本与 MITM（cron 仍用已存授权运行）。
+#!category=HotKids
+
+[Script]
+# 每日定时签到（有 fet-token 则刷新自动签，否则回退用最近 accessToken）
+friDay影音[签到] = type=cron,cronexp="{{{签到时间}}}",wake-system=1,script-update-interval=0,timeout=120,script-path=friDay.js
+
+# 开 App 时(member/get)抓 accessToken 并当场签到
+friDay影音[签到捕获] = type=http-request,pattern=^https:\/\/vbmspxy\.video\.{{{禁用脚本}}}\.tw\/apiv2\/member\/get,requires-body=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/friday-checkin.js
+
+# token 刷新时(token/getv2)存 fet-token，供 cron 自动续期
+friDay影音[续期捕获] = type=http-request,pattern=^https:\/\/vbmspxy\.video\.{{{禁用脚本}}}\.tw\/apiv2\/token\/getv2,requires-body=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/friday-checkin.js
+
+
+[MITM]
+hostname = %APPEND% vbmspxy.video.{{{禁用脚本}}}.tw
