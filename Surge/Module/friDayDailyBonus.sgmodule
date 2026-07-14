@@ -6,7 +6,7 @@
 
 [Script]
 # 每日定时签到（有 fet-token 则刷新自动签，否则回退用最近 accessToken）
-friDay影音[签到] = type=cron,cronexp="{{{签到时间}}}",wake-system=1,script-update-interval=0,timeout=120,script-path=friDay.js
+friDay影音[签到] = type=cron,cronexp="{{{签到时间}}}",wake-system=1,script-update-interval=0,timeout=120,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/friday-checkin.js
 
 # 开 App 时(member/get)抓 accessToken 并当场签到
 friDay影音[签到捕获] = type=http-request,pattern=^https:\/\/vbmspxy\.video\.{{{禁用脚本}}}\.tw\/apiv2\/member\/get,requires-body=0,script-path=https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/friday-checkin.js
