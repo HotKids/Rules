@@ -152,7 +152,7 @@ function main(config) {
     '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)',
     '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
     '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
-    'Server': null,
+    'Server': '(?i)^(?!.*dns)',
     'Hong Kong': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
     'Taiwan': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Neburst)(?!.*Pro)',
     'Singapore': '(?i)^(?=.*\\b(?:SG|SGP)\\d*\\b)(?!.*Neburst)(?!.*Pro)',
