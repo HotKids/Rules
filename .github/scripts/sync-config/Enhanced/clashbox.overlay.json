@@ -7,6 +7,10 @@
 
   "disabled_by_default": ["OneDrive", "Microsoft", "Speedtest"],
 
+  "group_overrides": {
+    "Server": { "filter": "(?i)^(?!.*dns)" }
+  },
+
   "rename_map": {
     "🔰 Proxy": "Proxy",
     "🎬 Streaming": "Streaming",
