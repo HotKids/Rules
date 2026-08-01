@@ -3242,6 +3242,10 @@ def _gen_clash_script_js(
         ]
 
     lines = [
+        # Bettbox 可视化开关适配：首行声明本脚本用 ruleOptionsEnable 暴露分组开关，
+        # Bettbox 读到后在 UI 里渲染成可视开关；其它客户端把它当普通未用常量、无副作用。
+        "const Compatible_With_Bettbox = { ruleOptionsEnable: true };",
+        "",
         "/**",
         " * mihomo 覆写脚本（Enhance Script）· HotKids/Rules",
         " *",
@@ -3251,7 +3255,8 @@ def _gen_clash_script_js(
         " *",
         *source_lines,
         " *",
-        " * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。",
+        " * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组；",
+        " * 首行 Compatible_With_Bettbox 声明让 Bettbox 把这些开关渲染成可视 UI。",
         " *",
         " * 仓库：https://github.com/HotKids/Rules",
         " */",

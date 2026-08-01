@@ -1,3 +1,5 @@
+const Compatible_With_Bettbox = { ruleOptionsEnable: true };
+
 /**
  * mihomo 覆写脚本（Enhance Script）· HotKids/Rules
  *
@@ -11,7 +13,8 @@
  * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）
  * 请改 myscriptcolor.overlay.json。
  *
- * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。
+ * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组；
+ * 首行 Compatible_With_Bettbox 声明让 Bettbox 把这些开关渲染成可视 UI。
  *
  * 仓库：https://github.com/HotKids/Rules
  */
