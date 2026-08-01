@@ -1,3 +1,5 @@
+const Compatible_With_Bettbox = { ruleOptionsEnable: true };
+
 /**
  * mihomo 覆写脚本（Enhance Script）· HotKids/Rules
  *
@@ -9,7 +11,8 @@
  * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；
  * 要改内容请改 Surge/Profile.conf。
  *
- * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。
+ * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组；
+ * 首行 Compatible_With_Bettbox 声明让 Bettbox 把这些开关渲染成可视 UI。
  *
  * 仓库：https://github.com/HotKids/Rules
  */
