@@ -329,6 +329,8 @@ function main(config) {
     // > Microsoft
     'RULE-SET,OneDrive,☁️ OneDrive',
     'RULE-SET,Microsoft,Ⓜ️ Microsoft',
+    // > Telegram
+    'RULE-SET,Telegram,📬 Telegram',
     'IP-ASN,44907,🇸🇬 Singapore,no-resolve',
     'IP-ASN,62014,🇸🇬 Singapore,no-resolve',
     'IP-ASN,59930,🇺🇸 America,no-resolve',
@@ -336,8 +338,6 @@ function main(config) {
     'IP-ASN,211157,🇩🇪 Germany,no-resolve',
     'IP-CIDR,5.28.192.0/18,🇩🇪 Germany,no-resolve',
     'IP-CIDR,109.239.140.0/24,🇩🇪 Germany,no-resolve',
-    // > Telegram
-    'RULE-SET,Telegram,📬 Telegram',
     // > Crypto
     'RULE-SET,Crypto,🪙 Crypto',
     // > Finance
