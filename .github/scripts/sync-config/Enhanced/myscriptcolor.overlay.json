@@ -5,6 +5,8 @@
 
   "extends": "myscript.overlay.json",
 
+  "disabled_by_default": ["📬 Telegram"],
+
   "icon_overrides": {
     "🔰 Proxy": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Shield.png",
     "🎬 Streaming": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Video.png",
