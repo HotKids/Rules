@@ -3,6 +3,21 @@
 
   "output": "Clash/Script/MyScript.js",
 
+  "rules_insert": [
+    {
+      "before": "RULE-SET,Telegram,",
+      "rules": [
+        "IP-ASN,44907,🇸🇬 Singapore,no-resolve",
+        "IP-ASN,62014,🇸🇬 Singapore,no-resolve",
+        "IP-ASN,59930,🇺🇸 America,no-resolve",
+        "IP-ASN,62041,🇩🇪 Germany,no-resolve",
+        "IP-ASN,211157,🇩🇪 Germany,no-resolve",
+        "IP-CIDR,5.28.192.0/18,🇩🇪 Germany,no-resolve",
+        "IP-CIDR,109.239.140.0/24,🇩🇪 Germany,no-resolve"
+      ]
+    }
+  ],
+
   "group_overrides": {
     "📧 Mail": { "filter": null },
     "🇭🇰 Hong Kong": { "type": "fallback", "hidden": true, "icon": "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png", "filter": "(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)" },
