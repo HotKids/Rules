@@ -57,6 +57,3 @@
 
 # > iQIYI Intl.｜HK TW SEA
 {{{iQIYI Intl. 开关}}},https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/IQ.list,{{{iQIYI Intl. 代理}}},extended-matching {{{iQIYI Intl. 条件}}}
-
-[Host]
-// RULE-SET:https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/GenAI.list = server:https://cloudflare-dns.com/dns-query
