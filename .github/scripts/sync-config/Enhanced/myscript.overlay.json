@@ -5,7 +5,7 @@
 
   "rules_insert": [
     {
-      "before": "RULE-SET,Telegram,",
+      "after": "RULE-SET,Telegram,",
       "rules": [
         "IP-ASN,44907,🇸🇬 Singapore,no-resolve",
         "IP-ASN,62014,🇸🇬 Singapore,no-resolve",

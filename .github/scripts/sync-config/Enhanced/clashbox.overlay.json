@@ -5,7 +5,7 @@
 
   "extends": "myscriptcolor.overlay.json",
 
-  "disabled_by_default": ["OneDrive", "Microsoft", "Speedtest"],
+  "disabled_by_default": ["OneDrive", "Microsoft", "Speedtest", "Telegram"],
 
   "group_overrides": {
     "Server": { "filter": "(?i)^(?!.*dns)" }
