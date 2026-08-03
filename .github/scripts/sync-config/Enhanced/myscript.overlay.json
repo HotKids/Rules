@@ -3,6 +3,8 @@
 
   "output": "Clash/Script/MyScript.js",
 
+  "disabled_by_default": ["📬 Telegram"],
+
   "rules_insert": [
     {
       "after": "RULE-SET,Telegram,",

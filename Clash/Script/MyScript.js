@@ -29,7 +29,7 @@ const ruleOptionsEnable = {
   '🔍 Google': true,
   '☁️ OneDrive': true,
   'Ⓜ️ Microsoft': true,
-  '📬 Telegram': true,
+  '📬 Telegram': false,
   '🤖 AIGC': true,
   '🪙 Crypto': true,
   '💳 Finance': true,
