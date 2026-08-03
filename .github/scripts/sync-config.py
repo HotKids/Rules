@@ -2840,6 +2840,9 @@ def _apply_overlay(
       分组之后，并登记进 pool_filters（运行时按 filter 从 config.proxies 里挑节点）。
     - move_after：把一个既有分组（结构性池组，无法用 group_proxies_insert 挪位置）
       挪到另一个分组之后，纯粹调整展示顺序，不影响候选列表/规则。
+    - rules_insert：在锚点规则（before/after 子串匹配某条规则）前/后插入自定义
+      规则行（如 Telegram 前插 IP-ASN/IP-CIDR 分区分流）。落点分组须已存在、用
+      基座 emoji 名书写，后续 rename_map 会一并改写。
 
     overlay_label 只用于报错信息里指明是哪个 overlay 文件（如 'myscript.overlay.json'）。
     """
@@ -2958,6 +2961,31 @@ def _apply_overlay(
         groups.remove(group)
         idx = next(j for j, g in enumerate(groups) if g["name"] == anchor_name)
         groups.insert(idx + 1, group)
+
+    # rules_insert：在锚点规则（before/after 子串匹配）前/后插入自定义规则行。
+    # 放在最后——落点分组此刻已全部就位（含 extra_pool_groups 新增的 England/Germany
+    # 等）。落点用本 overlay 生成态的分组名书写；若被 extends 的下游 overlay 有
+    # rename_map（如 clashbox），会在其自身处理里一并把这些新规则的策略级联改名。
+    for spec in overlay.get("rules_insert", []):
+        new_rules = list(spec.get("rules", []))
+        if not new_rules:
+            continue
+        for r in new_rules:
+            parts = r.split(",")
+            idx = _rule_policy_index(parts)
+            if idx < len(parts):
+                _get_group(parts[idx].strip(), f"rules_insert 落点 {r!r}")
+        before, after = spec.get("before"), spec.get("after")
+        anchor = before if before is not None else after
+        if anchor is None:
+            raise ValueError(f"{overlay_label} 的 rules_insert 需指定 before 或 after 锚点")
+        pos = next((i for i, r in enumerate(rules) if anchor in r), None)
+        if pos is None:
+            raise ValueError(
+                f"{overlay_label} 的 rules_insert 锚点 {anchor!r} 未匹配任何规则"
+            )
+        at = pos if before is not None else pos + 1
+        rules[at:at] = new_rules
 
 
 def _yaml_flow(v) -> str:
