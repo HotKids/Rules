@@ -29,7 +29,7 @@ const ruleOptionsEnable = {
   'Google': true,
   'OneDrive': false,
   'Microsoft': false,
-  'Telegram': true,
+  'Telegram': false,
   'AIGC': true,
   'Crypto': true,
   'Finance': true,
@@ -331,6 +331,13 @@ function main(config) {
     'RULE-SET,Microsoft,Microsoft',
     // > Telegram
     'RULE-SET,Telegram,Telegram',
+    'IP-ASN,44907,Singapore,no-resolve',
+    'IP-ASN,62014,Singapore,no-resolve',
+    'IP-ASN,59930,America,no-resolve',
+    'IP-ASN,62041,Germany,no-resolve',
+    'IP-ASN,211157,Germany,no-resolve',
+    'IP-CIDR,5.28.192.0/18,Germany,no-resolve',
+    'IP-CIDR,109.239.140.0/24,Germany,no-resolve',
     // > Crypto
     'RULE-SET,Crypto,Crypto',
     // > Finance
