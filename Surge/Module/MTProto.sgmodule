@@ -1,0 +1,25 @@
+#!name=MTProto
+#!desc=Telegram MTProto
+#!arguments=dc5-policy:🇸🇬 Singapore,dc1-policy:🇺🇸 America,dc2-policy:🇩🇪 Germany,
+interface:127.0.0.1,
+port:5753,
+secret:0cedbe9e6550d2361ebc561422a34541,
+ipv6:true
+
+[MTProto]
+interface = {{{interface}}}
+port = {{{port}}}
+secret = {{{secret}}}
+ipv6 = {{{ipv6}}}
+dc-config-url = https://raw.githubusercontent.com/surge-networks/MTProtoDCConfigGenerator/refs/heads/main/mtproto-dc-config.json
+
+[Rule]
+IP-ASN, 44907, {{{dc5-policy}}}, no-resolve
+IP-ASN, 62014, {{{dc5-policy}}}, no-resolve
+IP-ASN, 59930, {{{dc1-policy}}}, no-resolve
+IP-ASN, 62041, {{{dc2-policy}}}, no-resolve
+IP-ASN, 211157, {{{dc2-policy}}}, no-resolve
+IP-CIDR, 5.28.192.0/18, {{{dc2-policy}}}, no-resolve
+IP-CIDR, 109.239.140.0/24, {{{dc2-policy}}}, no-resolve
+
+# tg://proxy?server={{{interface}}}&port={{{port}}}&secret={{{secret}}}
