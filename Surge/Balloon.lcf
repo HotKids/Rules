@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-07-13 11:56:08
+# Date: 2026-08-06 19:38:00
 # Author: @HotKids
 
 [General]
@@ -87,7 +87,7 @@ FilterUS = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b
 # Finance
 💳 Finance = select,🇺🇸 America,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Finance.png
 # Mail
-📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Mail.png
+📧 Mail = select,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Email.png
 # Speedtest
 ⏱️ Speedtest = select,FilterUN,img-url = https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Speed.png
 # Adblock
