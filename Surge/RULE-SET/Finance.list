@@ -1,9 +1,10 @@
 # > American Express   
 DOMAIN-SUFFIX,americanexpress.com
+DOMAIN-SUFFIX,amex.com
 DOMAIN-SUFFIX,amextravel.com
-DOMAIN-SUFFIX,membershiprewards.com
 DOMAIN-SUFFIX,aexp.com
 DOMAIN-SUFFIX,aexp-static.com
+DOMAIN-SUFFIX,membershiprewards.com
 
 # > Chase
 DOMAIN-SUFFIX,chase.com
