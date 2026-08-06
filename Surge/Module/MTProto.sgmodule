@@ -1,10 +1,8 @@
 #!name=MTProto
-#!desc=Telegram MTProto
-#!arguments=dc5-policy:🇸🇬 Singapore,dc1-policy:🇺🇸 America,dc2-policy:🇩🇪 Germany,
-interface:127.0.0.1,
-port:5753,
-secret:0cedbe9e6550d2361ebc561422a34541,
-ipv6:true
+#!desc=Telegram MTProto 代理 —— Surge 本地监听 + 按 Telegram 机房分流。启用后用文件末尾注释里的 tg:// 链接导入 Telegram。
+#!category=HotKids
+#!arguments=dc5-policy:🇸🇬 Singapore,dc1-policy:🇺🇸 America,dc2-policy:🇩🇪 Germany,interface:127.0.0.1,port:5753,secret:0cedbe9e6550d2361ebc561422a34541,ipv6:true
+#!arguments-desc=dc5-policy:DC5（新加坡机房）流量使用的出口策略\ndc1-policy:DC1/DC3（迈阿密机房）流量使用的出口策略\ndc2-policy:DC2/DC4（阿姆斯特丹机房）流量使用的出口策略\ninterface:监听地址。127.0.0.1 表示仅本机可连；需要局域网内其他设备使用时改为 0.0.0.0 或本机内网 IP\nport:监听端口\nsecret:MTProxy 唯一的客户端认证凭据，16 字节（32 位十六进制）。它不是 Telegram 账号密码、Bot Token 或 API Key，泄露不会导致账号被访问；但任何拿到它并能连上监听地址的人都可以蹭用此代理、消耗你的带宽。请用 openssl rand -hex 16 自行生成，不要沿用默认值\nipv6:是否允许通过 IPv6 连接 Telegram 机房
 
 [MTProto]
 interface = {{{interface}}}
@@ -22,4 +20,5 @@ IP-ASN, 211157, {{{dc2-policy}}}, no-resolve
 IP-CIDR, 5.28.192.0/18, {{{dc2-policy}}}, no-resolve
 IP-CIDR, 109.239.140.0/24, {{{dc2-policy}}}, no-resolve
 
+# 导入链接（interface 为 127.0.0.1 时仅本机可用，分享给别人需改成可达地址）
 # tg://proxy?server={{{interface}}}&port={{{port}}}&secret={{{secret}}}
