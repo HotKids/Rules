@@ -185,7 +185,7 @@ function main(config) {
     // Finance
     { name: '💳 Finance', type: 'select', proxies: ['🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png' },
     // Mail
-    { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png' },
+    { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Email.png' },
     // Speedtest
     { name: '⏱️ Speedtest', type: 'select', 'include-all-providers': true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png' },
     // Adblock

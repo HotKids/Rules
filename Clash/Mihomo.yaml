@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-07-13 11:56:08
+# Date: 2026-08-06 19:38:00
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
@@ -132,7 +132,7 @@ proxy-groups:
   # Finance
   - {name: 💳 Finance, type: select, proxies: [🇺🇸 America, 🔰 Proxy, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Finance.png}
   # Mail
-  - {name: 📧 Mail, type: select, proxies: [🔰 Proxy, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Mail.png}
+  - {name: 📧 Mail, type: select, proxies: [🔰 Proxy, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Email.png}
   # Speedtest
   - {name: ⏱️ Speedtest, <<: *Region, icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png}
   # Adblock
