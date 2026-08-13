@@ -9,7 +9,7 @@ interface = {{{interface}}}
 port = {{{port}}}
 secret = {{{secret}}}
 ipv6 = {{{ipv6}}}
-dc-config-url =  {{{dc-config-url}}}
+dc-config-url = {{{dc-config-url}}}
 // dc-config-url = https://raw.githubusercontent.com/surge-networks/MTProtoDCConfigGenerator/refs/heads/main/mtproto-dc-config.json
 
 [Rule]
