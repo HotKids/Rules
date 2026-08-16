@@ -206,7 +206,10 @@ upgrade_node(){
   PSK=$(grep -E '^[[:space:]]*psk' "$SNCONF"|head -1|cut -d= -f2-|tr -d ' ')
   [ -n "$PORT" ] && [ -n "$PSK" ] || die "Could not read existing Snell port/psk"
   IP=${IP:-$(metaget "$SNMETA" report_ip)}; ID=${ID:-$(metaget "$SNMETA" node_id)}; API=${API:-$(metaget "$SNMETA" api_url)}
-  backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; write_unit; systemctl restart "$SNSVC"; openport "$PORT" tcp; meta; [ -n "$TOKEN" ] && register || true; ok "Upgraded Snell to V6"
+  backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; write_unit; systemctl restart "$SNSVC"; openport "$PORT" tcp; meta
+  # 注册失败不能吞掉：VPS 已是 V6，但面板仍记 V5，订阅会给 V6 服务器下发 V5 协议导致断连。
+  if [ -n "$TOKEN" ]; then register || die "Snell 已升级到 V6，但向面板注册失败（token 可能已过期）；面板仍显示旧版本，请在面板重试升级或手动更新该节点"; fi
+  ok "Upgraded Snell to V6"
 }
 
 status_node(){ [ -n "$PROTO" ] || { systemctl status "$SNSVC" --no-pager || true; systemctl status "$SSSVC" --no-pager || true; exit 0; }; norm; [ "$PROTO" = ss2022 ] && systemctl status "$SSSVC" --no-pager || systemctl status "$SNSVC" --no-pager; }
