@@ -2,8 +2,12 @@ import { and, eq, gte, isNull } from "drizzle-orm";
 import { installTokens } from "../db/schema";
 import type { Db } from "../db/client";
 
-/** One-time install/upgrade tokens live for 5 minutes. */
-export const TOKEN_TTL_SECONDS = 5 * 60;
+/** One-time install/upgrade tokens live for 30 minutes. The window must cover the
+ *  entire provisioning run — mint → operator pastes the command → apt-get +
+ *  binary download → the final `register` that consumes the token — not just the
+ *  click. A shorter TTL lets a slow install pass `verify-token` up front but then
+ *  fail `register` at the end, permanently stranding the node at `installing`. */
+export const TOKEN_TTL_SECONDS = 30 * 60;
 
 export type TokenPurpose = "install" | "upgrade" | "uninstall" | "heartbeat";
 
