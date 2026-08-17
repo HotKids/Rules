@@ -644,8 +644,11 @@ def _fetch_remote_section(url: str, section: str) -> list[str]:
             with urllib.request.urlopen(url, timeout=15) as resp:  # noqa: S310
                 _url_cache[url] = resp.read().decode("utf-8")
         except Exception as e:
-            print(f"  [WARN] 无法获取 {url}: {e}")
-            _url_cache[url] = ""
+            # 拉取失败若继续，会生成并提交缺失整段（如 QX 的 [dns] 块）的配置。
+            # 直接中止让 workflow 失败，避免把残缺配置 push 到 master。
+            raise RuntimeError(
+                f"远程包含拉取失败，中止同步以避免提交缺失段落的配置: {url}: {e}"
+            ) from e
     content = _url_cache[url]
     if not content:
         return []

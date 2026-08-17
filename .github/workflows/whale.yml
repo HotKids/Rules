@@ -21,6 +21,13 @@ on:
 permissions:
   contents: write
 
+# 与 sync-rules / sync-modules / sync-config 共用同一组，串行化对 master 的写操作。
+# whale 会 force-push 改写历史，若与自动同步的 push 并发，可能把同步刚提交的 commit
+# 覆盖丢失——必须纳入同一并发组串行执行。
+concurrency:
+  group: push-master
+  cancel-in-progress: false
+
 jobs:
   whale:
     runs-on: ubuntu-latest
@@ -46,4 +53,7 @@ jobs:
           git filter-branch -f --msg-filter 'printf "🐳\n"' -- HEAD
 
       - name: Force-push 回目标分支
-        run: git push --force origin "HEAD:${{ inputs.branch }}"
+        # 分支名经 env 传入并用 shell 变量引用，避免 ${{ }} 直接插值进命令行造成注入。
+        env:
+          BRANCH: ${{ inputs.branch }}
+        run: git push --force origin "HEAD:${BRANCH}"

@@ -14,7 +14,7 @@ import { installTokens, nodes, type NodeInsert } from "../db/schema";
 import type { AppEnv } from "../env";
 import { requireAccess, requireAccessOrApiToken } from "../middleware/auth";
 import { toNodeDTO } from "../lib/dto";
-import { mintToken } from "../lib/token";
+import { expectedPurpose, mintToken } from "../lib/token";
 import { getNode, nowSeconds as now } from "../lib/node-repo";
 import { snellVersionFor } from "../lib/versions";
 import { buildCommand } from "../lib/command";
@@ -141,7 +141,10 @@ router.get("/:id/install", requireAccess, async (c) => {
 
   const protocol = (row.protocol ?? "snell") as NodeProtocol;
   const version = (protocol === "ss2022" ? "2022" : row.version) as NodeVersion;
-  const { token, expiresAt } = await mintToken(db, row.nodeId, "install", now());
+  // Mint the token with the purpose the node's lifecycle will actually check at
+  // verify-token/register (expectedPurpose): re-provisioning an already-active
+  // node expects an 'upgrade' token, so a hardcoded 'install' would be rejected.
+  const { token, expiresAt } = await mintToken(db, row.nodeId, expectedPurpose(row.status), now());
   const command = buildCommand({
     apiUrl: new URL(c.req.url).origin,
     node: row,
@@ -163,7 +166,9 @@ router.get("/:id/upgrade", requireAccess, async (c) => {
     return c.json({ error: "Only Snell nodes can be upgraded to V6" }, 400);
   }
 
-  const { token, expiresAt } = await mintToken(db, row.nodeId, "upgrade", now());
+  // Purpose follows the node's lifecycle (expectedPurpose), not the endpoint name:
+  // upgrading a non-active node (e.g. failed) expects an 'install' token.
+  const { token, expiresAt } = await mintToken(db, row.nodeId, expectedPurpose(row.status), now());
   const command = buildCommand({
     apiUrl: new URL(c.req.url).origin,
     node: row,

@@ -27,7 +27,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        run: git clone --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
+        # depth=2：sync-rules.py 的方向检测依赖 `git diff-tree HEAD`（需要父提交）来
+        # 判断是「聚合→成员」还是「成员→聚合」。depth=1 的 shallow 克隆里 HEAD 被当作
+        # root 提交，diff-tree 输出为空 → 直接在 GitHub 上编辑聚合文件会被误判为无变更
+        # 而被回滚。至少保留一个父提交即可让单提交 push 的变更检测正常工作。
+        run: git clone --depth=2 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
 
       - name: Run sync script
         run: python3 .github/scripts/sync-rules.py
@@ -60,12 +64,14 @@ jobs:
           done
 
       - name: Compile mihomo binary rule-sets (.mrs)
+        env:
+          # mihomo 官方 CLI（用于 convert-ruleset）：mrs 只支持 domain / ipcidr 两种
+          # behavior。固定版本以保证 .mrs 产物可复现（与上方 sing-box 的固定版本
+          # 策略一致）；升级内核时手动 bump 即可。
+          MIHOMO_VERSION: "v1.19.30"
         run: |
           set -euo pipefail
-          # mihomo 官方 CLI（用于 convert-ruleset）：mrs 只支持 domain / ipcidr 两种
-          # behavior，取 latest release（版本号经 version.txt 资产解析）
-          VER=$(curl -fsSL https://github.com/MetaCubeX/mihomo/releases/latest/download/version.txt)
-          curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/latest/download/mihomo-linux-amd64-${VER}.gz" | gunzip > /tmp/mihomo
+          curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz" | gunzip > /tmp/mihomo
           chmod +x /tmp/mihomo
           /tmp/mihomo -v
 
