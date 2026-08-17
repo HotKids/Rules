@@ -29,6 +29,10 @@ export type NodeVersion = (typeof NODE_VERSIONS)[number];
 export const NODE_STATUSES = ["pending", "installing", "active", "failed", "upgrading", "disabled"] as const;
 export type NodeStatus = (typeof NODE_STATUSES)[number];
 
+/** How often a provisioned node POSTs /heartbeat. Returned to the node at register
+ *  and used to schedule its systemd timer. */
+export const HEARTBEAT_INTERVAL_SECONDS = 60;
+
 /** Subscription output formats. */
 export const SUBSCRIPTION_FORMATS = ["surge", "shadowrocket", "mihomo", "loon", "stash", "sing-box", "mihomo-provider"] as const;
 export type SubscriptionFormat = (typeof SUBSCRIPTION_FORMATS)[number];
@@ -216,6 +220,14 @@ export interface InstallCommandResponse {
   expires_at: number;
   /** 'install' | 'upgrade' */
   purpose: "install" | "upgrade";
+}
+
+export interface RegisterResponse {
+  node: NodeDTO;
+  /** Long-lived token the node uses to authenticate its periodic /heartbeat POSTs. */
+  heartbeat_token: string;
+  /** Seconds between heartbeats the node should schedule (see HEARTBEAT_INTERVAL_SECONDS). */
+  heartbeat_interval: number;
 }
 
 export interface SnellVersionsResponse {
