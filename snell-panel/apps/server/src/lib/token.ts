@@ -2,6 +2,12 @@ import { and, eq, gte, isNull } from "drizzle-orm";
 import { installTokens } from "../db/schema";
 import type { Db } from "../db/client";
 
+/** Heartbeat tokens are long-lived (10 years): unlike install/upgrade tokens they
+ *  are never consumed, and the node re-uses one every 60s for the life of the
+ *  install. One is minted per register and the node's previous heartbeat tokens
+ *  are revoked, so a re-provisioned/moved node's old token stops working. */
+export const HEARTBEAT_TTL_SECONDS = 10 * 365 * 24 * 60 * 60;
+
 /** One-time install/upgrade tokens live for 30 minutes. The window must cover the
  *  entire provisioning run — mint → operator pastes the command → apt-get +
  *  binary download → the final `register` that consumes the token — not just the
@@ -42,13 +48,36 @@ export async function mintToken(
   nodeId: string,
   purpose: TokenPurpose,
   now: number,
+  ttlSeconds: number = TOKEN_TTL_SECONDS,
 ): Promise<{ token: string; expiresAt: number }> {
   const token = newToken();
-  const expiresAt = now + TOKEN_TTL_SECONDS;
+  const expiresAt = now + ttlSeconds;
   await db
     .insert(installTokens)
     .values({ token: await hashToken(token), nodeId, purpose, expiresAt });
   return { token, expiresAt };
+}
+
+/**
+ * Rotate a node's long-lived heartbeat token: revoke any prior heartbeat tokens
+ * (so an old/moved VPS can no longer report), then mint a fresh one. Called on
+ * every successful register/upgrade so the token a node carries always matches
+ * the panel's current record.
+ */
+export async function rotateHeartbeatToken(
+  db: Db,
+  nodeId: string,
+  now: number,
+): Promise<{ token: string; expiresAt: number }> {
+  await db
+    .delete(installTokens)
+    .where(
+      and(
+        eq(installTokens.nodeId, nodeId),
+        eq(installTokens.purpose, "heartbeat"),
+      ),
+    );
+  return mintToken(db, nodeId, "heartbeat", now, HEARTBEAT_TTL_SECONDS);
 }
 
 /**
