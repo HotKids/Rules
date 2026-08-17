@@ -32,9 +32,11 @@ _UA = "sync-rules/1.0"
 def _recently_changed_files() -> set[str]:
     """Return repo-relative paths of recently changed files.
 
-    Checks both the HEAD commit (for CI shallow clones) and the working tree
-    (for local runs with uncommitted edits), so direction detection works in
-    both environments.
+    Checks both the HEAD commit (via ``git diff-tree HEAD`` — needs HEAD's parent,
+    so CI must clone with depth ≥ 2; a depth-1 shallow clone treats HEAD as a root
+    commit and this yields nothing) and the working tree (``git diff HEAD`` for
+    local runs with uncommitted edits), so direction detection works in both
+    environments.
     """
     result: set[str] = set()
     try:
@@ -671,8 +673,8 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None,
                 updated += 1
 
         # Clash → sing-box：从最终 Clash YAML 派生，保留规则自然包含在内
-        sb_content = (convert_domain_payload_to_singbox if is_domainset
-                      else convert_classical_payload_to_singbox)(clash_body)
+        sb_content = (convert_domain_payload_to_singbox(clash_body) if is_domainset
+                      else convert_classical_payload_to_singbox(clash_body, f"{stem}.json"))
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
                 print(f"    ✓ sing-box: {stem}.json")
@@ -947,10 +949,15 @@ def convert_ipcidr_to_clash(text: str) -> str | None:
 
 # ── classical behavior ───────────────────────────────────────────────
 
-def convert_classical_payload_to_singbox(text: str) -> str | None:
-    """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。"""
+def convert_classical_payload_to_singbox(text: str, name: str = "") -> str | None:
+    """Clash classical payload: → sing-box JSON（外部规则已是 Clash 格式时使用）。
+
+    sing-box 无对应字段的规则类型（如 IP-ASN、DOMAIN-WILDCARD）会被丢弃；此处
+    统计并打印告警，避免「新增未映射类型 → 产物静默缺规则」不被察觉（见 SINGBOX_MAP）。
+    """
     groups: dict[str, list[str]] = {}
     logical_rules: list[dict] = []
+    dropped: dict[str, int] = {}
     for line in _iter_clash_payload_rules(text):
         if line.startswith("#") or line.startswith("//"):
             continue
@@ -976,6 +983,14 @@ def convert_classical_payload_to_singbox(text: str) -> str | None:
         sb_type = SINGBOX_MAP.get(parts[0])
         if sb_type and len(parts) > 1:
             groups.setdefault(sb_type, []).append(parts[1])
+        elif len(parts) > 1:
+            # 有类型前缀但 SINGBOX_MAP 无对应字段 → 记录后丢弃
+            dropped[parts[0]] = dropped.get(parts[0], 0) + 1
+
+    if dropped:
+        label = f"{name} " if name else ""
+        summary = ", ".join(f"{t}×{n}" for t, n in sorted(dropped.items()))
+        print(f"    [WARN] {label}sing-box 无对应类型，已丢弃: {summary}")
 
     if not groups and not logical_rules:
         return None
@@ -1095,9 +1110,8 @@ def fetch_external_rules():
             print(f"    ✓ Clash:    {name}.yaml 无变化")
 
         # DOMAIN-SET, 前缀条目为 domain payload（裸域名 / +. 前缀），按 domain 语义转换
-        sb_convert = (convert_domain_payload_to_singbox if name in clash_domainset_names
-                      else convert_classical_payload_to_singbox)
-        sb_content = sb_convert(body)
+        sb_content = (convert_domain_payload_to_singbox(body) if name in clash_domainset_names
+                      else convert_classical_payload_to_singbox(body, f"{name}.json"))
         if sb_content:
             if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")

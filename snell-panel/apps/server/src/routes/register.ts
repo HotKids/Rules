@@ -1,12 +1,12 @@
 import { Hono, type Context } from "hono";
 import { zValidator } from "@hono/zod-validator";
 import { eq } from "drizzle-orm";
-import { heartbeatSchema, installFailedSchema, registerNodeSchema, type NodeProtocol } from "@snell-panel/shared";
+import { HEARTBEAT_INTERVAL_SECONDS, heartbeatSchema, installFailedSchema, registerNodeSchema, type NodeProtocol } from "@snell-panel/shared";
 import { nodes, type NodeInsert, type NodeRow } from "../db/schema";
 import type { AppEnv } from "../env";
 import type { Db } from "../db/client";
 import { extractToken, hasApiToken } from "../middleware/auth";
-import { consumeToken, expectedPurpose, validateToken, type TokenPurpose } from "../lib/token";
+import { consumeToken, expectedPurpose, rotateHeartbeatToken, validateToken, type TokenPurpose } from "../lib/token";
 import { getNode, nowSeconds } from "../lib/node-repo";
 import { lookupGeo } from "../lib/geoip";
 import { toNodeDTO } from "../lib/dto";
@@ -116,8 +116,16 @@ router.post("/:id/register", zValidator("json", registerNodeSchema), async (c) =
     })
     .where(eq(nodes.nodeId, id));
 
+  // Hand the node a long-lived heartbeat credential (rotating any prior one) so
+  // its periodic health callback authenticates without carrying the master token.
+  const { token: heartbeatToken } = await rotateHeartbeatToken(db, id, ts);
+
   const updated = await getNode(db, id);
-  return c.json({ node: toNodeDTO(updated!) });
+  return c.json({
+    node: toNodeDTO(updated!),
+    heartbeat_token: heartbeatToken,
+    heartbeat_interval: HEARTBEAT_INTERVAL_SECONDS,
+  });
 });
 
 // POST /api/nodes/:id/install-failed — provisioner failure callback.
@@ -135,24 +143,30 @@ router.post("/:id/install-failed", zValidator("json", installFailedSchema), asyn
   return c.json({ ok: true });
 });
 
-// POST /api/nodes/:id/heartbeat — node-scoped health callback.
+// POST /api/nodes/:id/heartbeat — node-scoped health callback, authenticated by
+// the node's long-lived heartbeat token (minted at register) or the master token.
 router.post("/:id/heartbeat", zValidator("json", heartbeatSchema), async (c) => {
   const db = c.get("db");
   const id = c.req.param("id");
   const ts = nowSeconds();
   const row = await getNode(db, id);
   if (!row) return c.json({ error: "Node not found" }, 404);
-  if (!(await authorizeNode(c, db, id, expectedPurpose(row.status), ts))) {
+  if (!(await authorizeNode(c, db, id, "heartbeat", ts))) {
     return c.json({ error: "Unauthorized" }, 401);
   }
   const input = c.req.valid("json");
-  await db.update(nodes).set({
-    status: input.service_active ? "active" : "failed",
+  // Heartbeats own the active/failed distinction, but must not resurrect a node
+  // the admin disabled, nor clobber a transient install/upgrade in flight — in
+  // those states we only refresh liveness timestamps, leaving status as-is.
+  const ownsStatus = row.status === "active" || row.status === "failed";
+  const patch: Partial<NodeInsert> = {
     lastSeenAt: ts,
     lastCheckAt: ts,
     lastError: input.error ?? null,
     ...reportedIpPort(row, input.ip, input.port),
-  }).where(eq(nodes.nodeId, id));
+  };
+  if (ownsStatus) patch.status = input.service_active ? "active" : "failed";
+  await db.update(nodes).set(patch).where(eq(nodes.nodeId, id));
   return c.json({ ok: true });
 });
 

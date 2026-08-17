@@ -18,12 +18,20 @@ SSMETA=$SSDIR/.install_meta
 SSVER=$SSDIR/ver.txt
 SSSVC=ss-rust
 SSUNIT=/etc/systemd/system/$SSSVC.service
+# 心跳（protocol 无关）：register 返回的长期 token + systemd timer 每 60s 上报健康
+HBDIR=/etc/snell-panel
+HBENV=$HBDIR/heartbeat.env
+HBSH=$HBDIR/heartbeat.sh
+HBSVC=snell-panel-heartbeat
+HBUNIT=/etc/systemd/system/$HBSVC.service
+HBTIMER=/etc/systemd/system/$HBSVC.timer
 SURGE=https://dl.nssurge.com/snell
 OPEN_API=https://api.github.com/repos/missuo/opensnell/releases/latest
 SSR_API=https://api.github.com/repos/shadowsocks/shadowsocks-rust/releases/latest
 
 ACT=${1:-help}; [ $# -gt 0 ] && shift || true
 PROTO= API= ID= TOKEN= API_TOKEN= VER= SNVER= SSVER_IN= METHOD= IP= PORT= NAME=
+HB_TOKEN= HB_INTERVAL=
 VARIANT=official; TFO=true; PSK=
 
 die(){ echo "[ERROR] $*" >&2; exit 1; }
@@ -180,9 +188,58 @@ register(){
   [ -n "$API" ] && [ -n "$ID" ] && [ -n "$TOKEN" ] || return 0
   mj= ij=; [ "$PROTO" = ss2022 ] && mj=",\"method\":\"$(esc "$METHOD")\""; [ -n "$IP" ] && ij=",\"ip\":\"$(esc "$IP")\""
   data="{\"protocol\":\"$PROTO\",\"port\":$PORT,\"psk\":\"$(esc "$PSK")\",\"version\":\"$VER\"$mj$ij}"
-  curl -fsS -X POST "$API/api/nodes/$ID/register?token=$TOKEN" -H "Content-Type: application/json" -d "$data" >/dev/null
+  # 捕获响应以取出长期心跳 token（register 成功才会返回）；curl -f 保证 HTTP 错误时非零退出
+  resp=$(curl -fsS -X POST "$API/api/nodes/$ID/register?token=$TOKEN" -H "Content-Type: application/json" -d "$data")
+  HB_TOKEN=$(printf %s "$resp" | grep -o '"heartbeat_token":"[^"]*"' | head -1 | cut -d'"' -f4)
+  HB_INTERVAL=$(printf %s "$resp" | grep -o '"heartbeat_interval":[0-9]*' | head -1 | cut -d: -f2)
 }
 del_panel(){ [ -n "$API" ] && [ -n "$ID" ] || return 0; t=${API_TOKEN:-$TOKEN}; [ -n "$t" ] && curl -fsS -X DELETE "$API/api/nodes/$ID?token=$t" >/dev/null || true; }
+
+# 装一个 systemd oneshot + timer，每 HB_INTERVAL 秒向面板 POST 一次健康状态。
+# 心跳 token 用 Authorization: Bearer 头传，避免长期 token 落进 URL/访问日志。
+setup_heartbeat(){
+  [ -n "$API" ] && [ -n "$ID" ] && [ -n "${HB_TOKEN:-}" ] || { log "No heartbeat token returned; skipping heartbeat setup"; return 0; }
+  local svc interval; [ "$PROTO" = ss2022 ] && svc=$SSSVC || svc=$SNSVC; interval=${HB_INTERVAL:-60}
+  mkdir -p "$HBDIR"
+  { echo "API_URL=$API"; echo "NODE_ID=$ID"; echo "HB_TOKEN=$HB_TOKEN"; echo "SVC=$svc"; echo "PORT=$PORT"; } > "$HBENV"; chmod 600 "$HBENV"
+  cat > "$HBSH" <<'EOF'
+#!/usr/bin/env bash
+set -uo pipefail
+. /etc/snell-panel/heartbeat.env
+systemctl is-active --quiet "$SVC" && active=true || active=false
+curl -fsS -m 15 -X POST "$API_URL/api/nodes/$NODE_ID/heartbeat" \
+  -H "Authorization: Bearer $HB_TOKEN" -H "Content-Type: application/json" \
+  -d "{\"service_active\":$active,\"port\":$PORT}" >/dev/null 2>&1 || true
+EOF
+  chmod 700 "$HBSH"
+  cat > "$HBUNIT" <<EOF
+[Unit]
+Description=Snell Panel node heartbeat
+After=network-online.target
+Wants=network-online.target
+[Service]
+Type=oneshot
+ExecStart=$HBSH
+EOF
+  cat > "$HBTIMER" <<EOF
+[Unit]
+Description=Snell Panel node heartbeat timer
+[Timer]
+OnBootSec=$interval
+OnUnitActiveSec=$interval
+AccuracySec=5s
+[Install]
+WantedBy=timers.target
+EOF
+  systemctl daemon-reload
+  systemctl enable "$HBSVC.timer" >/dev/null 2>&1 || true
+  systemctl restart "$HBSVC.timer" 2>/dev/null || log "heartbeat timer failed to start (non-fatal)"
+  log "Heartbeat every ${interval}s enabled"
+}
+remove_heartbeat(){
+  systemctl stop "$HBSVC.timer" 2>/dev/null || true; systemctl disable "$HBSVC.timer" 2>/dev/null || true
+  rm -f "$HBTIMER" "$HBUNIT" "$HBSH" "$HBENV"; systemctl daemon-reload 2>/dev/null || true
+}
 
 install_node(){
   trap report_failed ERR
@@ -190,14 +247,14 @@ install_node(){
   PORT=${PORT:-$(freeport)}; IP=${IP:-$(pubip || true)}; PSK=$(genpsk)
   if [ "$PROTO" = ss2022 ]; then log "Installing SS2022 $METHOD"; backup "$SSBIN"; backup "$SSCONF"; backup "$SSUNIT"; dl_ss; write_conf; tfo; write_unit; systemctl enable "$SSSVC" >/dev/null 2>&1 || true; systemctl restart "$SSSVC"; systemctl is-active --quiet "$SSSVC"; openport "$PORT" tcp; openport "$PORT" udp
   else log "Installing Snell V$VER $SNVER"; backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; tfo; write_unit; systemctl enable "$SNSVC" >/dev/null 2>&1 || true; systemctl restart "$SNSVC"; systemctl is-active --quiet "$SNSVC"; openport "$PORT" tcp; fi
-  meta; log "Registering installed node with panel"; register; trap - ERR; ok "Installed $PROTO"; printf "Protocol: %s\nPort: %s\nPassword/PSK: %s\n" "$PROTO" "$PORT" "$PSK"; [ -n "$IP" ] && echo "IP: $IP"
+  meta; log "Registering installed node with panel"; register; setup_heartbeat; trap - ERR; ok "Installed $PROTO"; printf "Protocol: %s\nPort: %s\nPassword/PSK: %s\n" "$PROTO" "$PORT" "$PSK"; [ -n "$IP" ] && echo "IP: $IP"
 }
 
 uninstall_node(){
   root; [ -n "$PROTO" ] || PROTO=$(detect); norm
   if [ "$PROTO" = ss2022 ]; then systemctl stop "$SSSVC" 2>/dev/null || true; systemctl disable "$SSSVC" 2>/dev/null || true; rm -f "$SSUNIT" "$SSBIN"; rm -rf "$SSDIR"
   else systemctl stop "$SNSVC" 2>/dev/null || true; systemctl disable "$SNSVC" 2>/dev/null || true; rm -f "$SNUNIT" "$SNBIN"; rm -rf "$SNDIR"; fi
-  systemctl daemon-reload; del_panel; ok "Removed $PROTO"
+  systemctl daemon-reload; remove_heartbeat; del_panel; ok "Removed $PROTO"
 }
 
 upgrade_node(){
@@ -206,7 +263,10 @@ upgrade_node(){
   PSK=$(grep -E '^[[:space:]]*psk' "$SNCONF"|head -1|cut -d= -f2-|tr -d ' ')
   [ -n "$PORT" ] && [ -n "$PSK" ] || die "Could not read existing Snell port/psk"
   IP=${IP:-$(metaget "$SNMETA" report_ip)}; ID=${ID:-$(metaget "$SNMETA" node_id)}; API=${API:-$(metaget "$SNMETA" api_url)}
-  backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; write_unit; systemctl restart "$SNSVC"; openport "$PORT" tcp; meta; [ -n "$TOKEN" ] && register || true; ok "Upgraded Snell to V6"
+  backup "$SNBIN"; backup "$SNCONF"; backup "$SNUNIT"; dl_snell; write_conf; write_unit; systemctl restart "$SNSVC"; openport "$PORT" tcp; meta
+  # 注册失败不能吞掉：VPS 已是 V6，但面板仍记 V5，订阅会给 V6 服务器下发 V5 协议导致断连。
+  if [ -n "$TOKEN" ]; then register || die "Snell 已升级到 V6，但向面板注册失败（token 可能已过期）；面板仍显示旧版本，请在面板重试升级或手动更新该节点"; setup_heartbeat; fi
+  ok "Upgraded Snell to V6"
 }
 
 status_node(){ [ -n "$PROTO" ] || { systemctl status "$SNSVC" --no-pager || true; systemctl status "$SSSVC" --no-pager || true; exit 0; }; norm; [ "$PROTO" = ss2022 ] && systemctl status "$SSSVC" --no-pager || systemctl status "$SNSVC" --no-pager; }
