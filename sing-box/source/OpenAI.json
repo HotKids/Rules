@@ -3,18 +3,65 @@
   "rules": [
     {
       "domain": [
-        "chat.openai.com.cdn.cloudflare.net",
+        "api-iam.intercom.io",
+        "api.statsig.com",
+        "chatgpt.livekit.cloud",
+        "host.livekit.cloud",
         "o33249.ingest.sentry.io",
+        "openai.com.cdn.cloudflare.net",
         "openaiapi-site.azureedge.net",
-        "openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net",
         "openaicomproductionae4b.blob.core.windows.net",
-        "production-openaicom-storage.azureedge.net"
+        "production-openaicom-storage.azureedge.net",
+        "turn.livekit.cloud"
       ]
     },
     {
       "domain_suffix": [
-        "ai.com",
-        "openai.com"
+        "chat.com",
+        "chatgpt.com",
+        "livekit.cloud",
+        "oaistatic.com",
+        "oaiusercontent.com",
+        "openai.com",
+        "sora.com"
+      ]
+    },
+    {
+      "domain_keyword": [
+        "openaiapi",
+        "openaicom"
+      ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "openaicom-api-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "azurefd.net"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "logical",
+      "mode": "and",
+      "rules": [
+        {
+          "domain_keyword": [
+            "chatgpt-async-webps-prod-"
+          ]
+        },
+        {
+          "domain_suffix": [
+            "webpubsub.azure.com"
+          ]
+        }
       ]
     }
   ]
