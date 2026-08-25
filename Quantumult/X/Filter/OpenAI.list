@@ -1,13 +1,21 @@
+# OpenAI
 # > ChatGPT
-DOMAIN-SUFFIX,ai.com,OpenAI
+DOMAIN,chatgpt.livekit.cloud,OpenAI
+DOMAIN,host.livekit.cloud,OpenAI
+DOMAIN,turn.livekit.cloud,OpenAI
+DOMAIN-SUFFIX,chat.com,OpenAI
+DOMAIN-SUFFIX,chatgpt.com,OpenAI
+DOMAIN-SUFFIX,livekit.cloud,OpenAI
+DOMAIN-SUFFIX,oaistatic.com,OpenAI
+DOMAIN-SUFFIX,oaiusercontent.com,OpenAI
 DOMAIN-SUFFIX,openai.com,OpenAI
-
-# > CDN & API
-DOMAIN,chat.openai.com.cdn.cloudflare.net,OpenAI
-DOMAIN,openaiapi-site.azureedge.net,OpenAI
-DOMAIN,openaicom-api-bdcpf8c6d2e9atf6.z01.azurefd.net,OpenAI
-DOMAIN,openaicomproductionae4b.blob.core.windows.net,OpenAI
-DOMAIN,production-openaicom-storage.azureedge.net,OpenAI
-
-# > Sentry.io
+DOMAIN-SUFFIX,sora.com,OpenAI
+DOMAIN,api.statsig.com,OpenAI
+DOMAIN,api-iam.intercom.io,OpenAI
 DOMAIN,o33249.ingest.sentry.io,OpenAI
+DOMAIN,openai.com.cdn.cloudflare.net,OpenAI
+DOMAIN,openaiapi-site.azureedge.net,OpenAI
+DOMAIN,production-openaicom-storage.azureedge.net,OpenAI
+DOMAIN,openaicomproductionae4b.blob.core.windows.net,OpenAI
+DOMAIN-KEYWORD,openaiapi,OpenAI
+DOMAIN-KEYWORD,openaicom,OpenAI
