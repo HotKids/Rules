@@ -1,5 +1,5 @@
 # Stash for Android
-# Date: 2026-08-28 20:39:31
+# Date: 2026-08-28 20:45:24
 # Author: @HotKids
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
 
@@ -92,7 +92,7 @@ dns:
     - "localhost.*.qq.com"
 
   # 主 DNS：经代理查询干净结果，防止境外域名请求泄露至国内 DNS 服务商
-  nameserver: #!replace
+  nameserver:
     - "https://1.1.1.1/dns-query"
 
   # 分域名 DNS 策略：按声明顺序匹配，先窄后宽
@@ -148,7 +148,7 @@ proxy-providers:
       timeout: 5000
       expected-status: 204
 
-proxy-groups: #!replace
+proxy-groups:
   # Global
   # name: "GLOBAL"
   # type: select
@@ -625,7 +625,7 @@ rule-providers:
     interval: 86400
 
 # 规则
-rules: #!replace
+rules:
   # 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
   - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT
 
