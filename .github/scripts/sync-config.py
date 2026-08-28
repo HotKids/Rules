@@ -3078,7 +3078,7 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         "# Date: ",
         "# Author: @HotKids",
         "#",
-        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "",
     ]
 
@@ -3259,17 +3259,17 @@ def _gen_clash_script_js(
 
     if overlay:
         source_lines = [
-            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
             f" * Clash/Mihomo.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
-            " * 而来，直接改本文件会在下次同步时被覆盖。公共部分请改 Surge/Profile.conf；",
+            " * 而来，直接修改本文件将在下次同步时被覆盖。公共部分请修改 Surge/Profile.conf；",
             " * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）",
             f" * 请改 {overlay_label}。",
         ]
     else:
         source_lines = [
-            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
-            " * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；",
-            " * 要改内容请改 Surge/Profile.conf。",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * Clash/Mihomo.yaml）转译而来，直接修改本文件将在下次同步时被覆盖；",
+            " * 如需调整请修改 Surge/Profile.conf。",
         ]
 
     lines = [
@@ -4117,10 +4117,10 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 #
 # Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
 # 同一定位）：整份配置原样转录，只在 Stash 与 mihomo 真正有差异的点上改写，因此
-# 可以直接作为覆写文件导入 Stash 使用。差异点仅以下四类，其余逐行照搬（含注释与排版）。
+# 可以直接作为覆写文件导入 Stash 使用。差异点仅以下四类，其余逐行转录（含注释与排版）。
 
-# 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由 App 自身掌管
-#    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并略去。
+# 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由客户端自身管理
+#    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并省略。
 _STASH_DROP_TOP = {
     "mixed-port", "allow-lan", "bind-address", "ipv6", "external-controller",
     "unified-delay", "tcp-concurrent", "find-process-mode", "geodata-loader",
@@ -4128,7 +4128,7 @@ _STASH_DROP_TOP = {
     "geox-url", "profile", "ntp", "sniffer", "tun", "proxies",
 }
 
-# 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，略去）
+# 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
 _STASH_DNS_KEEP = {
     "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
@@ -4139,13 +4139,13 @@ _SUB_KEY_RE = re.compile(r"^(\s+)(['\"]?)([^:'\"]+)\2\s*:")
 
 
 def _yq(value) -> str:
-    """YAML 单引号标量（组名 / filter 正则含 emoji、空格、反斜杠，统一加引号最稳）。"""
+    """YAML 单引号标量（组名 / filter 正则含 emoji、空格、反斜杠，统一加引号最为稳妥）。"""
     return "'" + str(value).replace("'", "''") + "'"
 
 
 def _stash_clean_nameserver(server: str) -> str:
     """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
-    `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。"""
+    `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律去除。"""
     if "#" not in server:
         return server
     base, frag = server.split("#", 1)
@@ -4175,7 +4175,7 @@ def _sync_stash(config: dict) -> None:
     changes: list[str] = []
 
     def flush() -> None:
-        # 略去某个键时它两侧的空行会跨过删除点叠在一起；这里丢掉与已输出空行相邻的
+        # 省略某个键时，其两侧的空行会在删除处相邻叠加；此处舍弃与已输出空行相邻的
         # 前导空行，避免出现源文件没有的空行堆积（源本身的空行结构保持不变）。
         while buf and not buf[0].strip() and out and not out[-1].strip():
             buf.pop(0)
@@ -4183,14 +4183,14 @@ def _sync_stash(config: dict) -> None:
         buf.clear()
 
     # 文件头（首个顶层键之前的注释/空行，含 # Clash / # Date / # Author / # 通用设置）
-    # 始终保留：它不属于任何键，不能跟着被略去的首个键一起丢掉。
+    # 始终保留：其不属于任何键，不应随被省略的首个键一同丢失。
     first_key = next((i for i, l in enumerate(src) if _TOP_KEY_RE.match(l)), 0)
     header = [l.rstrip() for l in src[:first_key]]
     if header and header[0].startswith("# Clash"):
         del header[0]
     header = [l for l in header if not l.startswith("# Author:")]
-    # 紧贴首个键的那段注释是该键的说明（首个键必然是被略去的 mixed-port），
-    # 随它一起去掉，避免留下孤儿注释；靠空行分隔的分区标题（# 通用设置）保留。
+    # 紧贴首个键的那段注释是该键的说明（首个键必为被省略的 mixed-port），
+    # 一并省略，避免遗留无主注释；靠空行分隔的分区标题（# 通用设置）保留。
     while header and header[-1].lstrip().startswith("#"):
         header.pop()
     out.extend(header)
@@ -4208,7 +4208,7 @@ def _sync_stash(config: dict) -> None:
                 out.append(f'    "{dom}":')
                 out.extend(policy_val)
             policy_split, policy_val = None, []
-            # 落到下面继续处理当前行
+            # 继续按普通行处理当前行
 
         m_top = _TOP_KEY_RE.match(line)
         if m_top:
@@ -4226,7 +4226,7 @@ def _sync_stash(config: dict) -> None:
                 out += [
                     "  # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，",
                     "  # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能",
-                    "  # 破坏云服务商 CDN 优化并轻微增加延迟。如需 DNS 直连改为 false。",
+                    "  # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。",
                     "  # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，",
                     "  # 满足官方要求的前置条件之一（避免递归查询）。",
                     "  follow-rule: true",
@@ -4259,7 +4259,7 @@ def _sync_stash(config: dict) -> None:
             buf.clear()
             continue
 
-        # nameserver 条目：剥掉 #RULES 后缀
+        # nameserver 条目：去除 #RULES 后缀
         if top == "dns" and dns_keep and stripped.startswith("- ") and "#RULES" in line:
             flush()
             val = stripped[2:].strip().strip("'\"")
@@ -4268,7 +4268,7 @@ def _sync_stash(config: dict) -> None:
             continue
 
         # nameserver-policy：逗号拼接多域名的单键是 mihomo 专属；Stash 只认
-        # 「精确域名 / 通配域名 / geosite:<name>」，拼接键会被当成字面域名永不命中。
+        # 「精确域名 / 通配域名 / geosite:<name>」，拼接键将被视作字面域名，无法命中。
         if top == "dns" and indent == 4 and m_sub and "," in m_sub.group(3):
             flush()
             policy_split = [d.strip() for d in m_sub.group(3).split(",") if d.strip()]
@@ -4302,7 +4302,7 @@ def _sync_stash(config: dict) -> None:
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem} for Android",
-        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
     ]
 
@@ -4318,10 +4318,10 @@ def _sync_stash(config: dict) -> None:
 # ── Enhanced/*.overlay.json → Stash 私人定制版 ────────────────────────────
 #
 # overlay 声明的是「相对基座的私人差异」，本身与输出格式无关（_apply_overlay 面向
-# 解析后的 groups/rules 结构，供 Script.js 使用）。Stash 侧是文本级转译（要保住
+# 解析后的 groups/rules 结构，供 Script.js 使用）。Stash 侧为文本级转译（需保留
 # Sample.yaml 的注释与排版），因此这里按同一份 overlay 在文本层实现对应改写。
 # 只有声明了 stash_output 的 overlay 才会产出 .stoverride；未实现的指令直接报错，
-# 避免私人差异被静默丢掉。
+# 避免私人差异被静默丢弃。
 _STASH_OVERLAY_OK = {
     "_comment", "output", "stash_output", "extends",
     "disabled_by_default", "rules_insert", "group_overrides",
@@ -4361,7 +4361,7 @@ def _stash_render_group(g: dict) -> list[str]:
         out.append(f"    icon: {g['icon']}")
     if g.get("hidden"):
         out.append("    hidden: true")
-    # 池组的节点来源：与基座地区组写法一致，从本仓库 provider 里按 filter 筛
+    # 池组的节点来源：与基座地区组写法一致，按 filter 从本仓库 provider 中筛选
     out += ["    use:", "      - Server"]
     for key in ("interval", "tolerance", "lazy"):
         if key in g:
@@ -4388,15 +4388,15 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
     lines = list(lines)
     notes: list[str] = []
 
-    # 展示字段改成本份定制版自己的，避免与基座在覆写列表里同名
+    # 展示字段替换为本定制版专属内容，避免与基座在覆写列表中同名
     for i, l in enumerate(lines):
         if l.startswith("name: "):
             lines[i] = f"name: {Path(overlay['stash_output']).stem} for Android"
         elif l.startswith("desc: "):
             lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
-                        f"叠加 {label}），请勿手改；改内容请改 Surge/Profile.conf。")
+                        f"叠加 {label}），请勿手动修改；如需调整请修改 Surge/Profile.conf。")
 
-    # 1) group_overrides：改写既有组的字段（filter 为 null 表示删掉该行）
+    # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():
         span = _stash_group_spans(lines).get(name)
         if span is None:
@@ -4441,7 +4441,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         lines[at:at] = [f"      - {p}" for p in spec["insert"]]
         notes.append(f"{name}: 候选插入 {len(spec['insert'])} 项")
 
-    # 3) extra_pool_groups：整组新增，插到锚点组之后
+    # 3) extra_pool_groups：整组新增，插入至锚点组之后
     for g in (overlay.get("extra_pool_groups") or []):
         spans = _stash_group_spans(lines)
         anchor = g.get("insert_after")
@@ -4462,15 +4462,15 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         lines[at:at] = [f"  - {r}" for r in spec["rules"]]
         notes.append(f"规则插入 {len(spec['rules'])} 条")
 
-    # 5) disabled_by_default：静态配置没有运行时开关，按声明整组剪掉——
-    #    删组、删以它为落点的规则、删其余组候选里对它的引用，
-    #    最后清掉因此不再被任何 RULE-SET 引用的规则集。
+    # 5) disabled_by_default：静态配置没有运行时开关，按声明整组移除——
+    #    移除该组、以其为落点的规则，以及其余组候选中对它的引用，
+    #    并清理因此不再被任何 RULE-SET 引用的规则集。
     for name in (overlay.get("disabled_by_default") or []):
         spans = _stash_group_spans(lines)
         if name not in spans:
             raise ValueError(f"{label}: disabled_by_default 引用了不存在的分组 {name!r}")
         s, e = spans[name]
-        # 组前的注释行一并删掉
+        # 组前的注释行一并移除
         while s > 0 and lines[s - 1].lstrip().startswith("#"):
             s -= 1
         del lines[s:e]

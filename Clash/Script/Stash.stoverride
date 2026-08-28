@@ -1,7 +1,7 @@
-# Date: 2026-08-28 21:02:57
+# Date: 2026-08-28 21:06:08
 
 name: Stash for Android
-desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
+desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
 author: '@HotKids'
 
 # 通用设置
@@ -23,7 +23,7 @@ hosts:
 dns:
   # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，
   # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能
-  # 破坏云服务商 CDN 优化并轻微增加延迟。如需 DNS 直连改为 false。
+  # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。
   # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，
   # 满足官方要求的前置条件之一（避免递归查询）。
   follow-rule: true

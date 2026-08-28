@@ -62,7 +62,7 @@ rule-providers:
 
 # Stash
 # 覆写文件：由上面的 Clash 产物二次转换（同 Mihomo.yaml 定位），整份逐行转录，
-# 只改写 Stash 与 mihomo 的差异点。无 Builtin，内容全部由脚本推导。
+# 仅改写 Stash 与 mihomo 的差异点。无 Builtin 段，内容全部由脚本推导。
 >> Clash/Script/Stash.stoverride
 
 # Quantumult X
