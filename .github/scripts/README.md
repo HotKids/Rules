@@ -55,7 +55,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Stash.stoverride`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Stash.stoverride`、`Clash/Script/MyStash.stoverride`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
@@ -92,6 +92,19 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 两点需留意：`GEOSITE` 的 domain-list-community 数据不随 Stash 分发，首次使用时按需从 github.com
 拉取；`format: mrs` 的 MRS 支持有官方说明（限 `behavior` 为 `domain` / `ipcidr`，本仓库 8 个 mrs
 规则集正好全在此范围内），但格式表未列出该 `format` 取值，沿用 mihomo 写法，需实测确认。
+
+`Clash/Script/MyStash.stoverride` 是 Stash 的私人定制版，复用 `Enhanced/` 下的同一份
+overlay：只要 overlay 里除 `output` 外再声明一个 `stash_output`，就会在 Stash 基座上叠加同样
+的私人差异（目前只有 `myscript.overlay.json` 声明了）。overlay 的差异声明本身与输出格式无关，
+但 `_apply_overlay` 面向解析后的结构、供 Script.js 使用，而 Stash 侧是文本级转译（要保住
+Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay` 里按文本重新实现，**遇到尚未
+实现的指令直接报错**，避免私人差异被静默丢掉。
+
+其中 `disabled_by_default` 没有静态等价物——它是 Script.js 的运行时开关（`ruleOptionsEnable`），
+YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组剪掉**：删组、删以它为落点的规则、删
+其余分组候选里对它的引用，并清掉因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
+的新增池组在 Script.js 里靠运行时过滤 `config.proxies` 填充，静态 YAML 必须显式写节点来源，
+统一按基座地区组的写法输出 `use: [Server]` + `filter`。
 
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
