@@ -4115,233 +4115,198 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 # Stash 覆写（.stoverride）
 # ---------------------------------------------------------------------------
 #
-# Stash 用「覆写文件」在基础配置之上打补丁，合并规则（官方）：
-#   标量同键 → 直接覆盖；字典同键 → 按键递归合并；
-#   数组同键 → 覆写的数组【插入到原数组开头】；
-#   键后加 `#!replace` 行注释 → 改为整体替换。
-# 因此本文件只产出「Stash 与 mihomo 的差异项」，其余全部沿用 Clash/Sample.yaml，
-# 不重复输出任何等价配置。所有差异项均从生成好的 Clash 配置推导，源改了这里自动跟随。
+# Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
+# 同一定位）：整份配置原样转录，只在 Stash 与 mihomo 真正有差异的点上改写，因此
+# 可以直接作为覆写文件导入 Stash 使用。差异点仅以下四类，其余逐行照搬（含注释与排版）。
 
-# mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的 `#`
-# 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。
+# 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由 App 自身掌管
+#    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并略去。
+_STASH_DROP_TOP = {
+    "mixed-port", "allow-lan", "bind-address", "ipv6", "external-controller",
+    "unified-delay", "tcp-concurrent", "find-process-mode", "geodata-loader",
+    "global-ua", "keep-alive-interval", "geo-auto-update", "geo-update-interval",
+    "geox-url", "profile", "ntp", "sniffer", "tun", "proxies",
+}
+
+# 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，略去）
+_STASH_DNS_KEEP = {
+    "default-nameserver", "nameserver", "nameserver-policy",
+    "proxy-server-nameserver", "fake-ip-filter",
+}
+
+_TOP_KEY_RE = re.compile(r"^([A-Za-z][\w-]*):")
+_SUB_KEY_RE = re.compile(r"^(\s+)(['\"]?)([^:'\"]+)\2\s*:")
+
+
 def _stash_clean_nameserver(server: str) -> str:
+    """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
+    `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。"""
     if "#" not in server:
         return server
     base, frag = server.split("#", 1)
     return server if frag.startswith("h3=") else base
 
 
-def _yq(value) -> str:
-    """YAML 单引号标量（组名含 emoji/空格，统一加引号最稳）。"""
-    return "'" + str(value).replace("'", "''") + "'"
-
-
-def _stash_group_lines(groups: list) -> tuple[list[str], list[str]]:
-    """mihomo proxy-groups → Stash proxy-groups（保序）。返回 (行, 改动说明)。"""
-    lines: list[str] = []
-    notes: list[str] = []
-    for g in groups:
-        if not isinstance(g, dict) or "name" not in g:
-            continue
-        lines.append(f"  - name: {_yq(g['name'])}")
-        lines.append(f"    type: {g.get('type', 'select')}")
-        if g.get("icon"):
-            lines.append(f"    icon: {g['icon']}")
-        # use:[Provider] 依赖本仓库自身的 proxy-providers；通用覆写要面向任意订阅，
-        # 改用 Stash 的 include-all 自动纳入订阅全部节点（filter 仍按原正则筛地区）。
-        if g.get("use"):
-            lines.append("    include-all: true")
-            notes.append(f"{g['name']}: use→include-all")
-        if g.get("filter"):
-            lines.append(f"    filter: {_yq(g['filter'])}")
-        for key in ("url", "interval", "tolerance", "lazy"):
-            if key in g:
-                lines.append(f"    {key}: {g[key]}")
-        if g.get("hidden"):
-            lines.append("    hidden: true")
-        # REJECT / REJECT-DROP 都是 Stash 内置策略（前者立即报错，后者静默丢弃），
-        # 原样保留即可，无需映射。
-        proxies = g.get("proxies") or []
-        if proxies:
-            lines.append("    proxies:")
-            for p in proxies:
-                lines.append(f"      - {_yq(p)}")
-    return lines, notes
-
-
-def _stash_provider_lines(providers: dict) -> list[str]:
-    """mihomo rule-providers → Stash rule-providers。
-
-    Stash 要求显式声明 behavior + format，与我们现有字段一一对应；MRS 支持
-    behavior 为 domain / ipcidr（我们的 8 个 mrs 规则集正好全在此范围内）。
-    `type` 与 `path` 是 mihomo 的本地缓存语义，Stash 侧不需要，略去。
-    """
-    lines: list[str] = []
-    for name, rp in providers.items():
-        if not isinstance(rp, dict):
-            continue
-        lines.append(f"  {_yq(name)}:")
-        for key in ("behavior", "format", "url", "interval"):
-            if key in rp:
-                lines.append(f"    {key}: {rp[key]}")
-    return lines
-
-
-# 规则行：`  - TYPE,值...,策略[,flag]`
-_RULE_LINE_RE = re.compile(r"^(\s*-\s*)(.+?)\s*$")
-
-
-def _stash_rules_block(sample_text: str) -> tuple[list[str], list[str]]:
-    """提取 Sample.yaml 的 rules 块（保留原注释、分段与顺序）。
-
-    规则本身无需转译：Stash 的规则类型是 Clash Premium 超集，我们用到的
-    RULE-SET / GEOIP / GEOSITE / MATCH / no-resolve 以及 AND / OR / NOT 逻辑规则
-    （含嵌套）官方文档均有明确支持，内置策略 REJECT / REJECT-DROP 亦然。
-    """
-    lines = sample_text.splitlines()
-    try:
-        start = next(i for i, ln in enumerate(lines) if ln.rstrip() == "rules:")
-    except StopIteration:
-        return [], []
-
-    out: list[str] = []
-    notes: list[str] = []
-    for raw in lines[start + 1:]:
-        if raw and not raw.startswith((" ", "\t", "#")):
-            break  # 下一个顶层键
-        stripped = raw.strip()
-        if not stripped or stripped.startswith("#"):
-            out.append(raw.rstrip())
-            continue
-        m = _RULE_LINE_RE.match(raw)
-        if not m:
-            continue
-        rule = m.group(2).strip().strip("'\"")
-        # GEOSITE 数据不随 Stash 分发，首次使用时按需从 github.com 拉取，提示一次即可
-        if rule.startswith("GEOSITE,") and not any("GEOSITE" in n for n in notes):
-            notes.append("GEOSITE 首次使用需能访问 github.com（数据不随 Stash 分发）")
-        out.append(f"  - {rule}")
-    return out, notes
-
-
 def _sync_stash(config: dict) -> None:
-    """生成 Stash 通用覆写：把本仓库整套策略组/规则集/规则套到任意订阅上。
-
-    与 Clash/Script/Script.js 同一定位（Script.js 面向支持 Enhance Script 的
-    Clash 客户端，Stash 不支持 JS，改用 .stoverride），因此不依赖本仓库自身的
-    proxy-providers：节点来自使用者订阅，由 include-all + filter 归入各组。
-    """
-    out = config.get("Stash", {}).get("output")
+    """Clash/Sample.yaml → Clash/Stash.stoverride（只改 Stash 与 mihomo 的差异点）。"""
+    out_path = config.get("Stash", {}).get("output")
     clash_out = config.get("Clash", {}).get("output")
-    if not out or not clash_out:
+    if not out_path or not clash_out:
         return
     base_path = REPO_ROOT / clash_out
     if not base_path.exists():
         return
 
     print("\n── sync-config: Clash Sample.yaml → Stash .stoverride ──")
-    sample_text = base_path.read_text(encoding="utf-8")
-    cfg = yaml.safe_load(sample_text) or {}
-    dns = cfg.get("dns", {}) or {}
+    src = base_path.read_text(encoding="utf-8").splitlines()
 
-    rule_lines, rule_notes = _stash_rules_block(sample_text)
-    group_lines, group_notes = _stash_group_lines(cfg.get("proxy-groups") or [])
-    provider_lines = _stash_provider_lines(cfg.get("rule-providers") or {})
+    out: list[str] = []
+    buf: list[str] = []          # 待决的注释 / 空行（跟随其后的键一起保留或丢弃）
+    top = ""                     # 当前顶层键
+    keep_top = True
+    dns_keep = True              # dns 块内当前子键是否保留
+    policy_split: list[str] | None = None   # 逗号拼接键待展开的域名
+    policy_val: list[str] = []              # 该键的值行
+    changes: list[str] = []
 
-    # ── DNS：仅 Stash 与 mihomo 写法不同的两处 ──
-    ns_raw = [s for s in (dns.get("nameserver") or []) if isinstance(s, str)]
-    follow_rule = any("#RULES" in s for s in ns_raw)
-    ns_clean = [_stash_clean_nameserver(s) for s in ns_raw]
-    psn = [s for s in (dns.get("proxy-server-nameserver") or []) if isinstance(s, str)]
-    split_policy: dict[str, object] = {}
-    for key, val in (dns.get("nameserver-policy") or {}).items():
-        if isinstance(key, str) and "," in key:
-            for one in (x.strip() for x in key.split(",")):
-                if one:
-                    split_policy[one] = val
+    def flush() -> None:
+        out.extend(buf)
+        buf.clear()
 
-    L: list[str] = [
-        "name: 🔰 HotKids Rules",
+    # 文件头（首个顶层键之前的注释/空行，含 # Clash / # Date / # Author / # 通用设置）
+    # 始终保留：它不属于任何键，不能跟着被略去的首个键一起丢掉。
+    first_key = next((i for i, l in enumerate(src) if _TOP_KEY_RE.match(l)), 0)
+    header = [l.rstrip() for l in src[:first_key]]
+    if header and header[0].startswith("# Clash"):
+        header[0] = "# Stash"
+    # 紧贴首个键的那段注释是该键的说明（首个键必然是被略去的 mixed-port），
+    # 随它一起去掉，避免留下孤儿注释；靠空行分隔的分区标题（# 通用设置）保留。
+    while header and header[-1].lstrip().startswith("#"):
+        header.pop()
+    out.extend(header)
+
+    for raw in src[first_key:]:
+        line = raw.rstrip()
+        stripped = line.strip()
+
+        # ── 逗号拼接的 nameserver-policy 键：收集值行后按域名展开 ──
+        if policy_split is not None:
+            if stripped and not stripped.startswith("#") and len(line) - len(line.lstrip()) >= 6:
+                policy_val.append(line)
+                continue
+            for dom in policy_split:
+                out.append(f'    "{dom}":')
+                out.extend(policy_val)
+            policy_split, policy_val = None, []
+            # 落到下面继续处理当前行
+
+        m_top = _TOP_KEY_RE.match(line)
+        if m_top:
+            top = m_top.group(1)
+            keep_top = top not in _STASH_DROP_TOP
+            if not keep_top:
+                buf.clear()
+                changes.append(f"略去 {top}")
+                continue
+            flush()
+            out.append(line)
+            if top == "dns":
+                # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
+                # Stash 的等价物是全局开关 follow-rule。
+                out += [
+                    "  # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，",
+                    "  # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能",
+                    "  # 破坏云服务商 CDN 优化并轻微增加延迟。如需 DNS 直连改为 false。",
+                    "  # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，",
+                    "  # 满足官方要求的前置条件之一（避免递归查询）。",
+                    "  follow-rule: true",
+                ]
+                changes.append("dns: #RULES → follow-rule")
+            continue
+
+        if not stripped or stripped.startswith("#"):
+            buf.append(line)
+            continue
+
+        if not keep_top:
+            buf.clear()
+            continue
+
+        indent = len(line) - len(line.lstrip())
+        m_sub = _SUB_KEY_RE.match(line)
+
+        # ── dns：按 Stash 支持的子键过滤 ──
+        if top == "dns" and indent == 2 and m_sub:
+            key = m_sub.group(3).strip()
+            dns_keep = key in _STASH_DNS_KEEP
+            if not dns_keep:
+                buf.clear()
+                continue
+            flush()
+            if key == "nameserver":
+                # 整体替换：原数组含 Stash 无法识别的 #RULES 后缀，
+                # 覆写默认的「前置插入」会把它保留下来。
+                out.append("  nameserver: #!replace")
+            else:
+                out.append(line)
+            continue
+        if top == "dns" and indent > 2 and not dns_keep:
+            buf.clear()
+            continue
+
+        # nameserver 条目：剥掉 #RULES 后缀
+        if top == "dns" and dns_keep and stripped.startswith("- ") and "#RULES" in line:
+            flush()
+            val = stripped[2:].strip().strip("'\"")
+            out.append(f'    - "{_stash_clean_nameserver(val)}"')
+            changes.append("nameserver 去 #RULES 后缀")
+            continue
+
+        # nameserver-policy：逗号拼接多域名的单键是 mihomo 专属；Stash 只认
+        # 「精确域名 / 通配域名 / geosite:<name>」，拼接键会被当成字面域名永不命中。
+        if top == "dns" and indent == 4 and m_sub and "," in m_sub.group(3):
+            flush()
+            policy_split = [d.strip() for d in m_sub.group(3).split(",") if d.strip()]
+            policy_val = []
+            changes.append(f"nameserver-policy 拆键 ×{len(policy_split)}")
+            continue
+
+        # ── provider：type 是 mihomo 专属；header 在 Stash 中为 headers ──
+        if top in ("proxy-providers", "rule-providers"):
+            if m_sub and m_sub.group(3).strip() == "type":
+                buf.clear()
+                continue
+            if m_sub and m_sub.group(3).strip() == "header":
+                flush()
+                out.append(line.replace("header:", "headers:", 1))
+                changes.append("proxy-providers: header → headers")
+                continue
+
+        flush()
+        out.append(line)
+
+    if policy_split is not None:
+        for dom in policy_split:
+            out.append(f'    "{dom}":')
+            out.extend(policy_val)
+
+    # 在文件头的 # Author 之后补上生成说明与覆写元数据
+    insert_at = next((i for i, l in enumerate(out) if l.startswith("# Author:")), 0) + 1
+    out[insert_at:insert_at] = [
+        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "",
+        "name: HotKids",
         "desc: |-",
-        "  HotKids 通用分流覆写 · Stash 版（由 Surge/Profile.conf 自动生成）",
-        "  规则集: 本仓库 RULE-SET（含 .mrs）· 每 24h 自动更新",
-        "  节点: include-all 自动纳入订阅全部节点，地区组按名称正则筛选",
+        "  HotKids 规则配置 · Stash 覆写",
+        "  由 Surge/Profile.conf 经 Clash/Sample.yaml 转译，仅改写 Stash 与 mihomo 的差异点",
         "author: HotKids",
-        "# Date: ",
-        "",
-        "# 由 .github/scripts/sync-config.py 生成，请勿手改；改源头 Surge/Profile.conf。",
-        "# 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。",
-        "",
     ]
 
-    if group_lines:
-        L += [
-            "# ════════════════════════════════════════════════",
-            "#  策略组：include-all 纳入订阅全部节点，filter 按名称筛地区",
-            "# ════════════════════════════════════════════════",
-            "proxy-groups:",
-        ] + group_lines + [""]
-
-    if provider_lines:
-        L += [
-            "# ════════════════════════════════════════════════",
-            "#  远程规则集（Stash 需显式声明 behavior + format）",
-            "# ════════════════════════════════════════════════",
-            "rule-providers:",
-        ] + provider_lines + [""]
-
-    if rule_lines:
-        L += [
-            "# ════════════════════════════════════════════════",
-            "#  分流规则：#!replace 整体替换，顺序即优先级",
-            "#  与源配置逐条一致——Stash 支持 AND/OR/NOT 逻辑规则（含嵌套）、GEOSITE、",
-            "#  no-resolve 及 REJECT-DROP，无需改写。",
-            "#  注意 GEOSITE 数据不随 Stash 分发，首次使用时按需从 github.com 拉取。",
-            "# ════════════════════════════════════════════════",
-            "rules: #!replace",
-        ] + rule_lines + [""]
-
-    dns_lines: list[str] = []
-    if follow_rule:
-        dns_lines += [
-            "  # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，Stash 的",
-            "  # 等价物是全局开关 follow-rule。官方提示多数场景无需开启（可能影响 CDN",
-            "  # 优化并轻微增加延迟），如需 DNS 直连改为 false 即可。",
-            "  follow-rule: true",
-            "",
-            "  nameserver: #!replace",
-        ] + [f"    - {_yq(s)}" for s in ns_clean] + [""]
-    if psn:
-        dns_lines += [
-            "  # 独立解析代理服务器域名，避免 follow-rule 下的递归查询。",
-            "  proxy-server-nameserver: #!replace",
-        ] + [f"    - {_yq(s)}" for s in psn] + [""]
-    if split_policy:
-        dns_lines += [
-            "  # 源配置把这些域名逗号拼成单键（mihomo 专属），按 Stash 语法拆为独立键。",
-            "  nameserver-policy:",
-        ]
-        for key, val in split_policy.items():
-            vals = val if isinstance(val, list) else [val]
-            dns_lines.append(f"    {_yq(key)}: [{', '.join(str(v) for v in vals)}]")
-        dns_lines.append("")
-    if dns_lines:
-        L += [
-            "# ════════════════════════════════════════════════",
-            "#  DNS：仅覆盖 Stash 与 mihomo 写法不同之处",
-            "# ════════════════════════════════════════════════",
-            "dns:",
-        ] + dns_lines
-
-    body = "\n".join(L).rstrip() + "\n"
-    changed = _write_stamped_if_changed(REPO_ROOT / out, body)
-    print(f"  groups={len(cfg.get('proxy-groups') or [])} | "
-          f"providers={len(cfg.get('rule-providers') or {})} | "
-          f"rules={sum(1 for x in rule_lines if x.lstrip().startswith('- '))}")
-    for note in dict.fromkeys(group_notes + rule_notes):
+    body = "\n".join(out).rstrip() + "\n"
+    changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
+    for note in dict.fromkeys(changes):
         print(f"    · {note}")
-    print(f"  {'✓ ' + out + ' 已更新' if changed else '✓ ' + out + ' 无变化'}")
-
+    print(f"  {'✓ ' + out_path + ' 已更新' if changed else '✓ ' + out_path + ' 无变化'}")
 
 # ---------------------------------------------------------------------------
 # 主函数
