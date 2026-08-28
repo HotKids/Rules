@@ -55,7 +55,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Stash.stoverride`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
@@ -64,6 +64,16 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 地区正则），条目单行紧凑排版；地区组由 `use:[Server]+filter` 改写为
 `<<: *Region, filter: *Filter<码>`（`include-all-providers` 与 `use:` 同走 mihomo
 保序路径，功能一致）。
+
+`Clash/Stash.stoverride` 是 `Clash/Sample.yaml` 生成完毕后推导出的 Stash 覆写文件，
+**只包含 Stash 与 mihomo 的差异项**，其余全部沿用 Sample.yaml，不重复输出等价配置：
+mihomo 每条 nameserver 的 `#RULES` 后缀 → Stash 的全局 `dns.follow-rule`（并用
+`#!replace` 整体替换 nameserver 数组以去掉 Stash 无法识别的后缀）；`nameserver-policy`
+里逗号拼接的多域名单键（mihomo 专属）→ 拆成 Stash 认的独立键；`[Rule]` 里的 QUIC 逻辑
+规则 `AND,((NETWORK,UDP),(DST-PORT,…),(NOT,…))` → Stash 的 `script.shortcuts` +
+`SCRIPT,quic,<策略>,no-track`（策略名与端口都从源规则提取）。差异项为空时对应段落不输出。
+注意 Stash 覆写的数组是**前置插入**，所以只在基础配置缺失时才补 `proxy-server-nameserver`，
+避免条目变双份；也因此 QUIC 规则必然先于 CN 规则命中（见文件内注释说明的语义差异）。
 
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /

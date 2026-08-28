@@ -1,52 +1,21 @@
 name: HotKids Stash 适配
-desc: 将 HotKids/Rules 的 mihomo 配置适配到 Stash：DNS 跟随规则改用 follow-rule、QUIC 拦截改用 Script Shortcuts。配合 Clash/Sample.yaml 使用。
+desc: Stash 与 mihomo 的差异补丁，基础配置请用 Clash/Sample.yaml。由 sync-config.py 自动生成，勿手改。
+# Date: 2026-08-28 17:11:33
 
-# ============================================================================
-# 覆写合并规则（Stash 官方）：
-#   标量（string/number/bool）同键 → 直接覆盖
-#   字典同键                      → 按键递归合并
-#   数组同键                      → 【覆写文件的数组插入到原数组的开头】
-#   键后加 `#!replace` 行注释      → 改为整体替换而非合并
-# 因此本文件中的 rules 会被前置到 Sample.yaml 规则列表最前面，顺序敏感项见下方说明。
-# ============================================================================
+# 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。
+# 本文件只含差异项，其余沿用基础配置。
 
-
-# ── DNS ──────────────────────────────────────────────────────────────────
-#
-# 背景：Sample.yaml / General.yaml 用的是 mihomo 的「每条 nameserver 级」跟随规则语法
-#   nameserver: ["https://1.1.1.1/dns-query#RULES"]
-# Stash 没有这个后缀语义——它的 `#` 片段只用于 DNS 选项（如 #h3=true），`#RULES`
-# 不是合法选项。Stash 的等价物是全局布尔开关 dns.follow-rule。
-#
-# 官方警告：DNS 经代理转发可能破坏云服务商 CDN 全球优化（静态资源变慢），并轻微增加延迟，
-# 「绝大部分场景下不需要开启」。同时存在递归查询问题，需满足以下之一：
-#   - 转发 DNS 的代理地址是 IP 而非域名
-#   - DNS 服务器地址是 IP 而非域名
-#   - 用 proxy-server-nameserver 为代理服务器域名配置独立解析  ← 我们满足这条
-#
-# 若你更认同官方建议（DNS 直连、把 CDN 优化留给运营商），把 follow-rule 改成 false 即可，
-# 其余配置无需改动。
 dns:
+  # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
+  # Stash 的等价物是全局开关 follow-rule。官方提示：多数场景无需开启
+  # （可能影响 CDN 优化并轻微增加延迟），如需 DNS 直连改为 false 即可。
   follow-rule: true
 
-  # 必须整体替换：原数组里的 "https://1.1.1.1/dns-query#RULES" 在 Stash 下无效，
-  # 若用默认的「前置合并」它会被保留下来。
-  # 保持与原配置一致的单上游，仅去掉 Stash 无法识别的 #RULES 后缀。
-  # 如需冗余可再加一条（官方建议不超过 2 条，多了增加系统功耗）。
+  # 整体替换：原数组含 Stash 无法识别的 #RULES 后缀，前置合并会保留它。
   nameserver: #!replace
     - 'https://1.1.1.1/dns-query'
 
-  # 解析代理服务器域名的独立链路，不跟随代理规则——这既是我们原本的设计，
-  # 也是上面开启 follow-rule 的前置条件。（iOS/tvOS 3.6+，macOS 4.3+）
-  proxy-server-nameserver:
-    - 223.5.5.5
-    - https://doh.pub/dns-query
-    - https://dns.alidns.com/dns-query
-
-  # Stash 的 nameserver-policy 键只支持「精确域名 / 通配域名 / geosite:<name>」三种形式。
-  # General.yaml 里 NTP 那条把多个域名用逗号拼成单个键（mihomo 专属写法），在 Stash 下
-  # 会被当成一个字面域名、永远匹配不上。这里按 Stash 语法拆成独立键补回。
-  # （字典递归合并，原有的 geosite:private / geosite:cn 条目保持不变。）
+  # 源配置把这些域名逗号拼成单键（mihomo 专属），按 Stash 语法拆为独立键。
   nameserver-policy:
     'time.*.com': [223.5.5.5, 119.29.29.29]
     'time.*.gov': [223.5.5.5, 119.29.29.29]
@@ -55,66 +24,17 @@ dns:
     '+.pool.ntp.org': [223.5.5.5, 119.29.29.29]
     '*.ntp.org.cn': [223.5.5.5, 119.29.29.29]
 
-
-# ── QUIC 拦截 ────────────────────────────────────────────────────────────
+# mihomo 用逻辑规则 AND/NOT/OR 表达「境外 QUIC 拦截、国内放行」，
+# Stash 的等价物是 Script Shortcuts + SCRIPT 规则。
 #
-# 背景：Sample.yaml 用 mihomo 逻辑规则表达「境外 QUIC 拦截、国内放行」：
-#   AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT
-# Stash 的官方做法是 Script Shortcuts + SCRIPT 规则。
-#
-# ⚠️ 语义差异（务必知悉）：
-# Stash 文档的示例靠「规则顺序」实现国内放行——把 GEOIP,CN,DIRECT 排在 SCRIPT 规则之前。
-# 但覆写文件的 rules 数组是【前置】到原列表最前面的，所以这里的 SCRIPT 规则一定跑在
-# Sample.yaml 的所有规则之前，无法排到 CN 规则之后。
-# 结果：国内 UDP:443 也会被拒绝，回退 TCP。功能不受影响（QUIC 本就设计为可回退），
-# 但国内 QUIC 的性能收益会失去——这是覆写机制的结构性限制，不是配置疏漏。
-#
-# 若要完全保留「国内放行」，两条路：
-#   1) 直接改 Sample.yaml 的规则顺序（不用覆写）；
-#   2) 若 Stash 的表达式支持目标 IP 的地理判断，可把条件写进 shortcut——
-#      文档未列出可用变量清单，需自行验证，故此处不臆造语法。
+# ⚠️ 语义差异：Stash 靠「规则顺序」实现国内放行（CN 规则排在 SCRIPT 之前），
+# 但覆写的 rules 数组是前置插入的，这条必然跑在所有规则之前，因此国内 UDP:443 也会被拒绝并回退 TCP。
+# 功能不受影响（QUIC 本就可回退），但国内 QUIC 的性能收益会失去。
+# 要完整保留国内放行，需直接调整基础配置的规则顺序，覆写机制无法表达。
 script:
   shortcuts:
-    # 文档示例用的是 dst_port == 443；Stash 自带示例还额外覆盖了 4483 / 9305
-    # （部分 QUIC 变体端口），如需更激进的拦截可改成：
-    #   network == 'udp' and (dst_port == 443 or dst_port == 4483 or dst_port == 9305)
     quic: network == 'udp' and dst_port == 443
 
 rules:
-  # no-track：不记录到连接日志，避免高频 UDP 拒绝刷屏
-  - SCRIPT,quic,REJECT,no-track
-
-
-# ============================================================================
-# 覆写解决不了、需要你确认或改动源配置的问题
-# ============================================================================
-#
-# 1) rule-providers 的 `format:` 键【最高优先级待验证】
-#    Stash 支持 MRS 规则集，behavior 限 domain 与 ipcidr——我们那 8 个 mrs 规则集
-#    （Private / Reject / Phishing / Speedtest / Global / China 为 domain，
-#     China IP / LAN 为 ipcidr）正好全部落在支持范围内。
-#    但 Stash 用 behavior 取值区分格式（domain / domain-text / ipcidr / ipcidr-text /
-#    classical），文档中没有出现 mihomo 那个独立的 `format:` 键。我们 30 个 provider
-#    每个都写了 format。若 Stash 忽略 format 而按 URL 或 behavior 推断，则 mrs 可能被
-#    当成文本解析而失败。请在 Stash 里实际加载一次，确认这 8 个规则集能正常生效。
-#    （22 个 classical + format: yaml 的规则集风险低——Stash 的 classical 示例用的
-#      就是 .yaml 源，多余的 format 键忽略即可；官方仅提示 classical 解析效率较低。）
-#
-# 2) proxy-groups 的 `filter`
-#    5 个地区组（🇭🇰 / 🇨🇳 / 🇸🇬 / 🇯🇵 / 🇺🇸）同时写了 use: [Server] 和 filter 正则，
-#    靠 filter 从订阅里筛出对应地区节点。Stash 文档的组字段里没出现 filter。
-#    若不支持：这些组不会变空，而是会塞进 Server 里的【全部】节点——每个地区组都一样，
-#    地区选择失效。覆写无法修复（要修就得把节点名写死）。请实测确认。
-#
-# 3) 其余 mihomo 专属键
-#    tun / sniffer 整块、dns 的 cache-algorithm（Stash 固定 LRU）、prefer-h3、
-#    respect-rules、fake-ip-ttl / fake-ip-range6 / fake-ip-filter-mode、
-#    direct-nameserver 系列，以及 unified-delay / tcp-concurrent / geodata-loader /
-#    global-ua / keep-alive-interval / ntp 等通用项，在 Stash 文档中均未出现。
-#    覆写只能增改、不能删键，所以这些原样保留；预期被忽略（Stash 作为 iOS/macOS
-#    VPN 扩展运行，tun 这类内核参数本就不由用户配置）。若 Stash 对未知顶层键
-#    严格校验导致加载失败，需要改的是源配置而非本文件。
-#
-# 4) Mihomo.yaml 不要直接喂给 Stash
-#    它依赖 YAML 锚点与 `<<:` 合并键，还有一个非 schema 的顶层 anchors: 键，
-#    且用 include-all-providers 替代 use。请使用 Sample.yaml 作为 Stash 的基础配置。
+  # no-track：不记入连接日志，避免高频 UDP 拒绝刷屏
+  - SCRIPT,quic,⛔️ REJECT,no-track
