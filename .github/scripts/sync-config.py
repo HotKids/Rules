@@ -4187,7 +4187,8 @@ def _sync_stash(config: dict) -> None:
     first_key = next((i for i, l in enumerate(src) if _TOP_KEY_RE.match(l)), 0)
     header = [l.rstrip() for l in src[:first_key]]
     if header and header[0].startswith("# Clash"):
-        header[0] = "# Stash for Android"
+        del header[0]
+    header = [l for l in header if not l.startswith("# Author:")]
     # 紧贴首个键的那段注释是该键的说明（首个键必然是被略去的 mixed-port），
     # 随它一起去掉，避免留下孤儿注释；靠空行分隔的分区标题（# 通用设置）保留。
     while header and header[-1].lstrip().startswith("#"):
@@ -4296,12 +4297,12 @@ def _sync_stash(config: dict) -> None:
 
     # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
     # 源文件没有这些键，不属于差异点，不自行添加）
-    insert_at = next((i for i, l in enumerate(out) if l.startswith("# Author:")), 0) + 1
+    insert_at = next((i for i, l in enumerate(out) if l.startswith("# Date:")), -1) + 1
     out[insert_at:insert_at] = [
         "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
-        f"name: {Path(out_path).stem}",
+        f"name: {Path(out_path).stem} for Android",
         "desc: HotKids 规则配置 · 由 Surge/Profile.conf 自动转译",
         "author: '@HotKids'",
     ]
@@ -4391,7 +4392,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
     # 展示字段改成本份定制版自己的，避免与基座在覆写列表里同名
     for i, l in enumerate(lines):
         if l.startswith("name: "):
-            lines[i] = f"name: {Path(overlay['stash_output']).stem}"
+            lines[i] = f"name: {Path(overlay['stash_output']).stem} for Android"
         elif l.startswith("desc: "):
             lines[i] = f"desc: HotKids 规则配置 · 叠加 {label} 的私人差异"
 
