@@ -4299,6 +4299,10 @@ def _sync_stash(config: dict) -> None:
     insert_at = next((i for i, l in enumerate(out) if l.startswith("# Author:")), 0) + 1
     out[insert_at:insert_at] = [
         "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "",
+        # name / desc 是覆写文件的惯例字段，仅用于在 Stash 覆写列表中展示
+        f"name: {Path(out_path).stem}",
+        "desc: HotKids 规则配置 · 由 Surge/Profile.conf 转译",
     ]
 
     body = "\n".join(out).rstrip() + "\n"
@@ -4382,6 +4386,13 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         )
     lines = list(lines)
     notes: list[str] = []
+
+    # name / desc 仅用于展示；改成本份定制版自己的，避免与基座同名
+    for i, l in enumerate(lines):
+        if l.startswith("name: "):
+            lines[i] = f"name: {Path(overlay['stash_output']).stem}"
+        elif l.startswith("desc: "):
+            lines[i] = f"desc: HotKids 规则配置 · 叠加 {label} 的私人差异"
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示删掉该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():
