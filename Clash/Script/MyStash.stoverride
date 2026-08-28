@@ -1,4 +1,4 @@
-# Date: 2026-08-28 21:18:09
+# Date: 2026-08-28 21:18:40
 
 name: MyStash for Android
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -149,7 +149,7 @@ dns: #!replace
 #       timeout: 5000
 #       expected-status: 204
 
-proxy-groups:
+proxy-groups: #!replace
   # Global
   # name: "GLOBAL"
   # type: select
