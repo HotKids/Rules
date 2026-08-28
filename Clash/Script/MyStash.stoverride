@@ -1,10 +1,14 @@
 # Stash for Android
-# Date: 2026-08-28 20:49:44
+# Date: 2026-08-28 20:52:11
 # Author: @HotKids
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
 
-name: MyStash
-desc: HotKids 规则配置 · 叠加 myscript.overlay.json 的私人差异
+name: 🔰 HotKids Rules · MyStash
+desc: |-
+  HotKids 规则配置 · Stash 版（由 Surge/Profile.conf 转译，叠加 myscript.overlay.json）
+  规则集: 本仓库 RULE-SET（含 .mrs 二进制）· 每 24h 自动更新
+  策略: 广告拦截 + 国内直连，境外按服务与地区分流；地区组 fallback + 中转链
+author: '@HotKids'
 
 # 通用设置
 
