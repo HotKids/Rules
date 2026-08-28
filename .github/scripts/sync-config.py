@@ -4129,8 +4129,6 @@ _STASH_DROP_TOP = {
 }
 
 # 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，略去）
-_STASH_REPLACE_TOP = {"proxy-groups", "rules"}
-
 _STASH_DNS_KEEP = {
     "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
@@ -4220,9 +4218,7 @@ def _sync_stash(config: dict) -> None:
                 changes.append(f"略去 {top}")
                 continue
             flush()
-            out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
-            if top in _STASH_REPLACE_TOP:
-                changes.append(f"{top}: 加 #!replace（数组默认前置插入，会与基础配置混合）")
+            out.append(line)
             if top == "dns":
                 # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
                 # Stash 的等价物是全局开关 follow-rule。
@@ -4256,12 +4252,7 @@ def _sync_stash(config: dict) -> None:
                 buf.clear()
                 continue
             flush()
-            if key == "nameserver":
-                # 整体替换：原数组含 Stash 无法识别的 #RULES 后缀，
-                # 覆写默认的「前置插入」会把它保留下来。
-                out.append("  nameserver: #!replace")
-            else:
-                out.append(line)
+            out.append(line)
             continue
         if top == "dns" and indent > 2 and not dns_keep:
             buf.clear()
