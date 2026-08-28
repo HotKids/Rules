@@ -4129,20 +4129,6 @@ _STASH_DROP_TOP = {
 }
 
 # 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
-_STASH_PROVIDER_NOTES = {
-    (4, "path"): "本地缓存路径，启动时优先读取，拉取失败也能沿用上次结果",
-    (4, "url"): "订阅地址",
-    (4, "interval"): "订阅更新间隔（秒）",
-    (4, "proxy"): "拉取订阅固定直连：此时策略组尚未就绪，经代理会形成循环依赖",
-    (4, "header"): "拉取订阅时携带的请求头：部分机场按 UA 返回不同格式，声明 Clash / mihomo 以取得正确内容",
-    (4, "health-check"): "节点可用性检查",
-    (6, "enable"): "是否启用",
-    (6, "url"): "测试地址：返回 204 空响应，体积最小",
-    (6, "interval"): "检查间隔（秒）",
-    (6, "timeout"): "单次超时（毫秒）",
-    (6, "expected-status"): "期望的 HTTP 状态码，不符则判定为不可用",
-}
-
 _STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
                       "rule-providers", "rules"}
 
@@ -4167,6 +4153,21 @@ def _stash_clean_nameserver(server: str) -> str:
         return server
     base, frag = server.split("#", 1)
     return server if frag.startswith("h3=") else base
+
+
+def _stash_comment_out(lines: list[str], top_key: str) -> list[str]:
+    """将某个顶层块整体注释掉（内容保留，需要时取消注释即可启用）。"""
+    start = next((i for i, l in enumerate(lines) if re.match(rf"^{re.escape(top_key)}:", l)), -1)
+    if start < 0:
+        return lines
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    out = list(lines)
+    for i in range(start, end):
+        if out[i].strip():
+            # 该块整体停用，无需保留 #!replace 标记
+            out[i] = "# " + out[i].replace(" #!replace", "")
+    return out
 
 
 def _sync_stash(config: dict) -> None:
@@ -4299,9 +4300,6 @@ def _sync_stash(config: dict) -> None:
             if key == "type":
                 buf.clear()
                 continue
-            note = _STASH_PROVIDER_NOTES.get((indent, key)) if top == "proxy-providers" else None
-            if note and not any(l.lstrip().startswith("#") for l in buf):
-                buf.append(f"{' ' * indent}# {note}")
             if key == "header":
                 flush()
                 out.append(line.replace("header:", "headers:", 1))
@@ -4326,6 +4324,8 @@ def _sync_stash(config: dict) -> None:
         "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
     ]
+
+    out = _stash_comment_out(out, "proxy-providers")
 
     body = "\n".join(out).rstrip() + "\n"
     changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
