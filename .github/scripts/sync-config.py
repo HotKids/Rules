@@ -4112,6 +4112,165 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 
 
 # ---------------------------------------------------------------------------
+# Stash 覆写（.stoverride）
+# ---------------------------------------------------------------------------
+#
+# Stash 用「覆写文件」在基础配置之上打补丁，合并规则（官方）：
+#   标量同键 → 直接覆盖；字典同键 → 按键递归合并；
+#   数组同键 → 覆写的数组【插入到原数组开头】；
+#   键后加 `#!replace` 行注释 → 改为整体替换。
+# 因此本文件只产出「Stash 与 mihomo 的差异项」，其余全部沿用 Clash/Sample.yaml，
+# 不重复输出任何等价配置。所有差异项均从生成好的 Clash 配置推导，源改了这里自动跟随。
+
+# mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的 `#`
+# 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。
+def _stash_clean_nameserver(server: str) -> str:
+    if "#" not in server:
+        return server
+    base, frag = server.split("#", 1)
+    return server if frag.startswith("h3=") else base
+
+
+# 从 mihomo 逻辑规则中识别 QUIC 拦截规则，取出目标策略与被拦截端口。
+# 形如：AND,((NETWORK,UDP),(DST-PORT,443),(NOT,(...))),⛔️ REJECT
+_QUIC_RULE_RE = re.compile(r"^AND,\(\(.*\)\),(?P<policy>.+)$")
+
+
+def _stash_quic_from_rules(rules: list) -> tuple[str, list[str]] | None:
+    for rule in rules:
+        if not isinstance(rule, str) or not rule.startswith("AND,"):
+            continue
+        if "NETWORK,UDP" not in rule:
+            continue
+        ports = re.findall(r"\(DST-PORT,(\d+)\)", rule)
+        if not ports:
+            continue
+        m = _QUIC_RULE_RE.match(rule)
+        if m:
+            return m.group("policy").strip(), ports
+    return None
+
+
+def _sync_stash(config: dict) -> None:
+    """生成 Stash 覆写：只输出与 mihomo 的差异项，从 Clash 产物推导。"""
+    out = config.get("Stash", {}).get("output")
+    clash_out = config.get("Clash", {}).get("output")
+    if not out or not clash_out:
+        return
+    base_path = REPO_ROOT / clash_out
+    if not base_path.exists():
+        return
+
+    print("\n── sync-config: Clash Sample.yaml → Stash .stoverride ──")
+    cfg = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
+    dns = cfg.get("dns", {}) or {}
+
+    lines: list[str] = [
+        "name: HotKids Stash 适配",
+        "desc: Stash 与 mihomo 的差异补丁，基础配置请用 Clash/Sample.yaml。由 sync-config.py 自动生成，勿手改。",
+        "# Date: ",
+        "",
+        "# 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。",
+        "# 本文件只含差异项，其余沿用基础配置。",
+        "",
+    ]
+
+    # ── DNS 差异 ──
+    ns_raw = [s for s in (dns.get("nameserver") or []) if isinstance(s, str)]
+    follow_rule = any("#RULES" in s for s in ns_raw)
+    ns_clean = [_stash_clean_nameserver(s) for s in ns_raw]
+
+    # 逗号拼接多域名的 nameserver-policy 键是 mihomo 专属；Stash 只认
+    # 「精确域名 / 通配域名 / geosite:<name>」，拼接键会被当成字面域名永不命中。
+    split_policy: dict[str, object] = {}
+    for key, val in (dns.get("nameserver-policy") or {}).items():
+        if isinstance(key, str) and "," in key:
+            for one in (x.strip() for x in key.split(",")):
+                if one:
+                    split_policy[one] = val
+
+    psn = [s for s in (dns.get("proxy-server-nameserver") or []) if isinstance(s, str)]
+
+    dns_lines: list[str] = []
+    if follow_rule:
+        dns_lines += [
+            "  # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，",
+            "  # Stash 的等价物是全局开关 follow-rule。官方提示：多数场景无需开启",
+            "  # （可能影响 CDN 优化并轻微增加延迟），如需 DNS 直连改为 false 即可。",
+            "  follow-rule: true",
+            "",
+            "  # 整体替换：原数组含 Stash 无法识别的 #RULES 后缀，前置合并会保留它。",
+            "  nameserver: #!replace",
+        ]
+        dns_lines += [f"    - '{s}'" for s in ns_clean]
+        dns_lines.append("")
+    # proxy-server-nameserver 只在基础配置缺失时才补：数组是前置插入的，
+    # 原样重复输出会让基础配置里的条目变成双份（并发查询翻倍，纯浪费）。
+    if follow_rule and not psn:
+        dns_lines += [
+            "  # 开启 follow-rule 需要独立解析代理服务器域名，否则会递归查询；",
+            "  # 基础配置未提供，这里补上。",
+            "  proxy-server-nameserver:",
+            "    - 223.5.5.5",
+            "    - 'https://doh.pub/dns-query'",
+            "",
+        ]
+    if split_policy:
+        dns_lines += [
+            "  # 源配置把这些域名逗号拼成单键（mihomo 专属），按 Stash 语法拆为独立键。",
+            "  nameserver-policy:",
+        ]
+        for key, val in split_policy.items():
+            vals = val if isinstance(val, list) else [val]
+            rendered = ", ".join(str(v) for v in vals)
+            dns_lines.append(f"    '{key}': [{rendered}]")
+        dns_lines.append("")
+    if dns_lines:
+        lines.append("dns:")
+        lines += dns_lines
+
+    # ── QUIC 差异 ──
+    quic = _stash_quic_from_rules(cfg.get("rules") or [])
+    if quic:
+        policy, ports = quic
+        if len(ports) == 1:
+            expr = f"network == 'udp' and dst_port == {ports[0]}"
+        else:
+            joined = " or ".join(f"dst_port == {p}" for p in ports)
+            expr = f"network == 'udp' and ({joined})"
+        lines += [
+            "# mihomo 用逻辑规则 AND/NOT/OR 表达「境外 QUIC 拦截、国内放行」，",
+            "# Stash 的等价物是 Script Shortcuts + SCRIPT 规则。",
+            "#",
+            "# ⚠️ 语义差异：Stash 靠「规则顺序」实现国内放行（CN 规则排在 SCRIPT 之前），",
+            "# 但覆写的 rules 数组是前置插入的，这条必然跑在所有规则之前，因此国内 UDP:"
+            f"{ports[0]} 也会被拒绝并回退 TCP。",
+            "# 功能不受影响（QUIC 本就可回退），但国内 QUIC 的性能收益会失去。",
+            "# 要完整保留国内放行，需直接调整基础配置的规则顺序，覆写机制无法表达。",
+            "script:",
+            "  shortcuts:",
+            f"    quic: {expr}",
+            "",
+            "rules:",
+            f"  # no-track：不记入连接日志，避免高频 UDP 拒绝刷屏",
+            f"  - SCRIPT,quic,{policy},no-track",
+            "",
+        ]
+
+    body = "\n".join(lines).rstrip() + "\n"
+    changed = _write_stamped_if_changed(REPO_ROOT / out, body)
+    bits = []
+    if follow_rule:
+        bits.append("dns.follow-rule")
+    if split_policy:
+        bits.append(f"nameserver-policy×{len(split_policy)}")
+    if quic:
+        bits.append("quic shortcut")
+    print(f"  差异项: {', '.join(bits) if bits else '无'}")
+    print(f"  {'✓ ' + out + ' 已更新' if changed else '✓ ' + out + ' 无变化'}")
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -4131,6 +4290,7 @@ def main() -> None:
     _GENERAL_INJECT = _build_general_inject(general_lines)
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
+    _sync_stash(config)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
