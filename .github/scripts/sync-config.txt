@@ -61,9 +61,9 @@ rule-providers:
   geoip/cn => China IP
 
 # Stash
-# 覆写文件：只输出 Stash 与 mihomo 的差异项（DNS follow-rule / nameserver-policy 拆键 /
-# QUIC Script Shortcut），其余沿用上面的 Clash 产物。无 Builtin，内容全部由脚本推导。
->> Clash/Stash.stoverride
+# 覆写文件：由上面的 Clash 产物二次转换（同 Mihomo.yaml 定位），整份逐行转录，
+# 只改写 Stash 与 mihomo 的差异点。无 Builtin，内容全部由脚本推导。
+>> Clash/Script/Stash.stoverride
 
 # Quantumult X
 >> Quantumult/Sample.conf
