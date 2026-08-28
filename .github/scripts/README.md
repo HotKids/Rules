@@ -81,10 +81,14 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
   开关 → 补 `follow-rule: true`，并在转译时去除该后缀（Stash 的 `#` 片段只承载 `h3=true`
   这类选项）；`nameserver-policy` 里逗号拼接的多域名单键是 mihomo 专属，
   按 Stash 语法拆分为独立键（官方仅支持精确域名 / 通配域名 / `geosite:<name>`）。
-- **Provider 字段**：移除 mihomo 专属的 `type`；proxy-providers 的 `header` 改为 Stash 文档
-  拼写的 `headers`。
+- **Provider 处理**：`proxy-providers` 整块注释停用——它是本仓库自己的订阅，不适用于他人的
+  配置；内容已按 Stash 口径转换（移除 mihomo 专属的 `type`、`header` 改为文档拼写的 `headers`），
+  取消注释即可启用。相应地，策略组的 `use: [Server]` 改为 `include-all: true`，直接从基础配置
+  的 `proxies` 中按 `filter` 取节点——否则组内无代理，会被 Stash 当作 `DIRECT` 处理。
+- **整体替换标记**：`hosts` / `dns` / `proxy-groups` / `rule-providers` / `rules` 均加 `#!replace`，
+  使覆写以本文件为准；`proxies` 不输出，因此基础配置的节点原样保留。
 
-其余内容——`hosts` / `mode` / `log-level`、23 个策略组（含 `use: [Server]` 与地区 `filter`）、
+其余内容——`hosts` / `mode` / `log-level`、23 个策略组（含地区 `filter`）、
 30 个规则集、36 条规则——全部原样保留：Stash 的规则类型是 Clash Premium 超集，我们用到的
 `RULE-SET` / `GEOIP` / `GEOSITE` / `MATCH` / `no-resolve`、`AND` / `OR` / `NOT` 逻辑规则（含嵌套）
 及内置策略 `REJECT` / `REJECT-DROP`，官方文档均明确支持。
@@ -104,12 +108,12 @@ Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay`
 YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组移除**：移除该组、以其为落点的规则，以及
 其余分组候选中对它的引用，并清理因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
 的新增池组在 Script.js 里靠运行时过滤 `config.proxies` 填充，静态 YAML 必须显式写节点来源，
-统一按基座地区组的写法输出 `use: [Server]` + `filter`。
+统一按基座地区组的写法输出 `include-all: true` + `filter`。
 
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
 规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
-不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接改动会被下次同步覆盖。地区组 / `🇺🇳 Server`
+不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接修改将在下次同步时被覆盖。地区组 / `🇺🇳 Server`
 组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
 无开关可关，见 `_gen_clash_script_js` 注释）：订阅里的内联节点由运行时按
 `poolGroupFilters` 手动过滤 `config.proxies` 填入并保持订阅原始顺序；订阅只给
@@ -126,8 +130,8 @@ YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组�
 规则落点重定向、`remove_groups` 整组删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
 `extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
 分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
-分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
-生成产物本体会被下次同步覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
+分组）随 `Profile.conf` 自动同步，私人差异集中修改对应的 `*.overlay.json` 即可——直接修改
+生成产物本体将在下次同步时被覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
 已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
 `myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
