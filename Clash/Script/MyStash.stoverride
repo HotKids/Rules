@@ -1,4 +1,4 @@
-# Date: 2026-08-28 21:16:36
+# Date: 2026-08-28 21:18:09
 
 name: MyStash for Android
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -271,8 +271,7 @@ proxy-groups:
   - name: "⏱️ Speedtest"
     type: select
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
-    use:
-      - Server
+    include-all: true
 
   # Adblock
   - name: "🚧 AdGuard"
@@ -312,8 +311,7 @@ proxy-groups:
     type: url-test
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     tolerance: 50
     filter: '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))'
 
@@ -321,79 +319,69 @@ proxy-groups:
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:HK|HKG)\d*\b)(?=.*(?:GoMaMi|Pro))'
 
   - name: "🇨🇳 TW Relay"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?=.*Neburst)'
 
   - name: "🇯🇵 JP Relay"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:JP|JPN)\d*\b)(?=.*Pro)'
 
   - name: "🇺🇸 US Relay"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:US|USA)\d*\b)(?=.*(?:GoMaMi|Pro))'
 
   - name: "🇺🇳 Server"
     type: select
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png
-    use:
-      - Server
+    include-all: true
 
   # Area
   - name: "🇭🇰 Hong Kong"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:HK|HKG)\d*\b)(?!.*GoMaMi)(?!.*Pro)'
 
   - name: "🇨🇳 Taiwan"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?!.*Neburst)(?!.*Pro)'
 
   - name: "🇸🇬 Singapore"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/SG.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:SG|SGP)\d*\b)(?!.*Neburst)(?!.*Pro)'
 
   - name: "🇯🇵 Japan"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/JP.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:JP|JPN)\d*\b)(?!.*Pro)'
 
   - name: "🇺🇸 America"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/US.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:US|USA)\d*\b)(?!.*GoMaMi)(?!.*Pro)'
 
 
@@ -403,16 +391,14 @@ proxy-groups:
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/UK.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:UK|GBR)\d*\b)'
 
   - name: "🇩🇪 Germany"
     type: fallback
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/DE.png
     hidden: true
-    use:
-      - Server
+    include-all: true
     filter: '(?i)^(?=.*\b(?:DE|DEU)\d*\b)'
 
 rule-providers: #!replace

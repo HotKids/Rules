@@ -1,4 +1,4 @@
-# Date: 2026-08-28 21:16:36
+# Date: 2026-08-28 21:17:50
 
 name: Stash for Android
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -275,8 +275,7 @@ proxy-groups: #!replace
   - name: "⏱️ Speedtest"
     type: select
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
-    use:
-      - Server
+    include-all: true
 
   # Adblock
   - name: "🚧 AdGuard"
@@ -315,43 +314,37 @@ proxy-groups: #!replace
   - name: "🇺🇳 Server"
     type: select
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png
-    use:
-      - Server
+    include-all: true
 
   # Area
   - name: "🇭🇰 Hong Kong"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Hong_Kong.png
-    use:
-      - Server
+    include-all: true
     filter: '(?i)(?:🇭🇰|香港|Hong Kong|\b(?:HK|HKG)\d*\b)'
 
   - name: "🇨🇳 Taiwan"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Taiwan.png
-    use:
-      - Server
+    include-all: true
     filter: '(?i)(?:🇨🇳|🇹🇼|台湾|Taiwan|\b(?:TW|TWN)\d*\b)'
 
   - name: "🇸🇬 Singapore"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Singapore.png
-    use:
-      - Server
+    include-all: true
     filter: '(?i)(?:🇸🇬|新加坡|Singapore|\b(?:SG|SGP)\d*\b)'
 
   - name: "🇯🇵 Japan"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Japan.png
-    use:
-      - Server
+    include-all: true
     filter: '(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)'
 
   - name: "🇺🇸 America"
     type: select
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/United_States.png
-    use:
-      - Server
+    include-all: true
     filter: '(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)'
 
 

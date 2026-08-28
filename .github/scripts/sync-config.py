@@ -4190,6 +4190,7 @@ def _sync_stash(config: dict) -> None:
     dns_keep = True              # dns 块内当前子键是否保留
     policy_split: list[str] | None = None   # 逗号拼接键待展开的域名
     policy_val: list[str] = []              # 该键的值行
+    skip_use_items = False                  # use: 的列表项（已换成 include-all）
     changes: list[str] = []
 
     def flush() -> None:
@@ -4262,6 +4263,19 @@ def _sync_stash(config: dict) -> None:
 
         indent = len(line) - len(line.lstrip())
         m_sub = _SUB_KEY_RE.match(line)
+
+        # use 引用的是本仓库自己的 provider，而它在 Stash 产物里已停用；
+        # 改用 include-all 从基础配置的 proxies 取节点（filter 仍照常生效）。
+        if skip_use_items:
+            if indent >= 6 and not m_sub:
+                continue
+            skip_use_items = False
+        if top == "proxy-groups" and indent == 4 and m_sub and m_sub.group(3).strip() == "use":
+            flush()
+            out.append("    include-all: true")
+            skip_use_items = True
+            changes.append("proxy-groups: use → include-all")
+            continue
 
         # ── dns：按 Stash 支持的子键过滤 ──
         if top == "dns" and indent == 2 and m_sub:
@@ -4382,8 +4396,8 @@ def _stash_render_group(g: dict) -> list[str]:
         out.append(f"    icon: {g['icon']}")
     if g.get("hidden"):
         out.append("    hidden: true")
-    # 池组的节点来源：与基座地区组写法一致，按 filter 从本仓库 provider 中筛选
-    out += ["    use:", "      - Server"]
+    # 池组的节点来源：与基座地区组写法一致，从基础配置的 proxies 中按 filter 筛选
+    out.append("    include-all: true")
     for key in ("interval", "tolerance", "lazy"):
         if key in g:
             out.append(f"    {key}: {g[key]}")
@@ -4394,7 +4408,7 @@ def _stash_render_group(g: dict) -> list[str]:
 
 
 # 组内字段的规范顺序（与 Sample.yaml 一致），group_overrides 新增字段时按此定位
-_STASH_FIELD_ORDER = ["name", "type", "icon", "hidden", "use", "proxies",
+_STASH_FIELD_ORDER = ["name", "type", "icon", "hidden", "include-all", "use", "proxies",
                       "interval", "tolerance", "lazy", "filter"]
 
 
