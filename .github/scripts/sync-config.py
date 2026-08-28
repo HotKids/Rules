@@ -4302,7 +4302,7 @@ def _sync_stash(config: dict) -> None:
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem}",
-        "desc: HotKids 规则配置 · 由 Surge/Profile.conf 转译",
+        "desc: HotKids 规则配置 · 由 Surge/Profile.conf 自动转译",
         "author: '@HotKids'",
     ]
 
