@@ -1,10 +1,9 @@
 # Stash
-# Date: 2026-08-28 19:33:58
+# Date: 2026-08-28 19:36:56
 # Author: @HotKids
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
 
 # 通用设置
-
 
 # 代理模式：rule（规则）/ global（全局）/ direct（直连）
 mode: rule
