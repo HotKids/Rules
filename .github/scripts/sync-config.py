@@ -4143,29 +4143,6 @@ def _yq(value) -> str:
     return "'" + str(value).replace("'", "''") + "'"
 
 
-_STASH_DATE_RE = re.compile(r"^date:.*$", re.MULTILINE)
-
-
-def _stash_write_if_changed(filepath: Path, content: str) -> bool:
-    """按需写入 Stash 覆写：date 字段替换为当前北京时间。
-
-    与 _write_stamped_if_changed 同样的「忽略时间戳比对」语义，只是时间戳载体
-    从 `# Date:` 注释换成了 YAML 的 date 字段——否则每次生成时间都不同，
-    产物会无谓地反复变更。
-    """
-    content = _inject_general(content)
-    now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
-    stamped = _STASH_DATE_RE.sub(f"date: '{now}'", content, count=1)
-    if filepath.exists():
-        placeholder = "date: __NORM__"
-        if (_STASH_DATE_RE.sub(placeholder, filepath.read_text(encoding="utf-8"), count=1)
-                == _STASH_DATE_RE.sub(placeholder, content, count=1)):
-            return False
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text(stamped, encoding="utf-8")
-    return True
-
-
 def _stash_clean_nameserver(server: str) -> str:
     """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
     `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。"""
@@ -4211,8 +4188,7 @@ def _sync_stash(config: dict) -> None:
     header = [l.rstrip() for l in src[:first_key]]
     if header and header[0].startswith("# Clash"):
         del header[0]
-    header = [l for l in header
-              if not l.startswith("# Author:") and not l.startswith("# Date:")]
+    header = [l for l in header if not l.startswith("# Author:")]
     # 紧贴首个键的那段注释是该键的说明（首个键必然是被略去的 mixed-port），
     # 随它一起去掉，避免留下孤儿注释；靠空行分隔的分区标题（# 通用设置）保留。
     while header and header[-1].lstrip().startswith("#"):
@@ -4321,18 +4297,17 @@ def _sync_stash(config: dict) -> None:
 
     # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
     # 源文件没有这些键，不属于差异点，不自行添加）
-    out[0:0] = [
-        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+    insert_at = next((i for i, l in enumerate(out) if l.startswith("# Date:")), -1) + 1
+    out[insert_at:insert_at] = [
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem} for Android",
-        "desc: HotKids 规则配置 · 由 Surge/Profile.conf 自动转译",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
         "author: '@HotKids'",
-        "date: ''",
     ]
 
     body = "\n".join(out).rstrip() + "\n"
-    changed = _stash_write_if_changed(REPO_ROOT / out_path, body)
+    changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
     for note in dict.fromkeys(changes):
         print(f"    · {note}")
     print(f"  {'✓ ' + out_path + ' 已更新' if changed else '✓ ' + out_path + ' 无变化'}")
@@ -4418,7 +4393,8 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         if l.startswith("name: "):
             lines[i] = f"name: {Path(overlay['stash_output']).stem} for Android"
         elif l.startswith("desc: "):
-            lines[i] = f"desc: HotKids 规则配置 · 叠加 {label} 的私人差异"
+            lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
+                        f"叠加 {label}），请勿手改；改内容请改 Surge/Profile.conf。")
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示删掉该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():
@@ -4545,7 +4521,7 @@ def _sync_stash_overlays(base_lines: list[str]) -> None:
         print(f"  ── overlay: {path.name} → {target} ──")
         lines = _stash_apply_overlay(base_lines, overlay, path.name)
         body = "\n".join(lines).rstrip() + "\n"
-        changed = _stash_write_if_changed(REPO_ROOT / target, body)
+        changed = _write_stamped_if_changed(REPO_ROOT / target, body)
         print(f"  {'✓ ' + target + ' 已更新' if changed else '✓ ' + target + ' 无变化'}")
 
 
