@@ -69,19 +69,19 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 同一定位：整份配置逐行转录（含注释与排版），**只改写 Stash 与 mihomo 真正有差异的点**，因此
 可直接作为覆写文件导入 Stash 使用。差异点仅以下四类：
 
-- **略去 mihomo 专属的顶层键 / 整块**（连同其前置注释）：监听与控制面（`mixed-port` /
+- **省略 mihomo 专属的顶层键 / 整块**（连同其前置注释）：监听与控制面（`mixed-port` /
   `allow-lan` / `bind-address` / `external-controller`）、`ipv6`、geo 数据源（`geodata-loader` /
   `geox-url` / `geo-auto-update` / `geo-update-interval`）、`unified-delay` / `tcp-concurrent` /
   `find-process-mode` / `global-ua` / `keep-alive-interval`，以及 `profile` / `ntp` / `sniffer` /
-  `tun` 和空占位 `proxies`。这些能力在 Stash 由 App 自身掌管或无对应项。
+  `tun` 和空占位 `proxies`。这些能力在 Stash 中由客户端自身管理，或无对应项。
 - **DNS 子键过滤**：只保留 Stash 文档支持的 `default-nameserver` / `nameserver` /
-  `nameserver-policy` / `proxy-server-nameserver` / `fake-ip-filter`，其余 14 个 mihomo 专属键
-  （`enhanced-mode` / `fake-ip-range` / `cache-algorithm` / `direct-nameserver` 等）略去。
-- **DNS 写法转换**：mihomo 用每条 nameserver 的 `#RULES` 后缀表达「跟随规则」，Stash 是全局
-  开关 → 补 `follow-rule: true`，并用 `#!replace` 整体替换 nameserver 数组以去掉该后缀（Stash 的
-  `#` 片段只承载 `h3=true` 这类选项）；`nameserver-policy` 里逗号拼接的多域名单键是 mihomo 专属，
-  按 Stash 语法拆成独立键（官方只支持精确域名 / 通配域名 / `geosite:<name>`）。
-- **Provider 字段**：去掉 mihomo 专属的 `type`；proxy-providers 的 `header` 改为 Stash 文档
+  `nameserver-policy` / `proxy-server-nameserver` / `fake-ip-filter`，其余 14 个 mihomo 专属键则予以省略
+  （`enhanced-mode` / `fake-ip-range` / `cache-algorithm` / `direct-nameserver` 等）。
+- **DNS 写法转换**：mihomo 用每条 nameserver 的 `#RULES` 后缀表达「跟随规则」，Stash 为全局
+  开关 → 补 `follow-rule: true`，并在转译时去除该后缀（Stash 的 `#` 片段只承载 `h3=true`
+  这类选项）；`nameserver-policy` 里逗号拼接的多域名单键是 mihomo 专属，
+  按 Stash 语法拆分为独立键（官方仅支持精确域名 / 通配域名 / `geosite:<name>`）。
+- **Provider 字段**：移除 mihomo 专属的 `type`；proxy-providers 的 `header` 改为 Stash 文档
   拼写的 `headers`。
 
 其余内容——`hosts` / `mode` / `log-level`、23 个策略组（含 `use: [Server]` 与地区 `filter`）、
@@ -96,13 +96,13 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 `Clash/Script/MyStash.stoverride` 是 Stash 的私人定制版，复用 `Enhanced/` 下的同一份
 overlay：只要 overlay 里除 `output` 外再声明一个 `stash_output`，就会在 Stash 基座上叠加同样
 的私人差异（目前只有 `myscript.overlay.json` 声明了）。overlay 的差异声明本身与输出格式无关，
-但 `_apply_overlay` 面向解析后的结构、供 Script.js 使用，而 Stash 侧是文本级转译（要保住
-Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay` 里按文本重新实现，**遇到尚未
-实现的指令直接报错**，避免私人差异被静默丢掉。
+但 `_apply_overlay` 面向解析后的结构、供 Script.js 使用，而 Stash 侧为文本级转译（需保留
+Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay` 中按文本重新实现，**遇到尚未
+实现的指令直接报错**，避免私人差异被静默丢弃。
 
 其中 `disabled_by_default` 没有静态等价物——它是 Script.js 的运行时开关（`ruleOptionsEnable`），
-YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组剪掉**：删组、删以它为落点的规则、删
-其余分组候选里对它的引用，并清掉因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
+YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组移除**：移除该组、以其为落点的规则，以及
+其余分组候选中对它的引用，并清理因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
 的新增池组在 Script.js 里靠运行时过滤 `config.proxies` 填充，静态 YAML 必须显式写节点来源，
 统一按基座地区组的写法输出 `use: [Server]` + `filter`。
 
