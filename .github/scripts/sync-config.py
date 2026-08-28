@@ -4351,21 +4351,30 @@ def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
 
 
 def _stash_render_group(g: dict) -> list[str]:
-    """按 Sample.yaml 的字段顺序渲染一个新增策略组。"""
-    out = [f"  - name: {_yq(g['name'])}", f"    type: {g.get('type', 'select')}"]
+    """按 Sample.yaml 的引号风格与字段顺序渲染一个新增策略组。
+
+    源风格：name 用双引号、proxies 条目不加引号、filter 用单引号；
+    字段顺序 name → type → icon → hidden → use/proxies → 测速参数 → filter。
+    """
+    out = [f'  - name: "{g["name"]}"', f"    type: {g.get('type', 'select')}"]
     if g.get("icon"):
         out.append(f"    icon: {g['icon']}")
+    if g.get("hidden"):
+        out.append("    hidden: true")
     # 池组的节点来源：与基座地区组写法一致，从本仓库 provider 里按 filter 筛
-    out.append("    use:")
-    out.append("      - Server")
+    out += ["    use:", "      - Server"]
     for key in ("interval", "tolerance", "lazy"):
         if key in g:
             out.append(f"    {key}: {g[key]}")
-    if g.get("hidden"):
-        out.append("    hidden: true")
     if g.get("filter"):
         out.append(f"    filter: {_yq(g['filter'])}")
+    out.append("")  # 组间空行，与 Sample.yaml 一致
     return out
+
+
+# 组内字段的规范顺序（与 Sample.yaml 一致），group_overrides 新增字段时按此定位
+_STASH_FIELD_ORDER = ["name", "type", "icon", "hidden", "use", "proxies",
+                      "interval", "tolerance", "lazy", "filter"]
 
 
 def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[str]:
@@ -4397,8 +4406,16 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
             if idx is not None:
                 lines[idx] = rendered
             else:
-                # 插到 name/type 之后，保持字段顺序稳定
-                lines.insert(s + 2, rendered)
+                # 按 Sample.yaml 的字段顺序插到第一个「应排在它之后」的字段前
+                rank = _STASH_FIELD_ORDER.index(key) if key in _STASH_FIELD_ORDER else len(_STASH_FIELD_ORDER)
+                at = e
+                for i in range(s, e):
+                    m2 = re.match(r"^    ([\w-]+):", lines[i])
+                    if m2 and m2.group(1) in _STASH_FIELD_ORDER \
+                            and _STASH_FIELD_ORDER.index(m2.group(1)) > rank:
+                        at = i
+                        break
+                lines.insert(at, rendered)
         notes.append(f"{name}: 覆盖 {'/'.join(patch)}")
 
     # 2) group_proxies_insert：在候选列表里紧邻锚点插入
@@ -4413,7 +4430,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         if idx is None:
             raise ValueError(f"{label}: {name} 的候选里找不到锚点 {anchor!r}")
         at = idx + 1 if spec.get("after") else idx
-        lines[at:at] = [f"      - {_yq(p)}" for p in spec["insert"]]
+        lines[at:at] = [f"      - {p}" for p in spec["insert"]]
         notes.append(f"{name}: 候选插入 {len(spec['insert'])} 项")
 
     # 3) extra_pool_groups：整组新增，插到锚点组之后
