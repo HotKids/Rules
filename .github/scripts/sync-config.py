@@ -4151,8 +4151,147 @@ def _stash_quic_from_rules(rules: list) -> tuple[str, list[str]] | None:
     return None
 
 
+def _yq(value) -> str:
+    """YAML 单引号标量（组名含 emoji/空格，统一加引号最稳）。"""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+# mihomo 专属内置策略 → Stash 等价物。Stash 只有 REJECT，没有 REJECT-DROP
+# （静默丢弃）；映射成 REJECT 后行为是「立即拒绝」而非「丢弃」，语义相近。
+_STASH_BUILTIN_MAP = {"REJECT-DROP": "REJECT"}
+
+
+def _stash_group_lines(groups: list) -> tuple[list[str], list[str]]:
+    """mihomo proxy-groups → Stash proxy-groups（保序）。返回 (行, 改动说明)。"""
+    lines: list[str] = []
+    notes: list[str] = []
+    for g in groups:
+        if not isinstance(g, dict) or "name" not in g:
+            continue
+        lines.append(f"  - name: {_yq(g['name'])}")
+        lines.append(f"    type: {g.get('type', 'select')}")
+        if g.get("icon"):
+            lines.append(f"    icon: {g['icon']}")
+        # use:[Provider] 依赖本仓库自身的 proxy-providers；通用覆写要面向任意订阅，
+        # 改用 Stash 的 include-all 自动纳入订阅全部节点（filter 仍按原正则筛地区）。
+        if g.get("use"):
+            lines.append("    include-all: true")
+            notes.append(f"{g['name']}: use→include-all")
+        if g.get("filter"):
+            lines.append(f"    filter: {_yq(g['filter'])}")
+        for key in ("url", "interval", "tolerance", "lazy"):
+            if key in g:
+                lines.append(f"    {key}: {g[key]}")
+        if g.get("hidden"):
+            lines.append("    hidden: true")
+        proxies = g.get("proxies") or []
+        if proxies:
+            lines.append("    proxies:")
+            for p in proxies:
+                mapped = _STASH_BUILTIN_MAP.get(p, p)
+                if mapped != p:
+                    notes.append(f"{g['name']}: {p}→{mapped}")
+                lines.append(f"      - {_yq(mapped)}")
+    return lines, notes
+
+
+def _stash_provider_lines(providers: dict) -> list[str]:
+    """mihomo rule-providers → Stash rule-providers。
+
+    Stash 要求显式声明 behavior + format，与我们现有字段一一对应；MRS 支持
+    behavior 为 domain / ipcidr（我们的 8 个 mrs 规则集正好全在此范围内）。
+    `type` 与 `path` 是 mihomo 的本地缓存语义，Stash 侧不需要，略去。
+    """
+    lines: list[str] = []
+    for name, rp in providers.items():
+        if not isinstance(rp, dict):
+            continue
+        lines.append(f"  {_yq(name)}:")
+        for key in ("behavior", "format", "url", "interval"):
+            if key in rp:
+                lines.append(f"    {key}: {rp[key]}")
+    return lines
+
+
+# 规则行：`  - TYPE,值...,策略[,flag]`
+_RULE_LINE_RE = re.compile(r"^(\s*-\s*)(.+?)\s*$")
+
+
+def _stash_rules_block(sample_text: str, shortcuts: dict[str, str]) -> tuple[list[str], list[str]]:
+    """提取 Sample.yaml 的 rules 块并译成 Stash 规则（保留原注释与分段）。
+
+    - AND/OR/NOT 逻辑规则 → Script Shortcut（表达式由调用方收集进 shortcuts）
+    - GEOSITE 规则 → 丢弃：Stash 未文档化该类型，且我们的 GEOSITE,cn /
+      GEOSITE,geolocation-!cn 与相邻的 RULE-SET,China / RULE-SET,Global
+      （即 geosite/cn.mrs、geolocation-!cn.mrs）等价，属冗余兜底。
+    """
+    lines = sample_text.splitlines()
+    try:
+        start = next(i for i, ln in enumerate(lines) if ln.rstrip() == "rules:")
+    except StopIteration:
+        return [], []
+
+    out: list[str] = []
+    notes: list[str] = []
+    for raw in lines[start + 1:]:
+        if raw and not raw.startswith((" ", "\t", "#")):
+            break  # 下一个顶层键
+        stripped = raw.strip()
+        if not stripped or stripped.startswith("#"):
+            out.append(raw.rstrip())
+            continue
+        m = _RULE_LINE_RE.match(raw)
+        if not m:
+            continue
+        rule = m.group(2).strip().strip("'\"")
+
+        if rule.startswith("AND,") or rule.startswith("OR,") or rule.startswith("NOT,"):
+            expr, policy, name = _stash_logic_to_shortcut(rule)
+            if expr is None:
+                notes.append(f"逻辑规则无法转译，已丢弃: {rule[:48]}…")
+                continue
+            shortcuts[name] = expr
+            extra = ",no-track" if name == "quic" else ""
+            out.append(f"  - SCRIPT,{name},{policy}{extra}")
+            notes.append(f"AND→SCRIPT,{name}")
+            continue
+
+        if rule.startswith("GEOSITE,"):
+            notes.append(f"丢弃 {rule.split(',')[0]},{rule.split(',')[1]}（与 RULE-SET 冗余）")
+            continue
+
+        out.append(f"  - {rule}")
+    return out, notes
+
+
+def _stash_logic_to_shortcut(rule: str) -> tuple[str | None, str, str]:
+    """mihomo 逻辑规则 → (Stash 表达式, 策略, shortcut 名)。无法表达时表达式为 None。"""
+    m = _QUIC_RULE_RE.match(rule)
+    if not m:
+        return None, "", ""
+    policy = m.group("policy").strip()
+    ports = re.findall(r"\(DST-PORT,(\d+)\)", rule)
+    if not ports:
+        return None, "", ""
+    net = "udp" if "NETWORK,UDP" in rule else ("tcp" if "NETWORK,TCP" in rule else "")
+    if not net:
+        return None, "", ""
+    if len(ports) == 1:
+        expr = f"network == '{net}' and dst_port == {ports[0]}"
+    else:
+        expr = f"network == '{net}' and (" + " or ".join(f"dst_port == {p}" for p in ports) + ")"
+    known = {("udp", "443"): "quic", ("tcp", "22"): "ssh"}
+    name = known.get((net, ports[0])) or f"{net}{ports[0]}"
+    return expr, policy, name
+
+
 def _sync_stash(config: dict) -> None:
-    """生成 Stash 覆写：只输出与 mihomo 的差异项，从 Clash 产物推导。"""
+    """生成 Stash 通用覆写：把本仓库整套策略组/规则集/规则套到任意订阅上。
+
+    与 Clash/Script/Script.js 同一定位（Script.js 面向支持 Enhance Script 的
+    Clash 客户端，Stash 不支持 JS，改用 .stoverride），因此不依赖本仓库自身的
+    proxy-providers：节点来自使用者订阅，由 include-all + filter 归入各组。
+    """
     out = config.get("Stash", {}).get("output")
     clash_out = config.get("Clash", {}).get("output")
     if not out or not clash_out:
@@ -4162,26 +4301,20 @@ def _sync_stash(config: dict) -> None:
         return
 
     print("\n── sync-config: Clash Sample.yaml → Stash .stoverride ──")
-    cfg = yaml.safe_load(base_path.read_text(encoding="utf-8")) or {}
+    sample_text = base_path.read_text(encoding="utf-8")
+    cfg = yaml.safe_load(sample_text) or {}
     dns = cfg.get("dns", {}) or {}
 
-    lines: list[str] = [
-        "name: HotKids Stash 适配",
-        "desc: Stash 与 mihomo 的差异补丁，基础配置请用 Clash/Sample.yaml。由 sync-config.py 自动生成，勿手改。",
-        "# Date: ",
-        "",
-        "# 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。",
-        "# 本文件只含差异项，其余沿用基础配置。",
-        "",
-    ]
+    shortcuts: dict[str, str] = {}
+    rule_lines, rule_notes = _stash_rules_block(sample_text, shortcuts)
+    group_lines, group_notes = _stash_group_lines(cfg.get("proxy-groups") or [])
+    provider_lines = _stash_provider_lines(cfg.get("rule-providers") or {})
 
-    # ── DNS 差异 ──
+    # ── DNS：仅 Stash 与 mihomo 写法不同的两处 ──
     ns_raw = [s for s in (dns.get("nameserver") or []) if isinstance(s, str)]
     follow_rule = any("#RULES" in s for s in ns_raw)
     ns_clean = [_stash_clean_nameserver(s) for s in ns_raw]
-
-    # 逗号拼接多域名的 nameserver-policy 键是 mihomo 专属；Stash 只认
-    # 「精确域名 / 通配域名 / geosite:<name>」，拼接键会被当成字面域名永不命中。
+    psn = [s for s in (dns.get("proxy-server-nameserver") or []) if isinstance(s, str)]
     split_policy: dict[str, object] = {}
     for key, val in (dns.get("nameserver-policy") or {}).items():
         if isinstance(key, str) and "," in key:
@@ -4189,32 +4322,77 @@ def _sync_stash(config: dict) -> None:
                 if one:
                     split_policy[one] = val
 
-    psn = [s for s in (dns.get("proxy-server-nameserver") or []) if isinstance(s, str)]
+    L: list[str] = [
+        "name: 🔰 HotKids Rules",
+        "desc: |-",
+        "  HotKids 通用分流覆写 · Stash 版（由 Surge/Profile.conf 自动生成）",
+        "  规则集: 本仓库 RULE-SET（含 .mrs）· 每 24h 自动更新",
+        "  节点: include-all 自动纳入订阅全部节点，地区组按名称正则筛选",
+        "author: HotKids",
+        "# Date: ",
+        "",
+        "# 由 .github/scripts/sync-config.py 生成，请勿手改；改源头 Surge/Profile.conf。",
+        "# 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。",
+        "",
+    ]
+
+    if group_lines:
+        L += [
+            "# ════════════════════════════════════════════════",
+            "#  策略组：include-all 纳入订阅全部节点，filter 按名称筛地区",
+            "# ════════════════════════════════════════════════",
+            "proxy-groups:",
+        ] + group_lines + [""]
+
+    if provider_lines:
+        L += [
+            "# ════════════════════════════════════════════════",
+            "#  远程规则集（Stash 需显式声明 behavior + format）",
+            "# ════════════════════════════════════════════════",
+            "rule-providers:",
+        ] + provider_lines + [""]
+
+    if shortcuts:
+        L += [
+            "# ════════════════════════════════════════════════",
+            "#  Script Shortcuts：替代 mihomo 的 AND/OR/NOT 逻辑规则",
+            "# ════════════════════════════════════════════════",
+            "script:",
+            "  shortcuts:",
+        ]
+        for name, expr in shortcuts.items():
+            L.append(f"    {name}: {expr}")
+        L.append("")
+
+    if rule_lines:
+        L += [
+            "# ════════════════════════════════════════════════",
+            "#  分流规则：#!replace 整体替换，顺序即优先级",
+            "#",
+            "#  ⚠️ QUIC 一条与源配置有语义差异：mihomo 版用 NOT(GEOSITE,cn OR GEOIP,CN)",
+            "#  排除国内，Stash 的 shortcut 表达式无法表达地理判断。这里保持它在首位，",
+            "#  代价是国内 UDP:443 也被拒绝（回退 TCP，功能不受影响）。",
+            "#  不把它挪到 CN 规则之后，是因为那样绝大多数境外 QUIC 会先被服务规则",
+            "#  分流走掉、根本到不了这条，反而彻底失去「QUIC 不走代理」的本意。",
+            "# ════════════════════════════════════════════════",
+            "rules: #!replace",
+        ] + rule_lines + [""]
 
     dns_lines: list[str] = []
     if follow_rule:
         dns_lines += [
-            "  # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，",
-            "  # Stash 的等价物是全局开关 follow-rule。官方提示：多数场景无需开启",
-            "  # （可能影响 CDN 优化并轻微增加延迟），如需 DNS 直连改为 false 即可。",
+            "  # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，Stash 的",
+            "  # 等价物是全局开关 follow-rule。官方提示多数场景无需开启（可能影响 CDN",
+            "  # 优化并轻微增加延迟），如需 DNS 直连改为 false 即可。",
             "  follow-rule: true",
             "",
-            "  # 整体替换：原数组含 Stash 无法识别的 #RULES 后缀，前置合并会保留它。",
             "  nameserver: #!replace",
-        ]
-        dns_lines += [f"    - '{s}'" for s in ns_clean]
-        dns_lines.append("")
-    # proxy-server-nameserver 只在基础配置缺失时才补：数组是前置插入的，
-    # 原样重复输出会让基础配置里的条目变成双份（并发查询翻倍，纯浪费）。
-    if follow_rule and not psn:
+        ] + [f"    - {_yq(s)}" for s in ns_clean] + [""]
+    if psn:
         dns_lines += [
-            "  # 开启 follow-rule 需要独立解析代理服务器域名，否则会递归查询；",
-            "  # 基础配置未提供，这里补上。",
-            "  proxy-server-nameserver:",
-            "    - 223.5.5.5",
-            "    - 'https://doh.pub/dns-query'",
-            "",
-        ]
+            "  # 独立解析代理服务器域名，避免 follow-rule 下的递归查询。",
+            "  proxy-server-nameserver: #!replace",
+        ] + [f"    - {_yq(s)}" for s in psn] + [""]
     if split_policy:
         dns_lines += [
             "  # 源配置把这些域名逗号拼成单键（mihomo 专属），按 Stash 语法拆为独立键。",
@@ -4222,51 +4400,24 @@ def _sync_stash(config: dict) -> None:
         ]
         for key, val in split_policy.items():
             vals = val if isinstance(val, list) else [val]
-            rendered = ", ".join(str(v) for v in vals)
-            dns_lines.append(f"    '{key}': [{rendered}]")
+            dns_lines.append(f"    {_yq(key)}: [{', '.join(str(v) for v in vals)}]")
         dns_lines.append("")
     if dns_lines:
-        lines.append("dns:")
-        lines += dns_lines
+        L += [
+            "# ════════════════════════════════════════════════",
+            "#  DNS：仅覆盖 Stash 与 mihomo 写法不同之处",
+            "# ════════════════════════════════════════════════",
+            "dns:",
+        ] + dns_lines
 
-    # ── QUIC 差异 ──
-    quic = _stash_quic_from_rules(cfg.get("rules") or [])
-    if quic:
-        policy, ports = quic
-        if len(ports) == 1:
-            expr = f"network == 'udp' and dst_port == {ports[0]}"
-        else:
-            joined = " or ".join(f"dst_port == {p}" for p in ports)
-            expr = f"network == 'udp' and ({joined})"
-        lines += [
-            "# mihomo 用逻辑规则 AND/NOT/OR 表达「境外 QUIC 拦截、国内放行」，",
-            "# Stash 的等价物是 Script Shortcuts + SCRIPT 规则。",
-            "#",
-            "# ⚠️ 语义差异：Stash 靠「规则顺序」实现国内放行（CN 规则排在 SCRIPT 之前），",
-            "# 但覆写的 rules 数组是前置插入的，这条必然跑在所有规则之前，因此国内 UDP:"
-            f"{ports[0]} 也会被拒绝并回退 TCP。",
-            "# 功能不受影响（QUIC 本就可回退），但国内 QUIC 的性能收益会失去。",
-            "# 要完整保留国内放行，需直接调整基础配置的规则顺序，覆写机制无法表达。",
-            "script:",
-            "  shortcuts:",
-            f"    quic: {expr}",
-            "",
-            "rules:",
-            f"  # no-track：不记入连接日志，避免高频 UDP 拒绝刷屏",
-            f"  - SCRIPT,quic,{policy},no-track",
-            "",
-        ]
-
-    body = "\n".join(lines).rstrip() + "\n"
+    body = "\n".join(L).rstrip() + "\n"
     changed = _write_stamped_if_changed(REPO_ROOT / out, body)
-    bits = []
-    if follow_rule:
-        bits.append("dns.follow-rule")
-    if split_policy:
-        bits.append(f"nameserver-policy×{len(split_policy)}")
-    if quic:
-        bits.append("quic shortcut")
-    print(f"  差异项: {', '.join(bits) if bits else '无'}")
+    print(f"  groups={len(cfg.get('proxy-groups') or [])} | "
+          f"providers={len(cfg.get('rule-providers') or {})} | "
+          f"rules={sum(1 for x in rule_lines if x.lstrip().startswith('- '))} | "
+          f"shortcuts={len(shortcuts)}")
+    for note in dict.fromkeys(group_notes + rule_notes):
+        print(f"    · {note}")
     print(f"  {'✓ ' + out + ' 已更新' if changed else '✓ ' + out + ' 无变化'}")
 
 
