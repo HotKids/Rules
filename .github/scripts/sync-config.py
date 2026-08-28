@@ -4182,7 +4182,7 @@ def _sync_stash(config: dict) -> None:
     first_key = next((i for i, l in enumerate(src) if _TOP_KEY_RE.match(l)), 0)
     header = [l.rstrip() for l in src[:first_key]]
     if header and header[0].startswith("# Clash"):
-        header[0] = "# Stash"
+        header[0] = "# Stash for Android"
     # 紧贴首个键的那段注释是该键的说明（首个键必然是被略去的 mixed-port），
     # 随它一起去掉，避免留下孤儿注释；靠空行分隔的分区标题（# 通用设置）保留。
     while header and header[-1].lstrip().startswith("#"):
