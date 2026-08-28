@@ -8,7 +8,7 @@
 | 目录 | 说明 |
 |---|---|
 | [`Surge/`](Surge/) | **单一来源**：托管配置 `Profile.conf`、规则源 `RULE-SET/`、sgmodule 模块 |
-| [`Clash/`](Clash/) | 自动生成：`Sample.yaml` / `Mihomo.yaml`（锚点版）/ `Stash.stoverride`（Stash 通用覆写）/ 规则集 / Enhance Script |
+| [`Clash/`](Clash/) | 自动生成：`Sample.yaml` / `Mihomo.yaml`（锚点版）/ 规则集 / Enhance Script 与 `Script/Stash.stoverride`（Stash 覆写） |
 | [`Quantumult/`](Quantumult/) | 自动生成：QX 配置与规则；手动维护：图标库 `X/Images/` |
 | [`sing-box/`](sing-box/) | 自动生成：完整配置 `config.json`、规则集（`source/` 源码 + `rule-set/` 二进制） |
 | [`subconverter/`](subconverter/) | subconverter 订阅转换远程配置（已弃用，仅维护 emoji） |
