@@ -4131,34 +4131,9 @@ def _stash_clean_nameserver(server: str) -> str:
     return server if frag.startswith("h3=") else base
 
 
-# 从 mihomo 逻辑规则中识别 QUIC 拦截规则，取出目标策略与被拦截端口。
-# 形如：AND,((NETWORK,UDP),(DST-PORT,443),(NOT,(...))),⛔️ REJECT
-_QUIC_RULE_RE = re.compile(r"^AND,\(\(.*\)\),(?P<policy>.+)$")
-
-
-def _stash_quic_from_rules(rules: list) -> tuple[str, list[str]] | None:
-    for rule in rules:
-        if not isinstance(rule, str) or not rule.startswith("AND,"):
-            continue
-        if "NETWORK,UDP" not in rule:
-            continue
-        ports = re.findall(r"\(DST-PORT,(\d+)\)", rule)
-        if not ports:
-            continue
-        m = _QUIC_RULE_RE.match(rule)
-        if m:
-            return m.group("policy").strip(), ports
-    return None
-
-
 def _yq(value) -> str:
     """YAML 单引号标量（组名含 emoji/空格，统一加引号最稳）。"""
     return "'" + str(value).replace("'", "''") + "'"
-
-
-# mihomo 专属内置策略 → Stash 等价物。Stash 只有 REJECT，没有 REJECT-DROP
-# （静默丢弃）；映射成 REJECT 后行为是「立即拒绝」而非「丢弃」，语义相近。
-_STASH_BUILTIN_MAP = {"REJECT-DROP": "REJECT"}
 
 
 def _stash_group_lines(groups: list) -> tuple[list[str], list[str]]:
@@ -4184,14 +4159,13 @@ def _stash_group_lines(groups: list) -> tuple[list[str], list[str]]:
                 lines.append(f"    {key}: {g[key]}")
         if g.get("hidden"):
             lines.append("    hidden: true")
+        # REJECT / REJECT-DROP 都是 Stash 内置策略（前者立即报错，后者静默丢弃），
+        # 原样保留即可，无需映射。
         proxies = g.get("proxies") or []
         if proxies:
             lines.append("    proxies:")
             for p in proxies:
-                mapped = _STASH_BUILTIN_MAP.get(p, p)
-                if mapped != p:
-                    notes.append(f"{g['name']}: {p}→{mapped}")
-                lines.append(f"      - {_yq(mapped)}")
+                lines.append(f"      - {_yq(p)}")
     return lines, notes
 
 
@@ -4217,13 +4191,12 @@ def _stash_provider_lines(providers: dict) -> list[str]:
 _RULE_LINE_RE = re.compile(r"^(\s*-\s*)(.+?)\s*$")
 
 
-def _stash_rules_block(sample_text: str, shortcuts: dict[str, str]) -> tuple[list[str], list[str]]:
-    """提取 Sample.yaml 的 rules 块并译成 Stash 规则（保留原注释与分段）。
+def _stash_rules_block(sample_text: str) -> tuple[list[str], list[str]]:
+    """提取 Sample.yaml 的 rules 块（保留原注释、分段与顺序）。
 
-    - AND/OR/NOT 逻辑规则 → Script Shortcut（表达式由调用方收集进 shortcuts）
-    - GEOSITE 规则 → 丢弃：Stash 未文档化该类型，且我们的 GEOSITE,cn /
-      GEOSITE,geolocation-!cn 与相邻的 RULE-SET,China / RULE-SET,Global
-      （即 geosite/cn.mrs、geolocation-!cn.mrs）等价，属冗余兜底。
+    规则本身无需转译：Stash 的规则类型是 Clash Premium 超集，我们用到的
+    RULE-SET / GEOIP / GEOSITE / MATCH / no-resolve 以及 AND / OR / NOT 逻辑规则
+    （含嵌套）官方文档均有明确支持，内置策略 REJECT / REJECT-DROP 亦然。
     """
     lines = sample_text.splitlines()
     try:
@@ -4244,45 +4217,11 @@ def _stash_rules_block(sample_text: str, shortcuts: dict[str, str]) -> tuple[lis
         if not m:
             continue
         rule = m.group(2).strip().strip("'\"")
-
-        if rule.startswith("AND,") or rule.startswith("OR,") or rule.startswith("NOT,"):
-            expr, policy, name = _stash_logic_to_shortcut(rule)
-            if expr is None:
-                notes.append(f"逻辑规则无法转译，已丢弃: {rule[:48]}…")
-                continue
-            shortcuts[name] = expr
-            extra = ",no-track" if name == "quic" else ""
-            out.append(f"  - SCRIPT,{name},{policy}{extra}")
-            notes.append(f"AND→SCRIPT,{name}")
-            continue
-
-        if rule.startswith("GEOSITE,"):
-            notes.append(f"丢弃 {rule.split(',')[0]},{rule.split(',')[1]}（与 RULE-SET 冗余）")
-            continue
-
+        # GEOSITE 数据不随 Stash 分发，首次使用时按需从 github.com 拉取，提示一次即可
+        if rule.startswith("GEOSITE,") and not any("GEOSITE" in n for n in notes):
+            notes.append("GEOSITE 首次使用需能访问 github.com（数据不随 Stash 分发）")
         out.append(f"  - {rule}")
     return out, notes
-
-
-def _stash_logic_to_shortcut(rule: str) -> tuple[str | None, str, str]:
-    """mihomo 逻辑规则 → (Stash 表达式, 策略, shortcut 名)。无法表达时表达式为 None。"""
-    m = _QUIC_RULE_RE.match(rule)
-    if not m:
-        return None, "", ""
-    policy = m.group("policy").strip()
-    ports = re.findall(r"\(DST-PORT,(\d+)\)", rule)
-    if not ports:
-        return None, "", ""
-    net = "udp" if "NETWORK,UDP" in rule else ("tcp" if "NETWORK,TCP" in rule else "")
-    if not net:
-        return None, "", ""
-    if len(ports) == 1:
-        expr = f"network == '{net}' and dst_port == {ports[0]}"
-    else:
-        expr = f"network == '{net}' and (" + " or ".join(f"dst_port == {p}" for p in ports) + ")"
-    known = {("udp", "443"): "quic", ("tcp", "22"): "ssh"}
-    name = known.get((net, ports[0])) or f"{net}{ports[0]}"
-    return expr, policy, name
 
 
 def _sync_stash(config: dict) -> None:
@@ -4305,8 +4244,7 @@ def _sync_stash(config: dict) -> None:
     cfg = yaml.safe_load(sample_text) or {}
     dns = cfg.get("dns", {}) or {}
 
-    shortcuts: dict[str, str] = {}
-    rule_lines, rule_notes = _stash_rules_block(sample_text, shortcuts)
+    rule_lines, rule_notes = _stash_rules_block(sample_text)
     group_lines, group_notes = _stash_group_lines(cfg.get("proxy-groups") or [])
     provider_lines = _stash_provider_lines(cfg.get("rule-providers") or {})
 
@@ -4352,28 +4290,13 @@ def _sync_stash(config: dict) -> None:
             "rule-providers:",
         ] + provider_lines + [""]
 
-    if shortcuts:
-        L += [
-            "# ════════════════════════════════════════════════",
-            "#  Script Shortcuts：替代 mihomo 的 AND/OR/NOT 逻辑规则",
-            "# ════════════════════════════════════════════════",
-            "script:",
-            "  shortcuts:",
-        ]
-        for name, expr in shortcuts.items():
-            L.append(f"    {name}: {expr}")
-        L.append("")
-
     if rule_lines:
         L += [
             "# ════════════════════════════════════════════════",
             "#  分流规则：#!replace 整体替换，顺序即优先级",
-            "#",
-            "#  ⚠️ QUIC 一条与源配置有语义差异：mihomo 版用 NOT(GEOSITE,cn OR GEOIP,CN)",
-            "#  排除国内，Stash 的 shortcut 表达式无法表达地理判断。这里保持它在首位，",
-            "#  代价是国内 UDP:443 也被拒绝（回退 TCP，功能不受影响）。",
-            "#  不把它挪到 CN 规则之后，是因为那样绝大多数境外 QUIC 会先被服务规则",
-            "#  分流走掉、根本到不了这条，反而彻底失去「QUIC 不走代理」的本意。",
+            "#  与源配置逐条一致——Stash 支持 AND/OR/NOT 逻辑规则（含嵌套）、GEOSITE、",
+            "#  no-resolve 及 REJECT-DROP，无需改写。",
+            "#  注意 GEOSITE 数据不随 Stash 分发，首次使用时按需从 github.com 拉取。",
             "# ════════════════════════════════════════════════",
             "rules: #!replace",
         ] + rule_lines + [""]
@@ -4414,8 +4337,7 @@ def _sync_stash(config: dict) -> None:
     changed = _write_stamped_if_changed(REPO_ROOT / out, body)
     print(f"  groups={len(cfg.get('proxy-groups') or [])} | "
           f"providers={len(cfg.get('rule-providers') or {})} | "
-          f"rules={sum(1 for x in rule_lines if x.lstrip().startswith('- '))} | "
-          f"shortcuts={len(shortcuts)}")
+          f"rules={sum(1 for x in rule_lines if x.lstrip().startswith('- '))}")
     for note in dict.fromkeys(group_notes + rule_notes):
         print(f"    · {note}")
     print(f"  {'✓ ' + out + ' 已更新' if changed else '✓ ' + out + ' 无变化'}")

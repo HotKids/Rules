@@ -4,7 +4,7 @@ desc: |-
   规则集: 本仓库 RULE-SET（含 .mrs）· 每 24h 自动更新
   节点: include-all 自动纳入订阅全部节点，地区组按名称正则筛选
 author: HotKids
-# Date: 2026-08-28 17:32:14
+# Date: 2026-08-28 17:40:31
 
 # 由 .github/scripts/sync-config.py 生成，请勿手改；改源头 Surge/Profile.conf。
 # 覆写合并：标量覆盖 / 字典递归合并 / 数组前置插入；键后 `#!replace` 改为整体替换。
@@ -130,7 +130,7 @@ proxy-groups:
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Reject.png
     hidden: true
     proxies:
-      - 'REJECT'
+      - 'REJECT-DROP'
   - name: '🇺🇳 Server'
     type: select
     icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png
@@ -317,28 +317,17 @@ rule-providers:
     interval: 86400
 
 # ════════════════════════════════════════════════
-#  Script Shortcuts：替代 mihomo 的 AND/OR/NOT 逻辑规则
-# ════════════════════════════════════════════════
-script:
-  shortcuts:
-    quic: network == 'udp' and dst_port == 443
-    ssh: network == 'tcp' and dst_port == 22
-
-# ════════════════════════════════════════════════
 #  分流规则：#!replace 整体替换，顺序即优先级
-#
-#  ⚠️ QUIC 一条与源配置有语义差异：mihomo 版用 NOT(GEOSITE,cn OR GEOIP,CN)
-#  排除国内，Stash 的 shortcut 表达式无法表达地理判断。这里保持它在首位，
-#  代价是国内 UDP:443 也被拒绝（回退 TCP，功能不受影响）。
-#  不把它挪到 CN 规则之后，是因为那样绝大多数境外 QUIC 会先被服务规则
-#  分流走掉、根本到不了这条，反而彻底失去「QUIC 不走代理」的本意。
+#  与源配置逐条一致——Stash 支持 AND/OR/NOT 逻辑规则（含嵌套）、GEOSITE、
+#  no-resolve 及 REJECT-DROP，无需改写。
+#  注意 GEOSITE 数据不随 Stash 分发，首次使用时按需从 github.com 拉取。
 # ════════════════════════════════════════════════
 rules: #!replace
   # 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
-  - SCRIPT,quic,⛔️ REJECT,no-track
+  - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT
 
   # 标准 SSH 端口
-  - SCRIPT,ssh,🔘 DIRECT
+  - AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT
 
   # Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
   - RULE-SET,Bypass,🔘 DIRECT
@@ -419,7 +408,9 @@ rules: #!replace
   - RULE-SET,LAN,🔘 DIRECT,no-resolve
 
   # GeoIP
+  - GEOSITE,cn,🔘 DIRECT
   - GEOIP,CN,🔘 DIRECT,no-resolve
+  - GEOSITE,geolocation-!cn,🔰 Proxy
 
   # Final
   - MATCH,🔰 Proxy
