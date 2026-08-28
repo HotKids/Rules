@@ -4170,6 +4170,10 @@ def _sync_stash(config: dict) -> None:
     changes: list[str] = []
 
     def flush() -> None:
+        # 略去某个键时它两侧的空行会跨过删除点叠在一起；这里丢掉与已输出空行相邻的
+        # 前导空行，避免出现源文件没有的空行堆积（源本身的空行结构保持不变）。
+        while buf and not buf[0].strip() and out and not out[-1].strip():
+            buf.pop(0)
         out.extend(buf)
         buf.clear()
 
