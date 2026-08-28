@@ -1,4 +1,4 @@
-# Date: 2026-08-28 21:07:50
+# Date: 2026-08-28 21:10:09
 
 name: Stash for Android
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -134,19 +134,30 @@ dns: #!replace
 # 服务器订阅配置
 proxy-providers: #!replace
   Server:
+    # 本地缓存路径，启动时优先读取，拉取失败也能沿用上次结果
     path: ./Provider/Proxy/Server.yaml
+    # 订阅地址
     url: https://sub.hotkids.me
+    # 订阅更新间隔（秒）
     interval: 3600
+    # 拉取订阅固定直连：此时策略组尚未就绪，经代理会形成循环依赖
     proxy: DIRECT
+    # 拉取订阅时携带的请求头：部分机场按 UA 返回不同格式，声明 Clash / mihomo 以取得正确内容
     headers:
       User-Agent:
       - "Clash/v1.18.0"
       - "mihomo/1.18.3"
+    # 节点可用性检查
     health-check:
+      # 是否启用
       enable: true
+      # 测试地址：返回 204 空响应，体积最小
       url: 'http://cp.cloudflare.com/generate_204'
+      # 检查间隔（秒）
       interval: 600
+      # 单次超时（毫秒）
       timeout: 5000
+      # 期望的 HTTP 状态码，不符则判定为不可用
       expected-status: 204
 
 proxy-groups: #!replace
