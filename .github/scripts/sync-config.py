@@ -4129,6 +4129,8 @@ _STASH_DROP_TOP = {
 }
 
 # 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，略去）
+_STASH_REPLACE_TOP = {"proxy-groups", "rules"}
+
 _STASH_DNS_KEEP = {
     "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
@@ -4218,7 +4220,9 @@ def _sync_stash(config: dict) -> None:
                 changes.append(f"略去 {top}")
                 continue
             flush()
-            out.append(line)
+            out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
+            if top in _STASH_REPLACE_TOP:
+                changes.append(f"{top}: 加 #!replace（数组默认前置插入，会与基础配置混合）")
             if top == "dns":
                 # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
                 # Stash 的等价物是全局开关 follow-rule。
@@ -4331,9 +4335,9 @@ _STASH_OVERLAY_OK = {
 
 def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
     """定位 proxy-groups 块内每个组的行区间 {组名: (起, 止)}（止为开区间）。"""
-    try:
-        start = lines.index("proxy-groups:")
-    except ValueError:
+    # 键行可能带 #!replace 行内标记，按前缀匹配而不是全等
+    start = next((i for i, l in enumerate(lines) if re.match(r"^proxy-groups:", l)), -1)
+    if start < 0:
         return {}
     end = next((i for i in range(start + 1, len(lines))
                 if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
@@ -4473,12 +4477,9 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
 
     # 清理不再被引用的规则集
     used = {m.group(1) for l in lines if (m := re.match(r"^  - RULE-SET,([^,]+),", l))}
-    try:
-        rp = lines.index("rule-providers:")
-        rp_end = next((i for i in range(rp + 1, len(lines))
-                       if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
-    except ValueError:
-        rp, rp_end = -1, -1
+    rp = next((i for i, l in enumerate(lines) if re.match(r"^rule-providers:", l)), -1)
+    rp_end = next((i for i in range(rp + 1, len(lines))
+                   if lines[i] and not lines[i].startswith((" ", "#"))), len(lines)) if rp >= 0 else -1
     if rp >= 0:
         kept, i, dropped = [], rp + 1, []
         while i < rp_end:
