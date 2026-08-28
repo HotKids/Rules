@@ -1,13 +1,7 @@
 # Stash
-# Date: 2026-08-28 19:29:18
+# Date: 2026-08-28 19:33:58
 # Author: @HotKids
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
-
-name: HotKids
-desc: |-
-  HotKids 规则配置 · Stash 覆写
-  由 Surge/Profile.conf 经 Clash/Sample.yaml 转译，仅改写 Stash 与 mihomo 的差异点
-author: HotKids
 
 # 通用设置
 

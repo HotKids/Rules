@@ -4290,16 +4290,11 @@ def _sync_stash(config: dict) -> None:
             out.append(f'    "{dom}":')
             out.extend(policy_val)
 
-    # 在文件头的 # Author 之后补上生成说明与覆写元数据
+    # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
+    # 源文件没有这些键，不属于差异点，不自行添加）
     insert_at = next((i for i, l in enumerate(out) if l.startswith("# Author:")), 0) + 1
     out[insert_at:insert_at] = [
         "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
-        "",
-        "name: HotKids",
-        "desc: |-",
-        "  HotKids 规则配置 · Stash 覆写",
-        "  由 Surge/Profile.conf 经 Clash/Sample.yaml 转译，仅改写 Stash 与 mihomo 的差异点",
-        "author: HotKids",
     ]
 
     body = "\n".join(out).rstrip() + "\n"
