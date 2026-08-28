@@ -70,22 +70,22 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 （Script.js 面向支持 Enhance Script 的 Clash 客户端，Stash 不支持 JS，改用 `.stoverride`）。
 因此它不依赖本仓库自身的 proxy-providers：节点来自使用者的订阅。转译规则如下。
 
-- **策略组**：`use: [Server]` → `include-all: true`（纳入订阅全部节点），地区组的 `filter`
-  正则原样保留继续按节点名筛地区；`REJECT-DROP` → `REJECT`（Stash 无静默丢弃内置策略）。
-- **规则集**：保留 `behavior` + `format`（Stash 要求显式声明，MRS 支持 `domain`/`ipcidr`，
-  本仓库 8 个 mrs 规则集正好全在此范围内）；`type` / `path` 是 mihomo 本地缓存语义，略去。
-- **规则**：`rules: #!replace` 整体替换，保留源注释与顺序。`AND/OR/NOT` 逻辑规则 →
-  `script.shortcuts` + `SCRIPT,<名>,<策略>`（网络/端口/策略均从源规则提取，`udp:443`→`quic`、
-  `tcp:22`→`ssh`）；`GEOSITE` 规则丢弃——Stash 未文档化该类型，且它与相邻的
-  `RULE-SET,China` / `RULE-SET,Global`（即 `geosite/cn.mrs`、`geolocation-!cn.mrs`）等价。
+- **策略组**：`use: [Server]` → `include-all: true`（引用订阅全部代理与远程代理集），地区组的
+  `filter` 正则原样保留继续按节点名筛地区。其余字段（`icon` / `proxies` / `hidden`）不变。
+- **规则集**：保留 `behavior` + `format`（Stash 需显式声明；MRS 支持 `behavior` 为
+  `domain` / `ipcidr`，本仓库 8 个 mrs 规则集正好全在此范围内）；`type` 是 mihomo 专属，
+  `path` 是本地缓存语义（Stash 会限制在自身资源目录内），二者均略去。
+- **规则**：`rules: #!replace` 整体替换，与源配置**逐条完全一致**，仅保留原注释与顺序。
+  无需任何改写——Stash 的规则类型是 Clash Premium 超集，我们用到的 `RULE-SET` / `GEOIP` /
+  `GEOSITE` / `MATCH` / `no-resolve`，以及 `AND` / `OR` / `NOT` 逻辑规则（含嵌套）和内置策略
+  `REJECT` / `REJECT-DROP`，官方文档均明确支持。
 - **DNS**：只覆盖写法不同的两处——`#RULES` 后缀 → 全局 `dns.follow-rule`（并 `#!replace`
-  替换 nameserver 数组去掉该后缀）；`nameserver-policy` 里逗号拼接的多域名单键（mihomo
-  专属）拆成 Stash 认的独立键。
+  替换 nameserver 数组去掉该后缀，Stash 的 `#` 片段只承载 `h3=true` 这类选项）；
+  `nameserver-policy` 里逗号拼接的多域名单键（mihomo 专属）拆成 Stash 认的独立键
+  （官方只支持精确域名 / 通配域名 / `geosite:<name>` 三种键形式）。
 
-QUIC 那条存在**已知语义差异**：mihomo 版用 `NOT(GEOSITE,cn OR GEOIP,CN)` 排除国内，而 Stash
-的 shortcut 表达式无法表达地理判断。生成结果保持它在规则首位，代价是国内 UDP:443 也被拒绝
-（回退 TCP）；不下移到 CN 规则之后，是因为那样绝大多数境外 QUIC 会先被服务规则分流走、
-根本到不了这条，反而失去「QUIC 不走代理」的本意。文件内注释已写明该取舍。
+唯一需要留意的运行时依赖：`GEOSITE` 的 domain-list-community 数据不随 Stash 分发，首次使用时
+按需从 github.com 拉取，需保证当时的配置能正常访问 github.com。
 
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
