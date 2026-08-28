@@ -159,8 +159,8 @@ _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 # ---------------------------------------------------------------------------
 
 _CST = timezone(timedelta(hours=8))
-# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会吃掉
-# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并打戳。
+# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会去除
+# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并写入时间戳。
 _DATE_LINE_RE = re.compile(r"^# Date:.*$", re.MULTILINE)
 
 
@@ -2800,8 +2800,8 @@ def _ordered_group(g: dict) -> dict:
 
 def _rule_policy_index(parts: list[str]) -> int:
     """Surge/Clash 规则行里策略字段的下标。`MATCH,POLICY` 策略在 index 1；
-    `AND/OR/NOT,(...),POLICY` 策略永远是最后一个逗号分段（拆括号里的逗号
-    也没关系，反正策略本身不含逗号，取 -1 仍然对）；其余类型固定是
+    `AND/OR/NOT,(...),POLICY` 策略始终为最后一个逗号分段（括号内的逗号
+    不影响判断：策略本身不含逗号，取 -1 仍然成立）；其余类型固定是
     `TYPE,VALUE,POLICY[,no-resolve]` 形式，策略在 index 2。
     """
     if parts[0] == "MATCH":
@@ -2825,10 +2825,10 @@ def _apply_overlay(
 
     - rule_policy_redirect：把 rules 里以某分组为策略目标的行改指另一分组
       （{旧落点: 新落点}，用改名前的基座名字）。先于 remove_groups 执行，
-      因此「删掉某组但保留其规则」可以两者搭配（如 📛 REJECT-DROP 组删掉、
+      因此「移除某组但保留其规则」可以两者搭配（如 📛 REJECT-DROP 组移除、
       其规则落点改指 ⛔️ REJECT）。
-    - remove_groups：整组删掉（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
-      里剔除对它的引用、删掉 rules 里以它为策略目标的行。
+    - remove_groups：整组移除（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
+      里剔除对它的引用、移除 rules 中以其为策略目标的行。
     - rename_map：批量改名（{旧名: 新名}），同步更新其余分组 proxies 候选里的旧名
       引用、pool_filters 的 key、以及 rules 里以该分组为策略目标的行，避免残留
       指向旧名字的悬空引用。多个 overlay 之间要做同一批改名时用这个，而不是在
@@ -3220,7 +3220,7 @@ def _gen_clash_script_js(
     # 结构性池组（Server + 地区，均来自 Sample.yaml 的 use:[Server]，或链式继承自
     # base_state）——这些没有直接对应的 RULE-SET 目标，不纳入可选开关。overlay 的
     # extra_pool_groups 新增的同样是结构性的（Relay 链 / 新地区）。但 group_overrides
-    # 给既有分组（如 📧 Mail）追加 filter 只是让它"顺带拿到全部节点"，不改变它本来是
+    # 给既有分组（如 📧 Mail）追加 filter 只是使其一并纳入全部节点，不改变它本来是
     # 个可开关的功能分组这件事，因此不计入本集合。
     if overlay:
         _apply_overlay(groups, pool_filters, rules, structural_pool_names, overlay, overlay_label)
@@ -3833,7 +3833,7 @@ SB_PLACEHOLDER = "🚀 Proxy（请用订阅工具注入节点）"
 SB_SKIP_GROUP_KW = ("Gateway", "Apple TV")
 
 # 各地区示例节点（占位用途：sing-box 无订阅机制，先内置一份可直接连通的示例
-# Shadowsocks 节点，方便直接改 server/password 试用；真实使用请用订阅工具替换）
+# Shadowsocks 节点，便于直接修改 server/password 试用；真实使用请用订阅工具替换）
 # 按地区组 policy-regex-filter 命中的关键词匹配，与本仓库 Profile.conf 的固定 5 个地区一一对应
 SB_EXAMPLE_NODES = {
     "HK": ("🇭🇰 HK", "hk.hotkids.me"),
@@ -4419,7 +4419,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
     if unknown:
         raise ValueError(
             f"{label}: Stash 转译尚未实现这些 overlay 指令 {sorted(unknown)}；"
-            f"请在 _stash_apply_overlay 中补齐，避免私人差异被静默丢掉"
+            f"请在 _stash_apply_overlay 中补齐，避免私人差异被静默丢弃"
         )
     lines = list(lines)
     notes: list[str] = []
@@ -4513,7 +4513,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         lines = [l for l in lines
                  if not (l.startswith("  - ") and l.rstrip().endswith(name))
                  and not (l.strip().startswith("- ") and l.strip().strip("-").strip().strip("'\"") == name)]
-        notes.append(f"剪掉分组 {name}（含其规则与候选引用）")
+        notes.append(f"移除分组 {name}（含其规则与候选引用）")
 
     # 清理不再被引用的规则集
     used = {m.group(1) for l in lines if (m := re.match(r"^  - RULE-SET,([^,]+),", l))}
