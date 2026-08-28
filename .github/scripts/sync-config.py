@@ -4129,6 +4129,20 @@ _STASH_DROP_TOP = {
 }
 
 # 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
+_STASH_PROVIDER_NOTES = {
+    (4, "path"): "本地缓存路径，启动时优先读取，拉取失败也能沿用上次结果",
+    (4, "url"): "订阅地址",
+    (4, "interval"): "订阅更新间隔（秒）",
+    (4, "proxy"): "拉取订阅固定直连：此时策略组尚未就绪，经代理会形成循环依赖",
+    (4, "header"): "拉取订阅时携带的请求头：部分机场按 UA 返回不同格式，声明 Clash / mihomo 以取得正确内容",
+    (4, "health-check"): "节点可用性检查",
+    (6, "enable"): "是否启用",
+    (6, "url"): "测试地址：返回 204 空响应，体积最小",
+    (6, "interval"): "检查间隔（秒）",
+    (6, "timeout"): "单次超时（毫秒）",
+    (6, "expected-status"): "期望的 HTTP 状态码，不符则判定为不可用",
+}
+
 _STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
                       "rule-providers", "rules"}
 
@@ -4281,10 +4295,14 @@ def _sync_stash(config: dict) -> None:
 
         # ── provider：type 是 mihomo 专属；header 在 Stash 中为 headers ──
         if top in ("proxy-providers", "rule-providers"):
-            if m_sub and m_sub.group(3).strip() == "type":
+            key = m_sub.group(3).strip() if m_sub else ""
+            if key == "type":
                 buf.clear()
                 continue
-            if m_sub and m_sub.group(3).strip() == "header":
+            note = _STASH_PROVIDER_NOTES.get((indent, key)) if top == "proxy-providers" else None
+            if note and not any(l.lstrip().startswith("#") for l in buf):
+                buf.append(f"{' ' * indent}# {note}")
+            if key == "header":
                 flush()
                 out.append(line.replace("header:", "headers:", 1))
                 changes.append("proxy-providers: header → headers")
