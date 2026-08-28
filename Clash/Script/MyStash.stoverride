@@ -1,9 +1,9 @@
-# Date: 2026-08-28 21:00:54
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
 
 name: MyStash for Android
 desc: HotKids 规则配置 · 叠加 myscript.overlay.json 的私人差异
 author: '@HotKids'
+date: '2026-08-28 21:01:49'
 
 # 通用设置
 
