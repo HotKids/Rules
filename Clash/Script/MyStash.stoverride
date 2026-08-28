@@ -1,4 +1,4 @@
-# Date: 2026-08-28 21:06:08
+# Date: 2026-08-28 21:07:50
 
 name: MyStash for Android
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -15,12 +15,12 @@ log-level: info
 # ── Hosts ──
 
 # 静态域名映射，优先级高于 DNS 解析
-hosts:
+hosts: #!replace
   'localhost': 127.0.0.1
 
 # ── DNS ──
 
-dns:
+dns: #!replace
   # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，
   # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能
   # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。
@@ -132,7 +132,7 @@ dns:
 
 
 # 服务器订阅配置
-proxy-providers:
+proxy-providers: #!replace
   Server:
     path: ./Provider/Proxy/Server.yaml
     url: https://sub.hotkids.me
@@ -415,7 +415,7 @@ proxy-groups:
       - Server
     filter: '(?i)^(?=.*\b(?:DE|DEU)\d*\b)'
 
-rule-providers:
+rule-providers: #!replace
 # name: # Provider 名称
 #   type: http # http 或 file
 #   behavior: classical # 或 ipcidr、domain
@@ -626,7 +626,7 @@ rule-providers:
     interval: 86400
 
 # 规则
-rules:
+rules: #!replace
   # 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
   - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT
 

@@ -4129,6 +4129,9 @@ _STASH_DROP_TOP = {
 }
 
 # 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
+_STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
+                      "rule-providers", "rules"}
+
 _STASH_DNS_KEEP = {
     "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
@@ -4219,7 +4222,7 @@ def _sync_stash(config: dict) -> None:
                 changes.append(f"略去 {top}")
                 continue
             flush()
-            out.append(line)
+            out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
                 # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
                 # Stash 的等价物是全局开关 follow-rule。
@@ -4387,6 +4390,12 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         )
     lines = list(lines)
     notes: list[str] = []
+
+    # 定制版的 proxy-groups 保持默认的前置插入，不整体替换
+    for i, l in enumerate(lines):
+        if l.startswith("proxy-groups:"):
+            lines[i] = "proxy-groups:"
+            break
 
     # 展示字段替换为本定制版专属内容，避免与基座在覆写列表中同名
     for i, l in enumerate(lines):
