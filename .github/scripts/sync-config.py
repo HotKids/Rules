@@ -4138,6 +4138,11 @@ _TOP_KEY_RE = re.compile(r"^([A-Za-z][\w-]*):")
 _SUB_KEY_RE = re.compile(r"^(\s+)(['\"]?)([^:'\"]+)\2\s*:")
 
 
+def _yq(value) -> str:
+    """YAML 单引号标量（组名 / filter 正则含 emoji、空格、反斜杠，统一加引号最稳）。"""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
 def _stash_clean_nameserver(server: str) -> str:
     """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
     `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律剥离。"""
@@ -4306,6 +4311,197 @@ def _sync_stash(config: dict) -> None:
     for note in dict.fromkeys(changes):
         print(f"    · {note}")
     print(f"  {'✓ ' + out_path + ' 已更新' if changed else '✓ ' + out_path + ' 无变化'}")
+
+    _sync_stash_overlays(out)
+
+
+# ── Enhanced/*.overlay.json → Stash 私人定制版 ────────────────────────────
+#
+# overlay 声明的是「相对基座的私人差异」，本身与输出格式无关（_apply_overlay 面向
+# 解析后的 groups/rules 结构，供 Script.js 使用）。Stash 侧是文本级转译（要保住
+# Sample.yaml 的注释与排版），因此这里按同一份 overlay 在文本层实现对应改写。
+# 只有声明了 stash_output 的 overlay 才会产出 .stoverride；未实现的指令直接报错，
+# 避免私人差异被静默丢掉。
+_STASH_OVERLAY_OK = {
+    "_comment", "output", "stash_output", "extends",
+    "disabled_by_default", "rules_insert", "group_overrides",
+    "group_proxies_insert", "extra_pool_groups",
+}
+
+
+def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
+    """定位 proxy-groups 块内每个组的行区间 {组名: (起, 止)}（止为开区间）。"""
+    try:
+        start = lines.index("proxy-groups:")
+    except ValueError:
+        return {}
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    spans: dict[str, tuple[int, int]] = {}
+    cur, cur_start = None, None
+    for i in range(start + 1, end):
+        m = re.match(r"^  - name:\s*(.+?)\s*$", lines[i])
+        if m:
+            if cur is not None:
+                spans[cur] = (cur_start, i)
+            cur, cur_start = m.group(1).strip().strip("'\""), i
+    if cur is not None:
+        spans[cur] = (cur_start, end)
+    return spans
+
+
+def _stash_render_group(g: dict) -> list[str]:
+    """按 Sample.yaml 的字段顺序渲染一个新增策略组。"""
+    out = [f"  - name: {_yq(g['name'])}", f"    type: {g.get('type', 'select')}"]
+    if g.get("icon"):
+        out.append(f"    icon: {g['icon']}")
+    # 池组的节点来源：与基座地区组写法一致，从本仓库 provider 里按 filter 筛
+    out.append("    use:")
+    out.append("      - Server")
+    for key in ("interval", "tolerance", "lazy"):
+        if key in g:
+            out.append(f"    {key}: {g[key]}")
+    if g.get("hidden"):
+        out.append("    hidden: true")
+    if g.get("filter"):
+        out.append(f"    filter: {_yq(g['filter'])}")
+    return out
+
+
+def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[str]:
+    """把一份 overlay 的差异叠加到已转译好的 Stash 文本上（就地返回新列表）。"""
+    unknown = set(overlay) - _STASH_OVERLAY_OK
+    if unknown:
+        raise ValueError(
+            f"{label}: Stash 转译尚未实现这些 overlay 指令 {sorted(unknown)}；"
+            f"请在 _stash_apply_overlay 中补齐，避免私人差异被静默丢掉"
+        )
+    lines = list(lines)
+    notes: list[str] = []
+
+    # 1) group_overrides：改写既有组的字段（filter 为 null 表示删掉该行）
+    for name, patch in (overlay.get("group_overrides") or {}).items():
+        span = _stash_group_spans(lines).get(name)
+        if span is None:
+            raise ValueError(f"{label}: group_overrides 引用了不存在的分组 {name!r}")
+        s, e = span
+        for key, val in patch.items():
+            idx = next((i for i in range(s, e)
+                        if re.match(rf"^    {re.escape(key)}:", lines[i])), None)
+            if val is None:
+                if idx is not None:
+                    del lines[idx]
+                continue
+            rendered = (f"    {key}: {_yq(val)}" if key == "filter"
+                        else f"    {key}: {'true' if val is True else val}")
+            if idx is not None:
+                lines[idx] = rendered
+            else:
+                # 插到 name/type 之后，保持字段顺序稳定
+                lines.insert(s + 2, rendered)
+        notes.append(f"{name}: 覆盖 {'/'.join(patch)}")
+
+    # 2) group_proxies_insert：在候选列表里紧邻锚点插入
+    for name, spec in (overlay.get("group_proxies_insert") or {}).items():
+        span = _stash_group_spans(lines).get(name)
+        if span is None:
+            raise ValueError(f"{label}: group_proxies_insert 引用了不存在的分组 {name!r}")
+        s, e = span
+        anchor = spec.get("after") or spec.get("before")
+        idx = next((i for i in range(s, e)
+                    if lines[i].strip().strip("-").strip().strip("'\"") == anchor), None)
+        if idx is None:
+            raise ValueError(f"{label}: {name} 的候选里找不到锚点 {anchor!r}")
+        at = idx + 1 if spec.get("after") else idx
+        lines[at:at] = [f"      - {_yq(p)}" for p in spec["insert"]]
+        notes.append(f"{name}: 候选插入 {len(spec['insert'])} 项")
+
+    # 3) extra_pool_groups：整组新增，插到锚点组之后
+    for g in (overlay.get("extra_pool_groups") or []):
+        spans = _stash_group_spans(lines)
+        anchor = g.get("insert_after")
+        if anchor not in spans:
+            raise ValueError(f"{label}: extra_pool_groups 的锚点分组 {anchor!r} 不存在")
+        at = spans[anchor][1]
+        lines[at:at] = _stash_render_group(g)
+        notes.append(f"新增分组 {g['name']}")
+
+    # 4) rules_insert：在锚点规则前/后插入
+    for spec in (overlay.get("rules_insert") or []):
+        anchor = spec.get("after") or spec.get("before")
+        idx = next((i for i, l in enumerate(lines)
+                    if l.startswith("  - ") and anchor in l), None)
+        if idx is None:
+            raise ValueError(f"{label}: rules_insert 找不到锚点规则 {anchor!r}")
+        at = idx + 1 if spec.get("after") else idx
+        lines[at:at] = [f"  - {r}" for r in spec["rules"]]
+        notes.append(f"规则插入 {len(spec['rules'])} 条")
+
+    # 5) disabled_by_default：静态配置没有运行时开关，按声明整组剪掉——
+    #    删组、删以它为落点的规则、删其余组候选里对它的引用，
+    #    最后清掉因此不再被任何 RULE-SET 引用的规则集。
+    for name in (overlay.get("disabled_by_default") or []):
+        spans = _stash_group_spans(lines)
+        if name not in spans:
+            raise ValueError(f"{label}: disabled_by_default 引用了不存在的分组 {name!r}")
+        s, e = spans[name]
+        # 组前的注释行一并删掉
+        while s > 0 and lines[s - 1].lstrip().startswith("#"):
+            s -= 1
+        del lines[s:e]
+        lines = [l for l in lines
+                 if not (l.startswith("  - ") and l.rstrip().endswith(name))
+                 and not (l.strip().startswith("- ") and l.strip().strip("-").strip().strip("'\"") == name)]
+        notes.append(f"剪掉分组 {name}（含其规则与候选引用）")
+
+    # 清理不再被引用的规则集
+    used = {m.group(1) for l in lines if (m := re.match(r"^  - RULE-SET,([^,]+),", l))}
+    try:
+        rp = lines.index("rule-providers:")
+        rp_end = next((i for i in range(rp + 1, len(lines))
+                       if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    except ValueError:
+        rp, rp_end = -1, -1
+    if rp >= 0:
+        kept, i, dropped = [], rp + 1, []
+        while i < rp_end:
+            m = re.match(r"^  (['\"]?)([^:'\"]+)\1:\s*$", lines[i])
+            if m:
+                nm = m.group(2).strip()
+                j = i + 1
+                while j < rp_end and (not lines[j].strip() or lines[j].startswith("    ")):
+                    j += 1
+                if nm not in used:
+                    dropped.append(nm)
+                else:
+                    kept.extend(lines[i:j])
+                i = j
+                continue
+            kept.append(lines[i])
+            i += 1
+        if dropped:
+            lines[rp + 1:rp_end] = kept
+            notes.append(f"清理无引用规则集 {', '.join(dropped)}")
+
+    for n in notes:
+        print(f"    · {n}")
+    return lines
+
+
+def _sync_stash_overlays(base_lines: list[str]) -> None:
+    """为声明了 stash_output 的 overlay 各产出一份 Stash 定制版覆写。"""
+    enhanced = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
+    for path in sorted(enhanced.glob("*.overlay.json")):
+        overlay = json.loads(path.read_text(encoding="utf-8"))
+        target = overlay.get("stash_output")
+        if not target:
+            continue
+        print(f"  ── overlay: {path.name} → {target} ──")
+        lines = _stash_apply_overlay(base_lines, overlay, path.name)
+        body = "\n".join(lines).rstrip() + "\n"
+        changed = _write_stamped_if_changed(REPO_ROOT / target, body)
+        print(f"  {'✓ ' + target + ' 已更新' if changed else '✓ ' + target + ' 无变化'}")
+
 
 # ---------------------------------------------------------------------------
 # 主函数
