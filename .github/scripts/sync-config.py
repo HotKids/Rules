@@ -4337,6 +4337,7 @@ def _sync_stash(config: dict) -> None:
         f"name: {Path(out_path).stem} for Android",
         "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
+        'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
     ]
 
     out = _stash_comment_out(out, "proxy-providers")
