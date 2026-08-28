@@ -1,10 +1,10 @@
 # Stash for Android
-# Date: 2026-08-28 20:56:16
+# Date: 2026-08-28 20:59:23
 # Author: @HotKids
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
 
 name: Stash
-desc: HotKids 规则配置 · 由 Surge/Profile.conf 转译
+desc: HotKids 规则配置 · 由 Surge/Profile.conf 自动转译
 author: '@HotKids'
 
 # 通用设置
