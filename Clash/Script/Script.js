@@ -5,9 +5,9 @@
  * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的
  * 策略组、分流规则与基础设置，不必依赖机场自带配置。
  *
- * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经
- * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；
- * 要改内容请改 Surge/Profile.conf。
+ * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经
+ * Clash/Mihomo.yaml）转译而来，直接修改本文件将在下次同步时被覆盖；
+ * 如需调整请修改 Surge/Profile.conf。
  *
  * 本地唯一可临时修改的是下方 ruleOptionsEnable 的取值，用于按需开关某个分组。
  *

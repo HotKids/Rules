@@ -3,6 +3,8 @@
 
   "output": "Clash/Script/MyScript.js",
 
+  "stash_output": "Clash/Script/MyStash.stoverride",
+
   "disabled_by_default": ["📬 Telegram"],
 
   "rules_insert": [
