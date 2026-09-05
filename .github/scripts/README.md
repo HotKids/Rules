@@ -55,7 +55,7 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 ## `sync-config.py` — 配置文件同步
 
 **源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
+**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Stash.stoverride`、`Clash/Script/MyStash.stoverride`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
 
 各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
 
@@ -65,10 +65,55 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 `<<: *Region, filter: *Filter<码>`（`include-all-providers` 与 `use:` 同走 mihomo
 保序路径，功能一致）。
 
+`Clash/Script/Stash.stoverride` 是 `Clash/Sample.yaml` 的二次转换产物，与 `Clash/Mihomo.yaml`
+同一定位：整份配置逐行转录（含注释与排版），**只改写 Stash 与 mihomo 真正有差异的点**，因此
+可直接作为覆写文件导入 Stash 使用。差异点仅以下四类：
+
+- **省略 mihomo 专属的顶层键 / 整块**（连同其前置注释）：监听与控制面（`mixed-port` /
+  `allow-lan` / `bind-address` / `external-controller`）、`ipv6`、geo 数据源（`geodata-loader` /
+  `geox-url` / `geo-auto-update` / `geo-update-interval`）、`unified-delay` / `tcp-concurrent` /
+  `find-process-mode` / `global-ua` / `keep-alive-interval`，以及 `profile` / `ntp` / `sniffer` /
+  `tun` 和空占位 `proxies`。这些能力在 Stash 中由客户端自身管理，或无对应项。
+- **DNS 子键过滤**：只保留 Stash 文档支持的 `default-nameserver` / `nameserver` /
+  `nameserver-policy` / `proxy-server-nameserver` / `fake-ip-filter`，其余 14 个 mihomo 专属键则予以省略
+  （`enhanced-mode` / `fake-ip-range` / `cache-algorithm` / `direct-nameserver` 等）。
+- **DNS 写法转换**：mihomo 用每条 nameserver 的 `#RULES` 后缀表达「跟随规则」，Stash 为全局
+  开关 → 补 `follow-rule: true`，并在转译时去除该后缀（Stash 的 `#` 片段只承载 `h3=true`
+  这类选项）；`nameserver-policy` 里逗号拼接的多域名单键是 mihomo 专属，
+  按 Stash 语法拆分为独立键（官方仅支持精确域名 / 通配域名 / `geosite:<name>`）。
+- **Provider 处理**：`proxy-providers` 整块注释停用——它是本仓库自己的订阅，不适用于他人的
+  配置；内容已按 Stash 口径转换（移除 mihomo 专属的 `type`、`header` 改为文档拼写的 `headers`），
+  取消注释即可启用。相应地，策略组的 `use: [Server]` 改为 `include-all: true`，直接从基础配置
+  的 `proxies` 中按 `filter` 取节点——否则组内无代理，会被 Stash 当作 `DIRECT` 处理。
+- **整体替换标记**：`hosts` / `dns` / `proxy-groups` / `rule-providers` / `rules` 均加 `#!replace`，
+  使覆写以本文件为准；`proxies` 不输出，因此基础配置的节点原样保留。
+
+其余内容——`hosts` / `mode` / `log-level`、23 个策略组（含地区 `filter`）、
+30 个规则集、36 条规则——全部原样保留：Stash 的规则类型是 Clash Premium 超集，我们用到的
+`RULE-SET` / `GEOIP` / `GEOSITE` / `MATCH` / `no-resolve`、`AND` / `OR` / `NOT` 逻辑规则（含嵌套）
+及内置策略 `REJECT` / `REJECT-DROP`，官方文档均明确支持。
+
+两点需留意：`GEOSITE` 的 domain-list-community 数据不随 Stash 分发，首次使用时按需从 github.com
+拉取；`format: mrs` 的 MRS 支持有官方说明（限 `behavior` 为 `domain` / `ipcidr`，本仓库 8 个 mrs
+规则集正好全在此范围内），但格式表未列出该 `format` 取值，沿用 mihomo 写法，需实测确认。
+
+`Clash/Script/MyStash.stoverride` 是 Stash 的私人定制版，复用 `Enhanced/` 下的同一份
+overlay：只要 overlay 里除 `output` 外再声明一个 `stash_output`，就会在 Stash 基座上叠加同样
+的私人差异（目前只有 `myscript.overlay.json` 声明了）。overlay 的差异声明本身与输出格式无关，
+但 `_apply_overlay` 面向解析后的结构、供 Script.js 使用，而 Stash 侧为文本级转译（需保留
+Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay` 中按文本重新实现，**遇到尚未
+实现的指令直接报错**，避免私人差异被静默丢弃。
+
+其中 `disabled_by_default` 没有静态等价物——它是 Script.js 的运行时开关（`ruleOptionsEnable`），
+YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组移除**：移除该组、以其为落点的规则，以及
+其余分组候选中对它的引用，并清理因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
+的新增池组在 Script.js 里靠运行时过滤 `config.proxies` 填充，静态 YAML 必须显式写节点来源，
+统一按基座地区组的写法输出 `include-all: true` + `filter`。
+
 `Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
 脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
 规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
-不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接改动会被下次同步覆盖。地区组 / `🇺🇳 Server`
+不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接修改将在下次同步时被覆盖。地区组 / `🇺🇳 Server`
 组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
 无开关可关，见 `_gen_clash_script_js` 注释）：订阅里的内联节点由运行时按
 `poolGroupFilters` 手动过滤 `config.proxies` 填入并保持订阅原始顺序；订阅只给
@@ -85,8 +130,8 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 规则落点重定向、`remove_groups` 整组删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
 `extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
 分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
-分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
-生成产物本体会被下次同步覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
+分组）随 `Profile.conf` 自动同步，私人差异集中修改对应的 `*.overlay.json` 即可——直接修改
+生成产物本体将在下次同步时被覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
 已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
 `myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。

@@ -354,7 +354,7 @@ if (!base) {
           changes.push(online ? `🟢 ${n.name} 恢复上线` : `🔴 ${n.name} 离线`);
         }
 
-        // 重启检测：uptime 明显回落（补离线推送因刷新间隔漏掉的快速重启）
+        // 重启检测：uptime 明显回落（补离线推送因刷新间隔遗漏的快速重启）
         const up = rec && rec.uptime > 0 ? rec.uptime : 0;
         if (up) next.uptime[n.uuid] = up;
         const prevUp = prev.uptime ? prev.uptime[n.uuid] : 0;

@@ -3,12 +3,12 @@
 自用规则、模块和代理工具集合。
 
 `Surge/Profile.conf` 与 `Surge/RULE-SET/` 是唯一手动维护的配置 / 规则来源，
-其他平台产物全部由 `.github/scripts/` 下的同步脚本自动生成——**改内容请改源头，直接改生成产物会被下次同步覆盖**。
+其他平台产物全部由 `.github/scripts/` 下的同步脚本自动生成——**如需调整请修改源头；直接修改生成产物将在下次同步时被覆盖**。
 
 | 目录 | 说明 |
 |---|---|
 | [`Surge/`](Surge/) | **单一来源**：托管配置 `Profile.conf`、规则源 `RULE-SET/`、sgmodule 模块 |
-| [`Clash/`](Clash/) | 自动生成：`Sample.yaml` / `Mihomo.yaml`（锚点版）/ 规则集 / Enhance Script |
+| [`Clash/`](Clash/) | 自动生成：`Sample.yaml` / `Mihomo.yaml`（锚点版）/ 规则集 / Enhance Script 与 `Script/Stash.stoverride`（Stash 覆写） |
 | [`Quantumult/`](Quantumult/) | 自动生成：QX 配置与规则；手动维护：图标库 `X/Images/` |
 | [`sing-box/`](sing-box/) | 自动生成：完整配置 `config.json`、规则集（`source/` 源码 + `rule-set/` 二进制） |
 | [`subconverter/`](subconverter/) | subconverter 订阅转换远程配置（已弃用，仅维护 emoji） |
