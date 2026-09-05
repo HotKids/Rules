@@ -20,6 +20,11 @@ domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 do
 （`+.` 前缀）、sing-box 出 `domain` / `domain_suffix`。`# >> Clash` 段同样支持 `DOMAIN-SET,`
 前缀（如 Loyalsoldier `reject.txt`），只产出 Clash payload + sing-box source，不落 Surge/QX。
 
+条目尾部可挂 ` #!remove=a.com,b.com` 行内覆盖：拉取后在步骤 ① 剔除来源里的指定域名
+（多个逗号分隔；匹配忽略 `.` / `+.` 前缀与 `DOMAIN-*` 类型，不误伤子域）。QX/Clash/sing-box
+均由该 Surge `.list` 派生，一处声明即全平台生效。Module 段的 `#!name/#!desc/#!author/#!category`
+同为此语法。
+
 > Clash 二进制规则集 `Clash/RuleSet/*.mrs` 不由本脚本生成：mihomo 的 mrs 只支持
 > domain / ipcidr 两种 behavior，故在 `sync-rules.yml` workflow 里下载 mihomo 后扫描
 > `Clash/RuleSet/` 产物（payload 无逗号 → domain / CIDR → ipcidr，classical 跳过），
@@ -121,20 +126,25 @@ YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组�
 路径同样保序），两种形态及混合订阅均兼容。三个 My* 私人定制版仍要求订阅含真实
 内联节点（纯手动填充）。脚本会保留订阅里的机场私有 DNS / 节点域名 hosts
 （覆盖 dns/hosts 前采集、覆盖后合并），规则集公共参数抽成 `remoteRuleProvider` 常量以
-`...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。
+`...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。脚本在 JSDoc 之后声明
+`const Compatible_With_Bettbox = { ruleOptionsEnable: true }`，Bettbox 读到后会把
+`ruleOptionsEnable` 里的分组开关渲染成内置可视 UI；其它客户端把它当未用常量、无副作用。
 
 `Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`
 都是 `Script.js` 的私人定制版：
 在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
 声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`rule_policy_redirect`
 规则落点重定向、`remove_groups` 整组删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
-`extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`disabled_by_default` 让部分
-分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
-分组）随 `Profile.conf` 自动同步，私人差异集中修改对应的 `*.overlay.json` 即可——直接修改
-生成产物本体将在下次同步时被覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
+`extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`rules_insert` 在锚点规则
+前/后插入自定义规则行、`disabled_by_default` 让部分分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
+分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
+生成产物本体会被下次同步覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
 已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
 `myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
 只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
+但 `disabled_by_default` 是各 overlay 独立读取、**不随 extends 继承**，且键要用该 overlay
+生成态的分组名（myscript / myscriptcolor 用 emoji 名，clashbox 因 rename_map 先生效而用改名后
+的名）——要让三份都默认关闭同一分组，需各自声明一次。
 
 `_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
 `output` 字段声明（仓库根相对，如 `"Clash/Script/MyClashBox.js"`），`extends` 依赖顺序自动

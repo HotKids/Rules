@@ -1,5 +1,5 @@
 {
-  "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。output 指定生成脚本的输出路径（仓库根相对）。",
+  "_comment": "Clash/Script/MyScript.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScript.js（会被下次同步覆盖）。output 指定生成脚本的输出路径（仓库根相对）。另：rules_insert 在 RULE-SET,Telegram 之后插入 Telegram 各 DC 的 IP-ASN/IP-CIDR 分区分流（落点 🇸🇬 Singapore / 🇺🇸 America / 🇩🇪 Germany，被 clashbox 继承时随其 rename_map 自动改名），并用 disabled_by_default 默认关闭域名 Telegram 组、让 Telegram 优先按 ASN 走——该项不随 extends 继承，myscriptcolor / clashbox 各自再声明。",
 
   "output": "Clash/Script/MyScript.js",
 

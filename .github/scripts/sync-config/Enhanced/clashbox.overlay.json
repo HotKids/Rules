@@ -1,5 +1,5 @@
 {
-  "_comment": "Clash/Script/MyClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyClashBox.js（会被下次同步覆盖）。extends 声明基于 myscriptcolor.overlay.json 已经生成的结果继续叠加——Liquid Glass 图标直接继承自 MyScriptColor（同一套，不必重复声明），MyClashBox 在其上批量改名（rename_map），外加 OneDrive/Microsoft/Speedtest 默认关闭。日常改地区/Relay链等公共部分维护 myscript.overlay.json、改图标维护 myscriptcolor.overlay.json，MyClashBox 都会自动跟着同步。",
+  "_comment": "Clash/Script/MyClashBox.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyClashBox.js（会被下次同步覆盖）。extends 声明基于 myscriptcolor.overlay.json 已经生成的结果继续叠加——Liquid Glass 图标直接继承自 MyScriptColor（同一套，不必重复声明），MyClashBox 在其上批量改名（rename_map），外加 OneDrive/Microsoft/Speedtest/Telegram 默认关闭、Server 组排除名字含 dns 的节点（group_overrides.filter）。注意本层 rename_map 先于 group_overrides / disabled_by_default 生效，这两处的键须用改名后的名（如 Server、Telegram）。日常改地区/Relay链等公共部分维护 myscript.overlay.json、改图标维护 myscriptcolor.overlay.json，MyClashBox 都会自动跟着同步。",
 
   "output": "Clash/Script/MyClashBox.js",
 
