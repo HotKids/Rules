@@ -1,5 +1,5 @@
 {
-  "_comment": "Clash/Script/MyScriptColor.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScriptColor.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已生成的结果继续叠加——在其地区/Relay 分组之上，为各策略组统一替换为 Liquid Glass 图标（icon_overrides）。",
+  "_comment": "Clash/Script/MyScriptColor.js 相对 Clash/Script/Script.js 的私人差异声明，由 sync-config.py 读取并叠加在自动生成的基座上。改这个文件即可调整差异，不要直接手改 MyScriptColor.js（会被下次同步覆盖）。extends 声明基于 myscript.overlay.json 已生成的结果继续叠加——在其地区/Relay 分组之上，为各策略组统一替换为 Liquid Glass 图标（icon_overrides）。同时默认关闭域名 Telegram 组（disabled_by_default 不随 extends 继承，故此处需重复声明）。",
 
   "output": "Clash/Script/MyScriptColor.js",
 
