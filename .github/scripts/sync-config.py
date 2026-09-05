@@ -159,8 +159,8 @@ _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 # ---------------------------------------------------------------------------
 
 _CST = timezone(timedelta(hours=8))
-# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会吃掉
-# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并打戳。
+# 冒号后的空格可选：loon/qx 头部经 _process_builtin_* 的 rstrip 会去除
+# 空占位 `# Date: ` 的尾空格变成 `# Date:`，仍需能匹配并写入时间戳。
 _DATE_LINE_RE = re.compile(r"^# Date:.*$", re.MULTILINE)
 
 
@@ -2800,8 +2800,8 @@ def _ordered_group(g: dict) -> dict:
 
 def _rule_policy_index(parts: list[str]) -> int:
     """Surge/Clash 规则行里策略字段的下标。`MATCH,POLICY` 策略在 index 1；
-    `AND/OR/NOT,(...),POLICY` 策略永远是最后一个逗号分段（拆括号里的逗号
-    也没关系，反正策略本身不含逗号，取 -1 仍然对）；其余类型固定是
+    `AND/OR/NOT,(...),POLICY` 策略始终为最后一个逗号分段（括号内的逗号
+    不影响判断：策略本身不含逗号，取 -1 仍然成立）；其余类型固定是
     `TYPE,VALUE,POLICY[,no-resolve]` 形式，策略在 index 2。
     """
     if parts[0] == "MATCH":
@@ -2825,10 +2825,10 @@ def _apply_overlay(
 
     - rule_policy_redirect：把 rules 里以某分组为策略目标的行改指另一分组
       （{旧落点: 新落点}，用改名前的基座名字）。先于 remove_groups 执行，
-      因此「删掉某组但保留其规则」可以两者搭配（如 📛 REJECT-DROP 组删掉、
+      因此「移除某组但保留其规则」可以两者搭配（如 📛 REJECT-DROP 组移除、
       其规则落点改指 ⛔️ REJECT）。
-    - remove_groups：整组删掉（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
-      里剔除对它的引用、删掉 rules 里以它为策略目标的行。
+    - remove_groups：整组移除（如 📛 REJECT-DROP），同时从其余分组的 proxies 候选
+      里剔除对它的引用、移除 rules 中以其为策略目标的行。
     - rename_map：批量改名（{旧名: 新名}），同步更新其余分组 proxies 候选里的旧名
       引用、pool_filters 的 key、以及 rules 里以该分组为策略目标的行，避免残留
       指向旧名字的悬空引用。多个 overlay 之间要做同一批改名时用这个，而不是在
@@ -3078,7 +3078,7 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         "# Date: ",
         "# Author: @HotKids",
         "#",
-        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。",
+        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "",
     ]
 
@@ -3220,7 +3220,7 @@ def _gen_clash_script_js(
     # 结构性池组（Server + 地区，均来自 Sample.yaml 的 use:[Server]，或链式继承自
     # base_state）——这些没有直接对应的 RULE-SET 目标，不纳入可选开关。overlay 的
     # extra_pool_groups 新增的同样是结构性的（Relay 链 / 新地区）。但 group_overrides
-    # 给既有分组（如 📧 Mail）追加 filter 只是让它"顺带拿到全部节点"，不改变它本来是
+    # 给既有分组（如 📧 Mail）追加 filter 只是使其一并纳入全部节点，不改变它本来是
     # 个可开关的功能分组这件事，因此不计入本集合。
     if overlay:
         _apply_overlay(groups, pool_filters, rules, structural_pool_names, overlay, overlay_label)
@@ -3259,17 +3259,17 @@ def _gen_clash_script_js(
 
     if overlay:
         source_lines = [
-            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
             f" * Clash/Mihomo.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
-            " * 而来，直接改本文件会在下次同步时被覆盖。公共部分请改 Surge/Profile.conf；",
+            " * 而来，直接修改本文件将在下次同步时被覆盖。公共部分请修改 Surge/Profile.conf；",
             " * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）",
             f" * 请改 {overlay_label}。",
         ]
     else:
         source_lines = [
-            " * 自动生成，请勿手改：由 sync-config.py 从 Surge/Profile.conf（经",
-            " * Clash/Mihomo.yaml）转译而来，直接改本文件会在下次同步时被覆盖；",
-            " * 要改内容请改 Surge/Profile.conf。",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * Clash/Mihomo.yaml）转译而来，直接修改本文件将在下次同步时被覆盖；",
+            " * 如需调整请修改 Surge/Profile.conf。",
         ]
 
     lines = [
@@ -3833,7 +3833,7 @@ SB_PLACEHOLDER = "🚀 Proxy（请用订阅工具注入节点）"
 SB_SKIP_GROUP_KW = ("Gateway", "Apple TV")
 
 # 各地区示例节点（占位用途：sing-box 无订阅机制，先内置一份可直接连通的示例
-# Shadowsocks 节点，方便直接改 server/password 试用；真实使用请用订阅工具替换）
+# Shadowsocks 节点，便于直接修改 server/password 试用；真实使用请用订阅工具替换）
 # 按地区组 policy-regex-filter 命中的关键词匹配，与本仓库 Profile.conf 的固定 5 个地区一一对应
 SB_EXAMPLE_NODES = {
     "HK": ("🇭🇰 HK", "hk.hotkids.me"),
@@ -4112,6 +4112,456 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 
 
 # ---------------------------------------------------------------------------
+# Stash 覆写（.stoverride）
+# ---------------------------------------------------------------------------
+#
+# Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
+# 同一定位）：整份配置原样转录，只在 Stash 与 mihomo 真正有差异的点上改写，因此
+# 可以直接作为覆写文件导入 Stash 使用。差异点仅以下四类，其余逐行转录（含注释与排版）。
+
+# 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由客户端自身管理
+#    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并省略。
+_STASH_DROP_TOP = {
+    "mixed-port", "allow-lan", "bind-address", "ipv6", "external-controller",
+    "unified-delay", "tcp-concurrent", "find-process-mode", "geodata-loader",
+    "global-ua", "keep-alive-interval", "geo-auto-update", "geo-update-interval",
+    "geox-url", "profile", "ntp", "sniffer", "tun", "proxies",
+}
+
+# 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
+_STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
+                      "rule-providers", "rules"}
+
+_STASH_DNS_KEEP = {
+    "default-nameserver", "nameserver", "nameserver-policy",
+    "proxy-server-nameserver", "fake-ip-filter",
+}
+
+_TOP_KEY_RE = re.compile(r"^([A-Za-z][\w-]*):")
+_SUB_KEY_RE = re.compile(r"^(\s+)(['\"]?)([^:'\"]+)\2\s*:")
+
+
+def _yq(value) -> str:
+    """YAML 单引号标量（组名 / filter 正则含 emoji、空格、反斜杠，统一加引号最为稳妥）。"""
+    return "'" + str(value).replace("'", "''") + "'"
+
+
+def _stash_clean_nameserver(server: str) -> str:
+    """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
+    `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律去除。"""
+    if "#" not in server:
+        return server
+    base, frag = server.split("#", 1)
+    return server if frag.startswith("h3=") else base
+
+
+def _stash_comment_out(lines: list[str], top_key: str) -> list[str]:
+    """将某个顶层块整体注释掉（内容保留，需要时取消注释即可启用）。"""
+    start = next((i for i, l in enumerate(lines) if re.match(rf"^{re.escape(top_key)}:", l)), -1)
+    if start < 0:
+        return lines
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    out = list(lines)
+    for i in range(start, end):
+        if out[i].strip():
+            # 该块整体停用，无需保留 #!replace 标记
+            out[i] = "# " + out[i].replace(" #!replace", "")
+    return out
+
+
+def _sync_stash(config: dict) -> None:
+    """Clash/Sample.yaml → Clash/Stash.stoverride（只改 Stash 与 mihomo 的差异点）。"""
+    out_path = config.get("Stash", {}).get("output")
+    clash_out = config.get("Clash", {}).get("output")
+    if not out_path or not clash_out:
+        return
+    base_path = REPO_ROOT / clash_out
+    if not base_path.exists():
+        return
+
+    print("\n── sync-config: Clash Sample.yaml → Stash .stoverride ──")
+    src = base_path.read_text(encoding="utf-8").splitlines()
+
+    out: list[str] = []
+    buf: list[str] = []          # 待决的注释 / 空行（跟随其后的键一起保留或丢弃）
+    top = ""                     # 当前顶层键
+    keep_top = True
+    dns_keep = True              # dns 块内当前子键是否保留
+    policy_split: list[str] | None = None   # 逗号拼接键待展开的域名
+    policy_val: list[str] = []              # 该键的值行
+    skip_use_items = False                  # use: 的列表项（已换成 include-all）
+    changes: list[str] = []
+
+    def flush() -> None:
+        # 省略某个键时，其两侧的空行会在删除处相邻叠加；此处舍弃与已输出空行相邻的
+        # 前导空行，避免出现源文件没有的空行堆积（源本身的空行结构保持不变）。
+        while buf and not buf[0].strip() and out and not out[-1].strip():
+            buf.pop(0)
+        out.extend(buf)
+        buf.clear()
+
+    # 文件头（首个顶层键之前的注释/空行，含 # Clash / # Date / # Author / # 通用设置）
+    # 始终保留：其不属于任何键，不应随被省略的首个键一同丢失。
+    first_key = next((i for i, l in enumerate(src) if _TOP_KEY_RE.match(l)), 0)
+    header = [l.rstrip() for l in src[:first_key]]
+    if header and header[0].startswith("# Clash"):
+        del header[0]
+    header = [l for l in header if not l.startswith("# Author:")]
+    # 紧贴首个键的那段注释是该键的说明（首个键必为被省略的 mixed-port），
+    # 一并省略，避免遗留无主注释；靠空行分隔的分区标题（# 通用设置）保留。
+    while header and header[-1].lstrip().startswith("#"):
+        header.pop()
+    out.extend(header)
+
+    for raw in src[first_key:]:
+        line = raw.rstrip()
+        stripped = line.strip()
+
+        # ── 逗号拼接的 nameserver-policy 键：收集值行后按域名展开 ──
+        if policy_split is not None:
+            if stripped and not stripped.startswith("#") and len(line) - len(line.lstrip()) >= 6:
+                policy_val.append(line)
+                continue
+            for dom in policy_split:
+                out.append(f'    "{dom}":')
+                out.extend(policy_val)
+            policy_split, policy_val = None, []
+            # 继续按普通行处理当前行
+
+        m_top = _TOP_KEY_RE.match(line)
+        if m_top:
+            top = m_top.group(1)
+            keep_top = top not in _STASH_DROP_TOP
+            if not keep_top:
+                buf.clear()
+                changes.append(f"略去 {top}")
+                continue
+            flush()
+            out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
+            if top == "dns":
+                # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
+                # Stash 的等价物是全局开关 follow-rule。
+                out += [
+                    "  # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，",
+                    "  # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能",
+                    "  # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。",
+                    "  # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，",
+                    "  # 满足官方要求的前置条件之一（避免递归查询）。",
+                    "  follow-rule: true",
+                ]
+                changes.append("dns: #RULES → follow-rule")
+            continue
+
+        if not stripped or stripped.startswith("#"):
+            buf.append(line)
+            continue
+
+        if not keep_top:
+            buf.clear()
+            continue
+
+        indent = len(line) - len(line.lstrip())
+        m_sub = _SUB_KEY_RE.match(line)
+
+        # use 引用的是本仓库自己的 provider，而它在 Stash 产物里已停用；
+        # 改用 include-all 从基础配置的 proxies 取节点（filter 仍照常生效）。
+        if skip_use_items:
+            if indent >= 6 and not m_sub:
+                continue
+            skip_use_items = False
+        if top == "proxy-groups" and indent == 4 and m_sub and m_sub.group(3).strip() == "use":
+            flush()
+            out.append("    include-all: true")
+            skip_use_items = True
+            changes.append("proxy-groups: use → include-all")
+            continue
+
+        # ── dns：按 Stash 支持的子键过滤 ──
+        if top == "dns" and indent == 2 and m_sub:
+            key = m_sub.group(3).strip()
+            dns_keep = key in _STASH_DNS_KEEP
+            if not dns_keep:
+                buf.clear()
+                continue
+            flush()
+            out.append(line)
+            continue
+        if top == "dns" and indent > 2 and not dns_keep:
+            buf.clear()
+            continue
+
+        # nameserver 条目：去除 #RULES 后缀
+        if top == "dns" and dns_keep and stripped.startswith("- ") and "#RULES" in line:
+            flush()
+            val = stripped[2:].strip().strip("'\"")
+            out.append(f'    - "{_stash_clean_nameserver(val)}"')
+            changes.append("nameserver 去 #RULES 后缀")
+            continue
+
+        # nameserver-policy：逗号拼接多域名的单键是 mihomo 专属；Stash 只认
+        # 「精确域名 / 通配域名 / geosite:<name>」，拼接键将被视作字面域名，无法命中。
+        if top == "dns" and indent == 4 and m_sub and "," in m_sub.group(3):
+            flush()
+            policy_split = [d.strip() for d in m_sub.group(3).split(",") if d.strip()]
+            policy_val = []
+            changes.append(f"nameserver-policy 拆键 ×{len(policy_split)}")
+            continue
+
+        # ── provider：type 是 mihomo 专属；header 在 Stash 中为 headers ──
+        if top in ("proxy-providers", "rule-providers"):
+            key = m_sub.group(3).strip() if m_sub else ""
+            if key == "type":
+                buf.clear()
+                continue
+            if key == "header":
+                flush()
+                out.append(line.replace("header:", "headers:", 1))
+                changes.append("proxy-providers: header → headers")
+                continue
+
+        flush()
+        out.append(line)
+
+    if policy_split is not None:
+        for dom in policy_split:
+            out.append(f'    "{dom}":')
+            out.extend(policy_val)
+
+    # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
+    # 源文件没有这些键，不属于差异点，不自行添加）
+    insert_at = next((i for i, l in enumerate(out) if l.startswith("# Date:")), -1) + 1
+    out[insert_at:insert_at] = [
+        "",
+        # name / desc / author 仅用于在 Stash 覆写列表中展示
+        f"name: {Path(out_path).stem} for Android",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
+        "author: '@HotKids'",
+        'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
+    ]
+
+    out = _stash_comment_out(out, "proxy-providers")
+
+    body = "\n".join(out).rstrip() + "\n"
+    changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
+    for note in dict.fromkeys(changes):
+        print(f"    · {note}")
+    print(f"  {'✓ ' + out_path + ' 已更新' if changed else '✓ ' + out_path + ' 无变化'}")
+
+    _sync_stash_overlays(out)
+
+
+# ── Enhanced/*.overlay.json → Stash 私人定制版 ────────────────────────────
+#
+# overlay 声明的是「相对基座的私人差异」，本身与输出格式无关（_apply_overlay 面向
+# 解析后的 groups/rules 结构，供 Script.js 使用）。Stash 侧为文本级转译（需保留
+# Sample.yaml 的注释与排版），因此这里按同一份 overlay 在文本层实现对应改写。
+# 只有声明了 stash_output 的 overlay 才会产出 .stoverride；未实现的指令直接报错，
+# 避免私人差异被静默丢弃。
+_STASH_OVERLAY_OK = {
+    "_comment", "output", "stash_output", "extends",
+    "disabled_by_default", "rules_insert", "group_overrides",
+    "group_proxies_insert", "extra_pool_groups",
+}
+
+
+def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
+    """定位 proxy-groups 块内每个组的行区间 {组名: (起, 止)}（止为开区间）。"""
+    # 键行可能带 #!replace 行内标记，按前缀匹配而不是全等
+    start = next((i for i, l in enumerate(lines) if re.match(r"^proxy-groups:", l)), -1)
+    if start < 0:
+        return {}
+    end = next((i for i in range(start + 1, len(lines))
+                if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    spans: dict[str, tuple[int, int]] = {}
+    cur, cur_start = None, None
+    for i in range(start + 1, end):
+        m = re.match(r"^  - name:\s*(.+?)\s*$", lines[i])
+        if m:
+            if cur is not None:
+                spans[cur] = (cur_start, i)
+            cur, cur_start = m.group(1).strip().strip("'\""), i
+    if cur is not None:
+        spans[cur] = (cur_start, end)
+    return spans
+
+
+def _stash_render_group(g: dict) -> list[str]:
+    """按 Sample.yaml 的引号风格与字段顺序渲染一个新增策略组。
+
+    源风格：name 用双引号、proxies 条目不加引号、filter 用单引号；
+    字段顺序 name → type → icon → hidden → use/proxies → 测速参数 → filter。
+    """
+    out = [f'  - name: "{g["name"]}"', f"    type: {g.get('type', 'select')}"]
+    if g.get("icon"):
+        out.append(f"    icon: {g['icon']}")
+    if g.get("hidden"):
+        out.append("    hidden: true")
+    # 池组的节点来源：与基座地区组写法一致，从基础配置的 proxies 中按 filter 筛选
+    out.append("    include-all: true")
+    for key in ("interval", "tolerance", "lazy"):
+        if key in g:
+            out.append(f"    {key}: {g[key]}")
+    if g.get("filter"):
+        out.append(f"    filter: {_yq(g['filter'])}")
+    out.append("")  # 组间空行，与 Sample.yaml 一致
+    return out
+
+
+# 组内字段的规范顺序（与 Sample.yaml 一致），group_overrides 新增字段时按此定位
+_STASH_FIELD_ORDER = ["name", "type", "icon", "hidden", "include-all", "use", "proxies",
+                      "interval", "tolerance", "lazy", "filter"]
+
+
+def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[str]:
+    """把一份 overlay 的差异叠加到已转译好的 Stash 文本上（就地返回新列表）。"""
+    unknown = set(overlay) - _STASH_OVERLAY_OK
+    if unknown:
+        raise ValueError(
+            f"{label}: Stash 转译尚未实现这些 overlay 指令 {sorted(unknown)}；"
+            f"请在 _stash_apply_overlay 中补齐，避免私人差异被静默丢弃"
+        )
+    lines = list(lines)
+    notes: list[str] = []
+
+    # 展示字段替换为本定制版专属内容，避免与基座在覆写列表中同名
+    for i, l in enumerate(lines):
+        if l.startswith("name: "):
+            lines[i] = f"name: {Path(overlay['stash_output']).stem} for Android"
+        elif l.startswith("desc: "):
+            lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
+                        f"叠加 {label}），请勿手动修改；如需调整请修改 Surge/Profile.conf。")
+
+    # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
+    for name, patch in (overlay.get("group_overrides") or {}).items():
+        span = _stash_group_spans(lines).get(name)
+        if span is None:
+            raise ValueError(f"{label}: group_overrides 引用了不存在的分组 {name!r}")
+        s, e = span
+        for key, val in patch.items():
+            idx = next((i for i in range(s, e)
+                        if re.match(rf"^    {re.escape(key)}:", lines[i])), None)
+            if val is None:
+                if idx is not None:
+                    del lines[idx]
+                continue
+            rendered = (f"    {key}: {_yq(val)}" if key == "filter"
+                        else f"    {key}: {'true' if val is True else val}")
+            if idx is not None:
+                lines[idx] = rendered
+            else:
+                # 按 Sample.yaml 的字段顺序插到第一个「应排在它之后」的字段前
+                rank = _STASH_FIELD_ORDER.index(key) if key in _STASH_FIELD_ORDER else len(_STASH_FIELD_ORDER)
+                at = e
+                for i in range(s, e):
+                    m2 = re.match(r"^    ([\w-]+):", lines[i])
+                    if m2 and m2.group(1) in _STASH_FIELD_ORDER \
+                            and _STASH_FIELD_ORDER.index(m2.group(1)) > rank:
+                        at = i
+                        break
+                lines.insert(at, rendered)
+        notes.append(f"{name}: 覆盖 {'/'.join(patch)}")
+
+    # 2) group_proxies_insert：在候选列表里紧邻锚点插入
+    for name, spec in (overlay.get("group_proxies_insert") or {}).items():
+        span = _stash_group_spans(lines).get(name)
+        if span is None:
+            raise ValueError(f"{label}: group_proxies_insert 引用了不存在的分组 {name!r}")
+        s, e = span
+        anchor = spec.get("after") or spec.get("before")
+        idx = next((i for i in range(s, e)
+                    if lines[i].strip().strip("-").strip().strip("'\"") == anchor), None)
+        if idx is None:
+            raise ValueError(f"{label}: {name} 的候选里找不到锚点 {anchor!r}")
+        at = idx + 1 if spec.get("after") else idx
+        lines[at:at] = [f"      - {p}" for p in spec["insert"]]
+        notes.append(f"{name}: 候选插入 {len(spec['insert'])} 项")
+
+    # 3) extra_pool_groups：整组新增，插入至锚点组之后
+    for g in (overlay.get("extra_pool_groups") or []):
+        spans = _stash_group_spans(lines)
+        anchor = g.get("insert_after")
+        if anchor not in spans:
+            raise ValueError(f"{label}: extra_pool_groups 的锚点分组 {anchor!r} 不存在")
+        at = spans[anchor][1]
+        lines[at:at] = _stash_render_group(g)
+        notes.append(f"新增分组 {g['name']}")
+
+    # 4) rules_insert：在锚点规则前/后插入
+    for spec in (overlay.get("rules_insert") or []):
+        anchor = spec.get("after") or spec.get("before")
+        idx = next((i for i, l in enumerate(lines)
+                    if l.startswith("  - ") and anchor in l), None)
+        if idx is None:
+            raise ValueError(f"{label}: rules_insert 找不到锚点规则 {anchor!r}")
+        at = idx + 1 if spec.get("after") else idx
+        lines[at:at] = [f"  - {r}" for r in spec["rules"]]
+        notes.append(f"规则插入 {len(spec['rules'])} 条")
+
+    # 5) disabled_by_default：静态配置没有运行时开关，按声明整组移除——
+    #    移除该组、以其为落点的规则，以及其余组候选中对它的引用，
+    #    并清理因此不再被任何 RULE-SET 引用的规则集。
+    for name in (overlay.get("disabled_by_default") or []):
+        spans = _stash_group_spans(lines)
+        if name not in spans:
+            raise ValueError(f"{label}: disabled_by_default 引用了不存在的分组 {name!r}")
+        s, e = spans[name]
+        # 组前的注释行一并移除
+        while s > 0 and lines[s - 1].lstrip().startswith("#"):
+            s -= 1
+        del lines[s:e]
+        lines = [l for l in lines
+                 if not (l.startswith("  - ") and l.rstrip().endswith(name))
+                 and not (l.strip().startswith("- ") and l.strip().strip("-").strip().strip("'\"") == name)]
+        notes.append(f"移除分组 {name}（含其规则与候选引用）")
+
+    # 清理不再被引用的规则集
+    used = {m.group(1) for l in lines if (m := re.match(r"^  - RULE-SET,([^,]+),", l))}
+    rp = next((i for i, l in enumerate(lines) if re.match(r"^rule-providers:", l)), -1)
+    rp_end = next((i for i in range(rp + 1, len(lines))
+                   if lines[i] and not lines[i].startswith((" ", "#"))), len(lines)) if rp >= 0 else -1
+    if rp >= 0:
+        kept, i, dropped = [], rp + 1, []
+        while i < rp_end:
+            m = re.match(r"^  (['\"]?)([^:'\"]+)\1:\s*$", lines[i])
+            if m:
+                nm = m.group(2).strip()
+                j = i + 1
+                while j < rp_end and (not lines[j].strip() or lines[j].startswith("    ")):
+                    j += 1
+                if nm not in used:
+                    dropped.append(nm)
+                else:
+                    kept.extend(lines[i:j])
+                i = j
+                continue
+            kept.append(lines[i])
+            i += 1
+        if dropped:
+            lines[rp + 1:rp_end] = kept
+            notes.append(f"清理无引用规则集 {', '.join(dropped)}")
+
+    for n in notes:
+        print(f"    · {n}")
+    return lines
+
+
+def _sync_stash_overlays(base_lines: list[str]) -> None:
+    """为声明了 stash_output 的 overlay 各产出一份 Stash 定制版覆写。"""
+    enhanced = REPO_ROOT / ".github" / "scripts" / "sync-config" / "Enhanced"
+    for path in sorted(enhanced.glob("*.overlay.json")):
+        overlay = json.loads(path.read_text(encoding="utf-8"))
+        target = overlay.get("stash_output")
+        if not target:
+            continue
+        print(f"  ── overlay: {path.name} → {target} ──")
+        lines = _stash_apply_overlay(base_lines, overlay, path.name)
+        body = "\n".join(lines).rstrip() + "\n"
+        changed = _write_stamped_if_changed(REPO_ROOT / target, body)
+        print(f"  {'✓ ' + target + ' 已更新' if changed else '✓ ' + target + ' 无变化'}")
+
+
+# ---------------------------------------------------------------------------
 # 主函数
 # ---------------------------------------------------------------------------
 
@@ -4131,6 +4581,7 @@ def main() -> None:
     _GENERAL_INJECT = _build_general_inject(general_lines)
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
+    _sync_stash(config)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)

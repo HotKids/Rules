@@ -38,6 +38,6 @@ jobs:
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "chore: sync Profile.conf → Clash / Loon / QX / Surfboard / sing-box [auto]"
+            git commit -m "chore: sync Profile.conf → Clash / Stash / Loon / QX / Surfboard / sing-box [auto]"
             git push
           fi

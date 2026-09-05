@@ -2,7 +2,7 @@
 # Date: 2026-08-06 19:38:00
 # Author: @HotKids
 #
-# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手改；改内容请改 Surge/Profile.conf。
+# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
 
 # ── 通用设置 ──
 
