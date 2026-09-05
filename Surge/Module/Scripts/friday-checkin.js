@@ -4,7 +4,7 @@
  * 背景：签到 Bearer(accessToken) 仅 3 小时；fet-token 只在 token/getv2(刷新时)出现，
  *   光开 App 常撞不到。故改混合策略：
  *     - 开 App 时(member/get 必触发)抓当前 accessToken → 当场签到（保证开 App 即签）
- *     - 顺手在 token/getv2 出现时存 fet-token + 设备字段 → 给 cron 做自动续期
+ *     - 并在 token/getv2 出现时存 fet-token + 设备字段 → 给 cron 做自动续期
  *   cron：有 fet-token 就刷新 accessToken 自动签；否则回退用最近存的 accessToken(3h 内有效)。
  *
  * 维护：每天开下 App 必签到；若抓到过 fet-token，则数天内不开 App 也能自动签。

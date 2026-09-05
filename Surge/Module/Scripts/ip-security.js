@@ -831,7 +831,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   }
 
   // 先并行发起 geo/risk/流量 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
-  // DNS 泄露检测需要走代理策略，必须等拿到 policy 后再执行
+  // DNS 泄露检测需要走代理策略，必须在取得 policy 后执行
   const [riskInfo, ipTypeResult, localSbRaw, localBaiduRaw, outGeoRaw, outOrgRaw, trafficResult] = await Promise.all([
     getRiskScore(outIP),                     // 0: 风险评分
     getIPType(outIP),                        // 1: IP 类型
