@@ -47,10 +47,23 @@ const keep = entries.filter((e) => String(e.version) !== "5");
 const dropped = entries.length - keep.length;
 
 const now = Math.floor(Date.now() / 1000);
+// Escape for a single-quoted SQLite string literal: double embedded quotes and
+// strip NUL bytes that quote-doubling alone does not neutralize.
 const s = (v: string | null | undefined) =>
-  v === null || v === undefined ? "NULL" : `'${String(v).replace(/'/g, "''")}'`;
-const n = (v: number | null | undefined) =>
-  v === null || v === undefined || (v as unknown) === "" ? "NULL" : Number(v);
+  v === null || v === undefined
+    ? "NULL"
+    : `'${String(v)
+        .replace(/\0/g, "")
+        .replace(/'/g, "''")}'`;
+// Numeric fields are interpolated unquoted, so any non-finite input
+// (including attacker-controlled strings from the legacy API) must be
+// rejected outright rather than silently coerced/NaN'd into the SQL text.
+const n = (v: number | null | undefined) => {
+  if (v === null || v === undefined || (v as unknown) === "") return "NULL";
+  const num = Number(v);
+  if (!Number.isFinite(num)) throw new Error(`expected numeric value, got: ${String(v)}`);
+  return num;
+};
 const b = (v: unknown) => (v ? 1 : 0);
 
 const cols =
