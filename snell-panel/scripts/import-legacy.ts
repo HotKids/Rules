@@ -47,23 +47,35 @@ const keep = entries.filter((e) => String(e.version) !== "5");
 const dropped = entries.length - keep.length;
 
 const now = Math.floor(Date.now() / 1000);
-// Escape for a single-quoted SQLite string literal: double embedded quotes and
-// strip NUL bytes that quote-doubling alone does not neutralize.
+// Escape for a single-quoted SQLite string literal: doubling embedded quotes is
+// the complete escape (SQLite has no backslash escapes inside '...'). NUL bytes
+// are stripped separately — not as an injection defence, but because a NUL in a
+// literal is TK_ILLEGAL, which would abort the statement and roll back the batch.
 const s = (v: string | null | undefined) =>
   v === null || v === undefined
     ? "NULL"
-    : `'${String(v)
-        .replace(/\0/g, "")
-        .replace(/'/g, "''")}'`;
-// Numeric fields are interpolated unquoted, so any non-finite input
-// (including attacker-controlled strings from the legacy API) must be
-// rejected outright rather than silently coerced/NaN'd into the SQL text.
-const n = (v: number | null | undefined) => {
-  if (v === null || v === undefined || (v as unknown) === "") return "NULL";
-  const num = Number(v);
-  if (!Number.isFinite(num)) throw new Error(`expected numeric value, got: ${String(v)}`);
+    : `'${String(v).replace(/\0/g, "").replace(/'/g, "''")}'`;
+// Numeric fields are interpolated unquoted, and both call sites (port, asn) are
+// INTEGER columns. Accept only a genuine integer: a bare Number() would silently
+// coerce " " and [] to 0, "0x1f" to 31, and let 1.5 through — importing a broken
+// node instead of failing loudly. Errors carry the node id and field so the
+// operator can find the offending record among hundreds of entries.
+const int = (v: unknown, field: string, nodeId: string) => {
+  if (v === null || v === undefined || v === "") return "NULL";
+  const num =
+    typeof v === "number"
+      ? v
+      : typeof v === "string" && /^-?\d+$/.test(v.trim())
+        ? Number(v.trim())
+        : NaN;
+  if (!Number.isInteger(num)) {
+    throw new Error(`${nodeId}: ${field} expects an integer, got ${JSON.stringify(v)}`);
+  }
   return num;
 };
+// ASN may arrive as "AS15169" — same form apps/server/src/lib/geoip.ts toAsn() handles.
+const asn = (v: unknown, nodeId: string) =>
+  int(typeof v === "string" ? v.trim().replace(/^AS(?=\d+$)/i, "") : v, "asn", nodeId);
 const b = (v: unknown) => (v ? 1 : 0);
 
 const cols =
@@ -77,11 +89,11 @@ const sql = keep
       s(String(e.version)),
       "'active'",
       s(e.ip),
-      n(e.port),
+      int(e.port, "port", String(e.node_id)),
       s(e.psk),
       s(e.country_code),
       s(e.isp),
-      n(e.asn),
+      asn(e.asn, String(e.node_id)),
       b(e.tfo),
       0,
       0,
