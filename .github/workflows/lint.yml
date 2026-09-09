@@ -102,6 +102,30 @@ jobs:
             console.log(f + ": OK");
           }'
 
+      # Stash 覆写产物（Clash/Script/*.stoverride）同样由 sync-config.py 生成，
+      # 但此前无任何校验——格式坏掉会静默发布。`#!replace` 等标记在 YAML 里是行尾
+      # 注释，可直接按 YAML 解析。
+      - name: Validate generated Stash overrides parseable
+        run: |
+          pip install pyyaml -q
+          python3 -c "
+          import yaml, pathlib, sys
+          files = sorted(pathlib.Path('Clash/Script').glob('*.stoverride'))
+          if not files:
+              print('no .stoverride found'); sys.exit(0)
+          errors = []
+          for f in files:
+              try:
+                  d = yaml.safe_load(f.read_text())
+                  if not isinstance(d, dict):
+                      errors.append(f'{f}: 顶层不是映射')
+              except yaml.YAMLError as e:
+                  errors.append(f'{f}: {e}')
+          if errors:
+              print('FAIL:', *errors, sep='\\n'); sys.exit(1)
+          print(f'All {len(files)} Stash overrides OK')
+          "
+
       - name: Validate overlay JSON
         run: |
           python3 -c "
