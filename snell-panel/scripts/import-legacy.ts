@@ -30,7 +30,23 @@ if (!url) {
   process.exit(1);
 }
 
-const res = await fetch(url, { headers: { "User-Agent": "snell-panel-import" } });
+// Only allow https:// URLs to a real remote host: reject other schemes
+// (file:, ftp:, etc.), loopback/link-local/metadata hosts, and bare IP
+// literals that could be used to reach internal/cloud-metadata services.
+const parsed = new URL(url);
+const host = parsed.hostname.toLowerCase();
+const isBlockedHost =
+  host === "localhost" ||
+  host === "169.254.169.254" ||
+  host === "::1" ||
+  /^(127\.|10\.|192\.168\.|0\.)/.test(host) ||
+  /^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
+if (parsed.protocol !== "https:" || isBlockedHost) {
+  console.error(`refusing to fetch unsafe url: ${url}`);
+  process.exit(1);
+}
+
+const res = await fetch(parsed, { headers: { "User-Agent": "snell-panel-import" } });
 if (!res.ok) {
   console.error(`fetch failed: ${res.status} ${res.statusText}`);
   process.exit(1);
