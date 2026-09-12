@@ -1,4 +1,5 @@
 ### fork from https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/domainset/reject_phishing.conf
+### upstream 404 · 2026-09-13
 # > Phishing
 DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe,Phishing
 DOMAIN-SUFFIX,e.vg,Phishing

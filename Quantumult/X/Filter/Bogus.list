@@ -1,4 +1,5 @@
 ### fork from https://raw.githubusercontent.com/SukkaLab/ruleset.skk.moe/master/List/ip/reject.conf
+### upstream 404 · 2026-09-13
 # > Bogus
 DOMAIN,7h15.ru1353t.1s.m4d3.by.5ukk4w.skk.moe,Bogus
 IP-CIDR,10.72.25.0/24,Bogus,no-resolve
