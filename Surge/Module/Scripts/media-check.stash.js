@@ -1,14 +1,17 @@
 /**
  * =============================================================================
- * 流媒体 & AI 服务解锁检测脚本 - Stash Home Tile Script
+ * 流媒体 & AI 服务解锁检测脚本 - Stash Service Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.0.0-stash.1 (2026-09-29)
+ * @version      2.0.0-stash.2 (2026-09-29)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @source-sha   63691141268bda771f10722331ce70381be13e34
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
- * @migration    首页汇总；backgroundColor；请求超时秒数；可选固定代理；异常不触发通知
- * @arguments    geminiapikey=null&nfprice=true&viu=false&notify=false
+ * @migration    独立服务 Tile；按服务执行；兼容旧汇总配置；独立通知状态
+ * @arguments    service=netflix&nfprice=true&notify=false
+ *               service 可选 netflix/disney/hbomax/youtube/spotify/chatgpt/gemini/claude/reddit
+ *               不传 service 或传 service=all 时使用旧的首页汇总模式
+ *               mode=collapsed 由 Stash 选择检测节点，忽略 proxy 并关闭变化通知
  *               可选 proxy=URL编码后的节点名、notifykey=自定义通知分组
  * @routing      默认遵循 Stash 分流；设置 proxy 后全部检测请求使用该代理。
  * @author       HotKids & ChatGPT & Claude
@@ -32,9 +35,6 @@
  * 🌐 社交 & 其他
  *    └─ Reddit        地区访问检测
  *
- * 🧩 可选（默认关闭，需参数开启，且仅在可用时显示）
- *    └─ Viu           HK/东南亚流媒体，viu=true 开启（参考 lmc999/RegionRestrictionCheck）
- *
  * ═══════════════════════════════════════════════════════════════════════════
  * ⚙️ 参数配置
  * ═══════════════════════════════════════════════════════════════════════════
@@ -43,7 +43,6 @@
  * • nfprice=false            关闭 Netflix 价格显示（默认开启）
  * • notify=true              解锁状态变化推送（默认关闭）：可用性或区域变化时通知，
  *                            超时/错误视为未知不触发，首次运行仅记录基线
- * • viu=true                 开启 Viu 检测（默认关闭；开启后仅在可用时显示）
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎨 状态指示
@@ -74,7 +73,9 @@ let ARGS = {};
  * 首次运行仅记录基线
  */
 function notifyUnlockChanges(services) {
-  const key = "stash_media_check_notify_v1:" + JSON.stringify([ARGS.notifykey || "home", ARGS.proxy || "routing"]);
+  // 各 Tile 并发运行：分开保存状态，避免互相覆盖；旧汇总模式沿用原来的键。
+  const scope = ARGS.service && ARGS.service !== "all" ? ":" + ARGS.service : "";
+  const key = "stash_media_check_notify_v1:" + JSON.stringify([ARGS.notifykey || "home", ARGS.proxy || "routing"]) + scope;
   let prev = {};
   try { prev = JSON.parse($persistentStore.read(key)) || {}; } catch (e) {}
   if (!prev || typeof prev !== "object" || Array.isArray(prev)) prev = {};
@@ -171,7 +172,7 @@ class Utils {
       if (at < 1) return;
       result[decode(part.slice(0, at)).trim()] = decode(part.slice(at + 1));
     });
-    ["nfprice", "viu", "notify"].forEach(key => {
+    ["nfprice", "notify"].forEach(key => {
       if (result[key] !== undefined) result[key] = result[key].trim().toLowerCase();
     });
     return result;
@@ -191,7 +192,7 @@ class Utils {
    * @param {string} suffix - 额外信息（如价格）
    * @returns {string} 格式化的显示行
    */
-  static buildLine(name, result, suffix = "") {
+  static buildContent(result, suffix = "") {
     const statusMap = {
       [STATUS.OK]: result.region || "OK",
       [STATUS.COMING]: (result.region?.includes("(") || result.region?.includes(" ")) ? result.region : `${result.region || "N/A"} (Coming)`,
@@ -205,7 +206,11 @@ class Utils {
       ? result.region 
       : statusMap[result.status];
     
-    return `${name.padEnd(11)} ➟ ${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
+    return `${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
+  }
+
+  static buildLine(name, result, suffix = "") {
+    return `${name.padEnd(11)} ➟ ${this.buildContent(result, suffix)}`;
   }
 
   /**
@@ -651,36 +656,68 @@ class ServiceChecker {
     } catch (error) { return Utils.errorResult(error); }
   }
 
-  /**
-   * Viu 解锁检测（默认关闭，需面板参数 viu=true 启用；仅在可用时显示）
-   *
-   * 参考 lmc999/RegionRestrictionCheck：请求 www.viu.com，可用地区会重定向到
-   * www.viu.com/ott/{area}/{lang}，不支持的地区落到 no-service 页。原脚本取重定向
-   * 后最终 URL 的地区段判断；Surge $httpClient 不暴露 url_effective（实测 response
-   * 仅 status/headers），故改从最终页面正文里的 /ott/{area}/ 路径提取地区码——正文里
-   * 该路径多为相对形式（实测 SG 节点返回 `/ott/sg/en"`），不带 viu.com 前缀，故正则
-   * 只匹配 /ott/{2 位地区}/。提取不到即按不可用处理（安全失败：宁可不显示）。
-   * @returns {Promise<Object>} 检测结果
-   */
-  static async checkViu() {
-    try {
-      const res = await Utils.request({ url: "https://www.viu.com/" });
-      if (res.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
-      const m = (res.body || "").match(/\/ott\/([a-z]{2})[/"']/i);
-      return m
-        ? Utils.createResult(STATUS.OK, m[1].toUpperCase())
-        : Utils.createResult(STATUS.FAIL, "No");
-    } catch (error) { return Utils.errorResult(error); }
-  }
 
 }
 
-/**
- * 主流程 - 执行检测并输出结果
- */
+// 所有 Tile 共用此脚本；只运行 argument.service 对应的检测。
+const SERVICES = {
+  netflix: { title: "Netflix", check: "checkNetflix", url: "https://www.netflix.com" },
+  disney: { title: "Disney+", check: "checkDisney", url: "https://www.disneyplus.com" },
+  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.max.com" },
+  youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium" },
+  spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com" },
+  chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com" },
+  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com" },
+  claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai" },
+  reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com" }
+};
+
+async function runServiceTile(service) {
+  // hasOwnProperty 防止 constructor 等继承属性被误当成服务。
+  if (!Object.prototype.hasOwnProperty.call(SERVICES, service)) {
+    $done({ title: "检测配置错误", content: "未知服务: " + service, backgroundColor: "#C44" });
+    return;
+  }
+  const definition = SERVICES[service];
+  const prices = service === "netflix" && ARGS.nfprice !== "false"
+    ? ServiceChecker.fetchNetflixPrices() : null;
+  let result;
+  try { result = await ServiceChecker[definition.check](); }
+  catch (error) { result = Utils.errorResult(error); }
+  const suffix = prices && result.status === STATUS.OK
+    ? await ServiceChecker.getNetflixPrice(prices, result.region) : "";
+  if (ARGS.notify === "true" && ARGS.mode !== "collapsed") {
+    try { notifyUnlockChanges([{ name: definition.title, result }]); }
+    catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
+  }
+  const colors = {
+    [STATUS.OK]: "#88A788",
+    [STATUS.COMING]: "#D4A017",
+    [STATUS.FAIL]: "#C44",
+    [STATUS.TIMEOUT]: "#86868B",
+    [STATUS.ERROR]: "#86868B"
+  };
+  const content = Utils.buildContent(result, suffix);
+  $done({
+    title: definition.title,
+    content: content === "No" ? "NO" : content,
+    // icon 由覆写配置提供，更新状态时保留各服务的 Logo。
+    backgroundColor: colors[result.status] || "#86868B",
+    url: definition.url
+  });
+}
+
+/** 主流程：独立服务优先；兼容仍在使用的汇总面板配置。 */
 (async () => {
   try {
     const args = ARGS = Utils.parseArgs(typeof $argument === "string" ? $argument : "");
+    args.service = String(args.service || "").trim().toLowerCase();
+    args.mode = String(args.mode || "home").trim().toLowerCase();
+    if (args.mode === "collapsed") args.proxy = "";
+    if (args.service && args.service !== "all") {
+      await runServiceTile(args.service);
+      return;
+    }
     // Netflix 价格表与各服务检测并行预取（仅在开启价格显示时）
     const pricesPromise = args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
     const results = await Promise.all([
@@ -692,12 +729,10 @@ class ServiceChecker {
       ServiceChecker.checkChatGPT(),
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit(),
-      // Viu 默认关闭：仅当面板参数 viu=true 时才发起检测（否则占位 null，不显示）
-      args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null)
+      ServiceChecker.checkReddit()
     ]);
 
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, viu] = results;
+    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit] = results;
     const netflixPrice = (netflix.status === STATUS.OK && pricesPromise)
       ? await ServiceChecker.getNetflixPrice(pricesPromise, netflix.region)
       : "";
@@ -714,14 +749,7 @@ class ServiceChecker {
       { name: "Reddit", result: reddit }
     ];
 
-    // Viu：默认关闭，且仅在可用（OK）时才显示；不可用 / 未启用一律不显示。
-    // 插到 Spotify 之前，让前几行都是流媒体（Netflix/Disney+/HBO Max/YouTube/Viu/Spotify）。
-    if (viu && viu.status === STATUS.OK) {
-      const at = services.findIndex(s => s.name === "Spotify");
-      services.splice(at < 0 ? services.length : at, 0, { name: "Viu", result: viu });
-    }
-
-    if (args.notify === "true") {
+    if (args.notify === "true" && args.mode !== "collapsed") {
       try { notifyUnlockChanges(services); }
       catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
     }

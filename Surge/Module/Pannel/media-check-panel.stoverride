@@ -1,21 +1,121 @@
-# GitHub 远程脚本版：导入此覆写即可加载 Scripts 目录下的 Stash 脚本。
 # 原脚本：HotKids & ChatGPT & Claude
-# Stash 首页汇总面板；默认遵循分流规则。
-# 修改下面的 argument 即可调整参数，参数值中含 &、+、空格等时使用 URL 编码。
-name: 'Streaming & AI Service Monitor · Stash'
+# 独立服务卡片：与 Stash 官方 Collapsed Tiles 示例一致。
+# 默认放入“流媒体/第三方服务”页面；长按节点时经该节点检测。
+# 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
+# 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
+# 图标逐项替换为用户提供的统一白色版本。
+name: 'Streaming & AI Service Tiles · Stash'
 desc: >-
-  首页汇总流媒体、AI 与 Reddit 可用性。可选 Netflix 价格、Viu、Gemini API Key 和变化通知。
-  每 600 秒执行；默认按 Stash 分流规则请求，可通过 proxy 参数指定代理。
+  每个服务独立卡片，显示 Logo、地区和可用性；ChatGPT 保留一张卡片。
+  共 9 项服务。按 service 参数仅执行对应检测。
 tiles:
-  - name: hotkids-media-check-home
+  - name: hotkids-media-check-netflix
     interval: 600
-    title: '流媒体 & AI 可用性检测'
+    title: 'Netflix'
     content: '等待检测…'
-    icon: play.circle.fill
-    backgroundColor: '#DAA520'
-    collapsed: false
-    argument: 'geminiapikey=null&nfprice=true&viu=false&notify=false'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/netflix-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.netflix.com'
+    argument: 'service=netflix&mode=collapsed&notify=false&nfprice=true'
+  - name: hotkids-media-check-disney
+    interval: 600
+    title: 'Disney+'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/disney-plus-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.disneyplus.com'
+    argument: 'service=disney&mode=collapsed&notify=false'
+  - name: hotkids-media-check-hbomax
+    interval: 600
+    title: 'HBO Max'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/hbo-max-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.max.com'
+    argument: 'service=hbomax&mode=collapsed&notify=false'
+  - name: hotkids-media-check-youtube
+    interval: 600
+    title: 'YouTube Premium'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/youtube-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.youtube.com/premium'
+    argument: 'service=youtube&mode=collapsed&notify=false'
+  - name: hotkids-media-check-spotify
+    interval: 600
+    title: 'Spotify'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.spotify.com'
+    argument: 'service=spotify&mode=collapsed&notify=false'
+  - name: hotkids-media-check-chatgpt
+    interval: 600
+    title: 'ChatGPT'
+    content: '等待检测…'
+    icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/chatgpt.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://chatgpt.com'
+    argument: 'service=chatgpt&mode=collapsed&notify=false'
+  - name: hotkids-media-check-gemini
+    interval: 600
+    title: 'Gemini'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/google-gemini-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://gemini.google.com'
+    argument: 'service=gemini&mode=collapsed&notify=false&geminiapikey=null'
+  - name: hotkids-media-check-claude
+    interval: 600
+    title: 'Claude'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/claude-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://claude.ai'
+    argument: 'service=claude&mode=collapsed&notify=false'
+  - name: hotkids-media-check-reddit
+    interval: 600
+    title: 'Reddit'
+    content: '等待检测…'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/reddit-light.png'
+    backgroundColor: '#86868B'
+    collapsed: true
+    url: 'https://www.reddit.com'
+    argument: 'service=reddit&mode=collapsed&notify=false'
+
 script-providers:
-  hotkids-media-check-home:
+  hotkids-media-check-netflix:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-disney:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-hbomax:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-youtube:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-spotify:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-chatgpt:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-gemini:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-claude:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    interval: 86400
+  hotkids-media-check-reddit:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
     interval: 86400
