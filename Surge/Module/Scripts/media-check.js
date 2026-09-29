@@ -1,9 +1,18 @@
 /**
  * =============================================================================
- * 流媒体 & AI 服务解锁检测脚本 - Surge Panel Script
+ * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.0.0 (2026-02-10)
+ * @version      2.1.0 (2026-09-29)
+ * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
+ * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
+ * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
+ * @arguments    service=netflix&nfprice=true&notify=false
+ *               service 可选 netflix/disney/hbomax/youtube/spotify/chatgpt/gemini/claude/reddit
+ *               Stash 不传 service 或传 service=all 时汇总；Surge 始终使用多行汇总
+ *               mode=collapsed 由 Stash 选择检测节点，忽略 proxy 并关闭变化通知
+ *               可选 proxy=URL编码后的节点名、notifykey=自定义通知分组
+ * @routing      默认遵循所在客户端分流；proxy 指定代理，Stash 折叠模式由所选节点接管。
  * @author       HotKids & ChatGPT & Claude
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -12,7 +21,7 @@
  *
  * 🎬 流媒体
  *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
- *    ├─ Disney+       支持 Hotstar 地区识别（ID/MY/TH/PH/VN）
+ *    ├─ Disney+       统一按地区与接口可用性判断
  *    ├─ HBO Max       单请求方案（max.com 响应头取地区码）、第三方平台识别（JP/KR/CA）
  *    ├─ YouTube       双重请求机制（带/不带 Cookie）
  *    └─ Spotify       标准地区检测
@@ -25,18 +34,15 @@
  * 🌐 社交 & 其他
  *    └─ Reddit        地区访问检测
  *
- * 🧩 可选（默认关闭，需参数开启，且仅在可用时显示）
- *    └─ Viu           HK/东南亚流媒体，viu=true 开启（参考 lmc999/RegionRestrictionCheck）
- *
  * ═══════════════════════════════════════════════════════════════════════════
  * ⚙️ 参数配置
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * • geminiapikey=YOUR_KEY    Gemini API Key（可选，增强检测准确性）
  * • nfprice=false            关闭 Netflix 价格显示（默认开启）
+ * • viu=true                 仅 Surge：开启 Viu 检测，仅可用时显示（默认关闭）
  * • notify=true              解锁状态变化推送（默认关闭）：可用性或区域变化时通知，
  *                            超时/错误视为未知不触发，首次运行仅记录基线
- * • viu=true                 开启 Viu 检测（默认关闭；开启后仅在可用时显示）
  *
  * ═══════════════════════════════════════════════════════════════════════════
  * 🎨 状态指示
@@ -47,6 +53,16 @@
  *
  * =============================================================================
  */
+
+// 优先使用客户端的环境标识；tile 类型兼容未提供 Stash 版本标识的运行环境。
+const ENV = typeof $environment === "object" && $environment ? $environment : {};
+const IS_STASH = !!(ENV["stash-version"] || ENV["stash-build"] ||
+  (!(ENV["surge-version"] || ENV["surge-build"]) && typeof $script === "object" && $script?.type === "tile"));
+
+function finishPanel({ backgroundColor, ...panel }) {
+  panel[IS_STASH ? "backgroundColor" : "icon-color"] = backgroundColor;
+  $done(panel);
+}
 
 // 全局配置常量
 const CONFIG = {
@@ -67,8 +83,15 @@ let ARGS = {};
  * 首次运行仅记录基线
  */
 function notifyUnlockChanges(services) {
+  // 保留两端既有记录；各 Stash Tile 单独保存，避免并发写入互相覆盖。
+  const scope = ARGS.service && ARGS.service !== "all" ? ":" + ARGS.service : "";
+  const group = JSON.stringify([ARGS.notifykey || "home", ARGS.proxy || "routing"]);
+  const key = IS_STASH ? "stash_media_check_notify_v1:" + group + scope
+    : (!ARGS.notifykey && !ARGS.proxy ? "mediaCheckNotifyState"
+      : "mediaCheckNotifyState:" + encodeURIComponent(group));
   let prev = {};
-  try { prev = JSON.parse($persistentStore.read("mediaCheckNotifyState")) || {}; } catch (e) {}
+  try { prev = JSON.parse($persistentStore.read(key)) || {}; } catch (e) {}
+  if (!prev || typeof prev !== "object" || Array.isArray(prev)) prev = {};
   const next = { ...prev };
   const changes = [];
   services.forEach(s => {
@@ -79,14 +102,14 @@ function notifyUnlockChanges(services) {
     const cur = avail ? `1:${region}` : "0";
     const old = prev[s.name];
     next[s.name] = cur;
-    if (old === undefined || old === cur) return;
+    if (typeof old !== "string" || old === cur) return;
     const oldAvail = old.charAt(0) === "1";
     const oldRegion = old.slice(2);
     if (!avail) changes.push(`🔴 ${s.name} 解锁失效`);
     else if (!oldAvail) changes.push(`🟢 ${s.name} 已解锁${region ? `（${region}）` : ""}`);
     else changes.push(`🔀 ${s.name} 区域变化 ${oldRegion || "?"} → ${region || "?"}`);
   });
-  $persistentStore.write(JSON.stringify(next), "mediaCheckNotifyState");
+  $persistentStore.write(JSON.stringify(next), key);
   if (changes.length) $notification.post("🎬 解锁状态变化", "", changes.join("\n"));
 }
 
@@ -106,30 +129,74 @@ class Utils {
     return new Promise((resolve, reject) => {
       const { url, method = "GET", headers = {}, body = null, timeout = CONFIG.TIMEOUT } = options;
       const finalHeaders = { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers };
-      const timer = setTimeout(() => reject("Timeout"), timeout);
-
-      const cb = (err, resp, data) => {
-        clearTimeout(timer);
-        if (err) return reject(err);
-        resolve({ status: resp.status, headers: resp.headers || {}, body: data || "" });
+      if (IS_STASH && ARGS.proxy) finalHeaders["X-Stash-Selected-Proxy"] = encodeURIComponent(ARGS.proxy);
+      let settled = false;
+      const settle = (error, value) => {
+        if (settled) return;
+        settled = true;
+        if (typeof clearTimeout === "function") clearTimeout(timer);
+        if (error) reject(error);
+        else resolve(value);
       };
-
-      const reqOpts = { url, headers: finalHeaders, body };
-      method === "POST" ? $httpClient.post(reqOpts, cb) : $httpClient.get(reqOpts, cb);
+      // 脚本计时器用毫秒；Surge / Stash HTTP timeout 均用秒。
+      const timer = setTimeout(() => settle(new Error("Timeout")), timeout);
+      const cb = (error, response, data) => {
+        if (settled) return;
+        if (error) return settle(error);
+        try {
+          const status = Number(response && (response.status || response.statusCode));
+          if (!status) return settle(new Error("Invalid Response"));
+          if (status >= 500) return settle(new Error(`HTTP ${status}`));
+          const normalizedHeaders = {};
+          Object.entries(response.headers || {}).forEach(([key, value]) => {
+            normalizedHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(", ") : String(value);
+          });
+          settle(null, { status, headers: normalizedHeaders, body: data == null ? "" : String(data) });
+        } catch (error) { settle(error); }
+      };
+      const request = {
+        url,
+        headers: finalHeaders,
+        timeout: timeout / 1000,
+        "auto-redirect": true,
+        // 保留显式 Cookie；不让上一次请求的自动 Cookie 干扰双重检测。
+        "auto-cookie": false
+      };
+      if (!IS_STASH && ARGS.proxy) request.policy = ARGS.proxy;
+      if (body !== null) request.body = body;
+      try {
+        if (method === "POST") $httpClient.post(request, cb);
+        else $httpClient.get(request, cb);
+      } catch (error) { settle(error); }
     });
   }
 
   /**
-   * 解析 Surge 参数字符串
+   * 解析 argument 参数字符串（支持 URL 编码）
    * @param {string} argString - 参数字符串 (key1=value1&key2=value2)
    * @returns {Object} 解析后的参数对象
    */
   static parseArgs(argString) {
-    if (!argString) return {};
-    return Object.fromEntries(argString.split("&").map(p => {
-      const [k, ...v] = p.split("=");
-      return [k, v.join("=")];
-    }));
+    const result = Object.create(null);
+    const decode = value => {
+      try { return decodeURIComponent(value); } catch { return value; }
+    };
+    String(argString || "").split("&").forEach(part => {
+      const at = part.indexOf("=");
+      if (at < 1) return;
+      result[decode(part.slice(0, at)).trim()] = decode(part.slice(at + 1));
+    });
+    ["nfprice", "notify", "viu"].forEach(key => {
+      if (result[key] !== undefined) result[key] = result[key].trim().toLowerCase();
+    });
+    return result;
+  }
+
+  static errorResult(error) {
+    const message = String(error && (error.message || error) || "");
+    return /timeout|timed.?out|超时/i.test(message)
+      ? this.createResult(STATUS.TIMEOUT, "Timeout")
+      : this.createResult(STATUS.ERROR, "Error");
   }
 
   /**
@@ -139,7 +206,7 @@ class Utils {
    * @param {string} suffix - 额外信息（如价格）
    * @returns {string} 格式化的显示行
    */
-  static buildLine(name, result, suffix = "") {
+  static buildContent(result, suffix = "") {
     const statusMap = {
       [STATUS.OK]: result.region || "OK",
       [STATUS.COMING]: (result.region?.includes("(") || result.region?.includes(" ")) ? result.region : `${result.region || "N/A"} (Coming)`,
@@ -153,7 +220,11 @@ class Utils {
       ? result.region 
       : statusMap[result.status];
     
-    return `${name.padEnd(11)} ➟ ${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
+    return `${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
+  }
+
+  static buildLine(name, result, suffix = "") {
+    return `${name.padEnd(11)} ➟ ${this.buildContent(result, suffix)}`;
   }
 
   /**
@@ -178,8 +249,8 @@ class Utils {
       const res = await this.request({ url, ...options });
       const match = res.body.match(regex);
       return match ? this.createResult(STATUS.OK, match[1]?.toUpperCase()) : this.createResult(STATUS.FAIL);
-    } catch {
-      return this.createResult(STATUS.FAIL);
+    } catch (error) {
+      return this.errorResult(error);
     }
   }
 }
@@ -198,8 +269,8 @@ class ServiceChecker {
       try {
         const res = await Utils.request({ url: `https://www.netflix.com/title/${id}` });
         return { httpStatus: res.status, body: res.body || "", headers: res.headers || {} };
-      } catch {
-        return { httpStatus: -1, body: "", headers: {} };
+      } catch (error) {
+        return { httpStatus: -1, body: "", headers: {}, error };
       }
     };
 
@@ -228,7 +299,7 @@ class ServiceChecker {
     const r1 = await checkFilm(81280792);
 
     if (r1.httpStatus === 403) return Utils.createResult(STATUS.FAIL);
-    if (r1.httpStatus === -1) return Utils.createResult(STATUS.ERROR);
+    if (r1.httpStatus === -1) return Utils.errorResult(r1.error);
 
     // Film 1 可用且非 "Oh no!" → 完整解锁
     if (r1.httpStatus === 200 && !r1.body.includes("Oh no!")) {
@@ -238,6 +309,7 @@ class ServiceChecker {
 
     // Film 1 不可用 → 尝试 Film 2: Breaking Bad
     const r2 = await checkFilm(70143836);
+    if (r2.httpStatus === -1) return Utils.errorResult(r2.error);
 
     if (r2.httpStatus === 200 && !r2.body.includes("Oh no!")) {
       const region = extractRegion(r2.body, r2.headers) || "US";
@@ -261,7 +333,7 @@ class ServiceChecker {
    * @returns {Promise<Object|null>} 价格表 HTTP 响应（或缓存等价物）
    */
   static fetchNetflixPrices() {
-    const CACHE_KEY = "media_check_nf_prices";
+    const CACHE_KEY = IS_STASH ? "stash_media_check_nf_prices_v1" : "media_check_nf_prices";
     const TTL = 86400000; // 24h
 
     let cached = null;
@@ -275,7 +347,7 @@ class ServiceChecker {
 
     return Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json" })
       .then(res => {
-        if (res?.status === 200 && res.body) {
+        if (res?.status === 200 && res.body && Array.isArray(JSON.parse(res.body))) {
           $persistentStore.write(JSON.stringify({ ts: Date.now(), body: res.body }), CACHE_KEY);
           return res;
         }
@@ -303,19 +375,17 @@ class ServiceChecker {
 
   /**
    * Disney+ 解锁检测
-   * 东南亚 Hotstar 地区（ID, MY, PH, TH, VN，不含 SG 和 IN）显示为 Hotstar
+   * 所有地区共用主页与 API 检测，不按地区名单特殊分类
    * @returns {Promise<Object>} 检测结果
    */
   static async checkDisney() {
-    const HOTSTAR_REGIONS = ['ID', 'MY', 'PH', 'TH', 'VN'];
-    
     const checkHomePage = async () => {
       try {
         const res = await Utils.request({ url: "https://www.disneyplus.com/" });
         if (res.status !== 200 || res.body.includes('Sorry, Disney+ is not available')) return { valid: false };
         const match = res.body.match(/Region: ([A-Za-z]{2})[\s\S]*?CNBL: [12]/);
         return match ? { valid: true, region: match[1] } : { valid: true, region: "" };
-      } catch { return { valid: false }; }
+      } catch (error) { return { valid: false, error }; }
     };
 
     const checkAPI = async () => {
@@ -342,7 +412,7 @@ class ServiceChecker {
           inSupportedLocation: session?.inSupportedLocation,
           countryCode: session?.location?.countryCode
         };
-      } catch { return { valid: false }; }
+      } catch (error) { return { valid: false, error }; }
     };
 
     try {
@@ -357,7 +427,6 @@ class ServiceChecker {
           return Utils.createResult(STATUS.FAIL, "No");
         }
         
-        if (HOTSTAR_REGIONS.includes(region)) return { status: STATUS.COMING, region: `${region} (Hotstar)` };
         return Utils.createResult(isSupported ? STATUS.OK : STATUS.COMING, region);
       }
       
@@ -368,8 +437,9 @@ class ServiceChecker {
           : Utils.createResult(STATUS.FAIL, "No");
       }
       
+      if (homeRes.error || apiRes.error) return Utils.errorResult(homeRes.error || apiRes.error);
       return Utils.createResult(STATUS.FAIL);
-    } catch { return Utils.createResult(STATUS.ERROR); }
+    } catch (error) { return Utils.errorResult(error); }
   }
 
   /**
@@ -412,8 +482,8 @@ class ServiceChecker {
       return availableRegions.has(region)
         ? Utils.createResult(STATUS.OK, region)
         : Utils.createResult(STATUS.FAIL, `${region} (No)`);
-    } catch {
-      return Utils.createResult(STATUS.FAIL, "No");
+    } catch (error) {
+      return Utils.errorResult(error);
     }
   }
 
@@ -442,11 +512,10 @@ class ServiceChecker {
       // 合并两次结果
       const combinedBody = tmpresult1.body + ":" + tmpresult2.body;
       
-      // 明确地区限制提示优先于页面地区码，避免误判为可用
+      // Stash 官方示例的明确地区限制提示优先于页面地区码。
       if (/youtube premium is not available in your country/i.test(combinedBody)) {
         return Utils.createResult(STATUS.FAIL, "NO");
       }
-
       // 检查是否为大陆
       if (combinedBody.includes('www.google.cn')) {
         return Utils.createResult(STATUS.FAIL, "CN");
@@ -477,7 +546,7 @@ class ServiceChecker {
         }
       }
       
-    } catch { return Utils.createResult(STATUS.ERROR, "Error"); }
+    } catch (error) { return Utils.errorResult(error); }
   }
 
   /**
@@ -512,14 +581,14 @@ class ServiceChecker {
       const iosBlocked = /VPN|disallowed isp|been blocked/i.test(iosRes.body);
 
       if (!webBlocked && !iosBlocked) {
-        const traceRes = await Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace" });
-        const region = traceRes.body.match(/loc=([A-Z]{2})/)?.[1] || "";
+        const traceRes = await Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace" }).catch(() => null);
+        const region = (traceRes?.body || "").match(/loc=([A-Z]{2})/)?.[1] || "";
         return Utils.createResult(STATUS.OK, region || "OK");
       }
       if (webBlocked && iosBlocked) return Utils.createResult(STATUS.FAIL, "NO");
       if (!webBlocked && iosBlocked) return Utils.createResult(STATUS.COMING, "Web Only");
       return Utils.createResult(STATUS.COMING, "Mobile Only");
-    } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
+    } catch (error) { return Utils.errorResult(error); }
   }
 
   /**
@@ -538,7 +607,7 @@ class ServiceChecker {
       }
       const region = traceRes?.body.match(/loc=([A-Z]{2})/)?.[1] || "";
       return Utils.createResult(STATUS.OK, region || "OK");
-    } catch { return Utils.createResult(STATUS.FAIL, "No"); }
+    } catch (error) { return Utils.errorResult(error); }
   }
 
   /**
@@ -549,6 +618,7 @@ class ServiceChecker {
   static async checkGemini() {
     // 网页检测：访问 gemini.google.com（参考 lmc999/RegionRestrictionCheck）
     let webResult = null;
+    let requestError = null;
     try {
       const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
       const body = res.body || "";
@@ -562,23 +632,24 @@ class ServiceChecker {
         return Utils.createResult(STATUS.FAIL, "No");
       }
       webResult = "fail";
-    } catch {}
+    } catch (error) { requestError = error; }
 
     // API 检测 fallback（需要 Key）
     const apiKey = (ARGS.geminiapikey || "").trim();
-    if (apiKey && !["{", "}", "0", "null"].some(k => apiKey.toLowerCase().includes(k))) {
+    if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase()) && !/[{}]/.test(apiKey)) {
       try {
-        const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}` });
+        const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}` });
         const body = (res.body || "").toLowerCase();
         if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
         if (res.status === 429) return Utils.createResult(STATUS.OK, "OK");
         if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
           return Utils.createResult(STATUS.ERROR, "Invalid Key");
         }
-      } catch {}
+      } catch (error) { requestError = error; }
     }
 
-    return Utils.createResult(STATUS.FAIL, webResult ? "No" : "Timeout");
+    if (requestError) return Utils.errorResult(requestError);
+    return Utils.createResult(STATUS.FAIL, webResult ? "No" : "Unknown");
   }
 
   /**
@@ -593,20 +664,10 @@ class ServiceChecker {
       return res.status === 200
         ? Utils.createResult(STATUS.OK, "OK")
         : Utils.createResult(STATUS.FAIL, "No");
-    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
+    } catch (error) { return Utils.errorResult(error); }
   }
 
-  /**
-   * Viu 解锁检测（默认关闭，需面板参数 viu=true 启用；仅在可用时显示）
-   *
-   * 参考 lmc999/RegionRestrictionCheck：请求 www.viu.com，可用地区会重定向到
-   * www.viu.com/ott/{area}/{lang}，不支持的地区落到 no-service 页。原脚本取重定向
-   * 后最终 URL 的地区段判断；Surge $httpClient 不暴露 url_effective（实测 response
-   * 仅 status/headers），故改从最终页面正文里的 /ott/{area}/ 路径提取地区码——正文里
-   * 该路径多为相对形式（实测 SG 节点返回 `/ott/sg/en"`），不带 viu.com 前缀，故正则
-   * 只匹配 /ott/{2 位地区}/。提取不到即按不可用处理（安全失败：宁可不显示）。
-   * @returns {Promise<Object>} 检测结果
-   */
+  /** Viu 仅供 Surge 可选检测：从最终页面中的 /ott/{area}/ 路径提取地区。 */
   static async checkViu() {
     try {
       const res = await Utils.request({ url: "https://www.viu.com/" });
@@ -615,17 +676,69 @@ class ServiceChecker {
       return m
         ? Utils.createResult(STATUS.OK, m[1].toUpperCase())
         : Utils.createResult(STATUS.FAIL, "No");
-    } catch { return Utils.createResult(STATUS.TIMEOUT, "Timeout"); }
+    } catch (error) { return Utils.errorResult(error); }
   }
-
 }
 
-/**
- * 主流程 - 执行检测并输出结果
- */
+// Stash Tile 只运行 argument.service 对应的检测。
+const SERVICES = {
+  netflix: { title: "Netflix", check: "checkNetflix", url: "https://www.netflix.com" },
+  disney: { title: "Disney+", check: "checkDisney", url: "https://www.disneyplus.com" },
+  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.max.com" },
+  youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium" },
+  spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com" },
+  chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com" },
+  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com" },
+  claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai" },
+  reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com" }
+};
+
+async function runServiceTile(service) {
+  // hasOwnProperty 防止 constructor 等继承属性被误当成服务。
+  if (!Object.prototype.hasOwnProperty.call(SERVICES, service)) {
+    finishPanel({ title: "检测配置错误", content: "未知服务: " + service, backgroundColor: "#C44" });
+    return;
+  }
+  const definition = SERVICES[service];
+  const prices = service === "netflix" && ARGS.nfprice !== "false"
+    ? ServiceChecker.fetchNetflixPrices() : null;
+  let result;
+  try { result = await ServiceChecker[definition.check](); }
+  catch (error) { result = Utils.errorResult(error); }
+  const suffix = prices && result.status === STATUS.OK
+    ? await ServiceChecker.getNetflixPrice(prices, result.region) : "";
+  if (ARGS.notify === "true" && ARGS.mode !== "collapsed") {
+    try { notifyUnlockChanges([{ name: definition.title, result }]); }
+    catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
+  }
+  const colors = {
+    [STATUS.OK]: "#88A788",
+    [STATUS.COMING]: "#D4A017",
+    [STATUS.FAIL]: "#C44",
+    [STATUS.TIMEOUT]: "#86868B",
+    [STATUS.ERROR]: "#86868B"
+  };
+  const content = Utils.buildContent(result, suffix);
+  finishPanel({
+    title: definition.title,
+    content: content === "No" ? "NO" : content,
+    // icon 由覆写配置提供，更新状态时保留各服务的 Logo。
+    backgroundColor: colors[result.status] || "#86868B",
+    url: definition.url
+  });
+}
+
+/** 主流程：Surge 汇总；Stash 按 service 检测，并兼容旧汇总配置。 */
 (async () => {
   try {
-    const args = ARGS = Utils.parseArgs($argument);
+    const args = ARGS = Utils.parseArgs(typeof $argument === "string" ? $argument : "");
+    args.service = IS_STASH ? String(args.service || "").trim().toLowerCase() : "";
+    args.mode = IS_STASH ? String(args.mode || "home").trim().toLowerCase() : "home";
+    if (args.mode === "collapsed") args.proxy = "";
+    if (args.service && args.service !== "all") {
+      await runServiceTile(args.service);
+      return;
+    }
     // Netflix 价格表与各服务检测并行预取（仅在开启价格显示时）
     const pricesPromise = args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
     const results = await Promise.all([
@@ -638,8 +751,7 @@ class ServiceChecker {
       ServiceChecker.checkGemini(),
       ServiceChecker.checkClaude(),
       ServiceChecker.checkReddit(),
-      // Viu 默认关闭：仅当面板参数 viu=true 时才发起检测（否则占位 null，不显示）
-      args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null)
+      !IS_STASH && args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null)
     ]);
 
     const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, viu] = results;
@@ -659,32 +771,34 @@ class ServiceChecker {
       { name: "Reddit", result: reddit }
     ];
 
-    // Viu：默认关闭，且仅在可用（OK）时才显示；不可用 / 未启用一律不显示。
-    // 插到 Spotify 之前，让前几行都是流媒体（Netflix/Disney+/HBO Max/YouTube/Viu/Spotify）。
+    // Surge 的 Viu 保持原顺序及仅可用时显示的规则。
     if (viu && viu.status === STATUS.OK) {
-      const at = services.findIndex(s => s.name === "Spotify");
-      services.splice(at < 0 ? services.length : at, 0, { name: "Viu", result: viu });
+      services.splice(4, 0, { name: "Viu", result: viu });
     }
 
-    if (args.notify === "true") notifyUnlockChanges(services);
+    if (args.notify === "true" && args.mode !== "collapsed") {
+      try { notifyUnlockChanges(services); }
+      catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
+    }
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
     const totalCount = services.length;
     const goodCount = services.filter(s => s.result.status === STATUS.OK || s.result.status === STATUS.COMING).length;
-    const hasFailed = services.some(s => [STATUS.FAIL, STATUS.ERROR, STATUS.TIMEOUT].includes(s.result.status));
+    const hasFailed = services.some(s => IS_STASH ? s.result.status !== STATUS.OK
+      : [STATUS.FAIL, STATUS.ERROR, STATUS.TIMEOUT].includes(s.result.status));
     
-    $done({
+    finishPanel({
       title: `${hasFailed ? ICONS.WARNING : ICONS.SUCCESS} 可用性检测 ${goodCount}/${totalCount}`,
       content: lines.join("\n"),
       icon: "play.circle.fill",
-      "icon-color": hasFailed ? ICONS.COLORS.WARNING : ICONS.COLORS.SUCCESS
+      backgroundColor: hasFailed ? ICONS.COLORS.WARNING : ICONS.COLORS.SUCCESS
     });
   } catch (error) {
-    $done({
+    finishPanel({
       title: "❌ 检测失败",
       content: `错误: ${error.message || error}`,
       icon: "exclamationmark.triangle.fill",
-      "icon-color": "#FF6B6B"
+      backgroundColor: "#FF6B6B"
     });
   }
 })();

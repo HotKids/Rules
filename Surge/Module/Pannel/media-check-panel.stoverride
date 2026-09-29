@@ -93,29 +93,29 @@ tiles:
 
 script-providers:
   hotkids-media-check-netflix:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-disney:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-hbomax:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-youtube:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-spotify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-chatgpt:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-gemini:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-claude:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
   hotkids-media-check-reddit:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400
