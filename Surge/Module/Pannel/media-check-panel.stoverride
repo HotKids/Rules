@@ -7,8 +7,7 @@
 name: 'Streaming & AI Service Tiles · Stash'
 icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Streaming.png
 desc: >-
-  检测 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude 和 Reddit 的可用性与地区。
-  独立卡片展示检测结果，支持按节点检测。
+  检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
