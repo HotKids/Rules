@@ -442,6 +442,11 @@ class ServiceChecker {
       // 合并两次结果
       const combinedBody = tmpresult1.body + ":" + tmpresult2.body;
       
+      // 明确地区限制提示优先于页面地区码，避免误判为可用
+      if (/youtube premium is not available in your country/i.test(combinedBody)) {
+        return Utils.createResult(STATUS.FAIL, "No");
+      }
+
       // 检查是否为大陆
       if (combinedBody.includes('www.google.cn')) {
         return Utils.createResult(STATUS.FAIL, "CN");
@@ -504,7 +509,7 @@ class ServiceChecker {
       ]);
 
       const webBlocked = /unsupported_country/i.test(webRes.body);
-      const iosBlocked = /VPN/i.test(iosRes.body);
+      const iosBlocked = /VPN|disallowed isp|been blocked/i.test(iosRes.body);
 
       if (!webBlocked && !iosBlocked) {
         const traceRes = await Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace" });
