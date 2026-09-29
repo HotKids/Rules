@@ -1,6 +1,6 @@
-# Date: 2026-08-28 21:23:19
+# Date: 2026-09-29 20:54:14
 
-name: Stash for Android
+name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
 author: '@HotKids'
 icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"
@@ -22,12 +22,9 @@ hosts: #!replace
 # ── DNS ──
 
 dns: #!replace
-  # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，
-  # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能
-  # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。
-  # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，
-  # 满足官方要求的前置条件之一（避免递归查询）。
-  follow-rule: true
+  # DNS 查询直接出站，不跟随代理规则；解析服务器仍由下方策略选择。
+  # 未命中 nameserver-policy 使用 Cloudflare DoH；国内与节点域名使用腾讯/阿里 DoH。
+  follow-rule: false
 
   # 引导 DNS：仅用于解析 nameserver 服务器的域名
   # 只能填纯 IP 地址
@@ -143,12 +140,6 @@ dns: #!replace
 #       User-Agent:
 #       - "Clash/v1.18.0"
 #       - "mihomo/1.18.3"
-#     health-check:
-#       enable: true
-#       url: 'http://cp.cloudflare.com/generate_204'
-#       interval: 600
-#       timeout: 5000
-#       expected-status: 204
 
 proxy-groups: #!replace
   # Global
@@ -570,8 +561,8 @@ rule-providers: #!replace
 
 # 规则
 rules: #!replace
-  # 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
-  - AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT
+  # 拦截境外 QUIC，排除国内域名/IP；no-track 隐藏该规则的连接记录
+  - AND,((PROTOCOL,QUIC),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT,no-track
 
   # 标准 SSH 端口
   - AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT

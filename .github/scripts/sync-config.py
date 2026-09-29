@@ -4117,7 +4117,7 @@ def _sync_singbox(config: dict, group_lines: list[str], rule_lines: list[str]) -
 #
 # Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
 # 同一定位）：整份配置原样转录，只在 Stash 与 mihomo 真正有差异的点上改写，因此
-# 可以直接作为覆写文件导入 Stash 使用。差异点仅以下四类，其余逐行转录（含注释与排版）。
+# 可以直接作为覆写文件导入 Stash 使用；Stash 专属适配之外逐行转录（含注释与排版）。
 
 # 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由客户端自身管理
 #    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并省略。
@@ -4191,6 +4191,7 @@ def _sync_stash(config: dict) -> None:
     policy_split: list[str] | None = None   # 逗号拼接键待展开的域名
     policy_val: list[str] = []              # 该键的值行
     skip_use_items = False                  # use: 的列表项（已换成 include-all）
+    skip_provider_health = False            # Provider 健康检查由 Stash 策略组接管
     changes: list[str] = []
 
     def flush() -> None:
@@ -4232,6 +4233,7 @@ def _sync_stash(config: dict) -> None:
         m_top = _TOP_KEY_RE.match(line)
         if m_top:
             top = m_top.group(1)
+            skip_provider_health = False
             keep_top = top not in _STASH_DROP_TOP
             if not keep_top:
                 buf.clear()
@@ -4240,18 +4242,22 @@ def _sync_stash(config: dict) -> None:
             flush()
             out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
-                # mihomo 用每条 nameserver 的 #RULES 后缀表达「DNS 跟随规则」，
-                # Stash 的等价物是全局开关 follow-rule。
+                # Stash 使用独立 DNS 出站；保留 nameserver-policy 与节点域名解析。
                 out += [
-                    "  # DNS 查询跟随规则出站（mihomo 用 nameserver 的 #RULES 后缀表达，",
-                    "  # Stash 为全局开关）。官方提示多数场景无需开启：DNS 经代理转发可能",
-                    "  # 破坏云服务商 CDN 优化并轻微增加延迟；如需 DNS 直连，将其改为 false。",
-                    "  # 下方 proxy-server-nameserver 已为代理服务器域名提供独立解析，",
-                    "  # 满足官方要求的前置条件之一（避免递归查询）。",
-                    "  follow-rule: true",
+                    "  # DNS 查询直接出站，不跟随代理规则；解析服务器仍由下方策略选择。",
+                    "  # 未命中 nameserver-policy 使用 Cloudflare DoH；国内与节点域名使用腾讯/阿里 DoH。",
+                    "  follow-rule: false",
                 ]
-                changes.append("dns: #RULES → follow-rule")
+                changes.append("dns: follow-rule=false")
             continue
+
+        if skip_provider_health:
+            if not stripped:
+                buf.append(line)
+                continue
+            if len(line) - len(line.lstrip()) > 4:
+                continue
+            skip_provider_health = False
 
         if not stripped or stripped.startswith("#"):
             buf.append(line)
@@ -4311,6 +4317,11 @@ def _sync_stash(config: dict) -> None:
         # ── provider：type 是 mihomo 专属；header 在 Stash 中为 headers ──
         if top in ("proxy-providers", "rule-providers"):
             key = m_sub.group(3).strip() if m_sub else ""
+            if top == "proxy-providers" and indent == 4 and key == "health-check":
+                buf.clear()
+                skip_provider_health = True
+                changes.append("proxy-providers: 健康检查交由策略组")
+                continue
             if key == "type":
                 buf.clear()
                 continue
@@ -4319,6 +4330,21 @@ def _sync_stash(config: dict) -> None:
                 out.append(line.replace("header:", "headers:", 1))
                 changes.append("proxy-providers: header → headers")
                 continue
+
+        # 只还原仓库里的境外 QUIC 限制规则，不改其他 UDP/443 或兜底规则。
+        if top == "rules" and stripped.startswith("- "):
+            condition = "AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN))))))"
+            rule = stripped[2:]
+            if rule.startswith(condition + ","):
+                rest = rule[len(condition) + 1:].split(",")
+                if rest[0] in ("⛔️ REJECT", "REJECT"):
+                    if "no-track" not in rest[1:]:
+                        rest.append("no-track")
+                    native = condition.replace("(NETWORK,UDP),(DST-PORT,443)", "(PROTOCOL,QUIC)")
+                    line = "  - " + native + "," + ",".join(rest)
+                    buf = ["  # 拦截境外 QUIC，排除国内域名/IP；no-track 隐藏该规则的连接记录"
+                           if l.strip().startswith("# 境外 QUIC（UDP 443）") else l for l in buf]
+                    changes.append("rules: 境外 QUIC → PROTOCOL,QUIC / no-track")
 
         flush()
         out.append(line)
@@ -4334,13 +4360,14 @@ def _sync_stash(config: dict) -> None:
     out[insert_at:insert_at] = [
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
-        f"name: {Path(out_path).stem} for Android",
+        f"name: {Path(out_path).stem}",
         "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
         'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
     ]
 
     out = _stash_comment_out(out, "proxy-providers")
+    out = _stash_group_health_checks(out)
 
     body = "\n".join(out).rstrip() + "\n"
     changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
@@ -4373,6 +4400,18 @@ def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
         return {}
     end = next((i for i in range(start + 1, len(lines))
                 if lines[i] and not lines[i].startswith((" ", "#"))), len(lines))
+    # 下一顶层块的前导注释不属于最后一个组，否则追加/删除组会穿过这段说明。
+    # 从块尾回扫，只排除顶格注释；保留组内缩进注释与原有空行。
+    for i in range(end - 1, start, -1):
+        if not lines[i].strip():
+            continue
+        if lines[i].startswith("#"):
+            end = i
+        else:
+            break
+    # 组间保留一个空行，多余的分节空行留在说明之前。
+    while end > start + 2 and not lines[end - 1].strip() and not lines[end - 2].strip():
+        end -= 1
     spans: dict[str, tuple[int, int]] = {}
     cur, cur_start = None, None
     for i in range(start + 1, end):
@@ -4384,6 +4423,23 @@ def _stash_group_spans(lines: list[str]) -> dict[str, tuple[int, int]]:
     if cur is not None:
         spans[cur] = (cur_start, end)
     return spans
+
+
+def _stash_group_health_checks(lines: list[str]) -> list[str]:
+    """为自动选路组补齐 Stash 检测参数；保留显式配置，不修改手动 select 组。"""
+    lines = list(lines)
+    for s, e in reversed(list(_stash_group_spans(lines).values())):
+        if not any(re.match(r"^    type:\s*(?:fallback|url-test)\s*$", l) for l in lines[s:e]):
+            continue
+        missing = [f"    {key}: {value}" for key, value in (("interval", "600"), ("lazy", "true"))
+                   if not any(re.match(rf"^    {key}:", l) for l in lines[s:e])]
+        if not missing:
+            continue
+        at = next((i for i in range(s, e) if re.match(r"^    filter:", lines[i])), e)
+        while at > s and not lines[at - 1].strip():
+            at -= 1
+        lines[at:at] = missing
+    return lines
 
 
 def _stash_render_group(g: dict) -> list[str]:
@@ -4427,7 +4483,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
     # 展示字段替换为本定制版专属内容，避免与基座在覆写列表中同名
     for i, l in enumerate(lines):
         if l.startswith("name: "):
-            lines[i] = f"name: {Path(overlay['stash_output']).stem} for Android"
+            lines[i] = f"name: {Path(overlay['stash_output']).stem}"
         elif l.startswith("desc: "):
             lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
                         f"叠加 {label}），请勿手动修改；如需调整请修改 Surge/Profile.conf。")
@@ -4543,7 +4599,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
 
     for n in notes:
         print(f"    · {n}")
-    return lines
+    return _stash_group_health_checks(lines)
 
 
 def _sync_stash_overlays(base_lines: list[str]) -> None:
