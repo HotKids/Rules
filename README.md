@@ -10,14 +10,12 @@
 | mihomo 完整配置 | [Sample.yaml](Clash/Sample.yaml) / [Mihomo.yaml](Clash/Mihomo.yaml) | 两种排版，配置内容等价 |
 | mihomo 订阅覆写 | [Script.js](Clash/Script/Script.js) | 用于支持 `main(config)` 的客户端脚本入口 |
 | Stash 配置覆写 | [Stash.stoverride](Clash/Script/Stash.stoverride) | 叠加到已有节点配置 |
-| Stash IP 检测 | [ip-security-panel.stoverride](Surge/Module/Pannel/ip-security-panel.stoverride) | 风险、DNS、出口、本地四张首页 Tile |
-| Stash 服务检测 | [media-check-panel.stoverride](Surge/Module/Pannel/media-check-panel.stoverride) | 独立服务 Tile，与配置覆写分别导入 |
 | Quantumult X | [Sample.conf](Quantumult/Sample.conf) | 完整示例配置 |
 | Loon | [Balloon.lcf](Surge/Balloon.lcf) | 完整示例配置 |
 | Surfboard | [Surfboard.conf](Surge/Surfboard.conf) | 完整示例配置 |
 | sing-box | [config.json](sing-box/config.json) | 含示例节点的配置模板，使用前替换节点 |
 
-远程导入使用文件的 **Raw 地址**。例如：[Stash 配置覆写](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride)、[Stash 服务检测](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/media-check-panel.stoverride)。示例配置中的订阅、节点和个人策略需要按自己的环境调整；名称以 `My` 开头的版本包含个人定制。
+远程导入使用文件的 **Raw 地址**，例如：[Stash 配置覆写](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride)。示例配置中的订阅、节点和个人策略需要按自己的环境调整；名称以 `My` 开头的版本包含个人定制。
 
 ## 修改哪里
 
