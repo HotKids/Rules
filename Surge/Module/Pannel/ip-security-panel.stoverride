@@ -4,7 +4,7 @@
 # 每 600 秒刷新；仅出口卡片通知 IP 变化，首次检测只记录基线。
 # 本地卡片显示直连公网 IP；DNS 卡片只显示解析器，不单凭地区判断泄露。
 # 如需折叠，请同时改为 collapsed: true 和 mode=collapsed（折叠模式不通知）。
-name: 'IP Security Monitor'
+name: 'IP Security Tiles'
 desc: 检测 IPPure 风险与类型、DNS 解析器、出口和本地 IP，支持刷新时通知 IP 变化
 icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Lock.png
 tiles:
