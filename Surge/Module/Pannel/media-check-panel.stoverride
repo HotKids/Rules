@@ -6,8 +6,8 @@
 # 图标逐项替换为用户提供的统一白色版本。
 name: 'Streaming & AI Service Tiles · Stash'
 desc: >-
-  每个服务独立卡片，显示 Logo、地区和可用性；ChatGPT 保留一张卡片。
-  共 9 项服务。按 service 参数仅执行对应检测。
+  检测 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude 和 Reddit 的可用性与地区。
+  独立卡片展示检测结果，支持按节点检测。
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
