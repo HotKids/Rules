@@ -1,0 +1,21 @@
+# GitHub 远程脚本版：导入此覆写即可加载同目录下的 Stash 脚本。
+# 原脚本：HotKids & ChatGPT & Claude
+# Stash 首页汇总面板；默认遵循分流规则。
+# 修改下面的 argument 即可调整参数，参数值中含 &、+、空格等时使用 URL 编码。
+name: 'Streaming & AI Service Monitor · Stash'
+desc: >-
+  首页汇总流媒体、AI 与 Reddit 可用性。可选 Netflix 价格、Viu、Gemini API Key 和变化通知。
+  每 600 秒执行；默认按 Stash 分流规则请求，可通过 proxy 参数指定代理。
+tiles:
+  - name: hotkids-media-check-home
+    interval: 600
+    title: '流媒体 & AI 可用性检测'
+    content: '等待检测…'
+    icon: play.circle.fill
+    backgroundColor: '#DAA520'
+    collapsed: false
+    argument: 'geminiapikey=null&nfprice=true&viu=false&notify=false'
+script-providers:
+  hotkids-media-check-home:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/media-check.stash.js
+    interval: 86400
