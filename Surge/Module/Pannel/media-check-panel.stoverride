@@ -6,7 +6,7 @@
 # 统一白色图标搭配品牌底色；不可用或检测异常时显示灰色。
 name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
-icon: https://dashboardicons.com/api/icons/external/simpleicons/streamlabs/brand.png
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/blinko.png
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
