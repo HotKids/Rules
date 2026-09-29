@@ -48,7 +48,7 @@
  *
  * @author HotKids&Claude
  * Stash：ip-security-panel.stoverride 默认折叠显示，600 秒刷新；与 Surge 共用此文件。
- * - 四张 Tile：outbound 出口、local 本地、risk 风险、type 类型，各自只执行需要的请求。
+ * - 三张 Tile：outbound 出口、local 本地、risk 纯净度（风险与类型），各自只执行需要的请求。
  * - 默认：风险仅 IPPure、本地百度、出口 ipapi-zh、mask_ip=0、tw_flag=tw、notify=true。
  * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.2
+ * @version 6.2.3
  * @date 2026-09-29
  */
 
@@ -69,11 +69,10 @@ const hasTimers = typeof setTimeout === "function";
 // 图标：Koolson/Qure https://github.com/Koolson/Qure（IconSet 白色图标）
 const stashIconRoot = "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/";
 const stashTiles = {
-  risk: { title: "IP 风险", icon: stashIconRoot + "Hijacking.png", color: "#88A788" },
-  type: { title: "IP 类型", icon: stashIconRoot + "Server.png", color: "#88A788" },
+  risk: { title: "IP 纯净度", icon: stashIconRoot + "Hijacking.png", color: "#88A788" },
   dns: { title: "DNS 解析器", icon: stashIconRoot + "Round_Robin.png", color: "#7357A6" },
-  outbound: { title: "出口 IP", icon: stashIconRoot + "Global.png", color: "#607D8B" },
-  local: { title: "本地 IP", icon: stashIconRoot + "Domestic.png", color: "#88A788" }
+  outbound: { title: "出口 IP", icon: stashIconRoot + "Global.png", color: "#1565C0" },
+  local: { title: "本地 IP", icon: stashIconRoot + "Domestic.png", color: "#00796B" }
 };
 const CONFIG = {
   timeout: isStash ? 20000 : 10000, // Surge 看门狗须小于 sgmodule 的 timeout=15；Stash 兼容无 JS 定时器的运行时
@@ -190,7 +189,7 @@ function done(o) {
       content: o.content || "检测失败",
       icon: stashTiles[args.tile]?.icon || stashTiles.outbound.icon,
       backgroundColor: o.backgroundColor || o["icon-color"] || "#9E9E9E",
-      url: o.url || (["risk", "type"].includes(args.tile) ? "https://ippure.com" : "https://ipinfo.io")
+      url: o.url || (args.tile === "risk" ? "https://ippure.com" : "https://ipinfo.io")
     });
   } else {
     $done(o);
@@ -853,7 +852,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
 
 // ==================== Stash 独立卡片 ====================
 // 固定选定的数据源，不运行 Surge 的全量检测，不依赖 $httpAPI 或 JS 定时器。
-// IPPure 的评分与类型来自同一个响应，显示其实际检测 IP；按规则分流时不同探测站点的出口可能不同。
+// 风险和类型取自同一次 IPPure 响应；按规则分流时，不同探测站点的出口可能不同。
 // 参考 StashNetworks/misc 的 IPPure 卡片：简短地区/运营商摘要与绿黄红风险配色。
 // 折叠卡片只有一行正文，将 IP 放到标题第二行，避免后续信息被换行截断。
 function compactStashLocation(location, local = false) {
@@ -880,7 +879,7 @@ async function runStashTile() {
   const heading = (title, ip) => [title, ip ? m(ip) : ""].filter(Boolean).join("\n");
   const ipURL = ip => args.maskIP === 0 ? "https://ipinfo.io/" + encodeURIComponent(ip) : "https://ipinfo.io";
 
-  if (args.tile === "risk" || args.tile === "type") {
+  if (args.tile === "risk") {
     // 每次刷新只请求一次 IPPure；不回落其他评分源，也不复用可能属于旧节点的评分。
     const info = await getIPPureInfo();
     if (!info || typeof info !== "object") return fail("IPPure 检测失败");
@@ -889,25 +888,17 @@ async function runStashTile() {
     const valid = Number.isFinite(score) && score >= 0 && score <= 100;
     const ipType = typeof info.isResidential === "boolean" ? (info.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
     const ipSrc = typeof info.isBroadcast === "boolean" ? (info.isBroadcast ? "广播 IP" : "原生 IP") : "来源未知";
-    if (args.tile === "type") {
-      const known = typeof info.isResidential === "boolean" && typeof info.isBroadcast === "boolean";
-      const color = !known ? "#9E9E9E" : info.isResidential && !info.isBroadcast ? "#88A788" :
-        !info.isResidential && info.isBroadcast ? "#C44444" : "#D4A017";
-      return render([ipType + " · " + ipSrc, typeof info.ip === "string" ? m(info.ip) : "", "来源：IPPure"], color, {
-        title: heading(tile.title, typeof info.ip === "string" ? info.ip : ""),
-        content: [ipType.replace(/ IP$/, ""), ipSrc.replace(/ IP$/, "")].join(" · "),
-        url: "https://ippure.com"
-      });
-    }
     const level = score < 40 ? "低风险" : score < 70 ? "中风险" : "高风险";
     const color = !valid ? "#9E9E9E" : score < 40 ? "#88A788" : score < 70 ? "#D4A017" : "#C44444";
+    const riskText = valid ? score + " / 100 · " + level : "暂无有效评分";
+    const typeText = [ipType.replace(/ IP$/, ""), ipSrc.replace(/ IP$/, "")].join(" · ");
     return render([
-      valid ? "评分：" + score + " / 100 · " + level : "IPPure 暂无有效评分",
-      typeof info.ip === "string" && info.ip ? m(info.ip) : "",
-      "来源：IPPure"
+      riskText,
+      typeText
     ], color, {
-      title: heading(tile.title, typeof info.ip === "string" ? info.ip : ""),
-      content: valid ? score + " / 100 · " + level : "IPPure 暂无有效评分",
+      // Android 折叠卡片正文只有一行；标题第二行放风险值，正文放类型。
+      title: tile.title + "\n" + riskText,
+      content: typeText,
       url: "https://ippure.com"
     });
   }
