@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.4
+ * @version 6.2.5
  * @date 2026-09-29
  */
 
@@ -69,10 +69,10 @@ const hasTimers = typeof setTimeout === "function";
 // 图标：Koolson/Qure 与 Simple Icons；卡片使用白色图标。
 const stashIconRoot = "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/";
 const stashTiles = {
-  risk: { title: "IP 纯净度", icon: "https://dashboardicons.com/api/icons/external/simpleicons/securityscorecard/dark.png", color: "#88A788" },
+  risk: { title: "IP 纯净度", icon: "https://dashboardicons.com/api/icons/external/simpleicons/googlepubsub/dark.png", color: "#88A788" },
   dns: { title: "DNS 解析器", icon: stashIconRoot + "Round_Robin.png", color: "#7357A6" },
-  outbound: { title: "出口 IP", icon: stashIconRoot + "Global.png", color: "#1565C0" },
-  local: { title: "本地 IP", icon: "https://dashboardicons.com/api/icons/external/simpleicons/organicmaps/dark.png", color: "#00796B" }
+  outbound: { title: "出口 IP", icon: "https://dashboardicons.com/api/icons/external/simpleicons/googleearth/dark.png", color: "#1565C0" },
+  local: { title: "本地 IP", icon: "https://dashboardicons.com/api/icons/external/simpleicons/googlemaps/dark.png", color: "#00796B" }
 };
 const CONFIG = {
   timeout: isStash ? 20000 : 10000, // Surge 看门狗须小于 sgmodule 的 timeout=15；Stash 兼容无 JS 定时器的运行时
