@@ -32,7 +32,7 @@ Streaming 成员以 `### Streaming` 或 `### Streaming US` 等标记声明归属
 | IP 风控 | [ip-security-panel.sgmodule](Module/Pannel/ip-security-panel.sgmodule) | 地理/风控数据源、可选 API Key、通知与 IP 打码 |
 | Komari 流量 | [komari-traffic-panel.sgmodule](Module/Pannel/komari-traffic-panel.sgmodule) | 面板地址、可选 token、节点筛选与展示项 |
 | 流媒体与 AI | [media-check-panel.sgmodule](Module/Pannel/media-check-panel.sgmodule) | 多行汇总、价格与状态通知 |
-| Stash IP Tile | [ip-security-panel.stoverride](Module/Pannel/ip-security-panel.stoverride) | 风险、出口、本地三张首页卡片 |
+| Stash IP Tile | [ip-security-panel.stoverride](Module/Pannel/ip-security-panel.stoverride) | 出口、本地、风险三张折叠卡片 |
 | Stash 服务 Tile | [media-check-panel.stoverride](Module/Pannel/media-check-panel.stoverride) | 每项服务一张卡片，与 Surge 共用检测 JS |
 
 流媒体检测包含 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit。Surge 可额外启用 Viu；Stash 不包含 Viu。ChatGPT 保留一个服务结果，区分地区、Web Only、Mobile Only 与 NO。
@@ -41,9 +41,9 @@ Stash 流媒体卡片默认折叠在第三方服务页面；如需放到首页�
 
 IP 风控的 Surge 和 Stash 版本共用 [ip-security.js](Module/Scripts/ip-security.js)。两者默认本地地理源为百度、出口地理源为 `ipapi-zh`；Surge 保留数据源选项，已有模块参数需自行检查是否仍保存旧值。
 
-Stash [IP 覆写 Raw 地址](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/ip-security-panel.stoverride) 导入后，首页按 **风险 → 出口 → 本地** 排列，每 600 秒刷新。风险固定使用 IPPure，评分和住宅/机房、原生/广播信息取自同一次请求；接口失败时显示灰色，不回落到其他评分源。其余两张卡片使用固定底色，主要检测失败时变灰。卡片图标使用 [Koolson/Qure](https://github.com/Koolson/Qure) 的 `IconSet/Color/` 彩色 Hijacking / Global / Domestic，覆写主图标为彩色 Lock。
+Stash [IP 覆写 Raw 地址](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/ip-security-panel.stoverride) 导入后，三张卡片默认折叠在第三方服务页面（Android 为“流媒体”），按 **出口 → 本地 → 风险** 排列，每 600 秒刷新。风险固定使用 IPPure，评分和住宅/机房、原生/广播信息取自同一次请求；接口失败时显示灰色，不回落到其他评分源。其余两张卡片使用固定底色，主要检测失败时变灰。卡片图标使用 [Koolson/Qure](https://github.com/Koolson/Qure) 的 `IconSet/Color/` 彩色 Global / Domestic / Hijacking，覆写主图标为彩色 Lock。
 
-Stash 已预设不打码、台湾旗帜和开启通知。首次成功检测只记录基线，此后由出口卡片在刷新时通知 IP 变化；这依赖客户端执行 Tile 与通知权限，不是 Surge 的 `network-changed` 即时事件。临时查询失败不作为 IP 变化，其他卡片不重复通知。若手动改为折叠模式，需同时设置 `collapsed: true` 和 `mode=collapsed`，此模式不通知。
+Stash 已预设不打码、台湾旗帜和开启 IP 变化通知，首页与折叠模式均可通知。首次成功检测只记录基线，此后由出口卡片在刷新时通知 IP 变化；这依赖客户端执行 Tile 与通知权限，不是 Surge 的 `network-changed` 即时事件。临时查询失败不作为 IP 变化，其他卡片不重复通知。支持首页 Tile 的客户端可同时设置 `collapsed: false` 和 `mode=home`；如需关闭通知，将出口卡片的 `notify=true` 改为 `notify=false`。
 
 本地卡片检测的是直连公网 IP。请求默认遵循当前分流，不同探测站点可能走不同出口，因此风险卡片同时显示 IPPure 实际检测的 IP。Stash 不显示依赖 Surge 专用接口的入口 IP、实际策略名称和流量统计。覆写中的 `argument` 只负责卡片分工，无需导入时选择参数。
 

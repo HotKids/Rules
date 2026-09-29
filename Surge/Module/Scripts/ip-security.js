@@ -31,7 +31,7 @@
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
- * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 首页刷新时比较 IP，首次仅记录
+ * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 卡片刷新时比较 IP，首次仅记录
  * - panel_interval: 面板 update-interval（秒），默认 600；改了 [Panel] 的 update-interval 需同步此参数，
  *   否则打码点击切换的自动刷新判定会失准
  *
@@ -47,18 +47,17 @@
  * ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
  *
  * @author HotKids&Claude
- * Stash：ip-security-panel.stoverride 默认首页显示，600 秒刷新；与 Surge 共用此文件。
- * - 四张 Tile：risk 风险、dns 解析器、outbound 出口、local 本地，各自只执行需要的请求。
+ * Stash：ip-security-panel.stoverride 默认折叠显示，600 秒刷新；与 Surge 共用此文件。
+ * - 三张 Tile：risk 风险、outbound 出口、local 本地，各自只执行需要的请求。
  * - 默认：风险仅 IPPure、本地百度、出口 ipapi-zh、mask_ip=0、tw_flag=tw、notify=true。
  * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
- * - mode: home(默认) / collapsed；折叠模式不覆盖 Stash 长按节点时指定的出口。
+ * - mode: home / collapsed（覆写默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
- *   首页模式刷新时可通知 IP 变化；折叠模式不通知，避免切换检测节点产生误报。
- * - DNS 仅显示探测到的解析器和地区提示；不能仅凭地区判断是否泄露。
+ *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.0
+ * @version 6.2.1
  * @date 2026-09-29
  */
 
@@ -729,10 +728,10 @@ function checkIPChange(localIP, outIP, outIPv6) {
   return true;
 }
 
-// Stash 没有使用 Surge 的网络事件：在首页 Tile 刷新时比较成功取得的 IP。
+// Stash 没有使用 Surge 的网络事件：在 Tile 刷新时比较成功取得的 IP。
 // 首次仅建立基线；本地接口失败不更新基线，IPv6 暂时失败不视为断开。
 function checkStashIPChange(localIP, outIP, outIPv6) {
-  if (!isStash || args.tile !== "outbound" || args.mode !== "home" || !args.notify || !localIP || !outIP) return false;
+  if (!isStash || args.tile !== "outbound" || !args.notify || !localIP || !outIP) return false;
   let previous = null;
   try { previous = JSON.parse($persistentStore.read(CONFIG.storeKeys.lastEvent) || "null"); } catch (_) {}
   const changed = previous && (previous.localIP !== localIP || previous.outIP !== outIP ||

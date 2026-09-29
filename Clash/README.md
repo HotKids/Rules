@@ -23,7 +23,7 @@ Stash 覆写保留基础配置的节点，并替换 hosts、DNS、策略组、�
 - Provider 层健康检查移除，由 url-test / fallback 策略组配置 `interval: 600`、`lazy: true`。
 - mihomo 专属监听、控制面、TUN、嗅探及部分全局参数由转换器过滤。
 
-检测卡片通过独立覆写导入：[流媒体/AI 服务 Tile](../Surge/Module/Pannel/media-check-panel.stoverride)、[IP 风险/出口/本地 Tile](../Surge/Module/Pannel/ip-security-panel.stoverride)，并不包含在以上配置覆写中。详情见 [面板说明](../Surge/README.md#面板与脚本)。
+检测卡片通过独立覆写导入：[流媒体/AI 服务 Tile](../Surge/Module/Pannel/media-check-panel.stoverride)、[IP 出口/本地/风险 Tile](../Surge/Module/Pannel/ip-security-panel.stoverride)，并不包含在以上配置覆写中。详情见 [面板说明](../Surge/README.md#面板与脚本)。
 
 ## 规则集
 

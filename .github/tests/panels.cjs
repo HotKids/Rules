@@ -213,15 +213,27 @@ test('Stash IP notifications establish a baseline then only report changes',asyn
   assert.equal((await ipPanel({store,argument,localIP:null})).notifications.length,0);
   assert.equal((await ipPanel({store,argument:'notify=false',outIP:'198.51.100.12'})).notifications.length,0);
 });
-test('Stash collapsed IP detection keeps selected-node routing and suppresses notifications',async()=>{
+test('Stash collapsed IP detection keeps selected-node routing and reports changes',async()=>{
   const store=new Map();
+  const argument='mode=collapsed&proxy=Ignored&notify=true';
   for(const outIP of ['198.51.100.10','198.51.100.11']) {
-    const result=await ipPanel({store,outIP,argument:'mode=collapsed&proxy=Ignored&notify=true'});
-    assert.equal(result.output.title,'出口 IP');assert.equal(result.notifications.length,0);
-    assert.ok(![...store.keys()].some(k=>k.endsWith('lastNetworkInfoEvent')));
+    const result=await ipPanel({store,outIP,argument});
+    assert.equal(result.output.title,'出口 IP');
+    assert.equal(result.notifications.length,outIP==='198.51.100.10'?0:1);
+    assert.ok([...store.keys()].some(k=>k.endsWith('lastNetworkInfoEvent')));
     for(const req of result.requests.filter(r=>!r.url.includes('bilibili')))
       assert.equal(req.headers?.['X-Stash-Selected-Proxy'],undefined);
   }
+  const outIP='198.51.100.11';
+  assert.equal((await ipPanel({store,outIP,argument})).notifications.length,0);
+  const beforeFailure=JSON.stringify([...store]);
+  assert.equal((await ipPanel({store,outIP,argument,localIP:null})).notifications.length,0);
+  assert.equal((await ipPanel({store,outIP,argument,ipFailure:true})).notifications.length,0);
+  assert.equal(JSON.stringify([...store]),beforeFailure);
+  assert.equal((await ipPanel({store,outIP,argument,localIP:'203.0.113.3'})).notifications.length,1);
+  const beforeDisabled=JSON.stringify([...store]);
+  assert.equal((await ipPanel({store,argument:'mode=collapsed&notify=false'})).notifications.length,0);
+  assert.equal(JSON.stringify([...store]),beforeDisabled);
 });
 test('Stash failures stay unknown and never fall back to other risk services',async()=>{
   const failedRisk=await ipPanel({argument:'tile=risk',riskFailure:true});
