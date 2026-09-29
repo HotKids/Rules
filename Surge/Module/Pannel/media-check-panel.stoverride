@@ -4,7 +4,7 @@
 # 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
 # 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
 # 统一白色图标搭配品牌底色；不可用或检测异常时显示灰色。
-name: 'Streaming & AI Service Tiles · Stash'
+name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
 icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Streaming.png
 tiles:
