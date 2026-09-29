@@ -18,7 +18,7 @@
  *    └─ Spotify       标准地区检测
  *
  * 🤖 AI 服务
- *    ├─ ChatGPT       统一显示可用地区或 NO（Web/App 仅用于内部检测）
+ *    ├─ ChatGPT       单行显示地区 / Web Only / Mobile Only / NO
  *    ├─ Gemini        网页检测 + API Key fallback
  *    └─ Claude        地区可用性检测
  *
@@ -490,7 +490,7 @@ class ServiceChecker {
 
   /**
    * ChatGPT 解锁检测
-   * 参考 lmc999/RegionRestrictionCheck：综合 Web/App 检测，统一显示地区或 NO
+   * 参考 lmc999/RegionRestrictionCheck：单行区分可用地区 / Web Only / Mobile Only / NO
    * @returns {Promise<Object>} 检测结果
    */
   static async checkChatGPT() {
@@ -516,8 +516,9 @@ class ServiceChecker {
         const region = traceRes.body.match(/loc=([A-Z]{2})/)?.[1] || "";
         return Utils.createResult(STATUS.OK, region || "OK");
       }
-      // Web/App 仅用于内部检测，任一端明确受限时统一显示 NO。
-      return Utils.createResult(STATUS.FAIL, "NO");
+      if (webBlocked && iosBlocked) return Utils.createResult(STATUS.FAIL, "NO");
+      if (!webBlocked && iosBlocked) return Utils.createResult(STATUS.COMING, "Web Only");
+      return Utils.createResult(STATUS.COMING, "Mobile Only");
     } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
 
