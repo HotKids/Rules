@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.7
+ * @version 6.2.8
  * @date 2026-09-29
  */
 
@@ -66,12 +66,12 @@ const isStash = (typeof $environment !== "undefined" &&
   (!!$environment["stash-version"] || !!$environment["stash-build"])) ||
   (typeof $script !== "undefined" && $script.type === "tile");
 const hasTimers = typeof setTimeout === "function";
-// 图标：Koolson/Qure 与 Simple Icons；卡片使用白色图标。
+// 卡片图标：selfh.st；保留的 DNS 卡片使用 Koolson/Qure。
 const stashIconRoot = "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/";
 const stashTiles = {
   risk: { title: "IP 纯净度", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png", color: "#88A788" },
   dns: { title: "DNS 解析器", icon: stashIconRoot + "Round_Robin.png", color: "#7357A6" },
-  outbound: { title: "出口 IP", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/atlas-network-light.png", color: "#1565C0" },
+  outbound: { title: "出口 IP", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png", color: "#1565C0" },
   local: { title: "本地 IP", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png", color: "#00796B" }
 };
 const CONFIG = {

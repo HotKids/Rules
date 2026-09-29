@@ -12,7 +12,7 @@ tiles:
     title: '出口 IP'
     url: 'https://ipinfo.io'
     content: 'Waiting…'
-    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/atlas-network-light.png'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
     argument: 'tile=outbound&mode=collapsed&notify=true'
@@ -37,11 +37,11 @@ tiles:
 
 script-providers:
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.7
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.8
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.7
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.8
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.7
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.8
     interval: 86400
