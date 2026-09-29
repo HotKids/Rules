@@ -7,9 +7,7 @@
 | 客户端 / 用途 | 文件 | 使用方式 |
 |---|---|---|
 | Surge | [Sample.conf](Surge/Sample.conf) / [Profile.conf](Surge/Profile.conf) | 示例入口与主配置 |
-| mihomo 完整配置 | [Sample.yaml](Clash/Sample.yaml) / [Mihomo.yaml](Clash/Mihomo.yaml) | 两种排版，配置内容等价 |
-| mihomo 订阅覆写 | [Script.js](Clash/Script/Script.js) | 用于支持 `main(config)` 的客户端脚本入口 |
-| Stash 配置覆写 | [Stash.stoverride](Clash/Script/Stash.stoverride) | 叠加到已有节点配置 |
+| Clash/mihomo | [Sample.yaml](Clash/Sample.yaml) / [Mihomo.yaml](Clash/Mihomo.yaml) | 两种排版，配置内容等价 |
 | Quantumult X | [Sample.conf](Quantumult/Sample.conf) | 完整示例配置 |
 | Loon | [Balloon.lcf](Surge/Balloon.lcf) | 完整示例配置 |
 | Surfboard | [Surfboard.conf](Surge/Surfboard.conf) | 完整示例配置 |
