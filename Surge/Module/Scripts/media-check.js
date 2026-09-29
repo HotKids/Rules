@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.1.2 (2026-09-29)
+ * @version      2.1.3 (2026-09-29)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
@@ -131,15 +131,19 @@ class Utils {
       const finalHeaders = { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers };
       if (IS_STASH && ARGS.proxy) finalHeaders["X-Stash-Selected-Proxy"] = encodeURIComponent(ARGS.proxy);
       let settled = false;
+      let timer;
       const settle = (error, value) => {
         if (settled) return;
         settled = true;
-        if (typeof clearTimeout === "function") clearTimeout(timer);
+        if (timer !== undefined && typeof clearTimeout === "function") clearTimeout(timer);
         if (error) reject(error);
         else resolve(value);
       };
-      // 脚本计时器用毫秒；Surge / Stash HTTP timeout 均用秒。
-      const timer = setTimeout(() => settle(new Error("Timeout")), timeout);
+      // Android Stash 可能没有 JS 计时器，此时依靠 HTTP 客户端自身的超时。
+      // 有计时器的客户端继续保留 watchdog：JS 用毫秒，HTTP timeout 用秒。
+      if (typeof setTimeout === "function") {
+        timer = setTimeout(() => settle(new Error("Timeout")), timeout);
+      }
       const cb = (error, response, data) => {
         if (settled) return;
         if (error) return settle(error);
@@ -194,7 +198,7 @@ class Utils {
 
   static errorResult(error) {
     const message = String(error && (error.message || error) || "");
-    return /timeout|timed.?out|超时/i.test(message)
+    return /\btimeout\b|timed.?out|超时/i.test(message)
       ? this.createResult(STATUS.TIMEOUT, "Timeout")
       : this.createResult(STATUS.ERROR, "Error");
   }

@@ -5,14 +5,13 @@
 # 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
 # 统一白色图标搭配固定品牌底色，检测状态以文字显示。
 name: 'Streaming & AI Service Tiles · Stash'
-desc: >-
-  检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
+desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit
 icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Streaming.png
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
     title: 'Netflix'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/netflix-light.png'
     backgroundColor: '#E50914'
     collapsed: true
@@ -21,7 +20,7 @@ tiles:
   - name: hotkids-media-check-disney
     interval: 600
     title: 'Disney+'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/disney-plus-light.png'
     backgroundColor: '#113CCF'
     collapsed: true
@@ -30,7 +29,7 @@ tiles:
   - name: hotkids-media-check-hbomax
     interval: 600
     title: 'HBO Max'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/hbo-max-light.png'
     backgroundColor: '#191919'
     collapsed: true
@@ -39,7 +38,7 @@ tiles:
   - name: hotkids-media-check-youtube
     interval: 600
     title: 'YouTube Premium'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/youtube-light.png'
     backgroundColor: '#E62117'
     collapsed: true
@@ -48,7 +47,7 @@ tiles:
   - name: hotkids-media-check-spotify
     interval: 600
     title: 'Spotify'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify-light.png'
     backgroundColor: '#117C39'
     collapsed: true
@@ -57,7 +56,7 @@ tiles:
   - name: hotkids-media-check-chatgpt
     interval: 600
     title: 'ChatGPT'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/chatgpt.png'
     backgroundColor: '#0D8A70'
     collapsed: true
@@ -66,7 +65,7 @@ tiles:
   - name: hotkids-media-check-gemini
     interval: 600
     title: 'Gemini'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/google-gemini-light.png'
     backgroundColor: '#386EDB'
     collapsed: true
@@ -75,7 +74,7 @@ tiles:
   - name: hotkids-media-check-claude
     interval: 600
     title: 'Claude'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/claude-light.png'
     backgroundColor: '#B85C3F'
     collapsed: true
@@ -84,7 +83,7 @@ tiles:
   - name: hotkids-media-check-reddit
     interval: 600
     title: 'Reddit'
-    content: '等待检测…'
+    content: 'Waiting…'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/reddit-light.png'
     backgroundColor: '#D93900'
     collapsed: true
