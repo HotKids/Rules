@@ -169,7 +169,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
 
 test('Stash outbound tile uses Chinese geography without timers or Surge API',async()=>{
   const {output,requests,apiCalls}=await ipPanel({argument:'tile=outbound&proxy=SG%20%E8%8A%82%E7%82%B9&mask_ip=2',outIPv6:'2001:db8::10'});
-  assert.equal(output.title,'出口 IP');assert.equal(output.backgroundColor,'#3269B7');
+  assert.equal(output.title,'出口 IP');assert.equal(output.backgroundColor,'#607D8B');
   assert.match(output.content,/🇹🇼/);assert.match(output.content,/台北市/);
   assert.match(output.content,/IPv6：\[IP 已隐藏\]/);assert.doesNotMatch(output.content,/198\.51|203\.0|2001:|流量统计|入口 IP/);
   assert.equal(output['icon-color'],undefined);assert.deepEqual(apiCalls,[]);
@@ -185,8 +185,24 @@ test('Stash risk uses one IPPure request, ignoring other configured risk sources
   const result=await ipPanel({argument:'tile=risk&risk_api=proxycheck&ipqs_key=unused'});
   assert.equal(result.requests.length,1);assert.equal(result.requests[0].url,'https://my.ippure.com/v1/info');
   assert.equal(result.output.title,'IP 风险');assert.match(result.output.content,/12 \/ 100/);
-  assert.match(result.output.content,/住宅 IP · 原生 IP/);assert.match(result.output.content,/来源：IPPure/);
-  assert.equal(result.output.backgroundColor,'#2E9F5E');assert.equal(result.notifications.length,0);
+  assert.match(result.output.content,/来源：IPPure/);
+  assert.equal(result.output.backgroundColor,'#88A788');assert.equal(result.notifications.length,0);
+});
+test('Stash IP type is independent of risk score and does not invent missing classifications',async()=>{
+  for(const [isResidential,isBroadcast,label,color] of [
+    [true,false,'住宅 · 原生','#88A788'], [true,true,'住宅 · 广播','#D4A017'],
+    [false,false,'机房 · 原生','#D4A017'], [false,true,'机房 · 广播','#C44444'],
+    [undefined,undefined,'类型未知 · 来源未知','#9E9E9E'],
+    ['true','false','类型未知 · 来源未知','#9E9E9E']
+  ]) {
+    const {output,requests,notifications}=await ipPanel({argument:'tile=type&mode=collapsed',
+      ippureData:{ip:'192.0.2.22',isResidential,isBroadcast,fraudScore:null}});
+    assert.equal(output.title,'IP 类型\n192.0.2.22');
+    assert.equal(output.content,label);assert.equal(output.backgroundColor,color);
+    assert.equal(output.url,'https://ippure.com');
+    assert.equal(requests.length,1);assert.equal(requests[0].url,'https://my.ippure.com/v1/info');
+    assert.equal(notifications.length,0);
+  }
 });
 test('Stash local tile looks up Baidu via DIRECT without outbound probes',async()=>{
   const {output,requests,notifications}=await ipPanel({argument:'tile=local'});
@@ -218,7 +234,7 @@ test('Stash collapsed IP detection keeps selected-node routing and reports chang
   const argument='mode=collapsed&proxy=Ignored&notify=true';
   for(const outIP of ['198.51.100.10','198.51.100.11']) {
     const result=await ipPanel({store,outIP,argument});
-    assert.equal(result.output.title,'出口 IP');
+    assert.equal(result.output.title,`出口 IP\n${outIP}`);
     assert.equal(result.notifications.length,outIP==='198.51.100.10'?0:1);
     assert.ok([...store.keys()].some(k=>k.endsWith('lastNetworkInfoEvent')));
     for(const req of result.requests.filter(r=>!r.url.includes('bilibili')))
@@ -235,6 +251,25 @@ test('Stash collapsed IP detection keeps selected-node routing and reports chang
   assert.equal((await ipPanel({store,argument:'mode=collapsed&notify=false'})).notifications.length,0);
   assert.equal(JSON.stringify([...store]),beforeDisabled);
 });
+test('Stash collapsed IP summaries keep essential information visible and respect masking',async()=>{
+  const outbound=await ipPanel({argument:'tile=outbound&mode=collapsed'});
+  assert.equal(outbound.output.title,'出口 IP\n198.51.100.10');
+  assert.equal(outbound.output.content,'🇹🇼 台北 · Example');
+  assert.equal(outbound.output.url,'https://ipinfo.io/198.51.100.10');
+  const local=await ipPanel({argument:'tile=local&mode=collapsed'});
+  assert.equal(local.output.title,'本地 IP\n203.0.113.2');
+  assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');
+  const risk=await ipPanel({argument:'tile=risk&mode=collapsed'});
+  assert.equal(risk.output.title,'IP 风险\n198.51.100.10');
+  assert.equal(risk.output.content,'12 / 100 · 低风险');
+  assert.equal(risk.output.url,'https://ippure.com');
+  for(const service of ['outbound','local','risk','type']) {
+    const {output}=await ipPanel({argument:`tile=${service}&mode=collapsed&mask_ip=2`});
+    assert.match(output.title,/\[IP 已隐藏\]/);
+    assert.doesNotMatch(JSON.stringify(output),/198\.51\.100\.10|203\.0\.113\.2/);
+    assert.doesNotMatch(output.content,/\n/);
+  }
+});
 test('Stash failures stay unknown and never fall back to other risk services',async()=>{
   const failedRisk=await ipPanel({argument:'tile=risk',riskFailure:true});
   assert.equal(failedRisk.output.backgroundColor,'#9E9E9E');assert.match(failedRisk.output.content,/IPPure 检测失败/);
@@ -242,9 +277,8 @@ test('Stash failures stay unknown and never fall back to other risk services',as
   for(const data of [{},{fraudScore:null},{fraudScore:''},{fraudScore:false},{fraudScore:101},{fraudScore:-1}]) {
     const bad=await ipPanel({argument:'tile=risk',ippureData:data});
     assert.equal(bad.output.backgroundColor,'#9E9E9E');assert.match(bad.output.content,/暂无有效评分/);
-    assert.match(bad.output.content,/类型未知 · 来源未知/);
   }
-  for(const [score,color] of [[0,'#2E9F5E'],[40,'#D4A017'],[70,'#C44444']]) {
+  for(const [score,color] of [[0,'#88A788'],[40,'#D4A017'],[70,'#C44444']]) {
     const valid=await ipPanel({argument:'tile=risk',ippureData:{fraudScore:score}});
     assert.equal(valid.output.backgroundColor,color);
   }
