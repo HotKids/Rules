@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.5
+ * @version 6.2.6
  * @date 2026-09-29
  */
 
@@ -893,12 +893,12 @@ async function runStashTile() {
     const riskText = valid ? score + " / 100 · " + level : "暂无有效评分";
     const typeText = [ipType.replace(/ IP$/, ""), ipSrc.replace(/ IP$/, "")].join(" · ");
     return render([
-      riskText,
-      typeText
+      typeText,
+      riskText
     ], color, {
-      // Android 折叠卡片正文只有一行；标题第二行放风险值，正文放类型。
-      title: tile.title + "\n" + riskText,
-      content: typeText,
+      // Android 折叠卡片正文只有一行；标题第二行放类型，正文放风险值。
+      title: tile.title + "\n" + typeText,
+      content: riskText,
       url: "https://ippure.com"
     });
   }
