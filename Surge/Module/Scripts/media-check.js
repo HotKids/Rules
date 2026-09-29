@@ -18,7 +18,7 @@
  *    └─ Spotify       标准地区检测
  *
  * 🤖 AI 服务
- *    ├─ ChatGPT       区分 OK / Web Only / Mobile Only
+ *    ├─ ChatGPT       统一显示可用地区或 NO（Web/App 仅用于内部检测）
  *    ├─ Gemini        网页检测 + API Key fallback
  *    └─ Claude        地区可用性检测
  *
@@ -444,7 +444,7 @@ class ServiceChecker {
       
       // 明确地区限制提示优先于页面地区码，避免误判为可用
       if (/youtube premium is not available in your country/i.test(combinedBody)) {
-        return Utils.createResult(STATUS.FAIL, "No");
+        return Utils.createResult(STATUS.FAIL, "NO");
       }
 
       // 检查是否为大陆
@@ -490,7 +490,7 @@ class ServiceChecker {
 
   /**
    * ChatGPT 解锁检测
-   * 参考 lmc999/RegionRestrictionCheck：区分 Web Only / Mobile Only
+   * 参考 lmc999/RegionRestrictionCheck：综合 Web/App 检测，统一显示地区或 NO
    * @returns {Promise<Object>} 检测结果
    */
   static async checkChatGPT() {
@@ -516,9 +516,8 @@ class ServiceChecker {
         const region = traceRes.body.match(/loc=([A-Z]{2})/)?.[1] || "";
         return Utils.createResult(STATUS.OK, region || "OK");
       }
-      if (webBlocked && iosBlocked) return Utils.createResult(STATUS.FAIL, "No");
-      if (!webBlocked && iosBlocked) return Utils.createResult(STATUS.COMING, "Web Only");
-      return Utils.createResult(STATUS.COMING, "Mobile Only");
+      // Web/App 仅用于内部检测，任一端明确受限时统一显示 NO。
+      return Utils.createResult(STATUS.FAIL, "NO");
     } catch { return Utils.createResult(STATUS.ERROR, "Timeout"); }
   }
 
