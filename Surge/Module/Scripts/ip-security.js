@@ -1,5 +1,5 @@
 /**
- * Surge IP Security Check Script
+ * Surge / Stash IP Security Check Script
  *
  * 功能概述：
  * - 检测并显示本地/入口/出口 IP 信息
@@ -15,7 +15,7 @@
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
  *    出口 IP 24 小时内未变化则复用缓存评分，避免面板自动刷新反复消耗按次计费额度
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地 IP → local_geoapi=bilibili bilibili(中文) / baidu 百度 opendata(中文, 省市区粒度) / ipsb ip.sb(英文) | 入口/出口 IP 地区 → remote_geoapi=ipinfo ipinfo.io / ipapi ip-api.com(en) / ipapi-zh ip-api.com(zh, http 明文) / maxmind GeoLite2(en) · maxmind-zh(zh 优先)（均需 maxmind_key）
+ * ⑦ 地理: 本地默认百度（可选 bilibili / ip.sb）；入口/出口默认 ip-api.com 中文（可选 ipinfo / ip-api.com 英文 / MaxMind）
  * ⑧ 运营商: 入口/出口 IP 始终使用 ipinfo.io
  * ⑨ DNS 泄露: edns.ip-api.com（通过代理探测 DNS 解析器，检测是否泄露到本地 ISP）
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -25,13 +25,13 @@
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 风险评分数据源，ipqs / proxycheck / ippure / scamalytics（可选，不填则四级回落）
- * - local_geoapi: 本地 IP 地理数据源，bilibili(默认)=bilibili(中文)，baidu=百度 opendata(中文，省市区粒度)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，ipinfo(默认)=ipinfo.io，ipapi=ip-api.com(英文)，ipapi-zh=ip-api.com(中文, http 明文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
+ * - local_geoapi: 本地 IP 地理数据源，baidu(默认)=百度 opendata(中文，省市区粒度)，bilibili=bilibili(中文)，ipsb=ip.sb(英文)
+ * - remote_geoapi: 入口/出口地理数据源，ipapi-zh(默认)=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
  * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind/maxmind-zh 需要，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
- * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送
+ * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 首页刷新时比较 IP，首次仅记录
  * - panel_interval: 面板 update-interval（秒），默认 600；改了 [Panel] 的 update-interval 需同步此参数，
  *   否则打码点击切换的自动刷新判定会失准
  *
@@ -47,13 +47,36 @@
  * ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
  *
  * @author HotKids&Claude
- * @version 6.1.0
- * @date 2026-07-12
+ * Stash：ip-security-panel.stoverride 默认首页显示，600 秒刷新；与 Surge 共用此文件。
+ * - 四张 Tile：risk 风险、dns 解析器、outbound 出口、local 本地，各自只执行需要的请求。
+ * - 默认：风险仅 IPPure、本地百度、出口 ipapi-zh、mask_ip=0、tw_flag=tw、notify=true。
+ * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
+ * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
+ * - mode: home(默认) / collapsed；折叠模式不覆盖 Stash 长按节点时指定的出口。
+ * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
+ * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
+ *   首页模式刷新时可通知 IP 变化；折叠模式不通知，避免切换检测节点产生误报。
+ * - DNS 仅显示探测到的解析器和地区提示；不能仅凭地区判断是否泄露。
+ *
+ * @version 6.2.0
+ * @date 2026-09-29
  */
 
 // ==================== 全局配置 ====================
+const isStash = (typeof $environment !== "undefined" &&
+  (!!$environment["stash-version"] || !!$environment["stash-build"])) ||
+  (typeof $script !== "undefined" && $script.type === "tile");
+const hasTimers = typeof setTimeout === "function";
+// 图标：Koolson/Qure https://github.com/Koolson/Qure（Color 彩色图标）
+const stashIconRoot = "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/";
+const stashTiles = {
+  risk: { title: "IP 风险", icon: stashIconRoot + "Hijacking.png", color: "#2E9F5E" },
+  dns: { title: "DNS 解析器", icon: stashIconRoot + "Round_Robin.png", color: "#7357A6" },
+  outbound: { title: "出口 IP", icon: stashIconRoot + "Global.png", color: "#3269B7" },
+  local: { title: "本地 IP", icon: stashIconRoot + "Domestic.png", color: "#397D78" }
+};
 const CONFIG = {
-  timeout: 10000, // 内部看门狗：须小于 sgmodule 的 timeout=15（15s），留 5s 余量给兜底面板输出，否则 Surge 先杀脚本
+  timeout: isStash ? 20000 : 10000, // Surge 看门狗须小于 sgmodule 的 timeout=15；Stash 兼容无 JS 定时器的运行时
   riskCacheTTL: 86400, // 风险评分缓存有效期（秒）：出口 IP 未变化时，此时长内复用缓存，
                        // 避免面板自动刷新（update-interval，默认 600s）反复消耗 IPQS 等按次计费额度
   storeKeys: {
@@ -109,7 +132,7 @@ function parseArguments() {
 
   const isPanel = typeof $input !== "undefined" && $input.purpose === "panel";
   const isRequest = typeof $request !== "undefined";
-  if (!isPanel && !isRequest) {
+  if (!isStash && !isPanel && !isRequest) {
     arg.TYPE = "EVENT";
   }
 
@@ -126,14 +149,17 @@ function parseArguments() {
   const notify = notifyVal !== "false";
 
   return {
-    isEvent: arg.TYPE === "EVENT",
-    ipqsKey: clean(arg.ipqs_key),
-    riskApi: clean(arg.risk_api).toLowerCase(),
+    isEvent: !isStash && arg.TYPE === "EVENT",
+    proxy: isStash && clean(arg.mode) !== "collapsed" ? clean(arg.proxy) : "",
+    mode: clean(arg.mode) === "collapsed" ? "collapsed" : "home",
+    tile: clean(arg.tile) || "outbound",
+    ipqsKey: isStash ? "" : clean(arg.ipqs_key),
+    riskApi: isStash ? "ippure" : clean(arg.risk_api).toLowerCase(),
     maxmindKey: clean(arg.maxmind_key),
-    localGeoApi: clean(arg.local_geoapi) || "bilibili",
-    remoteGeoApi: clean(arg.remote_geoapi) || "ipinfo",
+    localGeoApi: isStash ? "baidu" : clean(arg.local_geoapi) || "baidu",
+    remoteGeoApi: isStash ? "ipapi-zh" : clean(arg.remote_geoapi) || "ipapi-zh",
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
-    twFlag: clean(arg.tw_flag) || "cn",
+    twFlag: clean(arg.tw_flag) || (isStash ? "tw" : "cn"),
     eventDelay: parseFloat(arg.event_delay) || 2,
     notify: notify,
     panelInterval: parseInt(clean(arg.panel_interval), 10) || 600
@@ -141,44 +167,76 @@ function parseArguments() {
 }
 
 const args = parseArguments();
+if (isStash) {
+  // 避免与 Surge 或其他策略的通知/显示状态共用键；评分另按出口 IP 验证缓存。
+  for (const key of Object.keys(CONFIG.storeKeys)) {
+    CONFIG.storeKeys[key] = "stash.ip-security." + args.mode + "." + encodeURIComponent(args.proxy) + "." + CONFIG.storeKeys[key];
+  }
+}
 console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi + ", 通知: " + args.notify);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
+let watchdog = null;
+const requestDeadline = Date.now() + CONFIG.timeout - 250;
 
 function done(o) {
   if (finished) return;
   finished = true;
-  $done(o);
+  if (watchdog !== null && typeof clearTimeout === "function") clearTimeout(watchdog);
+  if (isStash) {
+    $done({
+      title: stashTiles[args.tile]?.title || "IP Security",
+      content: o.content || "检测失败",
+      icon: stashTiles[args.tile]?.icon || stashTiles.outbound.icon,
+      backgroundColor: o.backgroundColor || o["icon-color"] || "#9E9E9E"
+    });
+  } else {
+    $done(o);
+  }
 }
 
-setTimeout(() => {
-  done({ title: "检测超时", content: "API 请求超时", icon: "leaf", "icon-color": "#9E9E9E" });
-}, CONFIG.timeout);
+if (hasTimers) {
+  watchdog = setTimeout(() => {
+    done({ title: "检测超时", content: "API 请求超时", icon: "leaf", "icon-color": "#9E9E9E" });
+  }, CONFIG.timeout);
+}
 
 // ==================== HTTP 工具 ====================
-function httpJSON(url, policy, headers) {
-  return new Promise(r => {
+function httpRaw(url, policy, headers, deadline = requestDeadline) {
+  const remaining = Math.min(deadline, requestDeadline) - Date.now();
+  if (finished || remaining < 100) return Promise.resolve(null);
+  return new Promise(resolve => {
     const req = { url };
-    if (policy) req.policy = policy;
-    if (headers) req.headers = headers;
-    $httpClient.get(req, (_, __, d) => {
-      try { r(JSON.parse(d)); } catch { r(null); }
-    });
+    if (headers) req.headers = { ...headers };
+    if (isStash) {
+      // Stash timeout 单位为秒；Android 无 setTimeout 时仍由 HTTP 层限制请求时间。
+      req.timeout = Math.min(5, remaining / 1000);
+      const selected = policy || args.proxy;
+      if (selected) req.headers = { ...req.headers, "X-Stash-Selected-Proxy": encodeURIComponent(selected) };
+    } else if (policy) {
+      req.policy = policy;
+    }
+    try {
+      $httpClient.get(req, (error, response, data) => {
+        const status = Number(response?.status || response?.statusCode);
+        resolve(!error && status >= 200 && status < 300 ? (data || null) : null);
+      });
+    } catch (_) { resolve(null); }
   });
 }
 
-function httpRaw(url) {
-  return new Promise(r => {
-    $httpClient.get({ url }, (_, __, d) => r(d || null));
-  });
+async function httpJSON(url, policy, headers, deadline) {
+  const raw = await httpRaw(url, policy, headers, deadline);
+  try { return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
 }
 
 function wait(ms) {
-  return new Promise(r => setTimeout(r, ms));
+  return hasTimers ? new Promise(r => setTimeout(r, ms)) : Promise.resolve();
 }
 
 function surgeAPI(method, path) {
+  if (isStash || typeof $httpAPI !== "function") return Promise.resolve(null);
   return new Promise(r => {
     $httpAPI(method, path, null, res => r(res));
   });
@@ -356,6 +414,7 @@ function parseScamalyticsScore(html) {
  * 入口 IP 通过 remoteAddress 的 (Proxy) 后缀识别
  */
 async function getPolicyAndEntrance() {
+  if (isStash) return { policy: args.proxy || (args.mode === "collapsed" ? "当前检测出口" : "按规则分流"), entranceIP: null };
   const pattern = /(api(-ipv4)?\.ip\.sb|ipinfo\.io|ip-api\.com|\b1\.1\.1\.1\b|2606:4700|opendata\.baidu\.com|geolite\.info)/i;
 
   async function findInRecent(limit) {
@@ -545,7 +604,7 @@ async function checkDNSLeak(policy) {
   const geo = ednsData.dns.geo || "";
   const isChina = /China|中国/i.test(geo);
   const name = (geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip)).replace(/\s*communications\s+corporation/gi, "");
-  const resolvers = ip ? [{ ip, name, isChina }] : [];
+  const resolvers = ip ? [{ ip, name, geo, isChina }] : [];
   const leaked = isChina;
   console.log("DNS 解析器: " + (resolvers.length ? resolvers[0].name + (isChina ? " [CN]" : "") : "无"));
   return { leaked, resolvers: resolvers.length > 0 ? resolvers : null };
@@ -570,6 +629,7 @@ function formatDuration(seconds) {
 }
 
 async function getTrafficStats() {
+  if (isStash) return null;
   const data = await surgeAPI("GET", "/v1/traffic");
   if (!data) {
     console.log("流量统计获取失败");
@@ -620,10 +680,11 @@ async function fetchOutbound4() {
 }
 
 async function fetchOutbound6() {
-  const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace6));
+  const deadline = Date.now() + CONFIG.ipv6Timeout;
+  const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace6, null, null, deadline));
   if (t) return t.ip;
   console.log("CF trace(v6) 失败，回落 ip.sb");
-  const sb = await httpJSON(CONFIG.urls.outboundIPv6);
+  const sb = await httpJSON(CONFIG.urls.outboundIPv6, null, null, deadline);
   return sb?.ip || null;
 }
 
@@ -631,10 +692,10 @@ async function fetchIPs() {
   const [local, exit, exit6ip] = await Promise.all([
     httpJSON(CONFIG.urls.localIP, "DIRECT"),
     fetchOutbound4(),
-    Promise.race([
+    hasTimers ? Promise.race([
       fetchOutbound6(),
       wait(CONFIG.ipv6Timeout).then(() => null)
-    ])
+    ]) : fetchOutbound6()
   ]);
 
   const hasIPv6 = exit6ip && exit6ip.includes(":");
@@ -666,6 +727,19 @@ function checkIPChange(localIP, outIP, outIPv6) {
   console.log("网络信息已变化");
   $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6 }), CONFIG.storeKeys.lastEvent);
   return true;
+}
+
+// Stash 没有使用 Surge 的网络事件：在首页 Tile 刷新时比较成功取得的 IP。
+// 首次仅建立基线；本地接口失败不更新基线，IPv6 暂时失败不视为断开。
+function checkStashIPChange(localIP, outIP, outIPv6) {
+  if (!isStash || args.tile !== "outbound" || args.mode !== "home" || !args.notify || !localIP || !outIP) return false;
+  let previous = null;
+  try { previous = JSON.parse($persistentStore.read(CONFIG.storeKeys.lastEvent) || "null"); } catch (_) {}
+  const changed = previous && (previous.localIP !== localIP || previous.outIP !== outIP ||
+    (!!outIPv6 && previous.outIPv6 !== outIPv6));
+  const retainedIPv6 = previous && previous.outIP === outIP ? previous.outIPv6 : null;
+  $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6: outIPv6 || retainedIPv6 || null }), CONFIG.storeKeys.lastEvent);
+  return !!changed;
 }
 
 // ==================== 面板内容构建 ====================
@@ -776,10 +850,91 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   console.log("=== 已发送通知 ===");
 }
 
+// ==================== Stash 独立卡片 ====================
+// 固定选定的数据源，不运行 Surge 的全量检测，不依赖 $httpAPI 或 JS 定时器。
+// IPPure 的评分与类型来自同一个响应，显示其实际检测 IP；按规则分流时不同探测站点的出口可能不同。
+async function runStashTile() {
+  const tile = stashTiles[args.tile];
+  if (!tile) return done({ content: "未知卡片类型" });
+  const fail = message => done({ content: message, backgroundColor: "#9E9E9E" });
+  const render = (lines, color = tile.color) => done({ content: lines.filter(Boolean).join("\n"), backgroundColor: color });
+  const m = ip => maskIP(ip, args.maskIP);
+
+  if (args.tile === "risk") {
+    // 每次刷新只请求一次 IPPure；不回落其他评分源，也不复用可能属于旧节点的评分。
+    const info = await getIPPureInfo();
+    if (!info || typeof info !== "object") return fail("IPPure 检测失败");
+    const score = typeof info.fraudScore === "number" ? info.fraudScore :
+      (typeof info.fraudScore === "string" && info.fraudScore.trim() ? Number(info.fraudScore) : NaN);
+    const valid = Number.isFinite(score) && score >= 0 && score <= 100;
+    const ipType = typeof info.isResidential === "boolean" ? (info.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
+    const ipSrc = typeof info.isBroadcast === "boolean" ? (info.isBroadcast ? "广播 IP" : "原生 IP") : "来源未知";
+    const level = score < 40 ? "低风险" : score < 70 ? "中风险" : "高风险";
+    const color = !valid ? "#9E9E9E" : score < 40 ? "#2E9F5E" : score < 70 ? "#D4A017" : "#C44444";
+    return render([
+      valid ? "评分：" + score + " / 100 · " + level : "IPPure 暂无有效评分",
+      ipType + " · " + ipSrc,
+      typeof info.ip === "string" && info.ip ? m(info.ip) : "",
+      "来源：IPPure"
+    ], color);
+  }
+
+  if (args.tile === "local") {
+    const local = await httpJSON(CONFIG.urls.localIP, "DIRECT");
+    const ip = local?.data?.addr;
+    if (!ip) return fail("无法获取直连公网 IP");
+    const [baidu, sb] = await Promise.all([
+      httpJSON(CONFIG.urls.baiduGeo(ip), "DIRECT"),
+      httpJSON(CONFIG.urls.ipSbGeo(ip), "DIRECT")
+    ]);
+    const info = normalizeOpendata(baidu);
+    if (info && /^(移动|联通|电信|广电)$/.test(info.org)) info.org = "中国" + info.org;
+    return render([
+      m(ip),
+      info ? [flag(sb?.country_code), info.country_name].filter(Boolean).join(" ") : "百度地区查询失败",
+      info?.org || "运营商未知"
+    ], info ? tile.color : "#9E9E9E");
+  }
+
+  if (args.tile === "dns") {
+    const detected = await checkDNSLeak(args.proxy || undefined);
+    const resolver = detected.resolvers?.[0];
+    if (!resolver) return fail("DNS 解析器检测失败");
+    const info = normalizeIpApi(await httpJSON(CONFIG.urls.ipApi(resolver.ip, "zh-CN")));
+    return render([
+      m(resolver.ip),
+      info ? formatGeo(info.country_code, info.city, info.region, geoLabel(info)) : resolver.geo,
+      info?.org || (!resolver.geo ? resolver.name : "")
+    ]);
+  }
+
+  const { localIP, outIP, outIPv6, outRaw } = await fetchIPs();
+  if (!outIP) return fail("无法获取出口 IPv4");
+  const [geo, org] = await Promise.all([
+    httpJSON(CONFIG.urls.ipApi(outIP, "zh-CN")),
+    httpJSON(CONFIG.urls.ipInfo(outIP))
+  ]);
+  const info = normalizeIpApi(geo);
+  const organization = normalizeIpInfo(org)?.org || info?.org || "运营商未知";
+  const location = info ? formatGeo(info.country_code, info.city, info.region, geoLabel(info)) :
+    [flag(outRaw?.country_code), "ip-api 地区查询失败"].filter(Boolean).join(" ");
+  const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "", location, organization];
+  if (!finished && checkStashIPChange(localIP, outIP, outIPv6)) {
+    // 只有出口卡片负责通知；不为通知重复请求风险、本地地理或 DNS。
+    if (typeof $notification !== "undefined" && typeof $notification.post === "function") {
+      try {
+        $notification.post("🔄 IP 已变化", location, ["本地 IP：" + m(localIP), ...lines].join("\n"));
+      } catch (_) { console.log("通知发送失败，继续显示检测结果"); }
+    } else { console.log("当前客户端未提供通知接口"); }
+  }
+  return render(lines, info ? tile.color : "#9E9E9E");
+}
+
 // ==================== 主执行函数 ====================
 (async () => {
   try {
   console.log("=== IP 安全检测开始 ===");
+  if (isStash) return await runStashTile();
 
   // 1. EVENT 触发时延迟等待网络稳定
   if (args.isEvent && args.eventDelay > 0) {
@@ -804,8 +959,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
   let localGeoApi = args.localGeoApi;
   if (!["bilibili", "baidu", "ipsb"].includes(localGeoApi)) {
-    console.log("未知 local_geoapi: " + localGeoApi + "，使用 bilibili");
-    localGeoApi = "bilibili";
+    console.log("未知 local_geoapi: " + localGeoApi + "，使用 baidu");
+    localGeoApi = "baidu";
   }
   const useBilibili = localGeoApi === "bilibili";
   const useBaiduLocal = localGeoApi === "baidu";
@@ -815,8 +970,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   // maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
   let remoteGeoApi = args.remoteGeoApi;
   if (!["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(remoteGeoApi)) {
-    console.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipinfo");
-    remoteGeoApi = "ipinfo";
+    console.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipapi-zh");
+    remoteGeoApi = "ipapi-zh";
   }
   const useIpApi = remoteGeoApi.startsWith("ipapi");
   let useMaxmind = remoteGeoApi.startsWith("maxmind");
@@ -931,6 +1086,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   }
   const context = { localZh, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak: dnsLeakResult, reverseDNS, traffic: trafficResult };
 
+  if (finished) return;
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
     done({});

@@ -98,3 +98,175 @@ test('Generated Mihomo scripts run with both subscription variants',()=>{
     }
   }
 });
+
+async function ipPanel({client='stash', argument='', store=new Map(), outIP='198.51.100.10',
+  outIPv6=null, localIP='203.0.113.2', riskFailure=false, missingNotification=false,
+  notificationThrows=false, ipFailure=false, timers=false, ippureData, dnsFailure=false}={}) {
+  const requests=[], notifications=[], apiCalls=[], outputs=[], handles=[];
+  let deadline;
+  try {
+    const output=await Promise.race([
+      new Promise((resolve,reject)=>{
+        const request=(options,cb)=>{
+          requests.push(options);
+          const url=options.url;
+          let body, status=200;
+          if(url.includes('bilibili')) body={data:{addr:localIP,country:'中国',province:'广东',city:'深圳',isp:'电信'}};
+          else if(url.includes('2606:4700') || url.includes('api-ipv6')) {
+            if(outIPv6) body=url.includes('trace')?`ip=${outIPv6}\nloc=SG`:{ip:outIPv6};
+            else status=503;
+          }
+          else if(url.includes('cdn-cgi/trace') || url.includes('api-ipv4')) {
+            if(ipFailure) status=503;
+            else body=url.includes('trace')?`ip=${outIP}\nloc=SG`:{ip:outIP,country_code:'SG'};
+          }
+          else if(url.includes('proxycheck')) {
+            if(riskFailure) status=503;
+            else body={[outIP]:{risk:12,type:'Residential'}};
+          }
+          else if(url.includes('ippure') || url.includes('scamalytics')) {
+            if(riskFailure) {status=503;body='<html>service unavailable</html>';}
+            else body=ippureData===undefined?{ip:outIP,isResidential:true,isBroadcast:false,fraudScore:12}:ippureData;
+          }
+          else if(url.includes('edns')) {if(dnsFailure)status=503;else body={dns:{ip:'203.0.113.53',geo:'China - Example DNS'}};}
+          else if(url.includes('opendata.baidu')) body={status:'0',data:[{location:'广东省深圳市 电信'}]};
+          else if(url.includes('ip-api.com')) body={status:'success',country:'台湾',countryCode:'TW',regionName:'台湾',city:'台北市',isp:'Example Telecom',org:'Example'};
+          else if(url.includes('ipinfo')) body={country:'SG',city:'Singapore',org:'AS64500 Example'};
+          else if(url.includes('ip.sb')) body={country_code:'CN',country:'China',city:'Shenzhen',isp:'Example'};
+          else throw Error(`unexpected request: ${url}`);
+          cb(null,{status},typeof body==='string'?body:JSON.stringify(body||{}));
+        };
+        const ctx={$argument:argument,$httpClient:{get:request},console:quiet,
+          $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}},
+          $done:o=>{outputs.push(o);resolve(o);}};
+        if(client==='stash') {
+          ctx.$environment={'stash-version':'1.1.5'};ctx.$script={type:'tile'};
+          // No $httpAPI; no JS timers unless explicitly requested.
+        } else {
+          ctx.$input={purpose:'panel'};
+          ctx.$httpAPI=(method,path,body,cb)=>{
+            apiCalls.push(path);
+            cb(path==='/v1/traffic'?{interface:{en0:{in:2048,out:1024}}}:
+              {requests:[{URL:'https://ipinfo.io/test/json',policyName:'Test Proxy',remoteAddress:'192.0.2.1:443 (Proxy)'}]});
+          };
+        }
+        if(timers || client==='surge') {
+          ctx.setTimeout=(fn,ms)=>{const h=setTimeout(fn,ms);handles.push(h);return h;};ctx.clearTimeout=clearTimeout;
+        }
+        if(!missingNotification) ctx.$notification={post:(...args)=>{
+          if(notificationThrows) throw Error('notification unavailable');notifications.push(args);
+        }};
+        try {vm.runInNewContext(read('ip-security.js'),ctx,{timeout:1000});} catch(e){reject(e);}
+      }),
+      new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('IP panel did not finish')),2000);})
+    ]);
+    // Drain continuations to catch accidental second completion.
+    await new Promise(resolve=>setImmediate(resolve));
+    assert.equal(outputs.length,1);
+    return {output,requests,notifications,apiCalls,store};
+  } finally {clearTimeout(deadline);handles.forEach(clearTimeout);}
+}
+
+test('Stash outbound tile uses Chinese geography without timers or Surge API',async()=>{
+  const {output,requests,apiCalls}=await ipPanel({argument:'tile=outbound&proxy=SG%20%E8%8A%82%E7%82%B9&mask_ip=2',outIPv6:'2001:db8::10'});
+  assert.equal(output.title,'出口 IP');assert.equal(output.backgroundColor,'#3269B7');
+  assert.match(output.content,/🇹🇼/);assert.match(output.content,/台北市/);
+  assert.match(output.content,/IPv6：\[IP 已隐藏\]/);assert.doesNotMatch(output.content,/198\.51|203\.0|2001:|流量统计|入口 IP/);
+  assert.equal(output['icon-color'],undefined);assert.deepEqual(apiCalls,[]);
+  assert.ok(requests.some(r=>r.url.includes('lang=zh-CN')));
+  assert.ok(!requests.some(r=>/ippure|proxycheck|scamalytics|edns|opendata/.test(r.url)));
+  for(const req of requests){
+    assert.ok(req.timeout>0 && req.timeout<=5);
+    assert.equal(req.policy,undefined);
+    assert.equal(req.headers['X-Stash-Selected-Proxy'],req.url.includes('bilibili')?'DIRECT':encodeURIComponent('SG 节点'));
+  }
+});
+test('Stash risk uses one IPPure request, ignoring other configured risk sources',async()=>{
+  const result=await ipPanel({argument:'tile=risk&risk_api=proxycheck&ipqs_key=unused'});
+  assert.equal(result.requests.length,1);assert.equal(result.requests[0].url,'https://my.ippure.com/v1/info');
+  assert.equal(result.output.title,'IP 风险');assert.match(result.output.content,/12 \/ 100/);
+  assert.match(result.output.content,/住宅 IP · 原生 IP/);assert.match(result.output.content,/来源：IPPure/);
+  assert.equal(result.output.backgroundColor,'#2E9F5E');assert.equal(result.notifications.length,0);
+});
+test('Stash local tile looks up Baidu via DIRECT without outbound probes',async()=>{
+  const {output,requests,notifications}=await ipPanel({argument:'tile=local'});
+  assert.equal(output.title,'本地 IP');assert.match(output.content,/203\.0\.113\.2/);
+  assert.match(output.content,/广东省深圳市/);assert.match(output.content,/中国电信/);
+  assert.equal(requests.length,3);assert.ok(requests.some(r=>r.url.includes('opendata.baidu')));
+  assert.ok(requests.every(r=>r.headers['X-Stash-Selected-Proxy']==='DIRECT'));
+  assert.equal(notifications.length,0);
+});
+test('Stash DNS tile displays resolver and Chinese geography without declaring a leak',async()=>{
+  const {output,requests,notifications}=await ipPanel({argument:'tile=dns'});
+  assert.equal(output.title,'DNS 解析器');assert.match(output.content,/203\.0\.113\.53/);
+  assert.match(output.content,/🇹🇼/);assert.match(output.content,/Example Telecom/);assert.doesNotMatch(output.content,/泄露/);
+  assert.equal(requests.length,2);assert.equal(notifications.length,0);
+});
+test('Stash IP notifications establish a baseline then only report changes',async()=>{
+  const store=new Map();const argument='notify=true&mask_ip=2';
+  assert.equal((await ipPanel({store,argument})).notifications.length,0);
+  assert.equal((await ipPanel({store,argument})).notifications.length,0);
+  const changed=await ipPanel({store,argument,outIP:'198.51.100.11'});
+  assert.equal(changed.notifications.length,1);assert.match(changed.notifications[0][0],/IP 已变化/);
+  assert.doesNotMatch(changed.notifications[0].join('\n'),/198\.51|203\.0|泄露/);
+  assert.equal((await ipPanel({store,argument,outIP:'198.51.100.11'})).notifications.length,0);
+  assert.equal((await ipPanel({store,argument,localIP:null})).notifications.length,0);
+  assert.equal((await ipPanel({store,argument:'notify=false',outIP:'198.51.100.12'})).notifications.length,0);
+});
+test('Stash collapsed IP detection keeps selected-node routing and suppresses notifications',async()=>{
+  const store=new Map();
+  for(const outIP of ['198.51.100.10','198.51.100.11']) {
+    const result=await ipPanel({store,outIP,argument:'mode=collapsed&proxy=Ignored&notify=true'});
+    assert.equal(result.output.title,'出口 IP');assert.equal(result.notifications.length,0);
+    assert.ok(![...store.keys()].some(k=>k.endsWith('lastNetworkInfoEvent')));
+    for(const req of result.requests.filter(r=>!r.url.includes('bilibili')))
+      assert.equal(req.headers?.['X-Stash-Selected-Proxy'],undefined);
+  }
+});
+test('Stash failures stay unknown and never fall back to other risk services',async()=>{
+  const failedRisk=await ipPanel({argument:'tile=risk',riskFailure:true});
+  assert.equal(failedRisk.output.backgroundColor,'#9E9E9E');assert.match(failedRisk.output.content,/IPPure 检测失败/);
+  assert.equal(failedRisk.requests.length,1);assert.equal(failedRisk.store.size,0);
+  for(const data of [{},{fraudScore:null},{fraudScore:''},{fraudScore:false},{fraudScore:101},{fraudScore:-1}]) {
+    const bad=await ipPanel({argument:'tile=risk',ippureData:data});
+    assert.equal(bad.output.backgroundColor,'#9E9E9E');assert.match(bad.output.content,/暂无有效评分/);
+    assert.match(bad.output.content,/类型未知 · 来源未知/);
+  }
+  for(const [score,color] of [[0,'#2E9F5E'],[40,'#D4A017'],[70,'#C44444']]) {
+    const valid=await ipPanel({argument:'tile=risk',ippureData:{fraudScore:score}});
+    assert.equal(valid.output.backgroundColor,color);
+  }
+  const failedIP=await ipPanel({ipFailure:true});assert.equal(failedIP.output.title,'出口 IP');
+  assert.equal(failedIP.output.backgroundColor,'#9E9E9E');assert.match(failedIP.output.content,/无法获取出口/);
+  const localFailure=await ipPanel({argument:'tile=local',localIP:null});
+  assert.match(localFailure.output.content,/无法获取直连公网/);assert.equal(localFailure.requests.length,1);
+  const dnsFailure=await ipPanel({argument:'tile=dns',dnsFailure:true});
+  assert.equal(dnsFailure.output.backgroundColor,'#9E9E9E');assert.equal(dnsFailure.requests.length,1);
+});
+test('Stash missing or denied notifications still finish the tile',async()=>{
+  for(const options of [{missingNotification:true},{notificationThrows:true}]) {
+    const store=new Map();await ipPanel({store});
+    const result=await ipPanel({...options,store,outIP:'198.51.100.11',timers:true});
+    assert.match(result.output.content,/198\.51\.100\.11/);assert.equal(result.notifications.length,0);
+  }
+});
+test('Stash transient IPv6 failure does not report a network change',async()=>{
+  const store=new Map();await ipPanel({store,outIPv6:'2001:db8::10'});
+  assert.equal((await ipPanel({store})).notifications.length,0);
+  assert.equal((await ipPanel({store,outIPv6:'2001:db8::10'})).notifications.length,0);
+  assert.equal((await ipPanel({store,outIPv6:'2001:db8::11'})).notifications.length,1);
+});
+test('Surge IP panel retains policy, entrance, traffic and request routing',async()=>{
+  const {output,requests,apiCalls}=await ipPanel({client:'surge'});
+  assert.equal(output.title,'代理策略：Test Proxy');assert.equal(output.icon,'leaf.fill');
+  assert.equal(output.backgroundColor,undefined);assert.equal(output['icon-color'],'#0D6E3D');
+  assert.match(output.content,/入口 IP：192\.0\.2\.1/);assert.match(output.content,/流量统计：↑ 1 KB  ↓ 2 KB/);
+  assert.ok(apiCalls.includes('/v1/traffic'));assert.ok(apiCalls.includes('/v1/requests/recent'));
+  assert.ok(requests.some(r=>r.url.includes('opendata.baidu')));
+  assert.ok(requests.some(r=>r.url.includes('lang=zh-CN')));
+  assert.ok(requests.some(r=>r.url.includes('proxycheck'))); // Surge retains its risk fallback chain.
+  assert.match(output.content,/🇨🇳/); // Only Stash defaults its Taiwan flag to tw.
+  assert.equal(requests.find(r=>r.url.includes('bilibili')).policy,'DIRECT');
+  assert.equal(requests.find(r=>r.url.includes('edns')).policy,'Test Proxy');
+  assert.ok(requests.every(r=>!r.headers?.['X-Stash-Selected-Proxy']));
+});
