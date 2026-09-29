@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.1.3 (2026-09-29)
+ * @version      2.1.4 (2026-09-29)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
@@ -556,7 +556,7 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static checkSpotify() {
-    return Utils.checkByRegex("https://www.spotify.com/premium/", /spotify\.com\/([a-z]{2})\//);
+    return Utils.checkByRegex("https://www.spotify.com/premium/", /spotify\.com\/([a-z]{2})(?:-[a-z]{2,4})?\//i);
   }
 
   /**
@@ -722,8 +722,9 @@ async function runServiceTile(service) {
     title: definition.title,
     content: content === "No" ? "NO" : content,
     // icon 由覆写配置提供，更新状态时保留各服务的 Logo。
-    // 固定品牌底色，检测状态由 content 表达；使用完整六位色值。
-    backgroundColor: definition.color,
+    // 可用或部分可用显示品牌色；不可用及检测异常显示灰色。
+    backgroundColor: result.status === STATUS.OK || result.status === STATUS.COMING
+      ? definition.color : "#8E8E93",
     url: definition.url
   });
 }
