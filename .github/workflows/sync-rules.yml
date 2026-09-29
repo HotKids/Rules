@@ -10,6 +10,9 @@ on:
       - '.github/scripts/_common.py'
       # 编译步骤（.srs / .mrs）改动后立即重编译
       - '.github/workflows/sync-rules.yml'
+      - '.github/scripts/validate.py'
+      - '.github/scripts/requirements.txt'
+      - '.github/tests/**'
   schedule:
     - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:
@@ -21,19 +24,24 @@ permissions:
 concurrency:
   group: push-master
   cancel-in-progress: false
+  queue: max
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        # depth=2：sync-rules.py 的方向检测依赖 `git diff-tree HEAD`（需要父提交）来
-        # 判断是「聚合→成员」还是「成员→聚合」。depth=1 的 shallow 克隆里 HEAD 被当作
-        # root 提交，diff-tree 输出为空 → 直接在 GitHub 上编辑聚合文件会被误判为无变更
-        # 而被回滚。至少保留一个父提交即可让单提交 push 的变更检测正常工作。
-        run: git clone --depth=2 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Install validation dependencies
+        run: python3 -m pip install -r .github/scripts/requirements.txt
 
       - name: Run sync script
+        env:
+          SYNC_EVENT_NAME: ${{ github.event_name }}
+          SYNC_BASE_SHA: ${{ github.event.before }}
+          SYNC_EVENT_SHA: ${{ github.sha }}
         run: python3 .github/scripts/sync-rules.py
 
       - name: Compile sing-box binary rule-sets (.srs)
@@ -99,6 +107,9 @@ jobs:
                   orphan.unlink()
                   print(f"  ✗ 删除孤儿 {orphan}")
           EOF
+
+      - name: Validate before publishing
+        run: python3 .github/scripts/validate.py
 
       - name: Commit & push
         run: |

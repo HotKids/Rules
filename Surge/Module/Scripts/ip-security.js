@@ -203,8 +203,16 @@ function flag(cc) {
 }
 
 function riskText(score) {
+  if (score === null || score === undefined || !Number.isFinite(Number(score))) {
+    return { label: "检测失败", color: "#9E9E9E" };
+  }
   const level = CONFIG.riskLevels.find(l => score <= l.max) || CONFIG.riskLevels.at(-1);
   return { label: level.label, color: level.color };
+}
+
+function formatRisk(info) {
+  if (info.score === null || info.score === undefined) return "未知（检测失败）";
+  return info.score + "% " + riskText(info.score).label + " (" + info.source + ")";
 }
 
 function maskIP(ip, mode) {
@@ -464,10 +472,10 @@ async function getRiskScore(ip) {
     if (r) return r;
   }
 
-  // 所有数据源均失败：仅为本次展示返回默认值，不写入缓存，
+  // 所有数据源均失败：仅为本次展示返回未知状态，不写入缓存，
   // 避免一次性的临时故障被 24h TTL 放大成长期错误风控值
-  console.log("风险评分：所有数据源均失败，使用默认值（不缓存）");
-  return { score: 50, source: "Default" };
+  console.log("风险评分：所有数据源均失败，显示未知（不缓存）");
+  return { score: null, source: "Unavailable" };
 }
 
 // ==================== IP 类型检测（二级回落） ====================
@@ -687,7 +695,7 @@ function buildOutboundSection(outIP, outIPv6, outInfo, maskMode, reverseDNS) {
 function buildPanelContent({ localZh, maskMode, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
   const m = (ip) => maskIP(ip, maskMode);
   const lines = [
-    "IP 风控值：" + riskInfo.score + "% " + riskResult.label + " (" + riskInfo.source + ")",
+    "IP 风控值：" + formatRisk(riskInfo),
   ];
 
   // DNS 泄露检测
@@ -757,7 +765,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   }
   bodyLines.push(
     "🅟 " + formatGeo(outInfo?.country_code, outInfo?.city, geoLabel(outInfo)) + " · " + (outInfo?.org || "Unknown"),
-    "🅟 风控：" + riskInfo.score + "% " + riskResult.label + " | 类型：" + ipType + " · " + ipSrc
+    "🅟 风控：" + formatRisk(riskInfo) + " | 类型：" + ipType + " · " + ipSrc
   );
   if (dnsLeak && dnsLeak.leaked && dnsLeak.resolvers) {
     const leakedNames = [...new Set(dnsLeak.resolvers.filter(r => r.isChina).map(r => r.name))];

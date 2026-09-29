@@ -230,8 +230,11 @@ def aggregate():
     for url, alias in url_alias_list:
         text = results.get(url)
         if not text:
-            continue
+            raise ValueError(f"模块来源为空，中止聚合: {url}")
         parsed = parse_sgmodule(text)
+        if not any(line and not line.startswith(("#", ";"))
+                   for lines in parsed["sections"].values() for line in lines):
+            raise ValueError(f"模块缺少有效内容，中止聚合: {url}")
         name = parsed["meta"].get("name", url)
         if name not in ordered_modules:
             ordered_modules.append(name)

@@ -37,8 +37,10 @@ const args = (() => {
   const obj = {};
   try {
     ($argument || "").split("&").forEach(kv => {
-      const [k, v] = kv.split("=");
-      if (k) obj[k] = decodeURIComponent(v || "");
+      const at = kv.indexOf("=");
+      const k = (at < 0 ? kv : kv.slice(0, at)).trim();
+      const v = at < 0 ? "" : kv.slice(at + 1);
+      if (k) obj[k] = decodeURIComponent(v);
     });
   } catch (e) {}
   return obj;

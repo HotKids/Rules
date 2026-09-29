@@ -1,200 +1,148 @@
-# .github/scripts
+# 同步与维护
 
-三个同步脚本 + 共用模块 `_common.py`（Python 3.12+），将 Surge 格式规则/配置/模块自动同步到其他平台。
-`sync-rules.py` 仅标准库；`sync-modules.py` 额外依赖 `pypinyin`（排序用）；
-`sync-config.py` 额外依赖 `pyyaml`（解析 Sample.yaml 以生成 Mihomo.yaml 与 Script.js）。
+本目录将配置、规则和模块生成到各客户端目录。生成提交前执行统一验证；上游下载不完整时停止发布，保留 GitHub 上的上一份完整产物。
 
----
+## 维护入口
 
-## `sync-rules.py` — 规则集同步
+| 需要调整的内容 | 源文件 |
+|---|---|
+| 通用策略组、路由及 Surge 设置 | [Surge/Profile.conf](../../Surge/Profile.conf) |
+| 平台输出路径、排除项、URL 映射、重命名 | [sync-config.txt](sync-config.txt) |
+| 各平台静态基座 | [sync-config/](sync-config/) 的 ini 文件；Clash 还读取 [General.yaml](../../Clash/General.yaml) |
+| `My*` 私人差异 | [sync-config/Enhanced/](sync-config/Enhanced/) 的 overlay JSON |
+| 手工规则与 Streaming 成员 | [Surge/RULE-SET/](../../Surge/RULE-SET/) |
+| 上游规则及镜像模块 | [sync-rules.txt](sync-rules.txt) |
+| BlockAds 聚合来源与参数别名 | [sync-modules.txt](sync-modules.txt) |
+| 面板及检测实现 | [Pannel/](../../Surge/Module/Pannel/) 与 [Scripts/](../../Surge/Module/Scripts/) |
 
-**源**：`Surge/RULE-SET/**/*.list`  
-**目标**：`Quantumult/X/Filter/*.list`、`Clash/RuleSet/*.yaml`、`sing-box/source/*.json`
+## 本地命令
 
-执行顺序：① 拉取 `sync-rules.txt` 中的外部 URL → ② 地区流媒体合集双向同步（按 git diff 决定方向：HEAD commit + 工作区变更） → ③ 重建 `Streaming.list` → ④ 格式转换 → ⑤ 清理孤立文件
-
-`sync-rules.txt` 的 `# >> Surge` 段默认收编 RULE-SET 格式来源；条目加 `DOMAIN-SET,` 前缀
-则声明为 DOMAIN-SET 格式来源（裸域名 / `.` 前缀，如 Sukka 的 `reject_phishing`、`speedtest`）
-——镜像保持原格式（Surge/Loon/Surfboard 直接以 DOMAIN-SET 语义消费），派生时按各平台原生
-domain 语义转换：QX 展开为 `DOMAIN` / `DOMAIN-SUFFIX` 行、Clash 出 domain-behavior payload
-（`+.` 前缀）、sing-box 出 `domain` / `domain_suffix`。`# >> Clash` 段同样支持 `DOMAIN-SET,`
-前缀（如 Loyalsoldier `reject.txt`），只产出 Clash payload + sing-box source，不落 Surge/QX。
-
-条目尾部可挂 ` #!remove=a.com,b.com` 行内覆盖：拉取后在步骤 ① 剔除来源里的指定域名
-（多个逗号分隔；匹配忽略 `.` / `+.` 前缀与 `DOMAIN-*` 类型，不误伤子域）。QX/Clash/sing-box
-均由该 Surge `.list` 派生，一处声明即全平台生效。Module 段的 `#!name/#!desc/#!author/#!category`
-同为此语法。
-
-> Clash 二进制规则集 `Clash/RuleSet/*.mrs` 不由本脚本生成：mihomo 的 mrs 只支持
-> domain / ipcidr 两种 behavior，故在 `sync-rules.yml` workflow 里下载 mihomo 后扫描
-> `Clash/RuleSet/` 产物（payload 无逗号 → domain / CIDR → ipcidr，classical 跳过），
-> 用 `convert-ruleset` 编译出同名 `.mrs` 与源文件并存一同提交；`sync-config.py` 里
-> 自有 domain/ipcidr provider 已指向 `.mrs`（`format: mrs`），外部 Private/China/
-> Global/China IP 则指向 MetaCubeX meta-rules-dat 官方 mrs。
-
-> sing-box 二进制规则集 `sing-box/rule-set/*.srs` 不由本脚本生成：`.srs` 只能用官方 sing-box CLI 编译，故在 `sync-rules.yml` workflow 里下载 sing-box 后对 `source/*.json` 执行 `rule-set compile` 得到，与 `.json` 并存一同提交。
-
-**规则类型兼容性**
-
-| 类型 | QX | Clash | sing-box |
-|---|:---:|:---:|:---:|
-| DOMAIN / DOMAIN-SUFFIX / DOMAIN-KEYWORD | ✓ | ✓ | ✓ |
-| IP-CIDR / IP-CIDR6 | ✓ | ✓ | ✓ |
-| USER-AGENT | ✓ | — | — |
-| AND / PROCESS-NAME | — | ✓ | ✓ |
-| URL-REGEX | — | — | — |
-
-**触发**：`Surge/RULE-SET/**`、`sync-rules.txt`、`sync-rules.py` 或 `_common.py` 变动（push to master）；每天 UTC 16:00 定时
-
----
-
-## `sync-modules.py` — sgmodule 聚合
-
-**源**：`sync-modules.txt` 中的上游 sgmodule URL 列表（可带 `#!name` 等元数据覆盖）
-**目标**：`Surge/Module/BlockAds.sgmodule`（按 section 聚合、拼音排序、生成 `#!arguments` 开关）
-
-**触发**：`Surge/Module/**`、`sync-modules.txt`、`sync-modules.py` 或 `_common.py` 变动（push to master）；每天 UTC 16:00 定时
-
----
-
-## `sync-config.py` — 配置文件同步
-
-**源**：`Surge/Profile.conf`  
-**目标**：`Clash/Sample.yaml`、`Clash/Mihomo.yaml`、`Clash/Script/Stash.stoverride`、`Clash/Script/MyStash.stoverride`、`Clash/Script/Script.js`、`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`、`Surge/Balloon.lcf`（Loon）、`Quantumult/Sample.conf`、`Surge/Surfboard.conf`、`sing-box/config.json`
-
-各平台静态头部由 `sync-config/` 下的 ini 文件提供（支持 `<< path` / `<< https://url` 引用）。sing-box 完整配置以 `sync-config/sing-box.ini`（JSON 内容）为静态基座——仅保留 `sniff`/`hijack-dns`（sing-box 专属基础设施，Surge 无等价规则）；`route.rules`/`route.rule_set` 其余全部（含 QUIC 拦截、SSH 直连、私有网络、CN/geo、各服务分流）从 `[Rule]` 生成后 splice 进哨兵位——自有清单用本仓库 `.srs`，Loyalsoldier/VirgilClyne 等外部规则集映射到 SagerNet 官方等价规则集。
-
-`Clash/Mihomo.yaml` 是 `Clash/Sample.yaml` 生成完毕后转译出的锚点/flow 版（功能等价）：
-公共参数抽成 YAML 锚点（`&Remote` 规则集参数、`&Region` 地区分组基座、`&Filter<码>`
-地区正则），条目单行紧凑排版；地区组由 `use:[Server]+filter` 改写为
-`<<: *Region, filter: *Filter<码>`（`include-all-providers` 与 `use:` 同走 mihomo
-保序路径，功能一致）。
-
-`Clash/Script/Stash.stoverride` 是 `Clash/Sample.yaml` 的二次转换产物，与 `Clash/Mihomo.yaml`
-同一定位：整份配置逐行转录（含注释与排版），**只改写 Stash 与 mihomo 真正有差异的点**，因此
-可直接作为覆写文件导入 Stash 使用。差异点仅以下四类：
-
-- **省略 mihomo 专属的顶层键 / 整块**（连同其前置注释）：监听与控制面（`mixed-port` /
-  `allow-lan` / `bind-address` / `external-controller`）、`ipv6`、geo 数据源（`geodata-loader` /
-  `geox-url` / `geo-auto-update` / `geo-update-interval`）、`unified-delay` / `tcp-concurrent` /
-  `find-process-mode` / `global-ua` / `keep-alive-interval`，以及 `profile` / `ntp` / `sniffer` /
-  `tun` 和空占位 `proxies`。这些能力在 Stash 中由客户端自身管理，或无对应项。
-- **DNS 子键过滤**：只保留 Stash 文档支持的 `default-nameserver` / `nameserver` /
-  `nameserver-policy` / `proxy-server-nameserver` / `fake-ip-filter`，其余 14 个 mihomo 专属键则予以省略
-  （`enhanced-mode` / `fake-ip-range` / `cache-algorithm` / `direct-nameserver` 等）。
-- **DNS 写法转换**：mihomo 用每条 nameserver 的 `#RULES` 后缀表达「跟随规则」，Stash 为全局
-  开关 → 补 `follow-rule: true`，并在转译时去除该后缀（Stash 的 `#` 片段只承载 `h3=true`
-  这类选项）；`nameserver-policy` 里逗号拼接的多域名单键是 mihomo 专属，
-  按 Stash 语法拆分为独立键（官方仅支持精确域名 / 通配域名 / `geosite:<name>`）。
-- **Provider 处理**：`proxy-providers` 整块注释停用——它是本仓库自己的订阅，不适用于他人的
-  配置；内容已按 Stash 口径转换（移除 mihomo 专属的 `type`、`header` 改为文档拼写的 `headers`），
-  取消注释即可启用。相应地，策略组的 `use: [Server]` 改为 `include-all: true`，直接从基础配置
-  的 `proxies` 中按 `filter` 取节点——否则组内无代理，会被 Stash 当作 `DIRECT` 处理。
-- **整体替换标记**：`hosts` / `dns` / `proxy-groups` / `rule-providers` / `rules` 均加 `#!replace`，
-  使覆写以本文件为准；`proxies` 不输出，因此基础配置的节点原样保留。
-
-其余内容——`hosts` / `mode` / `log-level`、23 个策略组（含地区 `filter`）、
-30 个规则集、36 条规则——全部原样保留：Stash 的规则类型是 Clash Premium 超集，我们用到的
-`RULE-SET` / `GEOIP` / `GEOSITE` / `MATCH` / `no-resolve`、`AND` / `OR` / `NOT` 逻辑规则（含嵌套）
-及内置策略 `REJECT` / `REJECT-DROP`，官方文档均明确支持。
-
-两点需留意：`GEOSITE` 的 domain-list-community 数据不随 Stash 分发，首次使用时按需从 github.com
-拉取；`format: mrs` 的 MRS 支持有官方说明（限 `behavior` 为 `domain` / `ipcidr`，本仓库 8 个 mrs
-规则集正好全在此范围内），但格式表未列出该 `format` 取值，沿用 mihomo 写法，需实测确认。
-
-`Clash/Script/MyStash.stoverride` 是 Stash 的私人定制版，复用 `Enhanced/` 下的同一份
-overlay：只要 overlay 里除 `output` 外再声明一个 `stash_output`，就会在 Stash 基座上叠加同样
-的私人差异（目前只有 `myscript.overlay.json` 声明了）。overlay 的差异声明本身与输出格式无关，
-但 `_apply_overlay` 面向解析后的结构、供 Script.js 使用，而 Stash 侧为文本级转译（需保留
-Sample.yaml 的注释与排版），因此这些指令在 `_stash_apply_overlay` 中按文本重新实现，**遇到尚未
-实现的指令直接报错**，避免私人差异被静默丢弃。
-
-其中 `disabled_by_default` 没有静态等价物——它是 Script.js 的运行时开关（`ruleOptionsEnable`），
-YAML 覆写没有「默认关但可开」这种状态。因此按声明**整组移除**：移除该组、以其为落点的规则，以及
-其余分组候选中对它的引用，并清理因此不再被任何 `RULE-SET` 引用的规则集。`extra_pool_groups`
-的新增池组在 Script.js 里靠运行时过滤 `config.proxies` 填充，静态 YAML 必须显式写节点来源，
-统一按基座地区组的写法输出 `include-all: true` + `filter`。
-
-`Clash/Script/Script.js` 是 `Clash/Mihomo.yaml` 生成完毕后再解析出来的等效 mihomo 覆写
-脚本（Enhance Script），供 Clash Verge Rev / FlClash / Bettbox 等客户端直接对任意订阅动态生成同一套策略组 /
-规则 / 基础设置，无需依赖本仓库自身的 proxy-providers。它只读 Mihomo.yaml 的解析结果、
-不重新实现转换逻辑，因此随 `Profile.conf` 改动自动同步，直接修改将在下次同步时被覆盖。地区组 / `🇺🇳 Server`
-组不用 mihomo 的 `include-all` / `include-all-proxies`（它对候选节点做隐式字母序排序，
-无开关可关，见 `_gen_clash_script_js` 注释）：订阅里的内联节点由运行时按
-`poolGroupFilters` 手动过滤 `config.proxies` 填入并保持订阅原始顺序；订阅只给
-`proxy-providers` 时则回退到组上预置的 `include-all-providers` + `filter`（provider
-路径同样保序），两种形态及混合订阅均兼容。三个 My* 私人定制版仍要求订阅含真实
-内联节点（纯手动填充）。脚本会保留订阅里的机场私有 DNS / 节点域名 hosts
-（覆盖 dns/hosts 前采集、覆盖后合并），规则集公共参数抽成 `remoteRuleProvider` 常量以
-`...spread` 复用（与 Mihomo.yaml 的 `&Remote` 锚点互为镜像）。脚本在 JSDoc 之后声明
-`const Compatible_With_Bettbox = { ruleOptionsEnable: true }`，Bettbox 读到后会把
-`ruleOptionsEnable` 里的分组开关渲染成内置可视 UI；其它客户端把它当未用常量、无副作用。
-
-`Clash/Script/MyScript.js`、`Clash/Script/MyScriptColor.js`、`Clash/Script/MyClashBox.js`
-都是 `Script.js` 的私人定制版：
-在同一套自动生成基座上，各自叠加 `sync-config/Enhanced/` 下同名的 `*.overlay.json`
-声明的差异（`rename_map` 批量改名、`icon_overrides` 批量换图标、`rule_policy_redirect`
-规则落点重定向、`remove_groups` 整组删除、`group_overrides` 类型/filter 覆盖、`group_proxies_insert` 候选节点插入、
-`extra_pool_groups` 额外分组、`move_after` 调整展示顺序、`rules_insert` 在锚点规则
-前/后插入自定义规则行、`disabled_by_default` 让部分分组默认关闭），因此公共部分（rules/rule-providers/基础设置、以及未被 overlay 覆盖的
-分组）随 `Profile.conf` 自动同步，私人差异集中改对应的 `*.overlay.json` 即可——直接改
-生成产物本体会被下次同步覆盖。overlay 还可以用 `extends: "<其他 overlay 文件名>"` 声明基于另一份
-已生成的 overlay 结果继续叠加（链式：`clashbox.overlay.json` extends
-`myscriptcolor.overlay.json` extends `myscript.overlay.json`，图标继承自 MyScriptColor），
-只需要写与被继承者的差异，公共部分（地区 fallback、Relay 中转链等）不必重复声明。
-但 `disabled_by_default` 是各 overlay 独立读取、**不随 extends 继承**，且键要用该 overlay
-生成态的分组名（myscript / myscriptcolor 用 emoji 名，clashbox 因 rename_map 先生效而用改名后
-的名）——要让三份都默认关闭同一分组，需各自声明一次。
-
-`_sync_clash` 会自动扫描 `Enhanced/` 下所有 `*.overlay.json`，每份的输出路径由它自己的
-`output` 字段声明（仓库根相对，如 `"Clash/Script/MyClashBox.js"`），`extends` 依赖顺序自动
-拓扑解析——因此**新增一份个人配置只需在 `Enhanced/` 下放一个带 `output` 的 `*.overlay.json`
-即可自动生成对应脚本，无需改动 `sync-config.py`**。改某份 overlay 的 `output` 后，旧路径上
-遗留的脚本会在下次同步时自动清理（仅删带生成标记的产物，不碰手放的其它 `.js`）。
-
-**触发**：`Profile.conf`、`Clash/General.yaml`（clash.ini 经 `<<` 内嵌）、`sync-config.py`、`sync-config.txt`、`sync-config/**` 变动（push to master）
-
-### 各平台同步内容
-
-| Surge 段 | Clash | Loon | QX | Surfboard |
-|---|---|---|---|---|
-| `[General]` | — | — | — | 白名单过滤（5 个 key） |
-| `[Proxy]` | hidden wrapper group | `[Proxy]` | — | `[Proxy]` |
-| `[Proxy Group]` | `proxy-groups:` | `[Proxy Group]` | `[policy]` | `[Proxy Group]` |
-| `[Rule]` remote | `rule-providers:` + `rules:` | `[Remote Rule]` | `[filter_remote]` | — |
-| `[Rule]` local | `rules:` | `[Rule]` + FINAL | `[filter_local]` | `[Rule]` |
-| `[MITM]` | — | `[Mitm]` | `[mitm]` | — |
-
-### 各平台跳过 / 转换
-
-**Clash**
-- 规则类型重命名：`DEST-PORT` → `DST-PORT`，`PROTOCOL,TCP/UDP` → `NETWORK,TCP/UDP`
-- 跳过：`URL-REGEX`、`USER-AGENT`、`PROTOCOL,QUIC`（无等价）
-
-**Loon**
-- Action proxy 映射：`reject-drop` → `REJECT-DROP`，其余 reject 变体 → `REJECT`
-- `[Remote Filter]` 条目全部自动生成（单点源 Profile.conf）：smart 组的
-  `policy-regex-filter` → `Filter<码>`（如 FilterHK），`include-all-proxies` 组 →
-  全节点 FilterUN；`loon.ini` 只留段头，`sync-config.txt` 的 FilterMap 仅作手动覆盖
-- 无静态候选的 select + `include-other-group` 组（如 ⏱️ Speedtest）→ 全节点 FilterUN
-- 跳过：其余 `include-other-group`、`policy-path` 参数；非 HTTP URL 的本地规则
-
-**QX**
-- `Surge/RULE-SET/` URL 自动重映射为 `Quantumult/X/Filter/`
-- icon-url 保留；组名默认剥除 emoji
-- 无静态候选的 select + `include-other-group` 组（如 ⏱️ Speedtest）→ `server-tag-regex=.*`
-- 跳过：`include-all-proxies=true` 类 group；GEOIP CN
-
-**Surfboard**
-- `[General]` 白名单：`dns-server`、`doh-server`、`skip-proxy`、`proxy-test-url`、`always-real-ip`
-- `icon-url` 全部剥除；`REJECT-*` 变体统一归并为 `REJECT`
-- `include-all-proxies=true` 组从 Profile.conf `//` 注释行读取替代定义
-- 跳过规则类型：`URL-REGEX`、`USER-AGENT`、`GEOSITE`；无 `[MITM]` 输出
-
----
+环境：Python 3.12+、Node.js 20+。在仓库根目录运行：
 
 ```bash
-python .github/scripts/sync-rules.py
-python .github/scripts/sync-config.py
+python3 -m pip install -r .github/scripts/requirements.txt
+python3 .github/scripts/validate.py
 ```
 
+`validate.py` 离线检查 Python/JS 语法、YAML/JSON、Sample/Mihomo 等价性、Tile provider 对应关系，并执行 Python 回归与面板模拟测试。
+
+```bash
+# 完整重生配置后验证，会访问远程 include
+python3 .github/scripts/validate.py --regenerate
+
+# 分别执行生成器，会修改工作区
+python3 .github/scripts/sync-config.py
+python3 .github/scripts/sync-rules.py
+python3 .github/scripts/sync-modules.py
+```
+
+SRS/MRS 编译与 sing-box 完整配置检查由工作流调用官方内核执行，本地 `validate.py` 不代替这些步骤。JavaScript 测试使用模拟响应，不会进行真实签到或发送通知。
+
+## 配置生成
+
+[sync-config.py](sync-config.py) 保留命令入口，实际实现按职责拆分：
+
+| 模块 | 职责 |
+|---|---|
+| [parser.py](config_sync/parser.py) | 平台清单、基座与 Surge 源解析 |
+| [common.py](config_sync/common.py) | 路径、公共分组/规则工具与输出格式 |
+| [clash.py](config_sync/clash.py) | Clash/Mihomo YAML、增强 JS 和结构化 overlay |
+| [stash.py](config_sync/stash.py) | Stash 转译及保留注释的 overlay |
+| [loon.py](config_sync/loon.py)、[qx.py](config_sync/qx.py)、[surfboard.py](config_sync/surfboard.py)、[singbox.py](config_sync/singbox.py) | 各平台输出 |
+| [pipeline.py](config_sync/pipeline.py) | 按依赖顺序组织生成 |
+
+产物包括 `Clash/Sample.yaml`、`Mihomo.yaml`、`Clash/Script/` 的 JS/Stash 覆写、`Surge/Balloon.lcf`、`Surge/Surfboard.conf`、`Quantumult/Sample.conf` 和 `sing-box/config.json`。没有实质变化时保留原时间戳，避免空提交。
+
+### 平台清单
+
+`sync-config.txt` 按平台分块：
+
+| 写法 | 含义 |
+|---|---|
+| `# Platform` | 平台名称 |
+| `>> path` | 源文件或输出文件 |
+| `# > Skip` | 排除关键词；Surge 块中为全局排除项 |
+| `# > Builtin` | 平台基座与注入内容 |
+| `<< path` / `<< https://...` | 引入本地文件或远程内容 |
+| `# > Mapping` | URL 映射 |
+| `# > Rename` | 策略/Provider 名称映射 |
+| `# > Gist` | Raw 地址的反代设置 |
+
+Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则块支持多段锚点。具体格式和现有例子在清单顶部说明中保留。远程 include 下载失败即中止生成。
+
+### 私人 overlay
+
+通用脚本为 `Clash/Script/Script.js`。`Enhanced/*.overlay.json` 通过 `output` 声明定制 JS 路径，支持继承、改名、图标、分组覆盖/插入、额外节点池、规则插入和默认关闭项。以当前 overlay 文件为可用字段示例，不直接修改生成后的 `My*` 文件。
+
+声明 `stash_output` 的 overlay 还生成定制 Stash 覆写。Stash 没有 JS 运行时开关，`disabled_by_default` 会移除对应组、路由和候选引用，并清理失去引用的规则集。遇到 Stash 尚未支持的 overlay 字段会报错，避免静默遗漏。
+
+Stash 基座转换保留注释与排版：使用 `follow-rule: false`，境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`，并过滤 mihomo 专属字段。节点从基础配置继承，主要设置块使用 `#!replace`。
+
+## 规则同步
+
+[sync-rules.py](sync-rules.py) 依次拉取外部规则与镜像模块、处理 Streaming 双向同步、转换 QX/Clash/sing-box 格式、清理不再需要的产物。
+
+### 上游清单
+
+`sync-rules.txt` 支持 Surge、Clash、Module 段：
+
+```text
+URL,名称
+DOMAIN-SET,URL,名称
+URL,名称 #!remove=a.example,b.example
+```
+
+`DOMAIN-SET` 声明裸域名 / 域名后缀来源；转换后使用各平台相应语义。`#!remove` 从镜像中剔除指定域名，同名多来源合并去重。Module 段可覆盖 `#!name`、`#!desc`、`#!author`、`#!category`。
+
+上游镜像按清单维护，直接编辑下载产物会被覆盖。遇到来源迁移，请修改清单；需要删除某个来源时显式删除条目，不把下载失败当成上游内容已删除。
+
+### Streaming 双向同步
+
+成员文件用以下标记声明是否参与总表、地区表：
+
+```text
+### Streaming
+### Streaming US
+```
+
+优先修改服务成员文件。若只编辑 `Streaming.list` 或某个 `Streaming_<地区>.list`，生成器会先提取回成员，再重建合集；无地区标记和合并文件的全部 section 都会保留。
+
+- push 通过 `SYNC_BASE_SHA`（事件 before）到实际检出 HEAD 的完整差异决定方向，`SYNC_EVENT_SHA` 验证触发提交仍在当前历史中，覆盖多提交与排队期间的新修改。
+- 总表/地区表与对应成员同时修改且内容不一致时中止。先对齐两侧，或只保留一处编辑，再重新运行。
+- 定时/手动 CI 不重新解释最后一次提交。如果下载前发现合集与成员已不一致，会停止，给对应 push 任务保留待处理编辑。
+- 本地默认使用 HEAD 和工作区差异；多提交场景可显式运行 `SYNC_BASE_SHA=<基准提交> python3 .github/scripts/sync-rules.py`。
+
+### 格式与二进制
+
+| 产物 | 来源 / 处理 |
+|---|---|
+| `Quantumult/X/Filter/` | Surge 转换；跳过 QX 不支持的类型 |
+| `Clash/RuleSet/` | Surge 转换或 Clash 段上游；保留各自 behavior |
+| `sing-box/source/` | 转为 sing-box 规则集 JSON |
+| `sing-box/rule-set/*.srs` | 官方 sing-box CLI 编译，版本固定 1.12.0 |
+| `Clash/RuleSet/*.mrs` | 官方 mihomo CLI 编译 domain/ipcidr，版本固定 v1.19.30；classical 不编译为 MRS |
+
+二进制编译任一失败都会停止发布。对应源码删除后，工作流清理孤立二进制文件。升级编译版本时需同时核对 [sync-rules.yml](../workflows/sync-rules.yml) 与 [lint.yml](../workflows/lint.yml)。
+
+## 模块聚合
+
+[sync-modules.py](sync-modules.py) 将 `sync-modules.txt` 中的 sgmodule 合并到 `Surge/Module/BlockAds.sgmodule`，按 section 收集、按名称排序，合并 MITM hostname 并生成参数开关。条目可用 `URL,别名` 为对应应用生成域名开关。
+
+元数据可在现有 BlockAds 文件中维护；来源内容在清单中调整。聚合模块需搭配 BlockAdsBase，详见 [Surge 说明](../../Surge/README.md)。
+
+## 下载、验证与发布
+
+[_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 最多尝试三次；真实 404 不重试且保留状态码；空响应和无效内容不作为正常产物发布。超时不再写成 `upstream 404`。
+
+| 工作流 | 主要触发条件 | 发布前处理 |
+|---|---|---|
+| Lint Scripts | 配置、维护脚本、面板、清单与相关工作流变动；PR；手动 | 重生配置、共享验证、sing-box check |
+| Sync Config | 主配置、平台基座、overlay 与生成器变动；手动 | 生成配置并验证 |
+| Sync Rules | Surge 规则、来源清单与同步器变动；每天 UTC 16:00；手动 | 同步、编译 SRS/MRS、验证 |
+| Sync Modules | BlockAds 元数据、来源清单与聚合器变动；每天 UTC 16:00；手动 | 聚合并验证 |
+
+共享验证入口、依赖及测试变动也会触发同步工作流。完整路径过滤以 [workflows/](../workflows/) 为准；面板修改不再无关地触发全部模块下载。
+
+三个同步任务和既有手动历史工作流共用 `push-master`，启用 `queue: max`。同步提交只允许快进推送；运行期间出现外部提交时保留远端，任务失败后可重新运行。自动生成提交不依赖再次触发 push CI，因此每个发布任务都在提交前运行 [validate.py](validate.py)。
+
+修改转换或检测逻辑时，在 [tests/](../tests/) 增加对应行为的回归样例，再执行验证。模拟测试覆盖边界行为；实际客户端兼容性、节点可用性和第三方接口变化仍需结合运行结果判断。

@@ -8,8 +8,13 @@ on:
       # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
+      - '.github/scripts/config_sync/**'
+      - '.github/workflows/sync-config.yml'
       - '.github/scripts/sync-config.txt'
       - '.github/scripts/sync-config/**'
+      - '.github/scripts/validate.py'
+      - '.github/scripts/requirements.txt'
+      - '.github/tests/**'
   workflow_dispatch:
 
 permissions:
@@ -19,16 +24,23 @@ permissions:
 concurrency:
   group: push-master
   cancel-in-progress: false
+  queue: max
 
 jobs:
   sync:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        run: git clone --depth=1 "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" .
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+      - name: Install validation dependencies
+        run: python3 -m pip install -r .github/scripts/requirements.txt
 
       - name: Run sync script
-        run: pip install pyyaml -q && python3 .github/scripts/sync-config.py
+        run: python3 .github/scripts/sync-config.py
+
+      - name: Validate before publishing
+        run: python3 .github/scripts/validate.py
 
       - name: Commit & push
         run: |

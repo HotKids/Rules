@@ -4,157 +4,45 @@ on:
   push:
     branches: [master]
     paths:
-      - '.github/scripts/*.py'
-      - '.github/scripts/sync-config/**'
+      - '.github/scripts/**'
+      - '.github/tests/**'
+      - '.github/workflows/lint.yml'
+      - '.github/workflows/sync-*.yml'
       - 'Surge/Profile.conf'
       - 'Surge/RULE-SET/**'
-      - 'Clash/General.yaml'
-      - 'Clash/Sample.yaml'
-      - 'Clash/Mihomo.yaml'
-      - 'Clash/Script/**'
-      - 'sing-box/config.json'
+      - 'Surge/Module/Scripts/**'
+      - 'Surge/Module/Pannel/**'
+      - 'Clash/**'
+      - 'sing-box/**'
+      - 'Quantumult/**'
   pull_request:
     paths:
-      - '.github/scripts/*.py'
-      - '.github/scripts/sync-config/**'
+      - '.github/scripts/**'
+      - '.github/tests/**'
+      - '.github/workflows/lint.yml'
+      - '.github/workflows/sync-*.yml'
       - 'Surge/Profile.conf'
-      - 'Clash/General.yaml'
-      - 'Clash/Sample.yaml'
-      - 'Clash/Mihomo.yaml'
-      - 'Clash/Script/**'
-      - 'sing-box/config.json'
+      - 'Surge/RULE-SET/**'
+      - 'Surge/Module/Scripts/**'
+      - 'Surge/Module/Pannel/**'
+      - 'Clash/**'
+      - 'sing-box/**'
+      - 'Quantumult/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
+      - name: Install validation dependencies
+        run: python3 -m pip install -r .github/scripts/requirements.txt
+      - name: Regenerate and validate configurations and panels
+        run: python3 .github/scripts/validate.py --regenerate
 
-      - name: Syntax check Python
-        # glob 覆盖全部脚本（含 _common.py 及以后新增文件）；py_compile 不追 import，逐文件列举容易漏
-        run: python3 -m py_compile .github/scripts/*.py
-
-      - name: Dry-run sync-config.py（防「源坏但产物对」）
-        # 从源头（Profile.conf + sync-config/ 基座）完整重生一遍并断言 exit 0——
-        # 抓住会让 regen 崩溃的坏源（如占位符 @@ 未加引号触发 YAML ScannerError），
-        # 这类问题只校验已提交产物是发现不了的。不做 git diff：sync-config.py 会拉
-        # 少量远程片段（QX DNS snippet / Surfboard remote），上游变动会导致误报。
-        run: |
-          pip install pyyaml -q
-          python3 .github/scripts/sync-config.py
-          echo "✓ sync-config.py 能从源头干净重生"
-
-      # 注意：run 块内嵌 Python 必须与块基准缩进对齐（YAML 会剥除公共缩进）。
-      # 此前 Python 顶格书写导致整个 workflow 文件无法被 GitHub 解析，
-      # lint 自创建起从未真正运行（每次 push 记一次零 job 的 failure）。
-      - name: Validate generated Clash YAML parseable
-        run: |
-          python3 -c "
-          import yaml, pathlib, sys
-          files = sorted(pathlib.Path('Clash/RuleSet').rglob('*.yaml'))
-          errors = []
-          for f in files:
-              try:
-                  yaml.safe_load(f.read_text())
-              except yaml.YAMLError as e:
-                  errors.append(f'{f}: {e}')
-          if errors:
-              print('FAIL:', *errors, sep='\n')
-              sys.exit(1)
-          print(f'All {len(files)} Clash YAML files OK')
-          "
-
-      # 完整 Clash 配置（含 Mihomo.yaml 的锚点 / <<: 合并键）能被 PyYAML 解析即通过；
-      # Mihomo.yaml 额外与 Sample.yaml 做键序无关的深度等价校验（地区组 use↔include-all-providers 归一）
-      - name: Validate Clash Sample.yaml / Mihomo.yaml
-        run: |
-          pip install pyyaml -q
-          python3 -c "
-          import yaml, sys
-          s = yaml.safe_load(open('Clash/Sample.yaml'))
-          m = yaml.safe_load(open('Clash/Mihomo.yaml'))
-          m.pop('anchors', None)
-          for g in s['proxy-groups']:
-              if g.get('use') == ['Server']:
-                  del g['use']; g['include-all-providers'] = True
-          def canon(v):
-              if isinstance(v, dict): return {k: canon(v[k]) for k in sorted(v)}
-              if isinstance(v, list): return [canon(x) for x in v]
-              return v
-          if canon(s) != canon(m):
-              diff = [k for k in set(s) | set(m) if canon(s.get(k)) != canon(m.get(k))]
-              print('FAIL: Mihomo.yaml 与 Sample.yaml 不等价，差异键：', diff)
-              sys.exit(1)
-          print('Mihomo.yaml ≡ Sample.yaml OK')
-          "
-
-      # 生成的 mihomo 覆写脚本：语法检查 + 空跑 main()（含普通订阅与私有 DNS 订阅两种输入）
-      - name: Validate generated enhance scripts (node)
-        run: |
-          set -euo pipefail
-          for f in Clash/Script/*.js; do node --check "$f"; done
-          node -e '
-          const fs = require("fs");
-          for (const f of fs.readdirSync("Clash/Script").filter((x) => x.endsWith(".js"))) {
-            const main = new Function(fs.readFileSync("Clash/Script/" + f, "utf8") + "\nreturn main;")();
-            main({ proxies: [{ name: "HK01", type: "ss", server: "1.2.3.4" }] });
-            main({ proxies: [{ name: "US 02", type: "vmess", server: "n.example" }], dns: { "proxy-server-nameserver": ["https://p.example/dq"] }, hosts: { "n.example": "1.2.3.4" } });
-            console.log(f + ": OK");
-          }'
-
-      # Stash 覆写产物（Clash/Script/*.stoverride）同样由 sync-config.py 生成，
-      # 但此前无任何校验——格式坏掉会静默发布。`#!replace` 等标记在 YAML 里是行尾
-      # 注释，可直接按 YAML 解析。
-      - name: Validate generated Stash overrides parseable
-        run: |
-          pip install pyyaml -q
-          python3 -c "
-          import yaml, pathlib, sys
-          files = sorted(pathlib.Path('Clash/Script').glob('*.stoverride'))
-          if not files:
-              print('no .stoverride found'); sys.exit(0)
-          errors = []
-          for f in files:
-              try:
-                  d = yaml.safe_load(f.read_text())
-                  if not isinstance(d, dict):
-                      errors.append(f'{f}: 顶层不是映射')
-              except yaml.YAMLError as e:
-                  errors.append(f'{f}: {e}')
-          if errors:
-              print('FAIL:', *errors, sep='\\n'); sys.exit(1)
-          print(f'All {len(files)} Stash overrides OK')
-          "
-
-      - name: Validate overlay JSON
-        run: |
-          python3 -c "
-          import json, pathlib
-          for f in sorted(pathlib.Path('.github/scripts/sync-config/Enhanced').glob('*.overlay.json')):
-              json.load(open(f))
-              print(f'{f}: OK')
-          "
-
-      - name: Validate generated sing-box JSON parseable
-        run: |
-          python3 -c "
-          import json, pathlib, sys
-          files = sorted(pathlib.Path('sing-box/source').rglob('*.json'))
-          errors = []
-          for f in files:
-              try:
-                  json.loads(f.read_text())
-              except json.JSONDecodeError as e:
-                  errors.append(f'{f}: {e}')
-          if errors:
-              print('FAIL:', *errors, sep='\n')
-              sys.exit(1)
-          print(f'All {len(files)} sing-box JSON files OK')
-          "
-
-      # 完整配置模板用 sing-box 官方 check 校验结构（含 1.12+ 新格式字段）。
-      # check 只做结构校验、不下载 remote rule-set，故离线可跑。版本须与
-      # sync-rules.yml 的编译版本一致。
       - name: Validate sing-box full config (sing-box check)
         env:
           SING_BOX_VERSION: "1.12.0"

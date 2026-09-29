@@ -11,6 +11,7 @@ Surge RULE-SET 同步脚本
 """
 
 import json
+import os
 import re
 import subprocess
 from datetime import datetime, timezone, timedelta
@@ -30,28 +31,35 @@ _UA = "sync-rules/1.0"
 
 
 def _recently_changed_files() -> set[str]:
-    """Return repo-relative paths of recently changed files.
+    """Use the push base through the checked-out HEAD, including queued edits.
 
-    Checks both the HEAD commit (via ``git diff-tree HEAD`` — needs HEAD's parent,
-    so CI must clone with depth ≥ 2; a depth-1 shallow clone treats HEAD as a root
-    commit and this yields nothing) and the working tree (``git diff HEAD`` for
-    local runs with uncommitted edits), so direction detection works in both
-    environments.
+    Scheduled/manual CI runs do not replay the last commit. Local runs can set
+    SYNC_BASE_SHA explicitly; otherwise HEAD's changes and working edits apply.
+    Missing/rewritten push history is an error, never an empty change set.
     """
-    result: set[str] = set()
-    try:
-        for cmd in (
-            ["git", "diff-tree", "--no-commit-id", "-r", "--name-only", "HEAD"],
-            ["git", "diff", "--name-only", "HEAD"],
-        ):
-            out = subprocess.run(
-                cmd, capture_output=True, text=True, cwd=REPO_ROOT,
-            ).stdout.strip()
-            if out:
-                result.update(out.splitlines())
-    except Exception:
-        pass
-    return result
+    def git(*args: str) -> str:
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, check=True,
+                              capture_output=True, text=True).stdout.strip()
+
+    event = os.environ.get("SYNC_EVENT_NAME", "")
+    base = os.environ.get("SYNC_BASE_SHA", "")
+    event_sha = os.environ.get("SYNC_EVENT_SHA", "")
+    changed: set[str] = set()
+    if event == "push" or base:
+        if not base:
+            raise ValueError("push 同步缺少 SYNC_BASE_SHA，拒绝猜测同步方向")
+        if event_sha:
+            git("merge-base", "--is-ancestor", event_sha, "HEAD")
+        if set(base) == {"0"}:
+            changed.update(git("ls-files").splitlines())
+        else:
+            git("merge-base", "--is-ancestor", base, "HEAD")
+            changed.update(git("diff", "--name-only", base, "HEAD").splitlines())
+    elif not event:
+        changed.update(git("diff-tree", "--root", "--no-commit-id", "-r",
+                           "--name-only", "HEAD").splitlines())
+    changed.update(git("diff", "--name-only", "HEAD").splitlines())
+    return changed
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
 QX_SKIP = {"URL-REGEX", "AND", "OR", "NOT", "PROCESS-NAME", "PROCESS-NAME-REGEX"}
@@ -118,23 +126,6 @@ MERGE_SECTION_TO_FILE = _build_merge_maps()
 
 def is_blank(line: str) -> bool:
     return not line.strip()
-
-
-def _mark_upstream_deleted(filepath: Path) -> None:
-    """在 ### fork from 行后插入 ### upstream 404 · DATE 标记（幂等）。"""
-    if not filepath.exists():
-        return
-    lines = filepath.read_text(encoding="utf-8").splitlines()
-    if any(l.startswith("### upstream 404") for l in lines):
-        return  # 已标记，不重复写
-    today = datetime.now(tz=timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
-    new_lines = []
-    for line in lines:
-        new_lines.append(line)
-        if line.startswith("### fork from "):
-            new_lines.append(f"### upstream 404 · {today}")
-    if write_if_changed(filepath, "\n".join(new_lines) + "\n"):
-        print(f"  ⚠ {filepath.name} 上游已删除，已标记")
 
 
 def strip_streaming_placeholders(text: str) -> str:
@@ -217,21 +208,56 @@ def _extract_streaming(streaming_path: Path, placeholders: dict[str, list[str]])
         for region, stems in placeholders.items()
         for stem in stems
     }
+    contents: dict[str, list[str]] = {}
     for sec_name, lines in sections.items():
         stem = section_name_to_file(sec_name)
         if stem not in stem_to_region:
-            print(f"  [SKIP] 无法确定 region，跳过: {sec_name}")
-            continue
-        region = stem_to_region[stem]
-        out_lines = _inject_placeholder(lines, region) if region else lines
+            raise ValueError(f"总合集包含未声明 Streaming 标记的成员: {sec_name}")
+        if stem in contents:
+            contents[stem].append("")
+        contents.setdefault(stem, []).extend(lines)
+    for stem, lines in contents.items():
+        out_lines = _inject_placeholder(lines, stem_to_region[stem])
         if write_if_changed(SURGE_DIR / f"{stem}.list", "\n".join(out_lines) + "\n"):
             print(f"  ✓ Streaming.list → {stem}.list")
+
+
+def _streaming_sections(text: str) -> dict[str, list[str]]:
+    return {name: [line.strip() for line in lines
+                   if line.strip() and not STREAMING_PLACEHOLDER_RE.match(line.strip())]
+            for name, lines in parse_sections(text).items()}
+
+
+def _assert_consistent_aggregate(path: Path, stems: list[str]) -> None:
+    expected = "\n".join(read_standalone(stem) or "" for stem in stems)
+    if _streaming_sections(path.read_text(encoding="utf-8")) != _streaming_sections(expected):
+        raise ValueError(f"{path.name} 与成员/其他合集同时修改且内容不一致；"
+                         "请保留一处编辑或先将两侧内容对齐，未执行双向覆盖")
+
+
+def _check_idle_streaming() -> None:
+    """Scheduled/manual jobs must not consume unprocessed aggregate edits.
+
+    A job may acquire the shared queue after a user push but before its matching
+    sync run. Check the committed inputs before fetching/writing any upstreams.
+    """
+    if os.environ.get("SYNC_EVENT_NAME") not in {"schedule", "workflow_dispatch"} or os.environ.get("SYNC_BASE_SHA"):
+        return
+    placeholders = scan_streaming_placeholders()
+    stems = sorted({stem for members in placeholders.values() for stem in members})
+    total = SURGE_DIR / "Streaming.list"
+    if stems and total.exists():
+        _assert_consistent_aggregate(total, stems)
+    for region, members in placeholders.items():
+        path = SURGE_DIR / f"Streaming_{region}.list"
+        if region and path.exists():
+            _assert_consistent_aggregate(path, members)
 
 
 def sync_streaming() -> None:
     """Streaming 三层双向同步：总合集 ↔ 地区合集 ↔ 独立子项，以独立子项为枢纽。
 
-    同步方向由近期有改动的文件决定（HEAD commit + 工作区未提交改动）：
+    同步方向由 push 完整范围与工作区改动决定（本地可用 SYNC_BASE_SHA）：
     - 仅总合集有改动       → 提取到独立子项，再重建各地区合集和总合集
     - 仅某地区合集有改动   → 提取到对应独立子项，再重建所有合集
     - 独立子项有改动       → 直接重建各地区合集和总合集
@@ -261,6 +287,15 @@ def sync_streaming() -> None:
     member_changed     = any(rel(SURGE_DIR / f"{s}.list") in changed for s in all_stems)
     streaming_changed  = rel(streaming_path) in changed
     any_reg_changed    = any(rel(p) in changed for p, _, _ in regionals.values())
+
+    # Conflicting edits are rejected before either side can overwrite the other.
+    # Already-synchronized bot commits compare equal and remain idempotent.
+    if streaming_changed and (member_changed or any_reg_changed):
+        _assert_consistent_aggregate(streaming_path, all_stems)
+    for path, stems, _region in regionals.values():
+        if rel(path) in changed and (streaming_changed or any(
+                rel(SURGE_DIR / f"{stem}.list") in changed for stem in stems)):
+            _assert_consistent_aggregate(path, stems)
 
     # ── 阶段一：将"被直接编辑的上层合集"落实到独立子项 ──────────────────
     if streaming_changed and not member_changed and not any_reg_changed:
@@ -306,7 +341,7 @@ def sync_streaming() -> None:
 
 def _inject_placeholder(lines: list[str], region: str) -> list[str]:
     """在 lines 的第一个 '# > Name' 行之后插入 '### Streaming REGION'（若尚不存在）。"""
-    placeholder = f"### Streaming {region}"
+    placeholder = f"### Streaming {region}".rstrip()
     if any(STREAMING_PLACEHOLDER_RE.match(l.strip()) for l in lines):
         return lines
     result = []
@@ -1037,16 +1072,15 @@ def fetch_external_rules():
         for url in urls:
             print(f"  [Surge] {name} ← {url}")
             text = prefetched.get(url)
-            if text is None:
-                continue
+            if not text:
+                raise ValueError(f"规则来源为空，中止同步: {url}")
             if name not in domainset_names and _is_clash_payload(text):
                 text = convert_clash_payload_to_surge(text)
                 if text is None:
-                    print(f"    [WARN] {name} Clash→Surge 转换为空，跳过")
-                    continue
+                    raise ValueError(f"{name} Clash→Surge 转换为空，中止同步: {url}")
             normalized = normalize_surge_rules(text)
             if not normalized:
-                continue
+                raise ValueError(f"{name} 规则内容为空，中止同步: {url}")
             fork_urls.append(url)
             for line in normalized.splitlines():
                 if re.match(r"^#\s*>(?!>)\s*\S", line):
@@ -1060,9 +1094,7 @@ def fetch_external_rules():
                     rule_lines.append(line)
 
         if not rule_lines:
-            print(f"    [WARN] {name} 全部来源为空，跳过")
-            _mark_upstream_deleted(SURGE_DIR / f"{name}.list")
-            continue
+            raise ValueError(f"{name} 全部来源没有有效规则，中止同步")
         header = " & ".join(section_names) if section_names else name.rsplit("/", 1)[-1]
         rule_lines.insert(0, f"# > {header}")
 
@@ -1088,10 +1120,13 @@ def fetch_external_rules():
         for url in urls:
             print(f"  [Clash] {name} ← {url}")
             text = prefetched.get(url)
-            if text is None:
-                continue
+            if not text:
+                raise ValueError(f"规则来源为空，中止同步: {url}")
             fork_urls.append(url)
-            for rule in _clash_body_rules(text):
+            source_rules = _clash_body_rules(text)
+            if not source_rules:
+                raise ValueError(f"{name} Clash 来源没有有效规则: {url}")
+            for rule in source_rules:
                 if rule not in seen_rules:
                     if removal and _removal_domain(rule) in removal:
                         continue  # #!remove= 命中，剔除该域名
@@ -1099,8 +1134,7 @@ def fetch_external_rules():
                     all_rules.append(rule)
 
         if not all_rules:
-            print(f"    [WARN] {name} Clash 转换为空，跳过")
-            continue
+            raise ValueError(f"{name} Clash 转换为空，中止同步")
 
         body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
         clash_content = "### fork from " + " & ".join(fork_urls) + "\n" + body
@@ -1142,9 +1176,8 @@ def fetch_external_modules():
         orig_url, name = e["url"], e["name"]
         overrides: dict = e["overrides"]
         text = prefetched.get(orig_url)
-        if text is None:
-            _mark_upstream_deleted(module_dir / f"{name}.sgmodule")
-            continue
+        if not text or not re.search(r"^\[[^]\n]+\]\s*$", text, re.MULTILINE):
+            raise ValueError(f"模块来源为空或缺少配置段: {orig_url}")
         out = module_dir / f"{name}.sgmodule"
         lines = text.splitlines()
         # 应用 overrides：替换匹配的 #!key= 行
@@ -1204,6 +1237,9 @@ def main():
     print("=" * 60)
     print("  Rules 同步脚本")
     print("=" * 60)
+
+    # Fail before any upstream write if a scheduled run encounters pending edits.
+    _check_idle_streaming()
 
     # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
     fetch_external_rules()

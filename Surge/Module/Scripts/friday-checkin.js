@@ -34,7 +34,7 @@ const today = () => $.time('yyyy-MM-dd');
     if (!token) return notify('未获取授权，请打开 friDay 影音 App 任意页面');
     notify(await doSign(token, store));
 })()
-    .catch((err) => notify(`运行出错：${err}`) && $.error(err))
+    .catch((err) => { notify(`运行出错：${err}`); $.error(err); })
     .finally(() => {
         if (notifyMsg.length) $.msg('🎬 friDay 影音', '', notifyMsg.join('\n'));
         $.done({});
@@ -82,6 +82,7 @@ function Refresh(store) {
 async function doSign(token, store) {
     const sign = await Checkin(token);
     if (sign.invalid) return '授权已过期，请打开 friDay 影音 App 刷新';
+    if (!sign.success) return sign.text;
     store.signedDate = today();
     $.setjson(store, $.name);
     return [sign.text, await Points(token)].filter(Boolean).join('，');
@@ -98,11 +99,11 @@ function req(path, token) {
 function Checkin(token) {
     return req('bonusGetEvent/appLogin', token).then(({ status, data }) => {
         $.debug('签到响应:', $.toStr({ status, data }));
-        if (data.code == CODE.OK) return { text: `签到成功 +${data.data?.point ?? '?'} 点`, invalid: false };
-        if (data.code == CODE.SIGNED) return { text: '今日已签到', invalid: false };
-        if (status == 401 || status == 403) return { text: '', invalid: true };
-        return { text: `签到失败：${data.message || status}`, invalid: false };
-    }).catch((err) => { $.error('签到异常:', err); return { text: '签到请求异常', invalid: false }; });
+        if (data.code == CODE.OK) return { text: `签到成功 +${data.data?.point ?? '?'} 点`, success: true, invalid: false };
+        if (data.code == CODE.SIGNED) return { text: '今日已签到', success: true, invalid: false };
+        if (status == 401 || status == 403) return { text: '', success: false, invalid: true };
+        return { text: `签到失败：${data.message || status}`, success: false, invalid: false };
+    }).catch((err) => { $.error('签到异常:', err); return { text: '签到请求异常', success: false, invalid: false }; });
 }
 
 function Points(token) {
