@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.1.0 (2026-09-29)
+ * @version      2.1.1 (2026-09-29)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
@@ -22,7 +22,7 @@
  * 🎬 流媒体
  *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
  *    ├─ Disney+       统一按地区与接口可用性判断
- *    ├─ HBO Max       单请求方案（max.com 响应头取地区码）、第三方平台识别（JP/KR/CA）
+ *    ├─ HBO Max       官网结构化地区与可用性检测、第三方平台提示（JP/KR/CA）
  *    ├─ YouTube       双重请求机制（带/不带 Cookie）
  *    └─ Spotify       标准地区检测
  *
@@ -444,44 +444,42 @@ class ServiceChecker {
 
   /**
    * HBO Max 解锁检测
-   * 特殊处理：JP (U-NEXT)、CA (Crave)、KR (Coupang Play)
-   *
-   * 2026-07 重写（参考 lmc999/RegionRestrictionCheck 单请求方案）：
-   * 原实现走 token → bootstrap → users/me 深层 API 链，该链的 token 接口
-   * 已被后端加上未公开的 disco_params 必需参数（400 invalid.headers），
-   * 导致所有节点必现 No。现改为单次请求 www.max.com（301 至 hbomax.com）：
-   * - 地区码取自最终响应头中的 countryCode=XX（Set-Cookie，已实测可得）
-   * - 可用地区列表取自正文 "url":"/xx/xx" 正则（与旧 Step 1 相同），补 US
-   * 代价：原依赖 token 的 VPN 检测（playbackInfo）随 API 链一并移除。
+   * 参考 OpenClash 的 userCountry / isUserOutOfRegion 判据：
+   * https://github.com/vernesong/OpenClash/blob/master/luci-app-openclash/root/usr/share/openclash/openclash_streaming_unlock.lua
+   * 只读取 __NEXT_DATA__.props.pageProps，避免误取导航菜单或嵌套配置中的地区。
+   * HTTP 异常、缺失字段及页面解析失败属于未知状态，不代表地区受限。
+   * JP / CA / KR 保留第三方平台提示；此检测不验证账号播放或第三方平台解锁。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkHBOMax() {
+    const unknown = reason => {
+      console.log("[media-check][HBO Max] " + reason);
+      return Utils.createResult(STATUS.ERROR, "Error");
+    };
     try {
-      const res = await Utils.request({ url: "https://www.max.com/" });
-      const body = res.body || "";
+      const res = await Utils.request({ url: "https://www.hbomax.com/" });
+      if (res.status !== 200) return unknown("HTTP " + res.status);
+      const match = res.body.match(/<script\b[^>]*\bid\s*=\s*["']__NEXT_DATA__["'][^>]*>([\s\S]*?)<\/script\s*>/i);
+      if (!match) return unknown("Missing page data");
+      let page;
+      try { page = JSON.parse(match[1])?.props?.pageProps; }
+      catch { return unknown("Invalid page data"); }
+      if (!page || page.isCMSErrorPage === true) return unknown("Unavailable page data");
 
-      // 地区码：重定向链最终响应头（如 Set-Cookie）中的 countryCode=XX
-      const headerStr = JSON.stringify(res.headers || {});
-      const region = headerStr.match(/countryCode=([A-Za-z]{2})/)?.[1]?.toUpperCase() || "";
-      if (!region) return Utils.createResult(STATUS.FAIL, "No");
+      const region = typeof page.userCountry === "string" ? page.userCountry.trim().toUpperCase() : "";
+      const hasRegion = /^[A-Z]{2}$/.test(region);
+      const outOfRegion = page.isUserOutOfRegion;
+      if (outOfRegion !== true && outOfRegion !== false) return unknown("Missing availability flag");
 
-      // JP / CA / KR：经由第三方平台提供服务，直接标注不做二次校验
-      // （JP 原经 checkUNext() 校验 U-NEXT 可达性，但 U-NEXT 的 GraphQL 网关已启用
-      //   persisted query 白名单，自由查询一律 403 QUERY_NOT_IN_SAFELIST（2026-07
-      //   实测，完整/精简 query 均被拒），公开脚本的该检测全部失效，故移除校验）
-      if (region === "JP") return Utils.createResult(STATUS.COMING, "JP (U-NEXT)");
-      if (region === "CA") return Utils.createResult(STATUS.COMING, "CA (Crave)");
-      if (region === "KR") return Utils.createResult(STATUS.COMING, "KR (Coupang Play)");
-
-      // 可用地区列表：正文 "url":"/xx/xx" 地区链接；US 主站首页不含自身，手动补
-      const availableRegions = new Set(["US"]);
-      for (const m of body.matchAll(/"url":"\/([a-z]{2})\/[a-z]{2}"/gi)) {
-        availableRegions.add(m[1].toUpperCase());
+      if (outOfRegion) {
+        const partners = { JP: "U-NEXT", CA: "Crave", KR: "Coupang Play" };
+        if (hasRegion && Object.prototype.hasOwnProperty.call(partners, region)) {
+          return Utils.createResult(STATUS.COMING, `${region} (${partners[region]})`);
+        }
+        return Utils.createResult(STATUS.FAIL, "NO");
       }
-
-      return availableRegions.has(region)
-        ? Utils.createResult(STATUS.OK, region)
-        : Utils.createResult(STATUS.FAIL, `${region} (No)`);
+      if (!hasRegion) return unknown("Missing user country");
+      return Utils.createResult(STATUS.OK, region);
     } catch (error) {
       return Utils.errorResult(error);
     }
@@ -684,7 +682,7 @@ class ServiceChecker {
 const SERVICES = {
   netflix: { title: "Netflix", check: "checkNetflix", url: "https://www.netflix.com" },
   disney: { title: "Disney+", check: "checkDisney", url: "https://www.disneyplus.com" },
-  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.max.com" },
+  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.hbomax.com" },
   youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium" },
   spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com" },
   chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com" },

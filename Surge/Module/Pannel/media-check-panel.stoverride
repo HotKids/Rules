@@ -34,7 +34,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/hbo-max-light.png'
     backgroundColor: '#86868B'
     collapsed: true
-    url: 'https://www.max.com'
+    url: 'https://www.hbomax.com'
     argument: 'service=hbomax&mode=collapsed&notify=false'
   - name: hotkids-media-check-youtube
     interval: 600
