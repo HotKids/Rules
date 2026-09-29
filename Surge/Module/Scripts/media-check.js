@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.1.1 (2026-09-29)
+ * @version      2.1.2 (2026-09-29)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
@@ -562,6 +562,10 @@ class ServiceChecker {
    */
   static async checkChatGPT() {
     try {
+      // 地区查询与 Web / App 检测并行；辅助查询失败仍保留可用性结果。
+      const tracePromise = Utils.request({
+        url: "https://chatgpt.com/cdn-cgi/trace", timeout: 3000
+      }).catch(() => null);
       const [webRes, iosRes] = await Promise.all([
         Utils.request({
           url: "https://api.openai.com/compliance/cookie_requirements",
@@ -579,7 +583,7 @@ class ServiceChecker {
       const iosBlocked = /VPN|disallowed isp|been blocked/i.test(iosRes.body);
 
       if (!webBlocked && !iosBlocked) {
-        const traceRes = await Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace" }).catch(() => null);
+        const traceRes = await tracePromise;
         const region = (traceRes?.body || "").match(/loc=([A-Z]{2})/)?.[1] || "";
         return Utils.createResult(STATUS.OK, region || "OK");
       }
@@ -680,21 +684,21 @@ class ServiceChecker {
 
 // Stash Tile 只运行 argument.service 对应的检测。
 const SERVICES = {
-  netflix: { title: "Netflix", check: "checkNetflix", url: "https://www.netflix.com" },
-  disney: { title: "Disney+", check: "checkDisney", url: "https://www.disneyplus.com" },
-  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.hbomax.com" },
-  youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium" },
-  spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com" },
-  chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com" },
-  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com" },
-  claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai" },
-  reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com" }
+  netflix: { title: "Netflix", check: "checkNetflix", url: "https://www.netflix.com", color: "#E50914" },
+  disney: { title: "Disney+", check: "checkDisney", url: "https://www.disneyplus.com", color: "#113CCF" },
+  hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.hbomax.com", color: "#191919" },
+  youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium", color: "#E62117" },
+  spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com", color: "#117C39" },
+  chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com", color: "#0D8A70" },
+  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com", color: "#386EDB" },
+  claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai", color: "#B85C3F" },
+  reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com", color: "#D93900" }
 };
 
 async function runServiceTile(service) {
   // hasOwnProperty 防止 constructor 等继承属性被误当成服务。
   if (!Object.prototype.hasOwnProperty.call(SERVICES, service)) {
-    finishPanel({ title: "检测配置错误", content: "未知服务: " + service, backgroundColor: "#C44" });
+    finishPanel({ title: "检测配置错误", content: "未知服务: " + service, backgroundColor: "#CC4444" });
     return;
   }
   const definition = SERVICES[service];
@@ -709,19 +713,13 @@ async function runServiceTile(service) {
     try { notifyUnlockChanges([{ name: definition.title, result }]); }
     catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
   }
-  const colors = {
-    [STATUS.OK]: "#88A788",
-    [STATUS.COMING]: "#D4A017",
-    [STATUS.FAIL]: "#C44",
-    [STATUS.TIMEOUT]: "#86868B",
-    [STATUS.ERROR]: "#86868B"
-  };
   const content = Utils.buildContent(result, suffix);
   finishPanel({
     title: definition.title,
     content: content === "No" ? "NO" : content,
     // icon 由覆写配置提供，更新状态时保留各服务的 Logo。
-    backgroundColor: colors[result.status] || "#86868B",
+    // 固定品牌底色，检测状态由 content 表达；使用完整六位色值。
+    backgroundColor: definition.color,
     url: definition.url
   });
 }
