@@ -1,4 +1,4 @@
-# GitHub 远程脚本版：导入此覆写即可加载同目录下的 Stash 脚本。
+# GitHub 远程脚本版：导入此覆写即可加载 Scripts 目录下的 Stash 脚本。
 # 原脚本：HotKids & ChatGPT & Claude
 # Stash 首页汇总面板；默认遵循分流规则。
 # 修改下面的 argument 即可调整参数，参数值中含 &、+、空格等时使用 URL 编码。
@@ -17,5 +17,5 @@ tiles:
     argument: 'geminiapikey=null&nfprice=true&viu=false&notify=false'
 script-providers:
   hotkids-media-check-home:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/media-check.stash.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.stash.js
     interval: 86400
