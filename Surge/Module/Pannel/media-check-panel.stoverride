@@ -5,7 +5,7 @@
 # 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
 # 统一白色图标搭配固定品牌底色，检测状态以文字显示。
 name: 'Streaming & AI Service Tiles · Stash'
-icon: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Icons/media-check.png
+icon: https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Images/Color/Streaming.png
 desc: >-
   检测 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude 和 Reddit 的可用性与地区。
   独立卡片展示检测结果，支持按节点检测。
