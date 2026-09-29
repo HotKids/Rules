@@ -43,7 +43,7 @@ IP 风控的 Surge 和 Stash 版本共用 [ip-security.js](Module/Scripts/ip-sec
 
 Stash [IP 覆写 Raw 地址](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Pannel/ip-security-panel.stoverride) 导入后，三张卡片默认折叠在第三方服务页面（Android 为“流媒体”），按 **出口 → 本地 → IP 纯净度** 排列，每 600 秒刷新。IP 纯净度固定使用 IPPure，一次请求同时取得风险评分与 IP 类型：第一行结果显示“分数 / 100 · 风险等级”，第二行显示“住宅/机房 · 原生/广播”，不重复显示出口 IP。这里仍是 IPPure 原始风险分，数值越低风险越低，不做反转。评分缺失时背景变灰，分类字段缺失时明确显示未知，不回落到其他数据源。
 
-出口为深蓝，本地为青绿；两张卡片检测失败时变灰。IP 纯净度按低、中、高风险分别显示绿、黄、红色。出口和本地把 IP 放在标题第二行，正文保留“地区 · 运营商”；为适配 Android 折叠卡片的单行正文，纯净度把风险值放在标题下方，类型放在正文。卡片使用 [Koolson/Qure](https://github.com/Koolson/Qure) 的 `IconSet/` 白色 Global / Domestic / Hijacking 图标；覆写主图标使用 [Simple Icons / SecurityScorecard 品牌色 PNG](https://dashboardicons.com/api/icons/external/simpleicons/securityscorecard/brand.png)。点击出口/本地卡片打开对应 IP 的 ipinfo 页面，点击纯净度卡片打开 IPPure；开启打码时，跳转链接不附带 IP。
+出口为深蓝，本地为青绿；两张卡片检测失败时变灰。IP 纯净度按低、中、高风险分别显示绿、黄、红色。出口和本地把 IP 放在标题第二行，正文保留“地区 · 运营商”；为适配 Android 折叠卡片的单行正文，纯净度把风险值放在标题下方，类型放在正文。出口图标使用 [Koolson/Qure](https://github.com/Koolson/Qure) 的白色 Global；本地使用 [Organic Maps 白色 PNG](https://dashboardicons.com/api/icons/external/simpleicons/organicmaps/dark.png)，纯净度使用 [SecurityScorecard 白色 PNG](https://dashboardicons.com/api/icons/external/simpleicons/securityscorecard/dark.png)；覆写主图标使用 [Simple Icons / SecurityScorecard 品牌色 PNG](https://dashboardicons.com/api/icons/external/simpleicons/securityscorecard/brand.png)。点击出口/本地卡片打开对应 IP 的 ipinfo 页面，点击纯净度卡片打开 IPPure；开启打码时，跳转链接不附带 IP。
 
 Stash 已预设不打码、台湾旗帜和开启 IP 变化通知，首页与折叠模式均可通知。首次成功检测只记录基线，此后由出口卡片在刷新时通知 IP 变化；这依赖客户端执行 Tile 与通知权限，不是 Surge 的 `network-changed` 即时事件。临时查询失败不作为 IP 变化，其他卡片不重复通知。支持首页 Tile 的客户端可同时设置 `collapsed: false` 和 `mode=home`；如需关闭通知，将出口卡片的 `notify=true` 改为 `notify=false`。
 
