@@ -1,11 +1,11 @@
 # 图标来源：Koolson/Qure https://github.com/Koolson/Qure
-# 与 Surge 共用 ip-security.js，首页四张卡片各自执行所需检测。
+# 与 Surge 共用 ip-security.js，首页三张卡片各自执行所需检测。
 # 已预设：风险 IPPure、本地百度、出口 ipapi-zh、不打码、台湾旗帜、开启变化通知。
 # 每 600 秒刷新；仅出口卡片通知 IP 变化，首次检测只记录基线。
-# 本地卡片显示直连公网 IP；DNS 卡片只显示解析器，不单凭地区判断泄露。
+# 本地卡片显示直连公网 IP。
 # 如需折叠，请同时改为 collapsed: true 和 mode=collapsed（折叠模式不通知）。
 name: 'IP Security Tiles'
-desc: 检测 IPPure 风险与类型、DNS 解析器、出口和本地 IP，支持刷新时通知 IP 变化
+desc: 检测 IPPure 风险与类型、出口和本地 IP，支持刷新时通知 IP 变化
 icon: https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Lock.png
 tiles:
   - name: hotkids-ip-security-risk
@@ -16,14 +16,6 @@ tiles:
     backgroundColor: '#9E9E9E'
     collapsed: false
     argument: 'tile=risk&mode=home'
-  - name: hotkids-ip-security-dns
-    interval: 600
-    title: 'DNS 解析器'
-    content: 'Waiting…'
-    icon: 'https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Round_Robin.png'
-    backgroundColor: '#9E9E9E'
-    collapsed: false
-    argument: 'tile=dns&mode=home'
   - name: hotkids-ip-security-outbound
     interval: 600
     title: '出口 IP'
@@ -43,9 +35,6 @@ tiles:
 
 script-providers:
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js?v=6.2.0
-    interval: 86400
-  hotkids-ip-security-dns:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/ip-security.js?v=6.2.0
     interval: 86400
   hotkids-ip-security-outbound:
