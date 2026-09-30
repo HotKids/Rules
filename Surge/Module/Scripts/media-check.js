@@ -3,12 +3,13 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.1.4 (2026-09-29)
+ * @version      2.2.0 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
+ *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
  * @arguments    service=netflix&nfprice=true&notify=false
- *               service 可选 netflix/disney/hbomax/youtube/spotify/chatgpt/gemini/claude/reddit
+ *               service 可选 netflix/disney/hbomax/youtube/spotify/chatgpt/claude/gemini/metaai/tiktok/reddit
  *               Stash 不传 service 或传 service=all 时汇总；Surge 始终使用多行汇总
  *               mode=collapsed 由 Stash 选择检测节点，忽略 proxy 并关闭变化通知
  *               可选 proxy=URL编码后的节点名、notifykey=自定义通知分组
@@ -16,22 +17,24 @@
  * @author       HotKids & ChatGPT & Claude
  *
  * ═══════════════════════════════════════════════════════════════════════════
- * 📋 支持的服务（9 项）
+ * 📋 支持的服务（11 项）
  * ═══════════════════════════════════════════════════════════════════════════
  *
  * 🎬 流媒体
  *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
  *    ├─ Disney+       统一按地区与接口可用性判断
  *    ├─ HBO Max       官网结构化地区与可用性检测、第三方平台提示（JP/KR/CA）
- *    ├─ YouTube       双重请求机制（带/不带 Cookie）
+ *    ├─ YouTube       明确可用性检测，未知时 Cookie 回落
  *    └─ Spotify       标准地区检测
  *
  * 🤖 AI 服务
  *    ├─ ChatGPT       单行显示地区 / Web Only / Mobile Only / NO
+ *    ├─ Claude        地区可用性检测
  *    ├─ Gemini        网页检测 + API Key fallback
- *    └─ Claude        地区可用性检测
+ *    └─ Meta AI       AJAX 可用性与主页回落检测
  *
  * 🌐 社交 & 其他
+ *    ├─ TikTok        Explore / 主页地区检测
  *    └─ Reddit        地区访问检测
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -73,6 +76,11 @@ const CONFIG = {
 
 // 检测状态码定义
 const STATUS = { OK: 1, COMING: 2, FAIL: 0, TIMEOUT: -1, ERROR: -2 };
+
+// ISO 3166 地区映射；避免把 KOR / AUT 等三位码直接截断。
+const COUNTRY_CODES = Object.fromEntries(
+  "AD:AND AE:ARE AF:AFG AG:ATG AI:AIA AL:ALB AM:ARM AO:AGO AQ:ATA AR:ARG AS:ASM AT:AUT AU:AUS AW:ABW AX:ALA AZ:AZE BA:BIH BB:BRB BD:BGD BE:BEL BF:BFA BG:BGR BH:BHR BI:BDI BJ:BEN BL:BLM BM:BMU BN:BRN BO:BOL BQ:BES BR:BRA BS:BHS BT:BTN BV:BVT BW:BWA BY:BLR BZ:BLZ CA:CAN CC:CCK CD:COD CF:CAF CG:COG CH:CHE CI:CIV CK:COK CL:CHL CM:CMR CN:CHN CO:COL CR:CRI CU:CUB CV:CPV CW:CUW CX:CXR CY:CYP CZ:CZE DE:DEU DJ:DJI DK:DNK DM:DMA DO:DOM DZ:DZA EC:ECU EE:EST EG:EGY EH:ESH ER:ERI ES:ESP ET:ETH FI:FIN FJ:FJI FK:FLK FM:FSM FO:FRO FR:FRA GA:GAB GB:GBR GD:GRD GE:GEO GF:GUF GG:GGY GH:GHA GI:GIB GL:GRL GM:GMB GN:GIN GP:GLP GQ:GNQ GR:GRC GS:SGS GT:GTM GU:GUM GW:GNB GY:GUY HK:HKG HM:HMD HN:HND HR:HRV HT:HTI HU:HUN ID:IDN IE:IRL IL:ISR IM:IMN IN:IND IO:IOT IQ:IRQ IR:IRN IS:ISL IT:ITA JE:JEY JM:JAM JO:JOR JP:JPN KE:KEN KG:KGZ KH:KHM KI:KIR KM:COM KN:KNA KP:PRK KR:KOR KW:KWT KY:CYM KZ:KAZ LA:LAO LB:LBN LC:LCA LI:LIE LK:LKA LR:LBR LS:LSO LT:LTU LU:LUX LV:LVA LY:LBY MA:MAR MC:MCO MD:MDA ME:MNE MF:MAF MG:MDG MH:MHL MK:MKD ML:MLI MM:MMR MN:MNG MO:MAC MP:MNP MQ:MTQ MR:MRT MS:MSR MT:MLT MU:MUS MV:MDV MW:MWI MX:MEX MY:MYS MZ:MOZ NA:NAM NC:NCL NE:NER NF:NFK NG:NGA NI:NIC NL:NLD NO:NOR NP:NPL NR:NRU NU:NIU NZ:NZL OM:OMN PA:PAN PE:PER PF:PYF PG:PNG PH:PHL PK:PAK PL:POL PM:SPM PN:PCN PR:PRI PS:PSE PT:PRT PW:PLW PY:PRY QA:QAT RE:REU RO:ROU RS:SRB RU:RUS RW:RWA SA:SAU SB:SLB SC:SYC SD:SDN SE:SWE SG:SGP SH:SHN SI:SVN SJ:SJM SK:SVK SL:SLE SM:SMR SN:SEN SO:SOM SR:SUR SS:SSD ST:STP SV:SLV SX:SXM SY:SYR SZ:SWZ TC:TCA TD:TCD TF:ATF TG:TGO TH:THA TJ:TJK TK:TKL TL:TLS TM:TKM TN:TUN TO:TON TR:TUR TT:TTO TV:TUV TW:TWN TZ:TZA UA:UKR UG:UGA UM:UMI US:USA UY:URY UZ:UZB VA:VAT VC:VCT VE:VEN VG:VGB VI:VIR VN:VNM VU:VUT WF:WLF WS:WSM YE:YEM YT:MYT ZA:ZAF ZM:ZMB ZW:ZWE".split(" ").map(pair => pair.split(":"))
+);
 
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
@@ -155,7 +163,8 @@ class Utils {
           Object.entries(response.headers || {}).forEach(([key, value]) => {
             normalizedHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(", ") : String(value);
           });
-          settle(null, { status, headers: normalizedHeaders, body: data == null ? "" : String(data) });
+          settle(null, { status, headers: normalizedHeaders, body: data == null ? "" : String(data),
+            url: typeof response.url === "string" ? response.url : (typeof response.responseURL === "string" ? response.responseURL : "") });
         } catch (error) { settle(error); }
       };
       const request = {
@@ -203,6 +212,55 @@ class Utils {
       : this.createResult(STATUS.ERROR, "Error");
   }
 
+
+  // HTTP 错误、限流、验证页都属于未知；只让服务专属的明确限制进入 NO。
+  static responseProblem(res) {
+    if (res.status === 429) return this.createResult(STATUS.ERROR, "Rate Limited");
+    if (/cf-chl|challenge-platform|<title>\s*(?:just a moment|attention required)|checking your browser|verify (?:that )?you are human/i.test(res.body)) {
+      return this.createResult(STATUS.ERROR, "Verify");
+    }
+    if (res.status < 200 || res.status >= 400 || !res.body.trim()) return this.createResult(STATUS.ERROR, "Error");
+    return null;
+  }
+
+  static country(code) {
+    const value = String(code || "").trim().toUpperCase();
+    if (Object.prototype.hasOwnProperty.call(COUNTRY_CODES, value)) return value;
+    return Object.keys(COUNTRY_CODES).find(key => COUNTRY_CODES[key] === value) || "";
+  }
+
+  // Stash Android 不保证提供 atob / Buffer；只用标准 JS 解码网页内嵌配置。
+  static decodeBase64(value) {
+    const input = value.replace(/\s/g, "");
+    if (!/^[A-Za-z0-9+/]*={0,2}$/.test(input) || input.length % 4 === 1) throw Error("Invalid base64");
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    let bits = 0, buffer = 0, encoded = "";
+    for (const c of input.replace(/=+$/, "")) {
+      buffer = (buffer << 6) | alphabet.indexOf(c);
+      bits += 6;
+      if (bits >= 8) {
+        bits -= 8;
+        encoded += "%" + ((buffer >> bits) & 255).toString(16).padStart(2, "0");
+      }
+    }
+    return decodeURIComponent(encoded);
+  }
+
+  static traceRegion(res) {
+    return res?.status === 200 ? this.country(res.body.match(/^loc=([A-Z]{2})\s*$/m)?.[1]) : "";
+  }
+
+  static pageUrl(body) {
+    const tags = body.match(/<(?:link|meta)\b[^>]*>/gi) || [];
+    for (const tag of tags) {
+      if (/\brel=["']canonical["']|\bproperty=["']og:url["']/i.test(tag)) {
+        const url = tag.match(/\b(?:href|content)=["']([^"']+)/i)?.[1];
+        if (url) return url;
+      }
+    }
+    return "";
+  }
+
   /**
    * 构建显示行
    * @param {string} name - 服务名称
@@ -241,22 +299,7 @@ class Utils {
     return { status, region };
   }
 
-  /**
-   * 通用正则匹配检测方法
-   * @param {string} url - 检测 URL
-   * @param {RegExp} regex - 正则表达式（需包含捕获组）
-   * @param {Object} options - 额外的请求配置
-   * @returns {Promise<Object>} 检测结果
-   */
-  static async checkByRegex(url, regex, options = {}) {
-    try {
-      const res = await this.request({ url, ...options });
-      const match = res.body.match(regex);
-      return match ? this.createResult(STATUS.OK, match[1]?.toUpperCase()) : this.createResult(STATUS.FAIL);
-    } catch (error) {
-      return this.errorResult(error);
-    }
-  }
+
 }
 
 /**
@@ -269,66 +312,41 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static async checkNetflix() {
-    const checkFilm = async (id) => {
+    const probe = async id => {
       try {
         const res = await Utils.request({ url: `https://www.netflix.com/title/${id}` });
-        return { httpStatus: res.status, body: res.body || "", headers: res.headers || {} };
-      } catch (error) {
-        return { httpStatus: -1, body: "", headers: {}, error };
-      }
+        if (/not available in your country|proxy or unblocker/i.test(res.body)) return { blocked: true };
+        if (res.status === 404 || res.status === 410 || /Oh no!/.test(res.body)) return { available: false };
+        const error = Utils.responseProblem(res);
+        if (error) return { error };
+        if (res.status !== 200) return { error: Utils.createResult(STATUS.ERROR, "Error") };
+        const origin = res.headers["x-originating-url"] || "";
+        const canonical = Utils.pageUrl(res.body);
+        // 参考 UnlockTests：优先请求所在地区，避免语言菜单和 CDN 地区混入。
+        const jsonRegion = res.body.match(/"requestCountry"\s*:\s*\{\s*"id"\s*:\s*"([a-z]{2})"/i)?.[1]
+          || res.body.match(/"id"\s*:\s*"([a-z]{2})"[^}]*?"countryName"/i)?.[1]
+          || res.body.match(/"geo"\s*:\s*\{[^}]*"country"\s*:\s*"([a-z]{2})"/i)?.[1]
+          || res.body.match(/\bdata-country\s*=\s*["']([a-z]{2})["']/i)?.[1];
+        const regionPath = (origin || canonical).match(/netflix\.com\/([a-z]{2})(?:-[a-z]+)?\/title\//i)?.[1];
+        // /title/ 的来源头是明确的美国路径；没有地区证据时只显示 OK。
+        const region = Utils.country(jsonRegion || regionPath) || (/^https?:\/\/www\.netflix\.com\/title\//i.test(origin) ? "US" : "");
+        const titlePage = /<title>\s*Watch\b|"@type"\s*:\s*"(?:Movie|TVSeries|TVEpisode)"|"isPlayable"\s*:\s*true|property=["']og:video["']|data-uia=["']episodes["']|"playableVideo"\s*:/i.test(res.body)
+          || origin.includes(`/title/${id}`);
+        return titlePage ? { available: true, region } : { error: Utils.createResult(STATUS.ERROR, "Error") };
+      } catch (error) { return { error: Utils.errorResult(error) }; }
     };
-
-    /**
-     * 多级地区码提取（从 HTML body + 响应头）
-     * 参考 RegionRestrictionCheck 项目
-     */
-    const extractRegion = (body, headers) => {
-      // 1. 嵌入 JSON: "id":"xx" ... "countryName" (RegionRestrictionCheck 方案)
-      let m = body.match(/"id"\s*:\s*"([a-z]{2})"[^}]*?"countryName"/);
-      if (m) return m[1].toUpperCase();
-
-      // 2. Body 内 URL 模式: netflix.com/xx(-yy)?/title/
-      m = body.match(/netflix\.com\/([a-z]{2})(?:-[a-z]+)?\/title\//i);
-      if (m) return m[1].toUpperCase();
-
-      // 3. x-originating-url 响应头 (旧方案，部分节点仍有效)
-      const urlHeader = headers["x-originating-url"] || headers["X-Originating-URL"] || "";
-      const h = urlHeader.split("/")[3]?.split("-")[0]?.toUpperCase();
-      if (h && h !== "TITLE") return h;
-
-      return "";
-    };
-
-    // Film 1: LEGO Ninjago (非原创，用于区分完整解锁 vs Originals Only)
-    const r1 = await checkFilm(81280792);
-
-    if (r1.httpStatus === 403) return Utils.createResult(STATUS.FAIL);
-    if (r1.httpStatus === -1) return Utils.errorResult(r1.error);
-
-    // Film 1 可用且非 "Oh no!" → 完整解锁
-    if (r1.httpStatus === 200 && !r1.body.includes("Oh no!")) {
-      const region = extractRegion(r1.body, r1.headers) || "US";
-      return Utils.createResult(STATUS.OK, region);
+    // 两部非原创作品均明确不可用，才通过原创作品验证 Originals Only。
+    for (const id of [81280792, 70143836]) {
+      const result = await probe(id);
+      if (result.blocked) return Utils.createResult(STATUS.FAIL, "NO");
+      if (result.error) return result.error;
+      if (result.available) return Utils.createResult(STATUS.OK, result.region || "OK");
     }
-
-    // Film 1 不可用 → 尝试 Film 2: Breaking Bad
-    const r2 = await checkFilm(70143836);
-    if (r2.httpStatus === -1) return Utils.errorResult(r2.error);
-
-    if (r2.httpStatus === 200 && !r2.body.includes("Oh no!")) {
-      const region = extractRegion(r2.body, r2.headers) || "US";
-      return Utils.createResult(STATUS.OK, region);
-    }
-
-    // 两部影片均不可用，但至少一个返回了 200 → Originals Only
-    if (r1.httpStatus === 200 || r2.httpStatus === 200) {
-      const body = r1.httpStatus === 200 ? r1.body : r2.body;
-      const headers = r1.httpStatus === 200 ? r1.headers : r2.headers;
-      const region = extractRegion(body, headers);
-      return Utils.createResult(STATUS.FAIL, region ? `${region} (Originals)` : "Originals Only");
-    }
-
-    return Utils.createResult(STATUS.FAIL);
+    const original = await probe(80197526);
+    if (original.error) return original.error;
+    return original.available
+      ? Utils.createResult(STATUS.FAIL, original.region ? `${original.region} (Originals)` : "Originals Only")
+      : Utils.createResult(STATUS.FAIL, "NO");
   }
 
   /**
@@ -349,7 +367,7 @@ class ServiceChecker {
       return Promise.resolve({ status: 200, body: cached.body });
     }
 
-    return Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json" })
+    return Utils.request({ url: "https://raw.githubusercontent.com/tompec/netflix-prices/main/data/latest.json", timeout: 2000 })
       .then(res => {
         if (res?.status === 200 && res.body && Array.isArray(JSON.parse(res.body))) {
           $persistentStore.write(JSON.stringify({ ts: Date.now(), body: res.body }), CACHE_KEY);
@@ -383,67 +401,39 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static async checkDisney() {
-    const checkHomePage = async () => {
+    const home = Utils.request({ url: "https://www.disneyplus.com/" }).catch(error => ({ error }));
+    const api = Utils.request({
+      url: "https://disney.api.edge.bamgrid.com/graph/v1/device/graphql", method: "POST",
+      headers: { "Authorization": "ZGlzbmV5JmJyb3dzZXImMS4wLjA.Cu56AgSfBTDag5NiRA81oLHkDZfu5L3CKadnefEAY84", "Content-Type": "application/json" },
+      body: JSON.stringify({
+        query: 'mutation registerDevice($input: RegisterDeviceInput!) { registerDevice(registerDevice: $input) { grant { grantType assertion } } }',
+        variables: { input: { applicationRuntime: 'chrome', attributes: { browserName: 'chrome', browserVersion: CONFIG.CHROME_VERSION, operatingSystem: 'macintosh', operatingSystemVersion: '10.15.7' }, deviceFamily: 'browser', deviceLanguage: 'en', deviceProfile: 'macosx' } }
+      })
+    }).catch(error => ({ error }));
+    const [homeRes, apiRes] = await Promise.all([home, api]);
+    let apiProblem = apiRes.error ? Utils.errorResult(apiRes.error) : Utils.responseProblem(apiRes);
+    if (!apiRes.error && /forbidden-location|unsupported_country/i.test(apiRes.body)) return Utils.createResult(STATUS.FAIL, "NO");
+    if (!apiProblem) {
       try {
-        const res = await Utils.request({ url: "https://www.disneyplus.com/" });
-        if (res.status !== 200 || res.body.includes('Sorry, Disney+ is not available')) return { valid: false };
-        const match = res.body.match(/Region: ([A-Za-z]{2})[\s\S]*?CNBL: [12]/);
-        return match ? { valid: true, region: match[1] } : { valid: true, region: "" };
-      } catch (error) { return { valid: false, error }; }
-    };
-
-    const checkAPI = async () => {
-      try {
-        const res = await Utils.request({
-          url: 'https://disney.api.edge.bamgrid.com/graph/v1/device/graphql',
-          method: 'POST',
-          headers: {
-            "Authorization": "ZGlzbmV5JmJyb3dzZXImMS4wLjA.Cu56AgSfBTDag5NiRA81oLHkDZfu5L3CKadnefEAY84",
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            query: 'mutation registerDevice($input: RegisterDeviceInput!) { registerDevice(registerDevice: $input) { grant { grantType assertion } } }',
-            variables: { input: { applicationRuntime: 'chrome', attributes: { browserName: 'chrome', browserVersion: CONFIG.CHROME_VERSION, operatingSystem: 'macintosh', operatingSystemVersion: '10.15.7' }, deviceFamily: 'browser', deviceLanguage: 'en', deviceProfile: 'macosx' } }
-          })
-        });
-
-        if (res.status !== 200) return { valid: false };
-        const data = JSON.parse(res.body);
-        if (data?.errors) return { valid: false };
+        const data = JSON.parse(apiRes.body);
         const session = data?.extensions?.sdk?.session;
-        return {
-          valid: true,
-          inSupportedLocation: session?.inSupportedLocation,
-          countryCode: session?.location?.countryCode
-        };
-      } catch (error) { return { valid: false, error }; }
-    };
-
-    try {
-      const [homeRes, apiRes] = await Promise.all([checkHomePage(), checkAPI()]);
-      const region = apiRes.countryCode || homeRes.region || "";
-
-      if (apiRes.valid) {
-        const isSupported = apiRes.inSupportedLocation !== false && apiRes.inSupportedLocation !== 'false';
-        
-        // 修复：无地区码时返回 FAIL 状态显示 "No"
-        if (!region) {
-          return Utils.createResult(STATUS.FAIL, "No");
+        if (!data.errors && (session?.inSupportedLocation === true || session?.inSupportedLocation === "true")) {
+          return Utils.createResult(STATUS.OK, Utils.country(session?.location?.countryCode) || "OK");
         }
-        
-        return Utils.createResult(isSupported ? STATUS.OK : STATUS.COMING, region);
+        if (!data.errors && (session?.inSupportedLocation === false || session?.inSupportedLocation === "false")) {
+          return Utils.createResult(STATUS.FAIL, "NO");
+        }
+      } catch (_) {}
+      apiProblem = Utils.createResult(STATUS.ERROR, "Error");
+    }
+    if (!homeRes.error) {
+      if (/Sorry, Disney\+ is not available/i.test(homeRes.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      if (!Utils.responseProblem(homeRes)) {
+        const region = Utils.country(homeRes.body.match(/Region:\s*([A-Za-z]{2})[\s\S]*?CNBL:\s*[12]/)?.[1]);
+        if (region) return Utils.createResult(STATUS.OK, region);
       }
-      
-      // 修复：主页检测通过但无地区码时也返回 FAIL
-      if (homeRes.valid) {
-        return homeRes.region 
-          ? Utils.createResult(STATUS.OK, homeRes.region)
-          : Utils.createResult(STATUS.FAIL, "No");
-      }
-      
-      if (homeRes.error || apiRes.error) return Utils.errorResult(homeRes.error || apiRes.error);
-      return Utils.createResult(STATUS.FAIL);
-    } catch (error) { return Utils.errorResult(error); }
+    }
+    return apiProblem || Utils.createResult(STATUS.ERROR, "Error");
   }
 
   /**
@@ -491,72 +481,56 @@ class ServiceChecker {
 
   /**
    * YouTube Premium 解锁检测
-   * 采用双重请求机制（参考 RegionRestrictionCheck），提高检测准确性
+   * 参考 RegionRestrictionCheck 的明确可用性标记；未知时回落
    * @returns {Promise<Object>} 检测结果
    */
   static async checkYoutube() {
-    try {
-      // 带 Cookie / 不带 Cookie 两次请求互相独立，并行发起
-      const [tmpresult1, tmpresult2] = await Promise.all([
-        Utils.request({
-          url: "https://www.youtube.com/premium",
-          headers: {
-            "Cookie": "YSC=BiCUU3-5Gdk; CONSENT=YES+cb.20220301-11-p0.en+FX+700; GPS=1; VISITOR_INFO1_LIVE=4VwPMkB7W5A; PREF=tz=Asia.Shanghai; _gcl_au=1.1.1809531354.1646633279",
-            "Accept-Language": "en"
-          }
-        }),
-        Utils.request({
-          url: "https://www.youtube.com/premium",
-          headers: { "Accept-Language": "en" }
-        })
-      ]);
-
-      // 合并两次结果
-      const combinedBody = tmpresult1.body + ":" + tmpresult2.body;
-      
-      // Stash 官方示例的明确地区限制提示优先于页面地区码。
-      if (/youtube premium is not available in your country/i.test(combinedBody)) {
-        return Utils.createResult(STATUS.FAIL, "NO");
-      }
-      // 检查是否为大陆
-      if (combinedBody.includes('www.google.cn')) {
-        return Utils.createResult(STATUS.FAIL, "CN");
-      }
-      
-      // 提取地区码：countryCode 不一定有，contentRegion 一定有
-      const region = combinedBody.match(/"countryCode":"([A-Z]{2})"/)?.[1]
-                  || combinedBody.match(/"contentRegion":"([A-Z]{2})"/)?.[1];
-      
-      // 检查可用性标识
-      const hasPurchaseButton = combinedBody.includes('purchaseButtonOverride');
-      const hasStartTrial = combinedBody.includes('Start trial');
-      
-      // 判断逻辑：参考 RegionRestrictionCheck
-      if (hasPurchaseButton || hasStartTrial || region) {
-        // 可用
-        if (region) {
-          return Utils.createResult(STATUS.OK, region);
-        } else {
-          return Utils.createResult(STATUS.OK, "Premium");
+    let unknown = Utils.createResult(STATUS.ERROR, "Error");
+    // 通常一次请求即可；仅未知/异常时用最小同意 Cookie 重试，失败不覆盖有效结果。
+    for (const headers of [{}, { Cookie: "SOCS=CAI" }]) {
+      try {
+        const res = await Utils.request({ url: "https://www.youtube.com/premium", headers });
+        if (/premium is not available in your country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+        const issue = Utils.responseProblem(res);
+        if (issue) { unknown = issue; continue; }
+        if (res.body.includes("www.google.cn")) return Utils.createResult(STATUS.FAIL, "NO");
+        if (/ad-free|premiumPurchaseButton|purchaseButtonOverride|manageSubscriptionButton|Start trial/i.test(res.body)) {
+          const region = Utils.country(res.body.match(/"(?:countryCode|contentRegion|INNERTUBE_CONTEXT_GL)"\s*:\s*"([A-Z]{2})"/)?.[1]);
+          return Utils.createResult(STATUS.OK, region || "Premium");
         }
-      } else {
-        // 不可用
-        if (region) {
-          return Utils.createResult(STATUS.FAIL, region);
-        } else {
-          return Utils.createResult(STATUS.FAIL, "No");
-        }
-      }
-      
-    } catch (error) { return Utils.errorResult(error); }
+      } catch (error) { unknown = Utils.errorResult(error); }
+    }
+    return unknown;
   }
 
   /**
    * Spotify 解锁检测
    * @returns {Promise<Object>} 检测结果
    */
-  static checkSpotify() {
-    return Utils.checkByRegex("https://www.spotify.com/premium/", /spotify\.com\/([a-z]{2})(?:-[a-z]{2,4})?\//i);
+  static async checkSpotify() {
+    try {
+      // 参考 oneclickvirt/UnlockTests：优先读取播放器实际 market，不匹配语言菜单。
+      const res = await Utils.request({ url: "https://open.spotify.com/" });
+      if (/not (?:yet )?available in (?:your|this) country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      const issue = Utils.responseProblem(res);
+      if (issue) return issue;
+      const encoded = res.body.match(/<script\b[^>]*\bid=["']appServerConfig["'][^>]*>([^<]+)<\/script>/i)?.[1];
+      if (encoded) {
+        try {
+          const region = Utils.country(JSON.parse(Utils.decodeBase64(encoded)).market);
+          if (region) return Utils.createResult(STATUS.OK, region);
+        } catch (_) {}
+      }
+      // 页面结构变动时只用 canonical / og:url 回落，忽略 alternate 与页脚链接。
+      const premium = await Utils.request({ url: "https://www.spotify.com/premium/" });
+      if (/not (?:yet )?available in (?:your|this) country/i.test(premium.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      const fallbackIssue = Utils.responseProblem(premium);
+      if (fallbackIssue) return fallbackIssue;
+      const url = Utils.pageUrl(premium.body);
+      const region = Utils.country(url.match(/^https:\/\/(?:www\.)?spotify\.com\/([a-z]{2})(?:-[a-z]{2,4})?\/(?:premium(?:\/|$))?/i)?.[1]);
+      if (region) return Utils.createResult(STATUS.OK, region);
+      return Utils.createResult(STATUS.ERROR, "Error");
+    } catch (error) { return Utils.errorResult(error); }
   }
 
   /**
@@ -565,36 +539,29 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static async checkChatGPT() {
-    try {
-      // 地区查询与 Web / App 检测并行；辅助查询失败仍保留可用性结果。
-      const tracePromise = Utils.request({
-        url: "https://chatgpt.com/cdn-cgi/trace", timeout: 3000
-      }).catch(() => null);
-      const [webRes, iosRes] = await Promise.all([
-        Utils.request({
-          url: "https://api.openai.com/compliance/cookie_requirements",
-          headers: {
-            "Authorization": "Bearer null",
-            "Content-Type": "application/json",
-            "Origin": "https://platform.openai.com",
-            "Referer": "https://platform.openai.com/"
-          }
-        }),
-        Utils.request({ url: "https://ios.chat.openai.com/" })
-      ]);
-
-      const webBlocked = /unsupported_country/i.test(webRes.body);
-      const iosBlocked = /VPN|disallowed isp|been blocked/i.test(iosRes.body);
-
-      if (!webBlocked && !iosBlocked) {
-        const traceRes = await tracePromise;
-        const region = (traceRes?.body || "").match(/loc=([A-Z]{2})/)?.[1] || "";
-        return Utils.createResult(STATUS.OK, region || "OK");
-      }
-      if (webBlocked && iosBlocked) return Utils.createResult(STATUS.FAIL, "NO");
-      if (!webBlocked && iosBlocked) return Utils.createResult(STATUS.COMING, "Web Only");
-      return Utils.createResult(STATUS.COMING, "Mobile Only");
-    } catch (error) { return Utils.errorResult(error); }
+    const probe = async (url, headers, app = false) => {
+      try {
+        const res = await Utils.request({ url, headers });
+        const blocked = /unsupported_country|disallowed isp|been blocked|blocked_why_headline/i.test(res.body)
+          || (app && /\bVPN\b|"cf_details"\s*:\s*"[^"\n]*\([12]\)/i.test(res.body));
+        if (blocked) return Utils.createResult(STATUS.FAIL, "NO");
+        return Utils.responseProblem(res) || Utils.createResult(STATUS.OK);
+      } catch (error) { return Utils.errorResult(error); }
+    };
+    const [web, app, trace] = await Promise.all([
+      probe("https://api.openai.com/compliance/cookie_requirements", {
+        "Authorization": "Bearer null", "Content-Type": "application/json",
+        "Origin": "https://platform.openai.com", "Referer": "https://platform.openai.com/"
+      }),
+      probe("https://ios.chat.openai.com/", {}, true),
+      Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace", timeout: 1500 }).catch(() => null)
+    ]);
+    if (web.status === STATUS.OK && app.status === STATUS.OK) return Utils.createResult(STATUS.OK, Utils.traceRegion(trace) || "OK");
+    if (web.status === STATUS.FAIL && app.status === STATUS.FAIL) return Utils.createResult(STATUS.FAIL, "NO");
+    if (web.status === STATUS.OK && app.status === STATUS.FAIL) return Utils.createResult(STATUS.COMING, "Web Only");
+    if (web.status === STATUS.FAIL && app.status === STATUS.OK) return Utils.createResult(STATUS.COMING, "Mobile Only");
+    // 未知不能冒充另一端已被限制，也不能显示完全可用。
+    return [web, app].find(r => r.status === STATUS.ERROR || r.status === STATUS.TIMEOUT);
   }
 
   /**
@@ -604,15 +571,12 @@ class ServiceChecker {
    */
   static async checkClaude() {
     try {
-      const [loginRes, traceRes] = await Promise.all([
+      const [login, trace] = await Promise.all([
         Utils.request({ url: "https://claude.ai/login" }),
-        Utils.request({ url: "https://claude.ai/cdn-cgi/trace" }).catch(() => null)
+        Utils.request({ url: "https://claude.ai/cdn-cgi/trace", timeout: 1500 }).catch(() => null)
       ]);
-      if (!loginRes.body || loginRes.body.includes("app-unavailable-in-region")) {
-        return Utils.createResult(STATUS.FAIL, "No");
-      }
-      const region = traceRes?.body.match(/loc=([A-Z]{2})/)?.[1] || "";
-      return Utils.createResult(STATUS.OK, region || "OK");
+      if (/app-unavailable-in-region/i.test(login.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      return Utils.responseProblem(login) || Utils.createResult(STATUS.OK, Utils.traceRegion(trace) || "OK");
     } catch (error) { return Utils.errorResult(error); }
   }
 
@@ -622,40 +586,83 @@ class ServiceChecker {
    * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
-    // 网页检测：访问 gemini.google.com（参考 lmc999/RegionRestrictionCheck）
-    let webResult = null;
-    let requestError = null;
+    let unknown = Utils.createResult(STATUS.ERROR, "Error");
     try {
       const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
-      const body = res.body || "";
-
-      if (body.includes("45631641,null,true")) {
-        const m2 = body.match(/,2,1,200,"([A-Z]{2})"/);
-        if (m2) return Utils.createResult(STATUS.OK, m2[1]);
-        const m3 = body.match(/,2,1,200,"([A-Z]{3})"/);
-        if (m3) return Utils.createResult(STATUS.OK, m3[1].substring(0, 2));
-        // 有标记但无地区码 → 不可用
-        return Utils.createResult(STATUS.FAIL, "No");
+      if (/unsupported_country|not (?:currently )?available in (?:your|this) (?:country|region)/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      const issue = Utils.responseProblem(res);
+      if (issue) unknown = issue;
+      else if (/456(?:31641|17354),\s*null,\s*true/.test(res.body)) {
+        const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
+        return Utils.createResult(STATUS.OK, region || "OK");
       }
-      webResult = "fail";
-    } catch (error) { requestError = error; }
-
-    // API 检测 fallback（需要 Key）
+    } catch (error) { unknown = Utils.errorResult(error); }
     const apiKey = (ARGS.geminiapikey || "").trim();
     if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase()) && !/[{}]/.test(apiKey)) {
       try {
         const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}` });
-        const body = (res.body || "").toLowerCase();
-        if (res.status === 200 && body.includes('"models"')) return Utils.createResult(STATUS.OK, "OK");
-        if (res.status === 429) return Utils.createResult(STATUS.OK, "OK");
-        if (res.status === 400 || body.includes("key not valid") || body.includes("api_key_invalid")) {
-          return Utils.createResult(STATUS.ERROR, "Invalid Key");
-        }
-      } catch (error) { requestError = error; }
+        if (/user location is not supported|unsupported_country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+        if (/key not valid|api_key_invalid/i.test(res.body)) return Utils.createResult(STATUS.ERROR, "Invalid Key");
+        const issue = Utils.responseProblem(res);
+        if (issue) return issue;
+        if (res.status === 200 && Array.isArray(JSON.parse(res.body).models)) return Utils.createResult(STATUS.OK, "OK");
+      } catch (error) { unknown = Utils.errorResult(error); }
     }
+    return unknown;
+  }
 
-    if (requestError) return Utils.errorResult(requestError);
-    return Utils.createResult(STATUS.FAIL, webResult ? "No" : "Unknown");
+
+  /** 参考 oneclickvirt/UnlockTests/transnation/MetaAI.go，保留 AJAX 协议判据。
+   * 403 及验证页不直接算可用；主页需要明确标记，地区查询不影响可用性。
+   */
+  static async checkMetaAI() {
+    const parseHome = res => {
+      if (/GeoBlockedErrorRoot|not (?:yet )?available in (?:your|this) country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      if (/AbraRateLimitedErrorRoot/.test(res.body)) return Utils.createResult(STATUS.ERROR, "Rate Limited");
+      const issue = Utils.responseProblem(res);
+      if (issue) return issue;
+      if (/AbraHomeRoot\.react|AbraHomeRootConversationQuery|HomeRootQuery|KadabraRootContainer/.test(res.body)) {
+        const locale = res.body.match(/"code"\s*:\s*"(?:[a-z]{2}_)?([a-z]{2})"/i)?.[1];
+        return Utils.createResult(STATUS.OK, Utils.country(locale) || "OK");
+      }
+      return Utils.createResult(STATUS.ERROR, "Error");
+    };
+    try {
+      const ajax = await Utils.request({ url: "https://www.meta.ai/ajax", headers: { Accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8" } });
+      const parsed = parseHome(ajax);
+      if (parsed.status === STATUS.FAIL || parsed.status === STATUS.OK || ["Verify", "Rate Limited"].includes(parsed.region)) return parsed;
+      // /ajax 在可用地区返回 400/404；这是此端点的特定行为，不用于其他服务。
+      if (ajax.status === 400 || ajax.status === 404) {
+        let region = "";
+        try {
+          const legal = await Utils.request({ url: "https://www.meta.com/legal/", timeout: 1000 });
+          if (!Utils.responseProblem(legal)) {
+            const canonical = Utils.pageUrl(legal.body);
+            region = [legal.url, canonical, legal.headers.location].map(url =>
+              Utils.country(String(url || "").match(/meta\.com\/([a-z]{2})\/legal(?:\/|$)/i)?.[1])).find(Boolean) || "";
+          }
+        } catch (_) {}
+        return Utils.createResult(STATUS.OK, region || "OK");
+      }
+      return parseHome(await Utils.request({ url: "https://www.meta.ai/" }));
+    } catch (error) { return Utils.errorResult(error); }
+  }
+
+  /** 参考 oneclickvirt/UnlockTests/transnation/TikTok.go；回落时校验该次响应。 */
+  static async checkTikTok() {
+    let unknown = Utils.createResult(STATUS.ERROR, "Error");
+    for (const url of ["https://www.tiktok.com/explore", "https://www.tiktok.com/"]) {
+      try {
+        const res = await Utils.request({ url });
+        if (/tiktok\.com\/hk\/notfound|not available in (?:your|this) country/i.test(res.body)
+          || /tiktok\.com\/hk\/notfound/i.test(res.url)) return Utils.createResult(STATUS.FAIL, "NO");
+        const issue = Utils.responseProblem(res);
+        if (issue) { unknown = issue; continue; }
+        const region = Utils.country(res.body.match(/"region"\s*:\s*"([a-z]{2,3})"/i)?.[1]);
+        if (res.status === 200 && region) return Utils.createResult(STATUS.OK, region);
+      } catch (error) { unknown = Utils.errorResult(error); }
+    }
+    return unknown;
   }
 
   /**
@@ -667,21 +674,26 @@ class ServiceChecker {
   static async checkReddit() {
     try {
       const res = await Utils.request({ url: "https://www.reddit.com/" });
-      return res.status === 200
+      if (res.status === 403 && /been blocked/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      const issue = Utils.responseProblem(res);
+      if (issue) return issue;
+      return res.status === 200 || res.status === 302
         ? Utils.createResult(STATUS.OK, "OK")
-        : Utils.createResult(STATUS.FAIL, "No");
+        : Utils.createResult(STATUS.ERROR, "Error");
     } catch (error) { return Utils.errorResult(error); }
   }
 
-  /** Viu 仅供 Surge 可选检测：从最终页面中的 /ott/{area}/ 路径提取地区。 */
+  /** ViuCom 即 Viu，仅供 Surge 可选检测；参考 UnlockTests 的 no-service 重定向。 */
   static async checkViu() {
     try {
       const res = await Utils.request({ url: "https://www.viu.com/" });
-      if (res.status !== 200) return Utils.createResult(STATUS.FAIL, "No");
-      const m = (res.body || "").match(/\/ott\/([a-z]{2})[/"']/i);
-      return m
-        ? Utils.createResult(STATUS.OK, m[1].toUpperCase())
-        : Utils.createResult(STATUS.FAIL, "No");
+      const finalUrl = res.url || res.headers.location || Utils.pageUrl(res.body);
+      if (/\/no-service(?:[/?#]|$)/i.test(finalUrl)) return Utils.createResult(STATUS.FAIL, "NO");
+      const issue = Utils.responseProblem(res);
+      if (issue) return issue;
+      const region = Utils.country(finalUrl.match(/viu\.com\/ott\/([a-z]{2})(?:[/?#]|$)/i)?.[1]
+        || res.body.match(/\/ott\/([a-z]{2})[/"']/i)?.[1]);
+      return region ? Utils.createResult(STATUS.OK, region) : Utils.createResult(STATUS.ERROR, "Error");
     } catch (error) { return Utils.errorResult(error); }
   }
 }
@@ -694,8 +706,10 @@ const SERVICES = {
   youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium", color: "#E62117" },
   spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com", color: "#117C39" },
   chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com", color: "#0D8A70" },
-  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com", color: "#386EDB" },
   claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai", color: "#B85C3F" },
+  gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com", color: "#386EDB" },
+  metaai: { title: "Meta AI", check: "checkMetaAI", url: "https://www.meta.ai/", color: "#0866FF" },
+  tiktok: { title: "TikTok", check: "checkTikTok", url: "https://www.tiktok.com/", color: "#191919" },
   reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com", color: "#D93900" }
 };
 
@@ -742,35 +756,17 @@ async function runServiceTile(service) {
     }
     // Netflix 价格表与各服务检测并行预取（仅在开启价格显示时）
     const pricesPromise = args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
-    const results = await Promise.all([
-      ServiceChecker.checkNetflix(),
-      ServiceChecker.checkDisney(),
-      ServiceChecker.checkHBOMax(),
-      ServiceChecker.checkYoutube(),
-      ServiceChecker.checkSpotify(),
-      ServiceChecker.checkChatGPT(),
-      ServiceChecker.checkGemini(),
-      ServiceChecker.checkClaude(),
-      ServiceChecker.checkReddit(),
-      !IS_STASH && args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null)
-    ]);
-
-    const [netflix, disney, hbomax, youtube, spotify, chatgpt, gemini, claude, reddit, viu] = results;
-    const netflixPrice = (netflix.status === STATUS.OK && pricesPromise)
-      ? await ServiceChecker.getNetflixPrice(pricesPromise, netflix.region)
-      : "";
-
-    const services = [
-      { name: "Netflix", result: netflix, suffix: netflixPrice },
-      { name: "Disney+", result: disney },
-      { name: "HBO Max", result: hbomax },
-      { name: "YouTube", result: youtube },
-      { name: "Spotify", result: spotify },
-      { name: "ChatGPT", result: chatgpt },
-      { name: "Gemini", result: gemini },
-      { name: "Claude", result: claude },
-      { name: "Reddit", result: reddit }
-    ];
+    // 汇总与独立卡片共用服务表，顺序和新增服务只维护一次。
+    const definitions = Object.entries(SERVICES);
+    const viuPromise = !IS_STASH && args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null);
+    const results = await Promise.all(definitions.map(([, definition]) => ServiceChecker[definition.check]()));
+    const services = definitions.map(([id, definition], index) => ({
+      name: id === "youtube" ? "YouTube" : definition.title, result: results[index]
+    }));
+    if (results[0].status === STATUS.OK && pricesPromise) {
+      services[0].suffix = await ServiceChecker.getNetflixPrice(pricesPromise, results[0].region);
+    }
+    const viu = await viuPromise;
 
     // Surge 的 Viu 保持原顺序及仅可用时显示的规则。
     if (viu && viu.status === STATUS.OK) {

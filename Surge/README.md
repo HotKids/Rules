@@ -35,7 +35,11 @@ Streaming 成员以 `### Streaming` 或 `### Streaming US` 等标记声明归属
 | Stash IP Tile | [ip-security-panel.stoverride](Module/Pannel/ip-security-panel.stoverride) | 出口、本地、IP 纯净度三张折叠卡片 |
 | Stash 服务 Tile | [media-check-panel.stoverride](Module/Pannel/media-check-panel.stoverride) | 每项服务一张卡片，与 Surge 共用检测 JS |
 
-流媒体检测包含 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Gemini、Claude、Reddit。Surge 可额外启用 Viu；Stash 不包含 Viu。ChatGPT 保留一个服务结果，区分地区、Web Only、Mobile Only 与 NO。
+流媒体检测按 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Claude、Gemini、Meta AI、TikTok、Reddit 排列，共 11 项。Surge 可额外启用 Viu；Stash 不包含 Viu。ChatGPT 保留一个服务结果，区分地区、Web Only、Mobile Only 与 NO。Meta AI 优先从 Meta 官网地区路径获取地区，也支持主页地区字段；可用但无地区时显示 OK。TikTok 从 Explore 页面读取地区，未知时尝试主页。
+
+明确受限显示 NO；超时、限流、验证页分别显示 Timeout、Rate Limited、Verify，其他无法确认的响应显示 Error。未知状态不触发解锁失效通知。Spotify 优先读取播放器 market；Gemini 正确转换三位地区码；Netflix 在确认影片页面后判断可用性，另测原创影片确认 Originals Only，缺地区时不默认美国。YouTube 使用明确的 Premium 标记，通常只请求一次，未知时才用 Cookie 回落。Netflix 价格表缓存 24 小时，更新最多等待 2 秒，失败可使用之前缓存。
+
+检测判据参考 [Stash 官方示例](https://github.com/StashNetworks/misc/tree/main/collapsed-tiles) 和 [UnlockTests](https://github.com/oneclickvirt/UnlockTests/tree/main/transnation)。采用网页地区、结构化字段及明确限制信息，适配 Surge / Stash 的 HTTP 接口；不依赖命令行工具或额外 DNS 解锁类型探测。ViuCom 即可选的 Viu，支持最终重定向地区与 no-service 判据。
 
 Stash 流媒体卡片默认折叠在第三方服务页面；如需放到首页，将对应 Tile 的 `collapsed` 改为 `false`，并将 `argument` 中的 `mode=collapsed` 改成 `mode=home`。可用时显示品牌底色，不可用或检测异常时显示灰色。卡片点击 URL 同时定义在覆写与 JS 中，检测完成后以 JS 返回值为准；是否打开 App 还取决于系统链接关联。
 
@@ -45,7 +49,11 @@ Stash [IP 覆写 Raw 地址](https://raw.githubusercontent.com/HotKids/Rules/mas
 
 出口为深蓝，本地为青绿；两张卡片检测失败时变灰。IP 纯净度按低、中、高风险分别显示绿、黄、红色。出口和本地把 IP 放在标题第二行，正文保留“地区 · 运营商”；为适配 Android 折叠卡片的单行正文，纯净度把类型放在标题下方，风险值放在正文。出口、本地、纯净度卡片分别使用 selfh.st 的 [Drasl](https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png)、[Target](https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png)、[AdGuard Home Central Manager](https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png) 浅色 PNG；覆写主图标使用 [selfh.st / cAdvisor PNG](https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/cadvisor.png)。出口和纯净度卡片点击后打开 IPPure 首页；本地卡片检测成功后，通过 `https://ippure.com/?ip=本地公网IP` 查询卡片显示的直连公网 IP，首页与折叠模式均支持。未取得本地 IP 或开启打码时，跳转到 IPPure 首页。
 
-Stash 已预设不打码、台湾旗帜和开启 IP 变化通知，首页与折叠模式均可通知。首次成功检测只记录基线，此后由出口卡片在刷新时通知 IP 变化；这依赖客户端执行 Tile 与通知权限，不是 Surge 的 `network-changed` 即时事件。临时查询失败不作为 IP 变化，其他卡片不重复通知。支持首页 Tile 的客户端可同时设置 `collapsed: false` 和 `mode=home`；如需关闭通知，将出口卡片的 `notify=true` 改为 `notify=false`。
+Stash 已预设不打码、台湾旗帜和开启 IP 变化通知。独立的 `hotkids-ip-security-notify` 定时任务每 10 分钟检查一次日常分流下的本地与出口 IP，首次成功取得的字段各自建立基线，此后只通知确认的变化；一项查询失败不阻止其他 IP 的有效变化通知。通知接口缺失或调用抛出异常时保留旧基线，下一次检查重试。任务需要 Stash 保持连接并有通知权限，不是 Surge 的 `network-changed` 即时事件。
+
+卡片与通知记录分开，长按测试节点不会覆盖日常监测基线，也不会触发网络变化通知。更新至 6.3.0 需同时更新覆写以安装定时任务；如需关闭通知，将 `cron.script` 中该任务的 `notify=true` 改为 `notify=false`。支持首页 Tile 的客户端可同时设置 `collapsed: false` 和 `mode=home`，通知任务不受卡片布局影响。
+
+折叠出口卡片只检测显示所需的 IPv4，首页模式额外获取 IPv6；IPv4 返回后立即启动地区与运营商查询。地理信息按 IP 和数据源缓存 6 小时、最多保留 32 条，实时出口与 IPPure 评分不使用此缓存。旗帜查询最多等待 1 秒，失败不影响已取得的本地地区。三张 IP 卡片的图标统一在覆写中配置。
 
 本地卡片检测的是直连公网 IP。请求默认遵循当前分流，不同探测站点可能走不同出口，风险和类型反映 IPPure 探测请求的结果。Stash 不显示依赖 Surge 专用接口的入口 IP、实际策略名称和流量统计。覆写中的 `argument` 只负责卡片分工，无需导入时选择参数。
 

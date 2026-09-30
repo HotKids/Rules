@@ -1,10 +1,10 @@
 # 图标：selfh.st
 # 与 Surge 共用 ip-security.js，三张卡片默认折叠到第三方服务 / 流媒体页面。
-# 每 600 秒刷新；仅出口卡片通知 IP 变化，首次检测只记录基线。
+# 每 600 秒刷新；独立定时任务通知 IP 变化，首次检测只记录基线。
 # 本地卡片显示直连公网 IP。
-# 支持首页 Tile 的客户端可改为 collapsed: false 和 mode=home，通知规则相同。
+# 支持首页 Tile 的客户端可改为 collapsed: false 和 mode=home；通知独立于卡片。
 name: 'IP Security Tiles'
-desc: 检测出口 IP、本地 IP 和 IP 纯净度（风险与类型），支持刷新时通知 IP 变化
+desc: 检测出口 IP、本地 IP 和 IP 纯净度（风险与类型），支持定时通知 IP 变化
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/cadvisor.png
 tiles:
   - name: hotkids-ip-security-outbound
@@ -15,7 +15,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=outbound&mode=collapsed&notify=true'
+    argument: 'tile=outbound&mode=collapsed&notify=false'
   - name: hotkids-ip-security-local
     interval: 600
     title: '本地 IP'
@@ -24,7 +24,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=local&mode=collapsed&notify=true'
+    argument: 'tile=local&mode=collapsed&notify=false'
   - name: hotkids-ip-security-risk
     interval: 600
     title: 'IP 纯净度'
@@ -33,15 +33,26 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=risk&mode=collapsed&notify=true'
+    argument: 'tile=risk&mode=collapsed&notify=false'
+
+# 通知使用日常分流，不受长按测试节点影响；需要 Stash 保持连接。
+cron:
+  script:
+    - name: hotkids-ip-security-notify
+      cron: '*/10 * * * *'
+      timeout: 25
+      argument: 'task=monitor&notify=true'
 
 script-providers:
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.0
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.0
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.0
+    interval: 86400
+  hotkids-ip-security-notify:
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.0
     interval: 86400

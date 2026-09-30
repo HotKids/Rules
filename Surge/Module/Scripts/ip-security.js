@@ -31,7 +31,7 @@
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
- * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 卡片刷新时比较 IP，首次仅记录
+ * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 独立定时任务比较 IP，首次仅记录
  * - panel_interval: 面板 update-interval（秒），默认 600；改了 [Panel] 的 update-interval 需同步此参数，
  *   否则打码点击切换的自动刷新判定会失准
  *
@@ -55,9 +55,9 @@
  * - mode: home / collapsed（覆写默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
- *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
+ *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *
- * @version 6.2.10
+ * @version 6.3.0
  * @date 2026-09-30
  */
 
@@ -66,13 +66,12 @@ const isStash = (typeof $environment !== "undefined" &&
   (!!$environment["stash-version"] || !!$environment["stash-build"])) ||
   (typeof $script !== "undefined" && $script.type === "tile");
 const hasTimers = typeof setTimeout === "function";
-// 卡片图标：selfh.st；保留的 DNS 卡片使用 Koolson/Qure。
-const stashIconRoot = "https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/";
+// 图标统一由覆写提供；更新检测结果时保留卡片 Logo。
 const stashTiles = {
-  risk: { title: "IP 纯净度", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png", color: "#88A788" },
-  dns: { title: "DNS 解析器", icon: stashIconRoot + "Round_Robin.png", color: "#7357A6" },
-  outbound: { title: "出口 IP", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png", color: "#1565C0" },
-  local: { title: "本地 IP", icon: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png", color: "#00796B" }
+  risk: { title: "IP 纯净度", color: "#88A788" },
+  dns: { title: "DNS 解析器", color: "#7357A6" },
+  outbound: { title: "出口 IP", color: "#1565C0" },
+  local: { title: "本地 IP", color: "#00796B" }
 };
 const CONFIG = {
   timeout: isStash ? 20000 : 10000, // Surge 看门狗须小于 sgmodule 的 timeout=15；Stash 兼容无 JS 定时器的运行时
@@ -120,12 +119,13 @@ const CONFIG = {
 // ==================== 参数解析 ====================
 function parseArguments() {
   let arg = {};
+  const decode = value => { try { return decodeURIComponent(value); } catch (_) { return value; } };
 
   if (typeof $argument !== "undefined") {
     // 不打印 $argument 原文：其中可能含 ipqs_key 等敏感凭据
     arg = Object.fromEntries($argument.split("&").map(i => {
       const idx = i.indexOf("=");
-      return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decodeURIComponent(i.slice(idx + 1)).trim()];
+      return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decode(i.slice(idx + 1)).trim()];
     }));
   }
 
@@ -152,6 +152,7 @@ function parseArguments() {
     proxy: isStash && clean(arg.mode) !== "collapsed" ? clean(arg.proxy) : "",
     mode: clean(arg.mode) === "collapsed" ? "collapsed" : "home",
     tile: clean(arg.tile) || "outbound",
+    task: clean(arg.task),
     ipqsKey: isStash ? "" : clean(arg.ipqs_key),
     riskApi: isStash ? "ippure" : clean(arg.risk_api).toLowerCase(),
     maxmindKey: clean(arg.maxmind_key),
@@ -183,11 +184,12 @@ function done(o) {
   if (finished) return;
   finished = true;
   if (watchdog !== null && typeof clearTimeout === "function") clearTimeout(watchdog);
-  if (isStash) {
+  if (isStash && args.task === "monitor") {
+    $done({});
+  } else if (isStash) {
     $done({
       title: o.title || stashTiles[args.tile]?.title || "IP Security",
       content: o.content || "检测失败",
-      icon: stashTiles[args.tile]?.icon || stashTiles.outbound.icon,
       backgroundColor: o.backgroundColor || o["icon-color"] || "#9E9E9E",
       url: o.url || "https://ippure.com"
     });
@@ -729,17 +731,61 @@ function checkIPChange(localIP, outIP, outIPv6) {
   return true;
 }
 
-// Stash 没有使用 Surge 的网络事件：在 Tile 刷新时比较成功取得的 IP。
-// 首次仅建立基线；本地接口失败不更新基线，IPv6 暂时失败不视为断开。
-function checkStashIPChange(localIP, outIP, outIPv6) {
-  if (!isStash || args.tile !== "outbound" || !args.notify || !localIP || !outIP) return false;
-  let previous = null;
-  try { previous = JSON.parse($persistentStore.read(CONFIG.storeKeys.lastEvent) || "null"); } catch (_) {}
-  const changed = previous && (previous.localIP !== localIP || previous.outIP !== outIP ||
-    (!!outIPv6 && previous.outIPv6 !== outIPv6));
-  const retainedIPv6 = previous && previous.outIP === outIP ? previous.outIPv6 : null;
-  $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6: outIPv6 || retainedIPv6 || null }), CONFIG.storeKeys.lastEvent);
-  return !!changed;
+// Stash 通知专用上下文：不读取/写入节点测试卡片的记录。
+// 各 IP 字段独立建立基线；失败字段沿用旧值，不妨碍其他有效变化。
+async function runStashMonitor() {
+  if (!args.notify || (typeof $script !== "undefined" && $script.type === "tile")) return done({});
+  const current = await fetchIPs();
+  if (finished) return;
+  const key = "stash.ip-security.monitor.v2:" + encodeURIComponent(args.proxy || "routing");
+  let previous = {};
+  try { previous = JSON.parse($persistentStore.read(key) || "{}"); } catch (_) {}
+  if (!previous || typeof previous !== "object" || Array.isArray(previous)) previous = {};
+  const next = { ...previous }, changes = [];
+  for (const [field, title] of [["outIP", "出口 IP"], ["localIP", "本地 IP"], ["outIPv6", "出口 IPv6"]]) {
+    const value = current[field];
+    if (!value) continue;
+    if (previous[field] && previous[field] !== value) {
+      changes.push(title + "：" + maskIP(previous[field], args.maskIP) + " → " + maskIP(value, args.maskIP));
+    }
+    next[field] = value;
+  }
+  if (changes.length) {
+    if (typeof $notification === "undefined" || typeof $notification.post !== "function") {
+      console.log("当前客户端未提供通知接口；保留基线供下次重试");
+      return done({});
+    }
+    try { $notification.post("🔄 IP 已变化", "", changes.join("\n")); }
+    catch (_) { console.log("通知发送失败；保留基线供下次重试"); return done({}); }
+  }
+  if (Object.keys(next).length) {
+    try { $persistentStore.write(JSON.stringify(next), key); }
+    catch (_) { console.log("通知记录保存失败"); }
+  }
+  done({});
+}
+
+// 仅缓存指定 IP 的静态地理信息；实时出口、可用性与 IPPure 评分不共享缓存。
+// 限制 32 条与 6 小时，存储失败也不会导致卡片报错。
+async function stashGeo(source, ip, url, policy, valid, timeout = 3000) {
+  const key = "stash.ip-security.geo.v1", id = source + ":" + ip, ttl = 21600000;
+  const read = () => {
+    try {
+      const data = JSON.parse($persistentStore.read(key) || "{}");
+      return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+    } catch (_) { return {}; }
+  };
+  const cached = read()[id], age = Date.now() - cached?.ts;
+  if (cached && age >= 0 && age < ttl && valid(cached.data)) return cached.data;
+  const data = await httpJSON(url, policy, null, Date.now() + timeout);
+  if (!valid(data)) return null;
+  try {
+    const entries = Object.entries(read()).filter(([entry, value]) => entry !== id && value && Date.now() - value.ts < ttl);
+    entries.push([id, { ts: Date.now(), data }]);
+    entries.sort((a, b) => a[1].ts - b[1].ts);
+    $persistentStore.write(JSON.stringify(Object.fromEntries(entries.slice(-32))), key);
+  } catch (_) { console.log("地理缓存保存失败，继续显示结果"); }
+  return data;
 }
 
 // ==================== 面板内容构建 ====================
@@ -906,8 +952,8 @@ async function runStashTile() {
     const ip = local?.data?.addr;
     if (!ip) return fail("无法获取直连公网 IP");
     const [baidu, sb] = await Promise.all([
-      httpJSON(CONFIG.urls.baiduGeo(ip), "DIRECT"),
-      httpJSON(CONFIG.urls.ipSbGeo(ip), "DIRECT")
+      stashGeo("baidu", ip, CONFIG.urls.baiduGeo(ip), "DIRECT", data => !!normalizeOpendata(data)),
+      stashGeo("flag", ip, CONFIG.urls.ipSbGeo(ip), "DIRECT", data => /^[A-Z]{2}$/.test(data?.country_code || ""), 1000)
     ]);
     const info = normalizeOpendata(baidu);
     if (info && /^(移动|联通|电信|广电)$/.test(info.org)) info.org = "中国" + info.org;
@@ -934,25 +980,22 @@ async function runStashTile() {
     ]);
   }
 
-  const { localIP, outIP, outIPv6, outRaw } = await fetchIPs();
+  // 折叠卡片不展示 IPv6，也不承担通知；省去 IPv6 与本地 IP 辅助探测。
+  const ipv6 = args.mode === "home" ? fetchOutbound6() : Promise.resolve(null);
+  const exit = await fetchOutbound4();
+  const outIP = exit?.ip, outRaw = exit?.raw;
   if (!outIP) return fail("无法获取出口 IPv4");
-  const [geo, org] = await Promise.all([
-    httpJSON(CONFIG.urls.ipApi(outIP, "zh-CN")),
-    httpJSON(CONFIG.urls.ipInfo(outIP))
+  // IPv4 一返回即查询地区；与可选 IPv6 并行，不等辅助请求结束再开始。
+  const [geo, org, outIPv6] = await Promise.all([
+    stashGeo("ipapi-zh", outIP, CONFIG.urls.ipApi(outIP, "zh-CN"), undefined, data => !!normalizeIpApi(data)),
+    stashGeo("ipinfo", outIP, CONFIG.urls.ipInfo(outIP), undefined, data => !!normalizeIpInfo(data)),
+    ipv6
   ]);
   const info = normalizeIpApi(geo);
   const organization = normalizeIpInfo(org)?.org || info?.org || "运营商未知";
   const location = info ? formatGeo(info.country_code, info.city, info.region, geoLabel(info)) :
     [flag(outRaw?.country_code), "ip-api 地区查询失败"].filter(Boolean).join(" ");
   const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "", location, organization];
-  if (!finished && checkStashIPChange(localIP, outIP, outIPv6)) {
-    // 只有出口卡片负责通知；不为通知重复请求风险、本地地理或 DNS。
-    if (typeof $notification !== "undefined" && typeof $notification.post === "function") {
-      try {
-        $notification.post("🔄 IP 已变化", location, ["本地 IP：" + m(localIP), ...lines].join("\n"));
-      } catch (_) { console.log("通知发送失败，继续显示检测结果"); }
-    } else { console.log("当前客户端未提供通知接口"); }
-  }
   const shortLocation = info ? compactStashLocation(["HK", "MO", "SG"].includes(info.country_code) ?
     geoLabel(info) : info.city || info.region || geoLabel(info)) : "地区查询失败";
   return render(lines, info ? tile.color : "#9E9E9E", {
@@ -966,7 +1009,7 @@ async function runStashTile() {
 (async () => {
   try {
   console.log("=== IP 安全检测开始 ===");
-  if (isStash) return await runStashTile();
+  if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
   // 1. EVENT 触发时延迟等待网络稳定
   if (args.isEvent && args.eventDelay > 0) {
