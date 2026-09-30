@@ -89,6 +89,8 @@ Stash 通用字段的取舍以[官方配置样例](https://stash.wiki/configurat
 
 Stash 基座转换保留可沿用的源内容、注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`。主要设置块使用 `#!replace`。
 
+自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明，当前临时使用已核验新版的 jsDelivr 主入口 `cdn.jsdelivr.net`，设备验证后恢复 Fastly。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。规则发布后 CDN 仍可能保留旧分支内容，必要时通过 jsDelivr 官方 purge 接口刷新并比对源文件。
+
 ## 规则同步
 
 [sync-rules.py](sync-rules.py) 依次拉取外部规则与镜像模块、处理 Streaming 双向同步、转换 QX/Clash/sing-box 格式、清理不再需要的产物。

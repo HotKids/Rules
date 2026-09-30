@@ -26,6 +26,7 @@ from .common import (
     _fmt_group,
     _is_skipped,
     _load_policy_path_proxy_lines,
+    _lan_cache_filename,
     _merge_action_lines,
     _parse_provider_urls,
     _resolve_builtin_from_repo,
@@ -489,6 +490,7 @@ def gen_rules_and_providers(
         else:
             ext = ".mrs" if info.get("format") == "mrs" else ".yaml"
             path_file = f"{pname.replace(' ', '_')}{ext}"
+        path_file = _lan_cache_filename(clash_url, path_file)
         rp_lines += [
             f"  {pname}:",
             "    type: http",

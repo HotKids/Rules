@@ -42,6 +42,9 @@ iCloud
 Apple News
 Apple TV
 # > Mapping
+# LAN 临时使用已核验新版的 jsDelivr 主入口；设备验证后恢复 Fastly。
+# 本地缓存随上游有效地址段换版本，避免复用旧规则。
+LAN => https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
 VirgilClyne/GetSomeFries =>
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt => https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs

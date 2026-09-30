@@ -2,6 +2,8 @@
 
 from datetime import datetime, timezone, timedelta
 from pathlib import Path
+import hashlib
+import ipaddress
 import re
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -115,7 +117,6 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
 
 _GIST_RAW_RE = re.compile(r"https://raw\.githubusercontent\.com/([^/\s]+)/([^/\s]+)/([^/\s]+)/")
 
-
 def _apply_gist_reverse_proxy(text: str, host: str) -> str:
     """把 `https://raw.githubusercontent.com/<user>/<repo>/<ref>/` 改写为 jsDelivr 风格
     `https://<host>/gh/<user>/<repo>@<ref>/`。`host` 为空串则原样返回。"""
@@ -125,6 +126,32 @@ def _apply_gist_reverse_proxy(text: str, host: str) -> str:
         lambda m: f"https://{host}/gh/{m.group(1)}/{m.group(2)}@{m.group(3)}/",
         text,
     )
+
+
+def _lan_cache_filename(url: str, filename: str) -> str:
+    """自有 LAN 缓存随有效上游规则换版本，避免客户端继续载入已删除规则。"""
+    prefixes = (HOTKIDS_CLASH_PREFIX,
+                "https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/",
+                "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/")
+    asset = next((url[len(prefix):] for prefix in prefixes if url.startswith(prefix)), "")
+    if asset not in {
+        "LAN.yaml", "lancidr.txt", "lancidr.mrs",
+    }:
+        return filename
+    source = REPO_ROOT / "Surge/RULE-SET/LAN.list"
+    rules: set[str] = set()
+    for line in source.read_text(encoding="utf-8").splitlines():
+        parts = [part.strip() for part in line.partition("#")[0].split(",")]
+        if len(parts) < 2:
+            continue
+        if parts[0] in ("IP-CIDR", "IP-CIDR6"):
+            # ipcidr MRS 只编入地址段，不包含规则旗标与 DOMAIN-SUFFIX。
+            rules.add(str(ipaddress.ip_network(parts[1], strict=False)))
+        elif url.endswith("LAN.yaml"):
+            rules.add(",".join(parts))
+    digest = hashlib.sha256("\n".join(sorted(rules)).encode("utf-8")).hexdigest()[:12]
+    path = Path(filename)
+    return f"{path.stem}-{digest}{path.suffix}"
 
 
 def strip_emoji(name: str) -> str:

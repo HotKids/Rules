@@ -419,7 +419,8 @@ test('Stash uses one IPv4 ipify fallback after official IPPure fails and never r
 
 test('Stash ipify fallback success avoids Cloudflare, ip.sb and IPv6 probes in a collapsed tile',async()=>{
   for(const timers of [false,true]) {
-    const r=await ipPanel({timers,riskFailure:true,argument:'mode=collapsed'});
+    // Freeze elapsed-time accounting: a 1 ms clock tick must not fail the five-second budget assertion.
+    const r=await ipPanel({now:100000000,timers,riskFailure:true,argument:'mode=collapsed'});
     assert.equal(r.output.title,'出口 IP\n198.51.100.10');
     assert.equal(r.requests.filter(o=>o.url==='https://api.ipify.org?format=json').length,1);
     assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|api-ipv|api6\.ipify/.test(o.url)));

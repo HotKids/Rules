@@ -269,7 +269,7 @@ function main(config) {
     'China': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs' },
     'China ASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/China_ASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
     'China IP': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/China_IP.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs' },
-    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs' },
+    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN-e87c63f8926f.mrs', url: 'https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs' },
   };
 
   // ── 规则 ──

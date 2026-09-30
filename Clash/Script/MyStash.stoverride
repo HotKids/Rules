@@ -1,4 +1,4 @@
-# Date: 2026-10-01 01:04:34
+# Date: 2026-10-01 01:33:57
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -622,8 +622,8 @@ rule-providers: #!replace
   LAN:
     behavior: ipcidr
     format: mrs
-    path: ./Provider/RuleSet/LAN.mrs
-    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
+    path: ./Provider/RuleSet/LAN-e87c63f8926f.mrs
+    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
     interval: 86400
 
 # 规则

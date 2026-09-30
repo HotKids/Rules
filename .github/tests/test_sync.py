@@ -227,6 +227,10 @@ class StashGeneralUpstreamTests(unittest.TestCase):
 >> Clash/Sample.yaml
 # > Builtin
 << .github/scripts/sync-config/clash.ini
+# > Gist
+ReverseProxy => fastly.jsdelivr.net
+# > Mapping
+LAN => https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
 
 # Stash
 >> Clash/Script/Stash.stoverride
@@ -239,7 +243,18 @@ class StashGeneralUpstreamTests(unittest.TestCase):
             'stash_output': 'Clash/Script/MyStash.stoverride',
             'group_overrides': {'Proxy': {'type': 'url-test', 'interval': 456}},
         }), encoding='utf-8')
-        self.inputs = (self.general, self.sync_config, self.ini, self.overlay)
+        self.lan_source = self.root / 'Surge/RULE-SET/LAN.list'
+        self.lan_source.parent.mkdir(parents=True)
+        self.lan_source.write_text('''# Canonical LAN fixture
+DOMAIN-SUFFIX,local
+IP-CIDR,10.0.0.0/8,no-resolve
+IP-CIDR6,fc00::/7,no-resolve
+''', encoding='utf-8')
+        self.lan_asset = self.root / 'Clash/RuleSet/lancidr.txt'
+        self.lan_asset.parent.mkdir()
+        self.lan_asset.write_text("payload:\n  - '10.0.0.0/8'\n  - 'fc00::/7'\n", encoding='utf-8')
+        self.inputs = (self.general, self.sync_config, self.ini, self.overlay,
+                       self.lan_source, self.lan_asset)
         self.outputs = {
             'Sample': 'Clash/Sample.yaml',
             'Mihomo': 'Clash/Mihomo.yaml',
@@ -267,6 +282,7 @@ class StashGeneralUpstreamTests(unittest.TestCase):
             config = parser.parse_sync_txt()
             self.assertEqual(config['Clash']['include_file'], 'Clash/General.yaml')
             clash._sync_clash(config, ['DIRECT = direct'], ['Proxy = select, DIRECT'], [
+                'RULE-SET,LAN,DIRECT,no-resolve',
                 # A static URL creates a provider mapping; no provider is downloaded.
                 'RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Upstream.list,Proxy',
                 'FINAL,Proxy',
@@ -303,6 +319,64 @@ process.stdout.write(JSON.stringify(context.result));
     def generated_bytes(self):
         return {path.relative_to(self.root): path.read_bytes()
                 for path in self.root.rglob('*') if path.is_file() and path not in self.inputs}
+
+    def assert_lan_providers(self, outputs):
+        paths = {}
+        for name, output in outputs.items():
+            with self.subTest(output=name):
+                self.assertIn('RULE-SET,LAN,DIRECT,no-resolve', output['rules'])
+                provider = output['rule-providers']['LAN']
+                self.assertEqual(provider['url'],
+                    'https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs')
+                self.assertEqual(provider['behavior'], 'ipcidr')
+                self.assertEqual(provider['format'], 'mrs')
+                self.assertTrue(provider['path'].startswith('./Provider/RuleSet/'))
+                self.assertEqual(Path(provider['path']).suffix, '.mrs')
+                self.assertRegex(Path(provider['path']).stem, r'[0-9a-f]{8,64}')
+                paths[name] = provider['path']
+                self.assertEqual(output['rule-providers']['Upstream']['url'],
+                    'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Upstream.yaml')
+                self.assertEqual(output['rule-providers']['Upstream']['path'],
+                                 './Provider/RuleSet/Upstream.yaml')
+        self.assertEqual(len(set(paths.values())), 1)
+        return paths
+
+    def test_lan_download_mapping_and_cache_version_follow_effective_ip_rules(self):
+        self.general.write_text('''mixed-port: 7890
+mode: rule
+log-level: info
+hosts: {}
+dns:
+  nameserver:
+    - "https://192.0.2.53/dns-query#RULES"
+''', encoding='utf-8')
+        first = self.generate()
+        first_paths = self.assert_lan_providers(first)
+        first_bytes = self.generated_bytes()
+
+        self.lan_source.write_text(self.lan_source.read_text(encoding='utf-8').replace(
+            '# Canonical LAN fixture', '# Canonical LAN fixture with updated documentation')
+            + '# Extra annotation, no effective rule change\n', encoding='utf-8')
+        self.lan_asset.write_text('# Updated asset annotation\n'
+                                  + self.lan_asset.read_text(encoding='utf-8'), encoding='utf-8')
+        comment_only = self.generate()
+        self.assertEqual(self.assert_lan_providers(comment_only), first_paths)
+        self.assertEqual(self.generated_bytes(), first_bytes)
+
+        self.lan_source.write_text(self.lan_source.read_text(encoding='utf-8')
+                                  + 'IP-CIDR,172.16.0.0/12,no-resolve\n', encoding='utf-8')
+        self.lan_asset.write_text(self.lan_asset.read_text(encoding='utf-8')
+                                 + "  - '172.16.0.0/12'\n", encoding='utf-8')
+        changed = self.generate()
+        changed_paths = self.assert_lan_providers(changed)
+        for name in first_paths:
+            self.assertNotEqual(changed_paths[name], first_paths[name], name)
+            for key in ('url', 'path'):
+                self.assertEqual(changed[name]['rule-providers']['Upstream'][key],
+                                 first[name]['rule-providers']['Upstream'][key])
+        changed_bytes = self.generated_bytes()
+        self.generate()
+        self.assertEqual(self.generated_bytes(), changed_bytes)
 
     def test_general_edits_and_deletions_reach_every_config_and_keep_private_groups(self):
         class GeneralDumper(yaml.SafeDumper):
