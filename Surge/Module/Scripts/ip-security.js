@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *
- * @version 6.3.0
+ * @version 6.3.1
  * @date 2026-09-30
  */
 
@@ -205,6 +205,18 @@ if (hasTimers) {
 }
 
 // ==================== HTTP 工具 ====================
+function logHTTPFailure(url, status, error) {
+  // 只记录站点和错误类别；完整 URL 可能含 IP 或 API Key。
+  const host = String(url).match(/^https?:\/\/([^/?#]+)/)?.[1] || "API";
+  const detail = String(error || "");
+  const reason = error ? (/timeout|timed out/i.test(detail) ? "请求超时" :
+    /dns|resolve|lookup/i.test(detail) ? "DNS 解析失败" :
+    /invalid JSON/i.test(detail) ? "JSON 响应无效" :
+    /tls|ssl|certificate/i.test(detail) ? "TLS 连接失败" : "网络请求失败") :
+    (status ? "HTTP " + status : "无有效响应");
+  console.log("[IP HTTP] " + host + "：" + reason);
+}
+
 function httpRaw(url, policy, headers, deadline = requestDeadline) {
   const remaining = Math.min(deadline, requestDeadline) - Date.now();
   if (finished || remaining < 100) return Promise.resolve(null);
@@ -222,15 +234,17 @@ function httpRaw(url, policy, headers, deadline = requestDeadline) {
     try {
       $httpClient.get(req, (error, response, data) => {
         const status = Number(response?.status || response?.statusCode);
+        if (error || !(status >= 200 && status < 300)) logHTTPFailure(url, status, error);
         resolve(!error && status >= 200 && status < 300 ? (data || null) : null);
       });
-    } catch (_) { resolve(null); }
+    } catch (error) { logHTTPFailure(url, 0, error); resolve(null); }
   });
 }
 
 async function httpJSON(url, policy, headers, deadline) {
   const raw = await httpRaw(url, policy, headers, deadline);
-  try { return raw ? JSON.parse(raw) : null; } catch (_) { return null; }
+  try { return raw ? JSON.parse(raw) : null; }
+  catch (_) { logHTTPFailure(url, 0, "invalid JSON"); return null; }
 }
 
 function wait(ms) {
@@ -767,7 +781,7 @@ async function runStashMonitor() {
 
 // 仅缓存指定 IP 的静态地理信息；实时出口、可用性与 IPPure 评分不共享缓存。
 // 限制 32 条与 6 小时，存储失败也不会导致卡片报错。
-async function stashGeo(source, ip, url, policy, valid, timeout = 3000) {
+async function stashGeo(source, ip, url, policy, valid, timeout = 5000) {
   const key = "stash.ip-security.geo.v1", id = source + ":" + ip, ttl = 21600000;
   const read = () => {
     try {
@@ -955,16 +969,25 @@ async function runStashTile() {
       stashGeo("baidu", ip, CONFIG.urls.baiduGeo(ip), "DIRECT", data => !!normalizeOpendata(data)),
       stashGeo("flag", ip, CONFIG.urls.ipSbGeo(ip), "DIRECT", data => /^[A-Z]{2}$/.test(data?.country_code || ""), 1000)
     ]);
-    const info = normalizeOpendata(baidu);
+    // 本地 IP 响应已经带有地区，不让百度单点失败使整张卡片变灰。
+    // 所有回退数据都属于本次直连 IP，不重新探测或借用代理出口的数据。
+    const baiduInfo = normalizeOpendata(baidu);
+    const info = baiduInfo || normalizeBilibili(local) || normalizeIpSb(sb);
+    if (!baiduInfo && info) console.log("本地地区：百度不可用，使用同一 IP 的备用地区信息");
     if (info && /^(移动|联通|电信|广电)$/.test(info.org)) info.org = "中国" + info.org;
+    const countryCode = sb?.country_code || info?.country_code || (info?.country_name === "中国" ? "CN" : "");
+    const location = baiduInfo ? info.country_name :
+      [...new Set([info?.country_name, info?.region, info?.city].filter(Boolean))].join(" ");
+    const shortLocation = baiduInfo ? compactStashLocation(location, true) :
+      compactStashLocation(info?.city || info?.region || info?.country_name, true);
     return render([
       m(ip),
-      info ? [flag(sb?.country_code), info.country_name].filter(Boolean).join(" ") : "百度地区查询失败",
+      info ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败",
       info?.org || "运营商未知"
     ], info ? tile.color : "#9E9E9E", {
       title: heading(tile.title, ip),
-      content: info ? [[flag(sb?.country_code), compactStashLocation(info.country_name, true)].filter(Boolean).join(" "),
-        compactStashOrg(info.org)].join(" · ") : "百度地区查询失败"
+      content: info ? [[flag(countryCode), shortLocation].filter(Boolean).join(" "),
+        compactStashOrg(info.org)].join(" · ") : "地区查询失败"
     }, args.maskIP === 0 ? "https://ippure.com/?ip=" + encodeURIComponent(ip) : undefined);
   }
 
@@ -991,10 +1014,13 @@ async function runStashTile() {
     stashGeo("ipinfo", outIP, CONFIG.urls.ipInfo(outIP), undefined, data => !!normalizeIpInfo(data)),
     ipv6
   ]);
-  const info = normalizeIpApi(geo);
-  const organization = normalizeIpInfo(org)?.org || info?.org || "运营商未知";
+  // ipinfo 已用于查询运营商，同时可提供地区；最后保留探测响应自带的国家。
+  const primaryInfo = normalizeIpApi(geo), ipinfoInfo = normalizeIpInfo(org);
+  const info = primaryInfo || ipinfoInfo || normalizeIpSb(outRaw);
+  if (!primaryInfo && info) console.log("出口地区：ip-api 不可用，使用同一 IP 的备用地区信息");
+  const organization = ipinfoInfo?.org || info?.org || "运营商未知";
   const location = info ? formatGeo(info.country_code, info.city, info.region, geoLabel(info)) :
-    [flag(outRaw?.country_code), "ip-api 地区查询失败"].filter(Boolean).join(" ");
+    "地区查询失败";
   const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "", location, organization];
   const shortLocation = info ? compactStashLocation(["HK", "MO", "SG"].includes(info.country_code) ?
     geoLabel(info) : info.city || info.region || geoLabel(info)) : "地区查询失败";

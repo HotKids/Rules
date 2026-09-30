@@ -496,6 +496,61 @@ test('IP geography cache follows IP and source, expires, and tolerates unavailab
   const noStorage=await ipPanel({argument,storageThrows:true});assert.match(noStorage.output.content,/深圳/);
 });
 
+test('Stash local geography survives Baidu timeout using the current DIRECT response',async()=>{
+  for(const mode of ['home','collapsed']) {
+    const r=await ipPanel({argument:`tile=local&mode=${mode}`,now:100000000,intercept:(o,cb)=>{
+      if(o.url.includes('opendata.baidu')) {
+        assert.equal(o.timeout,5);cb('request timed out',null,null);return true;
+      }
+    }});
+    assert.equal(r.output.backgroundColor,'#00796B');assert.match(r.output.content,/深圳[\s\S]*中国电信/);
+    assert.match(JSON.stringify(r.output),/203\.0\.113\.2/);assert.doesNotMatch(r.output.content,/失败/);
+    assert.equal(r.requests.length,3);assert.ok(r.requests.every(o=>o.headers['X-Stash-Selected-Proxy']==='DIRECT'));
+  }
+});
+test('Stash local fallback preserves roaming country and can use the same-IP geo lookup',async()=>{
+  for(const country of ['新加坡',null]) {
+    const r=await ipPanel({argument:'tile=local&mode=collapsed',intercept:(o,cb)=>{
+      if(o.url.includes('bilibili')) {cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2',country,isp:'Singtel'}}));return true;}
+      if(o.url.includes('opendata.baidu')) {cb(null,{status:200},'<html>unavailable</html>');return true;}
+      if(o.url.includes('ip.sb')) {
+        cb(null,{status:200},JSON.stringify({ip:'203.0.113.2',country_code:'SG',country:'Singapore',city:'Singapore',organization:'Singtel'}));return true;
+      }
+    }});
+    assert.equal(r.output.backgroundColor,'#00796B');assert.match(r.output.content,/🇸🇬.*Singtel/);
+    assert.doesNotMatch(r.output.content,/🇨🇳|中国/);assert.equal(r.requests.length,3);
+  }
+});
+test('Stash outbound geography uses existing HTTPS ipinfo data after ip-api failure',async()=>{
+  for(const mode of ['home','collapsed']) {
+    const r=await ipPanel({argument:`tile=outbound&mode=${mode}&mask_ip=2`,now:100000000,intercept:(o,cb)=>{
+      if(o.url.includes('ip-api.com')) {assert.equal(o.timeout,5);cb(null,{status:403},'denied');return true;}
+    }});
+    assert.equal(r.output.backgroundColor,'#1565C0');assert.match(r.output.content,/🇸🇬[\s\S]*SG[\s\S]*Example/);
+    assert.doesNotMatch(JSON.stringify(r.output),/198\.51\.100\.10|失败/);
+    assert.ok(r.requests.every(o=>!o.headers?.['X-Stash-Selected-Proxy']));
+  }
+});
+test('Stash outbound retains only known country when both detailed geo sources fail',async()=>{
+  const r=await ipPanel({argument:'mode=collapsed',intercept:(o,cb)=>{
+    if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
+  }});
+  assert.equal(r.output.title,'出口 IP\n198.51.100.10');assert.equal(r.output.backgroundColor,'#1565C0');
+  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,3);
+});
+test('Stash keeps current IP and unknown geography when every metadata source is empty',async()=>{
+  for(const service of ['local','outbound']) {
+    const r=await ipPanel({argument:`tile=${service}&mode=collapsed`,intercept:(o,cb)=>{
+      if(o.url.includes('bilibili')) {cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));return true;}
+      if(o.url.includes('trace')) {cb(null,{status:200},'ip=198.51.100.10\n');return true;}
+      if(/ip-api.com|ipinfo|opendata|ip.sb/.test(o.url)){cb('timeout',null,null);return true;}
+    }});
+    assert.equal(r.output.backgroundColor,'#9E9E9E');assert.match(r.output.content,/地区查询失败/);
+    assert.match(r.output.title,/203\.0\.113\.2|198\.51\.100\.10/);
+    assert.doesNotMatch(r.output.content,/🇨🇳|🇸🇬|台北|深圳/);
+  }
+});
+
 test('Netflix accepts known video markup and prioritizes request country',async()=>{
   for(const marker of ['<meta property="og:video" content="video">','<div data-uia="episodes">','"playableVideo":{}']) {
     const r=await tile('netflix',{body:marker+' "preferredLocale":{"country":"US"},"requestCountry":{"id":"SG"}'});
