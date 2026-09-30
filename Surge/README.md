@@ -43,6 +43,8 @@ Streaming 成员以 `### Streaming` 或 `### Streaming US` 等标记声明归属
 
 Stash 流媒体卡片默认折叠在第三方服务页面；如需放到首页，将对应 Tile 的 `collapsed` 改为 `false`，并将 `argument` 中的 `mode=collapsed` 改成 `mode=home`。可用时显示品牌底色，不可用或检测异常时显示灰色。卡片点击 URL 同时定义在覆写与 JS 中，检测完成后以 JS 返回值为准；是否打开 App 还取决于系统链接关联。
 
+Stash 按 JS 汇总日志：服务检测写入 `hotkids-media-check.log`，IP 首页、出口、本地、纯净度及通知写入 `hotkids-ip-security.log`，每条保留原时间和服务或任务名。各卡片及 IP 通知通过 `log=shared` 保存日志，每个服务或任务最多保留 60 条；两个独立定时任务在 VPN 连接时每分钟收集一次，无额外网络请求，因此日志最多延迟约一分钟。更新覆写后可从脚本日志页面删除已有的独立日志；存储失败时临时回落到原调用自己的日志，卡片显示不受影响。手动调用和 Surge 未开启此参数时仍直接输出日志。
+
 IP 风控的 Surge 和 Stash 版本共用 [ip-security.js](Module/Scripts/ip-security.js)。两者默认本地地理源为百度、出口地理源为 `ipapi-zh`；Surge 保留数据源选项，已有模块参数需自行检查是否仍保存旧值。
 
 Stash 参考 [官方 IPPure Tile](https://github.com/StashNetworks/misc/blob/main/collapsed-tiles/ippure.com-collapsed-tiles.stoverride)，优先从 `https://my.ippure.com/v1/info` 取得出口 IP，首页风控、类型和出口共用本次请求。缺少有效 IPv4 时使用 `api.ipify.org` 备用探测；首页和通知需要 IPv6 时，先复用 IPPure 返回的 IPv6，否则通过 `api6.ipify.org` 查询。Stash 不再请求 Cloudflare trace；Surge 仍保持 Cloudflare trace → ip.sb。响应只在单次脚本运行内共享，每张独立卡片刷新时都会重新确认出口，避免跨节点复用。IPPure 失败时不会用备用接口推算风险或类型。

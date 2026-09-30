@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.3 (2026-09-30)
+ * @version      2.2.4 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -69,6 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
+  VERSION: "2.2.4",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -87,6 +88,94 @@ const CLAUDE_REGIONS = new Set("AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BE BZ 
 
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
+
+// Stash 保留独立服务卡片；通过一个定时脚本统一输出日志。
+// 每个服务使用独立队列，收集器只记录已输出 ID，不清空正在写入的队列。
+class MediaLog {
+  static PREFIX = "stash_media_check_log_v1:";
+  static RUN_ID = Date.now().toString(36) + ":" + Math.random().toString(36).slice(2);
+  static sequence = 0;
+
+  static native(value) {
+    try { console.log(value); } catch {}
+  }
+
+  static text(value) {
+    if (typeof value === "string") return value;
+    if (value instanceof Error) return value.message || String(value);
+    try { return JSON.stringify(value) ?? String(value); } catch { return String(value); }
+  }
+
+  static readQueue(service) {
+    const raw = $persistentStore.read(MediaLog.PREFIX + service);
+    if (!raw) return [];
+    const entries = JSON.parse(raw);
+    if (!Array.isArray(entries)) return [];
+    return entries.filter(entry => entry && typeof entry.id === "string"
+      && Number.isFinite(entry.time) && Math.abs(entry.time) <= 8640000000000000
+      && typeof entry.text === "string").slice(-60);
+  }
+
+  static log(...values) {
+    let text;
+    try { text = values.map(value => MediaLog.text(value)).join(" "); }
+    catch { text = "[media-check] 日志内容无法格式化"; }
+    if (!IS_STASH || ARGS.log !== "shared" || ARGS.service === "logs") {
+      MediaLog.native(text);
+      return;
+    }
+    try {
+      const service = Object.prototype.hasOwnProperty.call(SERVICES, ARGS.service)
+        ? ARGS.service : "summary";
+      const time = Date.now();
+      const entry = {
+        id: `${time}:${MediaLog.RUN_ID}:${String(MediaLog.sequence++).padStart(6, "0")}`,
+        time,
+        text: text.slice(0, 2000)
+      };
+      const entries = MediaLog.readQueue(service);
+      entries.push(entry);
+      if ($persistentStore.write(JSON.stringify(entries.slice(-60)), MediaLog.PREFIX + service) === false) {
+        throw new Error("日志存储写入失败");
+      }
+    } catch {
+      MediaLog.native(text);
+    }
+  }
+
+  static collect() {
+    const pending = [];
+    const queues = [];
+    for (const service of [...Object.keys(SERVICES), "summary"]) {
+      try {
+        const entries = MediaLog.readQueue(service);
+        const ackKey = MediaLog.PREFIX + "ack:" + service;
+        const previous = JSON.parse($persistentStore.read(ackKey) || "[]");
+        const seen = new Set(Array.isArray(previous) ? previous : []);
+        for (const entry of entries) {
+          if (!seen.has(entry.id)) pending.push({ ...entry, service });
+        }
+        const ids = entries.map(entry => entry.id);
+        if (ids.some(id => !seen.has(id)) || seen.size !== ids.length) queues.push({ ackKey, ids });
+      } catch {
+        MediaLog.native(`[media-check][${service}] 无法读取日志队列`);
+      }
+    }
+    pending.sort((a, b) => a.time - b.time || a.id.localeCompare(b.id));
+    for (const entry of pending) {
+      MediaLog.native(`[${new Date(entry.time).toISOString()}][${entry.service}] ${entry.text}`);
+    }
+    for (const queue of queues) {
+      try {
+        if ($persistentStore.write(JSON.stringify(queue.ids), queue.ackKey) === false) {
+          throw new Error("日志确认写入失败");
+        }
+      } catch {
+        MediaLog.native("[media-check] 无法记录日志确认，下次可能重复输出");
+      }
+    }
+  }
+}
 
 /**
  * 解锁状态变化推送（notify=true）：与上次快照对比，变化合并为一条通知
@@ -139,36 +228,46 @@ class Utils {
   static request(options) {
     return new Promise((resolve, reject) => {
       const { url, method = "GET", headers = {}, body = null, timeout = CONFIG.TIMEOUT } = options;
+      const started = Date.now();
+      const target = Utils.safeUrl(url);
       const finalHeaders = { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers };
       if (IS_STASH && ARGS.proxy) finalHeaders["X-Stash-Selected-Proxy"] = encodeURIComponent(ARGS.proxy);
       let settled = false;
       let timer;
-      const settle = (error, value) => {
+      const settle = (error, value, phase = "callback") => {
         if (settled) return;
         settled = true;
         if (timer !== undefined && typeof clearTimeout === "function") clearTimeout(timer);
-        if (error) reject(error);
-        else resolve(value);
+        if (error) {
+          const failure = new Error(Utils.errorMessage(error));
+          failure.phase = phase;
+          MediaLog.log(`[HTTP] ${method} ${target}; 阶段=${phase}; 耗时=${Date.now() - started}ms; ${Utils.errorDetails(error)}`);
+          reject(failure);
+        } else {
+          MediaLog.log(`[HTTP] ${method} ${target}; HTTP ${value.status}; 长度=${value.body.length}; 耗时=${Date.now() - started}ms`);
+          resolve(value);
+        }
       };
+      MediaLog.log(`[HTTP] ${method} ${target}; 开始请求`);
       // Android Stash 可能没有 JS 计时器，此时依靠 HTTP 客户端自身的超时。
       // 有计时器的客户端继续保留 watchdog：JS 用毫秒，HTTP timeout 用秒。
       if (typeof setTimeout === "function") {
-        timer = setTimeout(() => settle(new Error("Timeout")), timeout);
+        timer = setTimeout(() => settle(new Error("Timeout"), null, "timeout"), timeout);
       }
       const cb = (error, response, data) => {
         if (settled) return;
         if (error) return settle(error);
         try {
           const status = Number(response && (response.status || response.statusCode));
-          if (!status) return settle(new Error("Invalid Response"));
-          if (status >= 500) return settle(new Error(`HTTP ${status}`));
+          if (!status) return settle(new Error(response ? "Invalid Response: missing HTTP status" : "Invalid Response: missing response"), null, "response");
+          if (status >= 500) return settle(new Error(`HTTP ${status}`), null, "http");
           const normalizedHeaders = {};
           Object.entries(response.headers || {}).forEach(([key, value]) => {
             normalizedHeaders[key.toLowerCase()] = Array.isArray(value) ? value.join(", ") : String(value);
           });
           settle(null, { status, headers: normalizedHeaders, body: data == null ? "" : String(data),
             url: typeof response.url === "string" ? response.url : (typeof response.responseURL === "string" ? response.responseURL : "") });
-        } catch (error) { settle(error); }
+        } catch (error) { settle(error, null, "response"); }
       };
       const request = {
         url,
@@ -183,7 +282,7 @@ class Utils {
       try {
         if (method === "POST") $httpClient.post(request, cb);
         else $httpClient.get(request, cb);
-      } catch (error) { settle(error); }
+      } catch (error) { settle(error, null, "request"); }
     });
   }
 
@@ -208,9 +307,39 @@ class Utils {
     return result;
   }
 
+  static safeUrl(url) {
+    return String(url || "").split(/[?#]/, 1)[0].replace(/(https?:\/\/)[^/@\s]+@/gi, "$1[redacted]@");
+  }
+
+  // Stash 的原生错误可能是字符串或对象；只提取诊断字段，不记录正文、请求头或堆栈。
+  static errorMessage(error, depth = 0) {
+    if (!error || typeof error !== "object") return String(error || "Unknown error");
+    const parts = [];
+    for (const key of ["name", "message", "description", "localizedDescription", "NSLocalizedDescription", "code", "domain", "reason", "error"]) {
+      try {
+        const value = error[key];
+        if (value == null || value === "") continue;
+        if (typeof value !== "object") parts.push(`${key}=${String(value)}`);
+        else if (depth < 1) parts.push(`${key}=${Utils.errorMessage(value, depth + 1)}`);
+      } catch (_) {}
+    }
+    return parts.join("; ") || "Unknown error object";
+  }
+
+  static errorDetails(error) {
+    let message = Utils.errorMessage(error);
+    const apiKey = String(ARGS.geminiapikey || "");
+    if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase())) {
+      for (const secret of [apiKey, encodeURIComponent(apiKey)]) message = message.split(secret).join("[redacted]");
+    }
+    return message.replace(/https?:\/\/[^\s"'<>]+/gi, url => Utils.safeUrl(url))
+      .replace(/\b(?:api[_-]?key|key|token|authorization|cookie)\s*[:=]\s*[^\s;,]+/gi, "[redacted]")
+      .replace(/[\r\n\t]+/g, " ").slice(0, 320);
+  }
+
   static errorResult(error) {
-    const message = String(error && (error.message || error) || "");
-    return /\btimeout\b|timed.?out|超时/i.test(message)
+    const message = Utils.errorMessage(error);
+    return /\btimeout\b|timed.?out|超时/i.test(message) || (/NSURLErrorDomain/.test(message) && /code=-1001\b/.test(message))
       ? this.createResult(STATUS.TIMEOUT, "Timeout")
       : this.createResult(STATUS.ERROR, "Error");
   }
@@ -455,7 +584,7 @@ class ServiceChecker {
    */
   static async checkHBOMax() {
     const unknown = reason => {
-      console.log("[media-check][HBO Max] " + reason);
+      MediaLog.log("[media-check][HBO Max] " + reason);
       return Utils.createResult(STATUS.ERROR, "Error");
     };
     try {
@@ -576,7 +705,7 @@ class ServiceChecker {
     const region = Utils.traceRegion(trace);
     // 保留原地区检测口径；不把这个无需登录的探测地址当作真实 App 会话。
     if (web.status === STATUS.OK && app.reason === "app-probe" && region) {
-      console.log("ChatGPT: generic App probe response; regional result from Web + trace (" + region + ")");
+      MediaLog.log("ChatGPT: generic App probe response; regional result from Web + trace (" + region + ")");
       return Utils.createResult(STATUS.OK, region);
     }
     if (web.status === STATUS.OK && app.status === STATUS.OK) return Utils.createResult(STATUS.OK, region || "OK");
@@ -603,7 +732,7 @@ class ServiceChecker {
       // 保留原来的地区检测口径：Cloudflare 浏览器挑战不等于地区不支持。
       // 仅在 trace 确认受支持地区时回落；未知 403、限流和地区限制仍不算通过。
       if (Utils.isChallenge(login) && login.status !== 429 && CLAUDE_REGIONS.has(region)) {
-        console.log("Claude: browser challenge; regional result from trace (" + region + ")");
+        MediaLog.log("Claude: browser challenge; regional result from trace (" + region + ")");
         return Utils.createResult(STATUS.OK, region);
       }
       return Utils.responseProblem(login) || Utils.createResult(STATUS.OK, region || "OK");
@@ -619,9 +748,7 @@ class ServiceChecker {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
     const logError = (stage, error) => {
       const result = Utils.errorResult(error);
-      // 不打印请求地址或原始异常，避免 API Key 出现在日志中。
-      const http = String(error?.message || error).match(/\bHTTP\s+\d{3}\b/i)?.[0];
-      console.log(`[Gemini v2.2.3] ${stage}请求失败：${http || result.region}`);
+      MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}失败；阶段=${error?.phase || "parse"}；${Utils.errorDetails(error)}`);
       return result;
     };
     const pages = ["https://gemini.google.com", "https://gemini.google.com/app?hl=en"];
@@ -650,7 +777,7 @@ class ServiceChecker {
           reason = "可用";
           result = Utils.createResult(STATUS.OK, region || "OK");
         }
-        console.log(`[Gemini v2.2.3] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}`);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}`);
         if (result.status === STATUS.OK || result.status === STATUS.FAIL) return result;
         unknown = result;
         // 仅正常首页缺标记时回落；限流、验证和网络错误保持原结果。
@@ -665,7 +792,7 @@ class ServiceChecker {
       try {
         const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}` });
         const issue = Utils.responseProblem(res);
-        console.log(`[Gemini v2.2.3] API: HTTP ${res.status}; 长度=${res.body.length}; 原因=${issue?.reason || "响应已收到"}`);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] API: HTTP ${res.status}; 长度=${res.body.length}; 原因=${issue?.reason || "响应已收到"}`);
         if (issue?.reason) return issue;
         if (/user location is not supported|unsupported_country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
         if (/key not valid|api_key_invalid/i.test(res.body)) return Utils.createResult(STATUS.ERROR, "Invalid Key");
@@ -782,6 +909,18 @@ const SERVICES = {
   reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com", color: "#D93900" }
 };
 
+async function checkService(definition) {
+  MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测开始`);
+  try {
+    const result = await ServiceChecker[definition.check]();
+    MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测完成：${Utils.buildContent(result)}${result.reason ? "; 原因=" + result.reason : ""}`);
+    return result;
+  } catch (error) {
+    MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测异常：${Utils.errorDetails(error)}`);
+    throw error;
+  }
+}
+
 async function runServiceTile(service) {
   // hasOwnProperty 防止 constructor 等继承属性被误当成服务。
   if (!Object.prototype.hasOwnProperty.call(SERVICES, service)) {
@@ -792,13 +931,13 @@ async function runServiceTile(service) {
   const prices = service === "netflix" && ARGS.nfprice !== "false"
     ? ServiceChecker.fetchNetflixPrices() : null;
   let result;
-  try { result = await ServiceChecker[definition.check](); }
+  try { result = await checkService(definition); }
   catch (error) { result = Utils.errorResult(error); }
   const suffix = prices && result.status === STATUS.OK
     ? await ServiceChecker.getNetflixPrice(prices, result.region) : "";
   if (ARGS.notify === "true" && ARGS.mode !== "collapsed") {
     try { notifyUnlockChanges([{ name: definition.title, result }]); }
-    catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
+    catch { MediaLog.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
   }
   const content = Utils.buildContent(result, suffix);
   finishPanel({
@@ -818,6 +957,11 @@ async function runServiceTile(service) {
     const args = ARGS = Utils.parseArgs(typeof $argument === "string" ? $argument : "");
     args.service = IS_STASH ? String(args.service || "").trim().toLowerCase() : "";
     args.mode = IS_STASH ? String(args.mode || "home").trim().toLowerCase() : "home";
+    if (IS_STASH && args.service === "logs") {
+      MediaLog.collect();
+      $done({});
+      return;
+    }
     if (args.mode === "collapsed") args.proxy = "";
     if (args.service && args.service !== "all") {
       await runServiceTile(args.service);
@@ -828,7 +972,7 @@ async function runServiceTile(service) {
     // 汇总与独立卡片共用服务表，顺序和新增服务只维护一次。
     const definitions = Object.entries(SERVICES);
     const viuPromise = !IS_STASH && args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null);
-    const results = await Promise.all(definitions.map(([, definition]) => ServiceChecker[definition.check]()));
+    const results = await Promise.all(definitions.map(([, definition]) => checkService(definition)));
     const services = definitions.map(([id, definition], index) => ({
       name: id === "youtube" ? "YouTube" : definition.title, result: results[index]
     }));
@@ -844,7 +988,7 @@ async function runServiceTile(service) {
 
     if (args.notify === "true" && args.mode !== "collapsed") {
       try { notifyUnlockChanges(services); }
-      catch { console.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
+      catch { MediaLog.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
     }
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
@@ -860,6 +1004,7 @@ async function runServiceTile(service) {
       backgroundColor: hasFailed ? ICONS.COLORS.WARNING : ICONS.COLORS.SUCCESS
     });
   } catch (error) {
+    MediaLog.log(`[media-check v${CONFIG.VERSION}] 脚本异常：${Utils.errorDetails(error)}`);
     finishPanel({
       title: "❌ 检测失败",
       content: `错误: ${error.message || error}`,

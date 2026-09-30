@@ -40,6 +40,9 @@ def main():
                     for tile in data.get('tiles', []):
                         if tile.get('name') not in providers:
                             raise ValueError(f'{p}: missing script provider for {tile.get("name")}')
+                    for job in data.get('cron', {}).get('script', []):
+                        if job.get('name') not in providers:
+                            raise ValueError(f'{p}: missing script provider for {job.get("name")}')
             if p.suffix == '.json':
                 json.loads(p.read_text(encoding='utf-8')); counts['json'] += 1
     sample = yaml.safe_load((ROOT/'Clash/Sample.yaml').read_text())

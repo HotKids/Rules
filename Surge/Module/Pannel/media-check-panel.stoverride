@@ -4,6 +4,7 @@
 # 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
 # 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
 # 统一白色图标搭配品牌底色；不可用或检测异常时显示灰色。
+# 日志统一输出到 hotkids-media-check.log；连接时每分钟收集一次。
 name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/mediamanager.png
@@ -16,7 +17,7 @@ tiles:
     backgroundColor: '#E50914'
     collapsed: true
     url: 'https://www.netflix.com'
-    argument: 'service=netflix&mode=collapsed&notify=false&nfprice=true'
+    argument: 'service=netflix&mode=collapsed&notify=false&nfprice=true&log=shared'
   - name: hotkids-media-check-disney
     interval: 600
     title: 'Disney+'
@@ -25,7 +26,7 @@ tiles:
     backgroundColor: '#113CCF'
     collapsed: true
     url: 'https://www.disneyplus.com'
-    argument: 'service=disney&mode=collapsed&notify=false'
+    argument: 'service=disney&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-hbomax
     interval: 600
     title: 'HBO Max'
@@ -34,7 +35,7 @@ tiles:
     backgroundColor: '#191919'
     collapsed: true
     url: 'https://www.hbomax.com'
-    argument: 'service=hbomax&mode=collapsed&notify=false'
+    argument: 'service=hbomax&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-youtube
     interval: 600
     title: 'YouTube Premium'
@@ -43,7 +44,7 @@ tiles:
     backgroundColor: '#E62117'
     collapsed: true
     url: 'https://www.youtube.com/premium'
-    argument: 'service=youtube&mode=collapsed&notify=false'
+    argument: 'service=youtube&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-spotify
     interval: 600
     title: 'Spotify'
@@ -52,7 +53,7 @@ tiles:
     backgroundColor: '#117C39'
     collapsed: true
     url: 'https://www.spotify.com'
-    argument: 'service=spotify&mode=collapsed&notify=false'
+    argument: 'service=spotify&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-tiktok
     interval: 600
     title: 'TikTok'
@@ -61,7 +62,7 @@ tiles:
     backgroundColor: '#191919'
     collapsed: true
     url: 'https://www.tiktok.com/'
-    argument: 'service=tiktok&mode=collapsed&notify=false'
+    argument: 'service=tiktok&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-chatgpt
     interval: 600
     title: 'ChatGPT'
@@ -70,7 +71,7 @@ tiles:
     backgroundColor: '#0D8A70'
     collapsed: true
     url: 'https://chatgpt.com'
-    argument: 'service=chatgpt&mode=collapsed&notify=false'
+    argument: 'service=chatgpt&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-claude
     interval: 600
     title: 'Claude'
@@ -79,7 +80,7 @@ tiles:
     backgroundColor: '#B85C3F'
     collapsed: true
     url: 'https://claude.ai'
-    argument: 'service=claude&mode=collapsed&notify=false'
+    argument: 'service=claude&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-gemini
     interval: 600
     title: 'Gemini'
@@ -88,7 +89,7 @@ tiles:
     backgroundColor: '#386EDB'
     collapsed: true
     url: 'https://gemini.google.com'
-    argument: 'service=gemini&mode=collapsed&notify=false&geminiapikey=null'
+    argument: 'service=gemini&mode=collapsed&notify=false&geminiapikey=null&log=shared'
   - name: hotkids-media-check-metaai
     interval: 600
     title: 'Meta AI'
@@ -97,7 +98,7 @@ tiles:
     backgroundColor: '#0866FF'
     collapsed: true
     url: 'https://www.meta.ai/'
-    argument: 'service=metaai&mode=collapsed&notify=false'
+    argument: 'service=metaai&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-reddit
     interval: 600
     title: 'Reddit'
@@ -106,39 +107,49 @@ tiles:
     backgroundColor: '#D93900'
     collapsed: true
     url: 'https://www.reddit.com'
-    argument: 'service=reddit&mode=collapsed&notify=false'
+    argument: 'service=reddit&mode=collapsed&notify=false&log=shared'
+
+cron:
+  script:
+    - name: hotkids-media-check
+      cron: '* * * * *'
+      timeout: 5
+      argument: 'service=logs'
 
 script-providers:
+  hotkids-media-check:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
+    interval: 86400
   hotkids-media-check-netflix:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-disney:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-hbomax:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-youtube:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-spotify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-tiktok:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-chatgpt:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-claude:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-gemini:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-metaai:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400
   hotkids-media-check-reddit:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.4
     interval: 86400

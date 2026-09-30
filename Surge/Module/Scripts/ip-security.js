@@ -57,8 +57,9 @@
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
+ * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
- * @version 6.4.5
+ * @version 6.4.6
  * @date 2026-09-30
  */
 
@@ -123,6 +124,94 @@ const CONFIG = {
   ]
 };
 
+// 每个卡片/通知任务使用独立队列，收集器仅记录已输出 ID，不清空生产者的队列。
+class IPLog {
+  static PREFIX = "stash_ip_security_log_v1:";
+  static SCOPES = ["summary", "outbound", "local", "risk", "notify"];
+  static RUN_ID = Date.now().toString(36) + ":" + Math.random().toString(36).slice(2);
+  static sequence = 0;
+
+  static native(value) {
+    try { console.log(value); } catch {}
+  }
+
+  static text(value) {
+    if (typeof value === "string") return value;
+    if (value instanceof Error) return value.message || String(value);
+    try { return JSON.stringify(value) ?? String(value); } catch { return String(value); }
+  }
+
+  static readQueue(scope) {
+    const raw = $persistentStore.read(IPLog.PREFIX + scope);
+    if (!raw) return [];
+    const entries = JSON.parse(raw);
+    if (!Array.isArray(entries)) return [];
+    return entries.filter(entry => entry && typeof entry.id === "string"
+      && Number.isFinite(entry.time) && Math.abs(entry.time) <= 8640000000000000
+      && typeof entry.text === "string").slice(-60);
+  }
+
+  static log(...values) {
+    let text;
+    try { text = values.map(value => IPLog.text(value)).join(" "); }
+    catch { text = "[ip-security] 日志内容无法格式化"; }
+    if (!isStash || args.log !== "shared" || args.task === "logs") {
+      IPLog.native(text);
+      return;
+    }
+    try {
+      const scope = args.task === "monitor" ? "notify"
+        : IPLog.SCOPES.includes(args.tile) ? args.tile : "summary";
+      const time = Date.now();
+      const entry = {
+        id: `${time}:${IPLog.RUN_ID}:${String(IPLog.sequence++).padStart(6, "0")}`,
+        time,
+        text: text.slice(0, 2000)
+      };
+      const entries = IPLog.readQueue(scope);
+      entries.push(entry);
+      if ($persistentStore.write(JSON.stringify(entries.slice(-60)), IPLog.PREFIX + scope) === false) {
+        throw new Error("日志存储写入失败");
+      }
+    } catch {
+      IPLog.native(text);
+    }
+  }
+
+  static collect() {
+    const pending = [];
+    const queues = [];
+    for (const scope of IPLog.SCOPES) {
+      try {
+        const entries = IPLog.readQueue(scope);
+        const ackKey = IPLog.PREFIX + "ack:" + scope;
+        const previous = JSON.parse($persistentStore.read(ackKey) || "[]");
+        const seen = new Set(Array.isArray(previous) ? previous : []);
+        for (const entry of entries) {
+          if (!seen.has(entry.id)) pending.push({ ...entry, scope });
+        }
+        const ids = entries.map(entry => entry.id);
+        if (ids.some(id => !seen.has(id)) || seen.size !== ids.length) queues.push({ ackKey, ids });
+      } catch {
+        IPLog.native(`[ip-security][${scope}] 无法读取日志队列`);
+      }
+    }
+    pending.sort((a, b) => a.time - b.time || a.id.localeCompare(b.id));
+    for (const entry of pending) {
+      IPLog.native(`[${new Date(entry.time).toISOString()}][${entry.scope}] ${entry.text}`);
+    }
+    for (const queue of queues) {
+      try {
+        if ($persistentStore.write(JSON.stringify(queue.ids), queue.ackKey) === false) {
+          throw new Error("日志确认写入失败");
+        }
+      } catch {
+        IPLog.native("[ip-security] 无法记录日志确认，下次可能重复输出");
+      }
+    }
+  }
+}
+
 // ==================== 参数解析 ====================
 function parseArguments() {
   let arg = {};
@@ -148,7 +237,7 @@ function parseArguments() {
     return (v === "" || v.toLowerCase() === "null") ? "" : v;
   }
 
-  if (!isStash) console.log("参数解析: risk_api=" + JSON.stringify(arg.risk_api) + " ipqs_key=" + (arg.ipqs_key ? "已设置" : "未设置"));
+  if (!isStash) IPLog.log("参数解析: risk_api=" + JSON.stringify(arg.risk_api) + " ipqs_key=" + (arg.ipqs_key ? "已设置" : "未设置"));
 
   // notify 参数：默认 true，仅当明确设为 "false" 时关闭通知
   const notifyVal = clean(arg.notify).toLowerCase();
@@ -160,6 +249,7 @@ function parseArguments() {
     mode: clean(arg.mode) === "collapsed" ? "collapsed" : "home",
     tile: clean(arg.tile) || "outbound",
     task: clean(arg.task),
+    log: clean(arg.log),
     ipqsKey: isStash ? "" : clean(arg.ipqs_key),
     riskApi: isStash ? "ippure" : clean(arg.risk_api).toLowerCase(),
     maxmindKey: clean(arg.maxmind_key),
@@ -180,7 +270,7 @@ if (isStash) {
     CONFIG.storeKeys[key] = "stash.ip-security." + args.mode + "." + encodeURIComponent(args.proxy) + "." + CONFIG.storeKeys[key];
   }
 }
-console.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi + ", 通知: " + args.notify);
+if (!(isStash && args.task === "logs")) IPLog.log("触发类型: " + (args.isEvent ? "EVENT" : "MANUAL") + ", risk_api: " + (args.riskApi || "fallback") + ", 本地: " + args.localGeoApi + ", 通知: " + args.notify);
 
 // ==================== 全局状态控制 ====================
 let finished = false;
@@ -191,7 +281,7 @@ function done(o) {
   if (finished) return;
   finished = true;
   if (watchdog !== null && typeof clearTimeout === "function") clearTimeout(watchdog);
-  if (isStash && args.task === "monitor") {
+  if (isStash && (args.task === "monitor" || args.task === "logs")) {
     $done({});
   } else if (isStash) {
     $done({
@@ -205,7 +295,7 @@ function done(o) {
   }
 }
 
-if (hasTimers) {
+if (hasTimers && !(isStash && args.task === "logs")) {
   watchdog = setTimeout(() => {
     done({ title: "检测超时", content: "API 请求超时", icon: "leaf", "icon-color": "#9E9E9E" });
   }, CONFIG.timeout);
@@ -222,7 +312,7 @@ function logHTTPFailure(url, status, error) {
     /invalid JSON/i.test(detail) ? "JSON 响应无效" :
     /tls|ssl|certificate/i.test(detail) ? "TLS 连接失败" : "网络请求失败") :
     (status ? "HTTP " + status : "无有效响应");
-  console.log("[IP HTTP] " + host + "：" + reason);
+  IPLog.log("[IP HTTP] " + host + "：" + reason);
 }
 
 function httpRaw(url, policy, headers, deadline = requestDeadline) {
@@ -459,30 +549,30 @@ async function getPolicyAndEntrance() {
 
   let hit = await findInRecent(50);
   if (!hit) {
-    console.log("未找到策略记录，等待后重试 (1/2)");
+    IPLog.log("未找到策略记录，等待后重试 (1/2)");
     await wait(CONFIG.policyRetryDelay);
     hit = await findInRecent(50);
   }
   if (!hit) {
-    console.log("未找到策略记录，等待后重试 (2/2)");
+    IPLog.log("未找到策略记录，等待后重试 (2/2)");
     await wait(CONFIG.policyRetryDelay * 2);
     hit = await findInRecent(100);
   }
 
   if (!hit) {
     const lastPolicy = $persistentStore.read(CONFIG.storeKeys.lastPolicy);
-    console.log(lastPolicy ? "使用上次保存的策略: " + lastPolicy : "无法找到任何策略信息");
+    IPLog.log(lastPolicy ? "使用上次保存的策略: " + lastPolicy : "无法找到任何策略信息");
     return { policy: lastPolicy || "Unknown", entranceIP: null };
   }
 
   const policy = hit.policyName || "Unknown";
   $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
-  console.log("找到代理策略: " + policy);
+  IPLog.log("找到代理策略: " + policy);
 
   let entranceIP = null;
   if (/\(Proxy\)/.test(hit.remoteAddress)) {
     entranceIP = hit.remoteAddress.replace(/\s*\(Proxy\)\s*/, "").replace(/:\d+$/, "");
-    console.log("找到入口 IP: " + entranceIP);
+    IPLog.log("找到入口 IP: " + entranceIP);
   }
 
   return { policy, entranceIP };
@@ -503,7 +593,7 @@ async function getRiskScore(ip) {
       const c = JSON.parse(cached);
       const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
       if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey && age < CONFIG.riskCacheTTL) {
-        console.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")，已缓存 " + age + "s");
+        IPLog.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")，已缓存 " + age + "s");
         return { score: c.score, source: c.source };
       }
     } catch (e) {}
@@ -511,7 +601,7 @@ async function getRiskScore(ip) {
 
   function saveAndReturn(score, source) {
     $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.riskCache);
-    console.log("风险评分已缓存: " + score + "% (" + source + ")");
+    IPLog.log("风险评分已缓存: " + score + "% (" + source + ")");
     return { score, source };
   }
 
@@ -519,27 +609,27 @@ async function getRiskScore(ip) {
     if (!args.ipqsKey) return null;
     const data = await httpJSON(CONFIG.urls.ipqs(args.ipqsKey, ip));
     if (data?.success && data?.fraud_score !== undefined) return saveAndReturn(data.fraud_score, "IPQS");
-    console.log("IPQS 失败: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
+    IPLog.log("IPQS 失败: " + (data ? "success=" + data.success + " message=" + (data.message || "") : "请求失败"));
     return null;
   }
 
   async function tryProxyCheck() {
     const data = await getProxyCheck(ip);
     if (data?.[ip]?.risk !== undefined) return saveAndReturn(data[ip].risk, "ProxyCheck");
-    console.log("ProxyCheck 失败: " + (data ? JSON.stringify(data).slice(0, 100) : "请求失败"));
+    IPLog.log("ProxyCheck 失败: " + (data ? JSON.stringify(data).slice(0, 100) : "请求失败"));
     return null;
   }
 
   async function tryIPPure() {
     const info = await getIPPureInfo();
     if (info?.fraudScore !== undefined) return saveAndReturn(info.fraudScore, "IPPure");
-    console.log("IPPure /v1/info 无 fraudScore，回落到 /v1/card");
+    IPLog.log("IPPure /v1/info 无 fraudScore，回落到 /v1/card");
     const html = await getIPPureCard();
     if (html) {
       const m = html.match(/(\d+)\s*%\s*(极度纯净|纯净|一般|微风险|一般风险|极度风险)/);
       if (m) return saveAndReturn(Number(m[1]), "IPPure");
     }
-    console.log("IPPure 风险评分获取失败");
+    IPLog.log("IPPure 风险评分获取失败");
     return null;
   }
 
@@ -547,12 +637,12 @@ async function getRiskScore(ip) {
     const html = await httpRaw(CONFIG.urls.scamalytics(ip));
     const score = parseScamalyticsScore(html);
     if (score !== null) return saveAndReturn(score, "Scamalytics");
-    console.log("Scamalytics 失败: " + (html ? "解析失败" : "请求失败"));
+    IPLog.log("Scamalytics 失败: " + (html ? "解析失败" : "请求失败"));
     return null;
   }
 
   const tryMap = { ipqs: tryIPQS, proxycheck: tryProxyCheck, ippure: tryIPPure, scamalytics: tryScamalytics };
-  if (api && !tryMap[api]) console.log("未知 risk_api: " + api + "，走四级回落");
+  if (api && !tryMap[api]) IPLog.log("未知 risk_api: " + api + "，走四级回落");
 
   // 指定数据源 → 优先使用
   if (tryMap[api]) {
@@ -568,7 +658,7 @@ async function getRiskScore(ip) {
 
   // 所有数据源均失败：仅为本次展示返回未知状态，不写入缓存，
   // 避免一次性的临时故障被 24h TTL 放大成长期错误风控值
-  console.log("风险评分：所有数据源均失败，显示未知（不缓存）");
+  IPLog.log("风险评分：所有数据源均失败，显示未知（不缓存）");
   return { score: null, source: "Unavailable" };
 }
 
@@ -582,7 +672,7 @@ async function getIPType(ip) {
       const c = JSON.parse(cached);
       const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
       if (c.ip === ip && age < CONFIG.riskCacheTTL) {
-        console.log("IP 类型命中缓存: " + c.ipType + " | " + c.ipSrc + "，已缓存 " + age + "s");
+        IPLog.log("IP 类型命中缓存: " + c.ipType + " | " + c.ipSrc + "，已缓存 " + age + "s");
         return { ipType: c.ipType, ipSrc: c.ipSrc };
       }
     } catch (e) {}
@@ -595,19 +685,19 @@ async function getIPType(ip) {
 
   const info = await getIPPureInfo();
   if (info && info.isResidential !== undefined) {
-    console.log("IPPure /v1/info 返回 IP 类型数据");
+    IPLog.log("IPPure /v1/info 返回 IP 类型数据");
     return saveAndReturn(
       info.isResidential ? "住宅 IP" : "机房 IP",
       info.isBroadcast ? "广播 IP" : "原生 IP"
     );
   }
-  console.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
+  IPLog.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
   const html = await getIPPureCard();
   if (html) {
     const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
     const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
-    console.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
+    IPLog.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
     return saveAndReturn(ipType, ipSrc);
   }
 
@@ -616,11 +706,11 @@ async function getIPType(ip) {
   const pcType = pc?.[ip]?.type;
   if (pcType) {
     const ipType = /residential|wireless|mobile/i.test(pcType) ? "住宅 IP" : "机房 IP";
-    console.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
+    IPLog.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
     return saveAndReturn(ipType, "未知");
   }
 
-  console.log("IPPure/ProxyCheck 所有接口均失败");
+  IPLog.log("IPPure/ProxyCheck 所有接口均失败");
   return { ipType: "未知", ipSrc: "未知" };
 }
 
@@ -632,7 +722,7 @@ async function checkDNSLeak(policy) {
   // edns.ip-api.com：随机子域触发 DNS 查询，服务端返回解析器 IP 和地理信息
   const ednsData = await httpJSON(CONFIG.urls.dnsLeakEdns(randStr(32)), policy);
   if (!ednsData?.dns) {
-    console.log("DNS 泄露检测失败");
+    IPLog.log("DNS 泄露检测失败");
     return { leaked: null, resolvers: null };
   }
   const ip = ednsData.dns.ip || "";
@@ -641,7 +731,7 @@ async function checkDNSLeak(policy) {
   const name = (geo.includes(" - ") ? geo.split(" - ").pop().trim() : (geo || ip)).replace(/\s*communications\s+corporation/gi, "");
   const resolvers = ip ? [{ ip, name, geo, isChina }] : [];
   const leaked = isChina;
-  console.log("DNS 解析器: " + (resolvers.length ? resolvers[0].name + (isChina ? " [CN]" : "") : "无"));
+  IPLog.log("DNS 解析器: " + (resolvers.length ? resolvers[0].name + (isChina ? " [CN]" : "") : "无"));
   return { leaked, resolvers: resolvers.length > 0 ? resolvers : null };
 }
 
@@ -667,10 +757,10 @@ async function getTrafficStats() {
   if (isStash) return null;
   const data = await surgeAPI("GET", "/v1/traffic");
   if (!data) {
-    console.log("流量统计获取失败");
+    IPLog.log("流量统计获取失败");
     return null;
   }
-  console.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 300));
+  IPLog.log("流量统计原始数据: " + JSON.stringify(data).slice(0, 300));
 
   // Surge 返回 interface 为嵌套字典 { en0: {...}, pdp_ip0: {...}, lo0: {...} }
   let network = null;
@@ -678,7 +768,7 @@ async function getTrafficStats() {
     const keys = Object.keys(data.interface).filter(k => k !== "lo0");
     if (keys.length > 0) {
       network = data.interface[keys[0]];
-      console.log("使用网卡: " + keys[0]);
+      IPLog.log("使用网卡: " + keys[0]);
     }
   }
   if (!network) network = data.connector || data;
@@ -726,7 +816,7 @@ async function probeStashOutbound4() {
   if (ip && !ip.includes(":")) return { ip };
   if (requestDeadline - Date.now() < 100) return null;
   const deadline = Math.min(requestDeadline, Date.now() + CONFIG.stashIPv4Timeout);
-  console.log("IPPure 未提供有效 IPv4，使用 ipify 备用探测");
+  IPLog.log("IPPure 未提供有效 IPv4，使用 ipify 备用探测");
   const backup = await httpJSON(CONFIG.urls.stashIPv4, null, null, deadline);
   if (finished) return null;
   const backupIP = stashCacheIP(backup?.ip);
@@ -743,7 +833,7 @@ async function probeStashOutbound6() {
   if (finished) return null;
   const ip = stashCacheIP(data?.ip);
   if (ip.includes(":")) return ip;
-  console.log("IPv6 未探测到有效地址，仅展示 IPv4");
+  IPLog.log("IPv6 未探测到有效地址，仅展示 IPv4");
   return null;
 }
 
@@ -754,7 +844,7 @@ async function fetchOutbound4() {
   }
   const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace));
   if (t) return { ip: t.ip, raw: { country_code: t.loc, country: t.loc } };
-  console.log("CF trace(v4) 失败，回落 ip.sb");
+  IPLog.log("CF trace(v4) 失败，回落 ip.sb");
   const sb = await httpJSON(CONFIG.urls.outboundIP);
   return sb?.ip ? { ip: sb.ip, raw: sb } : null;
 }
@@ -766,7 +856,7 @@ async function fetchOutbound6() {
   const deadline = Date.now() + CONFIG.ipv6Timeout;
   const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace6, null, null, deadline));
   if (t) return t.ip;
-  console.log("CF trace(v6) 失败，回落 ip.sb");
+  IPLog.log("CF trace(v6) 失败，回落 ip.sb");
   const sb = await httpJSON(CONFIG.urls.outboundIPv6, null, null, deadline);
   return sb?.ip || null;
 }
@@ -803,11 +893,11 @@ function checkIPChange(localIP, outIP, outIPv6) {
   }
 
   if (localIP === lastData.localIP && outIP === lastData.outIP && outIPv6 === lastData.outIPv6) {
-    console.log("网络信息未变化，跳过");
+    IPLog.log("网络信息未变化，跳过");
     return false;
   }
 
-  console.log("网络信息已变化");
+  IPLog.log("网络信息已变化");
   $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6 }), CONFIG.storeKeys.lastEvent);
   return true;
 }
@@ -833,15 +923,15 @@ async function runStashMonitor() {
   }
   if (changes.length) {
     if (typeof $notification === "undefined" || typeof $notification.post !== "function") {
-      console.log("当前客户端未提供通知接口；保留基线供下次重试");
+      IPLog.log("当前客户端未提供通知接口；保留基线供下次重试");
       return done({});
     }
     try { $notification.post("🔄 IP 已变化", "", changes.join("\n")); }
-    catch (_) { console.log("通知发送失败；保留基线供下次重试"); return done({}); }
+    catch (_) { IPLog.log("通知发送失败；保留基线供下次重试"); return done({}); }
   }
   if (Object.keys(next).length) {
     try { $persistentStore.write(JSON.stringify(next), key); }
-    catch (_) { console.log("通知记录保存失败"); }
+    catch (_) { IPLog.log("通知记录保存失败"); }
   }
   done({});
 }
@@ -901,9 +991,9 @@ function stashLastGood(kind, ip, fresh, fallback = {}) {
     retained.push([id, { ts, fields }]);
     retained.sort((a, b) => a[1].ts - b[1].ts);
     try { $persistentStore.write(JSON.stringify(Object.fromEntries(retained.slice(-32))), key); }
-    catch (_) { console.log("上次成功结果保存失败，继续显示本次结果"); }
+    catch (_) { IPLog.log("上次成功结果保存失败，继续显示本次结果"); }
   }
-  if (cached) console.log("[IP 缓存] " + kind + "：复用同一 IP 的上次成功字段");
+  if (cached) IPLog.log("[IP 缓存] " + kind + "：复用同一 IP 的上次成功字段");
   return { data, cached };
 }
 
@@ -927,7 +1017,7 @@ async function stashGeo(source, ip, url, policy, valid, timeout = 5000) {
     entries.push([id, result]);
     entries.sort((a, b) => a[1].ts - b[1].ts);
     $persistentStore.write(JSON.stringify(Object.fromEntries(entries.slice(-32))), key);
-  } catch (_) { console.log("地理缓存保存失败，继续显示结果"); }
+  } catch (_) { IPLog.log("地理缓存保存失败，继续显示结果"); }
   return result;
 }
 
@@ -1013,7 +1103,7 @@ function buildPanelContent({ localZh, maskMode, riskInfo, riskResult, ipType, ip
 // ==================== 通知内容构建 ====================
 function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, maskMode, dnsLeak }) {
   if (!args.notify) {
-    console.log("通知已禁用 (notify=false)，跳过推送");
+    IPLog.log("通知已禁用 (notify=false)，跳过推送");
     return;
   }
 
@@ -1036,7 +1126,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   }
 
   $notification.post(title, subtitle, bodyLines.join("\n"));
-  console.log("=== 已发送通知 ===");
+  IPLog.log("=== 已发送通知 ===");
 }
 
 // ==================== Stash 独立卡片 ====================
@@ -1121,7 +1211,7 @@ async function getStashLocalResult() {
     countryCode: fallback?.country_code || (fallback?.country_name === "中国" ? "CN" : "")
   }, biliInfo ? Date.now() : sb?.ts));
   const { location } = data;
-  if (!baiduInfo && location) console.log("本地地区：百度不可用，使用同一 IP 的备用地区信息");
+  if (!baiduInfo && location) IPLog.log("本地地区：百度不可用，使用同一 IP 的备用地区信息");
   return { ip, ...data };
 }
 
@@ -1163,7 +1253,7 @@ async function getStashOutboundResult(includeIPv6) {
   });
   const { location } = data;
   const organization = data.organization || "运营商未知";
-  if (!primaryInfo && location) console.log("出口地区：ip-api 不可用，使用同一 IP 的备用地区信息");
+  if (!primaryInfo && location) IPLog.log("出口地区：ip-api 不可用，使用同一 IP 的备用地区信息");
   return { ip: outIP, ipv6: outIPv6, raw: outRaw, ...data, organization };
 }
 
@@ -1268,13 +1358,17 @@ async function runStashTile() {
 // ==================== 主执行函数 ====================
 (async () => {
   try {
-  console.log("=== IP 安全检测开始 (v6.4.5 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
-  if (isStash) console.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
+  if (isStash && args.task === "logs") {
+    IPLog.collect();
+    return done({});
+  }
+  IPLog.log("=== IP 安全检测开始 (v6.4.6 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+  if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
   // 1. EVENT 触发时延迟等待网络稳定
   if (args.isEvent && args.eventDelay > 0) {
-    console.log("等待网络稳定 " + args.eventDelay + " 秒");
+    IPLog.log("等待网络稳定 " + args.eventDelay + " 秒");
     await wait(args.eventDelay * 1000);
   }
 
@@ -1282,10 +1376,10 @@ async function runStashTile() {
   const { localIP, outIP, outIPv6, localRaw, outRaw } = await fetchIPs();
 
   if (!localIP || !outIP) {
-    console.log("IP 获取失败");
+    IPLog.log("IP 获取失败");
     return done({ title: "IP 获取失败", content: "无法获取本地或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
   }
-  console.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
+  IPLog.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
 
   // 3. EVENT 模式下检查 IP 是否变化
   if (!checkIPChange(localIP, outIP, outIPv6)) {
@@ -1295,7 +1389,7 @@ async function runStashTile() {
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
   let localGeoApi = args.localGeoApi;
   if (!["bilibili", "baidu", "ipsb"].includes(localGeoApi)) {
-    console.log("未知 local_geoapi: " + localGeoApi + "，使用 baidu");
+    IPLog.log("未知 local_geoapi: " + localGeoApi + "，使用 baidu");
     localGeoApi = "baidu";
   }
   const useBilibili = localGeoApi === "bilibili";
@@ -1306,14 +1400,14 @@ async function runStashTile() {
   // maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
   let remoteGeoApi = args.remoteGeoApi;
   if (!["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(remoteGeoApi)) {
-    console.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipapi-zh");
+    IPLog.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipapi-zh");
     remoteGeoApi = "ipapi-zh";
   }
   const useIpApi = remoteGeoApi.startsWith("ipapi");
   let useMaxmind = remoteGeoApi.startsWith("maxmind");
   const maxmindZh = remoteGeoApi === "maxmind-zh";
   if (useMaxmind && !args.maxmindKey) {
-    console.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
+    IPLog.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
     useMaxmind = false;
   }
   const ipApiLang = remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
@@ -1350,7 +1444,7 @@ async function runStashTile() {
   if (!isDirect) {
     dnsLeakResult = await checkDNSLeak(policy);
   } else {
-    console.log("当前为直连，跳过 DNS 泄露检测");
+    IPLog.log("当前为直连，跳过 DNS 泄露检测");
   }
 
   // 本地 IP 地理信息：zh 用 bilibili/baidu（默认中国），en 用 ip.sb
@@ -1379,7 +1473,7 @@ async function runStashTile() {
   // ipinfo 模式: outGeoRaw 来自 ipinfo.io; 其余数据源: outOrgRaw 来自 ipinfo.io
   const ipinfoRaw = needExtraOrg ? outOrgRaw : outGeoRaw;
   const reverseDNS = ipinfoRaw?.hostname || null;
-  if (reverseDNS) console.log("反向 DNS: " + reverseDNS);
+  if (reverseDNS) IPLog.log("反向 DNS: " + reverseDNS);
   if (needExtraOrg && outInfo) {
     const orgData = normalizeIpInfo(outOrgRaw);
     if (orgData?.org) outInfo.org = orgData.org;
@@ -1388,7 +1482,7 @@ async function runStashTile() {
   // 入口 IP 地理信息：与出口不同时才查询
   let entranceInfo = null;
   if (entranceIP && entranceIP !== outIP) {
-    console.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
+    IPLog.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
     const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
     if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
     const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
@@ -1427,7 +1521,7 @@ async function runStashTile() {
     sendNetworkChangeNotification(context);
     done({});
   } else {
-    console.log("=== 面板显示 ===");
+    IPLog.log("=== 面板显示 ===");
     done({
       title: "代理策略：" + policy,
       content: buildPanelContent(context),
@@ -1436,7 +1530,7 @@ async function runStashTile() {
     });
   }
   } catch (e) {
-    console.log("未捕获异常: " + (e.message || e));
+    IPLog.log("未捕获异常: " + (e.message || e));
     done({ title: "检测异常", content: e.message || String(e), icon: "leaf", "icon-color": "#9E9E9E" });
   }
 })();

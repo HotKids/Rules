@@ -3,7 +3,8 @@
 # 每 600 秒刷新；独立定时任务通知 IP 变化，首次检测只记录基线。
 # 本地卡片显示直连公网 IP。
 # 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
-# v6.4.5：更新覆写后统一刷新各脚本来源，避免旧版本缓存。
+# 卡片与通知日志统一收集到 hotkids-ip-security.log，最多延迟一分钟。
+# v6.4.6：更新覆写后统一刷新各脚本来源，避免旧版本缓存。
 name: 'IP Security Tiles'
 desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/cadvisor.png
@@ -16,7 +17,7 @@ tiles:
     icon: 'https://ippure.com/logo.png'
     backgroundColor: '#9E9E9E'
     collapsed: false
-    argument: 'tile=summary&mode=home&notify=false'
+    argument: 'tile=summary&mode=home&notify=false&log=shared'
   - name: hotkids-ip-security-outbound
     interval: 600
     title: '出口 IP'
@@ -25,7 +26,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=outbound&mode=collapsed&notify=false'
+    argument: 'tile=outbound&mode=collapsed&notify=false&log=shared'
   - name: hotkids-ip-security-local
     interval: 600
     title: '本地 IP'
@@ -34,7 +35,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=local&mode=collapsed&notify=false'
+    argument: 'tile=local&mode=collapsed&notify=false&log=shared'
   - name: hotkids-ip-security-risk
     interval: 600
     title: 'IP 纯净度'
@@ -43,29 +44,36 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=risk&mode=collapsed&notify=false'
+    argument: 'tile=risk&mode=collapsed&notify=false&log=shared'
 
 # 通知使用日常分流，不受长按测试节点影响；需要 Stash 保持连接。
 cron:
   script:
+    - name: hotkids-ip-security
+      cron: '* * * * *'
+      timeout: 5
+      argument: 'task=logs'
     - name: hotkids-ip-security-notify
       cron: '*/10 * * * *'
       timeout: 25
-      argument: 'task=monitor&notify=true'
+      argument: 'task=monitor&notify=true&log=shared'
 
 script-providers:
+  hotkids-ip-security:
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    interval: 86400
   hotkids-ip-security-summary:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.5
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
     interval: 86400
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.5
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.5
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.5
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
     interval: 86400
   hotkids-ip-security-notify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.5
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
     interval: 86400

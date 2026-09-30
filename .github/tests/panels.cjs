@@ -16,7 +16,10 @@ async function tile(service, response, {client="stash", argument="", store=new M
         const request = (options, cb) => {
           requests.push(options);
           const r = typeof response === 'function' ? response(options) : response;
-          cb(r.error || null, {status:r.status || 200, headers:r.headers || {}, url:r.url, responseURL:r.responseURL},
+          if(r.throw)throw r.throw;
+          const nativeResponse=Object.prototype.hasOwnProperty.call(r,'rawResponse')?r.rawResponse:
+            {status:r.status ?? 200,headers:r.headers || {},url:r.url,responseURL:r.responseURL};
+          cb(r.error || null, nativeResponse,
             r.body == null ? '' : typeof r.body === 'string' ? r.body : JSON.stringify(r.body));
         };
         const ctx = {$environment:client==='stash'?{'stash-version':'1.1.5'}:{'surge-version':'5'}, $script:{type:client==='stash'?'tile':'generic'},
@@ -197,6 +200,36 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
     return {output,requests,rawRequests,notifications,apiCalls,store,logs,requestEvents,timerEvents,elapsed:finishedAt-clockStart};
   } finally {clearTimeout(deadline);handles.forEach(clearTimeout);activeTimers.clear();}
 }
+
+test('IP shared logs combine card and notification runs without changing their results',async()=>{
+  const store=new Map();
+  for(const tile of ['summary','outbound','local','risk']) {
+    const r=await ipPanel({argument:`tile=${tile}&mode=${tile==='summary'?'home':'collapsed'}&notify=false&log=shared`,store});
+    assert.equal(r.logs.length,0);assert.ok(r.output.content);
+    assert.ok(store.has('stash_ip_security_log_v1:'+tile));
+  }
+  const monitor=await ipPanel({argument:'task=monitor&notify=true&log=shared',store});
+  assert.equal(monitor.logs.length,0);assert.ok(store.has('stash_ip_security_log_v1:notify'));
+  const snapshots=new Map(store);
+  const collect=await ipPanel({argument:'task=logs',store,timers:true});
+  assert.equal(collect.requests.length,0);assert.equal(collect.notifications.length,0);
+  assert.equal(collect.timerEvents.length,0);
+  for(const scope of ['summary','outbound','local','risk','notify'])assert.ok(collect.logs.some(line=>line.includes(`[${scope}]`)),scope);
+  for(const [key,value] of snapshots)assert.equal(store.get(key),value);
+  assert.equal((await ipPanel({argument:'task=logs',store})).logs.length,0);
+  await ipPanel({argument:'tile=local&mode=collapsed&notify=false&log=shared',store});
+  const fresh=await ipPanel({argument:'task=logs',store});
+  assert.ok(fresh.logs.length>0);assert.ok(fresh.logs.every(line=>line.includes('[local]')));
+});
+test('IP shared log queues stay bounded and storage failures preserve the card',async()=>{
+  const store=new Map();
+  for(let i=0;i<24;i++)await ipPanel({argument:'tile=local&mode=collapsed&notify=false&log=shared',store});
+  const entries=JSON.parse(store.get('stash_ip_security_log_v1:local'));
+  assert.equal(entries.length,60);assert.equal(new Set(entries.map(e=>e.id)).size,60);
+  assert.equal((await ipPanel({argument:'task=logs',store})).logs.length,60);
+  const failed=await ipPanel({argument:'tile=local&mode=collapsed&notify=false&log=shared',storageThrows:true});
+  assert.ok(failed.output.content);assert.ok(failed.logs.length>0);
+});
 
 test('Stash home summary keeps full geography and organization in the approved dual-stack layout',async()=>{
   const {output,requests,notifications,apiCalls,store}=await ipPanel({
@@ -907,20 +940,20 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.3.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.4.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
   assert.equal(unknown.output.content,'Error');assert.equal(unknown.requests.length,2);
-  const failed=await tile('gemini',{error:'HTTP 503 https://gemini.google.com'});
-  assert.equal(failed.output.content,'Error');assert.match(failed.logs.join('\n'),/首页请求失败：HTTP 503/);
+  const failed=await tile('gemini',{status:503});
+  assert.equal(failed.output.content,'Error');assert.match(failed.logs.join('\n'),/首页失败；阶段=http.*HTTP 503/);
   const timedOut=await tile('gemini',{error:'request timed out'});
-  assert.equal(timedOut.output.content,'Timeout');assert.match(timedOut.logs.join('\n'),/首页请求失败：Timeout/);
+  assert.equal(timedOut.output.content,'Timeout');assert.match(timedOut.logs.join('\n'),/首页失败；阶段=callback.*timed out/);
   const key='SECRET-KEY';
   const api=await tile('gemini',o=>o.url.includes('generativelanguage')?
     {error:`failed https://generativelanguage.googleapis.com/v1beta/models?key=${key}`}:{body:'unknown'},
     {argument:`geminiapikey=${key}`});
-  assert.equal(api.output.content,'Error');assert.match(api.logs.join('\n'),/API请求失败：Error/);
+  assert.equal(api.output.content,'Error');assert.match(api.logs.join('\n'),/API失败；阶段=callback.*failed/);
   assert.doesNotMatch(api.logs.join('\n'),/SECRET-KEY|key=/);
 });
 test('Gemini API fallback distinguishes valid models, rate limits and invalid keys',async()=>{
@@ -932,6 +965,73 @@ test('Gemini API fallback distinguishes valid models, rate limits and invalid ke
       {argument:'geminiapikey=example'});
     assert.equal(result.output.content,expected);
   }
+});
+test('Media request diagnostics preserve native errors and identify the failing phase',async()=>{
+  const malformedHeaders={status:200};
+  Object.defineProperty(malformedHeaders,'headers',{get(){throw new TypeError('headers conversion failed');}});
+  for(const [response,phase,detail,expected] of [
+    [{error:'Connection reset by peer'},'callback',/Connection reset by peer/,'Error'],
+    [{error:{domain:'NSURLErrorDomain',code:-1200,localizedDescription:'TLS handshake failed'}},'callback',/code=-1200; domain=NSURLErrorDomain/,'Error'],
+    [{error:{domain:'NSURLErrorDomain',code:-1001}},'callback',/code=-1001/,'Timeout'],
+    [{rawResponse:null},'response',/missing response/,'Error'],
+    [{rawResponse:{}},'response',/missing HTTP status/,'Error'],
+    [{status:0},'response',/missing HTTP status/,'Error'],
+    [{rawResponse:malformedHeaders},'response',/TypeError.*headers conversion failed/,'Error'],
+    [{throw:new TypeError('native request conversion failed')},'request',/TypeError.*native request conversion failed/,'Error'],
+  ]) {
+    const r=await tile('gemini',response),log=r.logs.join('\n');
+    assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
+    assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
+    assert.match(log,/Gemini v2\.2\.4.*首页失败/);
+    assert.match(log,/Gemini.*检测完成/);
+  }
+});
+test('All media services log a result, including routine successes',async()=>{
+  const source=read('media-check.js');
+  const ctx={};vm.createContext(ctx);
+  vm.runInContext(source.slice(source.indexOf('const SERVICES ='),source.indexOf('async function checkService'))+'\nglobalThis.services=SERVICES;',ctx);
+  for(const [service,definition] of Object.entries(ctx.services)) {
+    const r=await tile(service,{body:'unknown page'});
+    const log=r.logs.join('\n');
+    assert.ok(log.includes(`[${definition.title}] 检测开始`),service);
+    assert.ok(log.includes(`[${definition.title}] 检测完成`),service);
+  }
+  const ok=await tile('spotify',{body:spotifyConfig('SG')});
+  assert.equal(ok.output.content,'SG');assert.match(ok.logs.join('\n'),/Spotify.*检测完成：SG/);
+});
+test('Shared media logs merge services, retain records and do not request the network when collected',async()=>{
+  const store=new Map();
+  const spotify=await tile('spotify',{body:spotifyConfig('SG')},{argument:'log=shared',store});
+  const gemini=await tile('gemini',{error:{domain:'NSURLErrorDomain',code:-1200,message:'TLS handshake failed'}},{argument:'log=shared',store});
+  assert.equal(spotify.output.content,'SG');assert.equal(gemini.output.content,'Error');
+  assert.deepEqual(spotify.logs,[]);assert.deepEqual(gemini.logs,[]);
+  const before=new Map(store);
+  const collected=await tile('logs',{throw:new Error('collector must not send HTTP')},{store});
+  assert.equal(collected.requests.length,0);
+  const log=collected.logs.join('\n');
+  assert.match(log,/\[spotify\].*检测完成：SG/);
+  assert.match(log,/\[gemini\].*code=-1200/);
+  assert.match(log,/\[gemini\].*阶段=callback/);
+  for(const [key,value] of before)assert.equal(store.get(key),value); // The collector never clears service queues.
+  assert.equal((await tile('logs',{}, {store})).logs.length,0);
+  await tile('spotify',{body:spotifyConfig('HK')},{argument:'log=shared',store});
+  const next=await tile('logs',{}, {store});
+  assert.match(next.logs.join('\n'),/Spotify.*检测完成：HK/);
+  assert.doesNotMatch(next.logs.join('\n'),/检测完成：SG|code=-1200/);
+});
+test('Shared media logging stays bounded, redacts keys and survives unavailable storage',async()=>{
+  const store=new Map(),key='SECRET-KEY';
+  for(let index=0;index<18;index++)await tile('gemini',o=>o.url.includes('generativelanguage')?
+    {error:`TLS failure at https://generativelanguage.googleapis.com/v1beta/models?key=${key}&token=hidden`}:
+    {body:'unknown'}, {argument:`log=shared&geminiapikey=${key}`,store});
+  const entries=JSON.parse(store.get('stash_media_check_log_v1:gemini'));
+  assert.equal(entries.length,60);assert.equal(new Set(entries.map(e=>e.id)).size,entries.length);
+  assert.doesNotMatch(JSON.stringify(entries),/SECRET-KEY|key=|token=hidden/);
+  const collected=await tile('logs',{}, {store});
+  assert.equal(collected.logs.length,60);assert.doesNotMatch(collected.logs.join('\n'),/SECRET-KEY|key=|token=hidden/);
+  const unavailable=new Map();unavailable.get=()=>{throw Error('storage unavailable');};
+  const fallback=await tile('spotify',{body:spotifyConfig('SG')},{argument:'log=shared',store:unavailable});
+  assert.equal(fallback.output.content,'SG');assert.match(fallback.logs.join('\n'),/检测完成：SG/);
 });
 test('AI services keep unknown HTTP failures and missing regional evidence as Error',async()=>{
   for(const service of ['chatgpt','claude','gemini'])for(const [status,body,expected] of [
