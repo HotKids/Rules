@@ -225,8 +225,9 @@ mixed-port: 7890
 dns:
   enable: true
   # 各条目通过 #RULES / #策略名 后缀单独指定出站
-  respect-rules: true
-  follow-rule: true
+  respect-rules: false
+  # 引导 DNS：仅用于解析 nameserver 服务器的域名
+  # 只能填纯 IP 地址
   default-nameserver:
     - 192.0.2.53
     - 198.51.100.53
@@ -268,28 +269,154 @@ rules:
         path = self.root / self.config['Stash']['output']
         return path.read_text(encoding='utf-8'), yaml.safe_load(path.read_text(encoding='utf-8'))
 
-    def assert_native_dns(self, dns):
-        self.assertIs(dns['follow-rule'], False)
-        self.assertEqual(dns['nameserver'], ['https://doh.pub/dns-query',
-                                             'https://dns.alidns.com/dns-query'])
+    def replace_source(self, old, new):
+        text = self.source.read_text(encoding='utf-8')
+        self.assertIn(old, text)
+        self.source.write_text(text.replace(old, new), encoding='utf-8')
+        self.input_bytes = self.source.read_bytes()
+        self.input_dns = yaml.safe_load(self.input_bytes)['dns']
+
+    def assert_aligned_dns(self, dns):
+        self.assertIs(dns['follow-rule'], True)
+        self.assertEqual(dns['nameserver'], ['https://1.1.1.1/dns-query'])
         self.assertNotIn('respect-rules', dns)
         for key in ('default-nameserver', 'nameserver-policy',
                     'proxy-server-nameserver', 'fake-ip-filter'):
             self.assertEqual(dns[key], self.input_dns[key], key)
 
-    def test_mihomo_proxy_dns_becomes_native_direct_domestic_dns(self):
+    def test_source_rules_dns_keeps_cloudflare_and_supported_values(self):
         text, output = self.generate()
-        self.assert_native_dns(output['dns'])
-        self.assertNotIn('https://1.1.1.1/dns-query', text)
+        self.assert_aligned_dns(output['dns'])
         self.assertNotIn('#RULES', text)
-        self.assertNotIn('经代理查询干净结果', text)
-        self.assertNotIn('DNS 查询按现有代理规则转发', text)
-        self.assertNotIn('未命中 nameserver-policy 使用 Cloudflare DoH', text)
+        self.assertIn('经代理查询干净结果', text)
+        self.assertIn('除 system 外，服务器地址使用 IP；支持基于 IP 的加密 DNS', text)
+        self.assertNotIn('只能填纯 IP 地址', text)
         generated_bytes = (self.root / 'Clash/Stash.stoverride').read_bytes()
         self.generate()
         self.assertEqual((self.root / 'Clash/Stash.stoverride').read_bytes(), generated_bytes)
 
-    def test_private_overlay_inherits_the_same_direct_dns_without_changing_sample(self):
+    def test_unrouted_source_keeps_its_nameservers_and_disables_rule_following(self):
+        self.replace_source('"https://1.1.1.1/dns-query#RULES"',
+                            '"https://resolver.example.invalid/dns-query#h3=true"\n'
+                            '    - "https://dns.alidns.com/dns-query"')
+        _, output = self.generate()
+        self.assertIs(output['dns']['follow-rule'], False)
+        self.assertEqual(output['dns']['nameserver'], self.input_dns['nameserver'])
+
+    def test_respect_rules_requests_rule_following_without_a_server_selector(self):
+        self.replace_source('respect-rules: false', 'respect-rules: true')
+        self.replace_source('https://1.1.1.1/dns-query#RULES', 'https://1.1.1.1/dns-query')
+        _, output = self.generate()
+        self.assert_aligned_dns(output['dns'])
+
+    def test_policy_rules_selector_requests_rule_following(self):
+        self.replace_source('https://1.1.1.1/dns-query#RULES', 'https://1.1.1.1/dns-query')
+        self.replace_source('https://resolver.example.invalid/dns-query#h3=true',
+                            'https://resolver.example.invalid/dns-query#h3=true&RULES')
+        _, output = self.generate()
+        self.assertIs(output['dns']['follow-rule'], True)
+        self.assertEqual(output['dns']['nameserver-policy']['example.invalid'],
+                         ['https://resolver.example.invalid/dns-query#h3=true'])
+
+    def test_independent_and_unsupported_dns_selectors_do_not_enable_rule_following(self):
+        self.replace_source('https://1.1.1.1/dns-query#RULES', 'https://1.1.1.1/dns-query')
+        self.replace_source('    - 192.0.2.53',
+                            '    - "https://192.0.2.53/dns-query#RULES"')
+        self.replace_source('https://nodes.example.invalid/dns-query',
+                            'https://nodes.example.invalid/dns-query#RULES&h3=true')
+        self.replace_source('\nproxy-groups:', '''
+  direct-nameserver:
+    - "https://direct.example.invalid/dns-query#RULES"
+  direct-nameserver-follow-policy: true
+  fallback:
+    - "https://fallback.example.invalid/dns-query#RULES"
+
+proxy-groups:''')
+        text, output = self.generate()
+        dns = output['dns']
+        self.assertIs(dns['follow-rule'], False)
+        self.assertEqual(dns['default-nameserver'],
+                         ['https://192.0.2.53/dns-query', '198.51.100.53'])
+        self.assertEqual(dns['proxy-server-nameserver'],
+                         ['https://nodes.example.invalid/dns-query#h3=true'])
+        self.assertNotIn('#RULES', text)
+        for key in ('direct-nameserver', 'direct-nameserver-follow-policy', 'fallback'):
+            self.assertNotIn(key, dns)
+
+    def test_policy_cleanup_preserves_indent_comments_and_supported_url_options(self):
+        self.replace_source('    "example.invalid":\n'
+                            '      - "https://resolver.example.invalid/dns-query#h3=true"', '''    "example.invalid":
+      - "https://resolver.example.invalid/dns-query#RULES&h3=true" # list comment
+      - 'https://named.example.invalid/dns-query#Proxy Group' # named selector
+    "scalar.invalid": "https://scalar.example.invalid/dns-query#RULES" # scalar comment
+    "time.*.com,ntp.*.com": # shared comment
+      # resolver comment
+      - "https://time.example.invalid/dns-query#RULES&h3=true" # time comment
+      - 223.5.5.5
+    "first.invalid,second.invalid": ['https://inline.example.invalid/dns-query#Proxy', 'https://h3.example.invalid/dns-query#h3=true&RULES'] # inline comment''')
+        text, output = self.generate()
+        policy = output['dns']['nameserver-policy']
+        self.assertEqual(policy['example.invalid'],
+                         ['https://resolver.example.invalid/dns-query#h3=true',
+                          'https://named.example.invalid/dns-query'])
+        self.assertEqual(policy['scalar.invalid'], 'https://scalar.example.invalid/dns-query')
+        for name in ('time.*.com', 'ntp.*.com'):
+            self.assertEqual(policy[name], ['https://time.example.invalid/dns-query#h3=true',
+                                           '223.5.5.5'])
+            self.assertIn('    "' + name + '": # shared comment\n'
+                          '      # resolver comment\n'
+                          '      - "https://time.example.invalid/dns-query#h3=true" # time comment',
+                          text)
+        for name in ('first.invalid', 'second.invalid'):
+            self.assertEqual(policy[name], ['https://inline.example.invalid/dns-query',
+                                           'https://h3.example.invalid/dns-query#h3=true'])
+            self.assertIn('    "' + name + '": [\'https://inline.example.invalid/dns-query\', '
+                          '\'https://h3.example.invalid/dns-query#h3=true\'] # inline comment', text)
+        self.assertIn('      - "https://resolver.example.invalid/dns-query#h3=true" # list comment', text)
+        self.assertIn("      - 'https://named.example.invalid/dns-query' # named selector", text)
+        self.assertIn('    "scalar.invalid": "https://scalar.example.invalid/dns-query" # scalar comment', text)
+        self.assertNotIn('#RULES', text)
+        self.assertNotIn('&RULES', text)
+
+    def test_inline_source_nameservers_are_cleaned_without_losing_comments(self):
+        self.replace_source('  nameserver:\n    - "https://1.1.1.1/dns-query#RULES"',
+                            '  nameserver: ["https://1.1.1.1/dns-query#RULES"] # main comment')
+        text, output = self.generate()
+        self.assert_aligned_dns(output['dns'])
+        self.assertIn('  nameserver: ["https://1.1.1.1/dns-query"] # main comment', text)
+
+    def test_bare_ip_rule_selectors_are_cleaned_without_changing_domain_filters(self):
+        self.replace_source('https://1.1.1.1/dns-query#RULES',
+                            'https://1.1.1.1/dns-query')
+        self.replace_source('    - "*.example.invalid"',
+                            '    - "*.example.invalid"\n'
+                            '    - "223.5.5.5#RULES"')
+        self.replace_source('    "example.invalid":',
+                            '    "198.51.100.53#RULES": system\n'
+                            '    "example.invalid":')
+        _, output = self.generate()
+        self.assertIs(output['dns']['follow-rule'], False)
+        self.assertEqual(output['dns']['fake-ip-filter'], self.input_dns['fake-ip-filter'])
+        self.assertIn('198.51.100.53#RULES', output['dns']['nameserver-policy'])
+
+        servers = ('223.5.5.5', '223.5.5.5:5353',
+                   '2001:db8::53', '[2001:db8::53]:5353')
+        for server in servers:
+            with self.subTest(server=server):
+                original = self.source.read_bytes()
+                self.replace_source('"https://1.1.1.1/dns-query"',
+                                    '"' + server + '#RULES" # bare IP comment')
+                text, output = self.generate()
+                self.assertIs(output['dns']['follow-rule'], True)
+                self.assertEqual(output['dns']['nameserver'], [server])
+                self.assertIn('    - "' + server + '" # bare IP comment', text)
+                self.assertEqual(output['dns']['fake-ip-filter'], self.input_dns['fake-ip-filter'])
+                self.assertIn('198.51.100.53#RULES', output['dns']['nameserver-policy'])
+                self.source.write_bytes(original)
+                self.input_bytes = original
+                self.input_dns = yaml.safe_load(original)['dns']
+
+    def test_private_overlay_inherits_the_same_dns_without_changing_sample(self):
         directory = self.root / '.github/scripts/sync-config/Enhanced'
         directory.mkdir(parents=True)
         (directory / 'MyStash.overlay.json').write_text(json.dumps({
@@ -299,7 +426,7 @@ rules:
         _, output = self.generate()
         private = yaml.safe_load((self.root / 'Clash/MyStash.stoverride').read_text(encoding='utf-8'))
         self.assertEqual(private['dns'], output['dns'])
-        self.assert_native_dns(private['dns'])
+        self.assert_aligned_dns(private['dns'])
         self.assertEqual(private['name'], 'MyStash')
         self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
         self.assertEqual(self.source.read_bytes(), self.input_bytes)

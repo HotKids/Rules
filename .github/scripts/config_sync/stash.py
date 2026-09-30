@@ -1,8 +1,12 @@
 """Configuration generation: stash."""
 
 from pathlib import Path
+import ipaddress
 import json
 import re
+
+import yaml
+
 from .common import (
     REPO_ROOT,
     _write_stamped_if_changed,
@@ -27,15 +31,18 @@ _STASH_DROP_TOP = {
 }
 
 
-# 2) 从源配置保留的 DNS 子键；主 nameserver 与 follow-rule 使用 Stash 专属配置。
+# 2) 从源配置保留的 DNS 子键；规则路由选项转译为 Stash 的 follow-rule。
 _STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
                       "rule-providers", "rules"}
 
 
 _STASH_DNS_KEEP = {
-    "default-nameserver", "nameserver-policy",
+    "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
 }
+
+
+_STASH_DNS_SERVER_PREFIXES = ("https://", "tls://", "quic://", "tcp://", "udp://")
 
 
 _TOP_KEY_RE = re.compile(r"^([A-Za-z][\w-]*):")
@@ -50,12 +57,78 @@ def _yq(value) -> str:
 
 
 def _stash_clean_nameserver(server: str) -> str:
-    """mihomo 的 nameserver 策略后缀（#RULES / #策略名）在 Stash 中不存在——Stash 的
-    `#` 片段只承载选项（如 h3=true）。保留 h3= 这类合法选项，其余后缀一律去除。"""
+    """Stash 官方未定义 mihomo 的 nameserver 策略后缀（#RULES / #策略名）；
+    只保留官方定义的 h3= 选项，移除 mihomo 策略片段。"""
     if "#" not in server:
         return server
     base, frag = server.split("#", 1)
-    return server if frag.startswith("h3=") else base
+    options = [part for part in frag.split("&") if part.startswith("h3=")]
+    return base + ("#" + "&".join(options) if options else "")
+
+
+def _stash_is_dns_server(server: str) -> bool:
+    """识别 Stash 支持的协议 URL 或裸 IP（可含端口），不匹配普通域名。"""
+    base = server.partition("#")[0]
+    if base.startswith(_STASH_DNS_SERVER_PREFIXES):
+        return True
+    try:
+        ipaddress.ip_address(base)
+        return True
+    except ValueError:
+        pass
+    if base.startswith("["):
+        match = re.fullmatch(r"\[([^]]+)\](?::(\d+))?", base)
+        if not match:
+            return False
+        host, port = match.groups()
+    else:
+        host, sep, port = base.rpartition(":")
+        if not sep or not port.isdigit():
+            return False
+    if port is not None and not 1 <= int(port) <= 65535:
+        return False
+    try:
+        ipaddress.ip_address(host)
+        return True
+    except ValueError:
+        return False
+
+
+def _stash_dns_follow_rule(dns: dict) -> bool:
+    """只从普通 DNS 查询的路由要求推导；引导/节点解析使用独立链路。"""
+    if dns.get("respect-rules") is True:
+        return True
+    values = [dns.get("nameserver", [])]
+    values.extend((dns.get("nameserver-policy") or {}).values())
+    for value in values:
+        for server in value if isinstance(value, list) else [value]:
+            if isinstance(server, str) and _stash_is_dns_server(server):
+                if "RULES" in server.partition("#")[2].split("&"):
+                    return True
+    return False
+
+
+def _stash_clean_dns_line(line: str) -> str:
+    """按 YAML 标量位置清理服务器片段，保留缩进、引号风格和行尾注释。"""
+    if "#" not in line:
+        return line
+    tokens = list(yaml.scan(line))
+    for i in reversed(range(len(tokens))):
+        token = tokens[i]
+        if not isinstance(token, yaml.tokens.ScalarToken) \
+                or not _stash_is_dns_server(token.value):
+            continue
+        if i + 1 < len(tokens) and isinstance(tokens[i + 1], yaml.tokens.ValueToken):
+            # nameserver-policy 域名键不能当作 DNS 服务器标量改写。
+            continue
+        cleaned = _stash_clean_nameserver(token.value)
+        if cleaned == token.value:
+            continue
+        rendered = (_yq(cleaned) if token.style == "'"
+                    else json.dumps(cleaned, ensure_ascii=False) if token.style == '"'
+                    else cleaned)
+        line = line[:token.start_mark.column] + rendered + line[token.end_mark.column:]
+    return line
 
 
 def _stash_comment_out(lines: list[str], top_key: str) -> list[str]:
@@ -85,14 +158,18 @@ def _sync_stash(config: dict) -> None:
 
     print("\n── sync-config: Clash Sample.yaml → Stash .stoverride ──")
     src = base_path.read_text(encoding="utf-8").splitlines()
+    source_dns = (yaml.safe_load("\n".join(src)) or {}).get("dns") or {}
+    follow_rule = _stash_dns_follow_rule(source_dns)
 
     out: list[str] = []
     buf: list[str] = []          # 待决的注释 / 空行（跟随其后的键一起保留或丢弃）
     top = ""                     # 当前顶层键
     keep_top = True
     dns_keep = True              # dns 块内当前子键是否保留
+    dns_key = ""                 # 当前 DNS 子键，fake-ip-filter 不清理服务器片段
     policy_split: list[str] | None = None   # 逗号拼接键待展开的域名
     policy_val: list[str] = []              # 该键的值行
+    policy_tail = ""                       # 原键行的空格/注释
     skip_use_items = False                  # use: 的列表项（已换成 include-all）
     skip_provider_health = False            # Provider 健康检查由 Stash 策略组接管
     changes: list[str] = []
@@ -124,11 +201,11 @@ def _sync_stash(config: dict) -> None:
 
         # ── 逗号拼接的 nameserver-policy 键：收集值行后按域名展开 ──
         if policy_split is not None:
-            if stripped and not stripped.startswith("#") and len(line) - len(line.lstrip()) >= 6:
-                policy_val.append(line)
+            if len(line) - len(line.lstrip()) >= 6:
+                policy_val.append(_stash_clean_dns_line(line))
                 continue
             for dom in policy_split:
-                out.append(f'    "{dom}":')
+                out.append(f'    "{dom}":{policy_tail}')
                 out.extend(policy_val)
             policy_split, policy_val = None, []
             # 继续按普通行处理当前行
@@ -145,18 +222,16 @@ def _sync_stash(config: dict) -> None:
             flush()
             out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
-                # 按 Stash 官方示例直连查询两个 DoH；不沿用 mihomo 的 CF/#RULES 配置。
+                # Stash 没有逐上游 #RULES；主解析跟随规则，节点解析仍使用独立链路。
+                routed = "true" if follow_rule else "false"
                 out += [
-                    "  # DNS 查询直接出站，不经代理规则转发；解析服务器由 nameserver-policy 选择。",
-                    "  follow-rule: false",
-                    "",
-                    "  # 主 DNS：未命中域名策略时，并发查询腾讯/阿里 DoH，采用最快响应。",
-                    "  nameserver:",
-                    '    - "https://doh.pub/dns-query"',
-                    '    - "https://dns.alidns.com/dns-query"',
+                    ("  # DNS 查询按现有代理规则出站；代理节点域名使用独立 DNS 解析。"
+                     if follow_rule else
+                     "  # DNS 查询直接出站，不经代理规则转发；解析服务器由 nameserver-policy 选择。"),
+                    f"  follow-rule: {routed}",
                     "",
                 ]
-                changes.append("dns: follow-rule=false / 主 DNS 使用腾讯与阿里 DoH")
+                changes.append(f"dns: 保留源 nameserver / follow-rule={routed}")
             continue
 
         if skip_provider_health:
@@ -194,6 +269,7 @@ def _sync_stash(config: dict) -> None:
         # ── dns：按 Stash 支持的子键过滤 ──
         if top == "dns" and indent == 2 and m_sub:
             key = m_sub.group(3).strip()
+            dns_key = key
             dns_keep = key in _STASH_DNS_KEEP
             if not dns_keep:
                 buf.clear()
@@ -201,27 +277,37 @@ def _sync_stash(config: dict) -> None:
             if key == "nameserver-policy":
                 buf = ["  # 分域名 DNS 策略：精确域名 > 通配域名 > geosite；多个 geosite 按配置顺序匹配"
                        if l.strip().startswith("# 分域名 DNS 策略") else l for l in buf]
+            elif key == "default-nameserver":
+                buf = ["  # 除 system 外，服务器地址使用 IP；支持基于 IP 的加密 DNS"
+                       if l.strip() == "# 只能填纯 IP 地址" else l for l in buf]
             flush()
-            out.append(line)
+            out.append(_stash_clean_dns_line(line) if key != "fake-ip-filter" else line)
             continue
         if top == "dns" and indent > 2 and not dns_keep:
             buf.clear()
             continue
 
-        # nameserver 条目：去除 #RULES 后缀
-        if top == "dns" and dns_keep and stripped.startswith("- ") and "#RULES" in line:
-            flush()
-            val = stripped[2:].strip().strip("'\"")
-            out.append(f'    - "{_stash_clean_nameserver(val)}"')
-            changes.append("nameserver 去 #RULES 后缀")
-            continue
+        # 服务器可出现在列表、policy 单值或行内数组中；不改原缩进和注释。
+        if top == "dns" and dns_keep and dns_key != "fake-ip-filter":
+            cleaned = _stash_clean_dns_line(line)
+            if cleaned != line:
+                changes.append("DNS 服务器去 mihomo 策略后缀")
+            line = cleaned
 
         # nameserver-policy：逗号拼接多域名的单键是 mihomo 专属；Stash 只认
         # 「精确域名 / 通配域名 / geosite:<name>」，拼接键将被视作字面域名，无法命中。
-        if top == "dns" and indent == 4 and m_sub and "," in m_sub.group(3):
+        if top == "dns" and dns_key == "nameserver-policy" \
+                and indent == 4 and m_sub and "," in m_sub.group(3):
             flush()
-            policy_split = [d.strip() for d in m_sub.group(3).split(",") if d.strip()]
+            domains = [d.strip() for d in m_sub.group(3).split(",") if d.strip()]
+            suffix = line[m_sub.end():]
+            if suffix.strip() and not suffix.lstrip().startswith("#"):
+                out.extend(f'    "{dom}":{suffix}' for dom in domains)
+                changes.append(f"nameserver-policy 拆键 ×{len(domains)}")
+                continue
+            policy_split = domains
             policy_val = []
+            policy_tail = suffix
             changes.append(f"nameserver-policy 拆键 ×{len(policy_split)}")
             continue
 
@@ -262,7 +348,7 @@ def _sync_stash(config: dict) -> None:
 
     if policy_split is not None:
         for dom in policy_split:
-            out.append(f'    "{dom}":')
+            out.append(f'    "{dom}":{policy_tail}')
             out.extend(policy_val)
 
     # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
@@ -526,4 +612,3 @@ def _sync_stash_overlays(base_lines: list[str]) -> None:
         body = "\n".join(lines).rstrip() + "\n"
         changed = _write_stamped_if_changed(REPO_ROOT / target, body)
         print(f"  {'✓ ' + target + ' 已更新' if changed else '✓ ' + target + ' 无变化'}")
-

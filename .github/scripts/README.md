@@ -76,7 +76,9 @@ Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则�
 
 声明 `stash_output` 的 overlay 还生成定制 Stash 覆写。Stash 没有 JS 运行时开关，`disabled_by_default` 会移除对应组、路由和候选引用，并清理失去引用的规则集。遇到 Stash 尚未支持的 overlay 字段会报错，避免静默遗漏。
 
-Stash DNS 在 [stash.py](config_sync/stash.py) 单独适配，不修改 Surge 或其他平台的 DNS：使用 `follow-rule: false`，默认并发直连腾讯 `https://doh.pub/dns-query` 与阿里 `https://dns.alidns.com/dns-query`，保留引导 DNS、私网、NTP、国内域名策略及独立的 `proxy-server-nameserver`。这是按 [Stash 内置 DNS 文档](https://stash.wiki/features/dns-server) 和[官方配置示例](https://stash.wiki/configuration/example-config)选择的两条 DoH；域名策略按精确域名、通配域名、geosite 的优先级匹配，同级 geosite 使用配置顺序。
+Stash DNS 在 [stash.py](config_sync/stash.py) 按 [Stash 内置 DNS 文档](https://stash.wiki/features/dns-server)适配，保留 Clash/Mihomo 源中的主 DNS、引导 DNS、私网/NTP/国内域名策略、节点域名 DNS 和 `fake-ip-filter`，不另选主 DNS。源中的 `respect-rules: true` 或普通解析器的 `#RULES` 转为 Stash 的 `follow-rule: true`；没有规则路由要求时保持 `false`。当前源使用 Cloudflare `https://1.1.1.1/dns-query#RULES`，Stash 输出同一 DoH 地址并开启 `follow-rule`，让 DNS 请求按现有规则出站。腾讯/阿里 DoH 仍用于国内域名和独立的 `proxy-server-nameserver`；后者不会跟随代理规则，避免节点域名解析递归。
+
+Stash 官方 DNS 文档定义了 `#h3=true`，未提供 Mihomo 的 `#RULES` / `#策略名` 服务器后缀语法，转换时移除策略后缀、保留 HTTP/3 选项。`#RULES` 的功能由全局 `follow-rule` 适配，指定策略名的逐服务器路由不能等价保留；源配置混用跟随规则与直接出站的解析器时，也不能仅凭这个全局开关保证逐服务器等价。逗号拼接的 policy 键拆成独立域名；Stash 的 policy 按精确域名、通配域名、geosite 的优先级匹配，同级 geosite 使用配置顺序。Mihomo 的 `direct-nameserver` / `direct-nameserver-follow-policy` 没有 Stash 官方文档中的等价配置，因此不输出；对境外域名手动选择 DIRECT 时，两者可能使用不同解析器。监听、模式、缓存、IPv6 与 Fake IP 地址池等客户端管理项也不搬入 Stash 覆写。
 
 Stash 基座转换保留其余注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`，并过滤 mihomo 专属字段。节点从基础配置继承，主要设置块使用 `#!replace`。
 

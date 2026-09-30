@@ -1,4 +1,4 @@
-# Date: 2026-09-30 22:45:11
+# Date: 2026-10-01 00:33:58
 
 name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -22,16 +22,11 @@ hosts: #!replace
 # ── DNS ──
 
 dns: #!replace
-  # DNS 查询直接出站，不经代理规则转发；解析服务器由 nameserver-policy 选择。
-  follow-rule: false
-
-  # 主 DNS：未命中域名策略时，并发查询腾讯/阿里 DoH，采用最快响应。
-  nameserver:
-    - "https://doh.pub/dns-query"
-    - "https://dns.alidns.com/dns-query"
+  # DNS 查询按现有代理规则出站；代理节点域名使用独立 DNS 解析。
+  follow-rule: true
 
   # 引导 DNS：仅用于解析 nameserver 服务器的域名
-  # 只能填纯 IP 地址
+  # 除 system 外，服务器地址使用 IP；支持基于 IP 的加密 DNS
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
@@ -93,6 +88,10 @@ dns: #!replace
     - "*.mcdn.bilivideo.cn"
     # 其他需要真实 IP 解析的域名
     - "localhost.*.qq.com"
+
+  # 主 DNS：经代理查询干净结果，防止境外域名请求泄露至国内 DNS 服务商
+  nameserver:
+    - "https://1.1.1.1/dns-query"
 
   # 分域名 DNS 策略：精确域名 > 通配域名 > geosite；多个 geosite 按配置顺序匹配
   nameserver-policy:
