@@ -258,7 +258,7 @@ test('Stash collapsed IP summaries keep essential information visible and respec
   const outbound=await ipPanel({argument:'tile=outbound&mode=collapsed'});
   assert.equal(outbound.output.title,'出口 IP\n198.51.100.10');
   assert.equal(outbound.output.content,'🇹🇼 台北 · Example');
-  assert.equal(outbound.output.url,'https://ipinfo.io/198.51.100.10');
+  assert.equal(outbound.output.url,'https://ippure.com');
   const local=await ipPanel({argument:'tile=local&mode=collapsed'});
   assert.equal(local.output.title,'本地 IP\n203.0.113.2');
   assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');

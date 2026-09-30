@@ -57,8 +57,8 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.8
- * @date 2026-09-29
+ * @version 6.2.9
+ * @date 2026-09-30
  */
 
 // ==================== 全局配置 ====================
@@ -189,7 +189,7 @@ function done(o) {
       content: o.content || "检测失败",
       icon: stashTiles[args.tile]?.icon || stashTiles.outbound.icon,
       backgroundColor: o.backgroundColor || o["icon-color"] || "#9E9E9E",
-      url: o.url || (args.tile === "risk" ? "https://ippure.com" : "https://ipinfo.io")
+      url: "https://ippure.com"
     });
   } else {
     $done(o);
@@ -877,7 +877,6 @@ async function runStashTile() {
   });
   const m = ip => maskIP(ip, args.maskIP);
   const heading = (title, ip) => [title, ip ? m(ip) : ""].filter(Boolean).join("\n");
-  const ipURL = ip => args.maskIP === 0 ? "https://ipinfo.io/" + encodeURIComponent(ip) : "https://ipinfo.io";
 
   if (args.tile === "risk") {
     // 每次刷新只请求一次 IPPure；不回落其他评分源，也不复用可能属于旧节点的评分。
@@ -898,8 +897,7 @@ async function runStashTile() {
     ], color, {
       // Android 折叠卡片正文只有一行；标题第二行放类型，正文放风险值。
       title: tile.title + "\n" + typeText,
-      content: riskText,
-      url: "https://ippure.com"
+      content: riskText
     });
   }
 
@@ -920,8 +918,7 @@ async function runStashTile() {
     ], info ? tile.color : "#9E9E9E", {
       title: heading(tile.title, ip),
       content: info ? [[flag(sb?.country_code), compactStashLocation(info.country_name, true)].filter(Boolean).join(" "),
-        compactStashOrg(info.org)].join(" · ") : "百度地区查询失败",
-      url: ipURL(ip)
+        compactStashOrg(info.org)].join(" · ") : "百度地区查询失败"
     });
   }
 
@@ -961,8 +958,7 @@ async function runStashTile() {
   return render(lines, info ? tile.color : "#9E9E9E", {
     title: heading(tile.title, outIP),
     content: [[flag(info?.country_code || outRaw?.country_code), shortLocation].filter(Boolean).join(" "),
-      compactStashOrg(organization)].join(" · "),
-    url: ipURL(outIP)
+      compactStashOrg(organization)].join(" · ")
   });
 }
 
