@@ -1,5 +1,6 @@
 """Ensure Stash configuration wires the shared scripts to the right contexts."""
 from pathlib import Path
+import re
 import unittest
 from urllib.parse import parse_qs, urlsplit
 
@@ -41,9 +42,10 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertNotIn(jobs[0]['name'], [tile['name'] for tile in config['tiles']])
         self.assertEqual(parse_qs(jobs[0]['argument']), {'task': ['monitor'], 'notify': ['true']})
         self.assertEqual(jobs[0]['cron'], '*/10 * * * *')
+        version = re.search(r'@version ([\d.]+)', (ROOT / 'Surge/Module/Scripts/ip-security.js').read_text()).group(1)
         for context in [*config['tiles'], *jobs]:
             provider = config['script-providers'][context['name']]
-            self.assertEqual(urlsplit(provider['url']).query, '')
+            self.assertEqual(parse_qs(urlsplit(provider['url']).query), {'v': [version]})
             self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/ip-security.js'))
 
 
