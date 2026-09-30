@@ -115,7 +115,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
           const url=options.url;
           let body, status=200;
           if(url.includes('bilibili')) body={data:{addr:localIP,country:'中国',province:'广东',city:'深圳',isp:'电信'}};
-          else if(url.includes('2606:4700') || url.includes('api-ipv6')) {
+          else if(url.includes('2606:4700') || url.includes('api-ipv6') || url.includes('api6.ipify.org')) {
             if(outIPv6) body=url.includes('trace')?`ip=${outIPv6}\nloc=SG`:{ip:outIPv6};
             else status=503;
           }
@@ -123,13 +123,17 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
             if(ipFailure) status=503;
             else body=url.includes('trace')?`ip=${outIP}\nloc=SG`:{ip:outIP,country_code:'SG'};
           }
+          else if(url.includes('api.ipify.org')) {
+            if(ipFailure) status=503;
+            else body={ip:outIP};
+          }
           else if(url.includes('proxycheck')) {
             if(riskFailure) status=503;
             else body={[outIP]:{risk:12,type:'Residential'}};
           }
           else if(url.includes('ippure') || url.includes('scamalytics')) {
             if(riskFailure) {status=503;body='<html>service unavailable</html>';}
-            else body=ippureData===undefined?{ip:outIP,isResidential:true,isBroadcast:false,fraudScore:12}:ippureData;
+            else body=ippureData===undefined?{ip:ipFailure?null:outIP,isResidential:true,isBroadcast:false,fraudScore:12}:ippureData;
           }
           else if(url.includes('edns')) {if(dnsFailure)status=503;else body={dns:{ip:'203.0.113.53',geo:'China - Example DNS'}};}
           else if(url.includes('opendata.baidu')) body={status:'0',data:[{location:'广东省深圳市 电信'}]};
@@ -193,7 +197,7 @@ test('Stash home summary keeps full geography and organization in the approved d
     '出口 IP⁴：198.51.100.10','出口 IP⁶：2001:db8:85a3::8a2e:370:7334',
     '地区：🇭🇰 Kai Tsui Court, 東區, 香港','运营商：HKT Limited'
   ].join('\n'));
-  assert.equal(output.url,'https://ippure.com');assert.equal(requests.length,8);
+  assert.equal(output.url,'https://ippure.com');assert.equal(requests.length,7);
   assert.equal(requests.filter(r=>r.url.includes('ippure')).length,1);
   assert.equal(output.icon,undefined); // Preserve the IPPure icon supplied by the override.
   assert.deepEqual(apiCalls,[]);assert.deepEqual(notifications,[]);
@@ -230,21 +234,108 @@ test('Stash home summary retains independent results, hides absent IPv6 and hono
   assert.match(output.content,/出口 IP⁴：\[IP 已隐藏\]\n出口 IP⁶：\[IP 已隐藏\]/);
 });
 
-test('Stash home summary starts risk, local and outbound detection concurrently',async()=>{
+test('Stash home summary starts local and IPPure concurrently and shares IPPure with outbound',async()=>{
   const pending=new Map();
   const result=await ipPanel({argument:'tile=summary&mode=home',intercept(o,cb) {
-    const kind=o.url.includes('ippure')?'risk':o.url.includes('bilibili')?'local':
-      o.url==='https://1.1.1.1/cdn-cgi/trace'?'outbound':null;
+    const kind=o.url.includes('ippure')?'risk':o.url.includes('bilibili')?'local':null;
     if(!kind)return false;
     pending.set(kind,cb);
-    if(pending.size===3) {
+    if(pending.size===2) {
       pending.get('risk')(null,{status:200},JSON.stringify({ip:'198.51.100.10',fraudScore:12}));
       pending.get('local')(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));
-      pending.get('outbound')(null,{status:200},'ip=198.51.100.10\nloc=SG');
     }
     return true;
   }});
-  assert.equal(pending.size,3);assert.match(result.output.content,/IP 风控值：12% 低风险/);
+  assert.equal(pending.size,2);assert.match(result.output.content,/IP 风控值：12% 低风险/);
+  assert.match(result.output.content,/出口 IP：198\.51\.100\.10/);
+  assert.equal(result.requests.filter(o=>o.url.includes('ippure')).length,1);
+  assert.ok(!result.requests.some(o=>/trace|api\.ipify.org|api-ipv4/.test(o.url)));
+});
+
+test('Stash uses IPPure metadata when preferred geography fails, including each official location fallback',async()=>{
+  for(const [fields,location] of [[{city:'Test City',region:'Test Region',country:'Test Country'},'Test City, Test Region, Test Country'],
+    [{region:'Test Region',country:'Test Country'},'Test Region, Test Country'],[{country:'Test Country'},'Test Country']]) {
+    const result=await ipPanel({argument:'tile=summary&mode=home',timers:true,
+      ippureData:{ip:'198.51.100.10',...fields,asOrganization:'Example Network Limited',fraudScore:42,isResidential:true,isBroadcast:false},
+      intercept(o,cb) {if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}}
+    });
+    assert.match(result.output.content,/IP 风控值：42% 中风险/);
+    assert.ok(result.output.content.endsWith(`地区：${location}\n运营商：Example Network Limited`));
+    assert.equal(result.requests.filter(o=>o.url.includes('ippure')).length,1);
+    assert.ok(!result.requests.some(o=>/cdn-cgi|api-ipv|api\.ipify/.test(o.url)));
+  }
+  const partial=await ipPanel({argument:'mode=collapsed',ippureData:{ip:'198.51.100.10',asOrganization:'IPPure ISP'},
+    intercept(o,cb){if(o.url.includes('ipinfo')){cb(null,{status:200},'{"country":"SG"}');return true;}}
+  });
+  assert.match(partial.output.content,/Example Telecom/); // A valid primary ISP still wins.
+  const orgFallback=await ipPanel({argument:'mode=collapsed',ippureData:{ip:'198.51.100.10',asOrganization:'IPPure ISP'},
+    intercept(o,cb){
+      if(o.url.includes('ip-api.com')){cb('timeout',null,null);return true;}
+      if(o.url.includes('ipinfo')){cb(null,{status:200},'{"country":"SG"}');return true;}
+    }
+  });
+  assert.equal(orgFallback.output.content,'🇸🇬 SG · IPPure ISP');
+});
+
+test('Stash invalid IPPure responses use ipify without retrying IPPure or borrowing its metadata',async()=>{
+  for(const response of [{error:'timeout'}, {status:503,body:'{}'}, {body:'<html>bad JSON</html>'},
+    {body:{ip:'999.1.1.1',city:'Wrong City',asOrganization:'Wrong ISP'}},
+    {body:{ip:'2001:db8::2',city:'IPv6 City',asOrganization:'IPv6 ISP'}}, {body:null}]) {
+    const result=await ipPanel({argument:'mode=collapsed',intercept(o,cb){
+      if(o.url.includes('ippure')) {
+        cb(response.error||null,{status:response.status||200},typeof response.body==='string'?response.body:JSON.stringify(response.body));return true;
+      }
+      if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
+    }});
+    assert.equal(result.output.title,'出口 IP\n198.51.100.10');
+    assert.match(result.output.content,/地区查询失败/);
+    assert.doesNotMatch(result.output.content,/Wrong|IPv6 City|IPv6 ISP/);
+    assert.equal(result.requests.filter(o=>o.url.includes('ippure')).length,1);
+    assert.equal(result.requests.filter(o=>o.url.includes('api.ipify.org')).length,1);
+    assert.ok(!result.requests.some(o=>/cdn-cgi|api-ipv/.test(o.url)));
+  }
+});
+
+test('Stash rejects invalid or wrong-family fallback addresses without using a previous IP',async()=>{
+  for(const ip of ['2001:db8::1','999.1.1.1','bad-ip',null,42]) {
+    const store=new Map();await ipPanel({store,argument:'mode=collapsed'});
+    const r=await ipPanel({store,argument:'mode=collapsed',riskFailure:true,intercept(o,cb){
+      if(o.url.includes('api.ipify.org')){cb(null,{status:200},JSON.stringify({ip}));return true;}
+    }});
+    assert.equal(r.output.content,'无法获取出口 IPv4');assert.equal(r.output.backgroundColor,'#9E9E9E');
+  }
+  for(const ip of ['198.51.100.10','2001:::1',null]) {
+    const r=await ipPanel({argument:'tile=summary&mode=home',intercept(o,cb){
+      if(o.url.includes('api6.ipify.org')){cb(null,{status:200},JSON.stringify({ip}));return true;}
+    }});
+    assert.match(r.output.content,/出口 IP：198\.51\.100\.10/);assert.doesNotMatch(r.output.content,/出口 IP⁶/);
+  }
+});
+
+test('Stash reuses IPPure IPv6 and separately obtains IPv4 without another IPv6 probe',async()=>{
+  for(const timers of [false,true]) {
+    const r=await ipPanel({argument:'tile=summary&mode=home',timers,
+      ippureData:{ip:'2001:DB8::2',city:'IPv6 City',asOrganization:'IPv6 ISP',fraudScore:42}});
+    assert.match(r.output.content,/出口 IP⁴：198\.51\.100\.10\n出口 IP⁶：2001:db8::2/);
+    assert.doesNotMatch(r.output.content,/IPv6 City|IPv6 ISP/);
+    assert.equal(r.requests.filter(o=>o.url.includes('ippure')).length,1);
+    assert.equal(r.requests.filter(o=>o.url.includes('api.ipify.org')).length,1);
+    assert.ok(!r.requests.some(o=>/api6\.ipify|cdn-cgi|api-ipv/.test(o.url)));
+  }
+});
+
+test('Surge keeps Cloudflare IPv4 and IPv6 probes plus the ip.sb fallback',async()=>{
+  for(const failedPrimary of [false,true]) {
+    const r=await ipPanel({client:'surge',outIPv6:'2001:db8::1',intercept(o,cb){
+      if(failedPrimary && o.url.includes('cdn-cgi/trace')){cb('timeout',null,null);return true;}
+    }});
+    assert.match(r.output.content,/出口 IP⁴：198\.51\.100\.10\n出口 IP⁶：2001:db8::1/);
+    assert.ok(r.requests.some(o=>o.url==='https://1.1.1.1/cdn-cgi/trace'));
+    assert.ok(r.requests.some(o=>o.url.includes('2606:4700')));
+    assert.equal(r.requests.some(o=>o.url.includes('api-ipv4.ip.sb')),failedPrimary);
+    assert.equal(r.requests.some(o=>o.url.includes('api-ipv6.ip.sb')),failedPrimary);
+    assert.ok(!r.requests.some(o=>o.url.includes('ipify')));
+  }
 });
 
 test('Stash outbound tile uses Chinese geography without timers or Surge API',async()=>{
@@ -254,7 +345,7 @@ test('Stash outbound tile uses Chinese geography without timers or Surge API',as
   assert.match(output.content,/IPv6：\[IP 已隐藏\]/);assert.doesNotMatch(output.content,/198\.51|203\.0|2001:|流量统计|入口 IP/);
   assert.equal(output['icon-color'],undefined);assert.deepEqual(apiCalls,[]);
   assert.ok(requests.some(r=>r.url.includes('lang=zh-CN')));
-  assert.ok(!requests.some(r=>/ippure|proxycheck|scamalytics|edns|opendata/.test(r.url)));
+  assert.ok(!requests.some(r=>/proxycheck|scamalytics|edns|opendata/.test(r.url)));
   for(const req of requests){
     assert.ok(req.timeout>0 && req.timeout<=5);
     assert.equal(req.policy,undefined);
@@ -312,7 +403,7 @@ test('Stash scheduled notifications establish independent field baselines',async
   assert.equal(changed.notifications.length,1);assert.match(changed.notifications[0][0],/IP 已变化/);
   assert.doesNotMatch(changed.notifications[0].join('\n'),/198\.51|203\.0/);
   assert.deepEqual(JSON.parse(JSON.stringify(changed.output)),{});
-  assert.ok(changed.requests.every(r=>/bilibili|cdn-cgi\/trace|api-ipv[46]/.test(r.url)));
+  assert.ok(changed.requests.every(r=>/bilibili|ippure|ipify/.test(r.url)));
   assert.equal((await monitor({store,argument,outIP:'198.51.100.11'})).notifications.length,0);
   const localChanged=await monitor({store,localIP:'203.0.113.3',ipFailure:true});
   assert.equal(localChanged.notifications.length,1);assert.match(localChanged.notifications[0][2],/本地 IP/);
@@ -330,7 +421,7 @@ test('Stash node testing never changes scheduled notification baselines',async()
     assert.equal(result.output.icon,undefined);
     if(mode==='collapsed') {
       assert.equal(result.output.title,`出口 IP\n${outIP}`);
-      assert.ok(!result.requests.some(r=>/bilibili|ipv6|2606:4700/.test(r.url)));
+      assert.ok(!result.requests.some(r=>/bilibili|ipv6|2606:4700|api6\.ipify/.test(r.url)));
     }
     for(const req of result.requests)assert.equal(req.headers?.['X-Stash-Selected-Proxy'],undefined);
   }
@@ -555,7 +646,7 @@ test('Surge and Stash summaries include all eleven services in the requested ord
 test('IP metadata starts while IPv6 is still pending',async()=>{
   let pending, geoStarted=false;
   const r=await ipPanel({argument:'mode=home',intercept:(o,cb)=>{
-    if(o.url.includes('2606:4700')){pending=cb;return true;}
+    if(o.url.includes('api6.ipify.org')){pending=cb;return true;}
     if(o.url.includes('ip-api.com')){geoStarted=true;assert.equal(typeof pending,'function');pending(null,{status:503},'');}
   }});
   assert.ok(geoStarted);assert.match(r.output.content,/198\.51\.100\.10/);
@@ -608,17 +699,16 @@ test('Stash outbound geography uses existing HTTPS ipinfo data after ip-api fail
   }
 });
 test('Stash outbound retains only known country when both detailed geo sources fail',async()=>{
-  const r=await ipPanel({argument:'mode=collapsed',intercept:(o,cb)=>{
+  const r=await ipPanel({argument:'mode=collapsed',ippureData:{ip:'198.51.100.10',country:'SG'},intercept:(o,cb)=>{
     if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
   }});
   assert.equal(r.output.title,'出口 IP\n198.51.100.10');assert.equal(r.output.backgroundColor,'#1565C0');
-  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,3);
+  assert.equal(r.output.content,'SG · 运营商未知');assert.equal(r.requests.length,3);
 });
 test('Stash keeps current IP and unknown geography when every metadata source is empty',async()=>{
   for(const service of ['local','outbound']) {
     const r=await ipPanel({argument:`tile=${service}&mode=collapsed`,intercept:(o,cb)=>{
       if(o.url.includes('bilibili')) {cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));return true;}
-      if(o.url.includes('trace')) {cb(null,{status:200},'ip=198.51.100.10\n');return true;}
       if(/ip-api.com|ipinfo|opendata|ip.sb/.test(o.url)){cb('timeout',null,null);return true;}
     }});
     assert.equal(r.output.backgroundColor,'#9E9E9E');assert.match(r.output.content,/地区查询失败/);
