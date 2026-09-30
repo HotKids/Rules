@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-08-06 19:38:00
+# Date: 2026-09-30 13:10:01
 # Author: @HotKids
 
 # 通用设置
@@ -449,7 +449,7 @@ proxy-groups:
   # Speedtest
   - name: "⏱️ Speedtest"
     type: select
-    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speedtest.png
     use:
       - Server
 
