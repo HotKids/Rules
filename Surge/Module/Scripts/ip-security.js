@@ -9,7 +9,7 @@
  *
  * 数据来源：
  * ① 本地 IP: bilibili API (DIRECT)
- * ② 出口 IP: Surge 使用 Cloudflare trace → ip.sb；Stash 使用 IPPure → ipify，支持 IPv4/IPv6
+ * ② 出口 IP: Cloudflare trace → ip.sb；Stash 最后回落 ipify，支持 IPv4/IPv6
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQualityScore (可选，需 API Key) → ProxyCheck → IPPure → Scamalytics (兜底)
@@ -53,12 +53,12 @@
  * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
  * - mode: home / collapsed（独立卡片默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
- * - iOS 折叠卡片按 $environment.system 自动使用单行标题：Ⓓ / 🅟 + IP，⛨ + 纯净度百分比。
+ * - iOS 折叠卡片按 $environment.system 自动使用单行标题：Ⓓ / 🅟 + IP，纯净度只显示百分比。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *
- * @version 6.4.2
+ * @version 6.4.3
  * @date 2026-09-30
  */
 
@@ -72,7 +72,7 @@ const hasTimers = typeof setTimeout === "function";
 // 图标统一由覆写提供；更新检测结果时保留卡片 Logo。
 const stashTiles = {
   summary: { title: "IP 信息卡", color: "#9E9E9E" },
-  risk: { title: "IP 纯净度", marker: "⛨", color: "#88A788" },
+  risk: { title: "IP 纯净度", color: "#88A788" },
   dns: { title: "DNS 解析器", color: "#7357A6" },
   outbound: { title: "出口 IP", marker: "🅟", color: "#1565C0" },
   local: { title: "本地 IP", marker: "Ⓓ", color: "#00796B" }
@@ -264,7 +264,7 @@ function surgeAPI(method, path) {
   });
 }
 
-// 单次运行内去重：Surge 风险/类型、Stash 出口/风险/类型共享一次 IPPure 请求。
+// 单次运行内去重：风险/类型与 Stash 出口的备用元数据共享一次 IPPure 请求。
 // 不跨刷新缓存此响应，避免节点切换后沿用另一个出口。
 let _ippureInfoP = null, _ippureCardP = null;
 function getIPPureInfo() { return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType)); }
@@ -704,18 +704,45 @@ function normalizeStashIPPure(data) {
   };
 }
 
-// Stash 优先复用官方示例的 IPPure 响应；缺少 IPv4 时用 ipify，不依赖 CF 直连。
+// Stash 与 Surge 用相同的出口探测地址，避免把走直连的 IPPure 地址当成代理出口。
+// 单次运行内去重，首页、纯净度和出口卡片据同一次探测核对 IP。
+let _stashOutbound4P = null, _stashOutbound6P = null;
+async function probeStashOutbound4() {
+  const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace));
+  const traceIP = stashCacheIP(t?.ip);
+  if (traceIP && !traceIP.includes(":")) {
+    const code = /^[A-Z]{2}$/.test(t.loc || "") ? t.loc : "";
+    return { ip: traceIP, raw: { country_code: code, country: code } };
+  }
+  console.log("CF trace(v4) 失败，回落 ip.sb");
+  const sb = await httpJSON(CONFIG.urls.outboundIP);
+  const sbIP = stashCacheIP(sb?.ip);
+  if (sbIP && !sbIP.includes(":")) return { ip: sbIP, raw: sb };
+  console.log("ip.sb(v4) 失败，回落 ipify");
+  const backup = await httpJSON(CONFIG.urls.stashIPv4);
+  const backupIP = stashCacheIP(backup?.ip);
+  return backupIP && !backupIP.includes(":") ? { ip: backupIP } : null;
+}
+
+async function probeStashOutbound6() {
+  const deadline = Date.now() + CONFIG.ipv6Timeout;
+  const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace6, null, null, deadline));
+  const traceIP = stashCacheIP(t?.ip);
+  if (traceIP.includes(":")) return traceIP;
+  console.log("CF trace(v6) 失败，回落 ip.sb");
+  const sb = await httpJSON(CONFIG.urls.outboundIPv6, null, null, deadline);
+  const sbIP = stashCacheIP(sb?.ip);
+  if (sbIP.includes(":")) return sbIP;
+  console.log("ip.sb(v6) 失败，回落 ipify");
+  const backup = await httpJSON(CONFIG.urls.stashIPv6, null, null, deadline);
+  const backupIP = stashCacheIP(backup?.ip);
+  return backupIP.includes(":") ? backupIP : null;
+}
+
 // Surge 保持原有 Cloudflare trace → ip.sb。
 async function fetchOutbound4() {
   if (isStash) {
-    const info = await getIPPureInfo();
-    const ip = stashCacheIP(info?.ip);
-    if (ip && !ip.includes(":")) return { ip, geo: normalizeStashIPPure(info) };
-    console.log("IPPure 未提供有效 IPv4，使用 ipify 备用探测");
-    const backup = await httpJSON(CONFIG.urls.stashIPv4);
-    const backupIP = stashCacheIP(backup?.ip);
-    // 不把 IPPure 另一个地址的地区/风险套到备用探测结果上。
-    return backupIP && !backupIP.includes(":") ? { ip: backupIP } : null;
+    return _stashOutbound4P || (_stashOutbound4P = probeStashOutbound4());
   }
   const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace));
   if (t) return { ip: t.ip, raw: { country_code: t.loc, country: t.loc } };
@@ -726,12 +753,7 @@ async function fetchOutbound4() {
 
 async function fetchOutbound6() {
   if (isStash) {
-    const info = await getIPPureInfo();
-    const ip = stashCacheIP(info?.ip);
-    if (ip.includes(":")) return ip;
-    const data = await httpJSON(CONFIG.urls.stashIPv6, null, null, Date.now() + CONFIG.ipv6Timeout);
-    const ipv6 = stashCacheIP(data?.ip);
-    return ipv6.includes(":") ? ipv6 : null;
+    return _stashOutbound6P || (_stashOutbound6P = probeStashOutbound6());
   }
   const deadline = Date.now() + CONFIG.ipv6Timeout;
   const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace6, null, null, deadline));
@@ -1047,15 +1069,18 @@ function compactStashIPContent({ shortLocation, organization, countryCode }, fal
 }
 
 async function getStashRiskResult() {
-  // 每次刷新仍请求 IPPure；仅用本次响应确认的 IP 复用缺失字段。
-  // HTTP 整体失败时无法确认 IP，不以其他站点的出口或上次节点代替。
-  const info = await getIPPureInfo();
+  // 每次刷新请求 IPPure；必须属于本次独立探测确认的出口，才使用评分和同 IP 缓存。
+  const [info, exit] = await Promise.all([getIPPureInfo(), fetchOutbound4()]);
   if (!info || typeof info !== "object") return null;
-  const freshScore = typeof info.fraudScore === "number" ? info.fraudScore :
+  const pureIP = stashCacheIP(info.ip);
+  const expectedIP = pureIP.includes(":") ? stashCacheIP(await fetchOutbound6()) : exit?.ip;
+  const matched = !!pureIP && pureIP === expectedIP;
+  if (!matched) console.log("IPPure 未对应当前探测出口，不使用它的评分、类型和缓存");
+  const freshScore = !matched ? NaN : typeof info.fraudScore === "number" ? info.fraudScore :
     (typeof info.fraudScore === "string" && info.fraudScore.trim() ? Number(info.fraudScore) : NaN);
-  const { data } = stashLastGood("risk", info.ip, stashFields({
+  const { data } = matched ? stashLastGood("risk", pureIP, stashFields({
     score: freshScore, isResidential: info.isResidential, isBroadcast: info.isBroadcast
-  }));
+  })) : { data: {} };
   const score = data.score;
   const valid = Number.isFinite(score) && score >= 0 && score <= 100;
   const ipType = typeof data.isResidential === "boolean" ? (data.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
@@ -1098,18 +1123,22 @@ async function getStashLocalResult() {
 async function getStashOutboundResult(includeIPv6) {
   // 折叠卡片不展示 IPv6，也不承担通知；省去 IPv6 与本地 IP 辅助探测。
   const ipv6 = includeIPv6 ? fetchOutbound6() : Promise.resolve(null);
+  const pure = getIPPureInfo();
   const exit = await fetchOutbound4();
   const outIP = exit?.ip, outRaw = exit?.raw;
   if (!outIP) return null;
   // IPv4 一返回即查询地区；与可选 IPv6 并行，不等辅助请求结束再开始。
-  const [geo, org, outIPv6] = await Promise.all([
+  const [geo, org, outIPv6, pureInfo] = await Promise.all([
     stashGeo("ipapi-zh", outIP, CONFIG.urls.ipApi(outIP, "zh-CN"), undefined, data => !!normalizeIpApi(data)),
     stashGeo("ipinfo", outIP, CONFIG.urls.ipInfo(outIP), undefined, data => !!normalizeIpInfo(data)),
-    ipv6
+    ipv6, pure
   ]);
-  // ipinfo 同时可提供备用地区；最后使用同一 IPPure 响应的地区与运营商。
+  // IPPure 的请求可能走另一条分流；只有地址一致才把它当作备用元数据。
   const primaryInfo = normalizeIpApi(geo?.data), ipinfoInfo = normalizeIpInfo(org?.data);
-  const detectedInfo = exit.geo || normalizeIpSb(outRaw);
+  const probeInfo = normalizeIpSb(outRaw);
+  const sameIPPure = stashCacheIP(pureInfo?.ip) === outIP ? normalizeStashIPPure(pureInfo) : null;
+  const detectedInfo = Object.fromEntries(["country_code", "country_name", "city", "region", "org"]
+    .map(key => [key, sameIPPure?.[key] || probeInfo?.[key] || ""]));
   const fallback = ipinfoInfo || detectedInfo;
   const locationFields = info => ({
     location: info && [...new Set([info.city, info.region, geoLabel(info) || info.country_name].filter(Boolean))].join(", "),
@@ -1185,7 +1214,7 @@ async function runStashTile() {
       typeText,
       riskText
     ], color, {
-      // iOS 将标记和百分比放在同一行；Android 保留标题第二行，正文均放类型。
+      // iOS 标题只放百分比；Android 保留标题第二行，正文均放类型。
       title: heading(percentText),
       content: typeText
     });
@@ -1231,7 +1260,7 @@ async function runStashTile() {
 // ==================== 主执行函数 ====================
 (async () => {
   try {
-  console.log("=== IP 安全检测开始 (v6.4.2) ===");
+  console.log("=== IP 安全检测开始 (v6.4.3) ===");
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
   // 1. EVENT 触发时延迟等待网络稳定
