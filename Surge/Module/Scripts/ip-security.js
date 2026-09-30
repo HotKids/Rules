@@ -1023,6 +1023,15 @@ function compactStashOrg(organization) {
     .replace(/\s+(?:(?:Co\.?[,]?\s*)?Ltd\.?|Limited|Inc\.?|LLC|Corporation)\.?$/i, "").trim();
 }
 
+function compactStashIPContent({ shortLocation, organization, countryCode }, fallbackCountryCode) {
+  const code = countryCode || fallbackCountryCode;
+  const location = code === "CN" ? String(shortLocation || "").replace(/[省市]$/, "") : shortLocation;
+  let org = compactStashOrg(organization);
+  // 按去掉省/市后的地区字数缩短中国运营商；两字及以下保留“中国”。
+  if (code === "CN" && Array.from(location || "").length > 2) org = org.replace(/^中国/, "");
+  return [[flag(code), location || "地区查询失败"].filter(Boolean).join(" "), org].join(" · ");
+}
+
 async function getStashRiskResult() {
   // 每次刷新仍请求 IPPure；仅用本次响应确认的 IP 复用缺失字段。
   // HTTP 整体失败时无法确认 IP，不以其他站点的出口或上次节点代替。
@@ -1152,29 +1161,29 @@ async function runStashTile() {
   if (args.tile === "risk") {
     const result = await getStashRiskResult();
     if (!result) return fail("IPPure 检测失败");
-    const { color, riskText, typeText } = result;
+    const { color, riskText, typeText, valid, score, level } = result;
+    const percentText = valid ? score + "% " + level : riskText;
     return render([
       typeText,
       riskText
     ], color, {
-      // Android 折叠卡片正文只有一行；标题第二行放类型，正文放风险值。
-      title: tile.title + "\n" + typeText,
-      content: riskText
+      // Android 折叠卡片正文只有一行；标题第二行放百分比，正文放类型。
+      title: tile.title + "\n" + percentText,
+      content: typeText
     });
   }
 
   if (args.tile === "local") {
     const result = await getStashLocalResult();
     if (!result) return fail("无法获取直连公网 IP");
-    const { ip, countryCode, location, shortLocation, organization } = result;
+    const { ip, countryCode, location, organization } = result;
     return render([
       m(ip),
       location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败",
       organization || "运营商未知"
     ], location ? tile.color : "#9E9E9E", {
       title: heading(tile.title, ip),
-      content: location ? [[flag(countryCode), shortLocation].filter(Boolean).join(" "),
-        compactStashOrg(organization)].join(" · ") : "地区查询失败"
+      content: location ? compactStashIPContent(result) : "地区查询失败"
     }, args.maskIP === 0 ? "https://ippure.com/?ip=" + encodeURIComponent(ip) : undefined);
   }
 
@@ -1192,13 +1201,12 @@ async function runStashTile() {
 
   const result = await getStashOutboundResult(args.mode === "home");
   if (!result) return fail("无法获取出口 IPv4");
-  const { ip: outIP, ipv6: outIPv6, raw: outRaw, location, shortLocation, countryCode, organization } = result;
+  const { ip: outIP, ipv6: outIPv6, raw: outRaw, location, countryCode, organization } = result;
   const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "",
     location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败", organization];
   return render(lines, location ? tile.color : "#9E9E9E", {
     title: heading(tile.title, outIP),
-    content: [[flag(countryCode || outRaw?.country_code), shortLocation || "地区查询失败"].filter(Boolean).join(" "),
-      compactStashOrg(organization)].join(" · ")
+    content: compactStashIPContent(result, outRaw?.country_code)
   });
 }
 

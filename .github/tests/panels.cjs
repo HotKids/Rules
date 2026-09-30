@@ -213,7 +213,8 @@ test('Stash home summary keeps existing risk thresholds and colors including bou
     const collapsed=await ipPanel({argument:'tile=risk&mode=collapsed',ippureData});
     assert.equal(summary.output.backgroundColor,collapsed.output.backgroundColor);
     assert.equal(summary.output.content.split('\n')[0],
-      'IP 风控值：'+collapsed.output.content.replace(' / 100 · ','% '));
+      'IP 风控值：'+collapsed.output.title.split('\n')[1]);
+    assert.equal(summary.output.content.split('\n')[1],'IP 类型：'+collapsed.output.content);
     assert.match(summary.output.content,/IP 类型：机房 · 广播/);
   }
 });
@@ -369,9 +370,9 @@ test('Stash purity preserves classifications without a score and never invents m
     for(const fraudScore of [null,12]) {
       const {output,requests,notifications}=await ipPanel({argument:'tile=risk&mode=collapsed',
         ippureData:{ip:'192.0.2.22',isResidential,isBroadcast,fraudScore}});
-      assert.equal(output.title,'IP 纯净度\n'+label);
+      assert.equal(output.title,'IP 纯净度\n'+(fraudScore===null?'暂无有效评分':'12% 低风险'));
       assert.doesNotMatch(JSON.stringify(output),/192\.0\.2\.22/);
-      assert.equal(output.content,fraudScore===null?'暂无有效评分':'12 / 100 · 低风险');assert.equal(output.backgroundColor,fraudScore===null?'#9E9E9E':'#88A788');
+      assert.equal(output.content,label);assert.equal(output.backgroundColor,fraudScore===null?'#9E9E9E':'#88A788');
       assert.equal(output.url,'https://ippure.com');
       assert.equal(requests.length,1);assert.equal(requests[0].url,'https://my.ippure.com/v1/info');
       assert.equal(notifications.length,0);
@@ -440,9 +441,9 @@ test('Stash collapsed IP summaries keep essential information visible and respec
   assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');
   assert.equal(local.output.url,'https://ippure.com/?ip=203.0.113.2');
   const risk=await ipPanel({argument:'tile=risk&mode=collapsed'});
-  assert.equal(risk.output.title,'IP 纯净度\n住宅 · 原生');
+  assert.equal(risk.output.title,'IP 纯净度\n12% 低风险');
   assert.doesNotMatch(JSON.stringify(risk.output),/198\.51\.100\.10/);
-  assert.equal(risk.output.content,'12 / 100 · 低风险');
+  assert.equal(risk.output.content,'住宅 · 原生');
   assert.equal(risk.output.url,'https://ippure.com');
   for(const service of ['outbound','local','risk']) {
     const {output}=await ipPanel({argument:`tile=${service}&mode=collapsed&mask_ip=2`});
@@ -778,10 +779,10 @@ test('Stash purity reuses missing fields only for IPPure current IP and accepts 
   assert.equal(same.output.content,initial.output.content);assert.equal(same.output.title,initial.output.title);
   const fresh=await ipPanel({store,now:now+1200000,argument,
     ippureData:{ip:'198.51.100.10',fraudScore:0,isResidential:false,isBroadcast:false}});
-  assert.equal(fresh.output.content,'0 / 100 · 低风险');assert.equal(fresh.output.title,'IP 纯净度\n机房 · 原生');
+  assert.equal(fresh.output.content,'机房 · 原生');assert.equal(fresh.output.title,'IP 纯净度\n0% 低风险');
   for(const ip of ['198.51.100.11',undefined,'','Unknown','999.1.1.1']) {
     const next=await ipPanel({store,now:now+1800000,argument,outIP:'198.51.100.10',ippureData:{ip}});
-    assert.equal(next.output.backgroundColor,'#9E9E9E');assert.match(next.output.title,/类型未知/);
+    assert.equal(next.output.backgroundColor,'#9E9E9E');assert.match(next.output.content,/类型未知/);
     assert.equal(next.requests.length,1);
   }
   const failed=await ipPanel({store,now:now+1800000,argument,riskFailure:true});
@@ -792,7 +793,7 @@ test('Stash failed refreshes do not renew old fields and all-expired geography s
   await ipPanel({store,now,argument});
   await ipPanel({store,now:now+23*3600000,argument,ippureData:{ip:'198.51.100.10',fraudScore:90}});
   const partial=await ipPanel({store,now:now+25*3600000,argument,ippureData:{ip:'198.51.100.10'}});
-  assert.equal(partial.output.content,'90 / 100 · 高风险');assert.match(partial.output.title,/类型未知 · 来源未知/);
+  assert.equal(partial.output.title,'IP 纯净度\n90% 高风险');assert.match(partial.output.content,/类型未知 · 来源未知/);
   for(const service of ['local','outbound']) {
     const geoStore=new Map(), arg=`tile=${service}&mode=collapsed`;
     await ipPanel({store:geoStore,now,argument:arg});
@@ -825,7 +826,7 @@ test('Stash IP lookup failure never reuses a last-success address',async()=>{
   const store=new Map(), now=100000000, argument='tile=risk&mode=collapsed';
   await ipPanel({store,now,argument,ippureData:{ip:'2001:db8::1',fraudScore:0,isResidential:false,isBroadcast:false}});
   const same=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'2001:DB8::1'}});
-  assert.equal(same.output.content,'0 / 100 · 低风险');assert.match(same.output.title,/机房 · 原生/);
+  assert.equal(same.output.title,'IP 纯净度\n0% 低风险');assert.match(same.output.content,/机房 · 原生/);
   const changed=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'2001:db8::2'}});
   assert.equal(changed.output.backgroundColor,'#9E9E9E');
   for(const ip of ['2001:::1',':2001::1','2001::1:']) {
