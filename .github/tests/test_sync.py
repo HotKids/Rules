@@ -230,7 +230,7 @@ class StashGeneralUpstreamTests(unittest.TestCase):
 # > Gist
 ReverseProxy => fastly.jsdelivr.net
 # > Mapping
-LAN => https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
+LAN => https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
 
 # Stash
 >> Clash/Script/Stash.stoverride
@@ -253,8 +253,11 @@ IP-CIDR6,fc00::/7,no-resolve
         self.lan_asset = self.root / 'Clash/RuleSet/lancidr.txt'
         self.lan_asset.parent.mkdir()
         self.lan_asset.write_text("payload:\n  - '10.0.0.0/8'\n  - 'fc00::/7'\n", encoding='utf-8')
+        # URL versioning treats a compiled binary as opaque bytes; no CLI or download is needed.
+        self.lan_mrs = self.lan_asset.with_suffix('.mrs')
+        self.lan_mrs.write_bytes(b'compiled LAN fixture v1')
         self.inputs = (self.general, self.sync_config, self.ini, self.overlay,
-                       self.lan_source, self.lan_asset)
+                       self.lan_source, self.lan_asset, self.lan_mrs)
         self.outputs = {
             'Sample': 'Clash/Sample.yaml',
             'Mihomo': 'Clash/Mihomo.yaml',
@@ -265,6 +268,18 @@ IP-CIDR6,fc00::/7,no-resolve
             'Script': 'Clash/Script/Script.js',
             'MyScript': 'Clash/Script/MyStash.js',
         }
+        self.git('init', '-q')
+        self.lan_revision = self.commit('Publish initial compiled LAN')
+
+    def git(self, *args):
+        return subprocess.run(['git', *args], cwd=self.root, check=True,
+                              capture_output=True, text=True).stdout.strip()
+
+    def commit(self, title):
+        self.git('add', '.')
+        self.git('-c', 'user.name=Test', '-c', 'user.email=test@example.invalid',
+                 'commit', '-qm', title)
+        return self.git('rev-parse', 'HEAD')
 
     def generate(self):
         before = {path: path.read_bytes() for path in self.inputs}
@@ -318,7 +333,8 @@ process.stdout.write(JSON.stringify(context.result));
 
     def generated_bytes(self):
         return {path.relative_to(self.root): path.read_bytes()
-                for path in self.root.rglob('*') if path.is_file() and path not in self.inputs}
+                for path in self.root.rglob('*') if path.is_file() and path not in self.inputs
+                and '.git' not in path.relative_to(self.root).parts}
 
     def assert_lan_providers(self, outputs):
         paths = {}
@@ -327,13 +343,16 @@ process.stdout.write(JSON.stringify(context.result));
                 self.assertIn('RULE-SET,LAN,DIRECT,no-resolve', output['rules'])
                 provider = output['rule-providers']['LAN']
                 self.assertEqual(provider['url'],
-                    'https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs')
+                    f'https://fastly.jsdelivr.net/gh/HotKids/Rules@{self.lan_revision}/Clash/RuleSet/lancidr.mrs')
                 self.assertEqual(provider['behavior'], 'ipcidr')
                 self.assertEqual(provider['format'], 'mrs')
                 self.assertTrue(provider['path'].startswith('./Provider/RuleSet/'))
                 self.assertEqual(Path(provider['path']).suffix, '.mrs')
                 self.assertRegex(Path(provider['path']).stem, r'[0-9a-f]{8,64}')
                 paths[name] = provider['path']
+                with patch.object(config_common, 'REPO_ROOT', self.root):
+                    self.assertEqual(config_common._lan_cache_filename(provider['url'], 'LAN.mrs'),
+                                     Path(provider['path']).name)
                 self.assertEqual(output['rule-providers']['Upstream']['url'],
                     'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Upstream.yaml')
                 self.assertEqual(output['rule-providers']['Upstream']['path'],
@@ -359,6 +378,7 @@ dns:
             + '# Extra annotation, no effective rule change\n', encoding='utf-8')
         self.lan_asset.write_text('# Updated asset annotation\n'
                                   + self.lan_asset.read_text(encoding='utf-8'), encoding='utf-8')
+        self.commit('Update LAN documentation without recompiling the binary')
         comment_only = self.generate()
         self.assertEqual(self.assert_lan_providers(comment_only), first_paths)
         self.assertEqual(self.generated_bytes(), first_bytes)
@@ -367,16 +387,37 @@ dns:
                                   + 'IP-CIDR,172.16.0.0/12,no-resolve\n', encoding='utf-8')
         self.lan_asset.write_text(self.lan_asset.read_text(encoding='utf-8')
                                  + "  - '172.16.0.0/12'\n", encoding='utf-8')
+        self.lan_mrs.write_bytes(b'compiled LAN fixture v2: includes 172.16.0.0/12')
+        self.lan_revision = self.commit('Publish recompiled LAN after upstream CIDR change')
         changed = self.generate()
         changed_paths = self.assert_lan_providers(changed)
         for name in first_paths:
             self.assertNotEqual(changed_paths[name], first_paths[name], name)
+            self.assertNotEqual(changed[name]['rule-providers']['LAN']['url'],
+                                first[name]['rule-providers']['LAN']['url'], name)
             for key in ('url', 'path'):
                 self.assertEqual(changed[name]['rule-providers']['Upstream'][key],
                                  first[name]['rule-providers']['Upstream'][key])
         changed_bytes = self.generated_bytes()
         self.generate()
         self.assertEqual(self.generated_bytes(), changed_bytes)
+
+    def test_unpublished_lan_artifact_stops_generation_without_publishing_old_urls(self):
+        self.general.write_text('mode: rule\ndns:\n  nameserver: [192.0.2.53]\n', encoding='utf-8')
+        self.generate()
+        before = self.generated_bytes()
+        self.lan_mrs.write_bytes(b'recompiled but not published')
+        with self.assertRaisesRegex(RuntimeError, '请先编译并提交规则产物'):
+            self.generate()
+        self.assertEqual(self.generated_bytes(), before)
+
+    def test_fastly_lan_requires_a_published_asset_but_other_providers_stay_offline(self):
+        with patch.object(config_common, 'REPO_ROOT', self.root):
+            other = 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Upstream.yaml'
+            self.assertEqual(config_common._pin_lan_fastly_urls(other), other)
+            with self.assertRaisesRegex(RuntimeError, 'LAN.yaml'):
+                config_common._pin_lan_fastly_urls(
+                    'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/LAN.yaml')
 
     def test_general_edits_and_deletions_reach_every_config_and_keep_private_groups(self):
         class GeneralDumper(yaml.SafeDumper):

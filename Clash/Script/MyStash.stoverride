@@ -1,4 +1,4 @@
-# Date: 2026-10-01 01:33:57
+# Date: 2026-10-01 01:50:30
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -261,7 +261,7 @@ proxy-groups: #!replace
   # Speedtest
   - name: "⏱️ Speedtest"
     type: select
-    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speedtest.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
     include-all: true
 
   # Adblock
@@ -623,7 +623,7 @@ rule-providers: #!replace
     behavior: ipcidr
     format: mrs
     path: ./Provider/RuleSet/LAN-e87c63f8926f.mrs
-    url: https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs
+    url: https://fastly.jsdelivr.net/gh/HotKids/Rules@db26e13ca71977d0f6c36a75ae0a01a810715147/Clash/RuleSet/lancidr.mrs
     interval: 86400
 
 # 规则

@@ -5,6 +5,7 @@ from pathlib import Path
 import hashlib
 import ipaddress
 import re
+import subprocess
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
@@ -128,12 +129,47 @@ def _apply_gist_reverse_proxy(text: str, host: str) -> str:
     )
 
 
+_FASTLY_LAN_RE = re.compile(
+    r"https://fastly\.jsdelivr\.net/gh/HotKids/Rules@master/"
+    r"(Clash/RuleSet/(?:LAN\.yaml|lancidr\.(?:txt|mrs)))(?=$|[\s'\"])")
+
+
+def _pin_lan_fastly_urls(text: str) -> str:
+    """LAN 使用已提交产物的不可变 Fastly 地址，避免分支缓存复用旧地址段。"""
+    revisions: dict[str, str] = {}
+
+    def pin(match: re.Match) -> str:
+        asset = match.group(1)
+        if asset not in revisions:
+            try:
+                result = subprocess.run(
+                    ["git", "log", "-1", "--format=%H", "HEAD", "--", asset],
+                    cwd=REPO_ROOT, capture_output=True, text=True, check=True, timeout=15)
+                revision = result.stdout.strip()
+                if not re.fullmatch(r"[0-9a-f]{40}", revision):
+                    raise ValueError("产物尚未提交")
+                published = subprocess.run(
+                    ["git", "show", f"{revision}:{asset}"], cwd=REPO_ROOT,
+                    capture_output=True, check=True, timeout=15).stdout
+                if published != (REPO_ROOT / asset).read_bytes():
+                    raise ValueError("工作区产物与已提交版本不同")
+            except (OSError, ValueError, subprocess.SubprocessError) as error:
+                raise RuntimeError(
+                    f"无法确定 LAN 的已发布 Fastly 版本 ({asset})：请先编译并提交规则产物；"
+                    "生成配置需要 Git 仓库及完整历史。") from error
+            revisions[asset] = revision
+        return match.group(0).replace("@master/", f"@{revisions[asset]}/", 1)
+
+    return _FASTLY_LAN_RE.sub(pin, text)
+
+
 def _lan_cache_filename(url: str, filename: str) -> str:
     """自有 LAN 缓存随有效上游规则换版本，避免客户端继续载入已删除规则。"""
-    prefixes = (HOTKIDS_CLASH_PREFIX,
-                "https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/",
-                "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/")
-    asset = next((url[len(prefix):] for prefix in prefixes if url.startswith(prefix)), "")
+    match = re.fullmatch(
+        r"https://(?:raw\.githubusercontent\.com/HotKids/Rules/[^/]+/|"
+        r"(?:cdn|fastly)\.jsdelivr\.net/gh/HotKids/Rules@[^/]+/)"
+        r"Clash/RuleSet/(LAN\.yaml|lancidr\.(?:txt|mrs))", url)
+    asset = match.group(1) if match else ""
     if asset not in {
         "LAN.yaml", "lancidr.txt", "lancidr.mrs",
     }:

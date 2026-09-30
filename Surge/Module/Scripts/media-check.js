@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.2 (2026-09-30)
+ * @version      2.2.3 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -617,26 +617,61 @@ class ServiceChecker {
    */
   static async checkGemini() {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
-    try {
-      const res = await Utils.request({ url: "https://gemini.google.com", timeout: 10000 });
-      if (/unsupported_country|not (?:currently )?available in (?:your|this) (?:country|region)/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
-      const issue = Utils.responseProblem(res);
-      if (issue) unknown = issue;
-      else if (/456(?:31641|17354),\s*null,\s*true/.test(res.body)) {
+    const logError = (stage, error) => {
+      const result = Utils.errorResult(error);
+      // 不打印请求地址或原始异常，避免 API Key 出现在日志中。
+      const http = String(error?.message || error).match(/\bHTTP\s+\d{3}\b/i)?.[0];
+      console.log(`[Gemini v2.2.3] ${stage}请求失败：${http || result.region}`);
+      return result;
+    };
+    const pages = ["https://gemini.google.com", "https://gemini.google.com/app?hl=en"];
+    for (const [index, url] of pages.entries()) {
+      const stage = index ? "应用页" : "首页";
+      try {
+        const res = await Utils.request({ url, timeout: 10000 });
+        const flags = ["45631641", "45617354"].map(id =>
+          `${id}=${res.body.match(new RegExp(`${id},\\s*null,\\s*(true|false)`))?.[1] || "missing"}`);
         const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
-        return Utils.createResult(STATUS.OK, region || "OK");
+        const redirect = /https?:\/\/(?:[^/]+\.)?google\.com\/sorry(?:[/?#]|$)/i.test(res.url) ? "验证页"
+          : /^https?:\/\/consent\.google\./i.test(res.url) ? "同意页"
+          : /^https?:\/\/accounts\.google\./i.test(res.url) ? "登录页" : "无";
+        const issue = Utils.responseProblem(res);
+        let result = issue || Utils.createResult(STATUS.ERROR, "Error");
+        let reason = issue?.reason || (issue ? `HTTP ${res.status} 或空响应` : "缺少可用标记");
+        if (redirect !== "无" || /our systems have detected unusual traffic|unusual traffic from your computer network/i.test(res.body)) {
+          reason = redirect !== "无" ? redirect : "异常流量验证";
+          result = Utils.createResult(STATUS.ERROR, "Error");
+        } else if (issue?.reason) {
+          reason = issue.reason;
+        } else if (/unsupported_country|not (?:currently )?available in (?:your|this) (?:country|region)/i.test(res.body)) {
+          reason = "地区限制";
+          result = Utils.createResult(STATUS.FAIL, "NO");
+        } else if (!issue && /456(?:31641|17354),\s*null,\s*true/.test(res.body)) {
+          reason = "可用";
+          result = Utils.createResult(STATUS.OK, region || "OK");
+        }
+        console.log(`[Gemini v2.2.3] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}`);
+        if (result.status === STATUS.OK || result.status === STATUS.FAIL) return result;
+        unknown = result;
+        // 仅正常首页缺标记时回落；限流、验证和网络错误保持原结果。
+        if (res.status !== 200 || reason !== "缺少可用标记" || flags.some(flag => !flag.endsWith("=missing"))) break;
+      } catch (error) {
+        unknown = logError(stage, error);
+        break;
       }
-    } catch (error) { unknown = Utils.errorResult(error); }
+    }
     const apiKey = (ARGS.geminiapikey || "").trim();
     if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase()) && !/[{}]/.test(apiKey)) {
       try {
         const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}` });
+        const issue = Utils.responseProblem(res);
+        console.log(`[Gemini v2.2.3] API: HTTP ${res.status}; 长度=${res.body.length}; 原因=${issue?.reason || "响应已收到"}`);
+        if (issue?.reason) return issue;
         if (/user location is not supported|unsupported_country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
         if (/key not valid|api_key_invalid/i.test(res.body)) return Utils.createResult(STATUS.ERROR, "Invalid Key");
-        const issue = Utils.responseProblem(res);
         if (issue) return issue;
         if (res.status === 200 && Array.isArray(JSON.parse(res.body).models)) return Utils.createResult(STATUS.OK, "OK");
-      } catch (error) { unknown = Utils.errorResult(error); }
+      } catch (error) { unknown = logError("API", error); }
     }
     return unknown;
   }

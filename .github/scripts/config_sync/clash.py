@@ -21,6 +21,7 @@ from .common import (
     _SURGE_PROTOCOL_TO_NETWORK,
     _anchor_matches,
     _apply_gist_reverse_proxy,
+    _pin_lan_fastly_urls,
     _behavior_from_url,
     _derive_provider_name,
     _fmt_group,
@@ -1437,7 +1438,7 @@ def _sync_clash(
     parts += [groups_yaml, rp_rules_yaml]
 
     gist_host = clash.get("gist_reverse_proxy") or config.get("gist_reverse_proxy", "")
-    body = _apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host)
+    body = _pin_lan_fastly_urls(_apply_gist_reverse_proxy("\n\n".join(parts) + "\n", gist_host))
     changed = _write_stamped_if_changed(REPO_ROOT / clash_out, body)
     print(f"  {'✓ ' + clash_out + ' 已更新' if changed else '✓ ' + clash_out + ' 无变化'}")
 

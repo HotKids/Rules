@@ -89,7 +89,7 @@ Stash 通用字段的取舍以[官方配置样例](https://stash.wiki/configurat
 
 Stash 基座转换保留可沿用的源内容、注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`。主要设置块使用 `#!replace`。
 
-自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明，当前临时使用已核验新版的 jsDelivr 主入口 `cdn.jsdelivr.net`，设备验证后恢复 Fastly。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。规则发布后 CDN 仍可能保留旧分支内容，必要时通过 jsDelivr 官方 purge 接口刷新并比对源文件。
+自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明。生成器将 Fastly 的 LAN 分支地址固定为对应规则产物最后一次提交的版本，避免 CDN 分支缓存继续返回旧地址段；工作区产物未提交或无法取得 Git 历史时停止生成，不发布旧版本。Sync Rules 成功发布编译产物后会触发 Sync Config，未来上游修改会同步到新的不可变地址。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。生成配置需要完整 Git 历史（`fetch-depth: 0`）。
 
 ## 规则同步
 

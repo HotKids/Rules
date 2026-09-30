@@ -8,7 +8,7 @@ const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', nam
 const quiet = {log(){},error(){}};
 
 async function tile(service, response, {client="stash", argument="", store=new Map()}={}) {
-  const requests = [];
+  const requests = [], logs = [];
   let deadline;
   try {
     const output = await Promise.race([
@@ -21,14 +21,14 @@ async function tile(service, response, {client="stash", argument="", store=new M
         };
         const ctx = {$environment:client==='stash'?{'stash-version':'1.1.5'}:{'surge-version':'5'}, $script:{type:client==='stash'?'tile':'generic'},
           $argument:`service=${service}&mode=collapsed&notify=false&nfprice=false&${argument}`,
-          $httpClient:{get:request,post:request},$done:resolve,console:quiet,
+          $httpClient:{get:request,post:request},$done:resolve,console:{...quiet,log:(...args)=>logs.push(args.join(' '))},
           $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}}};
         // Intentionally no setTimeout/clearTimeout: Android Stash compatibility.
         try {vm.runInNewContext(read('media-check.js'),ctx,{timeout:1000});} catch(e){reject(e);}
       }),
       new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('tile did not finish')),2000);})
     ]);
-    return {output,requests};
+    return {output,requests,logs};
   } finally {clearTimeout(deadline);}
 }
 
@@ -877,8 +877,56 @@ test('Gemini maps ISO regions and keeps availability without a country',async()=
   assert.equal((await tile('gemini',{body:'45631641,null,true'})).output.content,'OK');
   assert.equal((await tile('gemini',{body:'<html>unknown</html>'})).output.content,'Error');
 });
+test('Gemini recovers a normal unrecognized home through the application page',async()=>{
+  for(const client of ['stash','surge']) {
+    const r=await tile('gemini',o=>o.url.includes('/app?')?
+      {body:'<script>[[45617354, null, true], [null,2,1,200,"SGP"]]</script>'}:
+      {body:'<title>Google Gemini</title><a href="/app">Try Gemini</a>'},{client});
+    if(client==='stash')assert.equal(r.output.content,'SG');
+    else assert.match(r.output.content,/Gemini\s+➟ SG/);
+    const requests=r.requests.filter(o=>o.url.startsWith('https://gemini.google.com'));
+    assert.equal(requests.length,2);
+    assert.equal(requests[1].url,'https://gemini.google.com/app?hl=en');
+    assert.equal(requests[1].timeout,10);
+    assert.ok(requests.every(o=>!o.policy&&!o.headers['X-Stash-Selected-Proxy']));
+    assert.match(r.logs.join('\n'),/首页: HTTP 200.*原因=缺少可用标记/);
+    assert.match(r.logs.join('\n'),/应用页: HTTP 200.*地区=SG; 原因=可用/);
+  }
+});
+test('Gemini logs failures without promoting verification pages, false flags or country-only HTML',async()=>{
+  for(const response of [
+    {status:429,body:'rate limited'}, {status:403,body:'Forbidden'},
+    {status:429,body:'not available in your country'},
+    {status:403,headers:{'cf-mitigated':'challenge'},body:'not available in your country'},
+    {url:'https://www.google.com/sorry/index?continue=hidden',body:'45631641,null,true ,2,1,200,"SGP"'},
+    {url:'https://consent.google.com/m?continue=hidden',body:'45631641,null,true'},
+    {url:'https://accounts.google.com/ServiceLogin?continue=hidden',body:'45631641,null,true'},
+    {body:'Our systems have detected unusual traffic from your computer network'},
+    {body:'<title>Just a moment...</title>45631641,null,true'},
+    {body:'45631641,null,false 45617354,null,false ,2,1,200,"SGP"'},
+  ]) {
+    const r=await tile('gemini',response);
+    assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.3.*首页: HTTP/);
+    assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
+  }
+  const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
+  assert.equal(unknown.output.content,'Error');assert.equal(unknown.requests.length,2);
+  const failed=await tile('gemini',{error:'HTTP 503 https://gemini.google.com'});
+  assert.equal(failed.output.content,'Error');assert.match(failed.logs.join('\n'),/首页请求失败：HTTP 503/);
+  const timedOut=await tile('gemini',{error:'request timed out'});
+  assert.equal(timedOut.output.content,'Timeout');assert.match(timedOut.logs.join('\n'),/首页请求失败：Timeout/);
+  const key='SECRET-KEY';
+  const api=await tile('gemini',o=>o.url.includes('generativelanguage')?
+    {error:`failed https://generativelanguage.googleapis.com/v1beta/models?key=${key}`}:{body:'unknown'},
+    {argument:`geminiapikey=${key}`});
+  assert.equal(api.output.content,'Error');assert.match(api.logs.join('\n'),/API请求失败：Error/);
+  assert.doesNotMatch(api.logs.join('\n'),/SECRET-KEY|key=/);
+});
 test('Gemini API fallback distinguishes valid models, rate limits and invalid keys',async()=>{
   for(const [response,expected] of [[{body:{models:[]}},'OK'],[{status:429,body:'rate limited'},'Error'],
+    [{status:429,body:'User location is not supported API_KEY_INVALID'},'Error'],
+    [{status:403,headers:{'cf-mitigated':'challenge'},body:'User location is not supported'},'Error'],
     [{status:400,body:'API_KEY_INVALID'},'Invalid Key'],[{status:400,body:'User location is not supported'},'NO']]) {
     const result=await tile('gemini',o=>o.url.includes('generativelanguage')?response:{body:'unknown page'},
       {argument:'geminiapikey=example'});

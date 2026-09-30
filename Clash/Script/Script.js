@@ -187,7 +187,7 @@ function main(config) {
     // Mail
     { name: '📧 Mail', type: 'select', proxies: ['🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Email.png' },
     // Speedtest
-    { name: '⏱️ Speedtest', type: 'select', 'include-all-providers': true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speedtest.png' },
+    { name: '⏱️ Speedtest', type: 'select', 'include-all-providers': true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png' },
     // Adblock
     { name: '🚧 AdGuard', type: 'select', proxies: ['🔘 DIRECT', '⛔️ REJECT', '📛 REJECT-DROP'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Block.png' },
     // DIRECT
@@ -269,7 +269,7 @@ function main(config) {
     'China': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs' },
     'China ASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/China_ASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
     'China IP': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/China_IP.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs' },
-    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN-e87c63f8926f.mrs', url: 'https://cdn.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/lancidr.mrs' },
+    'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN-e87c63f8926f.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@db26e13ca71977d0f6c36a75ae0a01a810715147/Clash/RuleSet/lancidr.mrs' },
   };
 
   // ── 规则 ──

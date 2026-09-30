@@ -16,6 +16,11 @@ on:
       - '.github/scripts/requirements.txt'
       - '.github/tests/**'
   workflow_dispatch:
+  # Sync Rules 使用 GITHUB_TOKEN 提交产物，其 push 不会触发另一个工作流。
+  # 等编译产物发布成功，再同步 LAN 的不可变 CDN 地址。
+  workflow_run:
+    workflows: [Sync Rules]
+    types: [completed]
 
 permissions:
   contents: write
@@ -28,11 +33,13 @@ concurrency:
 
 jobs:
   sync:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
         with:
           ref: master
+          fetch-depth: 0
       - name: Install validation dependencies
         run: python3 -m pip install -r .github/scripts/requirements.txt
 
