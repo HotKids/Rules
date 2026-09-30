@@ -7,8 +7,9 @@
 | 需要调整的内容 | 源文件 |
 |---|---|
 | 通用策略组、路由及 Surge 设置 | [Surge/Profile.conf](../../Surge/Profile.conf) |
+| Mihomo 与 Stash 共用的通用设置（模式、日志、Hosts、DNS 等） | [Clash/General.yaml](../../Clash/General.yaml) |
 | 平台输出路径、排除项、URL 映射、重命名 | [sync-config.txt](sync-config.txt) |
-| 各平台静态基座 | [sync-config/](sync-config/) 的 ini 文件；Clash 还读取 [General.yaml](../../Clash/General.yaml) |
+| 各平台静态基座 | [sync-config/](sync-config/) 的 ini 文件 |
 | `My*` 私人差异 | [sync-config/Enhanced/](sync-config/Enhanced/) 的 overlay JSON |
 | 手工规则与 Streaming 成员 | [Surge/RULE-SET/](../../Surge/RULE-SET/) |
 | 上游规则及镜像模块 | [sync-rules.txt](sync-rules.txt) |
@@ -76,11 +77,17 @@ Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则�
 
 声明 `stash_output` 的 overlay 还生成定制 Stash 覆写。Stash 没有 JS 运行时开关，`disabled_by_default` 会移除对应组、路由和候选引用，并清理失去引用的规则集。遇到 Stash 尚未支持的 overlay 字段会报错，避免静默遗漏。
 
+Mihomo 与 Stash 的通用设置以 `Clash/General.yaml` 为共同上游：`clash.ini` 引入 General，生成 `Clash/Sample.yaml` 后派生 `Mihomo.yaml`、Mihomo JS 覆写和两份 Stash 覆写。Mihomo YAML 和 JS 按当次上游输出全部通用字段，新增字段无需修改生成器中的字段表；节点、策略组、规则集及路由等结构块仍按各自流程处理。Stash 沿用可共用的源字段（如 `mode`、`log-level`、`hosts`、`proxy-hosts`）并适配 DNS 等差异，不另设固定值。修改 General 已在 `sync-config.yml` 的 push 触发范围内；直接修改生成产物会在下次同步时被覆盖。私人 overlay 只叠加它声明的差异。
+
 Stash DNS 在 [stash.py](config_sync/stash.py) 按 [Stash 内置 DNS 文档](https://stash.wiki/features/dns-server)适配，保留 Clash/Mihomo 源中的主 DNS、引导 DNS、私网/NTP/国内域名策略、节点域名 DNS 和 `fake-ip-filter`，不另选主 DNS。源中的 `respect-rules: true` 或普通解析器的 `#RULES` 转为 Stash 的 `follow-rule: true`；没有规则路由要求时保持 `false`。当前源使用 Cloudflare `https://1.1.1.1/dns-query#RULES`，Stash 输出同一 DoH 地址并开启 `follow-rule`，让 DNS 请求按现有规则出站。腾讯/阿里 DoH 仍用于国内域名和独立的 `proxy-server-nameserver`；后者不会跟随代理规则，避免节点域名解析递归。
 
-Stash 官方 DNS 文档定义了 `#h3=true`，未提供 Mihomo 的 `#RULES` / `#策略名` 服务器后缀语法，转换时移除策略后缀、保留 HTTP/3 选项。`#RULES` 的功能由全局 `follow-rule` 适配，指定策略名的逐服务器路由不能等价保留；源配置混用跟随规则与直接出站的解析器时，也不能仅凭这个全局开关保证逐服务器等价。逗号拼接的 policy 键拆成独立域名；Stash 的 policy 按精确域名、通配域名、geosite 的优先级匹配，同级 geosite 使用配置顺序。Mihomo 的 `direct-nameserver` / `direct-nameserver-follow-policy` 没有 Stash 官方文档中的等价配置，因此不输出；对境外域名手动选择 DIRECT 时，两者可能使用不同解析器。监听、模式、缓存、IPv6 与 Fake IP 地址池等客户端管理项也不搬入 Stash 覆写。
+Stash 官方 DNS 文档定义了 `#h3=true`，未提供 Mihomo 的 `#RULES` / `#策略名` 服务器后缀语法，转换时移除策略后缀、保留 HTTP/3 选项。`#RULES` 的功能由全局 `follow-rule` 适配，指定策略名的逐服务器路由不能等价保留；源配置混用跟随规则与直接出站的解析器时，也不能仅凭这个全局开关保证逐服务器等价。逗号拼接的 policy 键拆成独立域名；Stash 的 policy 按精确域名、通配域名、geosite 的优先级匹配，同级 geosite 使用配置顺序。Mihomo 的 `direct-nameserver` / `direct-nameserver-follow-policy` 没有 Stash 官方文档中的等价配置，因此不输出；对境外域名手动选择 DIRECT 时，两者可能使用不同解析器。DNS 子键中的监听、解析模式、缓存参数、IPv6 与 Fake IP 地址池也因未确认可等价沿用而省略；这不影响已保留的顶层 `mode`。
 
-Stash 基座转换保留其余注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`，并过滤 mihomo 专属字段。节点从基础配置继承，主要设置块使用 `#!replace`。
+Stash 通用字段的取舍以[官方配置样例](https://stash.wiki/configuration/example-config)、[主机名映射](https://stash.wiki/features/hosts)及相关功能文档为依据。LAN 代理、TCP 并发、TUN 和嗅探有明确功能证据，但未据此假定 Mihomo 同名 YAML 参数可等价生效；这些未获官方 YAML 文档确认的源参数暂不搬入覆写。省略字段不代表 Stash 缺少该能力，也不代表已证实字段被忽略。`proxies` 是主动省略的例外，使用户基础配置中的节点得以继承；`proxy-hosts` 是独立的代理域名映射字段，不与 `hosts` 合并。
+
+源中的顶层 `ipv6: false` 和 DNS 的 `ipv6: false` 均不输出，不能声称 Stash 已继承 Mihomo 禁用 IPv6 的效果。[官方 IPv6 文档](https://stash.wiki/faq/ipv6-compatible)说明 Stash 通常根据系统网络自动选择 IPv4/IPv6；「启用 Tunnel IPv6 路由」管理隧道路由，不能视为上述源开关的等价替代。
+
+Stash 基座转换保留可沿用的源内容、注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`。主要设置块使用 `#!replace`。
 
 ## 规则同步
 

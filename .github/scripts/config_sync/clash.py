@@ -526,8 +526,7 @@ def gen_rules_and_providers(
 _JS_IDENT_RE = re.compile(r"^[A-Za-z_$][A-Za-z0-9_$]*$")
 
 
-# main(config) 中按此顺序透传的基础设置 key（proxies / proxy-providers /
-# proxy-groups / rule-providers / rules 单独处理，不在此列）
+# 已知基础设置的展示顺序；通用键从源配置动态读取，不以此表限制透传范围。
 # 基础设置的分节 + 每键注释（单一来源）：Mihomo.yaml 与 Script.js 两个生成器共用，
 # 保证锚点版 YAML 和覆写脚本的分节/注释永远一致。结构：[(分节标题, [(键, [注释行, ...])])]
 _CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
@@ -588,12 +587,31 @@ _CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
 ]
 
 
-# 覆写脚本要接管的基础键，直接由上表派生（顺序一致）
-_CLASH_SCRIPT_BASE_KEYS = [key for _, items in _CLASH_BASE_SECTIONS for key, _ in items]
+# 节点、策略、规则与 YAML 锚点由各自的生成步骤处理，不能作为通用设置重复输出。
+_CLASH_STRUCTURAL_KEYS = frozenset({
+    "proxies", "proxy-providers", "proxy-groups", "rule-providers", "rules", "anchors",
+})
+
+
+def _clash_base_sections(data: dict) -> list[tuple[str, list[tuple[str, list[str]]]]]:
+    """保留既有分节，把源中新增的通用顶层键按声明顺序追加，避免静默丢失。"""
+    sections: list[tuple[str, list[tuple[str, list[str]]]]] = []
+    known_keys: set[str] = set()
+    for section, items in _CLASH_BASE_SECTIONS:
+        known_keys.update(key for key, _ in items)
+        present = [(key, comments) for key, comments in items if key in data]
+        if present:
+            sections.append((section, present))
+    extra = [(key, []) for key in data
+             if key not in known_keys and key not in _CLASH_STRUCTURAL_KEYS]
+    if extra:
+        sections.append(("其他通用设置", extra))
+    return sections
 
 
 def _js_string(s: str) -> str:
-    escaped = s.replace("\\", "\\\\").replace("'", "\\'")
+    escaped = (s.replace("\\", "\\\\").replace("'", "\\'")
+               .replace("\r", "\\r").replace("\n", "\\n"))
     return f"'{escaped}'"
 
 
@@ -962,21 +980,18 @@ def _gen_mihomo_yaml(sample_yaml_text: str) -> str:
         "# Date: ",
         "# Author: @HotKids",
         "#",
-        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
+        "# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。",
         "",
     ]
 
-    # 基础设置分节 + 注释来自 _CLASH_BASE_SECTIONS（与 Script.js 生成器共享单一来源）
-    for section, items in _CLASH_BASE_SECTIONS:
-        present = [(k, cs) for k, cs in items if k in cfg]
-        if not present:
-            continue
+    # 与 Script.js 共用分节，源中的新增通用字段同样透传。
+    for section, items in _clash_base_sections(cfg):
         L.append(f"# ── {section} ──")
         L.append("")
-        for key, comments in present:
+        for key, comments in items:
             for cline in comments:
                 L.append(f"# {cline}")
-            L.append(f"{key}: {_yaml_flow(cfg[key])}")
+            L.append(f"{_yaml_flow(key)}: {_yaml_flow(cfg[key])}")
         L.append("")
 
     # 节点 + 锚点
@@ -1143,17 +1158,18 @@ def _gen_clash_script_js(
 
     if overlay:
         source_lines = [
-            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf 与 Clash/General.yaml（经",
             f" * Clash/Mihomo.yaml）叠加 sync-config/Enhanced/{overlay_label}（私人差异声明）",
-            " * 而来，直接修改本文件将在下次同步时被覆盖。公共部分请修改 Surge/Profile.conf；",
+            " * 而来，直接修改本文件将在下次同步时被覆盖。通用设置请修改 Clash/General.yaml；",
+            " * 策略/规则请修改 Surge/Profile.conf；",
             " * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）",
             f" * 请改 {overlay_label}。",
         ]
     else:
         source_lines = [
-            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经",
+            " * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf 与 Clash/General.yaml（经",
             " * Clash/Mihomo.yaml）转译而来，直接修改本文件将在下次同步时被覆盖；",
-            " * 如需调整请修改 Surge/Profile.conf。",
+            " * 通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。",
         ]
 
     lines = [
@@ -1161,7 +1177,7 @@ def _gen_clash_script_js(
         " * mihomo 覆写脚本（Enhance Script）· HotKids/Rules",
         " *",
         " * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅",
-        " * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的",
+        " * （如 https://sub.hotkids.me）动态套用本仓库 Surge/Profile.conf 与 Clash/General.yaml 的",
         " * 策略组、分流规则与基础设置，不必依赖机场自带配置。",
         " *",
         *source_lines,
@@ -1218,14 +1234,11 @@ def _gen_clash_script_js(
         "  }",
         "",
     ]
-    # 基础设置：分节 + 注释与 Mihomo.yaml 共享同一来源（_CLASH_BASE_SECTIONS），
+    # 基础设置：分节 + 注释与 Mihomo.yaml 共享同一来源，新通用键不另设白名单，
     # 单行紧凑输出（与锚点版的 flow 单行风格对齐）
-    for section, items in _CLASH_BASE_SECTIONS:
-        present = [(k, cs) for k, cs in items if k in data]
-        if not present:
-            continue
+    for section, items in _clash_base_sections(data):
         lines.append(f"  // ── {section} ──")
-        for key, comments in present:
+        for key, comments in items:
             for cline in comments:
                 lines.append(f"  // {cline}")
             lines.append(f"  config[{_js_string(key)}] = {_to_js_inline(data[key])};")
@@ -1515,5 +1528,3 @@ def _sync_clash(
             continue
         existing.unlink()
         print(f"  ✓ {existing.relative_to(REPO_ROOT)} 已删除（失效残留）")
-
-

@@ -2,12 +2,13 @@
  * mihomo 覆写脚本（Enhance Script）· HotKids/Rules
  *
  * 用途：在 Clash Verge Rev / FlClash / Bettbox 等支持「覆写脚本」的 mihomo 客户端里，对任意订阅
- * （如 https://sub.hotkids.me）动态套用与本仓库 Surge/Profile.conf 等效的
+ * （如 https://sub.hotkids.me）动态套用本仓库 Surge/Profile.conf 与 Clash/General.yaml 的
  * 策略组、分流规则与基础设置，不必依赖机场自带配置。
  *
- * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf（经
+ * 自动生成，请勿手动修改：由 sync-config.py 从 Surge/Profile.conf 与 Clash/General.yaml（经
  * Clash/Mihomo.yaml）叠加 sync-config/Enhanced/myscriptcolor.overlay.json（私人差异声明）
- * 而来，直接修改本文件将在下次同步时被覆盖。公共部分请修改 Surge/Profile.conf；
+ * 而来，直接修改本文件将在下次同步时被覆盖。通用设置请修改 Clash/General.yaml；
+ * 策略/规则请修改 Surge/Profile.conf；
  * 私人差异（改名 / 换图标 / 额外分组 / 分组类型 / 候选节点 / 默认开关等）
  * 请改 myscriptcolor.overlay.json。
  *

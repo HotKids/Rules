@@ -16,7 +16,7 @@ import yaml
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
 import _common as common
-from config_sync import parser, common as config_common, stash
+from config_sync import parser, common as config_common, clash, stash
 
 
 def load(name):
@@ -208,6 +208,214 @@ class ConfigTests(unittest.TestCase):
         result = stash._stash_apply_overlay(lines, overlay, 'test')
         text = '\n'.join(result)
         self.assertLess(text.index('name: "'), text.index('# Rule Provider documentation'))
+
+
+class StashGeneralUpstreamTests(unittest.TestCase):
+    """Exercise the General include and both generators against isolated inputs."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        scripts = self.root / '.github/scripts'
+        enhanced = scripts / 'sync-config/Enhanced'
+        enhanced.mkdir(parents=True)
+        self.general = self.root / 'Clash/General.yaml'
+        self.general.parent.mkdir()
+        self.sync_config = scripts / 'sync-config.txt'
+        self.sync_config.write_text('''# Clash
+>> Clash/Sample.yaml
+# > Builtin
+<< .github/scripts/sync-config/clash.ini
+
+# Stash
+>> Clash/Script/Stash.stoverride
+''', encoding='utf-8')
+        self.ini = scripts / 'sync-config/clash.ini'
+        self.ini.write_text('<< Clash/General.yaml\n', encoding='utf-8')
+        self.overlay = enhanced / 'MyStash.overlay.json'
+        self.overlay.write_text(json.dumps({
+            'output': 'Clash/Script/MyStash.js',
+            'stash_output': 'Clash/Script/MyStash.stoverride',
+            'group_overrides': {'Proxy': {'type': 'url-test', 'interval': 456}},
+        }), encoding='utf-8')
+        self.inputs = (self.general, self.sync_config, self.ini, self.overlay)
+        self.outputs = {
+            'Sample': 'Clash/Sample.yaml',
+            'Mihomo': 'Clash/Mihomo.yaml',
+            'Stash': 'Clash/Script/Stash.stoverride',
+            'MyStash': 'Clash/Script/MyStash.stoverride',
+        }
+        self.script_outputs = {
+            'Script': 'Clash/Script/Script.js',
+            'MyScript': 'Clash/Script/MyStash.js',
+        }
+
+    def generate(self):
+        before = {path: path.read_bytes() for path in self.inputs}
+        with contextlib.ExitStack() as stack:
+            for module in (parser, config_common, clash, stash):
+                stack.enter_context(patch.object(module, 'REPO_ROOT', self.root))
+            for module in (parser, config_common):
+                stack.enter_context(patch.object(module, 'SYNC_CONFIG_TXT', self.sync_config))
+            stack.enter_context(patch.dict(config_common._GENERAL_INJECT, {
+                '@@PROXY_TEST_URL@@': 'https://probe.example.invalid/generate_204',
+            }, clear=True))
+            stack.enter_context(patch.object(parser.urllib.request, 'urlopen',
+                side_effect=AssertionError('General synchronization must stay offline')))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            config = parser.parse_sync_txt()
+            self.assertEqual(config['Clash']['include_file'], 'Clash/General.yaml')
+            clash._sync_clash(config, ['DIRECT = direct'], ['Proxy = select, DIRECT'], [
+                # A static URL creates a provider mapping; no provider is downloaded.
+                'RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Upstream.list,Proxy',
+                'FINAL,Proxy',
+            ])
+            sample = self.root / self.outputs['Sample']
+            sample_bytes = sample.read_bytes()
+            stash._sync_stash(config)
+            self.assertEqual(sample.read_bytes(), sample_bytes)
+        self.assertEqual({path: path.read_bytes() for path in self.inputs}, before)
+        outputs = {name: yaml.safe_load((self.root / path).read_text(encoding='utf-8'))
+                   for name, path in self.outputs.items()}
+        outputs.update({name: self.run_script(path) for name, path in self.script_outputs.items()})
+        return outputs
+
+    def run_script(self, path):
+        runner = '''const fs = require('fs');
+const vm = require('vm');
+const source = fs.readFileSync(process.argv[1], 'utf8');
+const context = {config: JSON.parse(fs.readFileSync(0, 'utf8'))};
+vm.runInNewContext(source + '\\nresult = main(config);', context);
+process.stdout.write(JSON.stringify(context.result));
+'''
+        subscription = {
+            'proxies': [{'name': 'Fixture', 'type': 'socks5',
+                         'server': 'node.example.invalid', 'port': 1080}],
+            'hosts': {},
+            'dns': {},
+        }
+        result = subprocess.run(['node', '-e', runner, str(self.root / path)],
+                                input=json.dumps(subscription), text=True, check=True,
+                                capture_output=True)
+        return json.loads(result.stdout)
+
+    def generated_bytes(self):
+        return {path.relative_to(self.root): path.read_bytes()
+                for path in self.root.rglob('*') if path.is_file() and path not in self.inputs}
+
+    def test_general_edits_and_deletions_reach_every_config_and_keep_private_groups(self):
+        class GeneralDumper(yaml.SafeDumper):
+            def increase_indent(self, flow=False, indentless=False):
+                return super().increase_indent(flow, indentless=False)
+
+        generations = [
+            ({
+                'mixed-port': 7890,
+                'mode': 'rule',
+                'log-level': 'info',
+                'hosts': {'old.example.invalid': '192.0.2.10',
+                          'shared.example.invalid': '192.0.2.11'},
+                'proxy-hosts': {'old-node.example.invalid': '192.0.2.20',
+                                'shared-node.example.invalid': '192.0.2.21'},
+                'keep-alive-idle': 27,
+                'dns': {
+                    'enable': True,
+                    'respect-rules': False,
+                    'default-nameserver': ['192.0.2.53'],
+                    'nameserver': ['https://192.0.2.54/dns-query#RULES'],
+                    'fallback': ['https://192.0.2.58/dns-query#RULES'],
+                    'nameserver-policy': {
+                        'old.example.invalid,alias.example.invalid': ['https://192.0.2.55/dns-query#RULES&h3=true'],
+                        'shared.example.invalid': ['192.0.2.56'],
+                    },
+                    'proxy-server-nameserver': ['https://192.0.2.57/dns-query#RULES'],
+                    'fake-ip-filter': ['+.lan', '*.old.example.invalid'],
+                },
+            }, {
+                'follow-rule': True,
+                'default-nameserver': ['192.0.2.53'],
+                'nameserver': ['https://192.0.2.54/dns-query'],
+                'nameserver-policy': {
+                    'old.example.invalid': ['https://192.0.2.55/dns-query#h3=true'],
+                    'alias.example.invalid': ['https://192.0.2.55/dns-query#h3=true'],
+                    'shared.example.invalid': ['192.0.2.56'],
+                },
+                'proxy-server-nameserver': ['https://192.0.2.57/dns-query'],
+                'fake-ip-filter': ['+.lan', '*.old.example.invalid'],
+            }),
+            ({
+                'mixed-port': 7890,
+                'mode': 'global',
+                'log-level': 'warning',
+                'hosts': {'shared.example.invalid': '198.51.100.11',
+                          'new.example.invalid': '198.51.100.12'},
+                'proxy-hosts': {'shared-node.example.invalid': '198.51.100.21',
+                                'new-node.example.invalid': '198.51.100.22'},
+                'dns': {
+                    'enable': True,
+                    'respect-rules': False,
+                    'default-nameserver': ['198.51.100.53', '203.0.113.53'],
+                    'nameserver': ['https://198.51.100.54/dns-query#h3=true',
+                                   'tls://203.0.113.54'],
+                    'fallback': ['https://198.51.100.58/dns-query#RULES'],
+                    'nameserver-policy': {
+                        'shared.example.invalid': ['https://198.51.100.55/dns-query'],
+                        'new.example.invalid': 'system',
+                    },
+                    'proxy-server-nameserver': ['https://198.51.100.57/dns-query'],
+                },
+            }, {
+                'follow-rule': False,
+                'default-nameserver': ['198.51.100.53', '203.0.113.53'],
+                'nameserver': ['https://198.51.100.54/dns-query#h3=true',
+                               'tls://203.0.113.54'],
+                'nameserver-policy': {
+                    'shared.example.invalid': ['https://198.51.100.55/dns-query'],
+                    'new.example.invalid': 'system',
+                },
+                'proxy-server-nameserver': ['https://198.51.100.57/dns-query'],
+            }),
+        ]
+        for style, dumper in (('indented', GeneralDumper), ('indentless', yaml.SafeDumper)):
+            for revision, (general, stash_dns) in enumerate(generations, 1):
+                with self.subTest(style=style, revision=revision):
+                    self.general.write_text('# Upstream General fixture\n' + yaml.dump(
+                        general, Dumper=dumper, sort_keys=False), encoding='utf-8')
+                    outputs = self.generate()
+                    for name, output in outputs.items():
+                        with self.subTest(output=name):
+                            for key in ('mode', 'log-level', 'hosts', 'proxy-hosts'):
+                                self.assertEqual(output[key], general[key], key)
+                            mihomo_outputs = ('Sample', 'Mihomo', 'Script', 'MyScript')
+                            expected_dns = general['dns'] if name in mihomo_outputs else stash_dns
+                            self.assertEqual(output['dns'], expected_dns)
+                            if name in mihomo_outputs:
+                                if revision == 1:
+                                    self.assertEqual(output['keep-alive-idle'], general['keep-alive-idle'])
+                                else:
+                                    self.assertNotIn('keep-alive-idle', output)
+                            self.assertEqual(output['rules'][-1], 'MATCH,Proxy')
+                            group = next(g for g in output['proxy-groups'] if g['name'] == 'Proxy')
+                            private = name in ('MyStash', 'MyScript')
+                            self.assertEqual(group['type'], 'url-test' if private else 'select')
+                            self.assertEqual(group['proxies'], ['DIRECT'])
+                            if private:
+                                self.assertEqual(group['interval'], 456)
+                            if name in ('Stash', 'MyStash'):
+                                self.assertNotIn('fallback', output['dns'])
+                            if revision == 2:
+                                self.assertNotIn('fake-ip-filter', output['dns'])
+                                self.assertNotIn('old.example.invalid', output['hosts'])
+                                self.assertNotIn('old-node.example.invalid', output['proxy-hosts'])
+                                self.assertNotIn('old.example.invalid', output['dns']['nameserver-policy'])
+                    for name in ('Stash', 'MyStash'):
+                        text = (self.root / self.outputs[name]).read_text(encoding='utf-8')
+                        self.assertNotIn('#RULES', text)
+                        self.assertNotIn('&RULES', text)
+                    once = self.generated_bytes()
+                    self.generate()
+                    self.assertEqual(self.generated_bytes(), once)
 
 
 class StashDNSTests(unittest.TestCase):

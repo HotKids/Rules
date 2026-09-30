@@ -1,8 +1,8 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-09-30 13:10:01
+# Date: 2026-10-01 01:04:34
 # Author: @HotKids
 #
-# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
+# 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。
 
 # ── 通用设置 ──
 

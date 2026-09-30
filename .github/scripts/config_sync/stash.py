@@ -18,11 +18,13 @@ from .common import (
 # ---------------------------------------------------------------------------
 #
 # Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
-# 同一定位）：整份配置原样转录，只在 Stash 与 mihomo 真正有差异的点上改写，因此
-# 可以直接作为覆写文件导入 Stash 使用；Stash 专属适配之外逐行转录（含注释与排版）。
+# 同一定位）：保留可用于覆写的源设置、注释与排版，应用 Stash 适配及节点继承策略。
+# 共用 Clash/General.yaml 的通用设置，不另维护 Stash 默认值。
 
-# 1) mihomo 专属的顶层键 / 整块——Stash 文档中不存在，且多为 Stash 由客户端自身管理
-#    的能力（监听端口、TUN、嗅探、geo 数据源等），连同其前置注释一并省略。
+# 1) 下列 mihomo 顶层参数未获所核验 Stash 官方 YAML 文档确认，连同前置注释省略。
+#    部分对应能力由 Stash 内置或应用设置控制；省略不代表功能不存在或字段确定无效。
+#    特别是 ipv6: false 的省略不等价于关闭 Stash IPv6，Tunnel 路由开关也非总开关。
+#    proxies 是主动省略的例外：该字段可用于 Stash，此覆写保留基础配置中的节点。
 _STASH_DROP_TOP = {
     "mixed-port", "allow-lan", "bind-address", "ipv6", "external-controller",
     "unified-delay", "tcp-concurrent", "find-process-mode", "geodata-loader",
@@ -201,7 +203,9 @@ def _sync_stash(config: dict) -> None:
 
         # ── 逗号拼接的 nameserver-policy 键：收集值行后按域名展开 ──
         if policy_split is not None:
-            if len(line) - len(line.lstrip()) >= 6:
+            # YAML 允许列表项与所属键采用相同缩进（PyYAML 默认写法）。
+            indent = len(line) - len(line.lstrip())
+            if indent >= 6 or (indent == 4 and stripped.startswith("- ")):
                 policy_val.append(_stash_clean_dns_line(line))
                 continue
             for dom in policy_split:
@@ -267,7 +271,7 @@ def _sync_stash(config: dict) -> None:
             continue
 
         # ── dns：按 Stash 支持的子键过滤 ──
-        if top == "dns" and indent == 2 and m_sub:
+        if top == "dns" and indent == 2 and m_sub and not stripped.startswith("- "):
             key = m_sub.group(3).strip()
             dns_key = key
             dns_keep = key in _STASH_DNS_KEEP
@@ -283,7 +287,8 @@ def _sync_stash(config: dict) -> None:
             flush()
             out.append(_stash_clean_dns_line(line) if key != "fake-ip-filter" else line)
             continue
-        if top == "dns" and indent > 2 and not dns_keep:
+        if top == "dns" and not dns_keep \
+                and (indent > 2 or stripped.startswith("- ")):
             buf.clear()
             continue
 
@@ -358,7 +363,7 @@ def _sync_stash(config: dict) -> None:
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem}",
-        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
         'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
     ]
@@ -483,7 +488,8 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
             lines[i] = f"name: {Path(overlay['stash_output']).stem}"
         elif l.startswith("desc: "):
             lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
-                        f"叠加 {label}），请勿手动修改；如需调整请修改 Surge/Profile.conf。")
+                        f"叠加 {label}），请勿手动修改；通用设置请修改 Clash/General.yaml，"
+                        f"策略/规则请修改 Surge/Profile.conf，私人差异请修改 {label}。")
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():
