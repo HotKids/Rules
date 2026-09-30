@@ -25,7 +25,15 @@ class TileConfigurationTests(unittest.TestCase):
     def test_ip_notification_context_is_separate_from_tiles(self):
         config = yaml.safe_load((PANELS / 'ip-security-panel.stoverride').read_text())
         self.assertEqual([parse_qs(t['argument'])['tile'][0] for t in config['tiles']],
-                         ['outbound', 'local', 'risk'])
+                         ['summary', 'outbound', 'local', 'risk'])
+        home, *collapsed = config['tiles']
+        self.assertFalse(home['collapsed'])
+        self.assertEqual(home['title'], 'IP 信息卡')
+        self.assertEqual(home['icon'], 'https://ippure.com/logo.png')
+        self.assertEqual(parse_qs(home['argument'])['mode'], ['home'])
+        self.assertEqual(home['interval'], 600)
+        self.assertTrue(all(tile['collapsed'] for tile in collapsed))
+        self.assertTrue(all(parse_qs(tile['argument'])['mode'] == ['collapsed'] for tile in collapsed))
         for tile in config['tiles']:
             self.assertEqual(parse_qs(tile['argument'])['notify'], ['false'])
         jobs = config['cron']['script']

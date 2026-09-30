@@ -47,17 +47,17 @@
  * ip-security-event = type=event,event-name=network-changed,timeout=15,script-path=ip-security.js,argument=TYPE=EVENT&ipqs_key=YOUR_API_KEY&event_delay=2&notify=true
  *
  * @author HotKids&Claude
- * Stash：ip-security-panel.stoverride 默认折叠显示，600 秒刷新；与 Surge 共用此文件。
- * - 三张 Tile：outbound 出口、local 本地、risk 纯净度（风险与类型），各自只执行需要的请求。
+ * Stash：ip-security-panel.stoverride 提供首页聚合与三张折叠卡片，600 秒刷新；与 Surge 共用此文件。
+ * - summary 首页 IP 信息卡；outbound 出口、local 本地、risk 纯净度维持独立折叠检测。
  * - 默认：风险仅 IPPure、本地百度、出口 ipapi-zh、mask_ip=0、tw_flag=tw、notify=true。
  * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
- * - mode: home / collapsed（覆写默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
+ * - mode: home / collapsed（独立卡片默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *
- * @version 6.3.2
+ * @version 6.4.0
  * @date 2026-09-30
  */
 
@@ -68,6 +68,7 @@ const isStash = (typeof $environment !== "undefined" &&
 const hasTimers = typeof setTimeout === "function";
 // 图标统一由覆写提供；更新检测结果时保留卡片 Logo。
 const stashTiles = {
+  summary: { title: "IP 信息卡", color: "#9E9E9E" },
   risk: { title: "IP 纯净度", color: "#88A788" },
   dns: { title: "DNS 解析器", color: "#7357A6" },
   outbound: { title: "出口 IP", color: "#1565C0" },
@@ -989,7 +990,118 @@ function compactStashOrg(organization) {
     .replace(/\s+(?:(?:Co\.?[,]?\s*)?Ltd\.?|Limited|Inc\.?|LLC|Corporation)\.?$/i, "").trim();
 }
 
+async function getStashRiskResult() {
+  // 每次刷新仍请求 IPPure；仅用本次响应确认的 IP 复用缺失字段。
+  // HTTP 整体失败时无法确认 IP，不以其他站点的出口或上次节点代替。
+  const info = await getIPPureInfo();
+  if (!info || typeof info !== "object") return null;
+  const freshScore = typeof info.fraudScore === "number" ? info.fraudScore :
+    (typeof info.fraudScore === "string" && info.fraudScore.trim() ? Number(info.fraudScore) : NaN);
+  const { data } = stashLastGood("risk", info.ip, stashFields({
+    score: freshScore, isResidential: info.isResidential, isBroadcast: info.isBroadcast
+  }));
+  const score = data.score;
+  const valid = Number.isFinite(score) && score >= 0 && score <= 100;
+  const ipType = typeof data.isResidential === "boolean" ? (data.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
+  const ipSrc = typeof data.isBroadcast === "boolean" ? (data.isBroadcast ? "广播 IP" : "原生 IP") : "来源未知";
+  const level = score < 40 ? "低风险" : score < 70 ? "中风险" : "高风险";
+  const color = !valid ? "#9E9E9E" : score < 40 ? "#88A788" : score < 70 ? "#D4A017" : "#C44444";
+  const riskText = valid ? score + " / 100 · " + level : "暂无有效评分";
+  const typeText = [ipType.replace(/ IP$/, ""), ipSrc.replace(/ IP$/, "")].join(" · ");
+  return { score, valid, level, color, riskText, typeText };
+}
+
+async function getStashLocalResult() {
+  const local = await httpJSON(CONFIG.urls.localIP, "DIRECT");
+  const ip = local?.data?.addr;
+  if (!ip) return null;
+  const [baidu, sb] = await Promise.all([
+    stashGeo("baidu", ip, CONFIG.urls.baiduGeo(ip), "DIRECT", data => !!normalizeOpendata(data)),
+    stashGeo("flag", ip, CONFIG.urls.ipSbGeo(ip), "DIRECT", data => /^[A-Z]{2}$/.test(data?.country_code || ""), 1000)
+  ]);
+  const baiduInfo = normalizeOpendata(baidu?.data), biliInfo = normalizeBilibili(local);
+  const fallback = biliInfo || normalizeIpSb(sb?.data);
+  if (baiduInfo && /^(移动|联通|电信|广电)$/.test(baiduInfo.org)) baiduInfo.org = "中国" + baiduInfo.org;
+  const fallbackLocation = [...new Set([fallback?.country_name, fallback?.region, fallback?.city].filter(Boolean))].join(" ");
+  const { data } = stashLastGood("local", ip, {
+    ...stashFields({ location: baiduInfo?.country_name,
+      shortLocation: baiduInfo && compactStashLocation(baiduInfo.country_name, true),
+      organization: baiduInfo?.org }, baidu?.ts),
+    ...stashFields({ countryCode: sb?.data?.country_code }, sb?.ts)
+  }, stashFields({
+    location: fallbackLocation,
+    shortLocation: compactStashLocation(fallback?.city || fallback?.region || fallback?.country_name, true),
+    organization: fallback?.org,
+    countryCode: fallback?.country_code || (fallback?.country_name === "中国" ? "CN" : "")
+  }, biliInfo ? Date.now() : sb?.ts));
+  const { location } = data;
+  if (!baiduInfo && location) console.log("本地地区：百度不可用，使用同一 IP 的备用地区信息");
+  return { ip, ...data };
+}
+
+async function getStashOutboundResult(includeIPv6) {
+  // 折叠卡片不展示 IPv6，也不承担通知；省去 IPv6 与本地 IP 辅助探测。
+  const ipv6 = includeIPv6 ? fetchOutbound6() : Promise.resolve(null);
+  const exit = await fetchOutbound4();
+  const outIP = exit?.ip, outRaw = exit?.raw;
+  if (!outIP) return null;
+  // IPv4 一返回即查询地区；与可选 IPv6 并行，不等辅助请求结束再开始。
+  const [geo, org, outIPv6] = await Promise.all([
+    stashGeo("ipapi-zh", outIP, CONFIG.urls.ipApi(outIP, "zh-CN"), undefined, data => !!normalizeIpApi(data)),
+    stashGeo("ipinfo", outIP, CONFIG.urls.ipInfo(outIP), undefined, data => !!normalizeIpInfo(data)),
+    ipv6
+  ]);
+  // ipinfo 已用于查询运营商，同时可提供地区；最后保留探测响应自带的国家。
+  const primaryInfo = normalizeIpApi(geo?.data), ipinfoInfo = normalizeIpInfo(org?.data);
+  const fallback = ipinfoInfo || normalizeIpSb(outRaw);
+  const locationFields = info => ({
+    location: info && [...new Set([info.city, info.region, geoLabel(info)].filter(Boolean))].join(", "),
+    shortLocation: info && compactStashLocation(["HK", "MO", "SG"].includes(info.country_code) ?
+      geoLabel(info) : info.city || info.region || geoLabel(info)),
+    countryCode: info?.country_code
+  });
+  const { data } = stashLastGood("outbound", outIP, {
+    ...stashFields(locationFields(primaryInfo), geo?.ts),
+    ...stashFields({ organization: ipinfoInfo?.org || primaryInfo?.org }, ipinfoInfo?.org ? org?.ts : geo?.ts)
+  }, stashFields({ ...locationFields(fallback), organization: fallback?.org }, ipinfoInfo ? org?.ts : Date.now()));
+  const { location } = data;
+  const organization = data.organization || "运营商未知";
+  if (!primaryInfo && location) console.log("出口地区：ip-api 不可用，使用同一 IP 的备用地区信息");
+  return { ip: outIP, ipv6: outIPv6, raw: outRaw, ...data, organization };
+}
+
+// 首页聚合卡片：各项并行检测，某一项失败不抹掉其他成功结果。
+// 复用折叠卡片的同 IP 缓存与风险阈值，只改变首页排版。
+async function runStashSummary() {
+  const results = await Promise.allSettled([
+    getStashRiskResult(), getStashLocalResult(), getStashOutboundResult(true)
+  ]);
+  const [risk, local, outbound] = results.map(result => result.status === "fulfilled" ? result.value : null);
+  const m = ip => maskIP(ip, args.maskIP);
+  const region = info => info?.location ? [flag(info.countryCode), info.location].filter(Boolean).join(" ") : "查询失败";
+  const lines = [
+    "IP 风控值：" + (risk?.valid ? risk.score + "% " + risk.level : "暂无有效评分"),
+    "IP 类型：" + (risk?.typeText || "类型未知 · 来源未知"),
+    "",
+    "本地 IP：" + (local?.ip ? m(local.ip) : "查询失败"),
+    "地区：" + region(local),
+    "运营商：" + (local?.organization || "Unknown"),
+    ""
+  ];
+  if (outbound?.ipv6) {
+    lines.push("出口 IP⁴：" + m(outbound.ip), "出口 IP⁶：" + m(outbound.ipv6));
+  } else {
+    lines.push("出口 IP：" + (outbound?.ip ? m(outbound.ip) : "查询失败"));
+  }
+  lines.push("地区：" + region(outbound), "运营商：" + (outbound?.organization || "Unknown"));
+  return done({
+    title: "IP 信息卡", content: lines.join("\n"),
+    backgroundColor: risk?.color || "#9E9E9E", url: "https://ippure.com"
+  });
+}
+
 async function runStashTile() {
+  if (args.tile === "summary") return runStashSummary();
   const tile = stashTiles[args.tile];
   if (!tile) return done({ content: "未知卡片类型" });
   const fail = message => done({ content: message, backgroundColor: "#9E9E9E" });
@@ -1001,23 +1113,9 @@ async function runStashTile() {
   const heading = (title, ip) => [title, ip ? m(ip) : ""].filter(Boolean).join("\n");
 
   if (args.tile === "risk") {
-    // 每次刷新仍请求 IPPure；仅用本次响应确认的 IP 复用缺失字段。
-    // HTTP 整体失败时无法确认 IP，不以其他站点的出口或上次节点代替。
-    const info = await getIPPureInfo();
-    if (!info || typeof info !== "object") return fail("IPPure 检测失败");
-    const freshScore = typeof info.fraudScore === "number" ? info.fraudScore :
-      (typeof info.fraudScore === "string" && info.fraudScore.trim() ? Number(info.fraudScore) : NaN);
-    const { data } = stashLastGood("risk", info.ip, stashFields({
-      score: freshScore, isResidential: info.isResidential, isBroadcast: info.isBroadcast
-    }));
-    const score = data.score;
-    const valid = Number.isFinite(score) && score >= 0 && score <= 100;
-    const ipType = typeof data.isResidential === "boolean" ? (data.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
-    const ipSrc = typeof data.isBroadcast === "boolean" ? (data.isBroadcast ? "广播 IP" : "原生 IP") : "来源未知";
-    const level = score < 40 ? "低风险" : score < 70 ? "中风险" : "高风险";
-    const color = !valid ? "#9E9E9E" : score < 40 ? "#88A788" : score < 70 ? "#D4A017" : "#C44444";
-    const riskText = valid ? score + " / 100 · " + level : "暂无有效评分";
-    const typeText = [ipType.replace(/ IP$/, ""), ipSrc.replace(/ IP$/, "")].join(" · ");
+    const result = await getStashRiskResult();
+    if (!result) return fail("IPPure 检测失败");
+    const { color, riskText, typeText } = result;
     return render([
       typeText,
       riskText
@@ -1029,30 +1127,9 @@ async function runStashTile() {
   }
 
   if (args.tile === "local") {
-    const local = await httpJSON(CONFIG.urls.localIP, "DIRECT");
-    const ip = local?.data?.addr;
-    if (!ip) return fail("无法获取直连公网 IP");
-    const [baidu, sb] = await Promise.all([
-      stashGeo("baidu", ip, CONFIG.urls.baiduGeo(ip), "DIRECT", data => !!normalizeOpendata(data)),
-      stashGeo("flag", ip, CONFIG.urls.ipSbGeo(ip), "DIRECT", data => /^[A-Z]{2}$/.test(data?.country_code || ""), 1000)
-    ]);
-    const baiduInfo = normalizeOpendata(baidu?.data), biliInfo = normalizeBilibili(local);
-    const fallback = biliInfo || normalizeIpSb(sb?.data);
-    if (baiduInfo && /^(移动|联通|电信|广电)$/.test(baiduInfo.org)) baiduInfo.org = "中国" + baiduInfo.org;
-    const fallbackLocation = [...new Set([fallback?.country_name, fallback?.region, fallback?.city].filter(Boolean))].join(" ");
-    const { data } = stashLastGood("local", ip, {
-      ...stashFields({ location: baiduInfo?.country_name,
-        shortLocation: baiduInfo && compactStashLocation(baiduInfo.country_name, true),
-        organization: baiduInfo?.org }, baidu?.ts),
-      ...stashFields({ countryCode: sb?.data?.country_code }, sb?.ts)
-    }, stashFields({
-      location: fallbackLocation,
-      shortLocation: compactStashLocation(fallback?.city || fallback?.region || fallback?.country_name, true),
-      organization: fallback?.org,
-      countryCode: fallback?.country_code || (fallback?.country_name === "中国" ? "CN" : "")
-    }, biliInfo ? Date.now() : sb?.ts));
-    const { countryCode, location, shortLocation, organization } = data;
-    if (!baiduInfo && location) console.log("本地地区：百度不可用，使用同一 IP 的备用地区信息");
+    const result = await getStashLocalResult();
+    if (!result) return fail("无法获取直连公网 IP");
+    const { ip, countryCode, location, shortLocation, organization } = result;
     return render([
       m(ip),
       location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败",
@@ -1076,33 +1153,9 @@ async function runStashTile() {
     ]);
   }
 
-  // 折叠卡片不展示 IPv6，也不承担通知；省去 IPv6 与本地 IP 辅助探测。
-  const ipv6 = args.mode === "home" ? fetchOutbound6() : Promise.resolve(null);
-  const exit = await fetchOutbound4();
-  const outIP = exit?.ip, outRaw = exit?.raw;
-  if (!outIP) return fail("无法获取出口 IPv4");
-  // IPv4 一返回即查询地区；与可选 IPv6 并行，不等辅助请求结束再开始。
-  const [geo, org, outIPv6] = await Promise.all([
-    stashGeo("ipapi-zh", outIP, CONFIG.urls.ipApi(outIP, "zh-CN"), undefined, data => !!normalizeIpApi(data)),
-    stashGeo("ipinfo", outIP, CONFIG.urls.ipInfo(outIP), undefined, data => !!normalizeIpInfo(data)),
-    ipv6
-  ]);
-  // ipinfo 已用于查询运营商，同时可提供地区；最后保留探测响应自带的国家。
-  const primaryInfo = normalizeIpApi(geo?.data), ipinfoInfo = normalizeIpInfo(org?.data);
-  const fallback = ipinfoInfo || normalizeIpSb(outRaw);
-  const locationFields = info => ({
-    location: info && [...new Set([info.city, info.region, geoLabel(info)].filter(Boolean))].join(", "),
-    shortLocation: info && compactStashLocation(["HK", "MO", "SG"].includes(info.country_code) ?
-      geoLabel(info) : info.city || info.region || geoLabel(info)),
-    countryCode: info?.country_code
-  });
-  const { data } = stashLastGood("outbound", outIP, {
-    ...stashFields(locationFields(primaryInfo), geo?.ts),
-    ...stashFields({ organization: ipinfoInfo?.org || primaryInfo?.org }, ipinfoInfo?.org ? org?.ts : geo?.ts)
-  }, stashFields({ ...locationFields(fallback), organization: fallback?.org }, ipinfoInfo ? org?.ts : Date.now()));
-  const { location, shortLocation, countryCode } = data;
-  const organization = data.organization || "运营商未知";
-  if (!primaryInfo && location) console.log("出口地区：ip-api 不可用，使用同一 IP 的备用地区信息");
+  const result = await getStashOutboundResult(args.mode === "home");
+  if (!result) return fail("无法获取出口 IPv4");
+  const { ip: outIP, ipv6: outIPv6, raw: outRaw, location, shortLocation, countryCode, organization } = result;
   const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "",
     location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败", organization];
   return render(lines, location ? tile.color : "#9E9E9E", {

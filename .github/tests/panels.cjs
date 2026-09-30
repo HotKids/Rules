@@ -171,6 +171,82 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
   } finally {clearTimeout(deadline);handles.forEach(clearTimeout);}
 }
 
+test('Stash home summary keeps full geography and organization in the approved dual-stack layout',async()=>{
+  const {output,requests,notifications,apiCalls,store}=await ipPanel({
+    argument:'tile=summary&mode=home&notify=true&proxy=HK%20%E8%8A%82%E7%82%B9',
+    outIPv6:'2001:db8:85a3::8a2e:370:7334',
+    ippureData:{ip:'198.51.100.10',fraudScore:42,isResidential:true,isBroadcast:false},
+    intercept(o,cb) {
+      if(o.url.includes('ip-api.com')) {
+        cb(null,{status:200},JSON.stringify({status:'success',country:'香港',countryCode:'HK',
+          regionName:'東區',city:'Kai Tsui Court',isp:'Fallback ISP'}));return true;
+      }
+      if(o.url.includes('ipinfo')) {
+        cb(null,{status:200},JSON.stringify({country:'HK',org:'AS64500 HKT Limited'}));return true;
+      }
+    }
+  });
+  assert.equal(output.title,'IP 信息卡');assert.equal(output.backgroundColor,'#D4A017');
+  assert.equal(output.content,[
+    'IP 风控值：42% 中风险','IP 类型：住宅 · 原生','',
+    '本地 IP：203.0.113.2','地区：🇨🇳 广东省深圳市','运营商：中国电信','',
+    '出口 IP⁴：198.51.100.10','出口 IP⁶：2001:db8:85a3::8a2e:370:7334',
+    '地区：🇭🇰 Kai Tsui Court, 東區, 香港','运营商：HKT Limited'
+  ].join('\n'));
+  assert.equal(output.url,'https://ippure.com');assert.equal(requests.length,8);
+  assert.equal(requests.filter(r=>r.url.includes('ippure')).length,1);
+  assert.equal(output.icon,undefined); // Preserve the IPPure icon supplied by the override.
+  assert.deepEqual(apiCalls,[]);assert.deepEqual(notifications,[]);
+  assert.ok(![...store.keys()].some(key=>/monitor|lastNetworkInfoEvent/.test(key)));
+  for(const r of requests) assert.equal(r.headers['X-Stash-Selected-Proxy'],
+    /bilibili|opendata|api\.ip\.sb\/geoip\//.test(r.url)?'DIRECT':encodeURIComponent('HK 节点'));
+});
+
+test('Stash home summary keeps existing risk thresholds and colors including boundaries',async()=>{
+  for(const score of [0,39,40,69,70,100,null,101]) {
+    const ippureData={ip:'198.51.100.10',fraudScore:score,isResidential:false,isBroadcast:true};
+    const summary=await ipPanel({argument:'tile=summary&mode=home',ippureData});
+    const collapsed=await ipPanel({argument:'tile=risk&mode=collapsed',ippureData});
+    assert.equal(summary.output.backgroundColor,collapsed.output.backgroundColor);
+    assert.equal(summary.output.content.split('\n')[0],
+      'IP 风控值：'+collapsed.output.content.replace(' / 100 · ','% '));
+    assert.match(summary.output.content,/IP 类型：机房 · 广播/);
+  }
+});
+
+test('Stash home summary retains independent results, hides absent IPv6 and honors masking',async()=>{
+  for(const failure of [{riskFailure:true},{localIP:null},{ipFailure:true},
+    {riskFailure:true,localIP:null,ipFailure:true}]) {
+    const {output}=await ipPanel({argument:'tile=summary&mode=home',...failure});
+    assert.equal(output.title,'IP 信息卡');
+    assert.match(output.content,failure.riskFailure?/IP 风控值：暂无有效评分/:/IP 风控值：12% 低风险/);
+    assert.match(output.content,failure.localIP===null?/本地 IP：查询失败/:/本地 IP：203\.0\.113\.2/);
+    assert.match(output.content,failure.ipFailure?/出口 IP：查询失败/:/出口 IP：198\.51\.100\.10/);
+    assert.doesNotMatch(output.content,/出口 IP[⁴⁶]|IPv6/);
+    assert.equal(output.backgroundColor,failure.riskFailure?'#9E9E9E':'#88A788');
+  }
+  const {output}=await ipPanel({argument:'tile=summary&mode=home&mask_ip=2',outIPv6:'2001:db8::10'});
+  assert.doesNotMatch(JSON.stringify(output),/203\.0|198\.51|2001:/);
+  assert.match(output.content,/出口 IP⁴：\[IP 已隐藏\]\n出口 IP⁶：\[IP 已隐藏\]/);
+});
+
+test('Stash home summary starts risk, local and outbound detection concurrently',async()=>{
+  const pending=new Map();
+  const result=await ipPanel({argument:'tile=summary&mode=home',intercept(o,cb) {
+    const kind=o.url.includes('ippure')?'risk':o.url.includes('bilibili')?'local':
+      o.url==='https://1.1.1.1/cdn-cgi/trace'?'outbound':null;
+    if(!kind)return false;
+    pending.set(kind,cb);
+    if(pending.size===3) {
+      pending.get('risk')(null,{status:200},JSON.stringify({ip:'198.51.100.10',fraudScore:12}));
+      pending.get('local')(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));
+      pending.get('outbound')(null,{status:200},'ip=198.51.100.10\nloc=SG');
+    }
+    return true;
+  }});
+  assert.equal(pending.size,3);assert.match(result.output.content,/IP 风控值：12% 低风险/);
+});
+
 test('Stash outbound tile uses Chinese geography without timers or Surge API',async()=>{
   const {output,requests,apiCalls}=await ipPanel({argument:'tile=outbound&proxy=SG%20%E8%8A%82%E7%82%B9&mask_ip=2',outIPv6:'2001:db8::10'});
   assert.equal(output.title,'出口 IP');assert.equal(output.backgroundColor,'#1565C0');
@@ -555,6 +631,24 @@ const failedGeography = (localIP='203.0.113.2') => (o,cb) => {
   if(o.url.includes('bilibili')) {cb(null,{status:200},JSON.stringify({data:{addr:localIP}}));return true;}
   if(/ip-api.com|ipinfo|opendata|ip.sb\/geoip\//.test(o.url)){cb('timeout',null,null);return true;}
 };
+test('Stash summary reuses collapsed same-IP cache without borrowing results after an IP change',async()=>{
+  const store=new Map(), now=100000000;
+  for(const service of ['local','outbound','risk'])
+    await ipPanel({store,now,argument:`tile=${service}&mode=collapsed`});
+  const argument='tile=summary&mode=home';
+  const same=await ipPanel({store,now:now+7*3600000,argument,intercept:failedGeography(),
+    ippureData:{ip:'198.51.100.10'}});
+  assert.match(same.output.content,/IP 风控值：12% 低风险\nIP 类型：住宅 · 原生/);
+  assert.match(same.output.content,/地区：🇨🇳 广东省深圳市\n运营商：中国电信/);
+  assert.match(same.output.content,/地区：🇹🇼 台北市, 台湾\n运营商：Example/);
+  assert.doesNotMatch(same.output.content,/缓存|cache|失败|IP⁶/);
+  const changed=await ipPanel({store,now:now+7*3600000,argument,intercept:failedGeography('203.0.113.3'),
+    outIP:'198.51.100.11',ippureData:{ip:'198.51.100.11'}});
+  assert.match(changed.output.content,/IP 风控值：暂无有效评分/);
+  assert.doesNotMatch(changed.output.content,/台北|深圳|Example|中国电信|住宅|原生/);
+  assert.match(changed.output.content,/本地 IP：203\.0\.113\.3/);
+  assert.match(changed.output.content,/出口 IP：198\.51\.100\.11/);
+});
 test('Stash IP tiles reuse successful same-IP fields after fresh geography expires without a label',async()=>{
   for(const service of ['local','outbound']) {
     const store=new Map(), now=100000000, argument=`tile=${service}&mode=collapsed`;

@@ -1,12 +1,21 @@
-# 图标：selfh.st
-# 与 Surge 共用 ip-security.js，三张卡片默认折叠到第三方服务 / 流媒体页面。
+# 图标：IPPure / selfh.st
+# 与 Surge 共用 ip-security.js，首页聚合卡片与三张独立折叠卡片并存。
 # 每 600 秒刷新；独立定时任务通知 IP 变化，首次检测只记录基线。
 # 本地卡片显示直连公网 IP。
-# 支持首页 Tile 的客户端可改为 collapsed: false 和 mode=home；通知独立于卡片。
+# 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
 name: 'IP Security Tiles'
-desc: 检测出口 IP、本地 IP 和 IP 纯净度（风险与类型），支持定时通知 IP 变化
+desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/cadvisor.png
 tiles:
+  - name: hotkids-ip-security-summary
+    interval: 600
+    title: 'IP 信息卡'
+    url: 'https://ippure.com'
+    content: 'Loading...'
+    icon: 'https://ippure.com/logo.png'
+    backgroundColor: '#9E9E9E'
+    collapsed: false
+    argument: 'tile=summary&mode=home&notify=false'
   - name: hotkids-ip-security-outbound
     interval: 600
     title: '出口 IP'
@@ -44,6 +53,9 @@ cron:
       argument: 'task=monitor&notify=true'
 
 script-providers:
+  hotkids-ip-security-summary:
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js
+    interval: 86400
   hotkids-ip-security-outbound:
     url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js
     interval: 86400
