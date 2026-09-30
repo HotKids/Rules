@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.4 (2026-09-30)
+ * @version      2.2.5 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -69,7 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.4",
+  VERSION: "2.2.5",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -746,6 +746,7 @@ class ServiceChecker {
    */
   static async checkGemini() {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
+    const deadline = Date.now() + 10000;
     const logError = (stage, error) => {
       const result = Utils.errorResult(error);
       MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}失败；阶段=${error?.phase || "parse"}；${Utils.errorDetails(error)}`);
@@ -754,8 +755,13 @@ class ServiceChecker {
     const pages = ["https://gemini.google.com", "https://gemini.google.com/app?hl=en"];
     for (const [index, url] of pages.entries()) {
       const stage = index ? "应用页" : "首页";
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) {
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] 网页检测预算已耗尽，不再请求应用页`);
+        break;
+      }
       try {
-        const res = await Utils.request({ url, timeout: 10000 });
+        const res = await Utils.request({ url, timeout: remaining });
         const flags = ["45631641", "45617354"].map(id =>
           `${id}=${res.body.match(new RegExp(`${id},\\s*null,\\s*(true|false)`))?.[1] || "missing"}`);
         const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
@@ -780,10 +786,17 @@ class ServiceChecker {
         MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}`);
         if (result.status === STATUS.OK || result.status === STATUS.FAIL) return result;
         unknown = result;
-        // 仅正常首页缺标记时回落；限流、验证和网络错误保持原结果。
+        // 正常首页缺标记时回落；限流和验证页面保持原结果。
         if (res.status !== 200 || reason !== "缺少可用标记" || flags.some(flag => !flag.endsWith("=missing"))) break;
       } catch (error) {
         unknown = logError(stage, error);
+        // Stash 的原生 SendRequest 失败尚未收到 HTTP；沿同一线路尝试应用页一次。
+        // 其他错误不重试，两个网页请求共用 10 秒预算。
+        if (IS_STASH && index === 0 && error?.phase === "callback" && unknown.status !== STATUS.TIMEOUT &&
+          /\bSendRequest\b/i.test(Utils.errorMessage(error))) {
+          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，回落同一线路的应用页`);
+          continue;
+        }
         break;
       }
     }

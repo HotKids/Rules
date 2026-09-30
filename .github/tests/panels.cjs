@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../..');
 const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', name), 'utf8');
 const quiet = {log(){},error(){}};
 
-async function tile(service, response, {client="stash", argument="", store=new Map()}={}) {
+async function tile(service, response, {client="stash", argument="", store=new Map(), now}={}) {
   const requests = [], logs = [];
   let deadline;
   try {
@@ -26,6 +26,7 @@ async function tile(service, response, {client="stash", argument="", store=new M
           $argument:`service=${service}&mode=collapsed&notify=false&nfprice=false&${argument}`,
           $httpClient:{get:request,post:request},$done:resolve,console:{...quiet,log:(...args)=>logs.push(args.join(' '))},
           $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}}};
+        if(now)ctx.Date=class extends Date {static now(){return now();}};
         // Intentionally no setTimeout/clearTimeout: Android Stash compatibility.
         try {vm.runInNewContext(read('media-check.js'),ctx,{timeout:1000});} catch(e){reject(e);}
       }),
@@ -920,11 +921,52 @@ test('Gemini recovers a normal unrecognized home through the application page',a
     const requests=r.requests.filter(o=>o.url.startsWith('https://gemini.google.com'));
     assert.equal(requests.length,2);
     assert.equal(requests[1].url,'https://gemini.google.com/app?hl=en');
-    assert.equal(requests[1].timeout,10);
+    assert.ok(requests[1].timeout>0&&requests[1].timeout<=10);
     assert.ok(requests.every(o=>!o.policy&&!o.headers['X-Stash-Selected-Proxy']));
     assert.match(r.logs.join('\n'),/首页: HTTP 200.*原因=缺少可用标记/);
     assert.match(r.logs.join('\n'),/应用页: HTTP 200.*地区=SG; 原因=可用/);
   }
+});
+test('Stash Gemini recovers SendRequest through the same route and checks the application response',async()=>{
+  for(const [response,expected] of [
+    [{body:'45617354,null,true ,2,1,200,"USA"'},'US'],
+    [{body:'not available in your country'},'NO'],
+    [{status:403,body:'Forbidden'},'Error'],
+    [{status:429,body:'not available in your country'},'Error'],
+    [{body:'<title>Just a moment...</title>45617354,null,true'},'Error'],
+    [{body:'unknown page'},'Error'],
+    [{error:'client error (SendRequest)'},'Error'],
+  ]) {
+    const r=await tile('gemini',o=>o.url.includes('/app?')?response:{error:'client error (SendRequest)'});
+    assert.equal(r.output.content,expected);assert.equal(r.requests.length,2);
+    assert.equal(r.requests[1].url,'https://gemini.google.com/app?hl=en');
+    assert.deepEqual(r.requests[1].headers,r.requests[0].headers);
+    assert.ok(r.requests.every(o=>!o.policy&&!o.headers['X-Stash-Selected-Proxy']));
+    assert.match(r.logs.join('\n'),/首页失败；阶段=callback.*SendRequest/);
+    assert.match(r.logs.join('\n'),/回落同一线路的应用页/);
+  }
+  const proxy='🇺🇸 US Test';
+  const home=await tile('gemini',o=>o.url.includes('/app?')?{body:'45617354,null,true'}:{error:'client error (SendRequest)'},
+    {argument:`mode=home&proxy=${encodeURIComponent(proxy)}`});
+  assert.equal(home.output.content,'OK');assert.equal(home.requests.length,2);
+  assert.ok(home.requests.every(o=>o.headers['X-Stash-Selected-Proxy']===encodeURIComponent(proxy)&&!o.policy));
+  const surge=await tile('gemini',{error:'client error (SendRequest)'},{client:'surge'});
+  assert.equal(surge.requests.filter(o=>o.url.startsWith('https://gemini.google.com')).length,1);
+  assert.doesNotMatch(surge.logs.join('\n'),/回落同一线路/);
+  const timeout=await tile('gemini',{error:'client error (SendRequest): timed out'});
+  assert.equal(timeout.output.content,'Timeout');assert.equal(timeout.requests.length,1);
+});
+test('Gemini application fallback shares the ten-second webpage deadline',async()=>{
+  let clock=Date.now();
+  const remaining=await tile('gemini',o=>{
+    if(o.url.includes('/app?'))return {body:'45631641,null,true'};
+    clock+=9500;return {error:'client error (SendRequest)'};
+  },{now:()=>clock});
+  assert.equal(remaining.output.content,'OK');assert.equal(remaining.requests.length,2);
+  assert.equal(remaining.requests[0].timeout,10);assert.equal(remaining.requests[1].timeout,0.5);
+  const exhausted=await tile('gemini',()=>{clock+=10000;return {error:'client error (SendRequest)'};},{now:()=>clock});
+  assert.equal(exhausted.output.content,'Error');assert.equal(exhausted.requests.length,1);
+  assert.match(exhausted.logs.join('\n'),/网页检测预算已耗尽/);
 });
 test('Gemini logs failures without promoting verification pages, false flags or country-only HTML',async()=>{
   for(const response of [
@@ -940,7 +982,7 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.4.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.5.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
@@ -982,7 +1024,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.4.*首页失败/);
+    assert.match(log,/Gemini v2\.2\.5.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
 });
