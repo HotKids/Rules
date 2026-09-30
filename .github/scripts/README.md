@@ -76,7 +76,9 @@ Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则�
 
 声明 `stash_output` 的 overlay 还生成定制 Stash 覆写。Stash 没有 JS 运行时开关，`disabled_by_default` 会移除对应组、路由和候选引用，并清理失去引用的规则集。遇到 Stash 尚未支持的 overlay 字段会报错，避免静默遗漏。
 
-Stash 基座转换保留注释与排版：使用 `follow-rule: true` 让 DNS 查询按现有代理规则转发，保留独立的 `proxy-server-nameserver`；境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`，并过滤 mihomo 专属字段。节点从基础配置继承，主要设置块使用 `#!replace`。
+Stash DNS 在 [stash.py](config_sync/stash.py) 单独适配，不修改 Surge 或其他平台的 DNS：使用 `follow-rule: false`，默认并发直连腾讯 `https://doh.pub/dns-query` 与阿里 `https://dns.alidns.com/dns-query`，保留引导 DNS、私网、NTP、国内域名策略及独立的 `proxy-server-nameserver`。这是按 [Stash 内置 DNS 文档](https://stash.wiki/features/dns-server) 和[官方配置示例](https://stash.wiki/configuration/example-config)选择的两条 DoH；域名策略按精确域名、通配域名、geosite 的优先级匹配，同级 geosite 使用配置顺序。
+
+Stash 基座转换保留其余注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`，并过滤 mihomo 专属字段。节点从基础配置继承，主要设置块使用 `#!replace`。
 
 ## 规则同步
 

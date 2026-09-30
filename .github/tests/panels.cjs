@@ -104,7 +104,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
   outIPv6=null, localIP='203.0.113.2', riskFailure=false, missingNotification=false,
   notificationThrows=false, ipFailure=false, timers=false, ippureData, dnsFailure=false,
   scriptType='tile', intercept, now, storageThrows=false, system, virtualTimers=false}={}) {
-  const requests=[], notifications=[], apiCalls=[], outputs=[], handles=[], logs=[], requestEvents=[], timerEvents=[];
+  const requests=[], rawRequests=[], notifications=[], apiCalls=[], outputs=[], handles=[], logs=[], requestEvents=[], timerEvents=[];
   const nativeNow=Date.now.bind(Date);
   const clockStart=now===undefined?100000000:now;
   let clockTime=clockStart, nextTimer=0, timerPump=false, finishedAt;
@@ -129,9 +129,11 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
   try {
     const output=await Promise.race([
       new Promise((resolve,reject)=>{
-        const request=(options,cb)=>{
+        const request=(raw,cb)=>{
+          rawRequests.push(raw);
+          const options=typeof raw==='string'?{url:raw,headers:{}}:{headers:{},...raw};
           requests.push(options);
-          requestEvents.push({url:options.url,at:testNow(),timeout:options.timeout});
+          requestEvents.push({url:options.url,at:testNow(),timeout:options.timeout,rawType:typeof raw});
           if(intercept && intercept(options,cb,{schedule,now:testNow})) return;
           const url=options.url;
           let body, status=200;
@@ -192,7 +194,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
     // Drain continuations to catch accidental second completion.
     await new Promise(resolve=>setImmediate(resolve));
     assert.equal(outputs.length,1);
-    return {output,requests,notifications,apiCalls,store,logs,requestEvents,timerEvents,elapsed:finishedAt-clockStart};
+    return {output,requests,rawRequests,notifications,apiCalls,store,logs,requestEvents,timerEvents,elapsed:finishedAt-clockStart};
   } finally {clearTimeout(deadline);handles.forEach(clearTimeout);activeTimers.clear();}
 }
 
@@ -274,9 +276,9 @@ test('Stash home summary starts local and IPPure concurrently and shares the off
   assert.ok(!result.requests.some(o=>/api\.ipify.org|cdn-cgi\/trace|api-ipv4/.test(o.url)));
 });
 
-test('Stash uses IPPure metadata when preferred geography fails, including each official location fallback',async()=>{
+test('Stash prefers current IPPure metadata and each official location fallback without supplemental requests',async()=>{
   for(const [fields,location] of [[{city:'Test City',region:'Test Region',country:'美国'},'Test City, Test Region, 美国'],
-    [{region:'Test Region',country:'美国'},'Test Region, 美国'],[{country:'美国'},'美国']]) {
+    [{region:'Test Region',country:'美国'},'Test Region, 美国'],[{country:'美国'},'美国'],[{},'US']]) {
     const result=await ipPanel({argument:'tile=summary&mode=home',timers:true,
       ippureData:{ip:'198.51.100.10',countryCode:'US',...fields,asOrganization:'Example Network Limited',fraudScore:42,isResidential:true,isBroadcast:false},
       intercept(o,cb) {if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}}
@@ -285,18 +287,69 @@ test('Stash uses IPPure metadata when preferred geography fails, including each 
     assert.ok(result.output.content.endsWith(`地区：🇺🇸 ${location}\n运营商：Example Network Limited`));
     assert.equal(result.requests.filter(o=>o.url.includes('ippure')).length,1);
     assert.ok(!result.requests.some(o=>/api\.ipify|api-ipv4|cdn-cgi\/trace/.test(o.url)));
+    assert.ok(!result.requests.some(o=>/ip-api.com|ipinfo/.test(o.url)));
   }
   const partial=await ipPanel({argument:'mode=collapsed',ippureData:{ip:'198.51.100.10',asOrganization:'IPPure ISP'},
     intercept(o,cb){if(o.url.includes('ipinfo')){cb(null,{status:200},'{"country":"SG"}');return true;}}
   });
-  assert.match(partial.output.content,/Example Telecom/); // A valid primary ISP still wins.
+  assert.equal(partial.output.content,'🇹🇼 台北 · IPPure ISP');
+  assert.equal(partial.requests.filter(o=>o.url.includes('ip-api.com')).length,1);
+  assert.ok(!partial.requests.some(o=>o.url.includes('ipinfo')));
   const orgFallback=await ipPanel({argument:'mode=collapsed',ippureData:{ip:'198.51.100.10',asOrganization:'IPPure ISP'},
     intercept(o,cb){
       if(o.url.includes('ip-api.com')){cb('timeout',null,null);return true;}
       if(o.url.includes('ipinfo')){cb(null,{status:200},'{"country":"SG"}');return true;}
     }
   });
-  assert.equal(orgFallback.output.content,'🇸🇬 SG · IPPure ISP');
+  assert.equal(orgFallback.output.content,'地区查询失败 · IPPure ISP');
+  assert.ok(!orgFallback.requests.some(o=>o.url.includes('ipinfo')));
+});
+
+test('Stash complete official metadata returns immediately even if supplemental services would never call back',async()=>{
+  for(const mode of ['home','collapsed']) {
+    const r=await ipPanel({virtualTimers:true,argument:`tile=outbound&mode=${mode}`,
+      ippureData:{ip:'198.51.100.10',countryCode:'US',country:'美国',region:'Pure Region',city:'Pure City',
+        asOrganization:'Pure ISP',fraudScore:12},
+      intercept(o,cb){return /ip-api.com|ipinfo/.test(o.url);}
+    });
+    assert.equal(r.elapsed,0);assert.equal(r.output.backgroundColor,'#1565C0');
+    assert.match(r.output.content,/Pure City[\s\S]*Pure ISP/);
+    assert.ok(!r.requests.some(o=>/ip-api.com|ipinfo/.test(o.url)));
+    assert.equal(r.requests.filter(o=>o.url.includes('ippure')).length,1);
+  }
+});
+
+test('Stash supplements only missing organization and cannot overwrite the official IPPure location',async()=>{
+  const r=await ipPanel({argument:'mode=collapsed',
+    ippureData:{ip:'198.51.100.10',countryCode:'US',country:'美国',region:'Pure Region',city:'Pure City'},
+    intercept(o,cb){
+      if(o.url.includes('ipinfo')){
+        cb(null,{status:200},JSON.stringify({country:'SG',city:'Wrong City',org:'AS64500 Supplemental ISP'}));return true;
+      }
+    }});
+  assert.equal(r.output.content,'🇺🇸 Pure City · Supplemental ISP');
+  assert.equal(r.requests.filter(o=>o.url.includes('ipinfo')).length,1);
+  assert.ok(!r.requests.some(o=>o.url.includes('ip-api.com')));
+  assert.doesNotMatch(r.output.content,/🇸🇬|Wrong/);
+});
+
+test('Stash fills both missing metadata fields in parallel for a valid official IP or a fallback address',async()=>{
+  for(const riskFailure of [false,true]) {
+    let pendingGeo, pendingOrg;
+    const r=await ipPanel({argument:'mode=collapsed',riskFailure,intercept(o,cb){
+      if(o.url.includes('ip-api.com'))pendingGeo=cb;
+      else if(o.url.includes('ipinfo'))pendingOrg=cb;
+      else return false;
+      if(pendingGeo&&pendingOrg){
+        pendingGeo(null,{status:200},JSON.stringify({status:'success',countryCode:'TW',country:'台湾',city:'台北市'}));
+        pendingOrg(null,{status:200},JSON.stringify({country:'TW',org:'AS64500 Supplemental ISP'}));
+      }
+      return true;
+    }});
+    assert.equal(r.output.content,'🇹🇼 台北 · Supplemental ISP');
+    assert.equal(r.requests.filter(o=>o.url.includes('ip-api.com')).length,1);
+    assert.equal(r.requests.filter(o=>o.url.includes('ipinfo')).length,1);
+  }
 });
 
 test('Stash invalid IPPure responses do not affect its independently probed exit or supply metadata',async()=>{
@@ -374,19 +427,65 @@ test('Stash ipify fallback success avoids Cloudflare, ip.sb and IPv6 probes in a
   }
 });
 
-test('Stash guards missing HTTP callbacks and bounds IPPure plus the single IPv4 fallback to ten seconds',async()=>{
+test('Stash native IPPure with no callback reaches the script deadline without starting a fallback',async()=>{
   const r=await ipPanel({virtualTimers:true,argument:'mode=collapsed',intercept(o,cb){
-    return /ippure|api\.ipify\.org/.test(o.url);
+    return o.url.includes('ippure');
   }});
   const probes=r.requestEvents.filter(o=>/ippure|api\.ipify\.org/.test(o.url));
   assert.deepEqual(probes.map(o=>o.url),[
-    'https://my.ippure.com/v1/info','https://api.ipify.org?format=json'
+    'https://my.ippure.com/v1/info'
   ]);
-  assert.deepEqual(probes.map(o=>o.at-probes[0].at),[0,5000]);
-  assert.deepEqual(probes.map(o=>o.timeout),[5,5]);
-  assert.equal(r.elapsed,10000);
+  assert.equal(probes[0].timeout,undefined);
+  assert.equal(probes[0].rawType,'string');
+  assert.equal(r.elapsed,19750);
   assert.equal(r.output.content,'无法获取出口 IPv4');assert.equal(r.output.backgroundColor,'#9E9E9E');
   assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|api-ipv[46]/.test(o.url)));
+  assert.match(r.logs.join('\n'),/脚本等待期限已到/);
+  assert.doesNotMatch(r.logs.join('\n'),/请求超时/);
+});
+
+test('Stash uses native URL-string IPPure requests for collapsed tiles and adds only explicit manual proxy headers',async()=>{
+  for(const timers of [false,true]) {
+    const collapsed=await ipPanel({timers,argument:'tile=risk&mode=collapsed&proxy=ignored'});
+    assert.deepEqual(collapsed.rawRequests,['https://my.ippure.com/v1/info']);
+    assert.equal(collapsed.requests[0].timeout,undefined);
+    assert.equal(collapsed.requests[0].headers['X-Stash-Selected-Proxy'],undefined);
+    const manual=await ipPanel({timers,argument:'tile=risk&mode=home&proxy=HK%20%E8%8A%82%E7%82%B9'});
+    assert.equal(typeof manual.rawRequests[0],'object');
+    assert.equal(manual.rawRequests[0].url,'https://my.ippure.com/v1/info');
+    assert.equal(manual.rawRequests[0].headers['X-Stash-Selected-Proxy'],encodeURIComponent('HK 节点'));
+    assert.equal(manual.rawRequests[0].timeout,undefined);
+    assert.equal(manual.requests.length,1);
+  }
+});
+
+test('Stash starts the five-second IPv4 fallback only after a native IPPure HTTP timeout',async()=>{
+  for(const stalledFallback of [false,true]) {
+    const r=await ipPanel({virtualTimers:true,argument:'mode=collapsed',intercept(o,cb,{schedule}){
+      if(o.url.includes('ippure')){schedule(()=>cb('request timed out',null,null),5000);return true;}
+      return stalledFallback&&o.url.includes('api.ipify.org');
+    }});
+    const fallback=r.requestEvents.find(o=>o.url.includes('api.ipify.org'));
+    assert.equal(fallback.at-r.requestEvents[0].at,5000);assert.equal(fallback.timeout,5);
+    assert.equal(r.elapsed,stalledFallback?10000:5000);
+    assert.equal(r.requests[0].timeout,undefined);
+    assert.match(r.logs.join('\n'),/my\.ippure\.com：请求超时/);
+    if(stalledFallback){
+      assert.equal(r.output.content,'无法获取出口 IPv4');
+      assert.match(r.logs.join('\n'),/api\.ipify\.org：脚本等待期限已到/);
+    }else assert.equal(r.output.title,'出口 IP\n198.51.100.10');
+    assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|api-ipv[46]/.test(o.url)));
+  }
+});
+
+test('Stash limits a fallback started near the script deadline to the remaining time',async()=>{
+  const r=await ipPanel({virtualTimers:true,argument:'mode=collapsed',intercept(o,cb,{schedule}){
+    if(o.url.includes('ippure')){schedule(()=>cb('request timed out',null,null),19000);return true;}
+    return o.url.includes('api.ipify.org');
+  }});
+  const fallback=r.requestEvents.find(o=>o.url.includes('api.ipify.org'));
+  assert.equal(fallback.at-r.requestEvents[0].at,19000);assert.equal(fallback.timeout,0.75);
+  assert.equal(r.elapsed,19750);assert.equal(r.output.content,'无法获取出口 IPv4');
 });
 
 test('Stash optional IPv6 has one three-second attempt and cannot hold back an otherwise complete summary',async()=>{
@@ -399,8 +498,9 @@ test('Stash optional IPv6 has one three-second attempt and cannot hold back an o
   const ipv6=r.requests.filter(o=>/2606:4700|api-ipv6|api6\.ipify/.test(o.url));
   assert.equal(ipv6.length,1);assert.equal(ipv6[0].timeout,3);
   assert.match(r.output.content,/IP 风控值：12% 低风险/);
-  const stalledPure=await ipPanel({virtualTimers:true,argument:'tile=summary&mode=home',intercept(o,cb){
-    return /ippure|api6\.ipify/.test(o.url);
+  const stalledPure=await ipPanel({virtualTimers:true,argument:'tile=summary&mode=home',intercept(o,cb,{schedule}){
+    if(o.url.includes('ippure')){schedule(()=>cb('request timed out',null,null),5000);return true;}
+    return o.url.includes('api6.ipify');
   }});
   assert.equal(stalledPure.elapsed,8000);
   assert.match(stalledPure.output.content,/出口 IP：198\.51\.100\.10/);
@@ -410,23 +510,23 @@ test('Stash optional IPv6 has one three-second attempt and cannot hold back an o
   assert.equal(stalledPure.requests.filter(o=>o.url.includes('ippure')).length,1);
 });
 
-test('Stash ignores late and duplicate IPPure callbacks after its timeout and keeps the ipify fallback address',async()=>{
-  let lateCalls=0;
-  const r=await ipPanel({virtualTimers:true,argument:'mode=collapsed',intercept(o,cb,{schedule}){
+test('Stash native IPPure can succeed after six seconds and ignores duplicate callbacks',async()=>{
+  let delayedCalls=0;
+  const r=await ipPanel({virtualTimers:true,argument:'tile=summary&mode=home',intercept(o,cb,{schedule}){
     if(o.url.includes('ippure')) {
       schedule(()=>{
-        lateCalls++;cb(null,{status:200},'{"ip":"198.51.100.99"}');
-        cb(null,{status:200},'{"ip":"198.51.100.88"}');
+        delayedCalls++;cb(null,{status:200},JSON.stringify({ip:'198.51.100.99',fraudScore:42,
+          isResidential:false,isBroadcast:true,countryCode:'HK',country:'香港',asOrganization:'Pure ISP'}));
+        cb(null,{status:200},'{"ip":"198.51.100.88","fraudScore":1}');
       },6000);return true;
     }
-    if(o.url.includes('ip-api.com')){
-      schedule(()=>cb(null,{status:200},JSON.stringify({status:'success',country:'台湾',countryCode:'TW',city:'台北市'})),3000);
-      return true;
-    }
   }});
-  assert.equal(lateCalls,1);assert.equal(r.output.title,'出口 IP\n198.51.100.10');
-  assert.doesNotMatch(JSON.stringify(r.output),/198\.51\.100\.(99|88)/);
-  assert.equal(r.requests.filter(o=>o.url==='https://api.ipify.org?format=json').length,1);
+  assert.equal(delayedCalls,1);assert.equal(r.elapsed,6000);
+  assert.match(r.output.content,/出口 IP：198\.51\.100\.99/);
+  assert.match(r.output.content,/IP 风控值：42% 中风险\nIP 类型：机房 · 广播/);
+  assert.doesNotMatch(JSON.stringify(r.output),/198\.51\.100\.88/);
+  assert.equal(r.requests.filter(o=>o.url.includes('ippure')).length,1);
+  assert.ok(!r.requests.some(o=>o.url.includes('api.ipify.org')));
   assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|api-ipv[46]/.test(o.url)));
 });
 
@@ -463,12 +563,13 @@ test('Stash official fresh risk remains usable without a valid IP but cannot bor
   }
 });
 
-test('Stash risk missing HTTP callback finishes after five seconds without auxiliary network requests',async()=>{
+test('Stash native risk missing HTTP callback finishes at the script deadline without auxiliary requests',async()=>{
   const r=await ipPanel({virtualTimers:true,argument:'tile=risk&mode=collapsed',intercept(o,cb){
     return o.url.includes('ippure');
   }});
-  assert.equal(r.elapsed,5000);assert.equal(r.requests.length,1);
+  assert.equal(r.elapsed,19750);assert.equal(r.requests.length,1);
   assert.equal(r.output.backgroundColor,'#9E9E9E');assert.match(r.output.content,/IPPure 检测失败/);
+  assert.match(r.logs.join('\n'),/脚本等待期限已到/);
 });
 
 test('Stash risk opens the current official IPPure address only when IP masking is disabled',async()=>{
@@ -559,7 +660,8 @@ test('Stash outbound tile uses Chinese geography without timers or Surge API',as
   assert.ok(requests.some(r=>r.url.includes('lang=zh-CN')));
   assert.ok(!requests.some(r=>/proxycheck|scamalytics|edns|opendata/.test(r.url)));
   for(const req of requests){
-    assert.ok(req.timeout>0 && req.timeout<=5);
+    if(req.url.includes('ippure'))assert.equal(req.timeout,undefined);
+    else assert.ok(req.timeout>0 && req.timeout<=5);
     assert.equal(req.policy,undefined);
     assert.equal(req.headers['X-Stash-Selected-Proxy'],req.url.includes('bilibili')?'DIRECT':encodeURIComponent('SG 节点'));
   }
@@ -956,7 +1058,7 @@ test('Stash outbound retains only known country when both detailed geo sources f
     if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
   }});
   assert.equal(r.output.title,'出口 IP\n198.51.100.10');assert.equal(r.output.backgroundColor,'#1565C0');
-  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,3);
+  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,2);
 });
 test('Stash keeps current IP and unknown geography when every metadata source is empty',async()=>{
   for(const service of ['local','outbound']) {

@@ -2,6 +2,7 @@
 import contextlib
 import importlib.util
 import io
+import json
 import os
 from pathlib import Path
 import subprocess
@@ -10,6 +11,7 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import urllib.error
+import yaml
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
@@ -206,6 +208,101 @@ class ConfigTests(unittest.TestCase):
         result = stash._stash_apply_overlay(lines, overlay, 'test')
         text = '\n'.join(result)
         self.assertLess(text.index('name: "'), text.index('# Rule Provider documentation'))
+
+
+class StashDNSTests(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.source = self.root / 'Clash/Sample.yaml'
+        self.source.parent.mkdir()
+        self.source.write_text('''# Clash
+# Date: fixture
+
+mixed-port: 7890
+
+dns:
+  enable: true
+  # 各条目通过 #RULES / #策略名 后缀单独指定出站
+  respect-rules: true
+  follow-rule: true
+  default-nameserver:
+    - 192.0.2.53
+    - 198.51.100.53
+  fake-ip-filter:
+    - "+.lan"
+    - "*.example.invalid"
+  # 主 DNS：经代理查询干净结果，防止境外域名请求泄露至国内 DNS 服务商
+  nameserver:
+    - "https://1.1.1.1/dns-query#RULES"
+  nameserver-policy:
+    "geosite:private":
+      - system
+    "geosite:cn":
+      - https://doh.pub/dns-query
+      - https://dns.alidns.com/dns-query
+    "example.invalid":
+      - "https://resolver.example.invalid/dns-query#h3=true"
+  proxy-server-nameserver:
+    - "https://nodes.example.invalid/dns-query"
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies: [DIRECT]
+
+rules:
+  - MATCH,Proxy
+''', encoding='utf-8')
+        self.input_bytes = self.source.read_bytes()
+        self.input_dns = yaml.safe_load(self.input_bytes)['dns']
+        self.config = {'Clash': {'output': 'Clash/Sample.yaml'},
+                       'Stash': {'output': 'Clash/Stash.stoverride'}}
+
+    def generate(self):
+        with patch.object(stash, 'REPO_ROOT', self.root), \
+                contextlib.redirect_stdout(io.StringIO()):
+            stash._sync_stash(self.config)
+        self.assertEqual(self.source.read_bytes(), self.input_bytes)
+        path = self.root / self.config['Stash']['output']
+        return path.read_text(encoding='utf-8'), yaml.safe_load(path.read_text(encoding='utf-8'))
+
+    def assert_native_dns(self, dns):
+        self.assertIs(dns['follow-rule'], False)
+        self.assertEqual(dns['nameserver'], ['https://doh.pub/dns-query',
+                                             'https://dns.alidns.com/dns-query'])
+        self.assertNotIn('respect-rules', dns)
+        for key in ('default-nameserver', 'nameserver-policy',
+                    'proxy-server-nameserver', 'fake-ip-filter'):
+            self.assertEqual(dns[key], self.input_dns[key], key)
+
+    def test_mihomo_proxy_dns_becomes_native_direct_domestic_dns(self):
+        text, output = self.generate()
+        self.assert_native_dns(output['dns'])
+        self.assertNotIn('https://1.1.1.1/dns-query', text)
+        self.assertNotIn('#RULES', text)
+        self.assertNotIn('经代理查询干净结果', text)
+        self.assertNotIn('DNS 查询按现有代理规则转发', text)
+        self.assertNotIn('未命中 nameserver-policy 使用 Cloudflare DoH', text)
+        generated_bytes = (self.root / 'Clash/Stash.stoverride').read_bytes()
+        self.generate()
+        self.assertEqual((self.root / 'Clash/Stash.stoverride').read_bytes(), generated_bytes)
+
+    def test_private_overlay_inherits_the_same_direct_dns_without_changing_sample(self):
+        directory = self.root / '.github/scripts/sync-config/Enhanced'
+        directory.mkdir(parents=True)
+        (directory / 'MyStash.overlay.json').write_text(json.dumps({
+            'stash_output': 'Clash/MyStash.stoverride',
+            'group_overrides': {'Proxy': {'type': 'url-test'}},
+        }), encoding='utf-8')
+        _, output = self.generate()
+        private = yaml.safe_load((self.root / 'Clash/MyStash.stoverride').read_text(encoding='utf-8'))
+        self.assertEqual(private['dns'], output['dns'])
+        self.assert_native_dns(private['dns'])
+        self.assertEqual(private['name'], 'MyStash')
+        self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
+        self.assertEqual(self.source.read_bytes(), self.input_bytes)
 
 
 if __name__ == '__main__': unittest.main()

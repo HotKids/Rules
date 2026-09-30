@@ -27,13 +27,13 @@ _STASH_DROP_TOP = {
 }
 
 
-# 2) dns 块内 Stash 支持的子键（其余为 mihomo 专属，予以省略）
+# 2) 从源配置保留的 DNS 子键；主 nameserver 与 follow-rule 使用 Stash 专属配置。
 _STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
                       "rule-providers", "rules"}
 
 
 _STASH_DNS_KEEP = {
-    "default-nameserver", "nameserver", "nameserver-policy",
+    "default-nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
 }
 
@@ -145,13 +145,18 @@ def _sync_stash(config: dict) -> None:
             flush()
             out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
-                # DNS 查询跟随现有规则；保留 nameserver-policy 与独立的节点域名解析。
+                # 按 Stash 官方示例直连查询两个 DoH；不沿用 mihomo 的 CF/#RULES 配置。
                 out += [
-                    "  # DNS 查询按现有代理规则转发；解析服务器仍由下方策略选择。",
-                    "  # 未命中 nameserver-policy 使用 Cloudflare DoH；国内与节点域名使用腾讯/阿里 DoH。",
-                    "  follow-rule: true",
+                    "  # DNS 查询直接出站，不经代理规则转发；解析服务器由 nameserver-policy 选择。",
+                    "  follow-rule: false",
+                    "",
+                    "  # 主 DNS：未命中域名策略时，并发查询腾讯/阿里 DoH，采用最快响应。",
+                    "  nameserver:",
+                    '    - "https://doh.pub/dns-query"',
+                    '    - "https://dns.alidns.com/dns-query"',
+                    "",
                 ]
-                changes.append("dns: follow-rule=true")
+                changes.append("dns: follow-rule=false / 主 DNS 使用腾讯与阿里 DoH")
             continue
 
         if skip_provider_health:
@@ -193,6 +198,9 @@ def _sync_stash(config: dict) -> None:
             if not dns_keep:
                 buf.clear()
                 continue
+            if key == "nameserver-policy":
+                buf = ["  # 分域名 DNS 策略：精确域名 > 通配域名 > geosite；多个 geosite 按配置顺序匹配"
+                       if l.strip().startswith("# 分域名 DNS 策略") else l for l in buf]
             flush()
             out.append(line)
             continue
@@ -518,5 +526,4 @@ def _sync_stash_overlays(base_lines: list[str]) -> None:
         body = "\n".join(lines).rstrip() + "\n"
         changed = _write_stamped_if_changed(REPO_ROOT / target, body)
         print(f"  {'✓ ' + target + ' 已更新' if changed else '✓ ' + target + ' 无变化'}")
-
 
