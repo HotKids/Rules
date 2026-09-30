@@ -45,14 +45,14 @@ cron:
 
 script-providers:
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.1
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.2
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.1
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.2
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.1
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.2
     interval: 86400
   hotkids-ip-security-notify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.1
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.3.2
     interval: 86400

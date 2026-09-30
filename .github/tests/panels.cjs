@@ -469,7 +469,7 @@ test('Surge and Stash summaries include all eleven services in the requested ord
   for(const client of ['stash','surge']) {
     const r=await tile('all',response,{client});
     const names=r.output.content.split('\n').map(line=>line.split('➟')[0].trim());
-    assert.deepEqual(names,['Netflix','Disney+','HBO Max','YouTube','Spotify','ChatGPT','Claude','Gemini','Meta AI','TikTok','Reddit']);
+    assert.deepEqual(names,['Netflix','Disney+','HBO Max','YouTube','Spotify','TikTok','ChatGPT','Claude','Gemini','Meta AI','Reddit']);
     assert.match(r.output.title,/11\/11/);
     assert.ok(r.output[client==='stash'?'backgroundColor':'icon-color']);
   }
@@ -549,6 +549,101 @@ test('Stash keeps current IP and unknown geography when every metadata source is
     assert.match(r.output.title,/203\.0\.113\.2|198\.51\.100\.10/);
     assert.doesNotMatch(r.output.content,/🇨🇳|🇸🇬|台北|深圳/);
   }
+});
+
+const failedGeography = (localIP='203.0.113.2') => (o,cb) => {
+  if(o.url.includes('bilibili')) {cb(null,{status:200},JSON.stringify({data:{addr:localIP}}));return true;}
+  if(/ip-api.com|ipinfo|opendata|ip.sb\/geoip\//.test(o.url)){cb('timeout',null,null);return true;}
+};
+test('Stash IP tiles reuse successful same-IP fields after fresh geography expires without a label',async()=>{
+  for(const service of ['local','outbound']) {
+    const store=new Map(), now=100000000, argument=`tile=${service}&mode=collapsed`;
+    const initial=await ipPanel({store,now,argument});
+    const again=await ipPanel({store,now:now+7*3600000,argument,intercept:failedGeography()});
+    assert.deepEqual(JSON.parse(JSON.stringify(again.output)),JSON.parse(JSON.stringify(initial.output)));
+    assert.doesNotMatch(again.output.content,/缓存|cache|失败/i);
+    assert.equal(again.notifications.length,0);
+    assert.ok(again.requests.some(o=>/ip-api.com|opendata/.test(o.url)));
+  }
+});
+test('Stash failed node changes do not borrow or overwrite another IP result',async()=>{
+  for(const service of ['local','outbound']) {
+    const store=new Map(), now=100000000, argument=`tile=${service}&mode=collapsed`;
+    const initial=await ipPanel({store,now,argument});
+    const next=await ipPanel({store,now:now+7*3600000,argument,outIP:'198.51.100.11',
+      intercept:failedGeography('203.0.113.3')});
+    assert.doesNotMatch(next.output.content,/深圳|台北|Example|中国电信/);
+    assert.match(next.output.title,service==='local'?/203\.0\.113\.3/:/198\.51\.100\.11/);
+    const back=await ipPanel({store,now:now+8*3600000,argument,intercept:failedGeography()});
+    assert.equal(back.output.content,initial.output.content);
+  }
+});
+test('Stash cached data respects current masking, layout and flags without stale IPv6',async()=>{
+  const store=new Map(), now=100000000;
+  await ipPanel({store,now,argument:'mode=home',outIPv6:'2001:db8::10'});
+  const r=await ipPanel({store,now:now+7*3600000,argument:'mode=home&mask_ip=2&tw_flag=cn',intercept:failedGeography()});
+  assert.equal(r.output.title,'出口 IP');assert.match(r.output.content,/🇨🇳/);assert.doesNotMatch(r.output.content,/🇹🇼|198\.51|2001:|IPv6/);
+  const localStore=new Map();await ipPanel({store:localStore,now,argument:'tile=local&mode=collapsed'});
+  const local=await ipPanel({store:localStore,now:now+7*3600000,argument:'tile=local&mode=home&mask_ip=2',intercept:failedGeography()});
+  assert.equal(local.output.url,'https://ippure.com');assert.doesNotMatch(JSON.stringify(local.output),/203\.0\.113\.2/);
+});
+test('Stash purity reuses missing fields only for IPPure current IP and accepts fresh zero/false',async()=>{
+  const store=new Map(), now=100000000, argument='tile=risk&mode=collapsed';
+  const initial=await ipPanel({store,now,argument});
+  const same=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'198.51.100.10'}});
+  assert.equal(same.output.content,initial.output.content);assert.equal(same.output.title,initial.output.title);
+  const fresh=await ipPanel({store,now:now+1200000,argument,
+    ippureData:{ip:'198.51.100.10',fraudScore:0,isResidential:false,isBroadcast:false}});
+  assert.equal(fresh.output.content,'0 / 100 · 低风险');assert.equal(fresh.output.title,'IP 纯净度\n机房 · 原生');
+  for(const ip of ['198.51.100.11',undefined,'','Unknown','999.1.1.1']) {
+    const next=await ipPanel({store,now:now+1800000,argument,outIP:'198.51.100.10',ippureData:{ip}});
+    assert.equal(next.output.backgroundColor,'#9E9E9E');assert.match(next.output.title,/类型未知/);
+    assert.equal(next.requests.length,1);
+  }
+  const failed=await ipPanel({store,now:now+1800000,argument,riskFailure:true});
+  assert.equal(failed.output.content,'IPPure 检测失败');assert.equal(failed.requests.length,1);
+});
+test('Stash failed refreshes do not renew old fields and all-expired geography stays unknown',async()=>{
+  const store=new Map(), now=100000000, argument='tile=risk&mode=collapsed';
+  await ipPanel({store,now,argument});
+  await ipPanel({store,now:now+23*3600000,argument,ippureData:{ip:'198.51.100.10',fraudScore:90}});
+  const partial=await ipPanel({store,now:now+25*3600000,argument,ippureData:{ip:'198.51.100.10'}});
+  assert.equal(partial.output.content,'90 / 100 · 高风险');assert.match(partial.output.title,/类型未知 · 来源未知/);
+  for(const service of ['local','outbound']) {
+    const geoStore=new Map(), arg=`tile=${service}&mode=collapsed`;
+    await ipPanel({store:geoStore,now,argument:arg});
+    await ipPanel({store:geoStore,now:now+3600000,argument:arg}); // six-hour geo cache hit must not renew timestamps
+    await ipPanel({store:geoStore,now:now+23*3600000,argument:arg,intercept:failedGeography()});
+    const expired=await ipPanel({store:geoStore,now:now+25*3600000,argument:arg,intercept:failedGeography()});
+    assert.doesNotMatch(expired.output.content,/台北|深圳|Example|中国电信/);
+  }
+});
+test('Stash cache survives unavailable/corrupt storage and caps saved IPs',async()=>{
+  const key='stash.ip-security.last-good.v1';
+  for(const value of ['invalid','[]','null']) {
+    const store=new Map([[key,value]]);
+    assert.match((await ipPanel({store,argument:'tile=risk'})).output.content,/12 \/ 100/);
+  }
+  assert.match((await ipPanel({storageThrows:true,argument:'tile=risk'})).output.content,/12 \/ 100/);
+  const store=new Map();
+  for(let i=1;i<=35;i++)await ipPanel({store,now:100000000+i,argument:'tile=risk',outIP:`198.51.100.${i}`});
+  const records=JSON.parse(store.get(key));assert.equal(Object.keys(records).length,32);
+  assert.ok(!records['risk:198.51.100.1']);assert.ok(records['risk:198.51.100.35']);
+});
+test('Stash IP lookup failure never reuses a last-success address',async()=>{
+  for(const service of ['local','outbound']) {
+    const store=new Map(), argument=`tile=${service}&mode=collapsed`;
+    await ipPanel({store,argument});
+    const failed=await ipPanel({store,argument,localIP:null,ipFailure:true});
+    assert.equal(failed.output.backgroundColor,'#9E9E9E');assert.match(failed.output.content,/无法获取/);
+    assert.doesNotMatch(JSON.stringify(failed.output),/198\.51\.100|203\.0\.113|台北|深圳/);
+  }
+  const store=new Map(), now=100000000, argument='tile=risk&mode=collapsed';
+  await ipPanel({store,now,argument,ippureData:{ip:'2001:db8::1',fraudScore:0,isResidential:false,isBroadcast:false}});
+  const same=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'2001:DB8::1'}});
+  assert.equal(same.output.content,'0 / 100 · 低风险');assert.match(same.output.title,/机房 · 原生/);
+  const changed=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'2001:db8::2'}});
+  assert.equal(changed.output.backgroundColor,'#9E9E9E');
 });
 
 test('Netflix accepts known video markup and prioritizes request country',async()=>{

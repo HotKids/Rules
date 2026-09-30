@@ -3,13 +3,13 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.1 (2026-09-30)
+ * @version      2.2.2 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
  * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
  * @arguments    service=netflix&nfprice=true&notify=false
- *               service 可选 netflix/disney/hbomax/youtube/spotify/chatgpt/claude/gemini/metaai/tiktok/reddit
+ *               service 可选 netflix/disney/hbomax/youtube/spotify/tiktok/chatgpt/claude/gemini/metaai/reddit
  *               Stash 不传 service 或传 service=all 时汇总；Surge 始终使用多行汇总
  *               mode=collapsed 由 Stash 选择检测节点，忽略 proxy 并关闭变化通知
  *               可选 proxy=URL编码后的节点名、notifykey=自定义通知分组
@@ -25,7 +25,8 @@
  *    ├─ Disney+       统一按地区与接口可用性判断
  *    ├─ HBO Max       官网结构化地区与可用性检测、第三方平台提示（JP/KR/CA）
  *    ├─ YouTube       明确可用性检测，未知时 Cookie 回落
- *    └─ Spotify       标准地区检测
+ *    ├─ Spotify       标准地区检测
+ *    └─ TikTok        Explore / 主页地区检测
  *
  * 🤖 AI 服务
  *    ├─ ChatGPT       单行显示地区 / Web Only / Mobile Only / NO
@@ -34,7 +35,6 @@
  *    └─ Meta AI       AJAX 可用性与主页回落检测
  *
  * 🌐 社交 & 其他
- *    ├─ TikTok        Explore / 主页地区检测
  *    └─ Reddit        地区访问检测
  *
  * ═══════════════════════════════════════════════════════════════════════════
@@ -739,11 +739,11 @@ const SERVICES = {
   hbomax: { title: "HBO Max", check: "checkHBOMax", url: "https://www.hbomax.com", color: "#191919" },
   youtube: { title: "YouTube Premium", check: "checkYoutube", url: "https://www.youtube.com/premium", color: "#E62117" },
   spotify: { title: "Spotify", check: "checkSpotify", url: "https://www.spotify.com", color: "#117C39" },
+  tiktok: { title: "TikTok", check: "checkTikTok", url: "https://www.tiktok.com/", color: "#191919" },
   chatgpt: { title: "ChatGPT", check: "checkChatGPT", url: "https://chatgpt.com", color: "#0D8A70" },
   claude: { title: "Claude", check: "checkClaude", url: "https://claude.ai", color: "#B85C3F" },
   gemini: { title: "Gemini", check: "checkGemini", url: "https://gemini.google.com", color: "#386EDB" },
   metaai: { title: "Meta AI", check: "checkMetaAI", url: "https://www.meta.ai/", color: "#0866FF" },
-  tiktok: { title: "TikTok", check: "checkTikTok", url: "https://www.tiktok.com/", color: "#191919" },
   reddit: { title: "Reddit", check: "checkReddit", url: "https://www.reddit.com", color: "#D93900" }
 };
 

@@ -13,8 +13,8 @@ PANELS = ROOT / 'Surge/Module/Pannel'
 class TileConfigurationTests(unittest.TestCase):
     def test_media_service_order_and_script_versions(self):
         config = yaml.safe_load((PANELS / 'media-check-panel.stoverride').read_text())
-        expected = ['netflix', 'disney', 'hbomax', 'youtube', 'spotify', 'chatgpt',
-                    'claude', 'gemini', 'metaai', 'tiktok', 'reddit']
+        expected = ['netflix', 'disney', 'hbomax', 'youtube', 'spotify', 'tiktok', 'chatgpt',
+                    'claude', 'gemini', 'metaai', 'reddit']
         actual = [parse_qs(tile['argument'])['service'][0] for tile in config['tiles']]
         self.assertEqual(actual, expected)
         self.assertTrue(all(tile['collapsed'] for tile in config['tiles']))
