@@ -12,7 +12,7 @@ tiles:
     interval: 600
     title: 'Netflix'
     content: 'Waiting…'
-    icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/netflix.png'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/netflix-light.png'
     backgroundColor: '#E50914'
     collapsed: true
     url: 'https://www.netflix.com'
@@ -39,7 +39,7 @@ tiles:
     interval: 600
     title: 'YouTube Premium'
     content: 'Waiting…'
-    icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/youtube.png'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/youtube-light.png'
     backgroundColor: '#E62117'
     collapsed: true
     url: 'https://www.youtube.com/premium'
