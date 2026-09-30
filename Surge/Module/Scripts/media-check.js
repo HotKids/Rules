@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.5 (2026-09-30)
+ * @version      2.2.6 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -69,7 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.5",
+  VERSION: "2.2.6",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -222,15 +222,18 @@ const ICONS = { SUCCESS: "🟢", WARNING: "🟡", COLORS: { SUCCESS: "#3CB371", 
 class Utils {
   /**
    * 发起 HTTP 请求（支持 GET/POST）
-   * @param {Object} options - 请求配置 {url, method, headers, body, timeout}
+   * @param {Object} options - 请求配置 {url, method, headers, body, timeout, includeDefaultHeaders, nativeDefaults}
    * @returns {Promise<{status: number, headers: Object, body: string}>}
    */
   static request(options) {
     return new Promise((resolve, reject) => {
-      const { url, method = "GET", headers = {}, body = null, timeout = CONFIG.TIMEOUT } = options;
+      const { url, method = "GET", headers = {}, body = null, timeout = CONFIG.TIMEOUT,
+        includeDefaultHeaders = true, nativeDefaults = false } = options;
+      const useNativeDefaults = IS_STASH && nativeDefaults;
       const started = Date.now();
       const target = Utils.safeUrl(url);
-      const finalHeaders = { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers };
+      const finalHeaders = includeDefaultHeaders && !useNativeDefaults
+        ? { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers } : { ...headers };
       if (IS_STASH && ARGS.proxy) finalHeaders["X-Stash-Selected-Proxy"] = encodeURIComponent(ARGS.proxy);
       let settled = false;
       let timer;
@@ -248,7 +251,7 @@ class Utils {
           resolve(value);
         }
       };
-      MediaLog.log(`[HTTP] ${method} ${target}; 开始请求`);
+      MediaLog.log(`[HTTP] ${method} ${target}; 开始请求${useNativeDefaults ? "; 配置=Stash 原生默认" : ""}`);
       // Android Stash 可能没有 JS 计时器，此时依靠 HTTP 客户端自身的超时。
       // 有计时器的客户端继续保留 watchdog：JS 用毫秒，HTTP timeout 用秒。
       if (typeof setTimeout === "function") {
@@ -269,14 +272,13 @@ class Utils {
             url: typeof response.url === "string" ? response.url : (typeof response.responseURL === "string" ? response.responseURL : "") });
         } catch (error) { settle(error, null, "response"); }
       };
-      const request = {
-        url,
-        headers: finalHeaders,
-        timeout: timeout / 1000,
-        "auto-redirect": true,
+      const request = { url, timeout: timeout / 1000 };
+      if (Object.keys(finalHeaders).length) request.headers = finalHeaders;
+      if (!useNativeDefaults) {
+        request["auto-redirect"] = true;
         // 保留显式 Cookie；不让上一次请求的自动 Cookie 干扰双重检测。
-        "auto-cookie": false
-      };
+        request["auto-cookie"] = false;
+      }
       if (!IS_STASH && ARGS.proxy) request.policy = ARGS.proxy;
       if (body !== null) request.body = body;
       try {
@@ -752,23 +754,33 @@ class ServiceChecker {
       MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}失败；阶段=${error?.phase || "parse"}；${Utils.errorDetails(error)}`);
       return result;
     };
-    const pages = ["https://gemini.google.com", "https://gemini.google.com/app?hl=en"];
-    for (const [index, url] of pages.entries()) {
-      const stage = index ? "应用页" : "首页";
+    // 与 lmc999 的 Gemini curl 请求对齐，仅对此服务使用 Windows Chrome 125 UA。
+    const headers = {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+      Accept: "*/*"
+    };
+    const pages = [
+      { url: "https://gemini.google.com", stage: "首页" },
+      { url: "https://gemini.google.com/app?hl=en", stage: "应用页" }
+    ];
+    for (const [index, page] of pages.entries()) {
+      const { url, stage, nativeDefaults = false } = page;
       const remaining = deadline - Date.now();
       if (remaining <= 0) {
-        MediaLog.log(`[Gemini v${CONFIG.VERSION}] 网页检测预算已耗尽，不再请求应用页`);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] 网页检测预算已耗尽，不再请求备用页面`);
         break;
       }
       try {
-        const res = await Utils.request({ url, timeout: remaining });
+        const res = await Utils.request({ url, timeout: remaining, headers: nativeDefaults ? {} : headers,
+          includeDefaultHeaders: false, nativeDefaults });
         const flags = ["45631641", "45617354"].map(id =>
           `${id}=${res.body.match(new RegExp(`${id},\\s*null,\\s*(true|false)`))?.[1] || "missing"}`);
         const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
         const redirect = /https?:\/\/(?:[^/]+\.)?google\.com\/sorry(?:[/?#]|$)/i.test(res.url) ? "验证页"
           : /^https?:\/\/consent\.google\./i.test(res.url) ? "同意页"
           : /^https?:\/\/accounts\.google\./i.test(res.url) ? "登录页" : "无";
-        const issue = Utils.responseProblem(res);
+        const issue = res.status >= 300 && res.status < 400
+          ? { ...Utils.createResult(STATUS.ERROR, "Error"), reason: "redirect" } : Utils.responseProblem(res);
         let result = issue || Utils.createResult(STATUS.ERROR, "Error");
         let reason = issue?.reason || (issue ? `HTTP ${res.status} 或空响应` : "缺少可用标记");
         if (redirect !== "无" || /our systems have detected unusual traffic|unusual traffic from your computer network/i.test(res.body)) {
@@ -783,18 +795,19 @@ class ServiceChecker {
           reason = "可用";
           result = Utils.createResult(STATUS.OK, region || "OK");
         }
-        MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}`);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}${issue?.reason === "redirect" ? `; 跳转=${Utils.safeUrl(res.headers.location || "未知")}` : ""}`);
         if (result.status === STATUS.OK || result.status === STATUS.FAIL) return result;
         unknown = result;
         // 正常首页缺标记时回落；限流和验证页面保持原结果。
         if (res.status !== 200 || reason !== "缺少可用标记" || flags.some(flag => !flag.endsWith("=missing"))) break;
       } catch (error) {
         unknown = logError(stage, error);
-        // Stash 的原生 SendRequest 失败尚未收到 HTTP；沿同一线路尝试应用页一次。
+        // Stash SendRequest 尚未收到 HTTP；精简可选设置并重试同一首页一次。
         // 其他错误不重试，两个网页请求共用 10 秒预算。
         if (IS_STASH && index === 0 && error?.phase === "callback" && unknown.status !== STATUS.TIMEOUT &&
           /\bSendRequest\b/i.test(Utils.errorMessage(error))) {
-          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，回落同一线路的应用页`);
+          pages[1] = { url, stage: "原生首页", nativeDefaults: true };
+          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，使用 Stash 原生默认设置重试同一首页`);
           continue;
         }
         break;
