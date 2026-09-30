@@ -787,7 +787,9 @@ function stashCacheIP(value) {
     return ip.split(".").every(n => Number(n) <= 255) ? ip : "";
   }
   // IPv6 缓存键保留地址写法；不同等价写法最多造成未命中，不会串用地址。
-  if (!/^[0-9a-f:]+$/.test(ip)) return "";
+  if (!/^[0-9a-f:]+$/.test(ip) || ip.includes(":::") ||
+    (ip.startsWith(":") && !ip.startsWith("::")) ||
+    (ip.endsWith(":") && !ip.endsWith("::"))) return "";
   const halves = ip.split("::"), groups = ip.split(":").filter(Boolean);
   if (halves.length > 2 || !groups.every(n => /^[0-9a-f]{1,4}$/.test(n))) return "";
   return halves.length === 2 ? (groups.length < 8 ? ip : "") :

@@ -644,6 +644,11 @@ test('Stash IP lookup failure never reuses a last-success address',async()=>{
   assert.equal(same.output.content,'0 / 100 · 低风险');assert.match(same.output.title,/机房 · 原生/);
   const changed=await ipPanel({store,now:now+600000,argument,ippureData:{ip:'2001:db8::2'}});
   assert.equal(changed.output.backgroundColor,'#9E9E9E');
+  for(const ip of ['2001:::1',':2001::1','2001::1:']) {
+    const invalidStore=new Map();
+    await ipPanel({store:invalidStore,now,argument,ippureData:{ip,fraudScore:12}});
+    assert.equal(invalidStore.size,0);
+  }
 });
 
 test('Netflix accepts known video markup and prioritizes request country',async()=>{

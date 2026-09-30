@@ -48,7 +48,7 @@ tiles:
     interval: 600
     title: 'Spotify'
     content: 'Loading...'
-    icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify-light.png'
+    icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/spotify-light.png'
     backgroundColor: '#117C39'
     collapsed: true
     url: 'https://www.spotify.com'
