@@ -355,18 +355,18 @@ test('Gemini maps ISO regions and keeps availability without a country',async()=
   assert.equal((await tile('gemini',{body:'<html>unknown</html>'})).output.content,'Error');
 });
 test('Gemini API fallback distinguishes valid models, rate limits and invalid keys',async()=>{
-  for(const [response,expected] of [[{body:{models:[]}},'OK'],[{status:429,body:'rate limited'},'Rate Limited'],
+  for(const [response,expected] of [[{body:{models:[]}},'OK'],[{status:429,body:'rate limited'},'Error'],
     [{status:400,body:'API_KEY_INVALID'},'Invalid Key'],[{status:400,body:'User location is not supported'},'NO']]) {
     const result=await tile('gemini',o=>o.url.includes('generativelanguage')?response:{body:'unknown page'},
       {argument:'geminiapikey=example'});
     assert.equal(result.output.content,expected);
   }
 });
-test('AI services do not turn HTTP errors and browser challenges into availability',async()=>{
+test('AI services keep unknown HTTP failures and missing regional evidence as Error',async()=>{
   for(const service of ['chatgpt','claude','gemini'])for(const [status,body,expected] of [
-    [403,'<title>Just a moment...</title>','Verify'],[429,'too many requests','Rate Limited'],
-    [403,'Forbidden','Error'],[200,'<script src="/cdn-cgi/challenge-platform/test"></script>','Verify']]) {
-    const result=await tile(service,o=>o.url.includes('trace')?{body:'loc=SG\n'}:{status,body});
+    [403,'<title>Just a moment...</title>','Error'],[429,'too many requests','Error'],
+    [403,'Forbidden','Error']]) {
+    const result=await tile(service,o=>o.url.includes('trace')?{error:'Timeout'}:{status,body});
     assert.equal(result.output.content,expected,service);assert.equal(result.output.backgroundColor,'#8E8E93');
   }
 });
@@ -433,12 +433,12 @@ test('Meta AI shows legal redirect region and tolerates a failed optional lookup
 });
 test('Meta AI home fallback requires evidence and distinguishes blocked/rate-limited pages',async()=>{
   for(const [home,expected] of [[{body:'KadabraRootContainer "code":"en_US"'},'US'],
-    [{body:'GeoBlockedErrorRoot'},'NO'],[{body:'AbraRateLimitedErrorRoot'},'Rate Limited'],
-    [{status:403,body:'Forbidden'},'Error'],[{body:'<title>Just a moment...</title>'},'Verify'],[{body:'generic home'},'Error']]) {
+    [{body:'GeoBlockedErrorRoot'},'NO'],[{body:'AbraRateLimitedErrorRoot'},'Error'],
+    [{status:403,body:'Forbidden'},'Error'],[{body:'<title>Just a moment...</title>'},'Error'],[{body:'generic home'},'Error']]) {
     const r=await tile('metaai',o=>o.url.endsWith('/ajax')?{status:403,body:'Forbidden'}:home);
     assert.equal(r.output.content,expected);
   }
-  assert.equal((await tile('metaai',{status:429,body:'slow down'})).output.content,'Rate Limited');
+  assert.equal((await tile('metaai',{status:429,body:'slow down'})).output.content,'Error');
 });
 test('TikTok checks fallback status, regions and explicit Hong Kong restriction',async()=>{
   const first=await tile('tiktok',{body:'"region":"SG"'});assert.equal(first.output.content,'SG');assert.equal(first.requests.length,1);
@@ -448,7 +448,7 @@ test('TikTok checks fallback status, regions and explicit Hong Kong restriction'
     {status:404,url:'https://www.tiktok.com/hk/notfound',body:'Not found'}])assert.equal((await tile('tiktok',response)).output.content,'NO');
   const rejected=await tile('tiktok',o=>o.url.endsWith('/explore')?{body:'unknown'}:{status:403,body:'"region":"US"'});
   assert.equal(rejected.output.content,'Error');
-  assert.equal((await tile('tiktok',{body:'<title>Just a moment...</title>'})).output.content,'Verify');
+  assert.equal((await tile('tiktok',{body:'<title>Just a moment...</title>'})).output.content,'Error');
 });
 test('Surge and Stash summaries include all eleven services in the requested order',async()=>{
   const response=o=>{
@@ -503,8 +503,8 @@ test('Netflix accepts known video markup and prioritizes request country',async(
   }
 });
 test('Reddit distinguishes rate limiting, explicit blocks and unknown responses',async()=>{
-  for(const [status,body,expected] of [[429,'slow down','Rate Limited'],[403,'You have been blocked','NO'],
-    [403,'Forbidden','Error'],[200,'<title>Just a moment...</title>','Verify'],[200,'Welcome','OK']]) {
+  for(const [status,body,expected] of [[429,'slow down','Error'],[403,'You have been blocked','NO'],
+    [403,'Forbidden','Error'],[200,'<title>Just a moment...</title>','Error'],[200,'Welcome','OK']]) {
     assert.equal((await tile('reddit',{status,body})).output.content,expected);
   }
 });
@@ -521,4 +521,46 @@ test('Surge Viu recognizes final region and no-service before body country links
     const result=await vm.runInContext(declarations+'\nServiceChecker.checkViu()',ctx);
     assert.equal(result.status,expectedStatus);assert.equal(result.region,region);
   }
+});
+
+// Redacted responses captured through Pixel Stash on 2026-09-30.
+const pixelResponses=JSON.parse(fs.readFileSync(path.join(__dirname,'fixtures/media-pixel-20260930.json'),'utf8'));
+test('Pixel generic App probe denial must not become a false Web Only result',async()=>{
+  for(const client of ['stash','surge']) {
+    const r=await tile('chatgpt',o=>o.url.includes('/trace')?{body:'loc=US\n'}:
+      pixelResponses[o.url.includes('ios.chat')?'gpt-app':'gpt-web'],{client});
+    if(client==='stash') assert.equal(r.output.content,'US');
+    else assert.match(r.output.content,/ChatGPT.*US/);
+  }
+});
+test('Claude retains regional fallback for a browser challenge, without treating generic 403 as success',async()=>{
+  for(const [trace,expected] of [[{body:'loc=US\n'},'US'],[{body:'loc=HK\n'},'Error'],[{error:'Timeout'},'Error']]) {
+    const r=await tile('claude',o=>o.url.includes('/trace')?trace:pixelResponses['claude-login']);
+    assert.equal(r.output.content,expected);
+  }
+  for(const login of [{status:403,body:'Forbidden'},{status:429,body:'<title>Just a moment...</title>'}]) {
+    const r=await tile('claude',o=>o.url.includes('/trace')?{body:'loc=US\n'}:login);
+    assert.equal(r.output.content,'Error');
+  }
+  const restricted=await tile('claude',o=>o.url.includes('/trace')?{body:'loc=US\n'}:{status:403,body:'app-unavailable-in-region'});
+  assert.equal(restricted.output.content,'NO');
+});
+test('Ordinary challenge-platform script inclusion is not a verification page',async()=>{
+  const r=await tile('claude',o=>o.url.includes('/trace')?{body:'loc=US\n'}:
+    {body:'<title>Claude</title><script src="/cdn-cgi/challenge-platform/scripts/jsd/main.js"></script>'});
+  assert.equal(r.output.content,'US');
+});
+test('Meta AI accepts the captured endpoint authentication response, not arbitrary 401 errors',async()=>{
+  const r=await tile('metaai',o=>o.url.endsWith('/ajax')?pixelResponses['meta-ajax']:{error:'Timeout'});
+  assert.equal(r.output.content,'OK');
+  const region=await tile('metaai',o=>o.url.endsWith('/ajax')?pixelResponses['meta-ajax']:
+    {body:'<link rel="canonical" href="https://www.meta.com/us/legal/">'});
+  assert.equal(region.output.content,'US');
+  const bad=await tile('metaai',{status:401,body:'Unauthorized'});assert.equal(bad.output.content,'Error');
+});
+test('TikTok HK about page is unavailable; infrastructure ALISG is never a user region',async()=>{
+  const r=await tile('tiktok',pixelResponses['tiktok-explore']);
+  assert.equal(r.output.content,'NO');assert.equal(r.requests.length,1);
+  assert.equal((await tile('tiktok',pixelResponses['tiktok-home'])).output.content,'Error');
+  assert.equal((await tile('tiktok',pixelResponses['tiktok-sg'])).output.content,'SG');
 });

@@ -11,7 +11,7 @@ tiles:
     interval: 600
     title: '出口 IP'
     url: 'https://ippure.com'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
@@ -20,7 +20,7 @@ tiles:
     interval: 600
     title: '本地 IP'
     url: 'https://ippure.com'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
@@ -29,7 +29,7 @@ tiles:
     interval: 600
     title: 'IP 纯净度'
     url: 'https://ippure.com'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true

@@ -35,9 +35,9 @@ Streaming 成员以 `### Streaming` 或 `### Streaming US` 等标记声明归属
 | Stash IP Tile | [ip-security-panel.stoverride](Module/Pannel/ip-security-panel.stoverride) | 出口、本地、IP 纯净度三张折叠卡片 |
 | Stash 服务 Tile | [media-check-panel.stoverride](Module/Pannel/media-check-panel.stoverride) | 每项服务一张卡片，与 Surge 共用检测 JS |
 
-流媒体检测按 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Claude、Gemini、Meta AI、TikTok、Reddit 排列，共 11 项。Surge 可额外启用 Viu；Stash 不包含 Viu。ChatGPT 保留一个服务结果，区分地区、Web Only、Mobile Only 与 NO。Meta AI 优先从 Meta 官网地区路径获取地区，也支持主页地区字段；可用但无地区时显示 OK。TikTok 从 Explore 页面读取地区，未知时尝试主页。
+流媒体检测按 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、ChatGPT、Claude、Gemini、Meta AI、TikTok、Reddit 排列，共 11 项。Surge 可额外启用 Viu；Stash 不包含 Viu。ChatGPT 保留一个服务结果，区分地区、Web Only、Mobile Only 与 NO。App 探测根路径的通用 `cf_details` 响应不作为地区封锁；Web 正常且 trace 有效时保留地区结果，明确的地区或 ISP 限制仍按原规则处理。Meta AI 优先从 Meta 官网地区路径获取地区，也支持主页地区字段；可用但无地区时显示 OK。TikTok 从 Explore 页面读取地区，未知时尝试主页；香港停止服务页面（包括 `/hk/about`）显示 NO。
 
-明确受限显示 NO；超时、限流、验证页分别显示 Timeout、Rate Limited、Verify，其他无法确认的响应显示 Error。未知状态不触发解锁失效通知。Spotify 优先读取播放器 market；Gemini 正确转换三位地区码；Netflix 在确认影片页面后判断可用性，另测原创影片确认 Originals Only，缺地区时不默认美国。YouTube 使用明确的 Premium 标记，通常只请求一次，未知时才用 Cookie 回落。Netflix 价格表缓存 24 小时，更新最多等待 2 秒，失败可使用之前缓存。
+明确受限显示 NO；超时显示 Timeout，限流和其他无法确认的响应显示 Error，不新增验证页等状态文案。Claude 遇到浏览器挑战时，可依据 trace 中已知受支持的地区回落显示地区；该回落表示地区支持，不代表已完成浏览器验证或账号登录。未知状态不触发解锁失效通知。Spotify 优先读取播放器 market；Gemini 正确转换三位地区码；Netflix 在确认影片页面后判断可用性，另测原创影片确认 Originals Only，缺地区时不默认美国。YouTube 使用明确的 Premium 标记，通常只请求一次，未知时才用 Cookie 回落。Netflix 价格表缓存 24 小时，更新最多等待 2 秒，失败可使用之前缓存。
 
 检测判据参考 [Stash 官方示例](https://github.com/StashNetworks/misc/tree/main/collapsed-tiles) 和 [UnlockTests](https://github.com/oneclickvirt/UnlockTests/tree/main/transnation)。采用网页地区、结构化字段及明确限制信息，适配 Surge / Stash 的 HTTP 接口；不依赖命令行工具或额外 DNS 解锁类型探测。ViuCom 即可选的 Viu，支持最终重定向地区与 no-service 判据。
 

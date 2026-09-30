@@ -1,0 +1,33 @@
+{
+  "gpt-web": {
+    "status": 200,
+    "body": "{\n  \"cookie_consent_required\": false\n}"
+  },
+  "gpt-app": {
+    "status": 403,
+    "body": "{\"cf_details\":\"Request is not allowed. Please try again later.\", \"type\":\"dc\"}"
+  },
+  "meta-ajax": {
+    "status": 401,
+    "body": "{\"error\":\"Authentication required\"}"
+  },
+  "claude-login": {
+    "status": 403,
+    "headers": {
+      "cf-mitigated": "challenge"
+    },
+    "body": "<!DOCTYPE html><html><head><title>Just a moment...</title></head><body><script src=\"/cdn-cgi/challenge-platform/h/b/orchestrate/chl_page/v1\"></script></body></html>"
+  },
+  "tiktok-explore": {
+    "status": 200,
+    "body": "<script type=\"application/json\">{\"region\":\"ALISG\",\"vregion\":\"Singapore-Central\"}</script><div class=\"hknotfound-page\">TikTok</div>"
+  },
+  "tiktok-home": {
+    "status": 200,
+    "body": "<title>About | TikTok</title><script type=\"application/json\">{\"region\":\"ALISG\",\"vregion\":\"Singapore-Central\"}</script>"
+  },
+  "tiktok-sg": {
+    "status": 200,
+    "body": "<script type=\"application/json\">{\"region\":\"ALISG\",\"vregion\":\"Singapore-Central\"}</script><script type=\"application/json\">{\"webapp.app-context\":{\"language\":\"en\",\"region\":\"SG\",\"appId\":1180}}</script>"
+  }
+}

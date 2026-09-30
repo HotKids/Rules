@@ -11,7 +11,7 @@ tiles:
   - name: hotkids-media-check-netflix
     interval: 600
     title: 'Netflix'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/netflix-light.png'
     backgroundColor: '#E50914'
     collapsed: true
@@ -20,7 +20,7 @@ tiles:
   - name: hotkids-media-check-disney
     interval: 600
     title: 'Disney+'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/disney-plus-light.png'
     backgroundColor: '#113CCF'
     collapsed: true
@@ -29,7 +29,7 @@ tiles:
   - name: hotkids-media-check-hbomax
     interval: 600
     title: 'HBO Max'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/hbo-max-light.png'
     backgroundColor: '#191919'
     collapsed: true
@@ -38,7 +38,7 @@ tiles:
   - name: hotkids-media-check-youtube
     interval: 600
     title: 'YouTube Premium'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/youtube-light.png'
     backgroundColor: '#E62117'
     collapsed: true
@@ -47,7 +47,7 @@ tiles:
   - name: hotkids-media-check-spotify
     interval: 600
     title: 'Spotify'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/spotify-light.png'
     backgroundColor: '#117C39'
     collapsed: true
@@ -56,7 +56,7 @@ tiles:
   - name: hotkids-media-check-chatgpt
     interval: 600
     title: 'ChatGPT'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/chatgpt.png'
     backgroundColor: '#0D8A70'
     collapsed: true
@@ -65,7 +65,7 @@ tiles:
   - name: hotkids-media-check-claude
     interval: 600
     title: 'Claude'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/claude-light.png'
     backgroundColor: '#B85C3F'
     collapsed: true
@@ -74,7 +74,7 @@ tiles:
   - name: hotkids-media-check-gemini
     interval: 600
     title: 'Gemini'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/google-gemini-light.png'
     backgroundColor: '#386EDB'
     collapsed: true
@@ -83,7 +83,7 @@ tiles:
   - name: hotkids-media-check-metaai
     interval: 600
     title: 'Meta AI'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://dashboardicons.com/api/icons/external/simpleicons/metaai/dark.png'
     backgroundColor: '#0866FF'
     collapsed: true
@@ -92,7 +92,7 @@ tiles:
   - name: hotkids-media-check-tiktok
     interval: 600
     title: 'TikTok'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/tiktok-light.png'
     backgroundColor: '#191919'
     collapsed: true
@@ -101,7 +101,7 @@ tiles:
   - name: hotkids-media-check-reddit
     interval: 600
     title: 'Reddit'
-    content: 'Waiting…'
+    content: 'Loading...'
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/reddit-light.png'
     backgroundColor: '#D93900'
     collapsed: true
@@ -110,35 +110,35 @@ tiles:
 
 script-providers:
   hotkids-media-check-netflix:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-disney:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-hbomax:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-youtube:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-spotify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-chatgpt:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-claude:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-gemini:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-metaai:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-tiktok:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400
   hotkids-media-check-reddit:
-    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.0
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js?v=2.2.1
     interval: 86400

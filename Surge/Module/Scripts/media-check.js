@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.0 (2026-09-30)
+ * @version      2.2.1 (2026-09-30)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -81,6 +81,9 @@ const STATUS = { OK: 1, COMING: 2, FAIL: 0, TIMEOUT: -1, ERROR: -2 };
 const COUNTRY_CODES = Object.fromEntries(
   "AD:AND AE:ARE AF:AFG AG:ATG AI:AIA AL:ALB AM:ARM AO:AGO AQ:ATA AR:ARG AS:ASM AT:AUT AU:AUS AW:ABW AX:ALA AZ:AZE BA:BIH BB:BRB BD:BGD BE:BEL BF:BFA BG:BGR BH:BHR BI:BDI BJ:BEN BL:BLM BM:BMU BN:BRN BO:BOL BQ:BES BR:BRA BS:BHS BT:BTN BV:BVT BW:BWA BY:BLR BZ:BLZ CA:CAN CC:CCK CD:COD CF:CAF CG:COG CH:CHE CI:CIV CK:COK CL:CHL CM:CMR CN:CHN CO:COL CR:CRI CU:CUB CV:CPV CW:CUW CX:CXR CY:CYP CZ:CZE DE:DEU DJ:DJI DK:DNK DM:DMA DO:DOM DZ:DZA EC:ECU EE:EST EG:EGY EH:ESH ER:ERI ES:ESP ET:ETH FI:FIN FJ:FJI FK:FLK FM:FSM FO:FRO FR:FRA GA:GAB GB:GBR GD:GRD GE:GEO GF:GUF GG:GGY GH:GHA GI:GIB GL:GRL GM:GMB GN:GIN GP:GLP GQ:GNQ GR:GRC GS:SGS GT:GTM GU:GUM GW:GNB GY:GUY HK:HKG HM:HMD HN:HND HR:HRV HT:HTI HU:HUN ID:IDN IE:IRL IL:ISR IM:IMN IN:IND IO:IOT IQ:IRQ IR:IRN IS:ISL IT:ITA JE:JEY JM:JAM JO:JOR JP:JPN KE:KEN KG:KGZ KH:KHM KI:KIR KM:COM KN:KNA KP:PRK KR:KOR KW:KWT KY:CYM KZ:KAZ LA:LAO LB:LBN LC:LCA LI:LIE LK:LKA LR:LBR LS:LSO LT:LTU LU:LUX LV:LVA LY:LBY MA:MAR MC:MCO MD:MDA ME:MNE MF:MAF MG:MDG MH:MHL MK:MKD ML:MLI MM:MMR MN:MNG MO:MAC MP:MNP MQ:MTQ MR:MRT MS:MSR MT:MLT MU:MUS MV:MDV MW:MWI MX:MEX MY:MYS MZ:MOZ NA:NAM NC:NCL NE:NER NF:NFK NG:NGA NI:NIC NL:NLD NO:NOR NP:NPL NR:NRU NU:NIU NZ:NZL OM:OMN PA:PAN PE:PER PF:PYF PG:PNG PH:PHL PK:PAK PL:POL PM:SPM PN:PCN PR:PRI PS:PSE PT:PRT PW:PLW PY:PRY QA:QAT RE:REU RO:ROU RS:SRB RU:RUS RW:RWA SA:SAU SB:SLB SC:SYC SD:SDN SE:SWE SG:SGP SH:SHN SI:SVN SJ:SJM SK:SVK SL:SLE SM:SMR SN:SEN SO:SOM SR:SUR SS:SSD ST:STP SV:SLV SX:SXM SY:SYR SZ:SWZ TC:TCA TD:TCD TF:ATF TG:TGO TH:THA TJ:TJK TK:TKL TL:TLS TM:TKM TN:TUN TO:TON TR:TUR TT:TTO TV:TUV TW:TWN TZ:TZA UA:UKR UG:UGA UM:UMI US:USA UY:URY UZ:UZB VA:VAT VC:VCT VE:VEN VG:VGB VI:VIR VN:VNM VU:VUT WF:WLF WS:WSM YE:YEM YT:MYT ZA:ZAF ZM:ZMB ZW:ZWE".split(" ").map(pair => pair.split(":"))
 );
+
+// Claude 地区回落白名单，参考 UnlockTests/model/model.go（2026-09-30）。
+const CLAUDE_REGIONS = new Set("AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA TD CL CO KM CG CR CI HR CY CZ DK DJ DM DO EC EG SV GQ EE SZ FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LI LT LU MG MW MY MV MT MH MR MU MX FM MD MC MN ME MA MZ NA NR NP NL NZ NE NG MK NO OM PK PW PS PA PG PY PE PH PL PT QA RO RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB ZA KR ES LK SR SE CH TW TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US UY UZ VU VA VN ZM ZW".split(" "));
 
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
@@ -215,12 +218,17 @@ class Utils {
 
   // HTTP 错误、限流、验证页都属于未知；只让服务专属的明确限制进入 NO。
   static responseProblem(res) {
-    if (res.status === 429) return this.createResult(STATUS.ERROR, "Rate Limited");
-    if (/cf-chl|challenge-platform|<title>\s*(?:just a moment|attention required)|checking your browser|verify (?:that )?you are human/i.test(res.body)) {
-      return this.createResult(STATUS.ERROR, "Verify");
-    }
+    if (res.status === 429) return { ...this.createResult(STATUS.ERROR, "Error"), reason: "rate-limit" };
+    if (this.isChallenge(res)) return { ...this.createResult(STATUS.ERROR, "Error"), reason: "challenge" };
     if (res.status < 200 || res.status >= 400 || !res.body.trim()) return this.createResult(STATUS.ERROR, "Error");
     return null;
+  }
+
+  static isChallenge(res) {
+    // 普通页面也会加载 challenge-platform，不能仅因脚本路径出现就误判。
+    return res.headers?.["cf-mitigated"] === "challenge" ||
+      /<title>\s*(?:just a moment|attention required)|checking your browser|verify (?:that )?you are human/i.test(res.body) ||
+      (res.status === 403 && /cf-chl|challenge-platform|__rd_verify_/i.test(res.body));
   }
 
   static country(code) {
@@ -545,6 +553,15 @@ class ServiceChecker {
         const blocked = /unsupported_country|disallowed isp|been blocked|blocked_why_headline/i.test(res.body)
           || (app && /\bVPN\b|"cf_details"\s*:\s*"[^"\n]*\([12]\)/i.test(res.body));
         if (blocked) return Utils.createResult(STATUS.FAIL, "NO");
+        // App 探测根路径的通用 cf_details 不是地区/ISP 封锁证据。
+        if (app && res.status === 403) {
+          try {
+            const data = JSON.parse(res.body);
+            if (data.type === "dc" && /^Request is not allowed\. Please try again later\.?$/i.test(data.cf_details || "")) {
+              return { ...Utils.createResult(STATUS.ERROR, "Error"), reason: "app-probe" };
+            }
+          } catch (_) {}
+        }
         return Utils.responseProblem(res) || Utils.createResult(STATUS.OK);
       } catch (error) { return Utils.errorResult(error); }
     };
@@ -556,7 +573,13 @@ class ServiceChecker {
       probe("https://ios.chat.openai.com/", {}, true),
       Utils.request({ url: "https://chatgpt.com/cdn-cgi/trace", timeout: 1500 }).catch(() => null)
     ]);
-    if (web.status === STATUS.OK && app.status === STATUS.OK) return Utils.createResult(STATUS.OK, Utils.traceRegion(trace) || "OK");
+    const region = Utils.traceRegion(trace);
+    // 保留原地区检测口径；不把这个无需登录的探测地址当作真实 App 会话。
+    if (web.status === STATUS.OK && app.reason === "app-probe" && region) {
+      console.log("ChatGPT: generic App probe response; regional result from Web + trace (" + region + ")");
+      return Utils.createResult(STATUS.OK, region);
+    }
+    if (web.status === STATUS.OK && app.status === STATUS.OK) return Utils.createResult(STATUS.OK, region || "OK");
     if (web.status === STATUS.FAIL && app.status === STATUS.FAIL) return Utils.createResult(STATUS.FAIL, "NO");
     if (web.status === STATUS.OK && app.status === STATUS.FAIL) return Utils.createResult(STATUS.COMING, "Web Only");
     if (web.status === STATUS.FAIL && app.status === STATUS.OK) return Utils.createResult(STATUS.COMING, "Mobile Only");
@@ -575,8 +598,15 @@ class ServiceChecker {
         Utils.request({ url: "https://claude.ai/login" }),
         Utils.request({ url: "https://claude.ai/cdn-cgi/trace", timeout: 1500 }).catch(() => null)
       ]);
-      if (/app-unavailable-in-region/i.test(login.body)) return Utils.createResult(STATUS.FAIL, "NO");
-      return Utils.responseProblem(login) || Utils.createResult(STATUS.OK, Utils.traceRegion(trace) || "OK");
+      if (login.status === 451 || /app-unavailable-in-region/i.test(login.body)) return Utils.createResult(STATUS.FAIL, "NO");
+      const region = Utils.traceRegion(trace);
+      // 保留原来的地区检测口径：Cloudflare 浏览器挑战不等于地区不支持。
+      // 仅在 trace 确认受支持地区时回落；未知 403、限流和地区限制仍不算通过。
+      if (Utils.isChallenge(login) && login.status !== 429 && CLAUDE_REGIONS.has(region)) {
+        console.log("Claude: browser challenge; regional result from trace (" + region + ")");
+        return Utils.createResult(STATUS.OK, region);
+      }
+      return Utils.responseProblem(login) || Utils.createResult(STATUS.OK, region || "OK");
     } catch (error) { return Utils.errorResult(error); }
   }
 
@@ -618,7 +648,7 @@ class ServiceChecker {
   static async checkMetaAI() {
     const parseHome = res => {
       if (/GeoBlockedErrorRoot|not (?:yet )?available in (?:your|this) country/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
-      if (/AbraRateLimitedErrorRoot/.test(res.body)) return Utils.createResult(STATUS.ERROR, "Rate Limited");
+      if (/AbraRateLimitedErrorRoot/.test(res.body)) return { ...Utils.createResult(STATUS.ERROR, "Error"), reason: "rate-limit" };
       const issue = Utils.responseProblem(res);
       if (issue) return issue;
       if (/AbraHomeRoot\.react|AbraHomeRootConversationQuery|HomeRootQuery|KadabraRootContainer/.test(res.body)) {
@@ -630,9 +660,13 @@ class ServiceChecker {
     try {
       const ajax = await Utils.request({ url: "https://www.meta.ai/ajax", headers: { Accept: "text/html,application/xhtml+xml,application/json;q=0.9,*/*;q=0.8" } });
       const parsed = parseHome(ajax);
-      if (parsed.status === STATUS.FAIL || parsed.status === STATUS.OK || ["Verify", "Rate Limited"].includes(parsed.region)) return parsed;
-      // /ajax 在可用地区返回 400/404；这是此端点的特定行为，不用于其他服务。
-      if (ajax.status === 400 || ajax.status === 404) {
+      if (parsed.status === STATUS.FAIL || parsed.status === STATUS.OK || ["challenge", "rate-limit"].includes(parsed.reason)) return parsed;
+      // /ajax 的 400/404 和明确的 401 登录要求均属于端点协议响应，不是地区限制。
+      let authRequired = false;
+      if (ajax.status === 401) {
+        try { authRequired = JSON.parse(ajax.body).error === "Authentication required"; } catch (_) {}
+      }
+      if (ajax.status === 400 || ajax.status === 404 || authRequired) {
         let region = "";
         try {
           const legal = await Utils.request({ url: "https://www.meta.com/legal/", timeout: 1000 });
@@ -654,8 +688,8 @@ class ServiceChecker {
     for (const url of ["https://www.tiktok.com/explore", "https://www.tiktok.com/"]) {
       try {
         const res = await Utils.request({ url });
-        if (/tiktok\.com\/hk\/notfound|not available in (?:your|this) country/i.test(res.body)
-          || /tiktok\.com\/hk\/notfound/i.test(res.url)) return Utils.createResult(STATUS.FAIL, "NO");
+        if (/tiktok\.com\/hk\/(?:notfound|about)|class=["'][^"']*\bhknotfound-page\b|not available in (?:your|this) country/i.test(res.body)
+          || /tiktok\.com\/hk\/(?:notfound|about)/i.test(res.url)) return Utils.createResult(STATUS.FAIL, "NO");
         const issue = Utils.responseProblem(res);
         if (issue) { unknown = issue; continue; }
         const region = Utils.country(res.body.match(/"region"\s*:\s*"([a-z]{2,3})"/i)?.[1]);
