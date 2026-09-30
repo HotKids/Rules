@@ -145,13 +145,13 @@ def _sync_stash(config: dict) -> None:
             flush()
             out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
-                # Stash 使用独立 DNS 出站；保留 nameserver-policy 与节点域名解析。
+                # DNS 查询跟随现有规则；保留 nameserver-policy 与独立的节点域名解析。
                 out += [
-                    "  # DNS 查询直接出站，不跟随代理规则；解析服务器仍由下方策略选择。",
+                    "  # DNS 查询按现有代理规则转发；解析服务器仍由下方策略选择。",
                     "  # 未命中 nameserver-policy 使用 Cloudflare DoH；国内与节点域名使用腾讯/阿里 DoH。",
-                    "  follow-rule: false",
+                    "  follow-rule: true",
                 ]
-                changes.append("dns: follow-rule=false")
+                changes.append("dns: follow-rule=true")
             continue
 
         if skip_provider_health:

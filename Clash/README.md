@@ -18,7 +18,7 @@
 
 Stash 覆写保留基础配置的节点，并替换 hosts、DNS、策略组、规则集与规则。示例 `proxy-providers` 整块注释停用，地区组通过 `include-all: true` 与 `filter` 从基础配置选节点。
 
-- DNS 使用 `follow-rule: false`，保留域名分组的 nameserver-policy；移除 mihomo 的 `#RULES` 后缀与不适用字段。
+- DNS 使用 `follow-rule: true`，查询按现有代理规则转发；保留 nameserver-policy 与独立的 proxy-server-nameserver，移除 mihomo 的 `#RULES` 后缀与不适用字段。
 - 境外 QUIC 使用 `PROTOCOL,QUIC` 及 `no-track`；国内域名/IP 的排除条件保留。
 - Provider 层健康检查移除，由 url-test / fallback 策略组配置 `interval: 600`、`lazy: true`。
 - mihomo 专属监听、控制面、TUN、嗅探及部分全局参数由转换器过滤。

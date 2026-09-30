@@ -1,4 +1,4 @@
-# Date: 2026-09-30 13:10:02
+# Date: 2026-09-30 17:25:15
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -22,9 +22,9 @@ hosts: #!replace
 # ── DNS ──
 
 dns: #!replace
-  # DNS 查询直接出站，不跟随代理规则；解析服务器仍由下方策略选择。
+  # DNS 查询按现有代理规则转发；解析服务器仍由下方策略选择。
   # 未命中 nameserver-policy 使用 Cloudflare DoH；国内与节点域名使用腾讯/阿里 DoH。
-  follow-rule: false
+  follow-rule: true
 
   # 引导 DNS：仅用于解析 nameserver 服务器的域名
   # 只能填纯 IP 地址
@@ -262,7 +262,7 @@ proxy-groups: #!replace
   # Speedtest
   - name: "⏱️ Speedtest"
     type: select
-    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speedtest.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
     include-all: true
 
   # Adblock
