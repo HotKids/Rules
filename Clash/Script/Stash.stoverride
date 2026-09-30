@@ -1,4 +1,4 @@
-# Date: 2026-09-30 17:25:15
+# Date: 2026-09-30 17:29:13
 
 name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；如需调整请修改 Surge/Profile.conf。
@@ -266,7 +266,7 @@ proxy-groups: #!replace
   # Speedtest
   - name: "⏱️ Speedtest"
     type: select
-    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speed.png
+    icon: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Speedtest.png
     include-all: true
 
   # Adblock
