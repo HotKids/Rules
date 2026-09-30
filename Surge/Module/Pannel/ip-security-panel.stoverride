@@ -37,11 +37,11 @@ tiles:
 
 script-providers:
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.9
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.9
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.9
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.2.10
     interval: 86400

@@ -57,7 +57,7 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   首页与折叠模式均在刷新时通知 IP 变化；首次成功检测只记录基线。
  *
- * @version 6.2.9
+ * @version 6.2.10
  * @date 2026-09-30
  */
 
@@ -189,7 +189,7 @@ function done(o) {
       content: o.content || "检测失败",
       icon: stashTiles[args.tile]?.icon || stashTiles.outbound.icon,
       backgroundColor: o.backgroundColor || o["icon-color"] || "#9E9E9E",
-      url: "https://ippure.com"
+      url: o.url || "https://ippure.com"
     });
   } else {
     $done(o);
@@ -871,8 +871,8 @@ async function runStashTile() {
   const tile = stashTiles[args.tile];
   if (!tile) return done({ content: "未知卡片类型" });
   const fail = message => done({ content: message, backgroundColor: "#9E9E9E" });
-  const render = (lines, color = tile.color, compact = null) => done({
-    content: lines.filter(Boolean).join("\n"), backgroundColor: color,
+  const render = (lines, color = tile.color, compact = null, url) => done({
+    content: lines.filter(Boolean).join("\n"), backgroundColor: color, url,
     ...(args.mode === "collapsed" && compact ? compact : {})
   });
   const m = ip => maskIP(ip, args.maskIP);
@@ -919,7 +919,7 @@ async function runStashTile() {
       title: heading(tile.title, ip),
       content: info ? [[flag(sb?.country_code), compactStashLocation(info.country_name, true)].filter(Boolean).join(" "),
         compactStashOrg(info.org)].join(" · ") : "百度地区查询失败"
-    });
+    }, args.maskIP === 0 ? "https://ippure.com/?ip=" + encodeURIComponent(ip) : undefined);
   }
 
   if (args.tile === "dns") {

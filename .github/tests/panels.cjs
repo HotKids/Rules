@@ -211,6 +211,7 @@ test('Stash local tile looks up Baidu via DIRECT without outbound probes',async(
   const {output,requests,notifications}=await ipPanel({argument:'tile=local'});
   assert.equal(output.title,'本地 IP');assert.equal(output.backgroundColor,'#00796B');assert.match(output.content,/203\.0\.113\.2/);
   assert.match(output.content,/广东省深圳市/);assert.match(output.content,/中国电信/);
+  assert.equal(output.url,'https://ippure.com/?ip=203.0.113.2');
   assert.equal(requests.length,3);assert.ok(requests.some(r=>r.url.includes('opendata.baidu')));
   assert.ok(requests.every(r=>r.headers['X-Stash-Selected-Proxy']==='DIRECT'));
   assert.equal(notifications.length,0);
@@ -262,6 +263,7 @@ test('Stash collapsed IP summaries keep essential information visible and respec
   const local=await ipPanel({argument:'tile=local&mode=collapsed'});
   assert.equal(local.output.title,'本地 IP\n203.0.113.2');
   assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');
+  assert.equal(local.output.url,'https://ippure.com/?ip=203.0.113.2');
   const risk=await ipPanel({argument:'tile=risk&mode=collapsed'});
   assert.equal(risk.output.title,'IP 纯净度\n住宅 · 原生');
   assert.doesNotMatch(JSON.stringify(risk.output),/198\.51\.100\.10/);
@@ -272,6 +274,7 @@ test('Stash collapsed IP summaries keep essential information visible and respec
     if(['outbound','local'].includes(service)) assert.match(output.title,/\[IP 已隐藏\]/);
     assert.doesNotMatch(JSON.stringify(output),/198\.51\.100\.10|203\.0\.113\.2/);
     assert.doesNotMatch(output.content,/\n/);
+    assert.equal(output.url,'https://ippure.com');
   }
 });
 test('Stash failures stay unknown and never fall back to other risk services',async()=>{
@@ -290,6 +293,7 @@ test('Stash failures stay unknown and never fall back to other risk services',as
   assert.equal(failedIP.output.backgroundColor,'#9E9E9E');assert.match(failedIP.output.content,/无法获取出口/);
   const localFailure=await ipPanel({argument:'tile=local',localIP:null});
   assert.match(localFailure.output.content,/无法获取直连公网/);assert.equal(localFailure.requests.length,1);
+  assert.equal(localFailure.output.url,'https://ippure.com');
   const dnsFailure=await ipPanel({argument:'tile=dns',dnsFailure:true});
   assert.equal(dnsFailure.output.backgroundColor,'#9E9E9E');assert.equal(dnsFailure.requests.length,1);
 });
