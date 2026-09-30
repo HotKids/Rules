@@ -322,6 +322,40 @@ DOMAIN-SUFFIX,brightcove.com,Streaming
 DOMAIN-SUFFIX,prod.boltdns.net,Streaming
 # DOMAIN,fod-cm-ad-v.webcdn.stream.ne.jp //广告
 
+# > TikTok
+USER-AGENT,TikTok*,Streaming
+DOMAIN,lf16-effectcdn.byteeffecttos-g.com,Streaming
+DOMAIN,lf16-pkgcdn.pitaya-clientai.com,Streaming
+DOMAIN,p16-tiktokcdn-com.akamaized.net,Streaming
+DOMAIN,trae-api-sg.mchost.guru,Streaming
+DOMAIN-SUFFIX,bytedapm.com,Streaming
+DOMAIN-SUFFIX,bytegecko-i18n.com,Streaming
+DOMAIN-SUFFIX,byteintlapi.com,Streaming
+DOMAIN-SUFFIX,byteoversea.com,Streaming
+DOMAIN-SUFFIX,capcut.com,Streaming
+DOMAIN-SUFFIX,ibytedtos.com,Streaming
+DOMAIN-SUFFIX,ibyteimg.com,Streaming
+DOMAIN-SUFFIX,ipstatp.com,Streaming
+DOMAIN-SUFFIX,isnssdk.com,Streaming
+DOMAIN-SUFFIX,marscode.com,Streaming
+DOMAIN-SUFFIX,muscdn.com,Streaming
+DOMAIN-SUFFIX,musical.ly,Streaming
+DOMAIN-SUFFIX,sgpstatp.com,Streaming
+DOMAIN-SUFFIX,snssdk.com,Streaming
+DOMAIN-SUFFIX,tik-tokapi.com,Streaming
+DOMAIN-SUFFIX,tiktok.com,Streaming
+DOMAIN-SUFFIX,tiktokcdn-us.com,Streaming
+DOMAIN-SUFFIX,tiktokcdn.com,Streaming
+DOMAIN-SUFFIX,tiktokd.net,Streaming
+DOMAIN-SUFFIX,tiktokd.org,Streaming
+DOMAIN-SUFFIX,tiktokmusic.app,Streaming
+DOMAIN-SUFFIX,tiktokv.com,Streaming
+DOMAIN-SUFFIX,tiktokv.us,Streaming
+DOMAIN-SUFFIX,trae.ai,Streaming
+DOMAIN-SUFFIX,ttwebview.com,Streaming
+DOMAIN-KEYWORD,musical.ly,Streaming
+DOMAIN-KEYWORD,tiktok,Streaming
+
 # > U-NEXT
 DOMAIN-SUFFIX,unext.jp,Streaming
 DOMAIN-SUFFIX,nxtv.jp,Streaming
