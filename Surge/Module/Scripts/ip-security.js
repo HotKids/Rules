@@ -53,11 +53,12 @@
  * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
  * - mode: home / collapsed（独立卡片默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
+ * - iOS 折叠卡片按 $environment.system 自动使用单行标题：Ⓓ / 🅟 + IP，⛨ + 纯净度百分比。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *
- * @version 6.4.1
+ * @version 6.4.2
  * @date 2026-09-30
  */
 
@@ -65,14 +66,16 @@
 const isStash = (typeof $environment !== "undefined" &&
   (!!$environment["stash-version"] || !!$environment["stash-build"])) ||
   (typeof $script !== "undefined" && $script.type === "tile");
+const stashSystem = typeof $environment !== "undefined" ? String($environment.system || "").trim().toLowerCase() : "";
+const isStashiOS = isStash && (stashSystem === "ios" || stashSystem === "ipados");
 const hasTimers = typeof setTimeout === "function";
 // 图标统一由覆写提供；更新检测结果时保留卡片 Logo。
 const stashTiles = {
   summary: { title: "IP 信息卡", color: "#9E9E9E" },
-  risk: { title: "IP 纯净度", color: "#88A788" },
+  risk: { title: "IP 纯净度", marker: "⛨", color: "#88A788" },
   dns: { title: "DNS 解析器", color: "#7357A6" },
-  outbound: { title: "出口 IP", color: "#1565C0" },
-  local: { title: "本地 IP", color: "#00796B" }
+  outbound: { title: "出口 IP", marker: "🅟", color: "#1565C0" },
+  local: { title: "本地 IP", marker: "Ⓓ", color: "#00796B" }
 };
 const CONFIG = {
   timeout: isStash ? 20000 : 10000, // Surge 看门狗须小于 sgmodule 的 timeout=15；Stash 兼容无 JS 定时器的运行时
@@ -1010,7 +1013,7 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
 // 固定选定的数据源，不运行 Surge 的全量检测，不依赖 $httpAPI 或 JS 定时器。
 // 风险和类型取自同一次 IPPure 响应；按规则分流时，不同探测站点的出口可能不同。
 // 参考 StashNetworks/misc 的 IPPure 卡片：简短地区/运营商摘要与绿黄红风险配色。
-// 折叠卡片只有一行正文，将 IP 放到标题第二行，避免后续信息被换行截断。
+// Android 用标题第二行显示 IP；iOS 标题也只有一行，改用标记与 IP 同行。
 function compactStashLocation(location, local = false) {
   const value = String(location || "").trim();
   const compact = local ? value.replace(/^中国/, "").replace(/^.*?(?:省|自治区)/, "")
@@ -1019,8 +1022,19 @@ function compactStashLocation(location, local = false) {
 }
 
 function compactStashOrg(organization) {
-  return String(organization || "运营商未知").replace(/^AS\d+\s+/, "")
+  const value = String(organization || "运营商未知").replace(/^AS\d+\s+/, "")
     .replace(/\s+(?:(?:Co\.?[,]?\s*)?Ltd\.?|Limited|Inc\.?|LLC|Corporation)\.?$/i, "").trim();
+  if (isStashiOS) {
+    // iOS 正文只有一行，常见中国运营商用短名称，包含香港等地区的同品牌出口。
+    const carriers = [
+      [/中国移动|\bChina\s*Mobile\b/i, "中国移动"],
+      [/中国联通|\bChina\s*Unicom\b/i, "中国联通"],
+      [/中国电信|\bChina\s*Telecom\b/i, "中国电信"],
+      [/中国广电|\bChina\s*(?:Broadnet|Broadcasting(?:\s*Network)?)\b/i, "中国广电"]
+    ];
+    for (const [pattern, label] of carriers) if (pattern.test(value)) return label;
+  }
+  return value;
 }
 
 function compactStashIPContent({ shortLocation, organization, countryCode }, fallbackCountryCode) {
@@ -1150,13 +1164,17 @@ async function runStashTile() {
   if (args.tile === "summary") return runStashSummary();
   const tile = stashTiles[args.tile];
   if (!tile) return done({ content: "未知卡片类型" });
-  const fail = message => done({ content: message, backgroundColor: "#9E9E9E" });
+  const fail = message => done({
+    title: args.mode === "collapsed" && isStashiOS && tile.marker ? tile.marker : tile.title,
+    content: message, backgroundColor: "#9E9E9E"
+  });
   const render = (lines, color = tile.color, compact = null, url) => done({
     content: lines.filter(Boolean).join("\n"), backgroundColor: color, url,
     ...(args.mode === "collapsed" && compact ? compact : {})
   });
   const m = ip => maskIP(ip, args.maskIP);
-  const heading = (title, ip) => [title, ip ? m(ip) : ""].filter(Boolean).join("\n");
+  const heading = (detail) => [isStashiOS ? tile.marker : tile.title, detail].filter(Boolean)
+    .join(isStashiOS ? " " : "\n");
 
   if (args.tile === "risk") {
     const result = await getStashRiskResult();
@@ -1167,8 +1185,8 @@ async function runStashTile() {
       typeText,
       riskText
     ], color, {
-      // Android 折叠卡片正文只有一行；标题第二行放百分比，正文放类型。
-      title: tile.title + "\n" + percentText,
+      // iOS 将标记和百分比放在同一行；Android 保留标题第二行，正文均放类型。
+      title: heading(percentText),
       content: typeText
     });
   }
@@ -1182,7 +1200,7 @@ async function runStashTile() {
       location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败",
       organization || "运营商未知"
     ], location ? tile.color : "#9E9E9E", {
-      title: heading(tile.title, ip),
+      title: heading(m(ip)),
       content: location ? compactStashIPContent(result) : "地区查询失败"
     }, args.maskIP === 0 ? "https://ippure.com/?ip=" + encodeURIComponent(ip) : undefined);
   }
@@ -1205,7 +1223,7 @@ async function runStashTile() {
   const lines = [m(outIP), outIPv6 ? "IPv6：" + m(outIPv6) : "",
     location ? [flag(countryCode), location].filter(Boolean).join(" ") : "地区查询失败", organization];
   return render(lines, location ? tile.color : "#9E9E9E", {
-    title: heading(tile.title, outIP),
+    title: heading(m(outIP)),
     content: compactStashIPContent(result, outRaw?.country_code)
   });
 }
@@ -1213,7 +1231,7 @@ async function runStashTile() {
 // ==================== 主执行函数 ====================
 (async () => {
   try {
-  console.log("=== IP 安全检测开始 (v6.4.1) ===");
+  console.log("=== IP 安全检测开始 (v6.4.2) ===");
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
   // 1. EVENT 触发时延迟等待网络稳定

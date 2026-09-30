@@ -103,7 +103,7 @@ test('Generated Mihomo scripts run with both subscription variants',()=>{
 async function ipPanel({client='stash', argument='', store=new Map(), outIP='198.51.100.10',
   outIPv6=null, localIP='203.0.113.2', riskFailure=false, missingNotification=false,
   notificationThrows=false, ipFailure=false, timers=false, ippureData, dnsFailure=false,
-  scriptType='tile', intercept, now, storageThrows=false}={}) {
+  scriptType='tile', intercept, now, storageThrows=false, system}={}) {
   const requests=[], notifications=[], apiCalls=[], outputs=[], handles=[];
   let deadline;
   try {
@@ -147,7 +147,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
           $persistentStore:{read:k=>{if(storageThrows)throw Error("store unavailable");return store.get(k)||null;},write:(v,k)=>{if(storageThrows)throw Error("store unavailable");store.set(k,v);return true;}},
           $done:o=>{outputs.push(o);resolve(o);}};
         if(client==='stash') {
-          ctx.$environment={'stash-version':'1.1.5'};ctx.$script={type:scriptType};
+          ctx.$environment={'stash-version':'1.1.5',system};ctx.$script={type:scriptType};
           // No $httpAPI; no JS timers unless explicitly requested.
         } else {
           ctx.$input={purpose:'panel'};
@@ -432,25 +432,66 @@ test('Stash node testing never changes scheduled notification baselines',async()
   assert.equal((await monitor({store,outIP:'198.51.100.11'})).notifications.length,1);
 });
 test('Stash collapsed IP summaries keep essential information visible and respect masking',async()=>{
-  const outbound=await ipPanel({argument:'tile=outbound&mode=collapsed'});
+  const outbound=await ipPanel({system:'Android',argument:'tile=outbound&mode=collapsed'});
   assert.equal(outbound.output.title,'出口 IP\n198.51.100.10');
   assert.equal(outbound.output.content,'🇹🇼 台北 · Example');
   assert.equal(outbound.output.url,'https://ippure.com');
-  const local=await ipPanel({argument:'tile=local&mode=collapsed'});
+  const local=await ipPanel({system:'Android',argument:'tile=local&mode=collapsed'});
   assert.equal(local.output.title,'本地 IP\n203.0.113.2');
   assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');
   assert.equal(local.output.url,'https://ippure.com/?ip=203.0.113.2');
-  const risk=await ipPanel({argument:'tile=risk&mode=collapsed'});
+  const risk=await ipPanel({system:'Android',argument:'tile=risk&mode=collapsed'});
   assert.equal(risk.output.title,'IP 纯净度\n12% 低风险');
   assert.doesNotMatch(JSON.stringify(risk.output),/198\.51\.100\.10/);
   assert.equal(risk.output.content,'住宅 · 原生');
   assert.equal(risk.output.url,'https://ippure.com');
   for(const service of ['outbound','local','risk']) {
-    const {output}=await ipPanel({argument:`tile=${service}&mode=collapsed&mask_ip=2`});
+    const {output}=await ipPanel({system:'Android',argument:`tile=${service}&mode=collapsed&mask_ip=2`});
     if(['outbound','local'].includes(service)) assert.match(output.title,/\[IP 已隐藏\]/);
     assert.doesNotMatch(JSON.stringify(output),/198\.51\.100\.10|203\.0\.113\.2/);
     assert.doesNotMatch(output.content,/\n/);
     assert.equal(output.url,'https://ippure.com');
+  }
+});
+
+test('Stash iOS uses single-line marker titles, short carrier names and the existing masking',async()=>{
+  for(const system of ['iOS','iPadOS',' ios ']) {
+    const outbound=await ipPanel({system,argument:'tile=outbound&mode=collapsed',outIP:'255.255.255.255'});
+    assert.equal(outbound.output.title,'🅟 255.255.255.255');
+    assert.equal(outbound.output.content,'🇹🇼 台北 · Example');
+    const local=await ipPanel({system,argument:'tile=local&mode=collapsed'});
+    assert.equal(local.output.title,'Ⓓ 203.0.113.2');
+    assert.equal(local.output.content,'🇨🇳 深圳 · 中国电信');
+    const risk=await ipPanel({system,argument:'tile=risk&mode=collapsed'});
+    assert.equal(risk.output.title,'⛨ 12% 低风险');
+    assert.equal(risk.output.content,'住宅 · 原生');
+    for(const tile of ['local','outbound','risk']) {
+      const {output}=await ipPanel({system,argument:`tile=${tile}&mode=collapsed&mask_ip=2`});
+      assert.doesNotMatch(output.title,/\n/);assert.doesNotMatch(output.content,/\n/);
+      assert.doesNotMatch(JSON.stringify(output),/203\.0\.113\.2|198\.51\.100\.10/);
+      assert.equal(output.url,'https://ippure.com');
+    }
+  }
+  for(const [organization,expected] of [
+    ['AS64500 China Mobile International Limited','中国移动'],
+    ['AS64500 China Unicom Global Limited','中国联通'],
+    ['AS64500 China Telecom Corporation','中国电信'],
+    ['AS64500 China Broadnet Network Co., Ltd.','中国广电']
+  ]) {
+    const {output}=await ipPanel({system:'iOS',argument:'mode=collapsed',intercept(o,cb){
+      if(o.url.includes('ip-api.com')) {
+        cb(null,{status:200},JSON.stringify({status:'success',country:'香港',countryCode:'HK',city:'香港'}));return true;
+      }
+      if(o.url.includes('ipinfo')) {
+        cb(null,{status:200},JSON.stringify({country:'HK',org:organization}));return true;
+      }
+    }});
+    assert.equal(output.content,'🇭🇰 香港 · '+expected);
+  }
+  for(const tile of ['summary','local','outbound','risk']) {
+    const ios=await ipPanel({system:'iOS',argument:`tile=${tile}&mode=home`});
+    const android=await ipPanel({system:'Android',argument:`tile=${tile}&mode=home`});
+    assert.equal(JSON.stringify(ios.output),JSON.stringify(android.output));
   }
 });
 test('Stash failures stay unknown and never fall back to other risk services',async()=>{
