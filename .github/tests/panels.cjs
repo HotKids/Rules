@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../..');
 const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', name), 'utf8');
 const quiet = {log(){},error(){}};
 
-async function tile(service, response, {client="stash", argument="", store=new Map(), now}={}) {
+async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta}={}) {
   const requests = [], logs = [];
   let deadline;
   try {
@@ -22,7 +22,8 @@ async function tile(service, response, {client="stash", argument="", store=new M
           cb(r.error || null, nativeResponse,
             r.body == null ? '' : typeof r.body === 'string' ? r.body : JSON.stringify(r.body));
         };
-        const ctx = {$environment:client==='stash'?{'stash-version':'1.1.5'}:{'surge-version':'5'}, $script:{type:client==='stash'?'tile':'generic'},
+        const ctx = {$environment:environment??(client==='stash'?{'stash-version':'1.1.5'}:{'surge-version':'5'}),
+          $script:{type:client==='stash'?'tile':'generic',...scriptMeta},
           $argument:`service=${service}&mode=collapsed&notify=false&nfprice=false&${argument}`,
           $httpClient:{get:request,post:request},$done:resolve,console:{...quiet,log:(...args)=>logs.push(args.join(' '))},
           $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}}};
@@ -941,7 +942,7 @@ test('Gemini recovers a normal unrecognized home through the application page',a
     assert.match(r.logs.join('\n'),/应用页: HTTP 200.*地区=SG; 原因=可用/);
   }
 });
-test('Stash Gemini retries SendRequest with native defaults on the same homepage and route',async()=>{
+test('Stash Gemini diagnoses SendRequest without automatic redirects and preserves its request route',async()=>{
   for(const [response,expected] of [
     [{body:'45617354,null,true ,2,1,200,"USA"'},'US'],
     [{body:'not available in your country'},'NO'],
@@ -956,15 +957,20 @@ test('Stash Gemini retries SendRequest with native defaults on the same homepage
     let attempt=0;
     const r=await tile('gemini',()=>++attempt===1?{error:'client error (SendRequest)'}:response);
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,2);
-    assert.equal(r.requests[1].url,r.requests[0].url);
-    assert.deepEqual(Object.keys(r.requests[1]).sort(),['timeout','url']);
+    assert.equal(r.requests[0].url,'https://gemini.google.com');
+    assert.equal(r.requests[1].url,'https://gemini.google.com/');
+    assert.equal(r.requests[0]['auto-redirect'],true);
+    assert.equal(r.requests[1]['auto-redirect'],false);
+    assert.ok(r.requests.every(o=>o['auto-cookie']===false));
+    assert.deepEqual(r.requests[1].headers,r.requests[0].headers);
     assert.ok(r.requests.every(o=>!o.policy&&!o.headers?.['X-Stash-Selected-Proxy']));
     assert.match(r.logs.join('\n'),/首页失败；阶段=callback.*SendRequest/);
-    assert.match(r.logs.join('\n'),/使用 Stash 原生默认设置重试同一首页/);
-    assert.match(r.logs.join('\n'),/配置=Stash 原生默认/);
-    assert.match(r.logs.join('\n'),/原生首页/);
+    assert.match(r.logs.join('\n'),/规范根路径并关闭自动跳转/);
+    assert.match(r.logs.join('\n'),/首页诊断/);
+    assert.match(r.logs.join('\n'),/auto-redirect=false/);
+    assert.match(r.logs.join('\n'),/错误类型=string.*客户端未暴露底层错误链/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
-    if(response.status===302)assert.match(r.logs.join('\n'),/HTTP 302.*原因=redirect; 跳转=https:\/\/accounts\.google\.com\/ServiceLogin/);
+    if(response.status===302)assert.match(r.logs.join('\n'),/HTTP 302.*原因=redirect.*跳转=https:\/\/accounts\.google\.com\/ServiceLogin/);
   }
   const proxy='🇺🇸 US Test';
   let attempt=0;
@@ -973,18 +979,18 @@ test('Stash Gemini retries SendRequest with native defaults on the same homepage
     {argument:`mode=home&proxy=${encodeURIComponent(proxy)}`});
   assert.equal(home.output.content,'OK');assert.equal(home.requests.length,2);
   assert.ok(home.requests.every(o=>o.headers['X-Stash-Selected-Proxy']===encodeURIComponent(proxy)&&!o.policy));
-  assert.deepEqual(Object.keys(home.requests[1].headers),['X-Stash-Selected-Proxy']);
+  assert.deepEqual(home.requests[1].headers,home.requests[0].headers);
   attempt=0;
   const collapsed=await tile('gemini',reply,{argument:`proxy=${encodeURIComponent(proxy)}`});
   assert.equal(collapsed.output.content,'OK');assert.equal(collapsed.requests.length,2);
   assert.ok(collapsed.requests.every(o=>!o.policy&&!o.headers?.['X-Stash-Selected-Proxy']));
   const surge=await tile('gemini',{error:'client error (SendRequest)'},{client:'surge'});
   assert.equal(surge.requests.filter(o=>o.url.startsWith('https://gemini.google.com')).length,1);
-  assert.doesNotMatch(surge.logs.join('\n'),/原生默认设置/);
+  assert.doesNotMatch(surge.logs.join('\n'),/首页诊断/);
   const timeout=await tile('gemini',{error:'client error (SendRequest): timed out'});
   assert.equal(timeout.output.content,'Timeout');assert.equal(timeout.requests.length,1);
 });
-test('Gemini native retry shares the ten-second webpage deadline',async()=>{
+test('Gemini diagnosis and one manual redirect share the ten-second webpage deadline',async()=>{
   let clock=Date.now();
   let attempt=0;
   const remaining=await tile('gemini',()=>{
@@ -996,6 +1002,117 @@ test('Gemini native retry shares the ten-second webpage deadline',async()=>{
   const exhausted=await tile('gemini',()=>{clock+=10000;return {error:'client error (SendRequest)'};},{now:()=>clock});
   assert.equal(exhausted.output.content,'Error');assert.equal(exhausted.requests.length,1);
   assert.match(exhausted.logs.join('\n'),/网页检测预算已耗尽/);
+  attempt=0;clock=Date.now();
+  const hop=await tile('gemini',()=>{
+    if(++attempt===1){clock+=9500;return {error:'client error (SendRequest)'};}
+    if(attempt===2){clock+=400;return {status:302,headers:{Location:'/app?hl=en'}};}
+    return {body:'45631641,null,true'};
+  },{now:()=>clock});
+  assert.equal(hop.output.content,'OK');assert.equal(hop.requests.length,3);
+  assert.deepEqual(hop.requests.map(o=>o.timeout),[10,0.5,0.1]);
+  attempt=0;clock=Date.now();
+  const expiredHop=await tile('gemini',()=>{
+    if(++attempt===1){clock+=9500;return {error:'client error (SendRequest)'};}
+    clock+=500;return {status:302,headers:{Location:'/app?hl=en'},body:'45631641,null,true'};
+  },{now:()=>clock});
+  assert.equal(expiredHop.output.content,'Error');assert.equal(expiredHop.requests.length,2);
+  assert.match(expiredHop.logs.join('\n'),/网页检测预算已耗尽/);
+});
+test('Gemini diagnosis manually follows one same-host redirect and judges its final response',async()=>{
+  for(const [response,expected] of [
+    [{body:'45617354,null,true ,2,1,200,"USA"'},'US'],
+    [{body:'not available in your country'},'NO'],
+    [{status:403,body:'45617354,null,true'},'Error'],
+    [{status:429,body:'not available in your country'},'Error'],
+    [{headers:{'cf-mitigated':'challenge'},body:'45617354,null,true'},'Error'],
+    [{url:'https://accounts.google.com/ServiceLogin?continue=hidden',body:'45617354,null,true'},'Error'],
+    [{body:'unknown page'},'Error'],
+    [{error:'client error (SendRequest)'},'Error'],
+    [{error:'request timed out'},'Timeout'],
+    [{status:302,headers:{Location:'/another'},body:'45617354,null,true'},'Error'],
+  ]) {
+    let attempt=0;
+    const replies=[{error:'client error (SendRequest)'},
+      {status:302,headers:{Location:'/app?hl=en&token=hidden'},body:'45617354,null,true'},response];
+    const r=await tile('gemini',()=>replies[attempt++]||{throw:Error('unexpected extra redirect')});
+    assert.equal(r.output.content,expected);assert.equal(r.requests.length,3);
+    assert.equal(r.requests[2].url,'https://gemini.google.com/app?hl=en&token=hidden');
+    assert.equal(r.requests[2]['auto-redirect'],false);
+    assert.equal(r.requests[2]['auto-cookie'],false);
+    assert.deepEqual(r.requests[2].headers,r.requests[0].headers);
+    assert.match(r.logs.join('\n'),/首页诊断已收到 HTTP 响应/);
+    assert.match(r.logs.join('\n'),/跳转目标/);
+    assert.doesNotMatch(r.logs.join('\n'),/token=hidden|continue=hidden/);
+  }
+  let attempt=0;
+  const proxy='🇺🇸 US Test';
+  const selected=await tile('gemini',()=>[
+    {error:'client error (SendRequest)'},{status:302,headers:{Location:'/app'}},
+    {body:'45631641,null,true'}][attempt++],{argument:`mode=home&proxy=${encodeURIComponent(proxy)}`});
+  assert.equal(selected.output.content,'OK');assert.equal(selected.requests.length,3);
+  assert.ok(selected.requests.every(o=>o.headers['X-Stash-Selected-Proxy']===encodeURIComponent(proxy)&&!o.policy));
+});
+test('Gemini redirect diagnosis stops at missing, invalid, external, verification and repeated targets',async()=>{
+  for(const location of [undefined,'','javascript:alert(1)','data:text/html,anything',
+    'http://gemini.google.com/app','https://other.invalid/app','//other.invalid/app',
+    'https://gemini.google.com.evil.invalid/app','https://gemini.google.com@other.invalid/app',
+    'https://accounts.google.com/ServiceLogin?continue=hidden','//consent.google.com/m?continue=hidden',
+    '/sorry/index?continue=hidden','https://gemini.google.com/','/','#again','/../../',
+    'https://gemini.google.com:444/app','/app page','/app\\path']) {
+    let attempt=0;
+    const r=await tile('gemini',()=>++attempt===1?{error:'client error (SendRequest)'}:
+      {status:302,headers:location===undefined?{}:{Location:location},body:'45631641,null,true'});
+    assert.equal(r.output.content,'Error',String(location));assert.equal(r.requests.length,2,String(location));
+    assert.match(r.logs.join('\n'),/手动跳转=停止/);
+    assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
+  }
+});
+test('Gemini diagnosis never follows a redirect carrying verification or unusual-traffic evidence',async()=>{
+  for(const response of [
+    {status:302,headers:{Location:'/app','cf-mitigated':'challenge'},body:'45631641,null,true'},
+    {status:302,headers:{Location:'/app'},body:'<title>Just a moment...</title>45631641,null,true'},
+    {status:302,headers:{Location:'/app'},body:'Our systems have detected unusual traffic from your computer network 45631641,null,true'},
+  ]) {
+    let attempt=0;
+    const r=await tile('gemini',()=>++attempt===1?{error:'client error (SendRequest)'}:response);
+    assert.equal(r.output.content,'Error');assert.equal(r.requests.length,2);
+    assert.doesNotMatch(r.logs.join('\n'),/手动跳转=https:/);
+  }
+  let attempt=0;
+  const privateRedirect=await tile('gemini',()=>++attempt===1?{error:'client error (SendRequest)'}:
+    {status:302,headers:{Location:'//PRIVATE-USER:PRIVATE-PASSWORD@gemini.google.com/app?token=hidden'}});
+  assert.equal(privateRedirect.output.content,'Error');assert.equal(privateRedirect.requests.length,2);
+  assert.doesNotMatch(privateRedirect.logs.join('\n'),/PRIVATE-USER|PRIVATE-PASSWORD|token=hidden/);
+});
+test('Gemini manual redirect resolution preserves paths and queries without a URL global',async()=>{
+  for(const [location,expected] of [
+    ['/app/','https://gemini.google.com/app/'],
+    ['app?hl=en','https://gemini.google.com/app?hl=en'],
+    ['./app?hl=en','https://gemini.google.com/app?hl=en'],
+    ['../app','https://gemini.google.com/app'],
+    ['/one/../app/?token=hidden#ignored','https://gemini.google.com/app/?token=hidden'],
+    ['https://Gemini.Google.Com:443/app?hl=en#ignored','https://gemini.google.com/app?hl=en'],
+    ['//gemini.google.com/app?hl=en','https://gemini.google.com/app?hl=en'],
+    ['?hl=en','https://gemini.google.com/?hl=en'],
+    ['/app//view/','https://gemini.google.com/app//view/'],
+  ]) {
+    let attempt=0;
+    const r=await tile('gemini',()=>[
+      {error:'client error (SendRequest)'},{status:302,headers:{Location:location}},
+      {body:'45631641,null,true'}][attempt++]);
+    assert.equal(r.output.content,'OK',location);assert.equal(r.requests.length,3,location);
+    assert.equal(r.requests[2].url,expected,location);
+    assert.doesNotMatch(r.logs.join('\n'),/token=hidden|#ignored/);
+  }
+  const source=read('media-check.js'),ctx={};vm.createContext(ctx);
+  assert.equal(vm.runInContext('typeof URL',ctx),'undefined');
+  vm.runInContext(source.slice(0,source.indexOf('class ServiceChecker'))+'\nglobalThis.resolve=Utils.geminiRedirectTarget;',ctx);
+  for(const [base,location,expected] of [
+    ['https://gemini.google.com/a/b/','../c/','https://gemini.google.com/a/c/'],
+    ['https://gemini.google.com/a/b?old=1','?new=2','https://gemini.google.com/a/b?new=2'],
+    ['https://gemini.google.com/a/b?old=1','./../c','https://gemini.google.com/c'],
+    ['https://gemini.google.com/a/b/','../../..','https://gemini.google.com/'],
+  ])assert.equal(ctx.resolve(base,location),expected,`${base} -> ${location}`);
 });
 test('Gemini logs failures without promoting verification pages, false flags or country-only HTML',async()=>{
   for(const response of [
@@ -1011,7 +1128,7 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.6.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.7.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
@@ -1053,9 +1170,67 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.6.*首页失败/);
+    assert.match(log,/Gemini v2\.2\.7.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
+});
+test('Media runtime logs include supplied platform metadata without changing successful requests',async()=>{
+  for(const [system,build] of [['iOS','4321'],['Android','5432']]) {
+    const r=await tile('gemini',{body:'45631641,null,true'},
+      {environment:{'stash-version':'3.4.0','stash-build':build,system},scriptMeta:{name:'hotkids-media-check-gemini'}});
+    assert.equal(r.output.content,'OK');assert.equal(r.requests.length,1);
+    assert.equal(r.requests[0].url,'https://gemini.google.com');
+    assert.equal(r.requests[0]['auto-redirect'],true);assert.equal(r.requests[0]['auto-cookie'],false);
+    assert.match(r.logs.join('\n'),new RegExp(`客户端=Stash; 版本=3\\.4\\.0; 构建=${build}; 系统=${system}`));
+    assert.match(r.logs.join('\n'),/脚本=hotkids-media-check-gemini; 类型=tile; 模式=collapsed/);
+    assert.match(r.logs.join('\n'),/脚本未指定策略/);
+  }
+  const surge=await tile('gemini',{body:'45631641,null,true'},
+    {client:'surge',environment:{'surge-version':'5.15.0','surge-build':9999,system:'macOS'},scriptMeta:{name:'MediaPanel'}});
+  assert.match(surge.output.content,/Gemini\s+➟ OK/);
+  assert.match(surge.logs.join('\n'),/客户端=Surge; 版本=5\.15\.0; 构建=9999; 系统=macOS/);
+  assert.match(surge.logs.join('\n'),/脚本=MediaPanel; 类型=generic; 模式=home/);
+  const missing=await tile('gemini',{body:'45631641,null,true'},{environment:{}});
+  assert.equal(missing.output.content,'OK');assert.match(missing.logs.join('\n'),/版本=未提供; 构建=未提供; 系统=未提供/);
+  const key='PRIVATE-API-KEY',metadata=await tile('gemini',{body:'45631641,null,true'},
+    {argument:`geminiapikey=${key}`,environment:{'stash-version':'3.4.0',system:'iOS',privateToken:'NEVER-LOG-ENV'},
+      scriptMeta:{name:`//PRIVATE-USER:PRIVATE-PASSWORD@example.invalid/panel?key=${key}`}});
+  assert.equal(metadata.output.content,'OK');assert.equal(metadata.requests.length,1);
+  assert.doesNotMatch(metadata.logs.join('\n'),/PRIVATE-API-KEY|PRIVATE-USER|PRIVATE-PASSWORD|NEVER-LOG-ENV|key=/);
+});
+test('Media error logs retain bounded causes and survive cycles and unsafe getters without exposing private fields',async()=>{
+  const nested={message:'Request failed',cause:{message:'connection error',source:{domain:'NSURLErrorDomain',code:-1200,
+    localizedDescription:'TLS handshake failed',underlyingError:{message:'deep retained',cause:{message:'OUT-OF-BOUND'}}}}},
+    cycle={message:'Native failure'};
+  cycle.cause=cycle;
+  const throwing={message:'Native getter failure'};
+  Object.defineProperty(throwing,'cause',{get(){throw Error('GETTER-PRIVATE');}});
+  const functionSource={message:'Native source unavailable',source(){throw Error('FUNCTION-BODY-PRIVATE');}};
+  for(const [error,details] of [
+    [nested,/cause=.*connection error.*source=.*code=-1200.*deep retained/],
+    [cycle,/Circular error/],
+    [throwing,/Native getter failure/],
+    [functionSource,/Native source unavailable/],
+  ]) {
+    const r=await tile('gemini',{error});
+    assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
+    const log=r.logs.join('\n');assert.match(log,details);
+    assert.match(log,/错误类型=object/);
+    assert.doesNotMatch(log,/OUT-OF-BOUND|GETTER-PRIVATE|FUNCTION-BODY-PRIVATE|function source/);
+  }
+  const timeout=await tile('gemini',{error:{message:'Native failure',cause:{source:{domain:'NSURLErrorDomain',code:-1001}}}});
+  assert.equal(timeout.output.content,'Timeout');assert.equal(timeout.requests.length,1);
+  assert.match(timeout.logs.join('\n'),/code=-1001/);
+  const token='PRIVATE-API-KEY';
+  const privateError=await tile('spotify',{error:{message:
+    `failure https://PRIVATE-USER:PRIVATE-PASSWORD@example.invalid/path?token=PRIVATE-QUERY `+
+    'source //PRIVATE-USER:PRIVATE-PASSWORD@example.invalid/path?private=PRIVATE-QUERY '+
+    'Authorization: Bearer PRIVATE-BEARER; Authorization=Basic PRIVATE-BASIC; cookie=PRIVATE-COOKIE',
+    cause:{message:`key=${token}; source detail`},headers:{Authorization:'NEVER-LOG-HEADER'},body:'NEVER-LOG-BODY'}},
+    {argument:`geminiapikey=${token}`});
+  assert.equal(privateError.output.content,'Error');assert.equal(privateError.requests.length,1);
+  assert.match(privateError.logs.join('\n'),/source detail/);
+  assert.doesNotMatch(privateError.logs.join('\n'),/PRIVATE-USER|PRIVATE-PASSWORD|PRIVATE-QUERY|PRIVATE-BEARER|PRIVATE-BASIC|PRIVATE-COOKIE|PRIVATE-API-KEY|NEVER-LOG-HEADER|NEVER-LOG-BODY/);
 });
 test('All media services log a result, including routine successes',async()=>{
   const source=read('media-check.js');

@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.6 (2026-09-30)
+ * @version      2.2.7 (2026-10-01)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -69,7 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.6",
+  VERSION: "2.2.7",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -222,17 +222,16 @@ const ICONS = { SUCCESS: "🟢", WARNING: "🟡", COLORS: { SUCCESS: "#3CB371", 
 class Utils {
   /**
    * 发起 HTTP 请求（支持 GET/POST）
-   * @param {Object} options - 请求配置 {url, method, headers, body, timeout, includeDefaultHeaders, nativeDefaults}
+   * @param {Object} options - 请求配置 {url, method, headers, body, timeout, includeDefaultHeaders, autoRedirect}
    * @returns {Promise<{status: number, headers: Object, body: string}>}
    */
   static request(options) {
     return new Promise((resolve, reject) => {
       const { url, method = "GET", headers = {}, body = null, timeout = CONFIG.TIMEOUT,
-        includeDefaultHeaders = true, nativeDefaults = false } = options;
-      const useNativeDefaults = IS_STASH && nativeDefaults;
+        includeDefaultHeaders = true, autoRedirect = true } = options;
       const started = Date.now();
       const target = Utils.safeUrl(url);
-      const finalHeaders = includeDefaultHeaders && !useNativeDefaults
+      const finalHeaders = includeDefaultHeaders
         ? { "User-Agent": CONFIG.UA, "Accept-Language": "en", ...headers } : { ...headers };
       if (IS_STASH && ARGS.proxy) finalHeaders["X-Stash-Selected-Proxy"] = encodeURIComponent(ARGS.proxy);
       let settled = false;
@@ -244,14 +243,14 @@ class Utils {
         if (error) {
           const failure = new Error(Utils.errorMessage(error));
           failure.phase = phase;
-          MediaLog.log(`[HTTP] ${method} ${target}; 阶段=${phase}; 耗时=${Date.now() - started}ms; ${Utils.errorDetails(error)}`);
+          MediaLog.log(`[HTTP] ${method} ${target}; 阶段=${phase}; 耗时=${Date.now() - started}ms; 错误类型=${typeof error}; ${Utils.errorDetails(error)}${phase === "callback" && typeof error === "string" ? "; 客户端未暴露底层错误链" : ""}`);
           reject(failure);
         } else {
           MediaLog.log(`[HTTP] ${method} ${target}; HTTP ${value.status}; 长度=${value.body.length}; 耗时=${Date.now() - started}ms`);
           resolve(value);
         }
       };
-      MediaLog.log(`[HTTP] ${method} ${target}; 开始请求${useNativeDefaults ? "; 配置=Stash 原生默认" : ""}`);
+      MediaLog.log(`[HTTP] ${method} ${target}; 开始请求; timeout=${timeout / 1000}s; auto-redirect=${autoRedirect}; auto-cookie=false; 请求头名称=${Object.keys(finalHeaders).join(",") || "无"}`);
       // Android Stash 可能没有 JS 计时器，此时依靠 HTTP 客户端自身的超时。
       // 有计时器的客户端继续保留 watchdog：JS 用毫秒，HTTP timeout 用秒。
       if (typeof setTimeout === "function") {
@@ -272,13 +271,8 @@ class Utils {
             url: typeof response.url === "string" ? response.url : (typeof response.responseURL === "string" ? response.responseURL : "") });
         } catch (error) { settle(error, null, "response"); }
       };
-      const request = { url, timeout: timeout / 1000 };
+      const request = { url, timeout: timeout / 1000, "auto-redirect": autoRedirect, "auto-cookie": false };
       if (Object.keys(finalHeaders).length) request.headers = finalHeaders;
-      if (!useNativeDefaults) {
-        request["auto-redirect"] = true;
-        // 保留显式 Cookie；不让上一次请求的自动 Cookie 干扰双重检测。
-        request["auto-cookie"] = false;
-      }
       if (!IS_STASH && ARGS.proxy) request.policy = ARGS.proxy;
       if (body !== null) request.body = body;
       try {
@@ -310,19 +304,23 @@ class Utils {
   }
 
   static safeUrl(url) {
-    return String(url || "").split(/[?#]/, 1)[0].replace(/(https?:\/\/)[^/@\s]+@/gi, "$1[redacted]@");
+    return String(url || "").split(/[?#]/, 1)[0].replace(/((?:https?:)?\/\/)[^/@\s]+@/gi, "$1[redacted]@")
+      .replace(/[\r\n\t]/g, " ");
   }
 
   // Stash 的原生错误可能是字符串或对象；只提取诊断字段，不记录正文、请求头或堆栈。
-  static errorMessage(error, depth = 0) {
+  static errorMessage(error, depth = 0, seen = new Set()) {
+    if (typeof error === "function") return "Error function (not inspected)";
     if (!error || typeof error !== "object") return String(error || "Unknown error");
+    if (seen.has(error)) return "[Circular error]";
+    seen.add(error);
     const parts = [];
-    for (const key of ["name", "message", "description", "localizedDescription", "NSLocalizedDescription", "code", "domain", "reason", "error"]) {
+    for (const key of ["name", "message", "description", "localizedDescription", "NSLocalizedDescription", "code", "domain", "reason", "error", "cause", "source", "underlyingError", "NSUnderlyingError", "NSUnderlyingErrorKey"]) {
       try {
         const value = error[key];
-        if (value == null || value === "") continue;
+        if (value == null || value === "" || typeof value === "function") continue;
         if (typeof value !== "object") parts.push(`${key}=${String(value)}`);
-        else if (depth < 1) parts.push(`${key}=${Utils.errorMessage(value, depth + 1)}`);
+        else if (depth < 3) parts.push(`${key}=${Utils.errorMessage(value, depth + 1, seen)}`);
       } catch (_) {}
     }
     return parts.join("; ") || "Unknown error object";
@@ -334,9 +332,52 @@ class Utils {
     if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase())) {
       for (const secret of [apiKey, encodeURIComponent(apiKey)]) message = message.split(secret).join("[redacted]");
     }
-    return message.replace(/https?:\/\/[^\s"'<>]+/gi, url => Utils.safeUrl(url))
-      .replace(/\b(?:api[_-]?key|key|token|authorization|cookie)\s*[:=]\s*[^\s;,]+/gi, "[redacted]")
-      .replace(/[\r\n\t]+/g, " ").slice(0, 320);
+    return message.replace(/(?:https?:)?\/\/[^\s"'<>]+/gi, url => Utils.safeUrl(url))
+      .replace(/\b(?:proxy-)?authorization["']?\s*[:=]\s*["']?(?:bearer|basic)\s+[^\s;,"'}]+/gi, "[redacted]")
+      .replace(/\b(?:api[_-]?key|key|token|authorization|cookie)["']?\s*[:=]\s*["']?[^\s;,"'}]+/gi, "[redacted]")
+      .replace(/[\r\n\t]+/g, " ").slice(0, 1000);
+  }
+
+  static runtimeDetails() {
+    const script = typeof $script === "object" && $script ? $script : {};
+    const value = v => v == null || v === "" ? "未提供" : Utils.errorDetails(String(v));
+    const route = ARGS.proxy ? `脚本指定策略=${value(ARGS.proxy)}`
+      : IS_STASH && ARGS.mode === "collapsed" ? "线路=客户端所选节点/当前分流，脚本未指定策略"
+      : "线路=当前分流，脚本未指定策略";
+    return `客户端=${IS_STASH ? "Stash" : "Surge"}; 版本=${value(ENV[IS_STASH ? "stash-version" : "surge-version"])}; 构建=${value(ENV[IS_STASH ? "stash-build" : "surge-build"])}; 系统=${value(ENV.system)}; 脚本=${value(script.name)}; 类型=${value(script.type)}; 模式=${value(ARGS.mode)}; ${route}`;
+  }
+
+  // 诊断只手动跟随同一 HTTPS 主机；不依赖 Stash 未保证提供的 URL 全局对象。
+  static geminiRedirectTarget(base, location) {
+    const origin = "https://gemini.google.com";
+    let target = String(location || "").trim().split("#", 1)[0];
+    if (!target || /[\s\\\x00-\x1f]/.test(target)) return "";
+    if (target.startsWith("//")) target = "https:" + target;
+    if (/^[a-z][a-z\d+.-]*:/i.test(target)) {
+      const match = target.match(/^https:\/\/gemini\.google\.com(?::443)?([/?].*)?$/i);
+      if (!match) return "";
+      target = match[1] || "/";
+    } else if (!target.startsWith("/")) {
+      const current = base.slice(origin.length).split(/[?#]/, 1)[0] || "/";
+      target = target.startsWith("?") ? current + target : current.slice(0, current.lastIndexOf("/") + 1) + target;
+    }
+    if (target.startsWith("?")) target = "/" + target;
+    const queryAt = target.indexOf("?");
+    const pathname = queryAt < 0 ? target : target.slice(0, queryAt);
+    const components = pathname.split("/");
+    const parts = [""];
+    for (let i = 1; i < components.length; i++) {
+      const part = components[i];
+      if (part === "..") {
+        if (parts.length > 1) parts.pop();
+        if (i === components.length - 1) parts.push("");
+      } else if (part === ".") {
+        if (i === components.length - 1) parts.push("");
+      } else parts.push(part);
+    }
+    target = origin + (parts.join("/") || "/") + (queryAt < 0 ? "" : target.slice(queryAt));
+    if (target === base.split("#", 1)[0] || /\/sorry(?:[/?]|$)/i.test(target)) return "";
+    return target;
   }
 
   static errorResult(error) {
@@ -764,23 +805,24 @@ class ServiceChecker {
       { url: "https://gemini.google.com/app?hl=en", stage: "应用页" }
     ];
     for (const [index, page] of pages.entries()) {
-      const { url, stage, nativeDefaults = false } = page;
+      const { url, stage, autoRedirect = true } = page;
       const remaining = deadline - Date.now();
       if (remaining <= 0) {
         MediaLog.log(`[Gemini v${CONFIG.VERSION}] 网页检测预算已耗尽，不再请求备用页面`);
         break;
       }
       try {
-        const res = await Utils.request({ url, timeout: remaining, headers: nativeDefaults ? {} : headers,
-          includeDefaultHeaders: false, nativeDefaults });
+        const res = await Utils.request({ url, timeout: remaining, headers,
+          includeDefaultHeaders: false, autoRedirect });
         const flags = ["45631641", "45617354"].map(id =>
           `${id}=${res.body.match(new RegExp(`${id},\\s*null,\\s*(true|false)`))?.[1] || "missing"}`);
         const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
         const redirect = /https?:\/\/(?:[^/]+\.)?google\.com\/sorry(?:[/?#]|$)/i.test(res.url) ? "验证页"
           : /^https?:\/\/consent\.google\./i.test(res.url) ? "同意页"
           : /^https?:\/\/accounts\.google\./i.test(res.url) ? "登录页" : "无";
-        const issue = res.status >= 300 && res.status < 400
-          ? { ...Utils.createResult(STATUS.ERROR, "Error"), reason: "redirect" } : Utils.responseProblem(res);
+        const problem = Utils.responseProblem(res);
+        const issue = problem?.reason ? problem : res.status >= 300 && res.status < 400
+          ? { ...Utils.createResult(STATUS.ERROR, "Error"), reason: "redirect" } : problem;
         let result = issue || Utils.createResult(STATUS.ERROR, "Error");
         let reason = issue?.reason || (issue ? `HTTP ${res.status} 或空响应` : "缺少可用标记");
         if (redirect !== "无" || /our systems have detected unusual traffic|unusual traffic from your computer network/i.test(res.body)) {
@@ -795,19 +837,27 @@ class ServiceChecker {
           reason = "可用";
           result = Utils.createResult(STATUS.OK, region || "OK");
         }
-        MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}${issue?.reason === "redirect" ? `; 跳转=${Utils.safeUrl(res.headers.location || "未知")}` : ""}`);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}: HTTP ${res.status}; 长度=${res.body.length}; ${flags.join(", ")}; 地区=${region || "未知"}; 原因=${reason}; 响应地址=${Utils.safeUrl(res.url || url)}${issue?.reason === "redirect" ? `; 跳转=${Utils.errorDetails(Utils.safeUrl(res.headers.location || "未知"))}` : ""}`);
         if (result.status === STATUS.OK || result.status === STATUS.FAIL) return result;
         unknown = result;
+        if (IS_STASH && index === 1 && !autoRedirect && issue?.reason === "redirect" && reason === "redirect") {
+          const target = Utils.geminiRedirectTarget(url, res.headers.location);
+          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页诊断已收到 HTTP 响应；手动跳转=${target ? Utils.safeUrl(target) : "停止（无效、重复、验证或站外目标）"}`);
+          if (target) {
+            pages.push({ url: target, stage: "跳转目标", autoRedirect: false });
+            continue;
+          }
+        }
         // 正常首页缺标记时回落；限流和验证页面保持原结果。
         if (res.status !== 200 || reason !== "缺少可用标记" || flags.some(flag => !flag.endsWith("=missing"))) break;
       } catch (error) {
         unknown = logError(stage, error);
-        // Stash SendRequest 尚未收到 HTTP；精简可选设置并重试同一首页一次。
-        // 其他错误不重试，两个网页请求共用 10 秒预算。
+        // 隐式跳转可能隐藏失败目标；关闭跳转以记录首页的首个响应。
+        // 最多首页、首页诊断、一个同站跳转，三次共用 10 秒预算。
         if (IS_STASH && index === 0 && error?.phase === "callback" && unknown.status !== STATUS.TIMEOUT &&
           /\bSendRequest\b/i.test(Utils.errorMessage(error))) {
-          pages[1] = { url, stage: "原生首页", nativeDefaults: true };
-          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，使用 Stash 原生默认设置重试同一首页`);
+          pages[1] = { url: "https://gemini.google.com/", stage: "首页诊断", autoRedirect: false };
+          MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，规范根路径并关闭自动跳转，单独检测首页响应`);
           continue;
         }
         break;
@@ -936,7 +986,7 @@ const SERVICES = {
 };
 
 async function checkService(definition) {
-  MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测开始`);
+  MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测开始; ${Utils.runtimeDetails()}`);
   try {
     const result = await ServiceChecker[definition.check]();
     MediaLog.log(`[media-check v${CONFIG.VERSION}][${definition.title}] 检测完成：${Utils.buildContent(result)}${result.reason ? "; 原因=" + result.reason : ""}`);
