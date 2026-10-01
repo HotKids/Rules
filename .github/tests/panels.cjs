@@ -1220,7 +1220,7 @@ function geminiAnonymousResponse(options) {
 }
 test('Gemini anonymous fallback runs after one Stash iOS homepage fails',async()=>{
   const store=new Map();
-  const r=await tile('gemini',geminiAnonymousResponse,{environment:stashIOS,store});
+  const r=await tile('gemini',geminiAnonymousResponse,{environment:stashIOS,store,now:()=>100000000});
   assert.equal(r.output.content,'US');assert.equal(r.output.backgroundColor,'#386EDB');
   assert.equal(r.requests.length,3);
   assert.equal(r.requests[0].url,'https://gemini.google.com');
@@ -1935,7 +1935,7 @@ test('Stash optional risk providers use the measured address, reject invalid sco
 
 test('Stash local geography selection skips Baidu and respects the selected source',async()=>{
   for(const source of ['bilibili','ipsb']) {
-    const r=await ipPanel({argument:`tile=local&local_geoapi=${source}`,intercept(o,cb){
+    const r=await ipPanel({now:100000000,argument:`tile=local&local_geoapi=${source}`,intercept(o,cb){
       if(o.url.includes('ip.sb')){cb(null,{status:200},JSON.stringify({country_code:'CN',country:'China',city:'Selected City',organization:'Selected ISP'}));return true;}
     }});
     assert.ok(!r.requests.some(o=>o.url.includes('opendata')));
