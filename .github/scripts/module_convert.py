@@ -312,5 +312,7 @@ def render_stash(module, output_name):
     # Keep other source metadata as comments rather than injecting client-specific keys.
     comments += [f"# {k}: {v}" for k, v in metadata.items() if k not in meta_keys]
     if defaults: comments += ["# Surge arguments use the merged defaults shown above."]
-    comments += ["# Not converted: " + warning for warning in warnings]
+    # Routine Surge rule-option omissions stay in Action logs, not in the override.
+    comments += ["# Not converted: " + warning for warning in warnings
+                 if not warning.startswith("[Rule] Surge-only options omitted: ")]
     return "\n".join(comments) + "\n" + yaml.safe_dump(result, allow_unicode=True, sort_keys=False, width=1000), warnings

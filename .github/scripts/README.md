@@ -153,7 +153,7 @@ URL,名称 #!remove=a.example,b.example
 
 转换包括域名/IP/端口/逻辑规则、URL/Header/Body 重写（含 jq）、文本/Base64/tiny-gif Map Local、HTTP/cron 脚本、MITM 域名及强制 HTTP 引擎。`requires-body` 和 `binary-body-mode` 转为 Stash 字段，`engine=webview` 对应 Stash 3.6+ 的 `webkit`。Map Local 用原生 `http.mock`，不引入额外脚本。脚本 URL 保持上游来源，转换不保证脚本内部所有 Surge 专用 API 都能在 Stash 运行。
 
-无法映射的配置会写入生成文件的 `# Not converted:` 注释并在 Action 中提示，不会伪造支持；Surge 的 `pre-matching`/`extended-matching` 不带入 Stash。未知参数、无效格式或来源下载失败会中止模块批次，保留上次产物。`http` 排在规则前，内部 MITM 排在重写与脚本前，依据 [Stash 官方示例](https://stash.wiki/configuration/example-config)。未列出的手工模块不参与清理。
+无法映射的配置会写入生成文件的 `# Not converted:` 注释并在 Action 中提示，不会伪造支持；Surge 的 `pre-matching`/`extended-matching` 不带入 Stash，这类规则参数省略提示只记录在 Action 日志，不写入覆写文件。未知参数、无效格式或来源下载失败会中止模块批次，保留上次产物。`http` 排在规则前，内部 MITM 排在重写与脚本前，依据 [Stash 官方示例](https://stash.wiki/configuration/example-config)。未列出的手工模块不参与清理。
 
 ## 模块聚合
 

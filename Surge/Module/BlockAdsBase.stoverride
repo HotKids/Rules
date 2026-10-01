@@ -2,9 +2,6 @@
 # Source: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/广告平台拦截器.sgmodule
 # tag: 去广告, 依赖
 # loon_version: 3.2.4(787)
-# Not converted: [Rule] Surge-only options omitted: extended-matching,pre-matching
-# Not converted: [Rule] Surge-only options omitted: pre-matching
-# Not converted: [Rule] Surge-only options omitted: extended-matching
 name: 广告平台拦截器
 desc: 此插件是所有去广告插件的基础，只针对广告平台处理。你依然需要安装其他去广告插件来搭配使用，并确保此插件始终排序在顶部
 author: 可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
