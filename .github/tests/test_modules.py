@@ -28,6 +28,8 @@ class ModuleTests(unittest.TestCase):
         first = '''#!name=First
 #!desc=Upstream first
 #!author=First author
+#!category=HotKids
+#!icon=https://example.invalid/first.png
 #!arguments=Shared:DIRECT
 [Rule]
 DOMAIN,one.invalid,{{{Shared}}}
@@ -39,6 +41,8 @@ hostname = %APPEND% one.invalid, *.example.invalid, -excluded.example.invalid
         second = '''#!name=Second
 #!desc=Second description
 #!author=Second author
+#!category=Ignored
+#!icon=https://example.invalid/second.png
 #!arguments=Shared:REJECT,Extra:REJECT
 [Rule]
 DOMAIN,one.invalid,{{{Shared}}}
@@ -58,6 +62,8 @@ hostname = %APPEND% two.invalid, one.invalid
         data = yaml.safe_load(output)
         self.assertFalse(warnings)
         self.assertEqual((data['name'], data['desc'], data['author']), ('First', 'Chosen first', 'First author'))
+        self.assertEqual(data['category'], 'HotKids')
+        self.assertEqual(data['icon'], 'https://example.invalid/first.png')
         self.assertEqual(data['rules'], ['DOMAIN,one.invalid,DIRECT', 'DOMAIN,two.invalid,REJECT'])
         self.assertEqual(data['http']['mitm'], ['one.invalid', '*.example.invalid', '-excluded.example.invalid', 'two.invalid'])
         self.assertEqual([s['match'] for s in data['http']['script']], ['one', 'two'])
@@ -82,6 +88,38 @@ Clock = type=cron,cronexp="*/5 * * * *",script-path=https://example.invalid/a.js
         self.assertIsInstance(entry['timeout'], int)
         self.assertEqual(data['cron']['script'][0]['cron'], '*/5 * * * *')
         self.assertEqual(data['cron']['script'][0]['argument'], 'hello, world')
+
+    def test_defaults_apply_to_all_module_sections_without_surge_editor_comments(self):
+        source = '''#!category=HotKids
+#!icon=https://example.invalid/icon.png
+#!arguments=policy:DIRECT,host:api.example.invalid,enabled:false,key:null,mask:0,token:account:license,off:#
+#!arguments-desc=Surge parameter editor instructions
+[Rule]
+DOMAIN,{{{host}}},{{{policy}}}
+{{{off}}}DOMAIN,disabled.example.invalid,REJECT
+[MITM]
+hostname = %APPEND% {{{host}}}
+[URL Rewrite]
+^https://{{{host}}}/ https://example.invalid/ 302
+[Script]
+Probe = type=http-response,pattern=^https://{{{host}}}/,script-path=https://example.invalid/probe.js,argument=enabled={{{enabled}}}&key={{{key}}}&mask={{{mask}}}&token={{{token}}}
+Clock = type=cron,cronexp="0 * * * *",script-path=https://example.invalid/clock.js,argument=enabled={{{enabled}}}
+{{{off}}} = type=http-response,pattern=off,script-path=https://example.invalid/off.js
+'''
+        module = merge_modules([('source', source, {})])
+        rendered, warnings = render_stash(module, 'Defaults.stoverride')
+        data = yaml.safe_load(rendered)
+        self.assertFalse(warnings)
+        self.assertEqual(data['rules'], ['DOMAIN,api.example.invalid,DIRECT'])
+        self.assertEqual(data['http']['mitm'], ['api.example.invalid'])
+        self.assertEqual(data['http']['url-rewrite'], ['^https://api.example.invalid/ https://example.invalid/ 302'])
+        self.assertEqual(data['http']['script'][0]['argument'], 'enabled=false&key=null&mask=0&token=account:license')
+        self.assertEqual(data['cron']['script'][0]['argument'], 'enabled=false')
+        self.assertEqual(len(data['script-providers']), 2)
+        self.assertNotIn('{{{', rendered)
+        self.assertNotIn('arguments-desc', rendered)
+        self.assertNotIn('# arguments:', rendered)
+        self.assertIn('#!arguments-desc=', render_surge(module))
 
     def test_native_mock_jq_header_and_url_rewrites(self):
         data, warnings = self.convert(r'''[Map Local]
@@ -128,6 +166,9 @@ h2 = true
         for name in ('BlockAdsBase', 'Bilibili', 'CloudMusic', 'RedNote', 'Weibo'):
             text = (root / 'Surge/Module' / (name + '.sgmodule')).read_text()
             data, warnings = self.convert(text)
+            metadata = parse_module(text)[0]
+            for key in ('category', 'icon'):
+                self.assertEqual(data.get(key), metadata.get(key), (name, key))
             self.assertTrue(data['http']['mitm'], name)
             self.assertTrue(all('Surge-only options omitted' in w for w in warnings), (name, warnings))
             for script in data['http'].get('script', []):

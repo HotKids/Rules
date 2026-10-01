@@ -2,8 +2,7 @@
 # Source: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/split/partX/Xiaohongshu.sgmodule
 # raw-url: https://github.com/fmz200/wool_scripts/raw/main/Surge/module/split/partX/Xiaohongshu.sgmodule
 # tg-channel: https://t.me/inaisi
-# arguments: xhs_enable:true
-# Surge arguments use the merged defaults shown above.
+# Surge 参数已按默认值展开。
 name: 小红书去广告
 desc: 小红书去广告，部分 App 需清除缓存或重新安装后才会生效
 author: fmz200

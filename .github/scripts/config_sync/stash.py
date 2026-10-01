@@ -4,6 +4,7 @@ from pathlib import Path
 import ipaddress
 import json
 import re
+from urllib.parse import parse_qsl, quote, urlencode
 
 import yaml
 
@@ -56,6 +57,72 @@ _SUB_KEY_RE = re.compile(r"^(\s+)(['\"]?)([^:'\"]+)\2\s*:")
 def _yq(value) -> str:
     """YAML 单引号标量（组名 / filter 正则含 emoji、空格、反斜杠，统一加引号最为稳妥）。"""
     return "'" + str(value).replace("'", "''") + "'"
+
+
+def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
+    """写入受 Stash 支持的 Surge 默认参数，保留任务选择和通知隔离。"""
+    args = dict(parse_qsl(argument, keep_blank_values=True))
+    if args.get("task") == "logs" or args.get("service") == "logs":
+        return argument
+    if stem == "ip-security-panel":
+        keys = ["risk_api", "local_geoapi", "remote_geoapi", "ipqs_key", "maxmind_key", "mask_ip", "tw_flag"]
+        if args.get("task") == "monitor":
+            keys.append("notify")
+        # event_delay / panel_interval 只参与 Surge 事件延迟与点击打码，不用于 Stash。
+    elif stem == "media-check-panel":
+        keys = ["notify"] if args.get("mode") != "collapsed" else []
+        if args.get("service", "all") in ("all", "netflix"):
+            keys.append("nfprice")
+        if args.get("service", "all") in ("all", "gemini"):
+            keys.append("geminiapikey")
+        # viu 仅供 Surge 汇总面板使用。
+    else:
+        return argument
+    for key in keys:
+        if key in defaults:
+            args[key] = defaults[key]
+        else:
+            args.pop(key, None)
+    return urlencode(args, quote_via=quote)
+
+
+def _sync_stash_panel_metadata() -> None:
+    """同名 Surge 面板提供 category/icon 和参数默认值；保留 Stash 布局。"""
+    panels = REPO_ROOT / "Surge/Module/Pannel"
+    for source in sorted(panels.glob("*.sgmodule")):
+        target = source.with_suffix(".stoverride")
+        if not target.exists():
+            continue
+        metadata = {}
+        for line in source.read_text(encoding="utf-8").splitlines():
+            if line.startswith("["):
+                break
+            match = re.fullmatch(r"#!(category|icon|arguments)=(.*)", line)
+            if match:
+                metadata.setdefault(match[1], match[2].strip())
+        before = target.read_text(encoding="utf-8")
+        # 只替换顶层单行元数据，不能改动 tiles 内的 icon。
+        lines = [line for line in before.splitlines()
+                 if not re.match(r"^(category|icon):", line)]
+        at = lines.index("tiles:")
+        lines[at:at] = [f"{key}: {_yq(metadata[key])}" for key in ("category", "icon")
+                        if metadata.get(key)]
+        defaults = {}
+        for item in metadata.get("arguments", "").split(","):
+            key, separator, value = item.partition(":")
+            if separator:
+                defaults.setdefault(key.strip(), value.strip())
+        for index, line in enumerate(lines):
+            match = re.match(r"^(\s+argument:)\s*(.*)$", line)
+            if match:
+                argument = yaml.safe_load(match[2])
+                resolved = _stash_panel_argument(argument, defaults, source.stem)
+                if resolved != argument:
+                    lines[index] = f"{match[1]} {_yq(resolved)}"
+        after = "\n".join(lines) + "\n"
+        if after != before:
+            target.write_text(after, encoding="utf-8")
+            print(f"  ✓ {target.relative_to(REPO_ROOT)} 面板分类/图标/默认参数已同步")
 
 
 def _stash_clean_nameserver(server: str) -> str:

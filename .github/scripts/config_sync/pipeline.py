@@ -23,6 +23,7 @@ from .singbox import (
 )
 from .stash import (
     _sync_stash,
+    _sync_stash_panel_metadata,
 )
 from .surfboard import (
     _sync_surfboard,
@@ -50,9 +51,9 @@ def main() -> None:
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
     _sync_stash(config, surge_mitm_lines, general_lines)  # 依赖 _sync_clash 的产物，必须排在其后
+    _sync_stash_panel_metadata()
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
     _sync_singbox(config, group_lines, rule_lines)
-
 

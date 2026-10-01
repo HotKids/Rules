@@ -1,4 +1,6 @@
 # 原脚本：HotKids & ChatGPT & Claude
+# 覆写的 category/icon 及兼容参数默认值由同名 .sgmodule 同步，在 Surge 源文件维护。
+# nfprice/geminiapikey 取 Surge 默认值，分别用于 Netflix/Gemini；折叠卡片保持关闭通知。
 # 独立服务卡片：与 Stash 官方 Collapsed Tiles 示例一致。
 # 默认放入“流媒体/第三方服务”页面；长按节点时经该节点检测。
 # 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
@@ -8,7 +10,8 @@
 # 日志统一输出到 hotkids-media-check.log；连接时每分钟收集一次。
 name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit
-icon: https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@latest/light/bilibili-color.png
+category: 'HotKids'
+icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/overseerr.png'
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600

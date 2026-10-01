@@ -54,6 +54,10 @@ SRS/MRS 编译与 sing-box 完整配置检查由工作流调用官方内核执�
 
 产物包括 `Clash/Sample.yaml`、`Mihomo.yaml`、`Clash/Script/` 的 JS/Stash 覆写、`Surge/Balloon.lcf`、`Surge/Surfboard.conf`、`Quantumult/Sample.conf` 和 `sing-box/config.json`。没有实质变化时保留原时间戳，避免空提交。
 
+`Pannel/` 内已有同名 `.stoverride` 的面板，其顶层 `category`、`icon` 由 `.sgmodule` 的 `#!category`、`#!icon` 同步。只在 Surge 源文件维护这两个字段，修改会触发 `Sync Config`；源中删除或留空也会移除 Stash 对应字段。卡片内部的图标、名称、描述及布局仍由 Stash 面板维护。
+
+两份面板还从 `#!arguments` 读取 Stash 支持的参数默认值，直接写入对应脚本的 `argument`，不输出 Surge 参数编辑占位符或 `#!arguments-desc`。IP 面板同步数据源、凭据、打码与旗帜，`notify` 用于定时通知任务；`risk_api=null` 保留脚本在 Stash 上默认使用 IPPure 的行为。流媒体面板的 `nfprice`、`geminiapikey` 分别用于 Netflix、Gemini；折叠卡片关闭通知，日志收集任务不接收检测参数。Surge 专用的 `event_delay`、`panel_interval`、`viu` 不搬入 Stash，Tile 刷新周期继续由 `interval` 配置。
+
 ### 平台清单
 
 `sync-config.txt` 按平台分块：
@@ -107,7 +111,7 @@ DOMAIN-SET,URL,名称
 URL,名称 #!remove=a.example,b.example
 ```
 
-`DOMAIN-SET` 声明裸域名 / 域名后缀来源；转换后使用各平台相应语义。`#!remove` 从镜像中剔除指定域名，同名多来源合并去重。Module 段可覆盖 `#!name`、`#!desc`、`#!author`、`#!category`。
+`DOMAIN-SET` 声明裸域名 / 域名后缀来源；转换后使用各平台相应语义。`#!remove` 从镜像中剔除指定域名，同名多来源合并去重。Module 段可覆盖 `#!name`、`#!desc`、`#!author`、`#!category`、`#!icon`、`#!arguments`。分类和图标保留在 Surge 模块，并同步到 Stash 顶层字段；Stash 将规则、重写、脚本及 MITM 中的参数占位符按默认值展开，不附带 Surge 参数编辑说明。同名来源合并时，描述性元数据取第一份，参数保留各来源的独有默认值、同名参数取第一份。
 
 上游镜像按清单维护，直接编辑下载产物会被覆盖。遇到来源迁移，请修改清单；需要删除某个来源时显式删除条目，不把下载失败当成上游内容已删除。
 

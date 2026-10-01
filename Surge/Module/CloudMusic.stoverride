@@ -2,9 +2,7 @@
 # Source: https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule
 # Thank RuCu6, kokoryh
 # system: ios
-# arguments: 隐藏底部标签开关↓:--,发现:0,漫游:1,笔记:0,隐藏首页卡片开关↓:--,问候语:1,每日推荐:0,推荐歌单:0,最近常听:0,音乐合伙人:0,雷达歌单:1,排行榜:0,推荐专属歌单:1,你的专属歌单:1,脚本伪vip:#
-# arguments-desc: 将 # 改成任意名称即可开启对应脚本\n\n隐藏为:1/true  不隐藏为:0/false
-# Surge arguments use the merged defaults shown above.
+# Surge 参数已按默认值展开。
 name: 网易云音乐去广告
 desc: 网易云音乐去广告，部分 App 需清除缓存或重新安装后才会生效
 author: Keywos
