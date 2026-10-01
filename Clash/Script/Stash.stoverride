@@ -1,8 +1,9 @@
-# Date: 2026-10-01 19:26:06
+# Date: 2026-10-01 20:56:40
 
 name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及 HTTP/MITM 设置请修改 Surge/Profile.conf。
 author: '@HotKids'
+category: HotKids
 icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"
 
 # 通用设置

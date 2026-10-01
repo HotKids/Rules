@@ -463,15 +463,14 @@ def _sync_stash(config: dict, surge_mitm_lines: list[str], general_lines=()) -> 
             out.append(f'    "{dom}":{policy_tail}')
             out.extend(policy_val)
 
-    # 在文件头的 # Author 之后补一行生成说明（覆写的 name/desc 仅用于展示，
-    # 源文件没有这些键，不属于差异点，不自行添加）
+    # 覆写列表的展示元数据放在配置主体之前；私人覆写继承后只改 name/desc。
     insert_at = next((i for i, l in enumerate(out) if l.startswith("# Date:")), -1) + 1
     out[insert_at:insert_at] = [
         "",
-        # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem}",
         "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及 HTTP/MITM 设置请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
+        "category: HotKids",
         'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
     ]
 
