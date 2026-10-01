@@ -304,7 +304,7 @@ IP-CIDR6,fc00::/7,no-resolve
             ])
             sample = self.root / self.outputs['Sample']
             sample_bytes = sample.read_bytes()
-            stash._sync_stash(config)
+            stash._sync_stash(config, [])
             self.assertEqual(sample.read_bytes(), sample_bytes)
         self.assertEqual({path: path.read_bytes() for path in self.inputs}, before)
         outputs = {name: yaml.safe_load((self.root / path).read_text(encoding='utf-8'))
@@ -533,7 +533,7 @@ dns:
                     self.assertEqual(self.generated_bytes(), once)
 
 
-class StashDNSTests(unittest.TestCase):
+class StashConfigTests(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
@@ -584,10 +584,10 @@ rules:
         self.config = {'Clash': {'output': 'Clash/Sample.yaml'},
                        'Stash': {'output': 'Clash/Stash.stoverride'}}
 
-    def generate(self):
+    def generate(self, mitm_lines=None):
         with patch.object(stash, 'REPO_ROOT', self.root), \
                 contextlib.redirect_stdout(io.StringIO()):
-            stash._sync_stash(self.config)
+            stash._sync_stash(self.config, mitm_lines or [])
         self.assertEqual(self.source.read_bytes(), self.input_bytes)
         path = self.root / self.config['Stash']['output']
         return path.read_text(encoding='utf-8'), yaml.safe_load(path.read_text(encoding='utf-8'))
@@ -753,6 +753,67 @@ proxy-groups:''')
         self.assertEqual(private['name'], 'MyStash')
         self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
         self.assertEqual(self.source.read_bytes(), self.input_bytes)
+
+    def test_surge_ca_rotation_and_removal_reach_both_stash_outputs(self):
+        directory = self.root / '.github/scripts/sync-config/Enhanced'
+        directory.mkdir(parents=True)
+        (directory / 'MyStash.overlay.json').write_text(json.dumps({
+            'stash_output': 'Clash/MyStash.stoverride',
+            'group_overrides': {'Proxy': {'type': 'url-test'}},
+        }), encoding='utf-8')
+        profile = self.root / 'Profile.conf'
+        for expected in ({'ca': 'fake+fixture/ca==', 'ca-passphrase': "a' b: # = c"},
+                         {'ca': 'rotated+fixture==', 'ca-passphrase': '012345'},
+                         {'ca': 'rotated+fixture==', 'ca-passphrase': ''},
+                         {}):
+            with self.subTest(fields=tuple(expected)):
+                profile.write_text('[MITM]\nh2 = true\nskip-server-cert-verify = true\n' +
+                                   '\n'.join(f'{"ca-p12" if k == "ca" else k} = {v}'
+                                             for k, v in expected.items()), encoding='utf-8')
+                mitm = parser.parse_surge_profile(profile)[3]
+                text, output = self.generate(mitm)
+                private_path = self.root / 'Clash/MyStash.stoverride'
+                private = yaml.safe_load(private_path.read_text(encoding='utf-8'))
+                for result in (output, private):
+                    if expected:
+                        self.assertEqual(result['http'], expected)
+                    else:
+                        self.assertNotIn('http', result)
+                self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
+                self.assertNotIn('http: #!replace', text)
+                once = private_path.read_bytes()
+                text_again, _ = self.generate(mitm)
+                self.assertEqual(text_again, text)
+                self.assertEqual(private_path.read_bytes(), once)
+
+    def test_ca_sync_preserves_other_http_fields_and_following_comments(self):
+        self.replace_source('\nproxy-groups:', '''
+http:
+  mitm: ['*.example.invalid']
+  ca: old-fixture
+  ca-passphrase: old-password
+  script:
+    - name: existing-script
+      type: request
+
+# Proxy groups documentation
+proxy-groups:''')
+        text, output = self.generate(['ca-p12 = new-fixture==', 'ca-passphrase = false'])
+        self.assertEqual(output['http'], {
+            'ca': 'new-fixture==', 'ca-passphrase': 'false',
+            'mitm': ['*.example.invalid'],
+            'script': [{'name': 'existing-script', 'type': 'request'}],
+        })
+        self.assertEqual(text.count('\nhttp:'), 1)
+        self.assertIn('# Proxy groups documentation\nproxy-groups:', text)
+        self.assertNotIn('http: #!replace', text)
+
+    def test_disabled_and_surge_only_mitm_fields_are_not_exported(self):
+        _, output = self.generate([
+            '# ca-p12 = commented', '// ca-passphrase = commented',
+            'skip-server-cert-verify = true', 'h2 = true',
+        ])
+        self.assertNotIn('http', output)
 
 
 if __name__ == '__main__': unittest.main()

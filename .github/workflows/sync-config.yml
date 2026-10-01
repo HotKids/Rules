@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'Surge/Profile.conf'
+      - 'Surge/Profile.conf' # 策略/规则及两份 Stash 覆写的 MITM 证书上游
       # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'

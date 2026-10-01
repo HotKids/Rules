@@ -19,7 +19,7 @@ from .common import (
 #
 # Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
 # 同一定位）：保留可用于覆写的源设置、注释与排版，应用 Stash 适配及节点继承策略。
-# 共用 Clash/General.yaml 的通用设置，不另维护 Stash 默认值。
+# 共用 Clash/General.yaml 的通用设置；MITM 证书来自 Surge/Profile.conf。
 
 # 1) 下列 mihomo 顶层参数未获所核验 Stash 官方 YAML 文档确认，连同前置注释省略。
 #    部分对应能力由 Stash 内置或应用设置控制；省略不代表功能不存在或字段确定无效。
@@ -148,7 +148,33 @@ def _stash_comment_out(lines: list[str], top_key: str) -> list[str]:
     return out
 
 
-def _sync_stash(config: dict) -> None:
+def _stash_mitm(lines: list[str], surge_mitm_lines: list[str]) -> list[str]:
+    """同步 Surge CA 到 http 子键；保留其他 HTTP 设置，不覆盖基础配置的整个 http。"""
+    fields = {"ca-p12": "ca", "ca-passphrase": "ca-passphrase"}
+    ca = {}
+    for line in surge_mitm_lines:
+        key, sep, value = line.strip().partition("=")
+        if sep and key.strip() in fields:
+            ca[fields[key.strip()]] = value.strip()
+    if not ca:
+        return lines
+
+    # http 当前不在 General 中；若以后加入 HTTP 设置，仅合并证书字段。
+    start = next((i for i, line in enumerate(lines) if line.startswith("http:")), len(lines))
+    end = next((i for i in range(start + 1, len(lines))
+                if _TOP_KEY_RE.match(lines[i])), len(lines))
+    # 后续块的说明不属于 http。
+    while end > start and (not lines[end - 1].strip() or lines[end - 1].startswith("#")):
+        end -= 1
+    http = (yaml.safe_load("\n".join(lines[start:end])) or {}).get("http") or {}
+    http.update(ca)
+    block = yaml.safe_dump({"http": http}, allow_unicode=True, sort_keys=False).rstrip().splitlines()
+    if start == len(lines):
+        block = ["", "# MITM 证书由 Surge/Profile.conf 的 [MITM] 同步；设备仍需安装并信任该 CA。"] + block
+    return lines[:start] + block + lines[end:]
+
+
+def _sync_stash(config: dict, surge_mitm_lines: list[str]) -> None:
     """Clash/Sample.yaml → Clash/Stash.stoverride（只改 Stash 与 mihomo 的差异点）。"""
     out_path = config.get("Stash", {}).get("output")
     clash_out = config.get("Clash", {}).get("output")
@@ -363,13 +389,14 @@ def _sync_stash(config: dict) -> None:
         "",
         # name / desc / author 仅用于在 Stash 覆写列表中展示
         f"name: {Path(out_path).stem}",
-        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及 MITM 证书请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
         'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
     ]
 
     out = _stash_comment_out(out, "proxy-providers")
     out = _stash_group_health_checks(out)
+    out = _stash_mitm(out, surge_mitm_lines)
 
     body = "\n".join(out).rstrip() + "\n"
     changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
@@ -489,7 +516,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         elif l.startswith("desc: "):
             lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
                         f"叠加 {label}），请勿手动修改；通用设置请修改 Clash/General.yaml，"
-                        f"策略/规则请修改 Surge/Profile.conf，私人差异请修改 {label}。")
+                        f"策略/规则及 MITM 证书请修改 Surge/Profile.conf，私人差异请修改 {label}。")
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():

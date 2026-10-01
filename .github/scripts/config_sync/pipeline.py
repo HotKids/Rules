@@ -49,7 +49,7 @@ def main() -> None:
     _GENERAL_INJECT.update(_build_general_inject(general_lines))
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
-    _sync_stash(config)  # 依赖 _sync_clash 的产物，必须排在其后
+    _sync_stash(config, surge_mitm_lines)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
