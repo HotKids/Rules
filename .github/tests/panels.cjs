@@ -1539,18 +1539,33 @@ test('Stash queries geography and organization every refresh and tolerates unava
   }
 });
 
-test('Stash local Baidu failure falls back to ip.sb rather than bilibili',async()=>{
-  for(const mode of ['home','collapsed']) {
-    const r=await ipPanel({argument:`tile=local&mode=${mode}`,intercept(o,cb){
-      if(o.url.includes('opendata.baidu')) {cb('request timed out',null,null);return true;}
-      if(o.url.includes('ip.sb')) {
-        cb(null,{status:200},JSON.stringify({country_code:'SG',country:'Singapore',city:'Selected City',organization:'Selected ISP'}));return true;
+test('Surge and Stash default local geography prefers Baidu, then bilibili, then ip.sb',async()=>{
+  for(const client of ['surge','stash']) for(const mode of ['home','collapsed']) {
+    for(const source of ['baidu','bilibili','ipsb']) {
+      const r=await ipPanel({client,argument:`tile=local&mode=${mode}`,intercept(o,cb){
+        if(o.url.includes('bilibili') && source==='ipsb') {
+          cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));return true;
+        }
+        if(o.url.includes('opendata.baidu')) {
+          assert.ok(o.url.includes('203.0.113.2'));
+          if(source==='baidu') cb(null,{status:200},JSON.stringify({data:[{location:'百度地区 百度运营商'}]}));
+          else cb('request timed out',null,null);
+          return true;
+        }
+        if(o.url.includes('ip.sb')) {
+          assert.ok(o.url.includes('203.0.113.2'));
+          cb(null,{status:200},JSON.stringify({country_code:'CN',country:'China',city:'Selected City',organization:'Selected ISP'}));return true;
+        }
+      }});
+      const expected={baidu:/百度地区[\s\S]*百度运营商/,bilibili:/深圳[\s\S]*中国电信/,ipsb:/Selected City[\s\S]*Selected ISP/};
+      assert.match(r.output.content,expected[source]);
+      for(const other of Object.keys(expected).filter(key=>key!==source))assert.doesNotMatch(r.output.content,expected[other]);
+      assert.equal(r.requests.filter(o=>o.url.includes('bilibili')).length,1);
+      if(client==='stash') {
+        assert.equal(r.output.backgroundColor,'#00796B');assert.equal(r.requests.length,3);
+        assert.ok(r.requests.every(o=>o.headers['X-Stash-Selected-Proxy']==='DIRECT'));
       }
-    }});
-    assert.equal(r.output.backgroundColor,'#00796B');
-    assert.match(r.output.content,/Selected City[\s\S]*Selected ISP/);
-    assert.doesNotMatch(r.output.content,/深圳|中国电信/);
-    assert.equal(r.requests.length,3);assert.ok(r.requests.every(o=>o.headers['X-Stash-Selected-Proxy']==='DIRECT'));
+    }
   }
 });
 
@@ -1643,7 +1658,7 @@ test('Stash ignores legacy geography caches and uses current fallback data',asyn
         if(o.url.includes('ip.sb')){cb(null,{status:200},JSON.stringify({country_code:'US',country:'US',city:'Fresh City',organization:'Fresh ISP'}));return true;}
       }});
     assert.doesNotMatch(r.output.content,/OldLocation|OldISP/);
-    assert.match(r.output.content,service==='local'?/Fresh City.*Fresh ISP/:/Probe City.*Example/);
+    assert.match(r.output.content,service==='local'?/深圳.*中国电信/:/Probe City.*Example/);
   }
   assert.deepEqual([...store],before);
 });
@@ -1820,14 +1835,14 @@ test('Stash optional risk providers use the measured address, reject invalid sco
   }
 });
 
-test('Stash local geography selection skips Baidu and respects the selected source',async()=>{
-  for(const source of ['bilibili','ipsb']) {
-    const r=await ipPanel({now:100000000,argument:`tile=local&local_geoapi=${source}`,intercept(o,cb){
+test('Surge and Stash explicit local geography selection skips Baidu and respects the selected source',async()=>{
+  for(const client of ['surge','stash']) for(const source of ['bilibili','ipsb']) {
+    const r=await ipPanel({client,now:100000000,argument:`tile=local&local_geoapi=${source}`,intercept(o,cb){
       if(o.url.includes('ip.sb')){cb(null,{status:200},JSON.stringify({country_code:'CN',country:'China',city:'Selected City',organization:'Selected ISP'}));return true;}
     }});
     assert.ok(!r.requests.some(o=>o.url.includes('opendata')));
     assert.match(r.output.content,source==='ipsb'?/Selected City[\s\S]*Selected ISP/:/深圳[\s\S]*中国电信/);
-    assert.equal(r.requests.find(o=>o.url.includes('ip.sb')).timeout,5);
+    if(client==='stash')assert.equal(r.requests.find(o=>o.url.includes('ip.sb')).timeout,5);
   }
 });
 

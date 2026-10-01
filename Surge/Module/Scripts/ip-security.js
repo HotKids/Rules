@@ -25,7 +25,7 @@
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 优先风险源，ipqs / proxycheck / ippure / scamalytics；Stash 默认 ippure，显式指定其他源时失败回落
- * - local_geoapi: 本地 IP 地理数据源，baidu(默认)=百度 opendata(中文，省市区粒度)，bilibili=bilibili(中文)，ipsb=ip.sb(英文)
+ * - local_geoapi: 本地 IP 地理数据源，baidu(默认)=百度 → bilibili → ip.sb，bilibili=bilibili → ip.sb，ipsb=ip.sb
  * - remote_geoapi: 入口/出口地理数据源，默认 ipapi-zh；Stash 可选 ippure。ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
  * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind/maxmind-zh 需要，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
@@ -51,7 +51,7 @@
  * - summary 首页 IP 信息卡；outbound 出口、local 本地、risk 纯净度维持独立折叠检测。
  * - Stash 默认风险源 IPPure、本地百度、出口地区 ipapi-zh；可用 risk_api / local_geoapi / remote_geoapi 改选。
  *   可选源与 Surge 同名；remote_geoapi=ippure 是 Stash 的可选源，其他地区源按指定 IP 查询。
- *   本地源失败回落本轮 ip.sb；出口地区源失败回落本轮出口探测地区，运营商优先 ipinfo。
+ *   本地默认按百度 → bilibili → ip.sb 回退；出口地区源失败回落本轮出口探测地区，运营商优先 ipinfo。
  *   地区与运营商每轮查询，不复用历史字段；风险数据缓存保持独立。
  *   两端共用六档风险等级与颜色，首页补充 DNS 解析器、rDNS、显式指定的策略名。
  *   DNS 地区只作展示，不据此判断泄露；打码时同时隐藏可能包含 IP 的 rDNS。
@@ -68,7 +68,7 @@
  *   只展示本轮有效 IP 对应的数据，不依赖 Surge 的入口或策略查询接口。
  * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
- * @version 6.4.13
+ * @version 6.4.14
  * @date 2026-10-01
  */
 
@@ -1203,11 +1203,17 @@ async function getStashLocalResult(local) {
     httpJSON(CONFIG.urls.ipSbGeo(ip), "DIRECT", null, Date.now() + 5000)
   ]);
   const sbInfo = normalizeIpSb(sb);
-  const primary = source === "baidu" ? normalizeOpendata(baidu)
-    : source === "bilibili" ? normalizeBilibili(local) : sbInfo;
+  const biliInfo = normalizeBilibili(local);
+  let primary = source === "baidu" ? normalizeOpendata(baidu)
+    : source === "bilibili" ? biliInfo : sbInfo;
+  if (source === "baidu" && !primary) {
+    primary = biliInfo;
+    if (primary) IPLog.log("本地地区：baidu 不可用，使用本轮 bilibili 结果");
+  }
   if (source === "baidu" && primary && /^(移动|联通|电信|广电)$/.test(primary.org)) primary.org = "中国" + primary.org;
-  // 与 Surge 相同：选定本地源失败后使用本轮 ip.sb，不混入 bilibili 或旧字段。
-  const info = primary && source !== "ipsb" ? { ...primary, country_code: sbInfo?.country_code || "CN" }
+  // bilibili 复用获取本地 IP 时的响应；前两级不可用才取本轮 ip.sb，不读取旧字段。
+  const info = primary && source !== "ipsb" ? { ...primary,
+    country_code: sbInfo?.country_code || (primary === biliInfo && biliInfo.country_name !== "中国" ? "" : "CN") }
     : primary || sbInfo;
   if (!primary && info) IPLog.log("本地地区：" + source + " 不可用，使用本轮 ip.sb 结果");
   return {
@@ -1380,7 +1386,7 @@ async function runStashTile() {
     IPLog.collect();
     return done({});
   }
-  IPLog.log("=== IP 安全检测开始 (v6.4.13 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+  IPLog.log("=== IP 安全检测开始 (v6.4.14 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
   if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
@@ -1465,15 +1471,18 @@ async function runStashTile() {
     IPLog.log("当前为直连，跳过 DNS 泄露检测");
   }
 
-  // 本地 IP 地理信息：zh 用 bilibili/baidu（默认中国），en 用 ip.sb
+  // 本地默认百度 → bilibili → ip.sb；bilibili 复用本轮本地 IP 响应。
   let localInfo;
   if (useBaiduLocal) {
     const bd = normalizeOpendata(localBaiduRaw);
     const sb = normalizeIpSb(localSbRaw);
     if (bd && /^(移动|联通|电信|广电)$/.test(bd.org)) bd.org = "中国" + bd.org;
-    localInfo = bd
-      ? { ...bd, country_code: sb?.country_code || "CN" }
+    const bili = !bd ? normalizeBilibili(localRaw) : null;
+    const primary = bd || bili;
+    localInfo = primary
+      ? { ...primary, country_code: sb?.country_code || (bili && bili.country_name !== "中国" ? "" : "CN") }
       : sb;
+    if (!bd && localInfo) IPLog.log("本地地区：baidu 不可用，使用本轮 " + (bili ? "bilibili" : "ip.sb") + " 结果");
   } else if (useBilibili) {
     const bili = normalizeBilibili(localRaw);
     const sb = normalizeIpSb(localSbRaw);
