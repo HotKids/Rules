@@ -286,7 +286,9 @@ def render_stash(module, output_name):
                         if opts[key].lower() not in ("true", "false", "0", "1"): raise ValueError(f"Invalid boolean: {key}")
                         script[target] = opts[key].lower() in ("true", "1")
                 if "max-size" in opts: script["max-size"] = max(0, int(opts["max-size"]))
-                if "timeout" in opts: script["timeout"] = float(opts["timeout"])
+                if "timeout" in opts:
+                    timeout = float(opts["timeout"])
+                    script["timeout"] = int(timeout) if timeout.is_integer() else timeout
                 if "argument" in opts: script["argument"] = opts["argument"]
                 if "engine" in opts:
                     engine = {"webview": "webkit", "jsc": "jsc", "auto": "auto"}.get(opts["engine"])

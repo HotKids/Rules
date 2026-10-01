@@ -79,6 +79,7 @@ Clock = type=cron,cronexp="*/5 * * * *",script-path=https://example.invalid/a.js
         self.assertIs(entry['binary-mode'], True)
         self.assertIs(entry['require-body'], True)
         self.assertEqual(entry['max-size'], 0)
+        self.assertIsInstance(entry['timeout'], int)
         self.assertEqual(data['cron']['script'][0]['cron'], '*/5 * * * *')
         self.assertEqual(data['cron']['script'][0]['argument'], 'hello, world')
 
