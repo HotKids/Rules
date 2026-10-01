@@ -35,12 +35,12 @@ payload:
 
   # > Google Services
   ### Google 下载、更新及基础服务
-  - DOMAIN-SUFFIX,blog.google
-  - DOMAIN-SUFFIX,googletraveladservices.com
-  - DOMAIN,clientservices.googleapis.com
-  - DOMAIN,dl.google.com
-  - DOMAIN,dl.l.google.com
-  - DOMAIN,update.googleapis.com
+  # DOMAIN-SUFFIX,blog.google
+  # DOMAIN-SUFFIX,googletraveladservices.com
+  # DOMAIN,clientservices.googleapis.com
+  # DOMAIN,dl.google.com
+  # DOMAIN,dl.l.google.com
+  # DOMAIN,update.googleapis.com
 
   # >> Firebase Cloud Messaging
   ### Android 推送服务
