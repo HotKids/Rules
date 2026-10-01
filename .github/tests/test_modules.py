@@ -191,14 +191,15 @@ h2 = true
              patch.object(runner, 'prefetch_urls', return_value=texts):
             runner.fetch_external_modules()
             folder = Path(tmp) / 'Surge/Module'
-            self.assertEqual(sorted(p.name for p in folder.iterdir()), ['Combined.sgmodule', 'Combined.stoverride', 'Only.sgmodule', 'OnlyStash.stoverride'])
-            output = yaml.safe_load((folder / 'Combined.stoverride').read_text())
+            self.assertEqual(sorted(str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file()),
+                             ['Combined.sgmodule', 'Only.sgmodule', 'Stash/Combined.stoverride', 'Stash/OnlyStash.stoverride'])
+            output = yaml.safe_load((folder / 'Stash/Combined.stoverride').read_text())
             self.assertEqual(output['desc'], 'first')
             self.assertEqual(len(output['rules']), 2)
-            before = {p: p.read_bytes() for p in folder.iterdir()}
+            before = {p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}
             texts['two'] = '<html>download failed</html>'
             with self.assertRaises(ValueError): runner.fetch_external_modules()
-            self.assertEqual({p: p.read_bytes() for p in folder.iterdir()}, before)
+            self.assertEqual({p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}, before)
 
 
 if __name__ == '__main__': unittest.main()

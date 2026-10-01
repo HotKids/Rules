@@ -3,7 +3,7 @@
 # ════════════════════════════════════════════════════════════════
 # 用途：拉取第三方规则集，规范化后落库为各平台原生格式
 # 消费：.github/scripts/sync-rules.py
-# 输出：Surge/RULE-SET · Clash/RuleSet · sing-box/source；Module → Surge/Module
+# 输出：Surge/RULE-SET · Clash/RuleSet · sing-box/source；Module → Surge/Module（Stash 版放 Stash/ 子目录）
 #
 # 格式：
 #   # >> 段              段落（Surge / Clash / Module）

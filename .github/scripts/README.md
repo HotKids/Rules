@@ -149,9 +149,11 @@ URL,名称 #!remove=a.example,b.example
 
 | 清单文件名 | 生成到 `Surge/Module/` |
 |---|---|
-| `BlockAdsBase` | `BlockAdsBase.sgmodule` 和 `BlockAdsBase.stoverride` |
-| `BlockAdsBase.sgmodule` | 仅 Surge 版 |
-| `BlockAdsBase.stoverride` | 仅 Stash 版 |
+| `BlockAdsBase` | `BlockAdsBase.sgmodule` 和 `Stash/BlockAdsBase.stoverride` |
+| `BlockAdsBase.sgmodule` | 仅 `BlockAdsBase.sgmodule` |
+| `BlockAdsBase.stoverride` | 仅 `Stash/BlockAdsBase.stoverride` |
+
+Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继续放在 `Pannel/`。
 
 多个来源指向同一个输出文件时按清单顺序合并，不再互相覆盖。`name`、`desc`、`author`、`category` 等元信息取第一个条目，先应用它的行内 `#!key=value` 覆盖；后面的元信息不覆盖、不补齐。规则保持先后顺序并去重，MITM/强制 HTTP 域名合并，重名脚本自动加后缀。参数默认值属于执行配置：保留后续独有参数，同名参数取首个；Stash 使用这些默认值，Surge 继续保留参数占位符。
 

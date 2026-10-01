@@ -1181,7 +1181,10 @@ def fetch_external_modules():
                 print(f"  [WARN] {target}: {warning}")
         else:
             content = render_surge(module)
-        outputs[REPO_ROOT / "Surge" / "Module" / target] = content
+        output_dir = REPO_ROOT / "Surge" / "Module"
+        if target.endswith(".stoverride"):
+            output_dir /= "Stash"
+        outputs[output_dir / target] = content
     for path, content in outputs.items():
         changed = write_if_changed(path, content)
         print(f"  {'✓' if changed else '·'} {path.relative_to(REPO_ROOT)} {'已更新' if changed else '无变化'}")
