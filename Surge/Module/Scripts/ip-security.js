@@ -64,10 +64,11 @@
  * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *   IP 变化后补查本地/出口地区、运营商及 IPPure 风险，再发送通知；
+ *   与 Surge 一样，本地/出口 IP 各自与地区、运营商同行，不合并到副标题。
  *   只展示本轮有效 IP 对应的数据，不依赖 Surge 的入口或策略查询接口。
  * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
- * @version 6.4.11
+ * @version 6.4.12
  * @date 2026-10-01
  */
 
@@ -950,12 +951,12 @@ async function runStashMonitor() {
     const detail = info => (info?.location ? formatGeo(info.countryCode, info.location) : "地区查询失败") +
       " · " + (info?.organization || "运营商未知");
     const title = "🔄 网络已切换" + (args.proxy ? " | " + args.proxy : "");
-    const subtitle = "Ⓓ " + m(current.localIP) + " 🅟 " + m(current.outIP);
-    const lines = ["Ⓓ " + detail(local), "🅟 " + detail(outbound)];
+    const lines = ["Ⓓ " + m(current.localIP) + " " + detail(local),
+      "🅟 " + m(current.outIP) + " " + detail(outbound)];
     if (current.outIPv6) lines.push("🅟 IPv6：" + m(current.outIPv6));
     lines.push("🅟 风控：" + (sameRisk?.valid ? formatRisk(sameRisk) : "未知（检测失败）") +
       " | 类型：" + (sameRisk?.typeText || "类型未知 · 来源未知"));
-    try { $notification.post(title, subtitle, lines.join("\n")); }
+    try { $notification.post(title, "", lines.join("\n")); }
     catch (_) { IPLog.log("通知发送失败；保留基线供下次重试"); return done({}); }
   }
   if (Object.keys(next).length) {
@@ -1379,7 +1380,7 @@ async function runStashTile() {
     IPLog.collect();
     return done({});
   }
-  IPLog.log("=== IP 安全检测开始 (v6.4.11 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+  IPLog.log("=== IP 安全检测开始 (v6.4.12 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
   if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 

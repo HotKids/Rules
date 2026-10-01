@@ -767,7 +767,8 @@ test('Stash scheduled notifications establish independent field baselines',async
   assert.equal((await monitor({store,argument,outIP:'198.51.100.11'})).notifications.length,0);
   const localChanged=await monitor({store,localIP:'203.0.113.3',ipFailure:true});
   assert.equal(localChanged.notifications.length,1);
-  assert.equal(localChanged.notifications[0][1],'Ⓓ 203.0.113.3 🅟 查询失败');
+  assert.equal(localChanged.notifications[0][1],'');
+  assert.match(localChanged.notifications[0][2],/^Ⓓ 203\.0\.113\.3 .*\n🅟 查询失败 /);
   assert.match(localChanged.notifications[0][2],/风控：未知（检测失败）/);
   const disabled=await monitor({store,argument:'notify=false',outIP:'198.51.100.12'});
   assert.equal(disabled.notifications.length,0);assert.equal(disabled.requests.length,0);
@@ -797,9 +798,9 @@ test('Stash changed-IP notifications use the Surge layout and the current detect
   assert.equal(r.notifications.length,1);
   const [title,subtitle,body]=r.notifications[0];
   assert.equal(title,'🔄 网络已切换');
-  assert.equal(subtitle,'Ⓓ 203.0.113.3 🅟 198.51.100.11');
-  assert.match(body,/Ⓓ 🇨🇳 广东省深圳市 · 中国电信/);
-  assert.match(body,/🅟 .*Example/);
+  assert.equal(subtitle,'');
+  assert.match(body,/^Ⓓ 203\.0\.113\.3 🇨🇳 广东省深圳市 · 中国电信\n/);
+  assert.match(body,/\n🅟 198\.51\.100\.11 .*Example\n/);
   assert.match(body,/🅟 IPv6：2001:db8::11/);
   assert.match(body,/🅟 风控：12% 极度纯净 \(IPPure\) \| 类型：住宅 · 原生/);
   assert.doesNotMatch(body,/203\.0\.113\.2|198\.51\.100\.10|Unknown|入口|策略/);
@@ -815,7 +816,8 @@ test('Stash changed-IP notifications survive missing metadata and never attach a
     ippureData:{ip:'2001:db8::99',fraudScore:99,isResidential:false,isBroadcast:true},
     intercept(o,cb){if(/ip-api.com|ipinfo|opendata|ip.sb\/geoip/.test(o.url)){cb('timeout',null,null);return true;}}});
   assert.equal(r.notifications.length,1);
-  assert.match(r.notifications[0][1],/198\.51\.100\.11/);
+  assert.equal(r.notifications[0][1],'');
+  assert.match(r.notifications[0][2],/\n🅟 198\.51\.100\.11 地区查询失败 · 运营商未知\n/);
   assert.match(r.notifications[0][2],/风控：未知（检测失败） \| 类型：类型未知 · 来源未知/);
   assert.doesNotMatch(r.notifications[0].join('\n'),/99%|机房|198\.51\.100\.10/);
 });
@@ -825,6 +827,11 @@ test('Stash notification details respect masking and explicit route selection',a
     await monitor({store,argument});
     const r=await monitor({store,argument,localIP:'203.0.113.3',outIPv6:'2001:db8::11'});
     assert.equal(r.notifications[0][0],'🔄 网络已切换 | US Test');
+    assert.equal(r.notifications[0][1],'');
+    const lines=r.notifications[0][2].split('\n');
+    assert.ok(lines[0].startsWith(mask===1?'Ⓓ 203.***.***.3 ':'Ⓓ [IP 已隐藏] '));
+    assert.ok(lines[1].startsWith(mask===1?'🅟 198.***.***.10 ':'🅟 [IP 已隐藏] '));
+    assert.match(lines[2],/^🅟 IPv6：/);
     assert.doesNotMatch(r.notifications[0].join('\n'),/203\.0\.113\.3|198\.51\.100\.10|2001:db8::11/);
     assert.ok(r.requests.filter(o=>!/bilibili|opendata|ip.sb\/geoip/.test(o.url))
       .every(o=>o.headers['X-Stash-Selected-Proxy']==='US%20Test'));
