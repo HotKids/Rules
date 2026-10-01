@@ -943,6 +943,28 @@ test('Surge IP panel retains policy, entrance, traffic and request routing',asyn
   assert.equal(requests.find(r=>r.url.includes('edns')).policy,'Test Proxy');
   assert.ok(requests.every(r=>!r.headers?.['X-Stash-Selected-Proxy']));
 });
+test('Surge notifications put each IP beside its own geography instead of merging the subtitle',async()=>{
+  for(const [mask,ips] of [
+    [0,['203.0.113.2','192.0.2.1','198.51.100.10']],
+    [1,['203.***.***.2','192.***.***.1','198.***.***.10']],
+    [2,['[IP 已隐藏]','[IP 已隐藏]','[IP 已隐藏]']]
+  ]) {
+    const r=await ipPanel({client:'surge',argument:`TYPE=EVENT&event_delay=0.001&mask_ip=${mask}`});
+    assert.equal(r.notifications.length,1);
+    const [title,subtitle,body]=r.notifications[0];
+    assert.equal(title,'🔄 网络已切换 | Test Proxy');
+    assert.equal(subtitle,'');
+    const lines=body.split('\n');
+    assert.equal(lines[0],`Ⓓ ${ips[0]} 🇨🇳 广东省深圳市 · 中国电信`);
+    assert.ok(lines[1].startsWith(`Ⓔ ${ips[1]} `));
+    assert.ok(lines[2].startsWith(`🅟 ${ips[2]} `));
+    for(const line of lines.slice(1,3))assert.match(line,/台北.* · Example$/);
+    assert.match(lines[3],/^🅟 风控：12% 极度纯净 \(ProxyCheck\) \| 类型：住宅 IP · 原生 IP$/);
+    if(mask)assert.doesNotMatch(body,/203\.0\.113\.2|192\.0\.2\.1|198\.51\.100\.10/);
+  }
+  const disabled=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001&notify=false'});
+  assert.deepEqual(disabled.notifications,[]);
+});
 
 const spotifyConfig = market => `<script type="text/plain" id="appServerConfig">${Buffer.from(JSON.stringify({market,label:'地区'})).toString('base64')}</script>`;
 test('Spotify reads market without atob and ignores alternate country links',async()=>{
