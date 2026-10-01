@@ -1,6 +1,7 @@
 #!name=IP Security Monitor
 #!desc=显示 IP 风险评分、类型、DNS 泄露检测、代理策略和本地/入口/出口 IP 地理信息，支持网络变化自动通知
 #!author=HotKids&ChatGPT&Claude
+#!icon=https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/nextdns.png
 #!category=HotKids
 #!system=ios
 #!arguments=risk_api:null,local_geoapi:baidu,remote_geoapi:ipapi-zh,ipqs_key:null,maxmind_key:null,mask_ip:0,tw_flag:cn,event_delay:2,notify:true,panel_interval:600
