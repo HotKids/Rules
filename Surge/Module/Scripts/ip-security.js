@@ -15,7 +15,7 @@
  * ⑤ 风险评分: IPQS (需 Key) → ProxyCheck → IPPure → Scamalytics；risk_api 指定优先源
  *    Surge 按出口 IP 缓存 24 小时；Stash 默认每次请求 IPPure，其他源按显式选项查询
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地默认百度；Surge 入口/出口默认 ip-api.com 中文，Stash 出口默认 IPPure；可选数据源见下方参数
+ * ⑦ 地理: 本地默认百度；入口/出口默认 ip-api.com 中文；可选数据源见下方参数
  * ⑧ 运营商: Surge 优先补查 ipinfo.io；Stash 优先使用 IPPure，仅缺失时补查
  * ⑨ DNS 解析器: edns.ip-api.com；Surge 按解析器地区作提示，未验证是否属于本地 ISP
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
@@ -26,7 +26,7 @@
  * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
  * - risk_api: 优先风险源，ipqs / proxycheck / ippure / scamalytics；Stash 默认 ippure，显式指定其他源时失败回落
  * - local_geoapi: 本地 IP 地理数据源，baidu(默认)=百度 opendata(中文，省市区粒度)，bilibili=bilibili(中文)，ipsb=ip.sb(英文)
- * - remote_geoapi: 入口/出口地理数据源，Stash 默认 ippure；Surge 默认 ipapi-zh，ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
+ * - remote_geoapi: 入口/出口地理数据源，默认 ipapi-zh；Stash 可选 ippure。ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
  * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind/maxmind-zh 需要，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
@@ -49,8 +49,8 @@
  * @author HotKids&Claude
  * Stash：ip-security-panel.stoverride 提供首页聚合与三张折叠卡片，600 秒刷新；与 Surge 共用此文件。
  * - summary 首页 IP 信息卡；outbound 出口、local 本地、risk 纯净度维持独立折叠检测。
- * - Stash 默认风险源 IPPure、本地百度、出口地区 IPPure；可用 risk_api / local_geoapi / remote_geoapi 改选。
- *   可选源与 Surge 同名；remote_geoapi=ippure 是 Stash 默认，其他地区源按指定 IP 查询。
+ * - Stash 默认风险源 IPPure、本地百度、出口地区 ipapi-zh；可用 risk_api / local_geoapi / remote_geoapi 改选。
+ *   可选源与 Surge 同名；remote_geoapi=ippure 是 Stash 的可选源，其他地区源按指定 IP 查询。
  *   两端共用六档风险等级与颜色，首页补充 DNS 解析器、rDNS、显式指定的策略名。
  *   DNS 地区只作展示，不据此判断泄露；打码时同时隐藏可能包含 IP 的 rDNS。
  *   脚本 notify 默认 true；配套卡片显式关闭通知，仅 monitor 定时任务开启。
@@ -65,7 +65,7 @@
  *   只展示本轮有效 IP 对应的数据，不依赖 Surge 的入口或策略查询接口。
  * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
- * @version 6.4.8
+ * @version 6.4.9
  * @date 2026-10-01
  */
 
@@ -260,7 +260,7 @@ function parseArguments() {
     riskApi: clean(arg.risk_api).toLowerCase() || (isStash ? "ippure" : ""),
     maxmindKey: clean(arg.maxmind_key),
     localGeoApi: clean(arg.local_geoapi) || "baidu",
-    remoteGeoApi: clean(arg.remote_geoapi) || (isStash ? "ippure" : "ipapi-zh"),
+    remoteGeoApi: clean(arg.remote_geoapi) || "ipapi-zh",
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
     twFlag: clean(arg.tw_flag) || (isStash ? "tw" : "cn"),
     eventDelay: parseFloat(arg.event_delay) || 2,
@@ -1256,7 +1256,7 @@ async function getStashOutboundResult(includeIPv6, detectedExit) {
   const pureInfo = await pure;
   const sameIPPure = stashCacheIP(pureInfo?.ip) === outIP ? normalizeStashIPPure(pureInfo) : null;
   const pureHasLocation = !!(sameIPPure?.city || sameIPPure?.region || sameIPPure?.country_name || sameIPPure?.country_code);
-  // 默认复用 IPPure；显式选择地区源时尊重参数。首页补查同一 IP 的 rDNS。
+  // 默认查询同一出口 IP 的中文地区；仅显式选择 ippure 时复用其地区。首页补查 rDNS。
   const usePure = args.remoteGeoApi === "ippure" && pureHasLocation;
   let source = ["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(args.remoteGeoApi)
     ? args.remoteGeoApi : "ipapi-zh";
@@ -1420,7 +1420,7 @@ async function runStashTile() {
     IPLog.collect();
     return done({});
   }
-  IPLog.log("=== IP 安全检测开始 (v6.4.8 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+  IPLog.log("=== IP 安全检测开始 (v6.4.9 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
   if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
