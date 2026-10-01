@@ -57,62 +57,62 @@ http:
     match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/(banner|hot)_list
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书搜索页__2
     match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/(hint|trending)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书搜索页__3
     match: ^https?:\/\/(so|edith)\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/notes\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书开屏广告
     match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/system_service\/config\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书开屏广告__2
     match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/system_service\/splash_config
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书详情页
     match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/widgets
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书图片视频水印
     match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/(imagefeed|live_photo\/save)
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书图片视频水印__2
     match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书图片视频水印__3
     match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/(v2\/note\/feed|v3\/note\/videofeed)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书图片视频水印__4
     match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/(v4\/note\/videofeed|v10\/note\/video\/save)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书评论区去水印存储
     match: ^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v5\/note\/comment\/list|v3\/note\/comment\/sub_comments)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: RedNote-小红书评论区去水印下载
     match: ^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/interaction\/comment\/video\/download\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
 script-providers:
   RedNote-小红书搜索页:
     url: https://github.com/fmz200/wool_scripts/raw/main/Scripts/xiaohongshu/xiaohongshu.js

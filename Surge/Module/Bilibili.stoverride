@@ -73,7 +73,7 @@ http:
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 10.0
+    timeout: 10
     argument: '{"logLevel":"4"}'
     engine: webkit
   - name: Bilibili-bilibili.request
@@ -82,7 +82,7 @@ http:
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 10.0
+    timeout: 10
     argument: '{"purifyComment":1,"logLevel":"4"}'
     engine: webkit
   - name: Bilibili-bilibili.skin

@@ -100,87 +100,87 @@ http:
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/search\/(finder|container_timeline|container_discover)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博热搜页面广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/(page|flowpage)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博话题页面广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/searchall\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博超话页面广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topicpage\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博超话tab页净化
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_timeline_topic\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博详情页面广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/extend\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博详情页面广告__2
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_detail\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博最顶部的tab页分组
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/groups\/allgroups\/v2
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博评论区广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/comments\/mix_comments\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博评论区广告__2
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/(container_detail_comment|container_detail_mix)\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博转发区广告
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/container_detail_forward\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博转发区广告__2
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/statuses\/repost_timeline\?
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博去广告以及去除各部分推广模块
     match: ^https?:\/\/m?api\.weibo\.c(n|om)/2/(cardlist|searchall|page|messageflow|statuses/(unread_)?friends(/|_)timeline|groups/timeline|statuses/(container_timeline|container_timeline_hot|unread_hot_timeline|extend|video_mixtimeline)|profile/(me|container_timeline)|video/(community_tab|remind_info|tiny_stream_video_list)|checkin/show|(\!/)?live/media_homelist|comments/build_comments|container/get_item)
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-微博去广告以及去除各部分推广模块__2
     match: ^https?:\/\/(sdk|wb)app\.uve\.weibo\.com(/interface/sdk/sdkad.php|/wbapplua/wbpullad.lua)
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-自定义tab皮肤
     match: ^https?:\/\/m?api\.weibo\.c(n|om)\/2\/!\/client\/light_skin
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-非会员设置tab皮肤
     match: ^https?:\/\/new\.vip\.weibo\.c(n|om)\/littleskin\/preview
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
   - name: Weibo-解锁微博会员APP图标
     match: ^https?:\/\/new\.vip\.weibo\.c(n|om)\/aj\/appicon\/list
     type: response
     require-body: true
-    timeout: 60.0
+    timeout: 60
 script-providers:
   Weibo-微博移除发现页广告:
     url: https://raw.githubusercontent.com/fmz200/wool_scripts/main/Scripts/weibo/weibo_ads.js

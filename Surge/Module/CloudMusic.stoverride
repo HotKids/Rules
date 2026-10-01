@@ -44,14 +44,14 @@ http:
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
   - name: CloudMusic-网易云音乐__2
     match: ^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/home\/framework\/tab
     type: response
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
     argument: '{"MY":"1","DT":"0","FX":"0"}'
   - name: CloudMusic-网易云音乐__3
     match: ^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/(homepage\/block\/page|link\/page\/rcmd\/(resource\/show|block\/resource\/multi\/refresh))
@@ -59,7 +59,7 @@ http:
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
     argument: '{"PRGG":"1","PRDRD":"0","PRSCVPT":"0","PRST":"0","HMPR":"0","PRRR":"1","PRRK":"0","PRMST":"1","PRCN":"1"}'
   - name: CloudMusic-网易云音乐__4
     match: ^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/page\/discovery\/resource\/show
@@ -67,21 +67,21 @@ http:
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
   - name: CloudMusic-网易云音乐__5
     match: ^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/link\/position\/show\/resource
     type: response
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
   - name: CloudMusic-网易云音乐__6
     match: ^https?:\/\/(ipv4|interface\d?)\.music\.163\.com\/e?api\/user\/follow\/users\/mixed\/get
     type: response
     require-body: true
     binary-mode: true
     max-size: 0
-    timeout: 20.0
+    timeout: 20
 script-providers:
   CloudMusic-网易云音乐:
     url: https://raw.githubusercontent.com/Keywos/rule/main/script/wy/js/wyres.js
