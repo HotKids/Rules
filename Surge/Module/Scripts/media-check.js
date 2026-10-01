@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.7 (2026-10-01)
+ * @version      2.2.8 (2026-10-01)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -31,7 +31,7 @@
  * 🤖 AI 服务
  *    ├─ ChatGPT       单行显示地区 / Web Only / Mobile Only / NO
  *    ├─ Claude        地区可用性检测
- *    ├─ Gemini        网页检测 + API Key fallback
+ *    ├─ Gemini        网页检测 + 可选 API 检测；Stash iOS 失败后匿名文本兜底
  *    └─ Meta AI       AJAX 可用性与主页回落检测
  *
  * 🌐 社交 & 其他
@@ -69,7 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.7",
+  VERSION: "2.2.8",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -784,10 +784,22 @@ class ServiceChecker {
 
   /**
    * Gemini 解锁检测
-   * 网页检测（参考 lmc999/RegionRestrictionCheck）+ API Key fallback
+   * 先完成原方案；仅 Stash iOS 的未知结果启用匿名兜底，不覆盖明确地区限制。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
+    const primary = await this.checkGeminiPrimary();
+    if (!IS_STASH || !/^ios(?:\b|\d)/i.test(String(ENV.system || "").trim()) ||
+        ![STATUS.ERROR, STATUS.TIMEOUT].includes(primary.status)) return primary;
+    MediaLog.log(`[Gemini v${CONFIG.VERSION}] 原方案未取得有效结果（${primary.region}），启用 Stash iOS 匿名兜底；免登录、免密钥，仅发送随机校验词`);
+    const fallback = await this.checkGeminiAnonymous();
+    if (fallback.status === STATUS.OK) return fallback;
+    MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名兜底未确认可用，保留原结果：${primary.region}`);
+    return primary;
+  }
+
+  /** 网页检测（参考 lmc999/RegionRestrictionCheck）+ 用户已配置的可选 API 检测。 */
+  static async checkGeminiPrimary() {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
     const deadline = Date.now() + 10000;
     const logError = (stage, error) => {
@@ -877,6 +889,98 @@ class ServiceChecker {
       } catch (error) { unknown = logError("API", error); }
     }
     return unknown;
+  }
+
+  /**
+   * Stash iOS 3.6.0 (1316) 已实测：首页 SendRequest，但这两个匿名 RPC 可用。
+   * 怀疑是脚本客户端的响应头大小限制：独立 HTTP/2 实验中首页头约 26 KB，
+   * CSP 单项约 19.8 KB；16 KB 头列表限制失败，64 KB 成功。RPC 头约 2.7 KB。
+   * 这是可能原因，未确认 Stash 内部上限，不能据此断言其固定限制为 16 KB。
+   * 旁证：https://github.com/xtekky/gpt4free/blob/5dc5e7a2e10ce2915ae24d4c01d208eb2867f207/g4f/Provider/needs_auth/Gemini.py#L83
+   * 请求/回复协议：https://github.com/OEvortex/llm4free/blob/ee00a7a0621dd8efdb23681bad514a49365279a2/llm4free/llm/gemini.py#L164
+   * 地区 RPC：https://github.com/Leechael/gemini-web-cli/blob/93ed70f8c9d782be8eb333c7eeec3f0daae13b9c/internal/client/protocol/rpcs/get_user_location.go
+   * 只验证匿名基础文本回复，不代表登录账号、App 或全部模型可用。地区仅用于
+   * 显示，不是出口 IP；HTTP 200、地区、配额或请求回显均不能替代本次真实回复。
+   * 无需主页初始化、Cookie、at 或账号接口；不读写成功缓存。
+   */
+  static async checkGeminiAnonymous() {
+    const origin = "https://gemini.google.com";
+    const token = "CHECK_" + Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, "0").toUpperCase();
+    const log = text => MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名兜底：${text}`);
+    const framesOf = res => {
+      if (!res || res.status !== 200 || Utils.responseProblem(res) || res.body.length > 524288) return [];
+      const frames = [];
+      // Google XSSI 前缀和长度行不属于 JSON 帧；只解析数据，不执行服务器脚本。
+      for (const line of res.body.split(/\r?\n/)) {
+        if (!line.trim().startsWith("[[")) continue;
+        try {
+          const chunk = JSON.parse(line);
+          if (Array.isArray(chunk)) frames.push(...chunk.filter(frame => Array.isArray(frame) && frame[0] === "wrb.fr"));
+        } catch (_) {}
+      }
+      return frames;
+    };
+    const request = (stage, path, payload, headers = {}) => Utils.request({
+      url: origin + path, method: "POST", timeout: 8000, autoRedirect: false, includeDefaultHeaders: false,
+      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", ...headers },
+      body: "f.req=" + encodeURIComponent(JSON.stringify(payload))
+    }).catch(error => { log(`${stage}失败；${Utils.errorDetails(error)}`); return null; });
+
+    const input = Array(97).fill(null);
+    input[0] = ["Reply with exactly " + token + " and nothing else.", 0, null, [], null, null, 0];
+    input[1] = ["en"];
+    input[2] = ["", "", "", null, null, null, null, null, null, ""];
+    const fields = { 6:[1], 7:1, 10:1, 11:0, 17:[[0]], 18:0, 27:1, 30:[4], 41:[1], 53:0, 61:[], 68:2, 79:1, 80:1, 91:0, 96:1 };
+    for (const key of Object.keys(fields)) input[Number(key)] = fields[key];
+    input[59] = "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
+      const r = Math.floor(Math.random() * 16);
+      return (c === "x" ? r : (r & 3) | 8).toString(16);
+    }).toUpperCase();
+    // 两项共用当前分流/所选节点上下文，同时发出，最多额外等待 8 秒。
+    const [reply, geo] = await Promise.all([
+      request("匿名回复", "/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?hl=en&rt=c&_reqid=" + (Date.now() % 1000000),
+        [null, JSON.stringify(input)], { Referer: origin + "/", "X-Same-Domain": "1" }),
+      request("地区查询", "/_/BardChatUi/data/batchexecute?rpcids=K4WWud&hl=en&rt=c&source-path=%2Fapp",
+        [[["K4WWud", JSON.stringify([[0], ["en-US"]]), null, "generic"]]])
+    ]);
+    let candidates = 0, matched = false;
+    const frames = framesOf(reply), errors = [];
+    for (const frame of frames) {
+      if (Array.isArray(frame[5])) errors.push(...frame[5].filter(Number.isInteger));
+      if (frame[1] !== null || typeof frame[2] !== "string") continue;
+      try {
+        const data = JSON.parse(frame[2]);
+        if (!Array.isArray(data) || !Array.isArray(data[4])) continue;
+        for (const candidate of data[4]) {
+          if (!Array.isArray(candidate) || typeof candidate[0] !== "string" || !/^rc_[a-zA-Z0-9_-]+$/.test(candidate[0]) ||
+              !Array.isArray(candidate[1]) || typeof candidate[1][0] !== "string") continue;
+          candidates++;
+          if (candidate[1][0].trim() === token) matched = true;
+        }
+      } catch (_) {}
+    }
+    log(`wrb.fr=${frames.length}; 候选回复=${candidates}; 本次校验词匹配=${matched}; RPC错误码=${errors.join(",") || "无"}`);
+    if (!matched || errors.length) return Utils.createResult(STATUS.ERROR, "Error");
+
+    let region = "";
+    const locations = framesOf(geo).filter(frame => frame[1] === "K4WWud");
+    if (locations.length === 1 && typeof locations[0][2] === "string" && !locations[0][5]?.length) {
+      try {
+        const data = JSON.parse(locations[0][2]), row = Array.isArray(data) && data[0];
+        if (Array.isArray(row) && row[1] === "SWML_DESCRIPTION_FROM_YOUR_INTERNET_ADDRESS" &&
+            typeof row[0] === "string" && row[0].length <= 160) {
+          const name = row[0].split(",").pop().trim();
+          // Washington, USA / United States；只匹配确切国家名或 ISO 码，不从城市猜地区。
+          region = Utils.country(name) || ({ "united states": "US", "united states of america": "US", "united kingdom": "GB", "uk": "GB" })[name.toLowerCase()] || "";
+          if (!region && typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
+            const names = new Intl.DisplayNames(["en"], { type: "region" });
+            region = Object.keys(COUNTRY_CODES).find(code => names.of(code).toLowerCase() === name.toLowerCase()) || "";
+          }
+        }
+      } catch (_) {}
+    }
+    log(`匿名文本回复验证成功；地区=${region || "未知"}；地区仅用于显示`);
+    return { ...Utils.createResult(STATUS.OK, region || "OK"), reason: "anonymous-text" };
   }
 
 

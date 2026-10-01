@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../..');
 const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', name), 'utf8');
 const quiet = {log(){},error(){}};
 
-async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta}={}) {
+async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta, intercept}={}) {
   const requests = [], logs = [];
   let deadline;
   try {
@@ -15,6 +15,7 @@ async function tile(service, response, {client="stash", argument="", store=new M
       new Promise((resolve, reject) => {
         const request = (options, cb) => {
           requests.push(options);
+          if(intercept && intercept(options,cb))return;
           const r = typeof response === 'function' ? response(options) : response;
           if(r.throw)throw r.throw;
           const nativeResponse=Object.prototype.hasOwnProperty.call(r,'rawResponse')?r.rawResponse:
@@ -1128,7 +1129,7 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.7.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.8.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
@@ -1154,6 +1155,157 @@ test('Gemini API fallback distinguishes valid models, rate limits and invalid ke
     assert.equal(result.output.content,expected);
   }
 });
+const stashIOS = {'stash-version':'3.6.0','stash-build':'1316',system:'iOS'};
+const geminiFrames = frames => ")]}'\n\n" + JSON.stringify(frames).length + '\n' + JSON.stringify(frames) + '\n';
+const geminiLocation = (name='Washington, USA',source='SWML_DESCRIPTION_FROM_YOUR_INTERNET_ADDRESS') =>
+  geminiFrames([['wrb.fr','K4WWud',JSON.stringify([[name,source,false]])]]);
+function geminiGenerated(options, transform=text=>text, extra=[]) {
+  const payload=JSON.parse(new URLSearchParams(options.body).get('f.req'));
+  const token=JSON.parse(payload[1])[0][0].match(/CHECK_[A-F0-9]{8}/)[0];
+  return geminiFrames([['wrb.fr',null,JSON.stringify([null,null,null,null,[['rc_test_reply',[transform(token)]]]])],...extra]);
+}
+function geminiAnonymousResponse(options) {
+  if(options.url.includes('/StreamGenerate'))return {body:geminiGenerated(options)};
+  if(options.url.includes('/batchexecute'))return {body:geminiLocation()};
+  return {error:'client error (SendRequest)'};
+}
+test('Gemini anonymous fallback runs only after the original Stash iOS flow fails',async()=>{
+  const store=new Map();
+  const r=await tile('gemini',geminiAnonymousResponse,{environment:stashIOS,store});
+  assert.equal(r.output.content,'US');assert.equal(r.output.backgroundColor,'#386EDB');
+  assert.equal(r.requests.length,4);
+  assert.equal(r.requests[0].url,'https://gemini.google.com');
+  assert.equal(r.requests[1].url,'https://gemini.google.com/');
+  assert.ok(r.requests[2].url.includes('/StreamGenerate'));
+  assert.ok(r.requests[3].url.includes('rpcids=K4WWud'));
+  for(const o of r.requests.slice(2)) {
+    assert.equal(new URL(o.url).hostname,'gemini.google.com');
+    assert.equal(o.timeout,8);assert.equal(o['auto-redirect'],false);assert.equal(o['auto-cookie'],false);
+    assert.equal(o.policy,undefined);
+    assert.equal(o.headers['User-Agent'],undefined);assert.equal(o.headers['Accept-Language'],undefined);
+    assert.ok(!Object.keys(o.headers).some(key=>/cookie|authorization|key|proxy/i.test(key)));
+    assert.deepEqual([...new URLSearchParams(o.body).keys()],['f.req']);
+    assert.doesNotMatch(o.url,/otAQ7b|f\.sid|\bbl=/);
+  }
+  assert.equal(store.size,0);
+  assert.match(r.logs.join('\n'),/原方案未取得有效结果.*Stash iOS 匿名兜底/);
+  assert.match(r.logs.join('\n'),/候选回复=1; 本次校验词匹配=true; RPC错误码=无/);
+  assert.match(r.logs.join('\n'),/匿名文本回复验证成功；地区=US/);
+  assert.doesNotMatch(r.logs.join('\n'),/CHECK_[A-F0-9]{8}|f\.req=/);
+});
+test('Gemini successful and explicitly blocked original results never start anonymous generation',async()=>{
+  for(const [body,expected] of [
+    ['45631641,null,true ,2,1,200,"SGP"','SG'],
+    ['Gemini is not available in your country','NO']
+  ]) {
+    const r=await tile('gemini',{body},{environment:stashIOS});
+    assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
+  }
+  let attempt=0;
+  const app=await tile('gemini',()=>++attempt===1?{body:'unrecognized home'}:{body:'45617354,null,true'},
+    {environment:stashIOS});
+  assert.equal(app.output.content,'OK');assert.equal(app.requests.length,2);
+  const api=await tile('gemini',o=>o.url.includes('generativelanguage')?{body:{models:[]}}:{error:'SendRequest'},
+    {environment:stashIOS,argument:'geminiapikey=TEST-OPTIONAL-KEY'});
+  assert.equal(api.output.content,'OK');assert.equal(api.requests.length,3);
+  assert.ok(api.requests.every(o=>!o.url.includes('/StreamGenerate')));
+});
+test('Gemini Android, Surge iOS and unknown platforms keep the original failure behavior',async()=>{
+  for(const [client,environment] of [
+    ['stash',{'stash-version':'3.6.0',system:'Android'}],
+    ['stash',{'stash-version':'3.6.0',system:'macOS'}],
+    ['stash',{'stash-version':'3.6.0'}],
+    ['surge',{'surge-version':'5',system:'iOS'}]
+  ]) {
+    const r=await tile('gemini',{error:'client error (SendRequest)'},{client,environment});
+    assert.equal(r.requests.filter(o=>o.url.includes('gemini.google.com')).length,client==='stash'?2:1);
+    assert.doesNotMatch(r.logs.join('\n'),/匿名兜底/);
+  }
+});
+test('Gemini fallback also handles timeouts and unknown pages while retaining failure when no reply is verified',async()=>{
+  for(const primary of [{error:'Timeout'},{body:'unrecognized page'}]) {
+    const r=await tile('gemini',o=>o.url.includes('/_/')?geminiAnonymousResponse(o):primary,{environment:stashIOS});
+    assert.equal(r.output.content,'US');
+    const failed=await tile('gemini',o=>o.url.includes('/_/')?{error:'Timeout'}:primary,{environment:stashIOS});
+    assert.equal(failed.output.content,primary.error?'Timeout':'Error');
+    assert.match(failed.logs.join('\n'),/匿名兜底未确认可用，保留原结果/);
+  }
+});
+test('Gemini fallback preserves home proxy selection and collapsed node context',async()=>{
+  const proxy='US Test';
+  for(const mode of ['home','collapsed']) {
+    const r=await tile('gemini',geminiAnonymousResponse,
+      {environment:stashIOS,argument:`mode=${mode}&proxy=${encodeURIComponent(proxy)}`});
+    assert.equal(r.output.content,'US');
+    assert.ok(r.requests.every(o=>!o.policy&&o.headers?.['X-Stash-Selected-Proxy']===(mode==='home'?encodeURIComponent(proxy):undefined)));
+  }
+});
+test('Gemini sends both anonymous requests in parallel after the primary budget and ignores duplicate callbacks',async()=>{
+  let clock=100000;
+  const pending=[];
+  const promise=tile('gemini',()=>{clock+=10000;return {error:'Timeout'};},
+    {environment:stashIOS,now:()=>clock,intercept:(o,cb)=>{
+      if(!o.url.includes('/_/'))return false;
+      pending.push({o,cb});return true;
+    }});
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(pending.length,2);
+  assert.ok(pending.every(({o})=>o.timeout===8));
+  pending[1].cb(null,{status:200,headers:{}},geminiLocation());
+  pending[0].cb(null,{status:200,headers:{}},geminiGenerated(pending[0].o));
+  pending[0].cb('late duplicate error',null,null);
+  const r=await promise;
+  assert.equal(r.output.content,'US');assert.equal(r.requests.length,3);
+  assert.doesNotMatch(r.logs.join('\n'),/late duplicate error/);
+});
+test('Gemini requires a current structured reply, not request reflection, stale data, quota or an RPC error',async()=>{
+  for(const bodyOf of [
+    o=>geminiGenerated(o,()=> 'CHECK_OLD00000'),
+    o=>new URLSearchParams(o.body).get('f.req'),
+    o=>geminiGenerated(o,token=>'Your token is '+token),
+    o=>geminiGenerated(o,text=>text,[['wrb.fr',null,null,null,null,[13]]]),
+    ()=>geminiFrames([['wrb.fr','aPya6c','[false,0,[]]']]),
+    ()=>geminiLocation(),
+    ()=>geminiFrames([['wrb.fr',null,'not-json']]),
+    ()=>'<html>Sign in to Gemini</html>',
+    ()=> 'x'.repeat(524289),
+    ()=>''
+  ]) {
+    const r=await tile('gemini',o=>o.url.includes('/StreamGenerate')?{body:bodyOf(o)}:geminiAnonymousResponse(o),
+      {environment:stashIOS});
+    assert.equal(r.output.content,'Error');assert.equal(r.output.backgroundColor,'#8E8E93');
+  }
+  for(const response of [{status:403},{status:302},{status:429},{error:'SendRequest'}]) {
+    const r=await tile('gemini',o=>o.url.includes('/StreamGenerate')?{body:geminiGenerated(o),...response}:geminiAnonymousResponse(o),
+      {environment:stashIOS});
+    assert.equal(r.output.content,'Error');
+  }
+});
+test('Gemini location failure never invalidates a verified anonymous reply or fabricates a country',async()=>{
+  for(const response of [
+    {error:'Timeout'}, {status:403,body:geminiLocation()},
+    {body:geminiLocation('Washington, USA','DEVICE_PRECISE_LOCATION')},
+    {body:geminiLocation('Unknown place')},
+    {body:geminiLocation()+geminiLocation()},
+    {body:geminiFrames([['wrb.fr','K4WWud',JSON.stringify([['Washington, USA','SWML_DESCRIPTION_FROM_YOUR_INTERNET_ADDRESS']]),null,null,[13]]])}
+  ]) {
+    const r=await tile('gemini',o=>o.url.includes('/batchexecute')?response:geminiAnonymousResponse(o),{environment:stashIOS});
+    assert.equal(r.output.content,'OK');assert.equal(r.output.backgroundColor,'#386EDB');
+  }
+  for(const [name,code] of [['Washington, USA','US'],['United States','US'],['United Kingdom','GB'],['Singapore','SG'],['Tokyo, Japan','JP'],['KOR','KR']]) {
+    const r=await tile('gemini',o=>o.url.includes('/batchexecute')?{body:geminiLocation(name)}:geminiAnonymousResponse(o),{environment:stashIOS});
+    assert.equal(r.output.content,code);
+  }
+});
+test('Gemini anonymous fallback diagnostics join the existing shared log',async()=>{
+  const store=new Map();
+  const r=await tile('gemini',geminiAnonymousResponse,{environment:stashIOS,store,argument:'log=shared'});
+  assert.equal(r.output.content,'US');assert.equal(r.logs.length,0);
+  assert.ok([...store.keys()].every(key=>key.startsWith('stash_media_check_log_v1:')));
+  const collected=await tile('logs',{throw:Error('no network expected')},{store,environment:stashIOS});
+  assert.match(collected.logs.join('\n'),/\[gemini\].*匿名文本回复验证成功/);
+});
+
 test('Media request diagnostics preserve native errors and identify the failing phase',async()=>{
   const malformedHeaders={status:200};
   Object.defineProperty(malformedHeaders,'headers',{get(){throw new TypeError('headers conversion failed');}});
@@ -1170,7 +1322,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.7.*首页失败/);
+    assert.match(log,/Gemini v2\.2\.8.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
 });
