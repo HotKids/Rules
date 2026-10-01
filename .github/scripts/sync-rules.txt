@@ -3,12 +3,14 @@
 # ════════════════════════════════════════════════════════════════
 # 用途：拉取第三方规则集，规范化后落库为各平台原生格式
 # 消费：.github/scripts/sync-rules.py
-# 输出：Surge/RULE-SET · Clash/RuleSet · sing-box/source（按段派生）
+# 输出：Surge/RULE-SET · Clash/RuleSet · sing-box/source；Module → Surge/Module
 #
 # 格式：
 #   # >> 段              段落（Surge / Clash / Module）
 #   URL,名称            RULE-SET 来源与落库名（Apple/Apple News = 子目录/名）
 #   DOMAIN-SET,URL,名称  DOMAIN-SET 格式来源（裸域名 / . 前缀域名）
+#   Module 文件名无后缀 → 同时生成 .sgmodule / .stoverride；指定后缀 → 只生成该格式
+#   同名输出按清单顺序合并；name/desc/author/category 等元信息取首条（含行内覆盖）
 #   URL,名称 #!key=value 行内覆盖：Module 段 name/desc/author/category；
 #                       Surge/Clash 段 #!remove=a.com,b.com 剔除来源里的指定域名
 #                       （多个逗号分隔，匹配忽略 . / +. 前缀与 DOMAIN-* 类型）

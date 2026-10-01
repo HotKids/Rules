@@ -29,7 +29,7 @@ def main():
     for folder in ('Clash/Script', 'Surge/Module/Scripts'):
         for p in sorted((ROOT / folder).glob('*.js')):
             run('node', '--check', str(p)); counts['javascript'] += 1
-    for folder in ('.github', 'Clash', 'Surge/Module/Pannel', 'sing-box'):
+    for folder in ('.github', 'Clash', 'Surge/Module', 'sing-box'):
         for p in sorted((ROOT / folder).rglob('*')):
             if p.name == 'snell-panel-ci.yml': continue
             if p.suffix in ('.yaml', '.yml', '.stoverride'):
@@ -40,6 +40,9 @@ def main():
                     for tile in data.get('tiles', []):
                         if tile.get('name') not in providers:
                             raise ValueError(f'{p}: missing script provider for {tile.get("name")}')
+                    for job in data.get('http', {}).get('script', []):
+                        if job.get('name') not in providers:
+                            raise ValueError(f'{p}: missing HTTP script provider for {job.get("name")}')
                     for job in data.get('cron', {}).get('script', []):
                         if job.get('name') not in providers:
                             raise ValueError(f'{p}: missing script provider for {job.get("name")}')

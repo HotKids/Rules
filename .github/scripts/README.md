@@ -89,7 +89,7 @@ Stash 通用字段的取舍以[官方配置样例](https://stash.wiki/configurat
 
 Stash 基座转换保留可沿用的源内容、注释与排版：境外 QUIC 改为 `PROTOCOL,QUIC` / `no-track`，Provider 健康检查交给策略组的 `interval: 600` / `lazy: true`。主要设置块使用 `#!replace`。
 
-两份 Stash 配置覆写的 MITM 证书由同一 `Sync Config` 工作流同步：`Surge/Profile.conf` 的 `[MITM] ca-p12` → `http.ca`，`ca-passphrase` → `http.ca-passphrase`。`MyStash.stoverride` 从基座继承同一证书，不另维护副本。`http` 按子键合并，保留基础配置及其他覆写中的 MITM 域名、重写和脚本；当前只同步证书，不转译 Surge 的模块域名或 `h2`、`skip-server-cert-verify`。字段依据 [Stash MITM 文档](https://stash.wiki/http-engine/mitm)，设备仍须安装并信任对应 CA。修改或删除源证书字段后重新生成，两份产物都会跟随更新；同步日志不输出证书和密码。
+两份 Stash 配置覆写的 MITM 证书由同一 `Sync Config` 工作流同步：`Surge/Profile.conf` 的 `[MITM] ca-p12` → `http.ca`，`ca-passphrase` → `http.ca-passphrase`。`MyStash.stoverride` 从基座继承同一证书，不另维护副本。`http` 按子键合并，保留基础配置及其他覆写中的 MITM 域名、重写和脚本；按官方示例放在通用设置之后、Hosts/DNS/代理与规则之前，内部采用 force-http-engine、ca、ca-passphrase、mitm 的顺序；同时将模板 `[General]` 实际声明的 `force-http-engine-hosts` 同步为 `http.force-http-engine`，域名和端口表达式保持原值并去重，参照 [Stash 强制 HTTP 引擎文档](https://stash.wiki/http-engine/force-http-engine)。只转换模板已有的受支持字段；没写的设置不补入，不转译模块域名或 `h2`、`skip-server-cert-verify`。字段依据 [Stash MITM 文档](https://stash.wiki/http-engine/mitm)，设备仍须安装并信任对应 CA。修改或删除源字段后重新生成，两份产物都会跟随更新；同步日志不输出证书和密码。
 
 自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明。生成器将 Fastly 的 LAN 分支地址固定为对应规则产物最后一次提交的版本，避免 CDN 分支缓存继续返回旧地址段；工作区产物未提交或无法取得 Git 历史时停止生成，不发布旧版本。Sync Rules 成功发布编译产物后会触发 Sync Config，未来上游修改会同步到新的不可变地址。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。生成配置需要完整 Git 历史（`fetch-depth: 0`）。
 
@@ -138,6 +138,22 @@ URL,名称 #!remove=a.example,b.example
 | `Clash/RuleSet/*.mrs` | 官方 mihomo CLI 编译 domain/ipcidr，版本固定 v1.19.30；classical 不编译为 MRS |
 
 二进制编译任一失败都会停止发布。对应源码删除后，工作流清理孤立二进制文件。升级编译版本时需同时核对 [sync-rules.yml](../workflows/sync-rules.yml) 与 [lint.yml](../workflows/lint.yml)。
+
+## Surge / Stash 模块同步
+
+`sync-rules.txt` 的 `# >> Module` 段由 `Sync Rules` 每日及变更时同步；转换在 Action 内完成，不依赖在线转换服务。格式映射参考 [Script-Hub](https://github.com/Script-Hub-Org/Script-Hub)，按 [Stash 官方 HTTP 重写](https://stash.wiki/http-engine/rewrite) 和 [脚本配置](https://stash.wiki/script/rewrite-requests)生成原生字段。
+
+| 清单文件名 | 生成到 `Surge/Module/` |
+|---|---|
+| `BlockAdsBase` | `BlockAdsBase.sgmodule` 和 `BlockAdsBase.stoverride` |
+| `BlockAdsBase.sgmodule` | 仅 Surge 版 |
+| `BlockAdsBase.stoverride` | 仅 Stash 版 |
+
+多个来源指向同一个输出文件时按清单顺序合并，不再互相覆盖。`name`、`desc`、`author`、`category` 等元信息取第一个条目，先应用它的行内 `#!key=value` 覆盖；后面的元信息不覆盖、不补齐。规则保持先后顺序并去重，MITM/强制 HTTP 域名合并，重名脚本自动加后缀。参数默认值属于执行配置：保留后续独有参数，同名参数取首个；Stash 使用这些默认值，Surge 继续保留参数占位符。
+
+转换包括域名/IP/端口/逻辑规则、URL/Header/Body 重写（含 jq）、文本/Base64/tiny-gif Map Local、HTTP/cron 脚本、MITM 域名及强制 HTTP 引擎。`requires-body` 和 `binary-body-mode` 转为 Stash 字段，`engine=webview` 对应 Stash 3.6+ 的 `webkit`。Map Local 用原生 `http.mock`，不引入额外脚本。脚本 URL 保持上游来源，转换不保证脚本内部所有 Surge 专用 API 都能在 Stash 运行。
+
+无法映射的配置会写入生成文件的 `# Not converted:` 注释并在 Action 中提示，不会伪造支持；Surge 的 `pre-matching`/`extended-matching` 不带入 Stash。未知参数、无效格式或来源下载失败会中止模块批次，保留上次产物。`http` 排在规则前，内部 MITM 排在重写与脚本前，依据 [Stash 官方示例](https://stash.wiki/configuration/example-config)。未列出的手工模块不参与清理。
 
 ## 模块聚合
 

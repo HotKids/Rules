@@ -584,10 +584,10 @@ rules:
         self.config = {'Clash': {'output': 'Clash/Sample.yaml'},
                        'Stash': {'output': 'Clash/Stash.stoverride'}}
 
-    def generate(self, mitm_lines=None):
+    def generate(self, mitm_lines=None, general_lines=()):
         with patch.object(stash, 'REPO_ROOT', self.root), \
                 contextlib.redirect_stdout(io.StringIO()):
-            stash._sync_stash(self.config, mitm_lines or [])
+            stash._sync_stash(self.config, mitm_lines or [], general_lines)
         self.assertEqual(self.source.read_bytes(), self.input_bytes)
         path = self.root / self.config['Stash']['output']
         return path.read_text(encoding='utf-8'), yaml.safe_load(path.read_text(encoding='utf-8'))
@@ -814,6 +814,31 @@ proxy-groups:''')
             'skip-server-cert-verify = true', 'h2 = true',
         ])
         self.assertNotIn('http', output)
+
+    def test_http_engine_follows_only_active_template_values_in_both_overrides(self):
+        directory = self.root / '.github/scripts/sync-config/Enhanced'
+        directory.mkdir(parents=True)
+        (directory / 'MyStash.overlay.json').write_text(json.dumps({
+            'stash_output': 'Clash/MyStash.stoverride',
+        }), encoding='utf-8')
+        for general, expected in (
+            (['force-http-engine-hosts = *.example.invalid, api.example.invalid:8080, *.example.invalid'],
+             ['*.example.invalid', 'api.example.invalid:8080']),
+            (['force-http-engine-hosts = replacement.invalid'], ['replacement.invalid']),
+            (['# force-http-engine-hosts = disabled.invalid',
+              '// force-http-engine-hosts = disabled.invalid'], None),
+            ([], None),
+        ):
+            _, public = self.generate(['ca-p12 = fixture', 'ca-passphrase = test'], general)
+            private = yaml.safe_load((self.root / 'Clash/MyStash.stoverride').read_text())
+            for output in (public, private):
+                self.assertEqual(output['http'].get('force-http-engine'), expected)
+                self.assertEqual(output['http']['ca'], 'fixture')
+                self.assertLess(list(output).index('http'), list(output).index('dns'))
+                self.assertLess(list(output).index('http'), list(output).index('rules'))
+                self.assertLess(list(output['http']).index('ca'), list(output['http']).index('ca-passphrase'))
+                self.assertNotIn('mitm', output['http'])
+                self.assertNotIn('script', output['http'])
 
 
 if __name__ == '__main__': unittest.main()

@@ -19,6 +19,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from _common import write_if_changed, prefetch_urls
+from module_convert import module_targets, merge_modules, render_surge, render_stash
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -1158,77 +1159,32 @@ def fetch_external_rules():
 # ═══════════════════════════════════════════════════════════════════════
 #  Main
 def fetch_external_modules():
-    """拉取 sync-rules.txt # >> Module 节，写入 Surge/Module/<name>.sgmodule。"""
-    print("\n── Step 1b: 拉取外部 sgmodule ──")
-    rules = parse_sync_rules()
-    entries = rules.get("module", [])
+    """Merge Module entries by output filename and generate selected native formats."""
+    print("\n── Step 1b: 同步 Surge / Stash 模块 ──")
+    entries = parse_sync_rules().get("module", [])
     if not entries:
         print("  sync-rules.txt 无 Module 条目")
         return
-
-    module_dir = REPO_ROOT / "Surge" / "Module"
-    module_dir.mkdir(parents=True, exist_ok=True)
-
-    module_urls = [e["url"] for e in entries]
-    prefetched = prefetch_urls(module_urls, _UA, encode=True)
-
-    for e in entries:
-        orig_url, name = e["url"], e["name"]
-        overrides: dict = e["overrides"]
-        text = prefetched.get(orig_url)
-        if not text or not re.search(r"^\[[^]\n]+\]\s*$", text, re.MULTILINE):
-            raise ValueError(f"模块来源为空或缺少配置段: {orig_url}")
-        out = module_dir / f"{name}.sgmodule"
-        lines = text.splitlines()
-        # 应用 overrides：替换匹配的 #!key= 行
-        if overrides:
-            key_positions: dict[str, int] = {}  # override key → 在 new_lines 中的行号
-            new_lines = []
-            for line in lines:
-                if line.startswith("#!") and "=" in line:
-                    key = line[2:].split("=", 1)[0]
-                    if key in overrides:
-                        key_positions[key] = len(new_lines)
-                        new_lines.append(f"#!{key}={overrides[key]}")
-                        continue
-                new_lines.append(line)
-            # 缺失的 override 键：按 override 列表顺序，插到前一个已放置 key 的正下方
-            override_keys = list(overrides.keys())
-            for i, key in enumerate(override_keys):
-                if key in key_positions:
-                    continue
-                val = overrides[key]
-                # 找前面最近的已放置 override key
-                predecessor_pos = None
-                for prev_key in reversed(override_keys[:i]):
-                    if prev_key in key_positions:
-                        predecessor_pos = key_positions[prev_key]
-                        break
-                if predecessor_pos is not None:
-                    insert_at = predecessor_pos + 1
-                else:
-                    # 无前驱，插到第一个 [Section] 之前
-                    insert_at = next(
-                        (j for j, l in enumerate(new_lines) if re.match(r"^\[.+\]$", l.strip())),
-                        len(new_lines),
-                    )
-                new_lines.insert(insert_at, f"#!{key}={val}")
-                # 插入后，更新所有受影响的行号
-                for k in key_positions:
-                    if key_positions[k] >= insert_at:
-                        key_positions[k] += 1
-                key_positions[key] = insert_at
-            lines = new_lines
-        last_meta = max((i for i, l in enumerate(lines) if l.startswith("#!")), default=-1)
-        if last_meta >= 0:
-            lines[last_meta + 1:last_meta + 1] = ["", f"### fork from {orig_url}"]
+    groups = {}
+    for entry in entries:
+        for target in module_targets(entry["name"]):
+            groups.setdefault(target, []).append(entry)
+    prefetched = prefetch_urls([e["url"] for e in entries], _UA, encode=True)
+    outputs = {}
+    # Validate every source and conversion before writing any module in the batch.
+    for target, sources in groups.items():
+        module = merge_modules([(e["url"], prefetched.get(e["url"]) or "", e["overrides"])
+                                for e in sources])
+        if target.endswith(".stoverride"):
+            content, warnings = render_stash(module, target)
+            for warning in warnings:
+                print(f"  [WARN] {target}: {warning}")
         else:
-            lines.insert(0, f"### fork from {orig_url}")
-        content = "\n".join(lines) + "\n"
-        if write_if_changed(out, content):
-            print(f"  ✓ {name}.sgmodule 已更新")
-        else:
-            print(f"  · {name}.sgmodule 无变化")
+            content = render_surge(module)
+        outputs[REPO_ROOT / "Surge" / "Module" / target] = content
+    for path, content in outputs.items():
+        changed = write_if_changed(path, content)
+        print(f"  {'✓' if changed else '·'} {path.relative_to(REPO_ROOT)} {'已更新' if changed else '无变化'}")
 
 
 # ═══════════════════════════════════════════════════════════════════════
