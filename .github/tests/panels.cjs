@@ -205,6 +205,10 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
   } finally {clearTimeout(deadline);handles.forEach(clearTimeout);activeTimers.clear();}
 }
 
+const failAlternativeRisk = (o,cb) => {
+  if(/proxycheck|scamalytics|ipqualityscore/.test(o.url)) {cb('timeout',null,null);return true;}
+};
+
 test('IP shared logs combine card and notification runs without changing their results',async()=>{
   const store=new Map();
   for(const tile of ['summary','outbound','local','risk']) {
@@ -270,8 +274,8 @@ test('Stash home summary keeps full geography and organization in the approved d
 test('Stash summary and purity keep dynamic colors at all six Surge risk boundaries',async()=>{
   for(const [score,label,color] of [[0,'极度纯净','#0D6E3D'],[15,'极度纯净','#0D6E3D'],[16,'纯净','#2E9F5E'],[25,'纯净','#2E9F5E'],[26,'一般','#8BC34A'],[40,'一般','#8BC34A'],[41,'微风险','#FFC107'],[50,'微风险','#FFC107'],[51,'一般风险','#FF9800'],[70,'一般风险','#FF9800'],[71,'极度风险','#F44336'],[100,'极度风险','#F44336'],[null,'暂无有效评分','#9E9E9E'],[101,'暂无有效评分','#9E9E9E']]) {
     const ippureData={ip:'198.51.100.10',fraudScore:score,isResidential:false,isBroadcast:true};
-    const summary=await ipPanel({argument:'tile=summary&mode=home',ippureData});
-    const collapsed=await ipPanel({argument:'tile=risk&mode=collapsed',ippureData});
+    const summary=await ipPanel({argument:'tile=summary&mode=home',ippureData,intercept:failAlternativeRisk});
+    const collapsed=await ipPanel({argument:'tile=risk&mode=collapsed',ippureData,intercept:failAlternativeRisk});
     assert.equal(summary.output.backgroundColor,collapsed.output.backgroundColor);
     assert.equal(summary.output.backgroundColor,color);assert.ok(collapsed.output.title.includes(label));
     assert.equal(summary.output.content.split('\n')[0],
@@ -341,7 +345,7 @@ test('Stash keeps IPPure geography when optional DNS and rDNS lookups fail',asyn
       if(o.url.includes('ipinfo')){cb(null,{status:200},'{"country":"SG"}');return true;}
     }
   });
-  assert.equal(orgFallback.output.content,'地区查询失败 · 运营商未知');
+  assert.equal(orgFallback.output.content,'🇸🇬 SG · 运营商未知');
   assert.equal(orgFallback.requests.filter(o=>o.url.includes('ipinfo')).length,1);
 });
 
@@ -572,14 +576,14 @@ test('Stash native IPPure can succeed after six seconds and ignores duplicate ca
   assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|api-ipv[46]/.test(o.url)));
 });
 
-test('Stash unavailable or malformed official risk never starts auxiliary probes',async()=>{
+test('Stash unavailable risk needs a valid fallback address before querying other risk sources',async()=>{
   for(const ippureData of [null,{ip:'999.1.1.1',fraudScore:null}]) {
     const r=await ipPanel({virtualTimers:true,argument:'tile=risk&mode=collapsed',
       riskFailure:ippureData===null,ippureData,intercept(o,cb){return o.url.includes('api.ipify.org');}});
-    assert.equal(r.elapsed,0);assert.equal(r.output.backgroundColor,'#9E9E9E');
+    assert.equal(r.elapsed,5000);assert.equal(r.output.backgroundColor,'#9E9E9E');
     assert.doesNotMatch(JSON.stringify(r.output),/12%|999\.1\.1\.1/);
-    assert.equal(r.requests.length,1);
-    assert.ok(!r.requests.some(o=>/ipify|cdn-cgi\/trace|proxycheck/.test(o.url)));
+    assert.equal(r.requests.filter(o=>o.url.includes('api.ipify.org')).length,1);
+    assert.ok(!r.requests.some(o=>/cdn-cgi\/trace|proxycheck|scamalytics/.test(o.url)));
   }
 });
 
@@ -725,12 +729,12 @@ test('Stash purity preserves classifications without a score and never invents m
   ]) {
     for(const fraudScore of [null,12]) {
       const {output,requests,notifications}=await ipPanel({argument:'tile=risk&mode=collapsed',
-        outIP:'192.0.2.22',ippureData:{ip:'192.0.2.22',isResidential,isBroadcast,fraudScore}});
+        outIP:'192.0.2.22',ippureData:{ip:'192.0.2.22',isResidential,isBroadcast,fraudScore},intercept:failAlternativeRisk});
       assert.equal(output.title,'IP 纯净度\n'+(fraudScore===null?'暂无有效评分':'12% 极度纯净'));
       assert.doesNotMatch(output.title+'\n'+output.content,/192\.0\.2\.22/);
       assert.equal(output.content,label);assert.equal(output.backgroundColor,fraudScore===null?'#9E9E9E':'#0D6E3D');
       assert.equal(output.url,'https://ippure.com/?ip=192.0.2.22');
-      assert.equal(requests.length,1);assert.equal(requests[0].url,'https://my.ippure.com/v1/info');
+      assert.equal(requests.length,fraudScore===null?3:1);assert.equal(requests[0].url,'https://my.ippure.com/v1/info');
       assert.equal(notifications.length,0);
     }
   }
@@ -902,12 +906,12 @@ test('Stash iOS uses single-line marker titles, short carrier names and the exis
     assert.equal(JSON.stringify(ios.output),JSON.stringify(android.output));
   }
 });
-test('Stash IPPure failures stay unknown without switching risk services',async()=>{
+test('Stash risk stays unknown only after all eligible sources fail',async()=>{
   const failedRisk=await ipPanel({argument:'tile=risk',riskFailure:true});
   assert.equal(failedRisk.output.backgroundColor,'#9E9E9E');assert.match(failedRisk.output.content,/风险评分检测失败/);
-  assert.equal(failedRisk.requests.length,1);assert.equal(failedRisk.store.size,0);
+  assert.equal(failedRisk.requests.length,4);assert.equal(failedRisk.store.size,0);
   for(const data of [{},{fraudScore:null},{fraudScore:''},{fraudScore:false},{fraudScore:101},{fraudScore:-1}]) {
-    const bad=await ipPanel({argument:'tile=risk',ippureData:data});
+    const bad=await ipPanel({argument:'tile=risk',ippureData:data,intercept:failAlternativeRisk});
     assert.equal(bad.output.backgroundColor,'#9E9E9E');assert.match(bad.output.content,/暂无有效评分/);
   }
   for(const [score,color] of [[0,'#0D6E3D'],[40,'#8BC34A'],[70,'#FF9800']]) {
@@ -1582,19 +1586,19 @@ test('Stash local fallback preserves roaming country and can use the same-IP geo
     assert.doesNotMatch(r.output.content,/🇨🇳|中国/);assert.equal(r.requests.length,3);
   }
 });
-test('Stash exit geography failure uses the current exit evidence and only takes the organization from ipinfo',async()=>{
+test('Stash exit geography switches to ipinfo before using probe metadata',async()=>{
   for(const mode of ['home','collapsed']) {
     const r=await ipPanel({argument:`tile=outbound&mode=${mode}&mask_ip=2`,
       ippureData:{ip:'198.51.100.10',countryCode:'US',country:'US',city:'Probe City',asOrganization:'Probe ISP'},
       intercept(o,cb){
         if(o.url.includes('ip-api.com')){cb(null,{status:403},'denied');return true;}
         if(o.url.includes('ipinfo')){
-          cb(null,{status:200},JSON.stringify({country:'SG',city:'Wrong City',org:'AS64500 Selected ISP'}));return true;
+          cb(null,{status:200},JSON.stringify({country:'CA',city:'Fallback City',org:'AS64500 Selected ISP'}));return true;
         }
       }});
     assert.equal(r.output.backgroundColor,'#1565C0');
-    assert.match(r.output.content,/🇺🇸[\s\S]*Probe City[\s\S]*Selected ISP/);
-    assert.doesNotMatch(JSON.stringify(r.output),/198\.51\.100\.10|Wrong City|Probe ISP|🇸🇬/);
+    assert.match(r.output.content,/🇨🇦[\s\S]*Fallback City[\s\S]*Selected ISP/);
+    assert.doesNotMatch(JSON.stringify(r.output),/198\.51\.100\.10|Probe City|Probe ISP|🇺🇸/);
     assert.ok(r.requests.every(o=>!o.headers?.['X-Stash-Selected-Proxy']));
   }
 });
@@ -1604,7 +1608,7 @@ test('Stash outbound retains only known country when both detailed geo sources f
     if(/ip-api.com|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
   }});
   assert.equal(r.output.title,'出口 IP\n198.51.100.10');assert.equal(r.output.backgroundColor,'#1565C0');
-  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,3);
+  assert.equal(r.output.content,'🇸🇬 SG · 运营商未知');assert.equal(r.requests.length,4);
   assert.ok(r.requests.some(o=>o.url.includes('lang=zh-CN')));
 });
 test('Stash keeps current IP and unknown geography when every metadata source is empty',async()=>{
@@ -1658,7 +1662,7 @@ test('Stash ignores legacy geography caches and uses current fallback data',asyn
         if(o.url.includes('ip.sb')){cb(null,{status:200},JSON.stringify({country_code:'US',country:'US',city:'Fresh City',organization:'Fresh ISP'}));return true;}
       }});
     assert.doesNotMatch(r.output.content,/OldLocation|OldISP/);
-    assert.match(r.output.content,service==='local'?/深圳.*中国电信/:/Probe City.*Example/);
+    assert.match(r.output.content,service==='local'?/深圳.*中国电信/:/🇸🇬 SG.*Example/);
   }
   assert.deepEqual([...store],before);
 });
@@ -1693,12 +1697,13 @@ test('Stash purity reuses missing fields only for IPPure current IP and accepts 
     ippureData:{ip:'198.51.100.10',fraudScore:0,isResidential:false,isBroadcast:false}});
   assert.equal(fresh.output.content,'机房 · 原生');assert.equal(fresh.output.title,'IP 纯净度\n0% 极度纯净');
   for(const ip of ['198.51.100.11',undefined,'','Unknown','999.1.1.1']) {
-    const next=await ipPanel({store,now:now+1800000,argument,outIP:'198.51.100.10',ippureData:{ip}});
+    const next=await ipPanel({store,now:now+1800000,argument,outIP:'198.51.100.10',ippureData:{ip},intercept:failAlternativeRisk});
     assert.equal(next.output.backgroundColor,'#9E9E9E');assert.match(next.output.content,/类型未知/);
-    assert.equal(next.requests.length,1);
+    assert.equal(next.requests.filter(o=>o.url.includes('ippure')).length,1);
+    assert.ok(next.requests.some(o=>o.url.includes('proxycheck')));
   }
   const failed=await ipPanel({store,now:now+1800000,argument,riskFailure:true});
-  assert.equal(failed.output.content,'风险评分检测失败');assert.equal(failed.requests.length,1);
+  assert.equal(failed.output.content,'风险评分检测失败');assert.equal(failed.requests.length,4);
 });
 test('Stash failed refreshes do not renew old fields and all-expired geography stays unknown',async()=>{
   const store=new Map(), now=100000000, argument='tile=risk&mode=collapsed';
@@ -1820,16 +1825,15 @@ test('TikTok HK about page is unavailable; infrastructure ALISG is never a user 
 });
 
 test('Stash optional risk providers use the measured address, reject invalid scores and do not reuse Surge score cache',async()=>{
-  for(const [source,score] of [['ipqs',22],['scamalytics',68],['proxycheck',null]]) {
+  for(const source of ['scamalytics','proxycheck']) {
     const store=new Map([['riskScoreCache',JSON.stringify({ip:'198.51.100.10',score:99,api:source,hasKey:true,ts:100000})]]);
     const original=store.get('riskScoreCache');
     const r=await ipPanel({store,now:100000000,argument:`tile=risk&risk_api=${source}&ipqs_key=fixture-secret`,intercept(o,cb){
-      if(o.url.includes('ipqualityscore')){cb(null,{status:200},JSON.stringify({success:true,fraud_score:score}));return true;}
       if(o.url.includes('scamalytics')){cb(null,{status:200},'<div class="score">Fraud Score: 68</div>');return true;}
       if(source==='proxycheck'&&o.url.includes('proxycheck')){cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:null}}));return true;}
     }});
     assert.equal(store.get('riskScoreCache'),original);
-    assert.match(r.output.content,source==='ipqs'?/22% 纯净 \(IPQS\)/:source==='scamalytics'?/68% 一般风险 \(Scamalytics\)/:/12% 极度纯净 \(IPPure\)/);
+    assert.match(r.output.content,source==='scamalytics'?/68% 一般风险 \(Scamalytics\)/:/12% 极度纯净 \(IPPure\)/);
     assert.doesNotMatch(r.logs.join('\n'),/fixture-secret/);
     assert.ok(r.requests.filter(o=>/ipqualityscore|proxycheck|scamalytics/.test(o.url)).every(o=>o.url.includes('198.51.100.10')));
   }
@@ -1844,6 +1848,137 @@ test('Surge and Stash explicit local geography selection skips Baidu and respect
     assert.match(r.output.content,source==='ipsb'?/Selected City[\s\S]*Selected ISP/:/深圳[\s\S]*中国电信/);
     if(client==='stash')assert.equal(r.requests.find(o=>o.url.includes('ip.sb')).timeout,5);
   }
+});
+
+test('Both local selectors try the preferred source then every remaining source once',async()=>{
+  const orders={baidu:['baidu','bilibili','ipsb'],bilibili:['bilibili','baidu','ipsb'],ipsb:['ipsb','baidu','bilibili']};
+  for(const client of ['surge','stash']) for(const [preferred,order] of Object.entries(orders)) {
+    for(let success=0;success<order.length;success++) {
+      const working=new Set(order.slice(success));
+      const r=await ipPanel({client,argument:`tile=local&mode=home&local_geoapi=${preferred}`,intercept(o,cb){
+        if(o.url.includes('bilibili')) {
+          cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2',...(working.has('bilibili')?
+            {country:'中国',city:'Bili City',isp:'Bili ISP'}:{})}}));return true;
+        }
+        if(o.url.includes('opendata.baidu')) {
+          cb(null,{status:200},JSON.stringify({data:[{location:working.has('baidu')?'BaiduCity BaiduISP':'   '}]}));return true;
+        }
+        if(o.url.includes('api.ip.sb/geoip/203.0.113.2')) {
+          cb(null,{status:200},JSON.stringify(working.has('ipsb')?
+            {country_code:'CN',country:'China',city:'Sb City',organization:'Sb ISP'}:{}));return true;
+        }
+      }});
+      assert.deepEqual(r.logs.filter(line=>line.startsWith('本地地区：尝试 ')).map(line=>line.split(' ').at(-1)),order.slice(0,success+1));
+      const expected={baidu:/BaiduCity[\s\S]*BaiduISP/,bilibili:/Bili City[\s\S]*Bili ISP/,ipsb:/Sb City[\s\S]*Sb ISP/};
+      assert.match(r.output.content,expected[order[success]]);
+      assert.equal(r.requests.filter(o=>o.url.includes('bilibili')).length,1);
+      assert.equal(r.requests.filter(o=>o.url.includes('api.ip.sb/geoip/203.0.113.2')).length,1);
+      if(client==='stash')assert.ok(r.requests.every(o=>o.headers['X-Stash-Selected-Proxy']==='DIRECT'));
+    }
+  }
+});
+
+test('Exit selectors try the preferred source then the supported remaining stages without repeated requests',async()=>{
+  const orders={
+    'ipapi-zh':['ipapi-zh','ipapi','ipinfo','maxmind'],
+    ipapi:['ipapi','ipapi-zh','ipinfo','maxmind'],
+    ipinfo:['ipinfo','ipapi-zh','ipapi','maxmind'],
+    maxmind:['maxmind','ipapi-zh','ipapi','ipinfo'],
+    'maxmind-zh':['maxmind-zh','ipapi-zh','ipapi','ipinfo']
+  };
+  for(const client of ['surge','stash']) for(const [preferred,configuredOrder] of Object.entries(orders)) {
+    if(client==='stash'&&preferred.startsWith('maxmind'))continue;
+    const order=client==='stash'?configuredOrder.filter(source=>!source.startsWith('maxmind')):configuredOrder;
+    for(let success=0;success<order.length;success++) {
+      const working=new Set(order.slice(success));
+      const r=await ipPanel({client,argument:`tile=outbound&mode=home&remote_geoapi=${preferred}&maxmind_key=123%3Afixture-key`,
+        intercept(o,cb){
+          if(!o.url.includes('198.51.100.10'))return false;
+          const source=o.url.includes('ip-api.com/json/')?(o.url.includes('lang=zh-CN')?'ipapi-zh':'ipapi'):
+            o.url.includes('ipinfo')?'ipinfo':o.url.includes('geolite.info')?(preferred==='maxmind-zh'?'maxmind-zh':'maxmind'):null;
+          if(!source)return false;
+          assert.ok(!o.policy && !o.headers?.['X-Stash-Selected-Proxy']);
+          if(source.startsWith('maxmind')) assert.equal(o.headers.Authorization,'Basic MTIzOmZpeHR1cmUta2V5');
+          if(!working.has(source)) {cb(null,{status:200},JSON.stringify({status:'success'}));return true;}
+          const data=source==='ipinfo'?{country:'US',city:'Info City',org:'AS1 Info ISP'}:
+            source.startsWith('maxmind')?{country:{iso_code:'US',names:{en:'US'}},city:{names:{en:'Maxmind City','zh-CN':'Maxmind中文'}}}:
+            {status:'success',countryCode:'US',country:'US',city:source==='ipapi-zh'?'Chinese City':'English City',isp:'Geo ISP'};
+          cb(null,{status:200},JSON.stringify(data));return true;
+        }});
+      assert.deepEqual(r.logs.filter(line=>line.startsWith('出口地区：尝试 ')).map(line=>line.split(' ').at(-1)),order.slice(0,success+1));
+      const expected={'ipapi-zh':/Chinese City/,ipapi:/English City/,ipinfo:/Info City/,maxmind:/Maxmind City/,'maxmind-zh':/Maxmind中文/};
+      const content=r.output.content.split('出口 IP')[1];
+      assert.match(client==='surge'?content:r.output.content,expected[order[success]]);
+      assert.equal(r.requests.filter(o=>o.url.includes('ipinfo.io/198.51.100.10/')).length,1);
+      assert.ok(r.requests.filter(o=>o.url.includes('geolite.info')&&o.url.includes('198.51.100.10')).length<=1);
+      assert.doesNotMatch(r.logs.join('\n'),/fixture-key|MTIzOmZpeHR1cmUta2V5/);
+    }
+  }
+});
+
+test('Geography deadlines advance the exit chain and ignore late responses in both clients',async()=>{
+  for(const client of ['surge','stash']) {
+    const r=await ipPanel({client,virtualTimers:true,argument:'tile=outbound&mode=home&maxmind_key=123%3Atest',
+      ippureData:{ip:'198.51.100.10',countryCode:'US',city:'Probe City',fraudScore:12},intercept(o,cb,{schedule}){
+      if(!o.url.includes('198.51.100.10'))return false;
+      if(o.url.includes('ip-api.com/json/')) {
+        if(o.url.includes('lang=zh-CN')) {
+          schedule(()=>cb(null,{status:200},JSON.stringify({status:'success',countryCode:'JP',city:'Late City'})),3000);
+        }
+        return true;
+      }
+      if(o.url.includes('ipinfo'))return true;
+      if(o.url.includes('geolite.info')) {cb(null,{status:200},JSON.stringify({country:{iso_code:'US',names:{en:'US'}},city:{names:{en:'Final City'}}}));return true;}
+    }});
+    assert.equal(r.elapsed,5000);assert.match(r.output.content,client==='surge'?/Final City/:/Probe City/);
+    assert.doesNotMatch(r.output.content,/Late City|API 请求超时/);
+    assert.deepEqual(r.logs.filter(line=>line.startsWith('出口地区：尝试 ')).map(line=>line.split(' ').at(-1)),client==='surge'?['ipapi-zh','ipapi','ipinfo','maxmind']:['ipapi-zh','ipapi','ipinfo']);
+  }
+});
+
+test('Missing MaxMind credentials skip that stage and all failed exit sources retain only current probe geography',async()=>{
+  for(const client of ['surge','stash']) for(const preferred of ['ipapi-zh','maxmind','maxmind-zh']) {
+    const r=await ipPanel({client,argument:`tile=outbound&mode=home&remote_geoapi=${preferred}`,
+      ippureData:{ip:'198.51.100.10',countryCode:'SG',country:'SG'},intercept(o,cb){
+        if(/ip-api.com\/json\/|ipinfo/.test(o.url)){cb('timeout',null,null);return true;}
+      }});
+    assert.ok(!r.requests.some(o=>o.url.includes('geolite.info')));
+    if(client==='surge')assert.match(r.logs.join('\n'),/跳过 maxmind/);
+    assert.deepEqual(r.logs.filter(line=>line.startsWith('出口地区：尝试 ')).map(line=>line.split(' ').at(-1)),['ipapi-zh','ipapi','ipinfo']);
+    assert.match(client==='surge'?r.output.content.split('出口 IP')[1]:r.output.content,/🇸🇬/);
+  }
+});
+
+test('Stash default risk falls back to the remaining providers and all explicit risk preferences work in both clients',async()=>{
+  const orders={ipqs:['ipqs','proxycheck','ippure','scamalytics'],proxycheck:['proxycheck','ipqs','ippure','scamalytics'],
+    ippure:['ippure','ipqs','proxycheck','scamalytics'],scamalytics:['scamalytics','ipqs','proxycheck','ippure']};
+  for(const client of ['surge','stash']) for(const [preferred,configuredOrder] of Object.entries(orders)) {
+    if(client==='stash'&&preferred==='ipqs')continue;
+    const order=client==='stash'?configuredOrder.filter(source=>source!=='ipqs'):configuredOrder;
+    for(let success=0;success<order.length;success++) {
+      const working=new Set(order.slice(success)), scores={ipqs:22,proxycheck:33,ippure:44,scamalytics:55};
+      const r=await ipPanel({client,argument:`tile=risk&mode=home&risk_api=${preferred}&ipqs_key=fixture-key`,
+        ippureData:{ip:'198.51.100.10',isResidential:true,fraudScore:working.has('ippure')?44:null},intercept(o,cb){
+          const source=o.url.includes('ipqualityscore')?'ipqs':o.url.includes('proxycheck')?'proxycheck':o.url.includes('scamalytics')?'scamalytics':null;
+          if(!source)return false;
+          assert.ok(o.url.includes('198.51.100.10'));
+          if(!working.has(source)){cb('timeout',null,null);return true;}
+          cb(null,{status:200},source==='scamalytics'?'<div class="score">Fraud Score: 55</div>':
+            JSON.stringify(source==='ipqs'?{success:true,fraud_score:22}:{'198.51.100.10':{risk:33}}));return true;
+        }});
+      const selected=order[success], label={ipqs:'IPQS',proxycheck:'ProxyCheck',ippure:'IPPure',scamalytics:'Scamalytics'}[selected];
+      assert.ok(r.output.content.includes(scores[selected]+'%'),r.output.content);
+      assert.ok(r.output.content.includes('('+label+')'),r.output.content);
+      assert.equal(r.requests.filter(o=>o.url==='https://my.ippure.com/v1/info').length,1);
+      assert.doesNotMatch(r.logs.join('\n'),/fixture-key/);
+    }
+  }
+  const fallback=await ipPanel({argument:'tile=risk',ippureData:{ip:'198.51.100.10',fraudScore:null}});
+  assert.match(fallback.output.content,/12% 极度纯净 \(ProxyCheck\)/);
+  assert.ok(!fallback.requests.some(o=>o.url.includes('ipqualityscore')));
+  const noIP=await ipPanel({argument:'tile=risk',ippureData:{},ipFailure:true});
+  assert.equal(noIP.output.backgroundColor,'#9E9E9E');
+  assert.ok(!noIP.requests.some(o=>/ipqualityscore|proxycheck|scamalytics/.test(o.url)));
 });
 
 test('Stash defaults to Chinese ip-api geography even when IPPure returns a complete English location',async()=>{
@@ -1865,8 +2000,21 @@ test('Stash defaults to Chinese ip-api geography even when IPPure returns a comp
   }
 });
 
+test('Stash never calls credential-only providers even when legacy arguments include credentials',async()=>{
+  for(const source of ['maxmind','maxmind-zh']) {
+    const r=await ipPanel({argument:`tile=summary&risk_api=ipqs&remote_geoapi=${source}&ipqs_key=secret-one&maxmind_key=123%3Asecret-two`,
+      ippureData:{ip:'198.51.100.10',countryCode:'US'},intercept(o,cb){
+        assert.ok(!/ipqualityscore|geolite.info/.test(o.url));
+        if(o.url.includes('ip-api.com/json/')){cb('timeout',null,null);return true;}
+      }});
+    assert.match(r.output.content,/12% 极度纯净 \(ProxyCheck\)/);
+    assert.match(r.output.content,/地区：🇸🇬 Singapore, SG/);
+    assert.doesNotMatch(r.logs.join('\n'),/secret-one|secret-two/);
+  }
+});
+
 test('Stash explicit remote geography replaces complete IPPure location and shares ipinfo requests',async()=>{
-  for(const source of ['ipinfo','ipapi','ipapi-zh','maxmind','maxmind-zh']) {
+  for(const source of ['ipinfo','ipapi','ipapi-zh']) {
     const r=await ipPanel({argument:`tile=outbound&remote_geoapi=${source}&maxmind_key=123%3Atest`,
       ippureData:{ip:'198.51.100.10',countryCode:'US',city:'Pure City',asOrganization:'Pure ISP'},intercept(o,cb){
         if(o.url.includes('geolite.info')){assert.equal(o.headers.Authorization,'Basic MTIzOnRlc3Q=');cb(null,{status:200},JSON.stringify({country:{iso_code:'JP',names:{en:'Japan','zh-CN':'日本'}},city:{names:{en:'Tokyo','zh-CN':'东京'}}}));return true;}
@@ -1878,7 +2026,7 @@ test('Stash explicit remote geography replaces complete IPPure location and shar
     if(source==='ipapi'||source==='ipapi-zh')assert.ok(r.requests.some(o=>o.url.includes(source==='ipapi'?'lang=en':'lang=zh-CN')));
   }
   const fallback=await ipPanel({argument:'remote_geoapi=maxmind'});
-  assert.match(fallback.output.content,/Singapore/);assert.ok(!fallback.requests.some(o=>o.url.includes('geolite')));
+  assert.match(fallback.output.content,/台北/);assert.ok(!fallback.requests.some(o=>o.url.includes('geolite')));
 });
 
 test('Stash summary displays measured resolver and rDNS while masking addresses and preserving route context',async()=>{
@@ -1900,7 +2048,7 @@ test('Stash summary, standalone cards and notifications share the Surge geograph
   for(const entry of ['summary','home','collapsed','notify']) {
     for(const [geoWorks,orgState,region,organization] of [
       [true,'ok','Geo City','Info ISP'],[true,'empty','Geo City','Geo ISP'],
-      [true,'failed','Geo City','Geo ISP'],[false,'ok','Probe City','Info ISP'],
+      [true,'failed','Geo City','Geo ISP'],[false,'ok','Info City','Info ISP'],
       [false,'failed','Probe City','Probe ISP']
     ]) {
       const store=new Map();
@@ -1916,12 +2064,12 @@ test('Stash summary, standalone cards and notifications share the Surge geograph
             cb(geoWorks?null:'timeout',{status:200},JSON.stringify({status:'success',countryCode:'US',country:'US',city:'Geo City',isp:'Geo ISP'}));return true;
           }
           if(o.url.includes('ipinfo')) {
-            cb(orgState==='failed'?'timeout':null,{status:200},JSON.stringify({country:'CA',city:'Wrong City',org:orgState==='empty'?'':'AS64500 Info ISP'}));return true;
+            cb(orgState==='failed'?'timeout':null,{status:200},JSON.stringify({country:'CA',city:'Info City',org:orgState==='empty'?'':'AS64500 Info ISP'}));return true;
           }
         }});
       const content=entry==='notify'?r.notifications[0]?.[2]:r.output.content;
       assert.ok(content?.includes(region),`${entry}/${geoWorks}/${orgState}: ${content}`);
-      assert.ok(content.includes(organization));assert.doesNotMatch(content,/Wrong City/);
+      assert.ok(content.includes(organization));if(geoWorks)assert.doesNotMatch(content,/Info City/);
       assert.equal(r.requests.filter(o=>o.url.includes('ipinfo')).length,1);
       if(entry==='summary')assert.equal(r.output.backgroundColor,'#FFC107');
     }

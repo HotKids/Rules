@@ -65,7 +65,15 @@ def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
     if args.get("task") == "logs" or args.get("service") == "logs":
         return argument
     if stem == "ip-security-panel":
-        keys = ["risk_api", "local_geoapi", "remote_geoapi", "ipqs_key", "maxmind_key", "mask_ip", "tw_flag"]
+        keys = ["risk_api", "local_geoapi", "remote_geoapi", "mask_ip", "tw_flag"]
+        # Stash IP 面板仅使用免密钥来源；同步时同时移除旧覆写中的凭据。
+        args.pop("ipqs_key", None)
+        args.pop("maxmind_key", None)
+        defaults = dict(defaults)
+        if defaults.get("risk_api", "").lower() == "ipqs":
+            defaults["risk_api"] = "ippure"
+        if defaults.get("remote_geoapi", "").lower() in {"maxmind", "maxmind-zh"}:
+            defaults["remote_geoapi"] = "ipapi-zh"
         if args.get("task") == "monitor":
             keys.append("notify")
         # event_delay / panel_interval 只参与 Surge 事件延迟与点击打码，不用于 Stash。

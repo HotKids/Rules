@@ -13,21 +13,21 @@
  * ③ 入口 IP: Surge /v1/requests/recent → remoteAddress(Proxy)
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQS (需 Key) → ProxyCheck → IPPure → Scamalytics；risk_api 指定优先源
- *    Surge 按出口 IP 缓存 24 小时；Stash 默认每次请求 IPPure，其他源按显式选项查询
+ *    Surge 按出口 IP 缓存 24 小时；Stash 默认 IPPure 优先，失败按 ProxyCheck → Scamalytics 回退，不使用需密钥的来源
  * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
- * ⑦ 地理: 本地默认百度；入口/出口默认 ip-api.com 中文；可选数据源见下方参数
- * ⑧ 出口运营商: 两端优先 ipinfo.io；失败保留选定地区源或本轮出口探测的运营商
+ * ⑦ 地理: 本地百度 → bilibili → ip.sb；出口 ipapi-zh → ipapi → ipinfo → MaxMind（Stash 不含 MaxMind）；参数指定首选
+ * ⑧ 出口运营商: 两端优先 ipinfo.io；失败保留成功地区源或本轮出口探测的运营商
  * ⑨ DNS 解析器: edns.ip-api.com；Surge 按解析器地区作提示，未验证是否属于本地 ISP
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
  * ⑪ 流量统计: Surge /v1/traffic API
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
- * - ipqs_key: IPQualityScore API Key（可选，仅 risk_api=ipqs 或回落模式需要）
- * - risk_api: 优先风险源，ipqs / proxycheck / ippure / scamalytics；Stash 默认 ippure，显式指定其他源时失败回落
- * - local_geoapi: 本地 IP 地理数据源，baidu(默认)=百度 → bilibili → ip.sb，bilibili=bilibili → ip.sb，ipsb=ip.sb
- * - remote_geoapi: 入口/出口地理数据源，默认 ipapi-zh；Stash 可选 ippure。ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
- * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 remote_geoapi=maxmind/maxmind-zh 需要，免费注册 1000 次/天）
+ * - ipqs_key: IPQualityScore API Key（仅 Surge，可选，首选或回退到 IPQS 时使用）
+ * - risk_api: 优先风险源，ipqs / proxycheck / ippure / scamalytics；Stash 默认 ippure 且不支持 ipqs；首选失败后按默认顺序尝试剩余来源
+ * - local_geoapi: 本地地区首选，默认 baidu；baidu / bilibili / ipsb 指定优先源，失败按百度 → bilibili → ip.sb 尝试剩余来源
+ * - remote_geoapi: 出口地区首选（入口仍按选定源查询），默认 ipapi-zh → ipapi → ipinfo → maxmind；首选优先且不重复，MaxMind 无凭据跳过；Stash 不支持 MaxMind，可选 ippure。ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
+ * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 Surge，MaxMind 首选或回退时使用，未填跳过，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
  * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
@@ -50,8 +50,8 @@
  * Stash：ip-security-panel.stoverride 提供首页聚合与三张折叠卡片，600 秒刷新；与 Surge 共用此文件。
  * - summary 首页 IP 信息卡；outbound 出口、local 本地、risk 纯净度维持独立折叠检测。
  * - Stash 默认风险源 IPPure、本地百度、出口地区 ipapi-zh；可用 risk_api / local_geoapi / remote_geoapi 改选。
- *   可选源与 Surge 同名；remote_geoapi=ippure 是 Stash 的可选源，其他地区源按指定 IP 查询。
- *   本地默认按百度 → bilibili → ip.sb 回退；出口地区源失败回落本轮出口探测地区，运营商优先 ipinfo。
+ *   Stash 仅用免密钥来源（不含 IPQS/MaxMind）；remote_geoapi=ippure 是额外可选源，其他地区源按指定 IP 查询。
+ *   本地与出口均按上述顺序回退，参数可指定首选；出口全部地区源失败后才保留本轮探测地区，运营商优先 ipinfo。
  *   地区与运营商每轮查询，不复用历史字段；风险数据缓存保持独立。
  *   两端共用六档风险等级与颜色，首页补充 DNS 解析器、rDNS、显式指定的策略名。
  *   DNS 地区只作展示，不据此判断泄露；打码时同时隐藏可能包含 IP 的 rDNS。
@@ -68,7 +68,7 @@
  *   只展示本轮有效 IP 对应的数据，不依赖 Surge 的入口或策略查询接口。
  * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
- * @version 6.4.14
+ * @version 6.4.15
  * @date 2026-10-01
  */
 
@@ -259,9 +259,10 @@ function parseArguments() {
     tile: clean(arg.tile) || "outbound",
     task: clean(arg.task),
     log: clean(arg.log),
-    ipqsKey: clean(arg.ipqs_key),
-    riskApi: clean(arg.risk_api).toLowerCase() || (isStash ? "ippure" : ""),
-    maxmindKey: clean(arg.maxmind_key),
+    ipqsKey: isStash ? "" : clean(arg.ipqs_key),
+    riskApi: isStash && clean(arg.risk_api).toLowerCase() === "ipqs" ? "ippure" :
+      clean(arg.risk_api).toLowerCase() || (isStash ? "ippure" : ""),
+    maxmindKey: isStash ? "" : clean(arg.maxmind_key),
     localGeoApi: clean(arg.local_geoapi) || "baidu",
     remoteGeoApi: clean(arg.remote_geoapi) || "ipapi-zh",
     maskIP: arg.mask_ip === "2" ? 2 : (arg.mask_ip === "1" || arg.mask_ip === "true") ? 1 : 0,
@@ -344,8 +345,13 @@ function httpRaw(url, policy, headers, deadline = requestDeadline) {
       if (hasTimers) timer = setTimeout(() => complete("script wait deadline", null, null),
         nativeIPPure ? remaining : Math.min(5000, remaining));
       if (nativeIPPure && !req.headers) req = url;
-    } else if (policy) {
-      req.policy = policy;
+    } else {
+      if (policy) req.policy = policy;
+      // 分级地理查询需在单次请求超时后继续回退；总期限仍由看门狗控制。
+      if (deadline !== requestDeadline) {
+        req.timeout = remaining / 1000;
+        if (hasTimers) timer = setTimeout(() => complete("script wait deadline", null, null), remaining);
+      }
     }
     try {
       $httpClient.get(req, complete);
@@ -375,6 +381,8 @@ function surgeAPI(method, path) {
 let _ippureInfoP = null, _ippureCardP = null;
 function getIPPureInfo() { return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType)); }
 function getIPPureCard() { return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard)); }
+// 同轮摘要的出口与风险回退共用一次 IPv4 探测，不跨运行保存。
+let _stashOutbound4P = null;
 
 // ProxyCheck 请求去重：风险评分和 IP 类型回退共享同一个请求
 let _proxyCheckP = null;
@@ -532,6 +540,71 @@ function normalizeBilibili(data) {
   };
 }
 
+async function getLocalGeo(local) {
+  const ip = local?.data?.addr;
+  if (!ip) return { info: null, source: "" };
+  const defaults = ["baidu", "bilibili", "ipsb"];
+  const preferred = defaults.includes(args.localGeoApi) ? args.localGeoApi : "baidu";
+  const order = [preferred, ...defaults.filter(source => source !== preferred)];
+  const policy = isStash ? "DIRECT" : undefined;
+  // ip.sb 同时补充国家代码；bilibili 复用本轮获取本地 IP 的响应。
+  const sbPromise = httpJSON(CONFIG.urls.ipSbGeo(ip), policy, null, Date.now() + 5000);
+  let info = null, source = "";
+  for (source of order) {
+    IPLog.log("本地地区：尝试 " + source);
+    info = source === "baidu" ? normalizeOpendata(await httpJSON(CONFIG.urls.baiduGeo(ip), policy, null, Date.now() + 2000))
+      : source === "bilibili" ? normalizeBilibili(local) : normalizeIpSb(await sbPromise);
+    if (info && [info.country_code, info.country_name, info.region, info.city].some(value => typeof value === "string" && value.trim())) break;
+    info = null;
+    IPLog.log("本地地区：" + source + " 无有效地区，继续回退");
+  }
+  const sb = normalizeIpSb(await sbPromise);
+  if (info && source !== "ipsb") {
+    if (/^(移动|联通|电信|广电)$/.test(info.org)) info.org = "中国" + info.org;
+    info.country_code = sb?.country_code || (source === "bilibili" && info.country_name !== "中国" ? "" : "CN");
+  }
+  if (info) IPLog.log("本地地区：采用 " + source);
+  return { info, source };
+}
+
+async function getOutboundGeo(ip, probeInfo, pureInfo) {
+  const defaults = isStash ? ["ipapi-zh", "ipapi", "ipinfo"] : ["ipapi-zh", "ipapi", "ipinfo", "maxmind"];
+  const allowed = [...defaults, ...(isStash ? ["ippure"] : ["maxmind-zh"])];
+  const preferred = allowed.includes(args.remoteGeoApi) ? args.remoteGeoApi : "ipapi-zh";
+  // MaxMind 中英文使用同一个接口，指定中文时替换默认英文级，不重复查询。
+  const order = [preferred, ...defaults.filter(source => source !== preferred &&
+    !(source === "maxmind" && preferred === "maxmind-zh"))];
+  // ipinfo 还用于运营商/rDNS，预先发起并在地区回退时复用，不改变地区选用顺序。
+  const orgPromise = httpJSON(CONFIG.urls.ipInfo(ip), undefined, null, Date.now() + 5000);
+  let info = null;
+  for (const source of order) {
+    if (source.startsWith("maxmind") && !args.maxmindKey) {
+      IPLog.log("出口地区：跳过 " + source + "（未填写 maxmind_key）");
+      continue;
+    }
+    IPLog.log("出口地区：尝试 " + source);
+    if (source === "ippure") info = pureInfo;
+    else if (source === "ipinfo") info = normalizeIpInfo(await orgPromise);
+    else if (source.startsWith("maxmind")) info = normalizeMaxmind(await httpJSON(
+      CONFIG.urls.maxmindGeo(ip), undefined, { Authorization: "Basic " + b64(args.maxmindKey) }, Date.now() + 2000), source === "maxmind-zh");
+    else info = normalizeIpApi(await httpJSON(CONFIG.urls.ipApi(ip, source === "ipapi-zh" ? "zh-CN" : "en"),
+      undefined, null, Date.now() + 2000));
+    if (info && [info.country_code, info.country_name, info.region, info.city].some(value => typeof value === "string" && value.trim())) {
+      IPLog.log("出口地区：采用 " + source);
+      break;
+    }
+    info = null;
+    IPLog.log("出口地区：" + source + " 无有效地区，继续回退");
+  }
+  if (!info && probeInfo) {
+    info = probeInfo;
+    IPLog.log("出口地区：回退来源均无有效结果，保留本轮出口探测地区");
+  }
+  const org = await orgPromise, orgInfo = normalizeIpInfo(org);
+  if (info && orgInfo?.org) info.org = orgInfo.org;
+  return { info, reverseDNS: typeof org?.hostname === "string" ? org.hostname.trim() : "" };
+}
+
 function parseScamalyticsScore(html) {
   const m = html?.match(/Fraud Score[^0-9]*([0-9]{1,3})/i);
   return m ? Number(m[1]) : null;
@@ -607,6 +680,7 @@ async function getRiskScore(ip) {
     if (!(typeof score === "number" || typeof score === "string" && score.trim())) return null;
     score = Number(score);
     if (!Number.isFinite(score) || score < 0 || score > 100) return null;
+    IPLog.log("风险评分：采用 " + source);
     if (isStash) return { score, source };
     $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.riskCache);
     IPLog.log("风险评分已缓存: " + score + "% (" + source + ")");
@@ -653,16 +727,16 @@ async function getRiskScore(ip) {
   }
 
   const tryMap = { ipqs: tryIPQS, proxycheck: tryProxyCheck, ippure: tryIPPure, scamalytics: tryScamalytics };
-  if (api && !tryMap[api]) IPLog.log("未知 risk_api: " + api + "，走四级回落");
+  if (api && !tryMap[api]) IPLog.log("未知 risk_api: " + api + "，按默认顺序回退");
 
-  // 指定数据源 → 优先使用
-  if (tryMap[api]) {
-    const r = await tryMap[api]();
-    if (r) return r;
-  }
-
-  // 未指定 → 四级回落 / 指定但失败 → 回落到剩余数据源
-  for (const key of ["ipqs", "proxycheck", "ippure", "scamalytics"].filter(k => k !== api)) {
+  const defaults = isStash ? ["proxycheck", "ippure", "scamalytics"] : ["ipqs", "proxycheck", "ippure", "scamalytics"];
+  const order = defaults.includes(api) ? [api, ...defaults.filter(key => key !== api)] : defaults;
+  for (const key of order) {
+    if (key === "ipqs" && !args.ipqsKey) {
+      IPLog.log("风险评分：跳过 ipqs（未填写 ipqs_key）");
+      continue;
+    }
+    IPLog.log("风险评分：尝试 " + key);
     const r = await tryMap[key]();
     if (r) return r;
   }
@@ -851,7 +925,7 @@ async function probeStashOutbound6() {
 // Surge 保持原有 Cloudflare trace → ip.sb。
 async function fetchOutbound4() {
   if (isStash) {
-    return probeStashOutbound4();
+    return _stashOutbound4P || (_stashOutbound4P = probeStashOutbound4());
   }
   const t = parseTrace(await httpRaw(CONFIG.urls.outboundTrace));
   if (t) return { ip: t.ip, raw: { country_code: t.loc, country: t.loc } };
@@ -1172,19 +1246,28 @@ function compactStashIPContent({ shortLocation, organization, countryCode }, fal
 }
 
 async function getStashRiskResult() {
-  // 按官方脚本读取当前 IPPure 响应；不再额外探测 CF/ipify 后拦截评分。
+  // IPPure 成功时沿用原生结果；首选评分不可用才按同一实测 IP 查询剩余来源。
   const info = await getIPPureInfo();
-  if (!info && args.riskApi === "ippure") return null;
-  const pureIP = stashCacheIP(info?.ip) || (args.riskApi !== "ippure" ? (await fetchOutbound4())?.ip : "");
+  let pureIP = stashCacheIP(info?.ip);
   const freshScore = typeof info?.fraudScore === "number" ? info.fraudScore :
     (typeof info?.fraudScore === "string" && info.fraudScore.trim() ? Number(info.fraudScore) : NaN);
-  const { data } = stashLastGood("risk", pureIP, stashFields({
+  let { data } = stashLastGood("risk", pureIP, stashFields({
     score: freshScore, isResidential: info?.isResidential, isBroadcast: info?.isBroadcast
   }));
-  const selected = args.riskApi !== "ippure" && pureIP ? await getRiskScore(pureIP) : null;
-  const score = args.riskApi === "ippure" ? data.score : selected?.score;
-  const source = args.riskApi === "ippure" ? "IPPure" : selected?.source || "Unavailable";
+  const usePure = args.riskApi === "ippure" && Number.isFinite(data.score) && data.score >= 0 && data.score <= 100;
+  if (usePure) IPLog.log("风险评分：采用 IPPure");
+  let selected = null;
+  if (!usePure) {
+    if (!pureIP) {
+      pureIP = (await fetchOutbound4())?.ip || "";
+      data = {}; // 无有效 IP 的 IPPure 字段不能套到备用探测地址上。
+    }
+    if (pureIP) selected = await getRiskScore(pureIP);
+  }
+  const score = usePure ? data.score : selected?.score;
+  const source = usePure ? "IPPure" : selected?.source || "Unavailable";
   const valid = Number.isFinite(score) && score >= 0 && score <= 100;
+  if (!info && !valid) return null;
   const ipType = typeof data.isResidential === "boolean" ? (data.isResidential ? "住宅 IP" : "机房 IP") : "类型未知";
   const ipSrc = typeof data.isBroadcast === "boolean" ? (data.isBroadcast ? "广播 IP" : "原生 IP") : "来源未知";
   const { label: level, color } = riskText(valid ? score : null);
@@ -1197,25 +1280,7 @@ async function getStashLocalResult(local) {
   if (local === undefined) local = await httpJSON(CONFIG.urls.localIP, "DIRECT");
   const ip = local?.data?.addr;
   if (!ip) return null;
-  const source = ["baidu", "bilibili", "ipsb"].includes(args.localGeoApi) ? args.localGeoApi : "baidu";
-  const [baidu, sb] = await Promise.all([
-    source === "baidu" ? httpJSON(CONFIG.urls.baiduGeo(ip), "DIRECT", null, Date.now() + 5000) : null,
-    httpJSON(CONFIG.urls.ipSbGeo(ip), "DIRECT", null, Date.now() + 5000)
-  ]);
-  const sbInfo = normalizeIpSb(sb);
-  const biliInfo = normalizeBilibili(local);
-  let primary = source === "baidu" ? normalizeOpendata(baidu)
-    : source === "bilibili" ? biliInfo : sbInfo;
-  if (source === "baidu" && !primary) {
-    primary = biliInfo;
-    if (primary) IPLog.log("本地地区：baidu 不可用，使用本轮 bilibili 结果");
-  }
-  if (source === "baidu" && primary && /^(移动|联通|电信|广电)$/.test(primary.org)) primary.org = "中国" + primary.org;
-  // bilibili 复用获取本地 IP 时的响应；前两级不可用才取本轮 ip.sb，不读取旧字段。
-  const info = primary && source !== "ipsb" ? { ...primary,
-    country_code: sbInfo?.country_code || (primary === biliInfo && biliInfo.country_name !== "中国" ? "" : "CN") }
-    : primary || sbInfo;
-  if (!primary && info) IPLog.log("本地地区：" + source + " 不可用，使用本轮 ip.sb 结果");
+  const { info } = await getLocalGeo(local);
   return {
     ip, countryCode: info?.country_code,
     location: info && [...new Set([info.country_name, info.region, info.city].filter(Boolean))].join(" "),
@@ -1233,42 +1298,16 @@ async function getStashOutboundResult(includeIPv6, detectedExit) {
   if (!outIP) return null;
   const pureInfo = await pure;
   const sameIPPure = stashCacheIP(pureInfo?.ip) === outIP ? normalizeStashIPPure(pureInfo) : null;
-  const pureHasLocation = !!(sameIPPure?.city || sameIPPure?.region || sameIPPure?.country_name || sameIPPure?.country_code);
-  // IPPure 仍可显式选作地区源；默认使用同一出口 IP 的 ipapi-zh。
-  const usePure = args.remoteGeoApi === "ippure" && pureHasLocation;
-  let source = ["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(args.remoteGeoApi)
-    ? args.remoteGeoApi : "ipapi-zh";
-  if (source.startsWith("maxmind") && !args.maxmindKey) {
-    IPLog.log("remote_geoapi=maxmind 未填写凭据，回落 ipinfo");
-    source = "ipinfo";
-  }
-  const maxmind = source.startsWith("maxmind");
-  const normalizeGeo = value => maxmind ? normalizeMaxmind(value, source === "maxmind-zh")
-    : source === "ipinfo" ? normalizeIpInfo(value) : normalizeIpApi(value);
-  // 所有卡片都查询 ipinfo；作为地区源时共用这一个请求。
-  const ipinfo = httpJSON(CONFIG.urls.ipInfo(outIP), undefined, null, Date.now() + 5000);
-  const [geo, org, outIPv6] = await Promise.all([
-    usePure ? null : source === "ipinfo" ? ipinfo : httpJSON(
-      maxmind ? CONFIG.urls.maxmindGeo(outIP) : CONFIG.urls.ipApi(outIP, source === "ipapi-zh" ? "zh-CN" : "en"),
-      undefined, maxmind ? { Authorization: "Basic " + b64(args.maxmindKey) } : null, Date.now() + 5000),
-    ipinfo,
-    ipv6
-  ]);
-  const primaryInfo = usePure ? sameIPPure : normalizeGeo(geo);
-  // 与 Surge 相同：地区源失败后只取本轮出口探测已有地区，不改用运营商源的地区。
-  // Stash 的出口来自 IPPure / ipify，因此仅复用已确认同一 IP 的 IPPure 地区。
   const probeInfo = sameIPPure?.country_code ? sameIPPure : normalizeIpSb(outRaw);
-  const info = primaryInfo || probeInfo;
-  const orgInfo = normalizeIpInfo(org);
-  if (info && orgInfo?.org) info.org = orgInfo.org;
-  if (!primaryInfo && info) IPLog.log("出口地区：" + source + " 不可用，使用本轮出口探测的地区");
+  const [geography, outIPv6] = await Promise.all([getOutboundGeo(outIP, probeInfo, sameIPPure), ipv6]);
+  const { info, reverseDNS } = geography;
   return {
     ip: outIP, ipv6: outIPv6, raw: outRaw, countryCode: info?.country_code,
     location: info && [...new Set([info.city, info.region, geoLabel(info) || info.country_name].filter(Boolean))].join(", "),
     shortLocation: info && compactStashLocation(["HK", "MO", "SG"].includes(info.country_code) ?
       geoLabel(info) : info.city || info.region || geoLabel(info) || info.country_name),
     organization: info?.org || "运营商未知",
-    reverseDNS: typeof org?.hostname === "string" ? org.hostname.trim() : ""
+    reverseDNS
   };
 }
 
@@ -1386,7 +1425,7 @@ async function runStashTile() {
     IPLog.collect();
     return done({});
   }
-  IPLog.log("=== IP 安全检测开始 (v6.4.14 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+  IPLog.log("=== IP 安全检测开始 (v6.4.15 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
   if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
   if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
@@ -1411,16 +1450,7 @@ async function runStashTile() {
   }
 
   // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
-  let localGeoApi = args.localGeoApi;
-  if (!["bilibili", "baidu", "ipsb"].includes(localGeoApi)) {
-    IPLog.log("未知 local_geoapi: " + localGeoApi + "，使用 baidu");
-    localGeoApi = "baidu";
-  }
-  const useBilibili = localGeoApi === "bilibili";
-  const useBaiduLocal = localGeoApi === "baidu";
-  const localZh = useBilibili || useBaiduLocal; // 本地地理为中文源 → 显示中文国名
-
-  // 入口/出口地理数据源：remote_geoapi=ipinfo → ipinfo.io, ipapi/ipapi-zh → ip-api.com(en/zh, http 明文),
+  // 入口维持指定数据源查询；出口使用独立四级回退。remote_geoapi=ipinfo → ipinfo.io, ipapi/ipapi-zh → ip-api.com(en/zh, http 明文),
   // maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
   let remoteGeoApi = args.remoteGeoApi;
   if (!["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(remoteGeoApi)) {
@@ -1449,15 +1479,16 @@ async function runStashTile() {
 
   // 先并行发起 geo/risk/流量 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
   // DNS 泄露检测需要走代理策略，必须在取得 policy 后执行
-  const [riskInfo, ipTypeResult, localSbRaw, localBaiduRaw, outGeoRaw, outOrgRaw, trafficResult] = await Promise.all([
-    getRiskScore(outIP),                     // 0: 风险评分
-    getIPType(outIP),                        // 1: IP 类型
-    httpJSON(CONFIG.urls.ipSbGeo(localIP)),  // 2: ip.sb 本地（en 地理 / zh country_code）
-    useBaiduLocal ? httpJSON(CONFIG.urls.baiduGeo(localIP)) : null,  // 3: 百度本地地理（仅 baidu 模式）
-    httpJSON(geoUrl(outIP), null, geoHeaders),  // 4: 出口地理
-    needExtraOrg ? httpJSON(CONFIG.urls.ipInfo(outIP)) : null,  // 5: 出口运营商（非 ipinfo 数据源时）+ hostname
-    getTrafficStats(),                       // 6: 流量统计
+  const [riskInfo, ipTypeResult, localGeo, outGeo, trafficResult] = await Promise.all([
+    getRiskScore(outIP),
+    getIPType(outIP),
+    getLocalGeo(localRaw),
+    getOutboundGeo(outIP, normalizeIpSb(outRaw)),
+    getTrafficStats()
   ]);
+  const localInfo = localGeo.info, localZh = localGeo.source !== "ipsb";
+  const outInfo = outGeo.info, reverseDNS = outGeo.reverseDNS;
+  if (reverseDNS) IPLog.log("反向 DNS: " + reverseDNS);
 
   // 请求完成后查询 recent，提高捕获概率；记录仍可能缺失，内部会重试并降级。
   const { policy, entranceIP } = await getPolicyAndEntrance();
@@ -1469,41 +1500,6 @@ async function runStashTile() {
     dnsLeakResult = await checkDNSLeak(policy);
   } else {
     IPLog.log("当前为直连，跳过 DNS 泄露检测");
-  }
-
-  // 本地默认百度 → bilibili → ip.sb；bilibili 复用本轮本地 IP 响应。
-  let localInfo;
-  if (useBaiduLocal) {
-    const bd = normalizeOpendata(localBaiduRaw);
-    const sb = normalizeIpSb(localSbRaw);
-    if (bd && /^(移动|联通|电信|广电)$/.test(bd.org)) bd.org = "中国" + bd.org;
-    const bili = !bd ? normalizeBilibili(localRaw) : null;
-    const primary = bd || bili;
-    localInfo = primary
-      ? { ...primary, country_code: sb?.country_code || (bili && bili.country_name !== "中国" ? "" : "CN") }
-      : sb;
-    if (!bd && localInfo) IPLog.log("本地地区：baidu 不可用，使用本轮 " + (bili ? "bilibili" : "ip.sb") + " 结果");
-  } else if (useBilibili) {
-    const bili = normalizeBilibili(localRaw);
-    const sb = normalizeIpSb(localSbRaw);
-    localInfo = bili
-      ? { ...bili, country_code: sb?.country_code || "CN" }
-      : sb;
-  } else {
-    localInfo = normalizeIpSb(localSbRaw);
-  }
-
-  // 出口地区优先使用 remote_geoapi，缺失时取探测结果；有 ipinfo 运营商字段才覆盖。
-  // IPv6 只显示 IP 地址，不单独查询地区和运营商
-  let outInfo = normalizeGeo(outGeoRaw) || normalizeIpSb(outRaw);
-  // 反向 DNS：从 ipinfo.io 响应中提取 hostname
-  // ipinfo 模式: outGeoRaw 来自 ipinfo.io; 其余数据源: outOrgRaw 来自 ipinfo.io
-  const ipinfoRaw = needExtraOrg ? outOrgRaw : outGeoRaw;
-  const reverseDNS = ipinfoRaw?.hostname || null;
-  if (reverseDNS) IPLog.log("反向 DNS: " + reverseDNS);
-  if (needExtraOrg && outInfo) {
-    const orgData = normalizeIpInfo(outOrgRaw);
-    if (orgData?.org) outInfo.org = orgData.org;
   }
 
   // 入口 IP 地理信息：与出口不同时才查询

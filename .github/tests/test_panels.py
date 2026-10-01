@@ -86,13 +86,25 @@ class TileConfigurationTests(unittest.TestCase):
                             self.assertEqual(args, {'task': 'logs'} if stem == 'ip-security-panel' else {'service': 'logs'})
                             continue
                         if stem == 'ip-security-panel':
-                            for key in ('risk_api', 'local_geoapi', 'remote_geoapi', 'ipqs_key', 'maxmind_key', 'mask_ip', 'tw_flag'):
+                            self.assertNotIn('ipqs_key', args)
+                            self.assertNotIn('maxmind_key', args)
+                            for key in ('risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'):
                                 self.assertEqual(args.get(key), params.get(key))
                             self.assertEqual(args.get('notify'), params.get('notify') if args.get('task') == 'monitor' else 'false')
                         else:
                             self.assertEqual(args['notify'], 'false')
                             for key, service in (('nfprice', 'netflix'), ('geminiapikey', 'gemini')):
                                 self.assertEqual(args.get(key), params.get(key) if args['service'] == service else None)
+
+    def test_ip_stash_sync_removes_credentials_and_replaces_keyed_source_preferences(self):
+        for remote in ('maxmind', 'maxmind-zh'):
+            original = {'risk_api': 'ipqs', 'remote_geoapi': remote,
+                        'ipqs_key': 'secret-one', 'maxmind_key': 'account:secret-two'}
+            result = stash._stash_panel_argument(
+                'tile=outbound&ipqs_key=old-key&maxmind_key=old-account', original, 'ip-security-panel')
+            self.assertEqual(parse_qs(result), {'tile': ['outbound'], 'risk_api': ['ippure'], 'remote_geoapi': ['ipapi-zh']})
+            self.assertEqual(original['risk_api'], 'ipqs')
+            self.assertEqual(original['remote_geoapi'], remote)
 
     def test_media_service_order_and_script_urls(self):
         config = yaml.safe_load((PANELS / 'media-check-panel.stoverride').read_text())
@@ -142,7 +154,7 @@ class TileConfigurationTests(unittest.TestCase):
         declaration = next(line.removeprefix('#!arguments=')
                            for line in (PANELS / 'ip-security-panel.sgmodule').read_text().splitlines()
                            if line.startswith('#!arguments='))
-        supported = {'notify', 'risk_api', 'local_geoapi', 'remote_geoapi', 'ipqs_key', 'maxmind_key', 'mask_ip', 'tw_flag'}
+        supported = {'notify', 'risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'}
         defaults = {key: [value] for key, value in (item.split(':', 1) for item in declaration.split(','))
                     if key in supported}
         self.assertEqual(parse_qs(monitor['argument'], keep_blank_values=True), {
