@@ -8,7 +8,7 @@
 name: 网易云音乐去广告
 desc: 网易云音乐去广告，部分 App 需清除缓存或重新安装后才会生效
 author: Keywos
-icon: https://raw.githubusercontent.com/luestr/IconResource/main/Website_icon/120px/NeteaseCloudMusic.png
+icon: https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/NeteaseCloudMusic.png
 category: 去广告
 date: '2025-02-17 02:24:16'
 http:
