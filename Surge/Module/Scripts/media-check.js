@@ -3,7 +3,7 @@
  * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
  * =============================================================================
  * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.8 (2026-10-01)
+ * @version      2.2.9 (2026-10-01)
  * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -69,7 +69,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.8",
+  VERSION: "2.2.9",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -784,24 +784,35 @@ class ServiceChecker {
 
   /**
    * Gemini 解锁检测
-   * 先完成原方案；仅 Stash iOS 的未知结果启用匿名兜底，不覆盖明确地区限制。
+   * Stash iOS：首页最多 2 秒，未知结果转匿名兜底，共用 6 秒预算。
+   * 不覆盖明确地区限制；其他客户端保留原方案。
    * @returns {Promise<Object>} 检测结果
    */
   static async checkGemini() {
-    const primary = await this.checkGeminiPrimary();
-    if (!IS_STASH || !/^ios(?:\b|\d)/i.test(String(ENV.system || "").trim()) ||
-        ![STATUS.ERROR, STATUS.TIMEOUT].includes(primary.status)) return primary;
-    MediaLog.log(`[Gemini v${CONFIG.VERSION}] 原方案未取得有效结果（${primary.region}），启用 Stash iOS 匿名兜底；免登录、免密钥，仅发送随机校验词`);
-    const fallback = await this.checkGeminiAnonymous();
-    if (fallback.status === STATUS.OK) return fallback;
-    MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名兜底未确认可用，保留原结果：${primary.region}`);
-    return primary;
+    if (!IS_STASH || !/^ios(?:\b|\d)/i.test(String(ENV.system || "").trim())) return this.checkGeminiPrimary();
+    const started = Date.now(), deadline = started + 6000;
+    // 每个请求使用剩余预算；系统暂停 JS 调度时，实际墙钟耗时仍可能超过预算。
+    try {
+      const primary = await this.checkGeminiPrimary(true);
+      if (![STATUS.ERROR, STATUS.TIMEOUT].includes(primary.status)) return primary;
+      MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页未确认（${primary.region}），启用 Stash iOS 匿名兜底；剩余预算=${Math.max(0, deadline - Date.now())}ms；免登录、免密钥，仅发送随机校验词`);
+      const fallback = await this.checkGeminiAnonymous(deadline);
+      if (fallback.status === STATUS.OK) return fallback;
+      if (fallback.status === STATUS.TIMEOUT) {
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名回复超时，未确认可用`);
+        return fallback;
+      }
+      MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名兜底未确认可用，保留原结果：${primary.region}`);
+      return primary;
+    } finally {
+      MediaLog.log(`[Gemini v${CONFIG.VERSION}] Stash iOS 检测结束；总耗时=${Date.now() - started}ms；预算=6000ms`);
+    }
   }
 
   /** 网页检测（参考 lmc999/RegionRestrictionCheck）+ 用户已配置的可选 API 检测。 */
-  static async checkGeminiPrimary() {
+  static async checkGeminiPrimary(singleHome = false) {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
-    const deadline = Date.now() + 10000;
+    const deadline = Date.now() + (singleHome ? 2000 : 10000);
     const logError = (stage, error) => {
       const result = Utils.errorResult(error);
       MediaLog.log(`[Gemini v${CONFIG.VERSION}] ${stage}失败；阶段=${error?.phase || "parse"}；${Utils.errorDetails(error)}`);
@@ -816,6 +827,7 @@ class ServiceChecker {
       { url: "https://gemini.google.com", stage: "首页" },
       { url: "https://gemini.google.com/app?hl=en", stage: "应用页" }
     ];
+    if (singleHome) pages.length = 1;
     for (const [index, page] of pages.entries()) {
       const { url, stage, autoRedirect = true } = page;
       const remaining = deadline - Date.now();
@@ -866,7 +878,7 @@ class ServiceChecker {
         unknown = logError(stage, error);
         // 隐式跳转可能隐藏失败目标；关闭跳转以记录首页的首个响应。
         // 最多首页、首页诊断、一个同站跳转，三次共用 10 秒预算。
-        if (IS_STASH && index === 0 && error?.phase === "callback" && unknown.status !== STATUS.TIMEOUT &&
+        if (IS_STASH && !singleHome && index === 0 && error?.phase === "callback" && unknown.status !== STATUS.TIMEOUT &&
           /\bSendRequest\b/i.test(Utils.errorMessage(error))) {
           pages[1] = { url: "https://gemini.google.com/", stage: "首页诊断", autoRedirect: false };
           MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页 SendRequest，规范根路径并关闭自动跳转，单独检测首页响应`);
@@ -877,8 +889,10 @@ class ServiceChecker {
     }
     const apiKey = (ARGS.geminiapikey || "").trim();
     if (apiKey && !["0", "null", "undefined"].includes(apiKey.toLowerCase()) && !/[{}]/.test(apiKey)) {
+      const timeout = singleHome ? deadline - Date.now() : CONFIG.TIMEOUT;
+      if (timeout <= 0) return unknown;
       try {
-        const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}` });
+        const res = await Utils.request({ url: `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`, timeout });
         const issue = Utils.responseProblem(res);
         MediaLog.log(`[Gemini v${CONFIG.VERSION}] API: HTTP ${res.status}; 长度=${res.body.length}; 原因=${issue?.reason || "响应已收到"}`);
         if (issue?.reason) return issue;
@@ -903,7 +917,7 @@ class ServiceChecker {
    * 显示，不是出口 IP；HTTP 200、地区、配额或请求回显均不能替代本次真实回复。
    * 无需主页初始化、Cookie、at 或账号接口；不读写成功缓存。
    */
-  static async checkGeminiAnonymous() {
+  static async checkGeminiAnonymous(deadline) {
     const origin = "https://gemini.google.com";
     const token = "CHECK_" + Math.floor(Math.random() * 0x100000000).toString(16).padStart(8, "0").toUpperCase();
     const log = text => MediaLog.log(`[Gemini v${CONFIG.VERSION}] 匿名兜底：${text}`);
@@ -920,11 +934,22 @@ class ServiceChecker {
       }
       return frames;
     };
-    const request = (stage, path, payload, headers = {}) => Utils.request({
-      url: origin + path, method: "POST", timeout: 8000, autoRedirect: false, includeDefaultHeaders: false,
-      headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", ...headers },
-      body: "f.req=" + encodeURIComponent(JSON.stringify(payload))
-    }).catch(error => { log(`${stage}失败；${Utils.errorDetails(error)}`); return null; });
+    let replyFailure;
+    const request = async (stage, path, payload, headers = {}, limit = 6000) => {
+      try {
+        const timeout = Math.min(limit, deadline - Date.now());
+        if (timeout <= 0) throw new Error("Timeout");
+        return await Utils.request({
+          url: origin + path, method: "POST", timeout, autoRedirect: false, includeDefaultHeaders: false,
+          headers: { "Content-Type": "application/x-www-form-urlencoded;charset=utf-8", ...headers },
+          body: "f.req=" + encodeURIComponent(JSON.stringify(payload))
+        });
+      } catch (error) {
+        if (stage === "匿名回复") replyFailure = Utils.errorResult(error);
+        log(`${stage}失败；${Utils.errorDetails(error)}`);
+        return null;
+      }
+    };
 
     const input = Array(97).fill(null);
     input[0] = ["Reply with exactly " + token + " and nothing else.", 0, null, [], null, null, 0];
@@ -936,12 +961,12 @@ class ServiceChecker {
       const r = Math.floor(Math.random() * 16);
       return (c === "x" ? r : (r & 3) | 8).toString(16);
     }).toUpperCase();
-    // 两项共用当前分流/所选节点上下文，同时发出，最多额外等待 8 秒。
+    // 两项沿当前分流/所选节点并行发出，使用剩余总预算；地区最多等待 1.5 秒。
     const [reply, geo] = await Promise.all([
       request("匿名回复", "/_/BardChatUi/data/assistant.lamda.BardFrontendService/StreamGenerate?hl=en&rt=c&_reqid=" + (Date.now() % 1000000),
         [null, JSON.stringify(input)], { Referer: origin + "/", "X-Same-Domain": "1" }),
       request("地区查询", "/_/BardChatUi/data/batchexecute?rpcids=K4WWud&hl=en&rt=c&source-path=%2Fapp",
-        [[["K4WWud", JSON.stringify([[0], ["en-US"]]), null, "generic"]]])
+        [[["K4WWud", JSON.stringify([[0], ["en-US"]]), null, "generic"]]], {}, 1500)
     ]);
     let candidates = 0, matched = false;
     const frames = framesOf(reply), errors = [];
@@ -960,7 +985,7 @@ class ServiceChecker {
       } catch (_) {}
     }
     log(`wrb.fr=${frames.length}; 候选回复=${candidates}; 本次校验词匹配=${matched}; RPC错误码=${errors.join(",") || "无"}`);
-    if (!matched || errors.length) return Utils.createResult(STATUS.ERROR, "Error");
+    if (!matched || errors.length) return replyFailure || Utils.createResult(STATUS.ERROR, "Error");
 
     let region = "";
     const locations = framesOf(geo).filter(frame => frame[1] === "K4WWud");

@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../..');
 const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', name), 'utf8');
 const quiet = {log(){},error(){}};
 
-async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta, intercept}={}) {
+async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta, intercept, timers}={}) {
   const requests = [], logs = [];
   let deadline;
   try {
@@ -29,7 +29,8 @@ async function tile(service, response, {client="stash", argument="", store=new M
           $httpClient:{get:request,post:request},$done:resolve,console:{...quiet,log:(...args)=>logs.push(args.join(' '))},
           $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}}};
         if(now)ctx.Date=class extends Date {static now(){return now();}};
-        // Intentionally no setTimeout/clearTimeout: Android Stash compatibility.
+        // 默认不提供计时器以覆盖 Android；时限测试注入虚拟时钟。
+        if(timers)Object.assign(ctx,timers);
         try {vm.runInNewContext(read('media-check.js'),ctx,{timeout:1000});} catch(e){reject(e);}
       }),
       new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('tile did not finish')),2000);})
@@ -1129,7 +1130,7 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.8.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.9.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
@@ -1169,18 +1170,20 @@ function geminiAnonymousResponse(options) {
   if(options.url.includes('/batchexecute'))return {body:geminiLocation()};
   return {error:'client error (SendRequest)'};
 }
-test('Gemini anonymous fallback runs only after the original Stash iOS flow fails',async()=>{
+test('Gemini anonymous fallback runs after one Stash iOS homepage fails',async()=>{
   const store=new Map();
   const r=await tile('gemini',geminiAnonymousResponse,{environment:stashIOS,store});
   assert.equal(r.output.content,'US');assert.equal(r.output.backgroundColor,'#386EDB');
-  assert.equal(r.requests.length,4);
+  assert.equal(r.requests.length,3);
   assert.equal(r.requests[0].url,'https://gemini.google.com');
-  assert.equal(r.requests[1].url,'https://gemini.google.com/');
-  assert.ok(r.requests[2].url.includes('/StreamGenerate'));
-  assert.ok(r.requests[3].url.includes('rpcids=K4WWud'));
-  for(const o of r.requests.slice(2)) {
+  assert.equal(r.requests[0].timeout,2);
+  assert.ok(r.requests[1].url.includes('/StreamGenerate'));
+  assert.ok(r.requests[2].url.includes('rpcids=K4WWud'));
+  assert.ok(r.requests[1].timeout>0 && r.requests[1].timeout<=6);
+  assert.equal(r.requests[2].timeout,1.5);
+  for(const o of r.requests.slice(1)) {
     assert.equal(new URL(o.url).hostname,'gemini.google.com');
-    assert.equal(o.timeout,8);assert.equal(o['auto-redirect'],false);assert.equal(o['auto-cookie'],false);
+    assert.equal(o['auto-redirect'],false);assert.equal(o['auto-cookie'],false);
     assert.equal(o.policy,undefined);
     assert.equal(o.headers['User-Agent'],undefined);assert.equal(o.headers['Accept-Language'],undefined);
     assert.ok(!Object.keys(o.headers).some(key=>/cookie|authorization|key|proxy/i.test(key)));
@@ -1188,7 +1191,7 @@ test('Gemini anonymous fallback runs only after the original Stash iOS flow fail
     assert.doesNotMatch(o.url,/otAQ7b|f\.sid|\bbl=/);
   }
   assert.equal(store.size,0);
-  assert.match(r.logs.join('\n'),/原方案未取得有效结果.*Stash iOS 匿名兜底/);
+  assert.match(r.logs.join('\n'),/首页未确认.*Stash iOS 匿名兜底/);
   assert.match(r.logs.join('\n'),/候选回复=1; 本次校验词匹配=true; RPC错误码=无/);
   assert.match(r.logs.join('\n'),/匿名文本回复验证成功；地区=US/);
   assert.doesNotMatch(r.logs.join('\n'),/CHECK_[A-F0-9]{8}|f\.req=/);
@@ -1201,13 +1204,14 @@ test('Gemini successful and explicitly blocked original results never start anon
     const r=await tile('gemini',{body},{environment:stashIOS});
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
   }
-  let attempt=0;
-  const app=await tile('gemini',()=>++attempt===1?{body:'unrecognized home'}:{body:'45617354,null,true'},
+  const app=await tile('gemini',o=>o.url.includes('/_/')?geminiAnonymousResponse(o):{body:'unrecognized home'},
     {environment:stashIOS});
-  assert.equal(app.output.content,'OK');assert.equal(app.requests.length,2);
+  assert.equal(app.output.content,'US');assert.equal(app.requests.length,3);
+  assert.ok(app.requests.every(o=>!o.url.includes('/app?')));
   const api=await tile('gemini',o=>o.url.includes('generativelanguage')?{body:{models:[]}}:{error:'SendRequest'},
     {environment:stashIOS,argument:'geminiapikey=TEST-OPTIONAL-KEY'});
-  assert.equal(api.output.content,'OK');assert.equal(api.requests.length,3);
+  assert.equal(api.output.content,'OK');assert.equal(api.requests.length,2);
+  assert.ok(api.requests[1].timeout>0 && api.requests[1].timeout<=2);
   assert.ok(api.requests.every(o=>!o.url.includes('/StreamGenerate')));
 });
 test('Gemini Android, Surge iOS and unknown platforms keep the original failure behavior',async()=>{
@@ -1227,8 +1231,8 @@ test('Gemini fallback also handles timeouts and unknown pages while retaining fa
     const r=await tile('gemini',o=>o.url.includes('/_/')?geminiAnonymousResponse(o):primary,{environment:stashIOS});
     assert.equal(r.output.content,'US');
     const failed=await tile('gemini',o=>o.url.includes('/_/')?{error:'Timeout'}:primary,{environment:stashIOS});
-    assert.equal(failed.output.content,primary.error?'Timeout':'Error');
-    assert.match(failed.logs.join('\n'),/匿名兜底未确认可用，保留原结果/);
+    assert.equal(failed.output.content,'Timeout');
+    assert.match(failed.logs.join('\n'),/匿名回复超时，未确认可用/);
   }
 });
 test('Gemini fallback preserves home proxy selection and collapsed node context',async()=>{
@@ -1240,23 +1244,79 @@ test('Gemini fallback preserves home proxy selection and collapsed node context'
     assert.ok(r.requests.every(o=>!o.policy&&o.headers?.['X-Stash-Selected-Proxy']===(mode==='home'?encodeURIComponent(proxy):undefined)));
   }
 });
-test('Gemini sends both anonymous requests in parallel after the primary budget and ignores duplicate callbacks',async()=>{
+test('Gemini sends both anonymous requests in parallel within the remaining budget and ignores duplicate callbacks',async()=>{
   let clock=100000;
   const pending=[];
-  const promise=tile('gemini',()=>{clock+=10000;return {error:'Timeout'};},
+  const promise=tile('gemini',()=>{clock+=900;return {error:'SendRequest'};},
     {environment:stashIOS,now:()=>clock,intercept:(o,cb)=>{
       if(!o.url.includes('/_/'))return false;
       pending.push({o,cb});return true;
     }});
   await new Promise(resolve=>setImmediate(resolve));
   assert.equal(pending.length,2);
-  assert.ok(pending.every(({o})=>o.timeout===8));
+  assert.deepEqual(pending.map(({o})=>o.timeout),[5.1,1.5]);
   pending[1].cb(null,{status:200,headers:{}},geminiLocation());
   pending[0].cb(null,{status:200,headers:{}},geminiGenerated(pending[0].o));
   pending[0].cb('late duplicate error',null,null);
   const r=await promise;
   assert.equal(r.output.content,'US');assert.equal(r.requests.length,3);
   assert.doesNotMatch(r.logs.join('\n'),/late duplicate error/);
+});
+async function timedGemini(route) {
+  let clock=100000,serial=0,elapsed;
+  const tasks=new Map();
+  const schedule=(fn,delay)=>{const id=++serial;tasks.set(id,{at:clock+delay,fn});return id;};
+  const promise=tile('gemini',geminiAnonymousResponse,{
+    environment:stashIOS,now:()=>clock,timers:{setTimeout:schedule,clearTimeout:id=>tasks.delete(id)},
+    intercept(o,cb){
+      const result=route(o);
+      if(result!==null)schedule(()=>{
+        const body=typeof result.body==='function'?result.body(o):result.body;
+        cb(result.error||null,{status:result.status||200,headers:{}},body||'');
+      },result.delay||0);
+      return true;
+    }
+  }).then(r=>{elapsed=clock-100000;return r;});
+  await new Promise(resolve=>setImmediate(resolve));
+  for(let step=0;tasks.size && step<30;step++) {
+    const [id,task]=[...tasks].sort((a,b)=>a[1].at-b[1].at || a[0]-b[0])[0];
+    tasks.delete(id);clock=task.at;task.fn();
+    await new Promise(resolve=>setImmediate(resolve));
+  }
+  return {...await promise,elapsed};
+}
+const fastGeminiResponse=o=>o.url.includes('/StreamGenerate')?{delay:2903,body:geminiGenerated}:
+  o.url.includes('/batchexecute')?{delay:726,body:geminiLocation()}:{delay:904,error:'client error (SendRequest)'};
+test('Stash iOS Gemini reproduces the verified fast probe timings in the production script',async()=>{
+  for(const [homeDelay,replyDelay,total] of [[904,2903,3807],[893,3817,4710]]) {
+    const r=await timedGemini(o=>({...fastGeminiResponse(o),delay:o.url.includes('/StreamGenerate')?replyDelay:
+      o.url.includes('/batchexecute')?726:homeDelay}));
+    assert.equal(r.output.content,'US');assert.equal(r.elapsed,total);assert.equal(r.requests.length,3);
+    assert.equal(r.requests[0].timeout,2);
+    assert.equal(r.requests[1].timeout,(6000-homeDelay)/1000);assert.equal(r.requests[2].timeout,1.5);
+  }
+});
+test('Stash iOS Gemini ends at the shared six-second deadline and ignores late replies',async()=>{
+  for(const reply of [null,{delay:8000,body:geminiGenerated}]) {
+    const r=await timedGemini(o=>o.url.includes('/StreamGenerate')?reply:fastGeminiResponse(o));
+    assert.equal(r.elapsed,6000);assert.equal(r.output.content,'Timeout');
+    assert.equal(r.output.backgroundColor,'#8E8E93');
+    assert.doesNotMatch(r.logs.join('\n'),/匿名文本回复验证成功/);
+    assert.equal(r.logs.filter(line=>line.includes('Stash iOS 检测结束')).length,1);
+  }
+});
+test('Stash iOS Gemini reserves four seconds after a silent homepage and bounds optional region lookup',async()=>{
+  const home=await timedGemini(o=>o.url==='https://gemini.google.com'?null:fastGeminiResponse(o));
+  assert.equal(home.output.content,'US');assert.equal(home.elapsed,4903);assert.equal(home.requests[1].timeout,4);
+  const geo=await timedGemini(o=>o.url.includes('/batchexecute')?null:o.url.includes('/StreamGenerate')?
+    {delay:1000,body:geminiGenerated}:fastGeminiResponse(o));
+  assert.equal(geo.output.content,'OK');assert.equal(geo.elapsed,2404);
+});
+test('Stash iOS Gemini starts no RPC after the total budget elapsed during a suspended callback',async()=>{
+  let clock=100000;
+  const r=await tile('gemini',()=>{clock+=7000;return {error:'SendRequest'};},
+    {environment:stashIOS,now:()=>clock});
+  assert.equal(r.output.content,'Timeout');assert.equal(r.requests.length,1);
 });
 test('Gemini requires a current structured reply, not request reflection, stale data, quota or an RPC error',async()=>{
   for(const bodyOf of [
@@ -1322,7 +1382,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.8.*首页失败/);
+    assert.match(log,/Gemini v2\.2\.9.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
 });
