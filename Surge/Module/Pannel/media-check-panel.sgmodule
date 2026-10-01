@@ -1,7 +1,7 @@
 #!name=Streaming & AI Service Monitor
 #!desc=检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Viu（可选）、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit
 #!author=HotKids&ChatGPT&Claude
-#!icon=https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/overseerr.png
+#!icon=https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/ackify.png
 #!category=HotKids
 #!system=ios
 #!arguments=geminiapikey:null,nfprice:true,viu:false,notify:false

@@ -11,7 +11,7 @@
 name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit
 category: 'HotKids'
-icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/overseerr.png'
+icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/ackify.png'
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600

@@ -15,7 +15,7 @@
 name: 'IP Security Tiles'
 desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 category: 'HotKids'
-icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/nextdns.png'
+icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/arrmatey.png'
 tiles:
   - name: hotkids-ip-security-summary
     interval: 600
