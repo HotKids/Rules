@@ -14,7 +14,6 @@ on:
       - '.github/scripts/sync-config/**'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
-      - '.github/tests/**'
   workflow_dispatch:
   # Sync Rules 使用 GITHUB_TOKEN 提交产物，其 push 不会触发另一个工作流。
   # 等编译产物发布成功，再同步 LAN 的不可变 CDN 地址。

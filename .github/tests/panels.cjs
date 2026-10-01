@@ -749,17 +749,21 @@ const monitor = (options={}) => ipPanel({...options, scriptType:'cron',
   argument:'task=monitor&notify=true&'+(options.argument||'')});
 test('Stash scheduled notifications establish independent field baselines',async()=>{
   const store=new Map(), argument='mask_ip=2';
-  assert.equal((await monitor({store,argument})).notifications.length,0);
+  const first=await monitor({store,argument});
+  assert.equal(first.notifications.length,0);
+  assert.ok(!first.requests.some(r=>/ip-api.com|ipinfo|opendata/.test(r.url)));
   assert.equal((await monitor({store,argument})).notifications.length,0);
   const changed=await monitor({store,argument,outIP:'198.51.100.11',localIP:null});
-  assert.equal(changed.notifications.length,1);assert.match(changed.notifications[0][0],/IP 已变化/);
+  assert.equal(changed.notifications.length,1);assert.equal(changed.notifications[0][0],'🔄 网络已切换');
   assert.doesNotMatch(changed.notifications[0].join('\n'),/198\.51|203\.0/);
   assert.deepEqual(JSON.parse(JSON.stringify(changed.output)),{});
-  assert.ok(changed.requests.every(r=>/bilibili|ippure|cdn-cgi\/trace|ip\.sb|ipify/.test(r.url)));
+  assert.equal(changed.requests.filter(r=>r.url.includes('ippure')).length,1);
+  assert.equal(changed.requests.filter(r=>r.url.includes('bilibili')).length,1);
   assert.equal((await monitor({store,argument,outIP:'198.51.100.11'})).notifications.length,0);
   const localChanged=await monitor({store,localIP:'203.0.113.3',ipFailure:true});
-  assert.equal(localChanged.notifications.length,1);assert.match(localChanged.notifications[0][2],/本地 IP/);
-  assert.doesNotMatch(localChanged.notifications[0][2],/出口 IP/);
+  assert.equal(localChanged.notifications.length,1);
+  assert.equal(localChanged.notifications[0][1],'Ⓓ 203.0.113.3 🅟 查询失败');
+  assert.match(localChanged.notifications[0][2],/风控：未知（检测失败）/);
   const disabled=await monitor({store,argument:'notify=false',outIP:'198.51.100.12'});
   assert.equal(disabled.notifications.length,0);assert.equal(disabled.requests.length,0);
 });
@@ -781,6 +785,45 @@ test('Stash node testing never changes scheduled notification baselines',async()
   assert.equal(wrongContext.notifications.length,0);assert.equal(wrongContext.requests.length,0);
   assert.equal(store.get(key),baseline);
   assert.equal((await monitor({store,outIP:'198.51.100.11'})).notifications.length,1);
+});
+test('Stash changed-IP notifications use the Surge layout and the current detection snapshot',async()=>{
+  const store=new Map();await monitor({store});
+  const r=await monitor({store,localIP:'203.0.113.3',outIP:'198.51.100.11',outIPv6:'2001:db8::11'});
+  assert.equal(r.notifications.length,1);
+  const [title,subtitle,body]=r.notifications[0];
+  assert.equal(title,'🔄 网络已切换');
+  assert.equal(subtitle,'Ⓓ 203.0.113.3 🅟 198.51.100.11');
+  assert.match(body,/Ⓓ 🇨🇳 广东省深圳市 · 中国电信/);
+  assert.match(body,/🅟 .*Example/);
+  assert.match(body,/🅟 IPv6：2001:db8::11/);
+  assert.match(body,/🅟 风控：12% 低风险 \(IPPure\) \| 类型：住宅 · 原生/);
+  assert.doesNotMatch(body,/203\.0\.113\.2|198\.51\.100\.10|Unknown|入口|策略/);
+  assert.equal(r.requests.filter(o=>o.url.includes('bilibili')).length,1);
+  assert.equal(r.requests.filter(o=>o.url.includes('ippure')).length,1);
+  assert.deepEqual(r.apiCalls,[]);
+  assert.ok(r.requests.filter(o=>/bilibili|opendata|ip.sb\/geoip/.test(o.url))
+    .every(o=>o.headers['X-Stash-Selected-Proxy']==='DIRECT'));
+});
+test('Stash changed-IP notifications survive missing metadata and never attach another IP score',async()=>{
+  const store=new Map();await monitor({store});
+  const r=await monitor({store,outIP:'198.51.100.11',
+    ippureData:{ip:'2001:db8::99',fraudScore:99,isResidential:false,isBroadcast:true},
+    intercept(o,cb){if(/ip-api.com|ipinfo|opendata|ip.sb\/geoip/.test(o.url)){cb('timeout',null,null);return true;}}});
+  assert.equal(r.notifications.length,1);
+  assert.match(r.notifications[0][1],/198\.51\.100\.11/);
+  assert.match(r.notifications[0][2],/风控：未知（检测失败） \| 类型：类型未知 · 来源未知/);
+  assert.doesNotMatch(r.notifications[0].join('\n'),/99%|机房|198\.51\.100\.10/);
+});
+test('Stash notification details respect masking and explicit route selection',async()=>{
+  for(const mask of [1,2]) {
+    const store=new Map(),argument=`mask_ip=${mask}&proxy=US%20Test`;
+    await monitor({store,argument});
+    const r=await monitor({store,argument,localIP:'203.0.113.3',outIPv6:'2001:db8::11'});
+    assert.equal(r.notifications[0][0],'🔄 网络已切换 | US Test');
+    assert.doesNotMatch(r.notifications[0].join('\n'),/203\.0\.113\.3|198\.51\.100\.10|2001:db8::11/);
+    assert.ok(r.requests.filter(o=>!/bilibili|opendata|ip.sb\/geoip/.test(o.url))
+      .every(o=>o.headers['X-Stash-Selected-Proxy']==='US%20Test'));
+  }
 });
 test('Stash collapsed IP summaries keep essential information visible and respect masking',async()=>{
   const outbound=await ipPanel({system:'Android',argument:'tile=outbound&mode=collapsed'});
@@ -868,9 +911,9 @@ test('Stash IPPure failures stay unknown without switching risk services',async(
 test('Stash failed notifications retain changes for a later retry',async()=>{
   for(const options of [{missingNotification:true},{notificationThrows:true}]) {
     const store=new Map();await monitor({store});
-    const before=JSON.stringify([...store]);
+    const key=[...store.keys()].find(k=>k.includes('monitor.v2')), before=store.get(key);
     const result=await monitor({...options,store,outIP:'198.51.100.11',timers:true});
-    assert.equal(result.notifications.length,0);assert.equal(JSON.stringify([...store]),before);
+    assert.equal(result.notifications.length,0);assert.equal(store.get(key),before);
     assert.equal((await monitor({store,outIP:'198.51.100.11'})).notifications.length,1);
     assert.equal((await monitor({store,outIP:'198.51.100.11'})).notifications.length,0);
   }
@@ -1130,7 +1173,7 @@ test('Gemini logs failures without promoting verification pages, false flags or 
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
-    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.9.*首页: HTTP/);
+    assert.equal(r.output.backgroundColor,'#8E8E93');assert.match(r.logs.join('\n'),/Gemini v2\.2\.10.*首页: HTTP/);
     assert.doesNotMatch(r.logs.join('\n'),/continue=hidden/);
   }
   const unknown=await tile('gemini',{body:',2,1,200,"SGP"'});
@@ -1382,7 +1425,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.9.*首页失败/);
+    assert.match(log,/Gemini v2\.2\.10.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
 });
@@ -1813,7 +1856,9 @@ test('Reddit distinguishes rate limiting, explicit blocks and unknown responses'
 test('Surge Viu recognizes final region and no-service before body country links',async()=>{
   // Invoke the real optional checker without making unrelated service requests.
   const source=read('media-check.js');
-  const declarations=source.slice(0,source.indexOf('/** 主流程：'));
+  const entry=source.lastIndexOf('(async () => {');
+  assert.ok(entry>0,'media script entry must exist');
+  const declarations=source.slice(0,entry);
   for(const [url,body,expectedStatus,region] of [
     ['https://www.viu.com/ott/sg/','Welcome',1,'SG'],
     ['https://www.viu.com/ott/no-service','<a href="/ott/hk/">Hong Kong</a>',0,'NO']]) {

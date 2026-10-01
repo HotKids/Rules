@@ -12,7 +12,6 @@ on:
       - '.github/workflows/sync-rules.yml'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
-      - '.github/tests/**'
   schedule:
     - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
   workflow_dispatch:

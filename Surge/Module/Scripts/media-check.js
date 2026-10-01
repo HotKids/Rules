@@ -1,60 +1,27 @@
 /**
- * =============================================================================
- * 流媒体 & AI 服务解锁检测脚本 - Surge Panel / Stash Tiles
- * =============================================================================
- * @description  检测代理节点对各大流媒体、AI 和社交平台的解锁状态
- * @version      2.2.9 (2026-10-01)
- * @source       https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
- * @reference    https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
- *               https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
- * @runtime      自动识别 Surge / Stash；检测逻辑共用，面板与请求参数分别适配
- * @arguments    service=netflix&nfprice=true&notify=false
- *               service 可选 netflix/disney/hbomax/youtube/spotify/tiktok/chatgpt/claude/gemini/metaai/reddit
- *               Stash 不传 service 或传 service=all 时汇总；Surge 始终使用多行汇总
- *               mode=collapsed 由 Stash 选择检测节点，忽略 proxy 并关闭变化通知
- *               可选 proxy=URL编码后的节点名、notifykey=自定义通知分组
- * @routing      默认遵循所在客户端分流；proxy 指定代理，Stash 折叠模式由所选节点接管。
- * @author       HotKids & ChatGPT & Claude
+ * 流媒体与 AI 服务检测；Surge 汇总面板 / Stash 独立卡片或汇总。
+ * @version 2.2.10 (2026-10-01)
+ * @source https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
+ * @reference https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
+ *            https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
+ * @author HotKids & ChatGPT & Claude
  *
- * ═══════════════════════════════════════════════════════════════════════════
- * 📋 支持的服务（11 项）
- * ═══════════════════════════════════════════════════════════════════════════
+ * 参数：
+ * - service：Stash 使用 SERVICES 中的服务 ID；空值 / all 汇总，logs 只收集日志。
+ *   Surge 始终汇总 SERVICES 中的 11 项；viu=true 可附加 Viu，仅可用时显示。
+ * - mode=collapsed：保留 Stash 长按节点上下文，忽略 proxy，关闭变化通知。
+ * - proxy：URL 编码的节点或策略组；留空按客户端分流。
+ * - nfprice=false：关闭 Netflix 价格显示，默认开启。
+ * - notify=true：可用性或地区变化时通知，默认关闭；首次只建基线，错误不更新基线。
+ *   notifykey 可隔离通知分组；通知基线不用于跳过服务检测。
+ * - log=shared：Stash 按服务暂存日志，由 service=logs 收集为一个日志文件。
+ * - geminiapikey：可选的 Google AI API 检测凭据；API 可访问不等价于网页或 App 可用。
  *
- * 🎬 流媒体
- *    ├─ Netflix       含价格显示（可选关闭）、多级地区码提取
- *    ├─ Disney+       统一按地区与接口可用性判断
- *    ├─ HBO Max       官网结构化地区与可用性检测、第三方平台提示（JP/KR/CA）
- *    ├─ YouTube       明确可用性检测，未知时 Cookie 回落
- *    ├─ Spotify       标准地区检测
- *    └─ TikTok        Explore / 主页地区检测
- *
- * 🤖 AI 服务
- *    ├─ ChatGPT       单行显示地区 / Web Only / Mobile Only / NO
- *    ├─ Claude        地区可用性检测
- *    ├─ Gemini        网页检测 + 可选 API 检测；Stash iOS 失败后匿名文本兜底
- *    └─ Meta AI       AJAX 可用性与主页回落检测
- *
- * 🌐 社交 & 其他
- *    └─ Reddit        地区访问检测
- *
- * ═══════════════════════════════════════════════════════════════════════════
- * ⚙️ 参数配置
- * ═══════════════════════════════════════════════════════════════════════════
- *
- * • geminiapikey=YOUR_KEY    Gemini API Key（可选，增强检测准确性）
- * • nfprice=false            关闭 Netflix 价格显示（默认开启）
- * • viu=true                 仅 Surge：开启 Viu 检测，仅可用时显示（默认关闭）
- * • notify=true              解锁状态变化推送（默认关闭）：可用性或区域变化时通知，
- *                            超时/错误视为未知不触发，首次运行仅记录基线
- *
- * ═══════════════════════════════════════════════════════════════════════════
- * 🎨 状态指示
- * ═══════════════════════════════════════════════════════════════════════════
- *
- * 🟢 所有服务均可用
- * 🟡 部分服务不可用 / 受限 / 超时
- *
- * =============================================================================
+ * Gemini：Stash iOS 首页及可选 API 最多 2 秒，未知结果使用匿名文本回复兜底，
+ * 总预算 6 秒；其他客户端保持网页及可选 API 检测。明确地区限制不触发兜底；
+ * 匿名对话不验证登录账号或全部模型。
+ * 成功检测结果不缓存；Netflix 价格表的 24 小时缓存与通知基线分别保留。
+ * 品牌色用于独立卡片；汇总面板绿色表示全部可用，黄色表示部分受限或未知。
  */
 
 // 优先使用客户端的环境标识；tile 类型兼容未提供 Stash 版本标识的运行环境。
@@ -69,7 +36,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.9",
+  VERSION: "2.2.10",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -216,9 +183,6 @@ function notifyUnlockChanges(services) {
 // 显示图标和颜色配置
 const ICONS = { SUCCESS: "🟢", WARNING: "🟡", COLORS: { SUCCESS: "#3CB371", WARNING: "#DAA520" } };
 
-/**
- * 工具类 - 提供通用方法
- */
 class Utils {
   /**
    * 发起 HTTP 请求（支持 GET/POST）
@@ -457,10 +421,8 @@ class Utils {
       [STATUS.ERROR]: result.region || "Error"
     };
     
-    // 优先显示具体失败原因（如 VPN、Region Blocked）
-    let displayStatus = (result.status === STATUS.FAIL && result.region && result.region !== "No") 
-      ? result.region 
-      : statusMap[result.status];
+    // FAIL 可显示服务返回的具体限制原因。
+    const displayStatus = statusMap[result.status];
     
     return `${displayStatus}${suffix ? ` | ${suffix}` : ""}`;
   }
@@ -469,12 +431,6 @@ class Utils {
     return `${name.padEnd(11)} ➟ ${this.buildContent(result, suffix)}`;
   }
 
-  /**
-   * 创建标准检测结果对象
-   * @param {number} status - 状态码
-   * @param {string} region - 地区代码或错误信息
-   * @returns {Object} {status, region}
-   */
   static createResult(status, region = "") {
     return { status, region };
   }

@@ -4,9 +4,11 @@ on:
   push:
     paths:
       - 'snell-panel/**'
+      - '.github/workflows/snell-panel-ci.yml'
   pull_request:
     paths:
       - 'snell-panel/**'
+      - '.github/workflows/snell-panel-ci.yml'
 
 jobs:
   check:

@@ -1,10 +1,11 @@
 # 图标：IPPure / selfh.st
 # 与 Surge 共用 ip-security.js，首页聚合卡片与三张独立折叠卡片并存。
 # 每 600 秒刷新；独立定时任务通知 IP 变化，首次检测只记录基线。
+# 通知展示本地/出口 IP、地区、运营商和风险，排版与 Surge 一致。
 # 本地卡片显示直连公网 IP。
 # 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
 # 卡片与通知日志统一收集到 hotkids-ip-security.log，最多延迟一分钟。
-# v6.4.6：更新覆写后统一刷新各脚本来源，避免旧版本缓存。
+# v6.4.7：更新覆写后统一刷新各脚本来源，避免旧版本缓存。
 name: 'IP Security Tiles'
 desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 icon: https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/cadvisor.png
@@ -60,20 +61,20 @@ cron:
 
 script-providers:
   hotkids-ip-security:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
   hotkids-ip-security-summary:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
   hotkids-ip-security-outbound:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
   hotkids-ip-security-local:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
   hotkids-ip-security-risk:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
   hotkids-ip-security-notify:
-    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.6
+    url: https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/ip-security.js?v=6.4.7
     interval: 86400
