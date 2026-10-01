@@ -5,7 +5,7 @@
 #!arguments=隐藏底部标签开关↓:--,发现:0,漫游:1,笔记:0,隐藏首页卡片开关↓:--,问候语:1,每日推荐:0,推荐歌单:0,最近常听:0,音乐合伙人:0,雷达歌单:1,排行榜:0,推荐专属歌单:1,你的专属歌单:1,脚本伪vip:#
 #!arguments-desc=将 # 改成任意名称即可开启对应脚本\n\n隐藏为:1/true  不隐藏为:0/false
 #!date=2025-02-17 02:24:16
-#!icon=https://raw.githubusercontent.com/Keywos/rule/main/tv/app/144px/Netease.png
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/Website_icon/120px/NeteaseCloudMusic.png
 #!author=Keywos
 
 ### fork from https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule

@@ -1,7 +1,7 @@
 #!name=微博去广告
 #!desc=微博去广告，部分 App 需清除缓存或重新安装后才会生效
 #!author=fmz200
-#!icon=https://raw.githubusercontent.com/fmz200/wool_scripts/main/icons/apps/Weibo-00.png
+#!icon=https://raw.githubusercontent.com/luestr/IconResource/main/Website_icon/120px/Weibo.png
 #!category=去广告
 #!homepage=https://github.com/fmz200/wool_scripts
 #!raw-url=https://github.com/fmz200/wool_scripts/raw/main/Surge/module/weibo.module

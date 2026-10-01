@@ -6,6 +6,7 @@
 name: 哔哩哔哩去广告
 desc: 哔哩哔哩去广告，部分 App 需清除缓存或重新安装后才会生效
 author: kokoryh
+icon: https://raw.githubusercontent.com/luestr/IconResource/main/Website_icon/120px/Bilibili.png
 category: 去广告
 http:
   mitm:
