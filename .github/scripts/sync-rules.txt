@@ -11,6 +11,7 @@
 #   DOMAIN-SET,URL,名称  DOMAIN-SET 格式来源（裸域名 / . 前缀域名）
 #   Module 文件名无后缀 → 同时生成 .sgmodule / .stoverride；指定后缀 → 只生成该格式
 #   同名输出按清单顺序合并；name/desc/author/category 等元信息取首条（含行内覆盖）
+#   Module 改名或移除后，成功同步会清理带本生成器标记的旧文件；手工模块保留
 #   URL,名称 #!key=value 行内覆盖：Module 段 name/desc/author/category/icon/arguments；
 #                       Surge/Clash 段 #!remove=a.com,b.com 剔除来源里的指定域名
 #                       （多个逗号分隔，匹配忽略 . / +. 前缀与 DOMAIN-* 类型）

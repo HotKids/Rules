@@ -201,5 +201,50 @@ h2 = true
             with self.assertRaises(ValueError): runner.fetch_external_modules()
             self.assertEqual({p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}, before)
 
+    def test_sync_removes_renamed_and_removed_outputs_but_preserves_manual_modules(self):
+        spec = importlib.util.spec_from_file_location('sync_rules_cleanup', SCRIPTS / 'sync-rules.py')
+        runner = importlib.util.module_from_spec(spec); spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as tmp, patch.object(runner, 'REPO_ROOT', Path(tmp)):
+            listing = Path(tmp) / 'sync-rules.txt'
+            folder = Path(tmp) / 'Surge/Module'
+            folder.mkdir(parents=True)
+            manual = {
+                'GeoLoc.sgmodule': '### fork from https://example.invalid/source\n[Rule]\nDOMAIN,manual.invalid,DIRECT\n',
+                'Stash/Manual.stoverride': 'name: Manual\nrules: ["DOMAIN,manual.invalid,DIRECT"]\n',
+                'Pannel/media.sgmodule': '#!name=Panel\n[Panel]\n',
+                'Pannel/media.stoverride': 'name: Panel\n',
+            }
+            for name, content in manual.items():
+                path = folder / name
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(content)
+            texts = {'one': '[Rule]\nDOMAIN,one.invalid,REJECT\n',
+                     'two': '[Rule]\nDOMAIN,two.invalid,REJECT\n'}
+            with patch.object(runner, 'SYNC_RULES_TXT', listing), \
+                 patch.object(runner, 'prefetch_urls', return_value=texts):
+                listing.write_text('# >> Module\none,DouyinHK\ntwo,Keep\n')
+                runner.fetch_external_modules()
+                # Test both native formats, subdirectories and removing one format.
+                listing.write_text('# >> Module\none,renamed/Douyin\ntwo,Keep.stoverride\n')
+                before = {p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+                valid = texts['one']
+                texts['one'] = '<html>download failed</html>'
+                with self.assertRaises(ValueError): runner.fetch_external_modules()
+                self.assertEqual({p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}, before)
+                texts['one'] = valid
+                runner.fetch_external_modules()
+                expected = set(manual) | {'renamed/Douyin.sgmodule', 'Stash/renamed/Douyin.stoverride', 'Stash/Keep.stoverride'}
+                self.assertEqual({str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file()}, expected)
+                for name, content in manual.items():
+                    self.assertEqual((folder / name).read_text(), content)
+                # Missing config is an error; an explicit empty list removes all managed outputs.
+                before = {p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}
+                listing.unlink()
+                with self.assertRaises(FileNotFoundError): runner.fetch_external_modules()
+                self.assertEqual({p: p.read_bytes() for p in folder.rglob('*') if p.is_file()}, before)
+                listing.write_text('# >> Module\n')
+                runner.fetch_external_modules()
+                self.assertEqual({str(p.relative_to(folder)) for p in folder.rglob('*') if p.is_file()}, set(manual))
+
 
 if __name__ == '__main__': unittest.main()

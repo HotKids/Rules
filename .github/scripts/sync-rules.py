@@ -19,7 +19,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from _common import write_if_changed, prefetch_urls
-from module_convert import module_targets, merge_modules, render_surge, render_stash
+from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -1159,12 +1159,13 @@ def fetch_external_rules():
 # ═══════════════════════════════════════════════════════════════════════
 #  Main
 def fetch_external_modules():
-    """Merge Module entries by output filename and generate selected native formats."""
+    """Generate current outputs, then remove obsolete files owned by this generator."""
     print("\n── Step 1b: 同步 Surge / Stash 模块 ──")
+    if not SYNC_RULES_TXT.is_file():
+        raise FileNotFoundError(f"模块清单不存在，保留现有文件：{SYNC_RULES_TXT}")
     entries = parse_sync_rules().get("module", [])
     if not entries:
         print("  sync-rules.txt 无 Module 条目")
-        return
     groups = {}
     for entry in entries:
         for target in module_targets(entry["name"]):
@@ -1188,6 +1189,14 @@ def fetch_external_modules():
     for path, content in outputs.items():
         changed = write_if_changed(path, content)
         print(f"  {'✓' if changed else '·'} {path.relative_to(REPO_ROOT)} {'已更新' if changed else '无变化'}")
+    # Only our exact generation marker establishes ownership. A third-party
+    # 'fork from' comment also appears in hand-maintained modules.
+    for path in sorted((REPO_ROOT / "Surge" / "Module").rglob("*")):
+        if path.suffix not in (".sgmodule", ".stoverride") or path in outputs or not path.is_file() or path.is_symlink():
+            continue
+        if GENERATED_HEADER in path.read_text(encoding="utf-8").splitlines():
+            path.unlink()
+            print(f"  ✗ 删除 {path.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除或改名）")
 
 
 # ═══════════════════════════════════════════════════════════════════════
