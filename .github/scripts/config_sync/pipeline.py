@@ -1,5 +1,8 @@
 """Configuration generation: pipeline."""
 
+from _common import write_if_changed
+from module_convert import apply_stash_ca
+
 from .clash import (
     _sync_clash,
 )
@@ -50,10 +53,13 @@ def main() -> None:
     _GENERAL_INJECT.update(_build_general_inject(general_lines))
 
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
-    _sync_stash(config, surge_mitm_lines, general_lines)  # 依赖 _sync_clash 的产物，必须排在其后
+    _sync_stash(config, general_lines)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_stash_panel_metadata()
+    # Profile 证书变化时直接更新已有模块；Sync Rules 重建模块时也应用同一同步。
+    base_module = REPO_ROOT / "Surge/Module/Stash/BlockAdsBase.stoverride"
+    if base_module.is_file():
+        write_if_changed(base_module, apply_stash_ca(base_module.read_text(encoding="utf-8"), surge_mitm_lines))
     _sync_loon(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_qx(config, proxy_lines, group_lines, rule_lines, surge_mitm_lines)
     _sync_surfboard(config, proxy_lines, group_lines, rule_lines, general_lines, surge_src)
     _sync_singbox(config, group_lines, rule_lines)
-

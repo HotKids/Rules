@@ -19,7 +19,8 @@ from collections import defaultdict
 from pathlib import Path
 
 from _common import write_if_changed, prefetch_urls
-from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash
+from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash, apply_stash_ca
+from config_sync.parser import parse_surge_profile
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -1178,6 +1179,9 @@ def fetch_external_modules():
                                 for e in sources])
         if target.endswith(".stoverride"):
             content, warnings = render_stash(module, target)
+            if target == "BlockAdsBase.stoverride":
+                mitm_lines = parse_surge_profile(REPO_ROOT / "Surge/Profile.conf")[3]
+                content = apply_stash_ca(content, mitm_lines)
             for warning in warnings:
                 print(f"  [WARN] {target}: {warning}")
         else:

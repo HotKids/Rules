@@ -20,7 +20,7 @@ from .common import (
 #
 # Clash/Stash.stoverride 是 Clash/Sample.yaml 的二次转换产物（与 Clash/Mihomo.yaml
 # 同一定位）：保留可用于覆写的源设置、注释与排版，应用 Stash 适配及节点继承策略。
-# 共用 Clash/General.yaml 的通用设置；HTTP/MITM 设置来自 Surge/Profile.conf 的实际声明。
+# 共用 Clash/General.yaml 的通用设置；强制 HTTP 引擎列表来自 Surge/Profile.conf。
 
 # 1) 下列 mihomo 顶层参数未获所核验 Stash 官方 YAML 文档确认，连同前置注释省略。
 #    部分对应能力由 Stash 内置或应用设置控制；省略不代表功能不存在或字段确定无效。
@@ -223,14 +223,9 @@ def _stash_comment_out(lines: list[str], top_key: str) -> list[str]:
     return out
 
 
-def _stash_http(lines: list[str], surge_mitm_lines: list[str], general_lines: list[str]) -> list[str]:
-    """同步模板实际声明的 CA 和强制 HTTP 引擎列表，按子键合并。"""
-    fields = {"ca-p12": "ca", "ca-passphrase": "ca-passphrase"}
+def _stash_http(lines: list[str], general_lines: list[str]) -> list[str]:
+    """同步模板实际声明的强制 HTTP 引擎列表，保留其他 HTTP 设置。"""
     settings = {}
-    for line in surge_mitm_lines:
-        key, sep, value = line.strip().partition("=")
-        if sep and key.strip() in fields:
-            settings[fields[key.strip()]] = value.strip()
     for line in general_lines:
         key, sep, value = line.strip().partition("=")
         if sep and key.strip() == "force-http-engine-hosts":
@@ -252,18 +247,18 @@ def _stash_http(lines: list[str], surge_mitm_lines: list[str], general_lines: li
     http = {key: http[key] for key in (*order, *http) if key in http}
     block = yaml.safe_dump({"http": http}, allow_unicode=True, sort_keys=False).rstrip().splitlines()
     # Official example: mode/log-level → http → cron/scripts/hosts/dns → proxies/rules.
-    # Move the whole block instead of appending certificates after MATCH.
+    # Keep the HTTP block before DNS and rules.
     remaining = lines[:start] + lines[end:]
     following = {"cron", "script-providers", "script", "hosts", "dns", "proxies", "proxy-groups", "proxy-providers", "rule-providers", "rules"}
     insert_at = next((i for i, line in enumerate(remaining)
                       if line.split(":", 1)[0] in following), len(remaining))
     while insert_at > 0 and (not remaining[insert_at - 1].strip() or remaining[insert_at - 1].startswith("#")):
         insert_at -= 1
-    block = ["", "# HTTP 设置由 Surge/Profile.conf 的实际声明同步；MITM CA 仍需设备安装并信任。"] + block + [""]
+    block = ["", "# 强制 HTTP 引擎列表由 Surge/Profile.conf 同步。"] + block + [""]
     return remaining[:insert_at] + block + remaining[insert_at:]
 
 
-def _sync_stash(config: dict, surge_mitm_lines: list[str], general_lines=()) -> None:
+def _sync_stash(config: dict, general_lines=()) -> None:
     """Clash/Sample.yaml → Clash/Stash.stoverride（只改 Stash 与 mihomo 的差异点）。"""
     out_path = config.get("Stash", {}).get("output")
     clash_out = config.get("Clash", {}).get("output")
@@ -476,7 +471,7 @@ def _sync_stash(config: dict, surge_mitm_lines: list[str], general_lines=()) -> 
     out[insert_at:insert_at] = [
         "",
         f"name: {Path(out_path).stem}",
-        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及 HTTP/MITM 设置请修改 Surge/Profile.conf。",
+        "desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf。",
         "author: '@HotKids'",
         "category: HotKids",
         'icon: "https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Want.png"',
@@ -484,7 +479,7 @@ def _sync_stash(config: dict, surge_mitm_lines: list[str], general_lines=()) -> 
 
     out = _stash_comment_out(out, "proxy-providers")
     out = _stash_group_health_checks(out)
-    out = _stash_http(out, surge_mitm_lines, general_lines)
+    out = _stash_http(out, general_lines)
 
     body = "\n".join(out).rstrip() + "\n"
     changed = _write_stamped_if_changed(REPO_ROOT / out_path, body)
@@ -604,7 +599,7 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         elif l.startswith("desc: "):
             lines[i] = (f"desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，"
                         f"叠加 {label}），请勿手动修改；通用设置请修改 Clash/General.yaml，"
-                        f"策略/规则及 HTTP/MITM 设置请修改 Surge/Profile.conf，私人差异请修改 {label}。")
+                        f"策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf，私人差异请修改 {label}。")
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():

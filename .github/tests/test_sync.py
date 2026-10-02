@@ -584,10 +584,10 @@ rules:
         self.config = {'Clash': {'output': 'Clash/Sample.yaml'},
                        'Stash': {'output': 'Clash/Stash.stoverride'}}
 
-    def generate(self, mitm_lines=None, general_lines=()):
+    def generate(self, general_lines=()):
         with patch.object(stash, 'REPO_ROOT', self.root), \
                 contextlib.redirect_stdout(io.StringIO()):
-            stash._sync_stash(self.config, mitm_lines or [], general_lines)
+            stash._sync_stash(self.config, general_lines)
         self.assertEqual(self.source.read_bytes(), self.input_bytes)
         path = self.root / self.config['Stash']['output']
         return path.read_text(encoding='utf-8'), yaml.safe_load(path.read_text(encoding='utf-8'))
@@ -754,39 +754,29 @@ proxy-groups:''')
         self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
         self.assertEqual(self.source.read_bytes(), self.input_bytes)
 
-    def test_surge_ca_rotation_and_removal_reach_both_stash_outputs(self):
+    def test_regeneration_removes_previously_synced_ca_from_both_stash_outputs(self):
         directory = self.root / '.github/scripts/sync-config/Enhanced'
         directory.mkdir(parents=True)
         (directory / 'MyStash.overlay.json').write_text(json.dumps({
             'stash_output': 'Clash/MyStash.stoverride',
             'group_overrides': {'Proxy': {'type': 'url-test'}},
         }), encoding='utf-8')
-        profile = self.root / 'Profile.conf'
-        for expected in ({'ca': 'fake+fixture/ca==', 'ca-passphrase': "a' b: # = c"},
-                         {'ca': 'rotated+fixture==', 'ca-passphrase': '012345'},
-                         {'ca': 'rotated+fixture==', 'ca-passphrase': ''},
-                         {}):
-            with self.subTest(fields=tuple(expected)):
-                profile.write_text('[MITM]\nh2 = true\nskip-server-cert-verify = true\n' +
-                                   '\n'.join(f'{"ca-p12" if k == "ca" else k} = {v}'
-                                             for k, v in expected.items()), encoding='utf-8')
-                mitm = parser.parse_surge_profile(profile)[3]
-                text, output = self.generate(mitm)
-                private_path = self.root / 'Clash/MyStash.stoverride'
-                private = yaml.safe_load(private_path.read_text(encoding='utf-8'))
-                for result in (output, private):
-                    if expected:
-                        self.assertEqual(result['http'], expected)
-                    else:
-                        self.assertNotIn('http', result)
-                self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
-                self.assertNotIn('http: #!replace', text)
-                once = private_path.read_bytes()
-                text_again, _ = self.generate(mitm)
-                self.assertEqual(text_again, text)
-                self.assertEqual(private_path.read_bytes(), once)
+        for name in ('Stash', 'MyStash'):
+            (self.root / f'Clash/{name}.stoverride').write_text(
+                'http:\n  ca: old-fixture\n  ca-passphrase: old-password\n')
+        general = ['force-http-engine-hosts = api.example.invalid']
+        text, output = self.generate(general)
+        private_path = self.root / 'Clash/MyStash.stoverride'
+        private = yaml.safe_load(private_path.read_text(encoding='utf-8'))
+        for result in (output, private):
+            self.assertEqual(result['http'], {'force-http-engine': ['api.example.invalid']})
+        self.assertEqual(private['proxy-groups'][0]['type'], 'url-test')
+        once = private_path.read_bytes()
+        text_again, _ = self.generate(general)
+        self.assertEqual(text_again, text)
+        self.assertEqual(private_path.read_bytes(), once)
 
-    def test_ca_sync_preserves_other_http_fields_and_following_comments(self):
+    def test_http_engine_sync_preserves_source_http_fields_and_following_comments(self):
         self.replace_source('\nproxy-groups:', '''
 http:
   mitm: ['*.example.invalid']
@@ -798,22 +788,16 @@ http:
 
 # Proxy groups documentation
 proxy-groups:''')
-        text, output = self.generate(['ca-p12 = new-fixture==', 'ca-passphrase = false'])
+        text, output = self.generate(['force-http-engine-hosts = api.example.invalid'])
         self.assertEqual(output['http'], {
-            'ca': 'new-fixture==', 'ca-passphrase': 'false',
+            'force-http-engine': ['api.example.invalid'],
+            'ca': 'old-fixture', 'ca-passphrase': 'old-password',
             'mitm': ['*.example.invalid'],
             'script': [{'name': 'existing-script', 'type': 'request'}],
         })
         self.assertEqual(text.count('\nhttp:'), 1)
         self.assertIn('# Proxy groups documentation\nproxy-groups:', text)
         self.assertNotIn('http: #!replace', text)
-
-    def test_disabled_and_surge_only_mitm_fields_are_not_exported(self):
-        _, output = self.generate([
-            '# ca-p12 = commented', '// ca-passphrase = commented',
-            'skip-server-cert-verify = true', 'h2 = true',
-        ])
-        self.assertNotIn('http', output)
 
     def test_http_engine_follows_only_active_template_values_in_both_overrides(self):
         directory = self.root / '.github/scripts/sync-config/Enhanced'
@@ -829,16 +813,15 @@ proxy-groups:''')
               '// force-http-engine-hosts = disabled.invalid'], None),
             ([], None),
         ):
-            _, public = self.generate(['ca-p12 = fixture', 'ca-passphrase = test'], general)
+            _, public = self.generate(general)
             private = yaml.safe_load((self.root / 'Clash/MyStash.stoverride').read_text())
             for output in (public, private):
-                self.assertEqual(output['http'].get('force-http-engine'), expected)
-                self.assertEqual(output['http']['ca'], 'fixture')
-                self.assertLess(list(output).index('http'), list(output).index('dns'))
-                self.assertLess(list(output).index('http'), list(output).index('rules'))
-                self.assertLess(list(output['http']).index('ca'), list(output['http']).index('ca-passphrase'))
-                self.assertNotIn('mitm', output['http'])
-                self.assertNotIn('script', output['http'])
+                if expected:
+                    self.assertEqual(output['http'], {'force-http-engine': expected})
+                    self.assertLess(list(output).index('http'), list(output).index('dns'))
+                    self.assertLess(list(output).index('http'), list(output).index('rules'))
+                else:
+                    self.assertNotIn('http', output)
 
 
 if __name__ == '__main__': unittest.main()

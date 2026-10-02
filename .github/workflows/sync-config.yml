@@ -4,12 +4,13 @@ on:
   push:
     branches: [master]
     paths:
-      - 'Surge/Profile.conf' # 策略/规则及两份 Stash 覆写的 MITM 证书上游
+      - 'Surge/Profile.conf' # 跨客户端配置上游；Stash 同步策略/规则和强制 HTTP 引擎列表
       - 'Surge/Module/Pannel/*.sgmodule' # 同名 Stash 面板的分类、图标和默认参数上游
       # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
       - '.github/scripts/config_sync/**'
+      - '.github/scripts/module_convert.py' # BlockAdsBase 的 MITM CA 同步
       - '.github/workflows/sync-config.yml'
       - '.github/scripts/sync-config.txt'
       - '.github/scripts/sync-config/**'
@@ -53,7 +54,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Clash/Sample.yaml Clash/Mihomo.yaml Clash/Script/ Surge/Balloon.lcf Quantumult/Sample.conf Surge/Surfboard.conf sing-box/config.json Surge/Module/Pannel/*.stoverride
+          git add Clash/Sample.yaml Clash/Mihomo.yaml Clash/Script/ Surge/Balloon.lcf Quantumult/Sample.conf Surge/Surfboard.conf sing-box/config.json Surge/Module/Pannel/*.stoverride Surge/Module/Stash/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

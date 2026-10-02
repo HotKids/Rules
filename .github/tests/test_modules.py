@@ -1,5 +1,7 @@
 """Module generation tests: preserve behavior, ordering, metadata and failure atomicity."""
 import importlib.util
+import contextlib
+import io
 from pathlib import Path
 import sys
 import tempfile
@@ -9,7 +11,8 @@ import yaml
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
-from module_convert import module_targets, merge_modules, render_surge, render_stash, parse_module
+from module_convert import module_targets, merge_modules, render_surge, render_stash, parse_module, apply_stash_ca
+from config_sync import pipeline
 
 
 class ModuleTests(unittest.TestCase):
@@ -23,6 +26,73 @@ class ModuleTests(unittest.TestCase):
             self.assertEqual(module_targets('sub/Name' + suffix), ['sub/Name' + suffix])
         for name in ('../name', '/name', 'a/../b', '', 'a\\b', 'name.yaml'):
             with self.assertRaises(ValueError): module_targets(name)
+
+    def test_profile_ca_sync_preserves_module_and_removes_old_credentials(self):
+        original, _ = render_stash(merge_modules([('source', '''#!name=Base
+[MITM]
+hostname = %APPEND% ads.example.invalid
+[URL Rewrite]
+^https://ads.example.invalid/ - reject
+[Rule]
+DOMAIN,ads.example.invalid,REJECT
+''', {})]), 'BlockAdsBase.stoverride')
+        text = original
+        for fields in ({'ca-p12': 'first+fixture==', 'ca-passphrase': "a' b: # = c"},
+                       {'ca-p12': 'rotated+fixture==', 'ca-passphrase': '012345'},
+                       {'ca-p12': 'rotated+fixture==', 'ca-passphrase': ''}, {}):
+            lines = [f'{k} = {v}' for k, v in fields.items()]
+            lines += ['# ca-p12 = ignored', '// ca-passphrase = ignored', 'hostname = unrelated.invalid']
+            text = apply_stash_ca(text, lines)
+            self.assertEqual(apply_stash_ca(text, lines), text)
+            actual = yaml.safe_load(text)
+            expected = yaml.safe_load(original)
+            for source, target in [('ca-p12', 'ca'), ('ca-passphrase', 'ca-passphrase')]:
+                if source in fields:
+                    expected['http'][target] = fields[source]
+            self.assertEqual(actual, expected)
+            self.assertLess(list(actual).index('http'), list(actual).index('rules'))
+        self.assertEqual(text, original)
+        no_http = 'name: Base\nrules: ["DOMAIN,a.invalid,REJECT"]\n'
+        added = yaml.safe_load(apply_stash_ca(no_http, ['ca-p12 = fixture']))
+        self.assertLess(list(added).index('http'), list(added).index('rules'))
+        self.assertEqual(yaml.safe_load(apply_stash_ca(yaml.safe_dump(added), [])), yaml.safe_load(no_http))
+
+    def test_rules_and_config_sync_keep_profile_ca_only_in_stash_base(self):
+        spec = importlib.util.spec_from_file_location('sync_rules_ca_test', SCRIPTS / 'sync-rules.py')
+        runner = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(runner)
+        with tempfile.TemporaryDirectory() as directory, contextlib.ExitStack() as stack:
+            root = Path(directory)
+            (root / 'Surge').mkdir()
+            profile = root / 'Surge/Profile.conf'
+            profile.write_text('[MITM]\nca-p12 = first-fixture\nca-passphrase = 012345\n')
+            listing = root / 'sync-rules.txt'
+            listing.write_text('# >> Module\nsource,BlockAdsBase\nsource,Other\n')
+            stack.enter_context(patch.object(runner, 'REPO_ROOT', root))
+            stack.enter_context(patch.object(runner, 'SYNC_RULES_TXT', listing))
+            stack.enter_context(patch.object(runner, 'prefetch_urls', return_value={
+                'source': '[MITM]\nhostname = ads.example.invalid\n[Rule]\nDOMAIN,ads.example.invalid,REJECT\n'}))
+            stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
+            runner.fetch_external_modules()
+            base = root / 'Surge/Module/Stash/BlockAdsBase.stoverride'
+            self.assertEqual(yaml.safe_load(base.read_text())['http']['ca'], 'first-fixture')
+            others = {p: p.read_bytes() for p in (root / 'Surge/Module').rglob('*') if p.is_file() and p != base}
+            self.assertNotIn('ca', yaml.safe_load((root / 'Surge/Module/Stash/Other.stoverride').read_text())['http'])
+            stack.enter_context(patch.object(pipeline, 'REPO_ROOT', root))
+            stack.enter_context(patch.object(pipeline, 'parse_sync_txt', return_value={'Surge': {'source': 'Surge/Profile.conf'}}))
+            stack.enter_context(patch.dict(pipeline._GENERAL_INJECT, clear=True))
+            for name in ('_sync_clash', '_sync_stash', '_sync_stash_panel_metadata', '_sync_loon', '_sync_qx', '_sync_surfboard', '_sync_singbox'):
+                stack.enter_context(patch.object(pipeline, name))
+            for fields, expected in [('ca-p12 = rotated-fixture\nca-passphrase = false\n',
+                                     {'ca': 'rotated-fixture', 'ca-passphrase': 'false'}), ('', {})]:
+                profile.write_text('[MITM]\n' + fields)
+                pipeline.main()
+                self.assertEqual(yaml.safe_load(base.read_text())['http'], {'mitm': ['ads.example.invalid'], **expected})
+                once = base.read_bytes()
+                runner.fetch_external_modules()
+                self.assertEqual(base.read_bytes(), once)
+                for path, content in others.items():
+                    self.assertEqual(path.read_bytes(), content)
 
     def test_merge_first_metadata_and_order_without_losing_scripts_or_hosts(self):
         first = '''#!name=First
