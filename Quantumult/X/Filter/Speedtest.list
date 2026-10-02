@@ -105,6 +105,7 @@ DOMAIN-SUFFIX,speedtest.razorblue.com,Speedtest
 DOMAIN-SUFFIX,ookla.enventis.net,Speedtest
 DOMAIN-SUFFIX,ookla.surfinternet.com,Speedtest
 DOMAIN-SUFFIX,ookla.ham1.x-ion.de,Speedtest
+DOMAIN-SUFFIX,speedtest.sg,Speedtest
 DOMAIN-SUFFIX,speed.cloudflare.com,Speedtest
 DOMAIN-SUFFIX,wifiman.com,Speedtest
 DOMAIN-SUFFIX,wifiman.me,Speedtest

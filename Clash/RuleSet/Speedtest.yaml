@@ -106,6 +106,7 @@ payload:
   - '+.ookla.enventis.net'
   - '+.ookla.surfinternet.com'
   - '+.ookla.ham1.x-ion.de'
+  - '+.speedtest.sg'
   - '+.speed.cloudflare.com'
   - '+.wifiman.com'
   - '+.wifiman.me'
