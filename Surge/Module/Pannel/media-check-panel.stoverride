@@ -71,7 +71,7 @@ tiles:
     interval: 600
     title: 'ChatGPT'
     content: 'Loading...'
-    icon: 'https://raw.githubusercontent.com/StashNetworks/misc/main/collapsed-tiles/img/chatgpt.png'
+    icon: 'https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/openai-light.png'
     backgroundColor: '#0D8A70'
     collapsed: true
     url: 'https://chatgpt.com'
