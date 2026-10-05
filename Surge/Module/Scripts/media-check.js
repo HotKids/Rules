@@ -384,7 +384,7 @@ class Utils {
       [STATUS.OK]: result.region || "OK",
       [STATUS.COMING]: (result.region?.includes("(") || result.region?.includes(" ")) ? result.region : `${result.region || "N/A"} (Coming)`,
       [STATUS.FAIL]: result.region || "No",
-      [STATUS.TIMEOUT]: "Timeout",
+      [STATUS.TIMEOUT]: "TO",
       [STATUS.ERROR]: result.region || "Error"
     };
     
