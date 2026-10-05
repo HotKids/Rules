@@ -1048,7 +1048,7 @@ test('Gemini original flags, explicit regional restrictions and unknown response
     [{status:429,body:'rate limited'},'Error'],
     [{status:403,body:'Forbidden'},'Error'],
     [{status:503},'Error'],
-    [{error:'request timed out'},'Timeout']
+    [{error:'request timed out'},'TO']
   ]) {
     const r=await tile('gemini',response);
     assert.equal(r.output.content,expected);
@@ -1146,7 +1146,7 @@ test('Gemini fallback also handles timeouts and unknown pages while retaining fa
     const r=await tile('gemini',o=>o.url.includes('/_/')?geminiAnonymousResponse(o):primary,{environment:stashIOS});
     assert.equal(r.output.content,'US');
     const failed=await tile('gemini',o=>o.url.includes('/_/')?{error:'Timeout'}:primary,{environment:stashIOS});
-    assert.equal(failed.output.content,'Timeout');
+    assert.equal(failed.output.content,'TO');
     assert.match(failed.logs.join('\n'),/匿名回复超时，未确认可用/);
   }
 });
@@ -1214,7 +1214,7 @@ test('Stash iOS Gemini reproduces the verified fast probe timings in the product
 test('Stash iOS Gemini ends at the shared six-second deadline and ignores late replies',async()=>{
   for(const reply of [null,{delay:8000,body:geminiGenerated}]) {
     const r=await timedGemini(o=>o.url.includes('/StreamGenerate')?reply:fastGeminiResponse(o));
-    assert.equal(r.elapsed,6000);assert.equal(r.output.content,'Timeout');
+    assert.equal(r.elapsed,6000);assert.equal(r.output.content,'TO');
     assert.equal(r.output.backgroundColor,'#8E8E93');
     assert.doesNotMatch(r.logs.join('\n'),/匿名文本回复验证成功/);
     assert.equal(r.logs.filter(line=>line.includes('Stash iOS 检测结束')).length,1);
@@ -1231,7 +1231,7 @@ test('Stash iOS Gemini starts no RPC after the total budget elapsed during a sus
   let clock=100000;
   const r=await tile('gemini',()=>{clock+=7000;return {error:'SendRequest'};},
     {environment:stashIOS,now:()=>clock});
-  assert.equal(r.output.content,'Timeout');assert.equal(r.requests.length,1);
+  assert.equal(r.output.content,'TO');assert.equal(r.requests.length,1);
 });
 test('Gemini requires a current structured reply, not request reflection, stale data, quota or an RPC error',async()=>{
   for(const bodyOf of [
@@ -1287,7 +1287,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
   for(const [response,phase,detail,expected] of [
     [{error:'Connection reset by peer'},'callback',/Connection reset by peer/,'Error'],
     [{error:{domain:'NSURLErrorDomain',code:-1200,localizedDescription:'TLS handshake failed'}},'callback',/code=-1200; domain=NSURLErrorDomain/,'Error'],
-    [{error:{domain:'NSURLErrorDomain',code:-1001}},'callback',/code=-1001/,'Timeout'],
+    [{error:{domain:'NSURLErrorDomain',code:-1001}},'callback',/code=-1001/,'TO'],
     [{rawResponse:null},'response',/missing response/,'Error'],
     [{rawResponse:{}},'response',/missing HTTP status/,'Error'],
     [{status:0},'response',/missing HTTP status/,'Error'],
@@ -1346,7 +1346,7 @@ test('Media error logs retain bounded causes and survive cycles and unsafe gette
     assert.doesNotMatch(log,/OUT-OF-BOUND|GETTER-PRIVATE|FUNCTION-BODY-PRIVATE|function source/);
   }
   const timeout=await tile('gemini',{error:{message:'Native failure',cause:{source:{domain:'NSURLErrorDomain',code:-1001}}}});
-  assert.equal(timeout.output.content,'Timeout');assert.equal(timeout.requests.length,1);
+  assert.equal(timeout.output.content,'TO');assert.equal(timeout.requests.length,1);
   assert.match(timeout.logs.join('\n'),/code=-1001/);
   const token='PRIVATE-API-KEY';
   const privateError=await tile('spotify',{error:{message:
@@ -1426,7 +1426,7 @@ test('ChatGPT keeps one result and only uses Only labels for confirmed restricti
     assert.equal(result.output.content,'Web Only');
   }
   const unknown=await tile('chatgpt',o=>o.url.includes('ios.chat')?{error:'Timeout'}:{body:'{}'});
-  assert.equal(unknown.output.content,'Timeout');
+  assert.equal(unknown.output.content,'TO');
 });
 test('Netflix needs a title page and independent original-title confirmation',async()=>{
   for(const body of ['', '<html>generic home</html>', '<title>Just a moment...</title>']) {
