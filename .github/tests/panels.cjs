@@ -110,7 +110,7 @@ test('Generated Mihomo scripts run with both subscription variants',()=>{
 async function ipPanel({client='stash', argument='', store=new Map(), outIP='198.51.100.10',
   outIPv6=null, localIP='203.0.113.2', riskFailure=false, missingNotification=false,
   notificationThrows=false, ipFailure=false, timers=false, ippureData, dnsFailure=false,
-  scriptType='tile', intercept, now, storageThrows=false, system, virtualTimers=false}={}) {
+  scriptType='tile', intercept, now, storageThrows=false, system, virtualTimers=false, recentRequests}={}) {
   const requests=[], rawRequests=[], notifications=[], apiCalls=[], outputs=[], handles=[], logs=[], requestEvents=[], timerEvents=[];
   const nativeNow=Date.now.bind(Date);
   const clockStart=now===undefined?100000000:now;
@@ -184,7 +184,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
           ctx.$httpAPI=(method,path,body,cb)=>{
             apiCalls.push(path);
             cb(path==='/v1/traffic'?{interface:{en0:{in:2048,out:1024}}}:
-              {requests:[{URL:'https://ipinfo.io/test/json',policyName:'Test Proxy',remoteAddress:'192.0.2.1:443 (Proxy)'}]});
+              {requests:recentRequests ?? [{URL:'https://ipinfo.io/test/json',policyName:'Test Proxy',remoteAddress:'192.0.2.1:443 (Proxy)'}]});
           };
         }
         if(now!==undefined||virtualTimers)ctx.Date=class extends Date{static now(){return testNow();}};
@@ -977,6 +977,29 @@ test('Surge notifications summarize both IPs then order risk, outbound, entrance
   }
   const disabled=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001&notify=false'});
   assert.deepEqual(disabled.notifications,[]);
+});
+
+test('Surge notifications omit unavailable policy names while preserving IP and risk details',async()=>{
+  const request={URL:'https://ipinfo.io/test/json'};
+  for(const options of [
+    {recentRequests:[]},
+    {recentRequests:[request]},
+    {recentRequests:[{...request,policyName:'Unknown'}]},
+    {recentRequests:[{...request,policyName:'  '}]},
+    {recentRequests:[],store:new Map([['lastProxyPolicy','Unknown']])}
+  ]) {
+    const r=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,...options});
+    assert.equal(r.notifications.length,1);
+    const [title,subtitle,body]=r.notifications[0];
+    assert.equal(title,'🔄 网络已切换');
+    assert.equal(subtitle,'Ⓓ 203.0.113.2 🅟 198.51.100.10');
+    assert.match(body,/^🅟 风控：12% 极度纯净 \(ProxyCheck\)/);
+    assert.match(body,/\n🅟 198\.51\.100\.10 /);
+    assert.match(body,/\nⒹ 203\.0\.113\.2 /);
+  }
+  const cached=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,
+    recentRequests:[],store:new Map([['lastProxyPolicy','HK HKT']])});
+  assert.equal(cached.notifications[0][0],'🔄 网络已切换 | HK HKT');
 });
 
 const spotifyConfig = market => `<script type="text/plain" id="appServerConfig">${Buffer.from(JSON.stringify({market,label:'地区'})).toString('base64')}</script>`;
