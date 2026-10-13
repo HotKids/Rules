@@ -988,8 +988,10 @@ test('Surge notifications omit unavailable policy names while preserving IP and 
     {recentRequests:[{...request,policyName:'  '}]},
     {recentRequests:[],store:new Map([['lastProxyPolicy','Unknown']])}
   ]) {
+    const previousPolicy=options.store?.get('lastProxyPolicy');
     const r=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,...options});
     assert.equal(r.notifications.length,1);
+    assert.equal(r.store.get('lastProxyPolicy'),previousPolicy);
     const [title,subtitle,body]=r.notifications[0];
     assert.equal(title,'🔄 网络已切换');
     assert.equal(subtitle,'Ⓓ 203.0.113.2 🅟 198.51.100.10');
@@ -1000,6 +1002,32 @@ test('Surge notifications omit unavailable policy names while preserving IP and 
   const cached=await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,
     recentRequests:[],store:new Map([['lastProxyPolicy','HK HKT']])});
   assert.equal(cached.notifications[0][0],'🔄 网络已切换 | HK HKT');
+});
+
+test('Surge preserves the last valid policy through incomplete request records',async()=>{
+  const store=new Map();
+  const request={URL:'https://ipinfo.io/test/json',remoteAddress:'192.0.2.1:443 (Proxy)'};
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  const first=await ipPanel({...options,recentRequests:[{...request,policyName:'HK HKT'}]});
+  assert.equal(first.notifications[0][0],'🔄 网络已切换 | HK HKT');
+  assert.equal(store.get('lastProxyPolicy'),'HK HKT');
+  for(const [index,policyName] of [undefined,null,'','  ','Unknown',' unknown '].entries()) {
+    const outIP='198.51.100.'+(11+index);
+    const r=await ipPanel({...options,outIP,recentRequests:[{...request,policyName}]});
+    assert.equal(r.notifications[0][0],'🔄 网络已切换 | HK HKT');
+    assert.equal(r.notifications[0][1],'Ⓓ 203.0.113.2 🅟 '+outIP);
+    assert.doesNotMatch(r.notifications[0][2],/Ⓔ|192\.0\.2\.1/);
+    assert.equal(store.get('lastProxyPolicy'),'HK HKT');
+  }
+  const missing=await ipPanel({...options,outIP:'198.51.100.12',recentRequests:[]});
+  assert.equal(missing.notifications[0][0],'🔄 网络已切换 | HK HKT');
+  const panel=await ipPanel({...options,argument:'',recentRequests:[request]});
+  assert.equal(panel.output.title,'代理策略：HK HKT');
+  for(const [index,policyName] of ['US Node','DIRECT'].entries()) {
+    const r=await ipPanel({...options,outIP:'198.51.100.'+(20+index),recentRequests:[{...request,policyName}]});
+    assert.equal(r.notifications[0][0],'🔄 网络已切换 | '+policyName);
+    assert.equal(store.get('lastProxyPolicy'),policyName);
+  }
 });
 
 const spotifyConfig = market => `<script type="text/plain" id="appServerConfig">${Buffer.from(JSON.stringify({market,label:'地区'})).toString('base64')}</script>`;
