@@ -73,7 +73,7 @@ http:
     timeout: 10
     argument: '{"logLevel":"4"}'
     engine: webkit
-  - name: Bilibili-bilibili.request
+  - name: Bilibili-bilibili.protobuf.request
     match: ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.(?:app\.viewunite\.v1\.View\/View|main\.community\.reply\.v1\.Reply\/MainList)$
     type: request
     require-body: true
@@ -107,7 +107,7 @@ http:
     require-body: true
     max-size: 0
     engine: webkit
-  - name: Bilibili-bilibili.protobuf
+  - name: Bilibili-bilibili.protobuf.response
     match: ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.(?:app\.(?:show\.v1\.Popular\/Index|dynamic\.v2\.Dynamic\/DynAll|view(?:unite)?\.v1\.View\/(?:View|ViewProgress|RelatesFeed|AIRelateAsync)|playurl\.v1\.PlayURL\/PlayView|playerunite\.v1\.Player\/PlayViewUnite)|polymer\.app\.search\.v1\.Search\/SearchAll|community\.service\.dm\.v1\.DM\/DmView|main\.community\.reply\.v1\.Reply\/MainList|pgc\.gateway\.player\.v2\.PlayURL\/PlayView)$
     type: response
     require-body: true
@@ -119,7 +119,7 @@ script-providers:
   Bilibili-bilibili.airborne:
     url: https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/bilibili.protobuf.request.js
     interval: 86400
-  Bilibili-bilibili.request:
+  Bilibili-bilibili.protobuf.request:
     url: https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/bilibili.protobuf.request.js
     interval: 86400
   Bilibili-bilibili.skin:
@@ -134,7 +134,7 @@ script-providers:
   Bilibili-bilibili.webpage:
     url: https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/webpage.bilibili.js
     interval: 86400
-  Bilibili-bilibili.protobuf:
+  Bilibili-bilibili.protobuf.response:
     url: https://raw.githubusercontent.com/kokoryh/Sparkle/refs/heads/master/dist/bilibili.protobuf.response.js
     interval: 86400
 rules:
@@ -146,5 +146,4 @@ rules:
 - AND,((DOMAIN-SUFFIX,chat.bilibili.com), (OR,((DOMAIN-KEYWORD,stun), (DOMAIN-KEYWORD,tracker), (DOMAIN-KEYWORD,p2p)))),REJECT
 - DST-PORT,4480,REJECT
 - DST-PORT,4483,REJECT
-- DST-PORT,8082,REJECT
 - DST-PORT,9102,REJECT
