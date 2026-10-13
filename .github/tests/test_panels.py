@@ -2,7 +2,6 @@
 from pathlib import Path
 import contextlib
 import io
-import re
 import sys
 import tempfile
 import unittest
@@ -114,11 +113,10 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(actual, expected)
         self.assertEqual(len({tile['name'] for tile in config['tiles']}), len(expected))
         self.assertTrue(all(tile['collapsed'] for tile in config['tiles']))
-        version = re.search(r'@version\s+([\d.]+)', (ROOT / 'Surge/Module/Scripts/media-check.js').read_text()).group(1)
         for tile in config['tiles']:
             self.assertEqual(parse_qs(tile['argument'])['log'], ['shared'])
             provider = config['script-providers'][tile['name']]
-            self.assertEqual(parse_qs(urlsplit(provider['url']).query), {'v': [version]})
+            self.assertEqual(urlsplit(provider['url']).query, '')
             self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/media-check.js'))
         jobs = config['cron']['script']
         self.assertEqual(len(jobs), 1)
@@ -128,7 +126,7 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(jobs[0]['timeout'], 5)
         self.assertEqual(parse_qs(jobs[0]['argument']), {'service': ['logs']})
         provider = config['script-providers'][jobs[0]['name']]
-        self.assertEqual(parse_qs(urlsplit(provider['url']).query), {'v': [version]})
+        self.assertEqual(urlsplit(provider['url']).query, '')
         self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/media-check.js'))
 
     def test_ip_notification_context_is_separate_from_tiles(self):
@@ -165,10 +163,9 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(collector['cron'], '* * * * *')
         self.assertEqual(collector['timeout'], 5)
         self.assertEqual(parse_qs(collector['argument']), {'task': ['logs']})
-        version = re.search(r'@version ([\d.]+)', (ROOT / 'Surge/Module/Scripts/ip-security.js').read_text()).group(1)
         for context in [*config['tiles'], *jobs]:
             provider = config['script-providers'][context['name']]
-            self.assertEqual(parse_qs(urlsplit(provider['url']).query), {'v': [version]})
+            self.assertEqual(urlsplit(provider['url']).query, '')
             self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/ip-security.js'))
 
 
