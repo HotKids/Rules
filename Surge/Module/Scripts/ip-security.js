@@ -1189,7 +1189,8 @@ function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entran
   }
 
   const m = (ip) => maskIP(ip, maskMode);
-  const title = "🔄 网络已切换 | " + policy;
+  const policyLabel = typeof policy === "string" ? policy.trim() : "";
+  const title = "🔄 网络已切换" + (policyLabel && !/^unknown$/i.test(policyLabel) ? " | " + policyLabel : "");
   const subtitle = "Ⓓ " + m(localIP) + " 🅟 " + m(outIP);
   const bodyLines = [
     "🅟 风控：" + formatRisk(riskInfo) + " | 类型：" + ipType + " · " + ipSrc,
