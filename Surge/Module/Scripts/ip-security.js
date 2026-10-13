@@ -636,13 +636,16 @@ async function getPolicyAndEntrance() {
     hit = await findInRecent(100);
   }
 
-  if (!hit) {
-    const lastPolicy = $persistentStore.read(CONFIG.storeKeys.lastPolicy);
+  const validPolicy = name => typeof name === "string" && name.trim() !== "" && !/^unknown$/i.test(name.trim());
+  const policy = hit?.policyName;
+  // 命中请求但缺少策略名时也回退；失败结果不能覆盖上次有效策略。
+  if (!validPolicy(policy)) {
+    const storedPolicy = $persistentStore.read(CONFIG.storeKeys.lastPolicy);
+    const lastPolicy = validPolicy(storedPolicy) ? storedPolicy : null;
     IPLog.log(lastPolicy ? "使用上次保存的策略: " + lastPolicy : "无法找到任何策略信息");
     return { policy: lastPolicy || "Unknown", entranceIP: null };
   }
 
-  const policy = hit.policyName || "Unknown";
   $persistentStore.write(policy, CONFIG.storeKeys.lastPolicy);
   IPLog.log("找到代理策略: " + policy);
 
