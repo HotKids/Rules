@@ -1,4 +1,4 @@
-# Date: 2026-10-13 15:57:22
+# Date: 2026-10-14 13:25:59
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -385,7 +385,7 @@ proxy-groups: #!replace
     include-all: true
     interval: 600
     lazy: true
-    filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?!.*Neburst)(?!.*Pro)'
+    filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?!.*Pro)'
 
   - name: "🇸🇬 Singapore"
     type: fallback
@@ -394,7 +394,7 @@ proxy-groups: #!replace
     include-all: true
     interval: 600
     lazy: true
-    filter: '(?i)^(?=.*\b(?:SG|SGP)\d*\b)(?!.*Neburst)(?!.*Pro)'
+    filter: '(?i)^(?=.*\b(?:SG|SGP)\d*\b)(?!.*GoMaMi)(?!.*Pro)'
 
   - name: "🇯🇵 Japan"
     type: fallback
