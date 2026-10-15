@@ -38,9 +38,9 @@ http:
   - ^https:\/\/images\.pinduoduo\.com\/marketing_api\/ - reject
 rules:
 - DOMAIN-KEYWORD,adstrategy,${args.early_reject}
-- AND,((DOMAIN-KEYWORD,tnc,extended-matching),(OR,((DOMAIN-SUFFIX,capcutapi.com,extended-matching),(DOMAIN-SUFFIX,zijieapi.com,extended-matching),(DOMAIN-SUFFIX,isnssdk.com,extended-matching),(DOMAIN-SUFFIX,toutiaoapi.com,extended-matching),(DOMAIN-SUFFIX,bytedance.com,extended-matching),(DOMAIN-SUFFIX,snssdk.com,extended-matching),(DOMAIN-SUFFIX,sgsnssdk.com,extended-matching)))),DIRECT
-- AND,((DOMAIN-KEYWORD,-ad-,extended-matching),(DOMAIN-SUFFIX,byteimg.com,extended-matching)),${args.early_reject}
-- AND,((DOMAIN-KEYWORD,ads,extended-matching),(DOMAIN-KEYWORD,-normal.zijieapi.com,extended-matching)),${args.early_reject}
+- AND,((DOMAIN-KEYWORD,tnc),(OR,((DOMAIN-SUFFIX,capcutapi.com),(DOMAIN-SUFFIX,zijieapi.com),(DOMAIN-SUFFIX,isnssdk.com),(DOMAIN-SUFFIX,toutiaoapi.com),(DOMAIN-SUFFIX,bytedance.com),(DOMAIN-SUFFIX,snssdk.com),(DOMAIN-SUFFIX,sgsnssdk.com)))),DIRECT
+- AND,((DOMAIN-KEYWORD,-ad-),(DOMAIN-SUFFIX,byteimg.com)),${args.early_reject}
+- AND,((DOMAIN-KEYWORD,ads),(DOMAIN-KEYWORD,-normal.zijieapi.com)),${args.early_reject}
 - DOMAIN,lf-ad-ies.bytecdn.cn,${args.early_reject}
 - DOMAIN,dig.bdurl.net,${args.early_reject}
 - DOMAIN,extlog.snssdk.com,${args.early_reject}
@@ -206,7 +206,7 @@ rules:
 - DOMAIN,adash.man.aliyuncs.com,${args.early_reject}
 - DOMAIN,applog.uc.cn,${args.early_reject}
 - DOMAIN,atoken.m.taobao.com,${args.early_reject}
-- AND,((DOMAIN-KEYWORD,adash,extended-matching),(DOMAIN-SUFFIX,ut.taobao.com,extended-matching)),${args.early_reject}
+- AND,((DOMAIN-KEYWORD,adash),(DOMAIN-SUFFIX,ut.taobao.com)),${args.early_reject}
 - DOMAIN,baichuan-sdk.alicdn.com,${args.early_reject}
 - DOMAIN,acs4baichuan.m.taobao.com,${args.early_reject}
 - DOMAIN,api.sm.cn,${args.early_reject}

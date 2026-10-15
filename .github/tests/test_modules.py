@@ -261,6 +261,18 @@ URL-REGEX,^https://other.invalid/,REJECT-NO-DROP
         self.assertEqual(data['http']['url-rewrite'],
                          ['^https://example.invalid/ - reject', '^https://other.invalid/ - reject'])
 
+    def test_nested_surge_flags_are_removed_without_changing_conditions_or_regex_values(self):
+        data, warnings = self.convert('''[Rule]
+AND,((DOMAIN-KEYWORD,tnc,extended-matching),(OR,((DOMAIN-SUFFIX,one.invalid,extended-matching),(IP-CIDR,192.0.2.0/24,no-resolve)))),DIRECT
+AND,((DOMAIN,ads.invalid,extended-matching),(NOT,((DOMAIN,safe.invalid,extended-matching)))),REJECT,pre-matching
+AND,((URL-REGEX,"^https://example.invalid/(a,extended-matching)",extended-matching),(DOMAIN,example.invalid)),REJECT-DROP
+''')
+        self.assertEqual(data['rules'], [
+            'AND,((DOMAIN-KEYWORD,tnc),(OR,((DOMAIN-SUFFIX,one.invalid),(IP-CIDR,192.0.2.0/24,no-resolve)))),DIRECT',
+            'AND,((DOMAIN,ads.invalid),(NOT,((DOMAIN,safe.invalid)))),${args.early_reject}',
+            'AND,((URL-REGEX,"^https://example.invalid/(a,extended-matching)"),(DOMAIN,example.invalid)),REJECT-DROP'])
+        self.assertEqual(warnings, ['[Rule] Surge-only options omitted: nested condition flags'])
+
     def test_disabled_defaults_do_not_run_and_unknown_features_are_reported(self):
         data, warnings = self.convert('''#!arguments=off:#
 [Script]
