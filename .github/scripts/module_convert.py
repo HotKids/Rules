@@ -200,6 +200,21 @@ def _rule_parts(line):
     return parts
 
 
+def _stash_condition_flags(value):
+    """清理逻辑子条件的 Surge 选项，保留正则值、引号与 no-resolve。"""
+    if not (value.startswith("(") and value.endswith(")")):
+        return value
+    parts = _rule_parts(value[1:-1])
+    original = parts[:]
+    if parts[0].startswith("("):
+        parts = [_stash_condition_flags(part) for part in parts]
+    else:
+        if parts[0] in {"AND", "OR", "NOT"} and len(parts) > 1:
+            parts[1] = _stash_condition_flags(parts[1])
+        parts = parts[:2] + [flag for flag in parts[2:] if flag not in {"extended-matching", "pre-matching"}]
+    return value if parts == original else "(" + ",".join(parts) + ")"
+
+
 def render_stash(module, output_name):
     metadata, sections, urls = module
     defaults = _arguments(metadata.get("arguments", ""))
@@ -233,6 +248,11 @@ def render_stash(module, output_name):
                 if len(parts) < 3:
                     warn(section, line); continue
                 kind, value, policy, *flags = parts
+                if kind in {"AND", "OR", "NOT"}:
+                    cleaned = _stash_condition_flags(value)
+                    if cleaned != value:
+                        warn(section, "Surge-only options omitted: nested condition flags")
+                    value = cleaned
                 if flags:
                     ignored = [f for f in flags if f not in {"no-resolve", "no-track", "pre-matching"}]
                     if ignored: warn(section, "Surge-only options omitted: " + ",".join(ignored))

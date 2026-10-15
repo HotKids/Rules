@@ -44,4 +44,4 @@ rules:
 - AND,((IP-CIDR,111.225.147.191/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
 - AND,((IP-CIDR,111.63.61.101/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
 - AND,((IP-CIDR,220.243.141.0/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
-- AND,((OR,((DOMAIN-SUFFIX,bytegecko.com,extended-matching),(DOMAIN-SUFFIX,byteeffecttos.com,extended-matching))),(DOMAIN-KEYWORD,ncdn,extended-matching)),${args.early_reject}
+- AND,((OR,((DOMAIN-SUFFIX,bytegecko.com),(DOMAIN-SUFFIX,byteeffecttos.com))),(DOMAIN-KEYWORD,ncdn)),${args.early_reject}
