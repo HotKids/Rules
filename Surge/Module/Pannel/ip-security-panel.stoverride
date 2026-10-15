@@ -1,7 +1,7 @@
 # 图标：IPPure / selfh.st
 # 覆写的 category/icon 及兼容参数默认值由同名 .sgmodule 同步，在 Surge 源文件维护。
 # 与 Surge 共用 ip-security.js，首页聚合卡片与三张独立折叠卡片并存。
-# 每 600 秒刷新；独立定时任务通知 IP 变化，首次检测只记录基线。
+# 卡片刷新间隔由 panel_interval 设置，默认 600 秒；独立定时任务通知 IP 变化，首次只记录基线。
 # 通知展示本地/出口 IP、地区、运营商和风险，排版与 Surge 一致。
 # 本地卡片显示直连公网 IP；首页及纯净度卡按风险值动态变色，六档等级与 Surge 一致。
 # 地区每轮查询：本地百度 → bilibili → ip.sb；出口 ipapi-zh → ipapi → ipinfo。
@@ -9,10 +9,10 @@
 # 首页补充 DNS 解析器与 rDNS；DNS 查询最多等待 1.5 秒，rDNS 复用运营商查询，打码时隐藏。
 # 免密钥数据源、打码、旗帜参数取 Surge 默认值；Stash 不使用 IPQS/MaxMind，凭据不随源文件同步。
 # risk_api=null 在 Stash 按 IPPure → ProxyCheck → Scamalytics 回退，指定源失败后尝试其余来源。
-# notify 默认值用于定时任务，卡片保持关闭通知；不搬入 Surge 专用的事件延迟/点击打码参数。
+# notify 默认值用于定时任务，卡片保持关闭通知；event_delay 和点击切换打码仅适用于 Surge。
 # Stash 可选 risk_api=ippure/proxycheck/scamalytics；local_geoapi=baidu/bilibili/ipsb；remote_geoapi=ipapi-zh/ipapi/ipinfo/ippure。
 # 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
-# 支持覆写参数的客户端可在表单中改选数据源、打码和通知；设备上的选择独立于同步的默认值。
+# 支持覆写参数的客户端可调整数据源、打码、通知和刷新间隔；设备上的选择独立于同步的默认值。
 # 本机 API 默认关闭。需在“外部访问”启用控制接口并填写实际地址/密钥；仅首页和通知调用。
 # API 显示的是出口探测域名的规则预测，不代表其他服务线路；接口不支持或失败则省略相关信息。
 # 卡片与通知日志统一收集到 hotkids-ip-security.log，最多延迟一分钟。
@@ -24,7 +24,8 @@ arguments-version: 1
 arguments:
   risk_api:
     type: select
-    title: 风险评分来源
+    title: 风险评分来源（risk_api）
+    description: 自动：IPPure → ProxyCheck → Scamalytics；指定来源优先，失败后尝试其余来源。Stash 仅使用免密钥服务。
     default: 'null'
     options:
     - value: 'null'
@@ -37,7 +38,8 @@ arguments:
       label: scamalytics
   local_geoapi:
     type: select
-    title: 本地地区首选
+    title: 本地地区首选（local_geoapi）
+    description: 默认：百度 → bilibili → ip.sb；指定来源优先，失败后按默认顺序尝试其余来源。百度提供中文省市区，bilibili 为中文，ip.sb 为英文。
     default: baidu
     options:
     - value: baidu
@@ -48,7 +50,8 @@ arguments:
       label: ipsb
   remote_geoapi:
     type: select
-    title: 出口地区首选
+    title: 出口地区首选（remote_geoapi）
+    description: 出口默认：ipapi-zh → ipapi → ipinfo；指定来源优先。ipapi-zh/ipapi 为同一接口的中英文，使用 HTTP；ipinfo 为英文，IPPure 为额外可选源。运营商优先 ipinfo，缺失时回退到地区来源。
     default: ipapi-zh
     options:
     - value: ipapi-zh
@@ -61,7 +64,8 @@ arguments:
       label: ippure
   mask_ip:
     type: select
-    title: IP 打码
+    title: IP 打码（mask_ip）
+    description: 0 关闭；1 部分打码；2 全部隐藏。用于卡片和通知；Stash 不支持 Surge 的点击切换打码。
     default: '0'
     options:
     - value: '0'
@@ -72,7 +76,8 @@ arguments:
       label: 全部隐藏
   tw_flag:
     type: select
-    title: 台湾地区旗帜
+    title: 台湾地区旗帜（tw_flag）
+    description: cn 显示 🇨🇳，tw 显示 🇹🇼。
     default: cn
     options:
     - value: cn
@@ -81,8 +86,17 @@ arguments:
       label: 🇹🇼
   notify:
     type: switch
-    title: IP 变化通知
+    title: IP 变化通知（notify）
+    description: 每 10 分钟检查本地/出口 IP，变化时通知；首次只记录。Stash 使用定时检查，不使用 Surge 的网络变化事件延迟。独立卡片不触发通知。
     default: true
+  panel_interval:
+    type: input
+    title: 卡片刷新间隔（panel_interval）
+    description: 单位为秒，用于四张 IP 卡片。通知仍每 10 分钟检查，日志每分钟收集。
+    value-type: integer
+    default: 600
+    minimum: 1
+    required: true
   stash_api:
     type: switch
     title: 显示本机 API 信息
@@ -100,7 +114,7 @@ arguments:
     description: 填写 Stash 控制接口密钥；留空则不调用 API。不是第三方服务 API Key。
 tiles:
   - name: hotkids-ip-security-summary
-    interval: 600
+    interval: '${args.panel_interval}'
     title: 'IP 信息卡'
     url: 'https://ippure.com'
     content: 'Loading...'
@@ -109,7 +123,7 @@ tiles:
     collapsed: false
     argument: 'tile=summary&mode=home&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
   - name: hotkids-ip-security-outbound
-    interval: 600
+    interval: '${args.panel_interval}'
     title: '出口 IP'
     url: 'https://ippure.com'
     content: 'Loading...'
@@ -118,7 +132,7 @@ tiles:
     collapsed: true
     argument: 'tile=outbound&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-local
-    interval: 600
+    interval: '${args.panel_interval}'
     title: '本地 IP'
     url: 'https://ippure.com'
     content: 'Loading...'
@@ -127,7 +141,7 @@ tiles:
     collapsed: true
     argument: 'tile=local&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-risk
-    interval: 600
+    interval: '${args.panel_interval}'
     title: 'IP 纯净度'
     url: 'https://ippure.com'
     content: 'Loading...'

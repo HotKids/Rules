@@ -3,48 +3,57 @@ desc: Telegram MTProto 代理，按机房分流。需使用支持 MTProto 和覆
 category: HotKids
 icon: https://raw.githubusercontent.com/czy13724/LeviIcons/main/leviicons/telegram.png
 
-# 来源：Surge/Module/MTProto.sgmodule；通过 Stash 覆写参数设置监听端口和机房策略。
+# 来源：Surge/Module/MTProto.sgmodule；兼容参数的默认值由 Sync Config 同步，设备上可独立调整。
 # 官方文档：https://stash.wiki/en/features/mtproto
 # Stash 不提供 interface 参数；局域网访问由“允许局域网连接”开关控制。
 arguments-version: 1
 arguments:
-  port:
-    type: input
-    title: 监听端口
-    value-type: integer
-    default: 5753
-    minimum: 1
-    maximum: 65535
-  secret:
-    type: input
-    title: MTProto 密钥
-    description: 32 位十六进制；沿用原模块示例值，可用 openssl rand -hex 16 生成自己的密钥。
-    default: '0cedbe9e6550d2361ebc561422a34541'
-    min-length: 32
-    max-length: 32
-  ipv6:
-    type: switch
-    title: 仅通过 IPv6 连接机房
-    default: false
-  dc_config_url:
-    type: input
-    title: 机房地址配置
-    default: https://ruleset.skk.moe/Internal/mtproto-dc-config.json
   dc_asia:
     type: input
-    title: DC5 策略
+    title: DC5 新加坡策略（dc5-policy）
+    description: 填写配置中已有的策略名；默认值跟随 Surge。
     default: 🇸🇬 Singapore
     required: true
   dc_america:
     type: input
-    title: DC1/DC3 策略
+    title: DC1/DC3 迈阿密策略（dc1-policy）
+    description: 填写配置中已有的策略名；默认值跟随 Surge。
     default: 🇺🇸 America
     required: true
   dc_europe:
     type: input
-    title: DC2/DC4 策略
-    description: 填写配置中已有的策略名。MyStash 可填 🇩🇪 Germany；通用配置请选择实际存在的策略组。
+    title: DC2/DC4 阿姆斯特丹策略（dc4-policy）
+    description: 默认值跟随 Surge；如果当前配置没有对应策略组，请选择实际存在的策略。
     required: true
+    default: 🇩🇪 Germany
+  port:
+    type: input
+    title: 监听端口
+    description: Telegram 客户端连接本机代理时使用的端口（port）。
+    value-type: integer
+    default: 5753
+    minimum: 1
+    maximum: 65535
+    required: true
+  secret:
+    type: input
+    title: MTProto 密钥
+    description: 32 位十六进制（secret），不是 Telegram 账号密码；默认值跟随 Surge，可用 openssl rand -hex 16 生成自己的密钥。
+    default: 0cedbe9e6550d2361ebc561422a34541
+    min-length: 32
+    max-length: 32
+    required: true
+  ipv6:
+    type: switch
+    title: 仅通过 IPv6 连接机房
+    description: Stash 的 ipv6=true 表示只使用 IPv6，false 只使用 IPv4；与 Surge 允许 IPv6 的含义不同，默认关闭。
+    default: false
+  dc_config_url:
+    type: input
+    title: 机房地址配置
+    description: Telegram 数据中心地址列表（dc-config-url），默认值跟随 Surge。
+    required: true
+    default: https://ruleset.skk.moe/Internal/mtproto-dc-config.json
 mtproto:
   port: ${args.port}
   secret: ${args.secret}

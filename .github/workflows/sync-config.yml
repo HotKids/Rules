@@ -6,6 +6,7 @@ on:
     paths:
       - 'Surge/Profile.conf' # 跨客户端配置上游；Stash 同步策略/规则和强制 HTTP 引擎列表
       - 'Surge/Module/Pannel/*.sgmodule' # 同名 Stash 面板的分类、图标和默认参数上游
+      - 'Surge/Module/MTProto.sgmodule' # Stash MTProto 的兼容参数默认值
       # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'

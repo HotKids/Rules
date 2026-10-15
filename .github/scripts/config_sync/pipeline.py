@@ -27,6 +27,7 @@ from .singbox import (
 from .stash import (
     _sync_stash,
     _sync_stash_panel_metadata,
+    _sync_stash_mtproto,
 )
 from .surfboard import (
     _sync_surfboard,
@@ -55,6 +56,7 @@ def main() -> None:
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
     _sync_stash(config, general_lines)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_stash_panel_metadata()
+    _sync_stash_mtproto()
     # Profile 证书变化时直接更新已有模块；Sync Rules 重建模块时也应用同一同步。
     base_module = REPO_ROOT / "Surge/Module/Stash/BlockAdsBase.stoverride"
     if base_module.is_file():
