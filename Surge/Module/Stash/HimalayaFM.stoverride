@@ -2,6 +2,7 @@
 # Source: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/喜马拉雅去广告.sgmodule
 # tag: 去广告
 # loon_version: 3.2.4(787)
+# 需使用支持覆写参数的 Stash；提前拦截为可选功能，默认关闭。
 name: 喜马拉雅去广告
 desc: 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
 author: 可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
@@ -10,6 +11,18 @@ category: 去广告
 homepage: https://hub.kelee.one
 date: '2025-07-11 17:53:22'
 openUrl: https://apps.apple.com/app/id876336838
+arguments-version: 1
+arguments:
+  early_reject:
+    type: select
+    title: 广告拦截时机
+    description: 提前拦截需客户端版本支持，且不会遵循普通规则阶段的前置放行规则。默认保留普通拦截。
+    default: REJECT
+    options:
+    - value: REJECT
+      label: 普通拦截
+    - value: REJECT,pre-matching
+      label: 提前拦截（需版本支持）
 http:
   mitm:
   - gslbali.ximalaya.com
@@ -107,8 +120,8 @@ http:
     headers:
       Content-Type: application/json
 rules:
-- DOMAIN,adse.ximalaya.com,REJECT
-- DOMAIN,adsehera.ximalaya.com,REJECT
-- DOMAIN,adse.wsa.ximalaya.com,REJECT
-- DOMAIN,adbehavior.ximalaya.com,REJECT
-- DOMAIN,adbehavior.wsa.ximalaya.com,REJECT
+- DOMAIN,adse.ximalaya.com,${args.early_reject}
+- DOMAIN,adsehera.ximalaya.com,${args.early_reject}
+- DOMAIN,adse.wsa.ximalaya.com,${args.early_reject}
+- DOMAIN,adbehavior.ximalaya.com,${args.early_reject}
+- DOMAIN,adbehavior.wsa.ximalaya.com,${args.early_reject}

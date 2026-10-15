@@ -2,6 +2,7 @@
 # Source: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/香港抖音去广告.sgmodule
 # tag: 去广告
 # loon_version: 3.2.4(787)
+# 需使用支持覆写参数的 Stash；提前拦截为可选功能，默认关闭。
 name: 香港抖音去广告
 desc: 精简左右侧边栏、移除底栏切换，其余内容后续再完善。
 author: 可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
@@ -10,6 +11,18 @@ category: 去广告
 homepage: https://hub.kelee.one
 date: '2025-05-13 15:17:08'
 openUrl: https://apps.apple.com/app/id1142110895
+arguments-version: 1
+arguments:
+  early_reject:
+    type: select
+    title: 广告拦截时机
+    description: 提前拦截需客户端版本支持，且不会遵循普通规则阶段的前置放行规则。默认保留普通拦截。
+    default: REJECT
+    options:
+    - value: REJECT
+      label: 普通拦截
+    - value: REJECT,pre-matching
+      label: 提前拦截（需版本支持）
 http:
   mitm:
   - aweme.snssdk.com
@@ -26,9 +39,9 @@ http:
   - ^https:\/\/(aweme\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend response-jq if (getpath(["data","/service/settings/v3/","body","data","settings"]) | has("homepage_two_session_tab_skin_2025")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_two_session_tab_skin_2025"]; false)) else . end
   - ^https:\/\/(aweme\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend response-jq if (getpath(["data","/service/settings/v3/","body","data","settings"]) | has("homepage_tab_skin_enable")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_tab_skin_enable"]; false)) else . end
 rules:
-- AND,((IP-CIDR,101.126.58.201/32,no-resolve),(DST-PORT,6443)),REJECT
-- AND,((IP-CIDR,110.249.199.75/32,no-resolve),(DST-PORT,6443)),REJECT
-- AND,((IP-CIDR,111.225.147.191/32,no-resolve),(DST-PORT,6443)),REJECT
-- AND,((IP-CIDR,111.63.61.101/32,no-resolve),(DST-PORT,6443)),REJECT
-- AND,((IP-CIDR,220.243.141.0/32,no-resolve),(DST-PORT,6443)),REJECT
-- AND,((OR,((DOMAIN-SUFFIX,bytegecko.com,extended-matching),(DOMAIN-SUFFIX,byteeffecttos.com,extended-matching))),(DOMAIN-KEYWORD,ncdn,extended-matching)),REJECT
+- AND,((IP-CIDR,101.126.58.201/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
+- AND,((IP-CIDR,110.249.199.75/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
+- AND,((IP-CIDR,111.225.147.191/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
+- AND,((IP-CIDR,111.63.61.101/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
+- AND,((IP-CIDR,220.243.141.0/32,no-resolve),(DST-PORT,6443)),${args.early_reject}
+- AND,((OR,((DOMAIN-SUFFIX,bytegecko.com,extended-matching),(DOMAIN-SUFFIX,byteeffecttos.com,extended-matching))),(DOMAIN-KEYWORD,ncdn,extended-matching)),${args.early_reject}

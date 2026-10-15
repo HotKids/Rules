@@ -2,6 +2,7 @@
 # Source: https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/高德地图去广告.sgmodule
 # tag: 去广告
 # loon_version: 3.2.4(787)
+# 需使用支持覆写参数的 Stash；提前拦截为可选功能，默认关闭。
 name: 高德地图去广告
 desc: 过滤高德地图开屏广告、各页面推广，精简我的页面。
 author: RuCu6[https://github.com/RuCu6], kelv1n1n[https://github.com/kelv1n1n], 可莉🅥[https://github.com/luestr/ProxyResource/blob/main/README.md]
@@ -10,6 +11,18 @@ category: 去广告
 homepage: https://hub.kelee.one
 date: '2026-02-22 06:04:15'
 openUrl: https://apps.apple.com/app/id461703208
+arguments-version: 1
+arguments:
+  early_reject:
+    type: select
+    title: 广告拦截时机
+    description: 提前拦截需客户端版本支持，且不会遵循普通规则阶段的前置放行规则。默认保留普通拦截。
+    default: REJECT
+    options:
+    - value: REJECT
+      label: 普通拦截
+    - value: REJECT,pre-matching
+      label: 提前拦截（需版本支持）
 http:
   mitm:
   - '*.amap.com'
@@ -196,6 +209,6 @@ script-providers:
     url: https://kelee.one/Resource/JavaScript/Amap/Amap_remove_ads.js
     interval: 86400
 rules:
-- DOMAIN,amap-aos-info-nogw.amap.com,REJECT
-- DOMAIN,free-aos-cdn-image.amap.com,REJECT
-- DOMAIN-SUFFIX,v.smtcdns.com,REJECT
+- DOMAIN,amap-aos-info-nogw.amap.com,${args.early_reject}
+- DOMAIN,free-aos-cdn-image.amap.com,${args.early_reject}
+- DOMAIN-SUFFIX,v.smtcdns.com,${args.early_reject}
