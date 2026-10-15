@@ -97,13 +97,10 @@ class TileConfigurationTests(unittest.TestCase):
                             self.assertEqual(args.get('notify'), params.get('notify') if args['service'] == 'monitor' else 'false')
                             self.assertEqual(args.get('nfprice'), params.get('nfprice') if args['service'] == 'netflix' else None)
                     if stem == 'ip-security-panel':
-                        interval = config.get('arguments', {}).get('panel_interval')
-                        if 'panel_interval' in params:
-                            self.assertEqual(interval['default'], int(params['panel_interval']))
-                            self.assertTrue(all(t['interval'] == '${args.panel_interval}' for t in config['tiles']))
-                        else:
-                            self.assertIsNone(interval)
-                            self.assertTrue(all(t['interval'] == 600 for t in config['tiles']))
+                        self.assertNotIn('panel_interval', config.get('arguments', {}))
+                        for tile in config['tiles']:
+                            self.assertIs(type(tile['interval']), int)
+                            self.assertEqual(tile['interval'], int(params.get('panel_interval', 600)))
 
     def test_ip_stash_sync_removes_credentials_and_replaces_keyed_source_preferences(self):
         for remote in ('maxmind', 'maxmind-zh'):
@@ -139,6 +136,17 @@ class TileConfigurationTests(unittest.TestCase):
                 for key, value in options.items():
                     if key.startswith('stash_api'): continue
                     self.assertEqual(str(value).lower(), args[key].lower())
+
+    def test_panels_keep_numeric_fields_valid_without_form_expansion(self):
+        # 旧客户端不会展开 ${args...}，但仍会把 interval/timeout 交给内核解析。
+        for stem in ('ip-security-panel', 'media-check-panel'):
+            config = yaml.safe_load((PANELS / (stem + '.stoverride')).read_text())
+            for entry in [*config['tiles'], *config['script-providers'].values(), *config['cron']['script']]:
+                for field in ('interval', 'timeout'):
+                    if field in entry:
+                        with self.subTest(stem=stem, name=entry.get('name'), field=field):
+                            self.assertIs(type(entry[field]), int)
+                            self.assertGreater(entry[field], 0)
 
     def test_mtproto_form_follows_surge_policies_and_keeps_typed_parameters(self):
         config = yaml.safe_load((ROOT / 'Surge/Module/Stash/MTProto.stoverride').read_text())
@@ -222,8 +230,8 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(home['title'], 'IP 信息卡')
         self.assertEqual(home['icon'], 'https://ippure.com/logo.png')
         self.assertEqual(parse_qs(home['argument'])['mode'], ['home'])
-        self.assertEqual(home['interval'], '${args.panel_interval}')
-        self.assertEqual(config['arguments']['panel_interval']['default'], 600)
+        self.assertEqual(home['interval'], 600)
+        self.assertNotIn('panel_interval', config['arguments'])
         self.assertTrue(all(tile['collapsed'] for tile in collapsed))
         self.assertTrue(all(parse_qs(tile['argument'])['mode'] == ['collapsed'] for tile in collapsed))
         for tile in config['tiles']:

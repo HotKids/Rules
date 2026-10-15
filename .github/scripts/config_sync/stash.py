@@ -146,11 +146,6 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
         schema["notify"] = {"type": "switch", "title": "IP 变化通知（notify）",
                             "description": "每 10 分钟检查本地/出口 IP，变化时通知；首次只记录。Stash 使用定时检查，不使用 Surge 的网络变化事件延迟。独立卡片不触发通知。",
                             "default": str(defaults["notify"]).lower() != "false"}
-    if "panel_interval" in defaults:
-        schema["panel_interval"] = {"type": "input", "title": "卡片刷新间隔（panel_interval）",
-                                    "description": "单位为秒，用于四张 IP 卡片。通知仍每 10 分钟检查，日志每分钟收集。",
-                                    "value-type": "integer", "default": int(defaults["panel_interval"]),
-                                    "minimum": 1, "required": True}
     schema.update({
         "stash_api": {"type": "switch", "title": "显示本机 API 信息", "default": False,
                       "description": "可选：显示出口探测域名的规则预测和本机累计流量。需在 Stash 启用外部控制，仅用于首页和通知。"},
@@ -207,11 +202,13 @@ def _sync_stash_panel_metadata() -> None:
                 if resolved != argument:
                     lines[index] = f"{match[1]} {_yq(resolved)}"
         if source.stem == "ip-security-panel":
+            # 没有覆写参数展开能力的客户端也会解析 tiles；interval 必须保留原生整数。
+            # 支持表单的脚本参数仍在 argument 中传递，可安全回落到静态默认值。
+            interval = int(defaults.get("panel_interval", 600))
             start, end = lines.index("tiles:"), lines.index("cron:")
             for index in range(start, end):
                 if re.match(r"^\s+interval:", lines[index]):
-                    interval = "${args.panel_interval}" if "panel_interval" in schema else 600
-                    lines[index] = "    interval: " + (_yq(interval) if isinstance(interval, str) else str(interval))
+                    lines[index] = f"    interval: {interval}"
         after = "\n".join(lines) + "\n"
         if after != before:
             target.write_text(after, encoding="utf-8")

@@ -2130,6 +2130,18 @@ test('Stash summary, standalone cards and notifications share the Surge geograph
 
 const stashForm = values => '&stash_options=' + JSON.stringify(values);
 
+test('Clients without override parameter expansion retain static panel arguments', async()=>{
+  const ip=await ipPanel({argument:'tile=summary&mode=home&mask_ip=2&notify=false&stash_options={"mask_ip":${args.mask_ip|json},"stash_api":${args.stash_api|json}}'});
+  assert.doesNotMatch(ip.output.content,/198\.51\.100\./);
+  assert.ok(ip.output.backgroundColor);
+  assert.equal(ip.notifications.length,0);
+  assert.ok(ip.requests.every(o=>!o.url.includes('127.0.0.1')));
+  const media=await tile('netflix',{body:'<title>Watch Example | Netflix</title>'},
+    {argument:'nfprice=false&stash_options={"nfprice":${args.nfprice|json}}'});
+  assert.equal(media.output.content,'OK');
+  assert.ok(media.requests.every(o=>!o.url.includes('latest.json')));
+});
+
 test('Media monitor only runs from an enabled Stash cron; collapsed tiles keep node context', async()=>{
   for(const options of [
     {scriptMeta:{type:'cron'},argument:'notify=false'},
