@@ -17,8 +17,6 @@ http:
   - '*.weibo.com'
   - weibo.com
   url-rewrite:
-  - ^https?:\/\/api\.weibo\.cn\/2\/(push\/active|client\/addlog_batch|ad\/preload) - reject-200
-  - ^https?:\/\/api-cloudim\.api\.weibo\.com\/v1\/log\/ - reject-200
   - ^https?:\/\/sdkapp\.uve\.weibo\.com\/interface\/sdk\/(get-lbs-cell-info\.php|sdkconfig\.php) - reject
   - ^https:\/\/api\.weibo\.cn\/2\/logservice\/service\? - reject
   body-rewrite:
@@ -234,6 +232,8 @@ script-providers:
     url: https://github.com/fmz200/wool_scripts/raw/main/Scripts/weibo/weibo_vip.js
     interval: 86400
 rules:
+- URL-REGEX,^https?:\/\/api\.weibo\.cn\/2\/(push\/active|client\/addlog_batch|ad\/preload),REJECT-DROP
+- URL-REGEX,^https?:\/\/api-cloudim\.api\.weibo\.com\/v1\/log\/,REJECT-DROP
 - DOMAIN-SUFFIX,biz.weibo.com,REJECT
 - DOMAIN,bootpreload.uve.weibo.com,REJECT
 - DOMAIN-SUFFIX,fastimage.uve.weibo.com,REJECT

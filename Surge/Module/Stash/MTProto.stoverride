@@ -1,32 +1,70 @@
 name: MTProto
-desc: Telegram MTProto 代理，按机房分流。需使用支持 MTProto 代理服务的 Stash 版本；启用后可通过文件末尾的链接导入 Telegram。
+desc: Telegram MTProto 代理，按机房分流。需使用支持 MTProto 和覆写参数的 Stash；启用前请选择配置中已有的机房策略。
 category: HotKids
 icon: https://raw.githubusercontent.com/czy13724/LeviIcons/main/leviicons/telegram.png
 
-# 来源：Surge/Module/MTProto.sgmodule；参数按默认值展开。
+# 来源：Surge/Module/MTProto.sgmodule；通过 Stash 覆写参数设置监听端口和机房策略。
 # 官方文档：https://stash.wiki/en/features/mtproto
 # Stash 不提供 interface 参数；局域网访问由“允许局域网连接”开关控制。
+arguments-version: 1
+arguments:
+  port:
+    type: input
+    title: 监听端口
+    value-type: integer
+    default: 5753
+    minimum: 1
+    maximum: 65535
+  secret:
+    type: input
+    title: MTProto 密钥
+    description: 32 位十六进制；沿用原模块示例值，可用 openssl rand -hex 16 生成自己的密钥。
+    default: '0cedbe9e6550d2361ebc561422a34541'
+    min-length: 32
+    max-length: 32
+  ipv6:
+    type: switch
+    title: 仅通过 IPv6 连接机房
+    default: false
+  dc_config_url:
+    type: input
+    title: 机房地址配置
+    default: https://ruleset.skk.moe/Internal/mtproto-dc-config.json
+  dc_asia:
+    type: input
+    title: DC5 策略
+    default: 🇸🇬 Singapore
+    required: true
+  dc_america:
+    type: input
+    title: DC1/DC3 策略
+    default: 🇺🇸 America
+    required: true
+  dc_europe:
+    type: input
+    title: DC2/DC4 策略
+    description: 填写配置中已有的策略名。MyStash 可填 🇩🇪 Germany；通用配置请选择实际存在的策略组。
+    required: true
 mtproto:
-  port: 5753
-  # 沿用原模块示例密钥；可用 openssl rand -hex 16 生成自己的密钥，并同步修改 Telegram 设置。
-  secret: '0cedbe9e6550d2361ebc561422a34541'
+  port: ${args.port}
+  secret: ${args.secret}
   # Stash 的 true 表示仅用 IPv6 连接机房，故默认使用 IPv4。
-  ipv6: false
-  dc-config-url: https://ruleset.skk.moe/Internal/mtproto-dc-config.json
+  ipv6: ${args.ipv6}
+  dc-config-url: ${args.dc_config_url}
 
-# 保留原模块按 DC 分流的规则；配置中需已有下列三个同名策略组。
+# 保留原模块按 DC 分流的规则；策略名称来自上面的参数。
 # MTProto 连接以机房 IP 匹配这些规则，无需在前面添加统一的 PROTOCOL,MTPROTO 规则。
 rules:
   # DC5：新加坡
-  - IP-ASN,44907,🇸🇬 Singapore,no-resolve
-  - IP-ASN,62014,🇸🇬 Singapore,no-resolve
+  - IP-ASN,44907,${args.dc_asia},no-resolve
+  - IP-ASN,62014,${args.dc_asia},no-resolve
   # DC1/DC3：迈阿密
-  - IP-ASN,59930,🇺🇸 America,no-resolve
+  - IP-ASN,59930,${args.dc_america},no-resolve
   # DC2/DC4：阿姆斯特丹
-  - IP-ASN,62041,🇩🇪 Germany,no-resolve
-  - IP-ASN,211157,🇩🇪 Germany,no-resolve
-  - IP-CIDR,5.28.192.0/18,🇩🇪 Germany,no-resolve
-  - IP-CIDR,109.239.140.0/24,🇩🇪 Germany,no-resolve
+  - IP-ASN,62041,${args.dc_europe},no-resolve
+  - IP-ASN,211157,${args.dc_europe},no-resolve
+  - IP-CIDR,5.28.192.0/18,${args.dc_europe},no-resolve
+  - IP-CIDR,109.239.140.0/24,${args.dc_europe},no-resolve
 
-# 本机导入链接；若更改端口或密钥，链接也需同步修改。
+# 以下为默认端口和密钥的本机导入链接；若修改参数，链接也需同步修改。
 # tg://proxy?server=127.0.0.1&port=5753&secret=0cedbe9e6550d2361ebc561422a34541

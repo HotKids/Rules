@@ -206,7 +206,7 @@ http-request ^https://a/ header-add X-Test yes
 URL-REGEX,"^https://a/(foo|bar)",REJECT-DROP
 AND,((DOMAIN,a.invalid),(DEST-PORT,443)),REJECT,pre-matching
 ''')
-        self.assertEqual(len(warnings), 1)
+        self.assertEqual(warnings, [])
         http = data['http']
         self.assertEqual(http['mock'][0]['text'], '{"a":[1,2],"quote":"ok"}')
         self.assertEqual(http['mock'][0]['headers'], {'content-type': 'application/json', 'X-Test': 'yes'})
@@ -215,8 +215,51 @@ AND,((DOMAIN,a.invalid),(DEST-PORT,443)),REJECT,pre-matching
         self.assertEqual(http['mock'][2]['headers']['Content-Type'], 'image/gif')
         self.assertEqual(http['body-rewrite'], ['^https://a/json response-jq del(.ad) | .name = "Stash"'])
         self.assertEqual(http['header-rewrite'], ['^https://a/ request-add X-Test yes'])
-        self.assertEqual(http['url-rewrite'], ['^https://a/ https://b/ transparent', '^https://a/(foo|bar) - reject-200'])
-        self.assertEqual(data['rules'], ['AND,((DOMAIN,a.invalid),(DST-PORT,443)),REJECT'])
+        self.assertEqual(http['url-rewrite'], ['^https://a/ https://b/ transparent'])
+        self.assertEqual(data['rules'], ['URL-REGEX,^https://a/(foo|bar),REJECT-DROP',
+                                        'AND,((DOMAIN,a.invalid),(DST-PORT,443)),${args.early_reject}'])
+        self.assertEqual(data['arguments']['early_reject']['default'], 'REJECT')
+
+    def test_pre_matching_is_optional_and_only_applies_to_supported_literal_rejects(self):
+        data, warnings = self.convert("""[Rule]
+DOMAIN,one.invalid,REJECT,pre-matching,extended-matching
+IP-CIDR,192.0.2.0/24,REJECT-DROP,pre-matching,no-resolve,no-track
+DOMAIN,two.invalid,AdGuard,pre-matching
+PROTOCOL,QUIC,REJECT,pre-matching
+AND,((DOMAIN,late.invalid),(PROCESS-NAME,app)),REJECT,pre-matching
+DOMAIN,normal.invalid,REJECT-DROP
+URL-REGEX,^https://tiny.invalid/,REJECT-TINYGIF
+""")
+        defaults = {k: v['default'] for k, v in data['arguments'].items()}
+        def expand(values):
+            rules = []
+            for rule in data['rules']:
+                for key, value in values.items(): rule = rule.replace('${args.' + key + '}', value)
+                rules.append(rule)
+            return rules
+        normal = expand(defaults)
+        self.assertFalse(any('pre-matching' in rule for rule in normal))
+        self.assertEqual(normal[1], 'IP-CIDR,192.0.2.0/24,REJECT-DROP,no-resolve,no-track')
+        early = expand({k: v['options'][1]['value'] for k, v in data['arguments'].items()})
+        self.assertIn('pre-matching', early[0])
+        self.assertIn('pre-matching', early[1])
+        self.assertEqual(normal[2:], early[2:])
+        self.assertEqual(normal[-1], 'DOMAIN,normal.invalid,REJECT-DROP')
+        self.assertEqual(data['http']['url-rewrite'], ['^https://tiny.invalid/ - reject-img'])
+        self.assertEqual(len(warnings), 4)
+        self.assertEqual(data['arguments-version'], 1)
+
+    def test_native_source_ip_and_existing_url_reject_rewrite_semantics(self):
+        data, warnings = self.convert("""[Rule]
+SRC-IP,192.0.2.1,DIRECT
+SRC-IP-CIDR,198.51.100.0/24,REJECT-DROP
+URL-REGEX,^https://example.invalid/,REJECT
+URL-REGEX,^https://other.invalid/,REJECT-NO-DROP
+""")
+        self.assertFalse(warnings)
+        self.assertEqual(data['rules'], ['SRC-IP,192.0.2.1,DIRECT', 'SRC-IP,198.51.100.0/24,REJECT-DROP'])
+        self.assertEqual(data['http']['url-rewrite'],
+                         ['^https://example.invalid/ - reject', '^https://other.invalid/ - reject'])
 
     def test_disabled_defaults_do_not_run_and_unknown_features_are_reported(self):
         data, warnings = self.convert('''#!arguments=off:#

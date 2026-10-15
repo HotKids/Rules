@@ -12,12 +12,92 @@
 # notify 默认值用于定时任务，卡片保持关闭通知；不搬入 Surge 专用的事件延迟/点击打码参数。
 # Stash 可选 risk_api=ippure/proxycheck/scamalytics；local_geoapi=baidu/bilibili/ipsb；remote_geoapi=ipapi-zh/ipapi/ipinfo/ippure。
 # 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
+# 支持覆写参数的客户端可在表单中改选数据源、打码和通知；设备上的选择独立于同步的默认值。
+# 本机 API 默认关闭。需在“外部访问”启用控制接口并填写实际地址/密钥；仅首页和通知调用。
+# API 显示的是出口探测域名的规则预测，不代表其他服务线路；接口不支持或失败则省略相关信息。
 # 卡片与通知日志统一收集到 hotkids-ip-security.log，最多延迟一分钟。
-# v6.4.10：更新覆写后统一刷新各脚本来源，避免旧版本缓存。
 name: 'IP Security Tiles'
 desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 category: 'HotKids'
 icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/arrmatey.png'
+arguments-version: 1
+arguments:
+  risk_api:
+    type: select
+    title: 风险评分来源
+    default: 'null'
+    options:
+    - value: 'null'
+      label: 自动回退
+    - value: ippure
+      label: ippure
+    - value: proxycheck
+      label: proxycheck
+    - value: scamalytics
+      label: scamalytics
+  local_geoapi:
+    type: select
+    title: 本地地区首选
+    default: baidu
+    options:
+    - value: baidu
+      label: baidu
+    - value: bilibili
+      label: bilibili
+    - value: ipsb
+      label: ipsb
+  remote_geoapi:
+    type: select
+    title: 出口地区首选
+    default: ipapi-zh
+    options:
+    - value: ipapi-zh
+      label: ipapi-zh
+    - value: ipapi
+      label: ipapi
+    - value: ipinfo
+      label: ipinfo
+    - value: ippure
+      label: ippure
+  mask_ip:
+    type: select
+    title: IP 打码
+    default: '0'
+    options:
+    - value: '0'
+      label: 关闭
+    - value: '1'
+      label: 部分打码
+    - value: '2'
+      label: 全部隐藏
+  tw_flag:
+    type: select
+    title: 台湾地区旗帜
+    default: cn
+    options:
+    - value: cn
+      label: 🇨🇳
+    - value: tw
+      label: 🇹🇼
+  notify:
+    type: switch
+    title: IP 变化通知
+    default: true
+  stash_api:
+    type: switch
+    title: 显示本机 API 信息
+    default: false
+    description: 可选：显示出口探测域名的规则预测和本机累计流量。需在 Stash 启用外部控制，仅用于首页和通知。
+  stash_api_url:
+    type: input
+    title: 本机 API 地址
+    default: http://127.0.0.1:9090
+    description: 按客户端控制端口填写，仅接受 127.0.0.1、localhost 或 [::1]。
+  stash_api_secret:
+    type: input
+    title: 本机 API 密钥
+    default: ''
+    description: 填写 Stash 控制接口密钥；留空则不调用 API。不是第三方服务 API Key。
 tiles:
   - name: hotkids-ip-security-summary
     interval: 600
@@ -27,7 +107,7 @@ tiles:
     icon: 'https://ippure.com/logo.png'
     backgroundColor: '#9E9E9E'
     collapsed: false
-    argument: 'tile=summary&mode=home&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn'
+    argument: 'tile=summary&mode=home&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
   - name: hotkids-ip-security-outbound
     interval: 600
     title: '出口 IP'
@@ -36,7 +116,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=outbound&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn'
+    argument: 'tile=outbound&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-local
     interval: 600
     title: '本地 IP'
@@ -45,7 +125,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=local&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn'
+    argument: 'tile=local&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-risk
     interval: 600
     title: 'IP 纯净度'
@@ -54,7 +134,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=risk&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn'
+    argument: 'tile=risk&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
 
 # 通知使用日常分流，不受长按测试节点影响；需要 Stash 保持连接。
 cron:
@@ -66,7 +146,7 @@ cron:
     - name: hotkids-ip-security-notify
       cron: '*/10 * * * *'
       timeout: 25
-      argument: 'task=monitor&notify=true&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn'
+      argument: 'task=monitor&notify=true&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"notify":${args.notify|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
 
 script-providers:
   hotkids-ip-security:

@@ -1,4 +1,4 @@
-# Date: 2026-10-14 13:25:59
+# Date: 2026-10-15 22:19:49
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -13,6 +13,9 @@ mode: rule
 
 # 日志等级：silent / error / warning / info / debug
 log-level: info
+
+# 关闭 IPv6 域名解析：Stash 自身仅解析 IPv4，应用 AAAA 查询返回空结果
+ipv6: false
 
 # 强制 HTTP 引擎列表由 Surge/Profile.conf 同步。
 http:
@@ -44,11 +47,16 @@ dns: #!replace
   # DNS 查询按现有代理规则出站；代理节点域名使用独立 DNS 解析。
   follow-rule: true
 
+  # 关闭 IPv6 解析，AAAA 查询返回空结果
+  ipv6: false
+
   # 引导 DNS：仅用于解析 nameserver 服务器的域名
   # 除 system 外，服务器地址使用 IP；支持基于 IP 的加密 DNS
   default-nameserver:
     - 223.5.5.5
     - 119.29.29.29
+  # fake-ip 地址池（RFC 6598 保留段）
+  fake-ip-range: 198.18.0.1/16
   fake-ip-filter:
     # 本地域名
     - "*.lan"
