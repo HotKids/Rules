@@ -2126,3 +2126,134 @@ test('Stash summary, standalone cards and notifications share the Surge geograph
     }
   }
 });
+
+const stashForm = values => '&stash_options=' + JSON.stringify(values);
+const stashAPIDefaults = {stash_api:true, stash_api_url:'http://127.0.0.1:9090', stash_api_secret:'local-secret'};
+const localAPI = url => url.startsWith('http://127.0.0.1:9090/');
+
+test('Stash native form changes display settings without changing task or adding notification side effects',async()=>{
+  const argument='tile=summary&mode=home&notify=false'+stashForm({mask_ip:'2',notify:true,task:'monitor',tile:'risk'});
+  const r=await ipPanel({argument});
+  assert.equal(r.output.title,'IP 信息卡');
+  assert.ok(!r.output.content.includes('198.51.100.10'));
+  assert.ok(!r.output.content.includes('203.0.113.2'));
+  assert.equal(r.notifications.length,0);
+  assert.equal(r.requests.some(o=>localAPI(o.url)),false);
+  const legacy=await ipPanel({argument:'tile=local&mask_ip=0&stash_options={"mask_ip":${args.mask_ip|json}}'});
+  assert.ok(legacy.output.content.includes('203.0.113.2'));
+});
+
+test('Optional Stash control API separates route predictions from measured IP and keeps risk colour',async()=>{
+  const secret='key&mask_ip=0="quoted"+value';
+  const baseline=await ipPanel({argument:'tile=summary&mode=home'});
+  const r=await ipPanel({argument:'tile=summary&mode=home'+stashForm({...stashAPIDefaults,stash_api_secret:secret}),intercept(o,cb){
+    if(!localAPI(o.url))return;
+    assert.equal(o.headers.Authorization,'Bearer '+secret);
+    assert.equal(o.headers['X-Stash-Selected-Proxy'],'DIRECT');
+    assert.equal(o['auto-cookie'],false);assert.equal(o['auto-redirect'],false);
+    assert.ok(o.timeout<=1.5);
+    const pathname=new URL(o.url).pathname;
+    cb(null,{status:200},JSON.stringify(pathname==='/connections'?{uploadTotal:1024,downloadTotal:2048}:
+      pathname==='/rules/match'?{outbound:'HK Node',chain:['Proxy','HK Node']}:{server:'192.0.2.100'}));
+    return true;
+  }});
+  assert.match(r.output.content,/规则预测（my\.ippure\.com）：HK Node/);
+  assert.match(r.output.content,/代理链：Proxy → HK Node/);
+  assert.match(r.output.content,/代理服务器 IP：192\.0\.2\.100/);
+  assert.match(r.output.content,/本机累计流量：↑ 1 KB  ↓ 2 KB/);
+  assert.ok(r.output.content.includes('198.51.100.10'));
+  assert.equal(r.output.backgroundColor,baseline.output.backgroundColor);
+  assert.equal(r.requests.filter(o=>localAPI(o.url)).length,3);
+  assert.ok(!JSON.stringify([r.output,r.logs,[...r.store]]).includes(secret));
+});
+
+test('Stash API credentials never leave loopback, never run in collapsed node tests or Surge',async()=>{
+  const variants=[
+    {argument:'tile=summary', options:{stash_api:false}},
+    {argument:'tile=summary', options:{stash_api_secret:''}},
+    {argument:'tile=outbound&mode=collapsed', options:{}},
+    {argument:'', client:'surge', options:{}},
+    ...['https://example.invalid','http://127.0.0.1:9090@evil.invalid',
+      'http://127.0.0.1.evil.invalid:9090','http://127.0.0.1:65536',
+      'http://127.0.0.1:9090/path'].map(stash_api_url=>({argument:'tile=summary',options:{stash_api_url}})),
+    {argument:'tile=summary',options:{stash_api_secret:'one\r\nInjected: value'}}
+  ];
+  for(const {argument,options,client} of variants){
+    const r=await ipPanel({argument:argument+stashForm({...stashAPIDefaults,...options}),client});
+    assert.ok(r.requests.every(o=>!o.headers.Authorization));
+    assert.ok(!JSON.stringify(r.logs).includes('local-secret'));
+  }
+});
+
+test('Stash control API errors and unrecognized fields leave normal results intact',async()=>{
+  for(const response of [
+    {status:401,body:{message:'private-error'}},
+    {status:302,headers:{Location:'https://example.invalid'},body:''},
+    {status:200,body:{outbound:'Unknown',chain:[],uploadTotal:-1,downloadTotal:'2048'}},
+    {status:200,body:{metadata:{destinationIP:'192.0.2.99'}}},
+    {status:200,body:'not JSON'}
+  ]){
+    const r=await ipPanel({argument:'tile=summary'+stashForm(stashAPIDefaults),intercept(o,cb){
+      if(!localAPI(o.url))return;
+      cb(null,{status:response.status,headers:response.headers},typeof response.body==='string'?response.body:JSON.stringify(response.body));return true;
+    }});
+    assert.ok(r.output.content.includes('198.51.100.10'));
+    assert.doesNotMatch(r.output.content,/规则预测|代理服务器 IP|本机累计流量/);
+    assert.ok(!r.logs.join('\n').includes('private-error'));
+  }
+});
+
+test('Stash API prediction follows the successful outbound probe and never substitutes a destination IP',async()=>{
+  const r=await ipPanel({argument:'tile=summary&mask_ip=2'+stashForm(stashAPIDefaults),intercept(o,cb){
+    if(o.url.includes('ippure')){cb('unavailable');return true;}
+    if(!localAPI(o.url))return;
+    const url=new URL(o.url);
+    if(url.pathname==='/rules/match')assert.equal(url.searchParams.get('target'),'api.ipify.org');
+    cb(null,{status:200},JSON.stringify(url.pathname==='/rules/match'?
+      {outbound:'192.0.2.44',chain:['192.0.2.44']}:
+      {server:'node.example.invalid',metadata:{destinationIP:'192.0.2.88'}}));
+    return true;
+  }});
+  assert.match(r.output.content,/规则预测（api\.ipify\.org）/);
+  assert.doesNotMatch(r.output.content,/192\.0\.2|代理服务器 IP/);
+});
+
+test('Stash optional API has a shared 1.5 second deadline and skips rule prediction for an explicit policy',async()=>{
+  const r=await ipPanel({virtualTimers:true,argument:'tile=summary'+stashForm(stashAPIDefaults),intercept(o){
+    if(localAPI(o.url))return true;
+  }});
+  assert.ok(r.elapsed<=1500);
+  assert.ok(r.output.content.includes('198.51.100.10'));
+  const forced=await ipPanel({argument:'tile=summary&proxy=Chosen'+stashForm(stashAPIDefaults),intercept(o,cb){
+    if(!localAPI(o.url))return;
+    assert.equal(new URL(o.url).pathname,'/connections');
+    cb(null,{status:200},'{"uploadTotal":0,"downloadTotal":0}');return true;
+  }});
+  assert.match(forced.output.content,/指定策略：Chosen/);
+  assert.doesNotMatch(forced.output.content,/规则预测/);
+});
+
+test('Stash notification keeps first-line IPs and risk/outbound/entry/local order with optional API',async()=>{
+  const store=new Map(), argument='task=monitor&notify=true'+stashForm(stashAPIDefaults);
+  const first=await ipPanel({argument,store,scriptType:'cron'});
+  assert.equal(first.requests.some(o=>localAPI(o.url)),false);
+  const r=await ipPanel({argument,store,scriptType:'cron',outIP:'198.51.100.11',intercept(o,cb){
+    if(!localAPI(o.url))return;
+    cb(null,{status:200},JSON.stringify(o.url.includes('/rules/match')?{outbound:'Node'}:{server:'192.0.2.77'}));return true;
+  }});
+  const [title,subtitle,body]=r.notifications[0];
+  assert.equal(title,'🔄 网络已切换');
+  assert.match(subtitle,/Ⓓ 203\.0\.113\.2 🅟 198\.51\.100\.11/);
+  assert.ok(body.indexOf('🅟 风控')<body.indexOf('🅟 198.51.100.11'));
+  assert.ok(body.indexOf('🅟 198.51.100.11')<body.indexOf('Ⓔ 192.0.2.77'));
+  assert.ok(body.indexOf('Ⓔ 192.0.2.77')<body.indexOf('Ⓓ 203.0.113.2'));
+  assert.match(body,/规则预测.*Node/);
+});
+
+test('Netflix Stash form overrides a static price default, while Surge ignores Stash form JSON',async()=>{
+  const response={body:'"countryCode":"HK"'};
+  const r=await tile('netflix',response,{argument:'nfprice=true'+stashForm({nfprice:false})});
+  assert.equal(r.requests.length,1);
+  const s=await tile('netflix',response,{client:'surge',argument:'nfprice=false'+stashForm({nfprice:true})});
+  assert.ok(s.requests.every(o=>!o.url.includes('netflix-prices')));
+});

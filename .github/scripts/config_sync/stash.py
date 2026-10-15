@@ -24,10 +24,10 @@ from .common import (
 
 # 1) 下列 mihomo 顶层参数未获所核验 Stash 官方 YAML 文档确认，连同前置注释省略。
 #    部分对应能力由 Stash 内置或应用设置控制；省略不代表功能不存在或字段确定无效。
-#    特别是 ipv6: false 的省略不等价于关闭 Stash IPv6，Tunnel 路由开关也非总开关。
+#    ipv6 / dns.ipv6 已获官方支持，保留源文件显式设置。
 #    proxies 是主动省略的例外：该字段可用于 Stash，此覆写保留基础配置中的节点。
 _STASH_DROP_TOP = {
-    "mixed-port", "allow-lan", "bind-address", "ipv6", "external-controller",
+    "mixed-port", "allow-lan", "bind-address", "external-controller",
     "unified-delay", "tcp-concurrent", "find-process-mode", "geodata-loader",
     "global-ua", "keep-alive-interval", "geo-auto-update", "geo-update-interval",
     "geox-url", "profile", "ntp", "sniffer", "tun", "proxies",
@@ -42,6 +42,7 @@ _STASH_REPLACE_TOP = {"hosts", "dns", "proxy-providers", "proxy-groups",
 _STASH_DNS_KEEP = {
     "default-nameserver", "nameserver", "nameserver-policy",
     "proxy-server-nameserver", "fake-ip-filter",
+    "ipv6", "fallback", "fallback-filter", "fake-ip-range",
 }
 
 
@@ -61,7 +62,7 @@ def _yq(value) -> str:
 
 def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
     """写入受 Stash 支持的 Surge 默认参数，保留任务选择和通知隔离。"""
-    args = dict(parse_qsl(argument, keep_blank_values=True))
+    args = dict(parse_qsl(argument.partition("&stash_options=")[0], keep_blank_values=True))
     if args.get("task") == "logs" or args.get("service") == "logs":
         return argument
     if stem == "ip-security-panel":
@@ -91,7 +92,57 @@ def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
             args[key] = defaults[key]
         else:
             args.pop(key, None)
-    return urlencode(args, quote_via=quote)
+    encoded = urlencode(args, quote_via=quote)
+    # 保留静态默认参数；支持表单的客户端用 JSON 覆盖，旧客户端仍能按默认参数运行。
+    fields = [key for key in keys if key in _stash_panel_schema(defaults, stem)]
+    if stem == "ip-security-panel" and args.get("mode") != "collapsed":
+        fields += ["stash_api", "stash_api_url", "stash_api_secret"]
+    if fields:
+        encoded += "&stash_options={" + ",".join(
+            json.dumps(key) + ":${args." + key + "|json}" for key in fields) + "}"
+    return encoded
+
+
+def _stash_panel_schema(defaults: dict, stem: str) -> dict:
+    """Stash 表单保留 Surge 的兼容默认值；本机 API 为显式开启的附加项。"""
+    if stem == "media-check-panel":
+        return ({"nfprice": {"type": "switch", "title": "显示 Netflix 价格",
+                             "default": str(defaults["nfprice"]).lower() == "true"}}
+                if "nfprice" in defaults else {})
+    if stem != "ip-security-panel":
+        return {}
+    choices = {
+        "risk_api": ("风险评分来源", ["null", "ippure", "proxycheck", "scamalytics"]),
+        "local_geoapi": ("本地地区首选", ["baidu", "bilibili", "ipsb"]),
+        "remote_geoapi": ("出口地区首选", ["ipapi-zh", "ipapi", "ipinfo", "ippure"]),
+        "mask_ip": ("IP 打码", ["0", "1", "2"]),
+        "tw_flag": ("台湾地区旗帜", ["cn", "tw"]),
+    }
+    schema = {}
+    for key, (title, options) in choices.items():
+        if key not in defaults:
+            continue
+        value = str(defaults[key])
+        if key == "risk_api" and value == "ipqs": value = "ippure"
+        if key == "remote_geoapi" and value.startswith("maxmind"): value = "ipapi-zh"
+        if value not in options: value = options[0]
+        labels = {"risk_api": {"null": "自动回退"},
+                  "mask_ip": {"0": "关闭", "1": "部分打码", "2": "全部隐藏"},
+                  "tw_flag": {"cn": "🇨🇳", "tw": "🇹🇼"}}.get(key, {})
+        schema[key] = {"type": "select", "title": title, "default": value,
+                       "options": [{"value": option, "label": labels.get(option, option)} for option in options]}
+    if "notify" in defaults:
+        schema["notify"] = {"type": "switch", "title": "IP 变化通知",
+                            "default": str(defaults["notify"]).lower() != "false"}
+    schema.update({
+        "stash_api": {"type": "switch", "title": "显示本机 API 信息", "default": False,
+                      "description": "可选：显示出口探测域名的规则预测和本机累计流量。需在 Stash 启用外部控制，仅用于首页和通知。"},
+        "stash_api_url": {"type": "input", "title": "本机 API 地址", "default": "http://127.0.0.1:9090",
+                          "description": "按客户端控制端口填写，仅接受 127.0.0.1、localhost 或 [::1]。"},
+        "stash_api_secret": {"type": "input", "title": "本机 API 密钥", "default": "",
+                             "description": "填写 Stash 控制接口密钥；留空则不调用 API。不是第三方服务 API Key。"},
+    })
+    return schema
 
 
 def _sync_stash_panel_metadata() -> None:
@@ -120,6 +171,17 @@ def _sync_stash_panel_metadata() -> None:
             key, separator, value = item.partition(":")
             if separator:
                 defaults.setdefault(key.strip(), value.strip())
+        # 重建表单默认值，避免下一次同步覆盖用户在设备上保存的独立参数值。
+        start = next((i for i, line in enumerate(lines) if line.startswith("arguments-version:")), None)
+        if start is not None:
+            end = next(i for i in range(start + 1, len(lines))
+                       if _TOP_KEY_RE.match(lines[i]) and not lines[i].startswith("arguments:"))
+            del lines[start:end]
+        schema = _stash_panel_schema(defaults, source.stem)
+        if schema:
+            at = lines.index("tiles:")
+            lines[at:at] = yaml.safe_dump({"arguments-version": 1, "arguments": schema},
+                                         allow_unicode=True, sort_keys=False, width=1000).rstrip().splitlines()
         for index, line in enumerate(lines):
             match = re.match(r"^(\s+argument:)\s*(.*)$", line)
             if match:
@@ -175,7 +237,7 @@ def _stash_dns_follow_rule(dns: dict) -> bool:
     """只从普通 DNS 查询的路由要求推导；引导/节点解析使用独立链路。"""
     if dns.get("respect-rules") is True:
         return True
-    values = [dns.get("nameserver", [])]
+    values = [dns.get("nameserver", []), dns.get("fallback", [])]
     values.extend((dns.get("nameserver-policy") or {}).values())
     for value in values:
         for server in value if isinstance(value, list) else [value]:
@@ -333,6 +395,9 @@ def _sync_stash(config: dict, general_lines=()) -> None:
                 buf.clear()
                 changes.append(f"略去 {top}")
                 continue
+            if top == "ipv6":
+                buf = ["# 关闭 IPv6 域名解析：Stash 自身仅解析 IPv4，应用 AAAA 查询返回空结果"
+                       if l.strip() == "# 关闭 IPv6：阻断所有 IPv6 连接并屏蔽 AAAA DNS 记录" else l for l in buf]
             flush()
             out.append(f"{line} #!replace" if top in _STASH_REPLACE_TOP else line)
             if top == "dns":
@@ -426,7 +491,7 @@ def _sync_stash(config: dict, general_lines=()) -> None:
             changes.append(f"nameserver-policy 拆键 ×{len(policy_split)}")
             continue
 
-        # ── provider：type 是 mihomo 专属；header 在 Stash 中为 headers ──
+        # ── provider：Stash 内联规则集保留 type: inline；远程集省略 type ──
         if top in ("proxy-providers", "rule-providers"):
             key = m_sub.group(3).strip() if m_sub else ""
             if top == "proxy-providers" and indent == 4 and key == "health-check":
@@ -435,8 +500,10 @@ def _sync_stash(config: dict, general_lines=()) -> None:
                 changes.append("proxy-providers: 健康检查交由策略组")
                 continue
             if key == "type":
-                buf.clear()
-                continue
+                if not (top == "rule-providers" and
+                        re.fullmatch(r"type:\s*['\"]?inline['\"]?\s*(?:#.*)?", stripped)):
+                    buf.clear()
+                    continue
             if key == "header":
                 flush()
                 out.append(line.replace("header:", "headers:", 1))

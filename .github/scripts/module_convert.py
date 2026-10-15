@@ -208,6 +208,7 @@ def render_stash(module, output_name):
     result.setdefault("name", PurePosixPath(output_name).stem)
     http, providers, cron, warnings = {}, {}, [], []
     rules = []
+    arguments = {}
 
     def warn(section, line):
         message = f"[{section}] {line}"
@@ -233,22 +234,36 @@ def render_stash(module, output_name):
                     warn(section, line); continue
                 kind, value, policy, *flags = parts
                 if flags:
-                    ignored = [f for f in flags if f != "no-resolve"]
+                    ignored = [f for f in flags if f not in {"no-resolve", "no-track", "pre-matching"}]
                     if ignored: warn(section, "Surge-only options omitted: " + ",".join(ignored))
-                if kind == "URL-REGEX" and policy.startswith("REJECT"):
-                    action = {"REJECT": "reject", "REJECT-TINYGIF": "reject-img",
-                              "REJECT-DROP": "reject-200", "REJECT-NO-DROP": "reject"}.get(policy)
-                    if action: append("url-rewrite", f"{_unquote(value)} - {action}")
-                    else: warn(section, line)
+                if kind == "URL-REGEX" and policy in {"REJECT", "REJECT-NO-DROP", "REJECT-TINYGIF"}:
+                    action = "reject-img" if policy == "REJECT-TINYGIF" else "reject"
+                    append("url-rewrite", f"{_unquote(value)} - {action}")
                     continue
-                supported = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD", "IP-CIDR", "IP-CIDR6",
-                             "IP-ASN", "GEOIP", "DEST-PORT", "DST-PORT", "SRC-PORT", "SRC-IP", "SRC-IP-CIDR", "AND", "OR", "NOT"}
+                supported = {"DOMAIN", "DOMAIN-SUFFIX", "DOMAIN-KEYWORD", "DOMAIN-WILDCARD", "DOMAIN-REGEX", "IP-CIDR", "IP-CIDR6",
+                             "IP-ASN", "GEOIP", "GEOSITE", "NETWORK", "PROTOCOL", "PROCESS-NAME", "PROCESS-PATH", "USER-AGENT", "URL-REGEX",
+                             "DEST-PORT", "DST-PORT", "SRC-PORT", "SRC-IP", "SRC-IP-CIDR", "AND", "OR", "NOT"}
                 if kind not in supported:
                     warn(section, line); continue
-                if policy.startswith("REJECT-"): policy = "REJECT"
-                rule = ",".join([kind, value, policy] + (["no-resolve"] if "no-resolve" in flags else []))
+                if policy.startswith("REJECT-") and policy != "REJECT-DROP": policy = "REJECT"
+                if "pre-matching" in flags:
+                    late_types = {"PROCESS-NAME", "PROCESS-PATH", "USER-AGENT", "URL-REGEX", "PROTOCOL", "SCRIPT"}
+                    condition_types = {kind} | set(re.findall(r"\(([A-Z][A-Z-]*),", value))
+                    if policy in {"REJECT", "REJECT-DROP"} and not condition_types & late_types:
+                        key = "early_drop" if policy == "REJECT-DROP" else "early_reject"
+                        arguments[key] = {
+                            "type": "select", "title": "丢弃连接时机" if key == "early_drop" else "广告拦截时机",
+                            "description": "提前拦截需客户端版本支持，且不会遵循普通规则阶段的前置放行规则。默认保留普通拦截。",
+                            "default": policy,
+                            "options": [{"value": policy, "label": "普通拦截"},
+                                        {"value": policy + ",pre-matching", "label": "提前拦截（需版本支持）"}],
+                        }
+                        policy = "${args." + key + "}"
+                    else:
+                        warn(section, "pre-matching omitted for incompatible rule: " + line)
+                rule = ",".join([kind, _unquote(value), policy] + [f for f in flags if f in {"no-resolve", "no-track"}])
                 rule = re.sub(r"\bDEST-PORT,", "DST-PORT,", rule)
-                rule = re.sub(r"\bSRC-IP,", "SRC-IP-CIDR,", rule)
+                rule = re.sub(r"\bSRC-IP-CIDR,", "SRC-IP,", rule)
                 if rule not in rules: rules.append(rule)
             elif section in ("MITM", "General"):
                 key, sep, value = line.partition("=")
@@ -337,6 +352,10 @@ def render_stash(module, output_name):
     if http:
         order = ("force-http-engine", "mitm", "url-rewrite", "header-rewrite", "body-rewrite", "mock", "script")
         result["http"] = {key: http[key] for key in order if key in http}
+    if arguments:
+        result = {**{k: v for k, v in result.items() if k != "http"},
+                  "arguments-version": 1, "arguments": arguments,
+                  **({"http": result["http"]} if "http" in result else {})}
     if cron: result["cron"] = {"script": cron}
     if providers: result["script-providers"] = providers
     if rules: result["rules"] = rules
@@ -347,6 +366,7 @@ def render_stash(module, output_name):
     comments += [f"# {k}: {v}" for k, v in metadata.items()
                  if k not in meta_keys and k not in ("arguments", "arguments-desc")]
     if defaults: comments += ["# Surge 参数已按默认值展开。"]
+    if arguments: comments += ["# 需使用支持覆写参数的 Stash；提前拦截为可选功能，默认关闭。"]
     # Routine Surge rule-option omissions stay in Action logs, not in the override.
     comments += ["# Not converted: " + warning for warning in warnings
                  if not warning.startswith("[Rule] Surge-only options omitted: ")]

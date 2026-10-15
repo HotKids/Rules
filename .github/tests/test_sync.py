@@ -451,6 +451,7 @@ dns:
                 'follow-rule': True,
                 'default-nameserver': ['192.0.2.53'],
                 'nameserver': ['https://192.0.2.54/dns-query'],
+                'fallback': ['https://192.0.2.58/dns-query'],
                 'nameserver-policy': {
                     'old.example.invalid': ['https://192.0.2.55/dns-query#h3=true'],
                     'alias.example.invalid': ['https://192.0.2.55/dns-query#h3=true'],
@@ -481,10 +482,11 @@ dns:
                     'proxy-server-nameserver': ['https://198.51.100.57/dns-query'],
                 },
             }, {
-                'follow-rule': False,
+                'follow-rule': True,
                 'default-nameserver': ['198.51.100.53', '203.0.113.53'],
                 'nameserver': ['https://198.51.100.54/dns-query#h3=true',
                                'tls://203.0.113.54'],
+                'fallback': ['https://198.51.100.58/dns-query'],
                 'nameserver-policy': {
                     'shared.example.invalid': ['https://198.51.100.55/dns-query'],
                     'new.example.invalid': 'system',
@@ -517,8 +519,6 @@ dns:
                             self.assertEqual(group['proxies'], ['DIRECT'])
                             if private:
                                 self.assertEqual(group['interval'], 456)
-                            if name in ('Stash', 'MyStash'):
-                                self.assertNotIn('fallback', output['dns'])
                             if revision == 2:
                                 self.assertNotIn('fake-ip-filter', output['dns'])
                                 self.assertNotIn('old.example.invalid', output['hosts'])
@@ -651,8 +651,6 @@ rules:
   direct-nameserver:
     - "https://direct.example.invalid/dns-query#RULES"
   direct-nameserver-follow-policy: true
-  fallback:
-    - "https://fallback.example.invalid/dns-query#RULES"
 
 proxy-groups:''')
         text, output = self.generate()
@@ -663,8 +661,47 @@ proxy-groups:''')
         self.assertEqual(dns['proxy-server-nameserver'],
                          ['https://nodes.example.invalid/dns-query#h3=true'])
         self.assertNotIn('#RULES', text)
-        for key in ('direct-nameserver', 'direct-nameserver-follow-policy', 'fallback'):
+        for key in ('direct-nameserver', 'direct-nameserver-follow-policy'):
             self.assertNotIn(key, dns)
+
+    def test_ipv6_fallback_range_and_inline_rules_are_preserved(self):
+        self.replace_source('mixed-port: 7890', 'mixed-port: 7890\nipv6: false')
+        self.replace_source('https://1.1.1.1/dns-query#RULES', 'https://1.1.1.1/dns-query')
+        self.replace_source('  enable: true', """  enable: true
+  ipv6: false
+  fake-ip-range: 198.19.0.1/16
+  fallback: ['https://fallback.invalid/dns-query#RULES&h3=true']
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    domain: ['+.example.invalid']""")
+        self.replace_source('\nproxy-groups:', """
+rule-providers:
+  Local:
+    type: inline
+    behavior: classical
+    payload: ['DOMAIN,example.invalid']
+  Remote:
+    type: http
+    behavior: domain
+    url: https://example.invalid/rules.yaml
+    interval: 86400
+
+proxy-groups:""")
+        _, output = self.generate()
+        self.assertIs(output['ipv6'], False)
+        self.assertIs(output['dns']['ipv6'], False)
+        self.assertIs(output['dns']['follow-rule'], True)
+        self.assertEqual(output['dns']['fake-ip-range'], '198.19.0.1/16')
+        self.assertEqual(output['dns']['fallback'], ['https://fallback.invalid/dns-query#h3=true'])
+        self.assertEqual(output['dns']['fallback-filter'], self.input_dns['fallback-filter'])
+        self.assertEqual(output['rule-providers']['Local'], {
+            'type': 'inline', 'behavior': 'classical', 'payload': ['DOMAIN,example.invalid']})
+        self.assertNotIn('type', output['rule-providers']['Remote'])
+        self.replace_source('ipv6: false', 'ipv6: true')
+        _, output = self.generate()
+        self.assertIs(output['ipv6'], True)
+        self.assertIs(output['dns']['ipv6'], True)
 
     def test_policy_cleanup_preserves_indent_comments_and_supported_url_options(self):
         self.replace_source('    "example.invalid":\n'

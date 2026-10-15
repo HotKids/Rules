@@ -56,15 +56,18 @@
  *   两端共用六档风险等级与颜色，首页补充 DNS 解析器、rDNS、显式指定的策略名。
  *   DNS 地区只作展示，不据此判断泄露；打码时同时隐藏可能包含 IP 的 rDNS。
  *   脚本 notify 默认 true；配套卡片显式关闭通知，仅 monitor 定时任务开启。
- * - 覆写 argument 内的 tile 用于选择卡片；其余选项已预设，不需要导入参数界面。
+ * - 覆写 argument 内的 tile 用于选择卡片；支持覆写参数的客户端可在表单中调整数据源和显示。
+ *   未展开表单时使用静态默认参数；不提供 IPQS/MaxMind 凭据输入。
  * - proxy: 可手动指定 URL 编码的节点/策略组名；留空遵循当前分流。
  * - mode: home / collapsed（独立卡片默认）；折叠模式不覆盖 Stash 长按节点时指定的出口。
  * - iOS 折叠卡片按 $environment.system 自动使用单行标题：Ⓓ / 🅟 + IP，纯净度只显示百分比。
  * - mask_ip: Stash 固定按参数显示，不通过刷新时间猜测点击切换。
- * - Stash 不调用 Surge 专用 API，不显示入口 IP/流量统计，不订阅 network-changed 事件。
+ * - Stash 不调用 Surge 专用 API，不订阅 network-changed 事件。
+ *   可在覆写参数中启用本机 HTTP API，显示出口探测域名的规则预测、代理服务器 IP 和累计流量。
+ *   默认关闭；地址必须为回环地址，密钥仅用于本机请求，折叠节点测试不调用该 API。
  *   task=monitor 独立定时通知 IP 变化；卡片不写通知基线，避免长按测试节点时误报。
  *   IP 变化后补查本地/出口地区、运营商及 IPPure 风险，再发送通知；
- *   与 Surge 一样，首行汇总本地/出口 IP，正文依次为风控、出口、本地；各详情行保留 IP。
+ *   首行汇总本地/出口 IP，正文依次为风控、出口、可选代理服务器、本地；各详情行保留 IP。
  *   只展示本轮有效 IP 对应的数据，不依赖 Surge 的入口或策略查询接口。
  * - log=shared: Stash 各卡片与通知日志按任务暂存；task=logs 独立收集到一个脚本日志。
  *
@@ -228,10 +231,21 @@ function parseArguments() {
 
   if (typeof $argument !== "undefined") {
     // 不打印 $argument 原文：其中可能含 ipqs_key 等敏感凭据
-    arg = Object.fromEntries($argument.split("&").map(i => {
+    const split = isStash ? $argument.indexOf("&stash_options=") : -1;
+    const query = split < 0 ? $argument : $argument.slice(0, split);
+    arg = Object.fromEntries(query.split("&").map(i => {
       const idx = i.indexOf("=");
       return idx === -1 ? [i.trim(), ""] : [i.slice(0, idx).trim(), decode(i.slice(idx + 1)).trim()];
     }));
+    if (split >= 0) {
+      try {
+        const options = JSON.parse($argument.slice(split + "&stash_options=".length));
+        for (const key of ["risk_api", "local_geoapi", "remote_geoapi", "mask_ip", "tw_flag", "notify",
+          "stash_api", "stash_api_url", "stash_api_secret"]) {
+          if (["string", "boolean", "number"].includes(typeof options?.[key])) arg[key] = String(options[key]);
+        }
+      } catch (_) {} // 未支持覆写参数的客户端保留前面的静态默认值。
+    }
   }
 
   const isPanel = typeof $input !== "undefined" && $input.purpose === "panel";
@@ -259,6 +273,9 @@ function parseArguments() {
     tile: clean(arg.tile) || "outbound",
     task: clean(arg.task),
     log: clean(arg.log),
+    stashAPI: isStash && clean(arg.stash_api) === "true" && clean(arg.mode) !== "collapsed",
+    stashAPIURL: isStash ? clean(arg.stash_api_url) : "",
+    stashAPISecret: isStash ? clean(arg.stash_api_secret) : "",
     ipqsKey: isStash ? "" : clean(arg.ipqs_key),
     riskApi: isStash && clean(arg.risk_api).toLowerCase() === "ipqs" ? "ippure" :
       clean(arg.risk_api).toLowerCase() || (isStash ? "ippure" : ""),
@@ -374,6 +391,67 @@ function surgeAPI(method, path) {
   return new Promise(r => {
     $httpAPI(method, path, null, res => r(res));
   });
+}
+
+// 本机控制 API 仅供首页/通知显式启用；折叠节点测试不会访问它。
+function stashControlAPI(path, deadline) {
+  if (!args.stashAPI || !args.stashAPISecret || /[\r\n]/.test(args.stashAPISecret)) return Promise.resolve(null);
+  const base = args.stashAPIURL.match(/^(https?):\/\/(127\.0\.0\.1|localhost|\[::1\])(?::(\d{1,5}))?\/?$/i);
+  if (!base || (base[3] && (+base[3] < 1 || +base[3] > 65535))) {
+    IPLog.log("[Stash API] 地址须为本机回环地址");
+    return Promise.resolve(null);
+  }
+  const remaining = Math.min(deadline, requestDeadline) - Date.now();
+  if (finished || remaining < 100) return Promise.resolve(null);
+  return new Promise(resolve => {
+    let settled = false, timer = null;
+    const complete = (error, response, body) => {
+      if (settled) return;
+      settled = true;
+      if (timer !== null && typeof clearTimeout === "function") clearTimeout(timer);
+      let data = null;
+      if (!error && Number(response?.status || response?.statusCode) === 200) {
+        try { data = JSON.parse(body); } catch (_) {}
+      }
+      if (!data && !finished) IPLog.log("[Stash API] " + path.split("?")[0].split("/").slice(0, 2).join("/") + " 不可用，保留常规检测结果");
+      resolve(data);
+    };
+    if (hasTimers) timer = setTimeout(() => complete("timeout"), remaining);
+    try {
+      $httpClient.get({ url: args.stashAPIURL.replace(/\/$/, "") + path,
+        headers: { Authorization: "Bearer " + args.stashAPISecret, "X-Stash-Selected-Proxy": "DIRECT" },
+        timeout: remaining / 1000, "auto-cookie": false, "auto-redirect": false
+      }, complete);
+    } catch (_) { complete("request failed"); }
+  });
+}
+
+async function getStashControlContext() {
+  if (!args.stashAPI || !args.stashAPISecret) return null;
+  const exit = await fetchOutbound4();
+  if (finished) return null;
+  const host = exit?.probeHost;
+  const deadline = Date.now() + 1500;
+  const [connections, route] = await Promise.all([
+    stashControlAPI("/connections", deadline),
+    host && !args.proxy ? stashControlAPI("/rules/match?target=" + encodeURIComponent(host) + "&port=443&network=tcp&resolve=true", deadline) : null
+  ]);
+  if (finished) return null;
+  // /rules/match 是当前规则的预测结果，不是其他服务的线路，也不等同于已建立连接。
+  const policy = typeof route?.outbound === "string" && route.outbound.trim() &&
+    !/^unknown$/i.test(route.outbound.trim()) ? route.outbound.trim() : "";
+  const chain = Array.isArray(route?.chain) && route.chain.every(item => typeof item === "string") ? route.chain : [];
+  const totals = connections && [connections.uploadTotal, connections.downloadTotal];
+  const traffic = totals?.every(value => Number.isFinite(value) && value >= 0)
+    ? { upload: totals[0], download: totals[1] } : null;
+  let entranceIP = "";
+  if (policy && !/^(?:DIRECT|REJECT(?:-DROP)?)$/i.test(policy)) {
+    const info = await stashControlAPI("/proxies/" + encodeURIComponent(policy) + "/info", deadline);
+    // 只接受接口明确提供的服务器 IP；域名、出口 IP 和连接 destinationIP 均不代用。
+    entranceIP = stashCacheIP(info?.serverIP || info?.server);
+  }
+  if (!policy && !traffic) return null;
+  return { host, policy, chain, entranceIP, traffic };
 }
 
 // 单次运行内去重：Stash 出口、评分和类型与官方卡片一样取自同一份 IPPure 数据。
@@ -901,14 +979,14 @@ async function probeStashOutbound4() {
   const info = await getIPPureInfo();
   if (finished) return null;
   const ip = stashCacheIP(info?.ip);
-  if (ip && !ip.includes(":")) return { ip };
+  if (ip && !ip.includes(":")) return { ip, probeHost: CONFIG.urls.ipType.match(/^https?:\/\/([^/]+)/)[1] };
   if (requestDeadline - Date.now() < 100) return null;
   const deadline = Math.min(requestDeadline, Date.now() + CONFIG.stashIPv4Timeout);
   IPLog.log("IPPure 未提供有效 IPv4，使用 ipify 备用探测");
   const backup = await httpJSON(CONFIG.urls.stashIPv4, null, null, deadline);
   if (finished) return null;
   const backupIP = stashCacheIP(backup?.ip);
-  return backupIP && !backupIP.includes(":") ? { ip: backupIP } : null;
+  return backupIP && !backupIP.includes(":") ? { ip: backupIP, probeHost: "api.ipify.org" } : null;
 }
 
 async function probeStashOutbound6() {
@@ -1019,10 +1097,11 @@ async function runStashMonitor() {
     const results = await Promise.allSettled([
       getStashLocalResult(current.localRaw),
       current.outIP ? getStashOutboundResult(false, { ip: current.outIP, raw: current.outRaw }) : null,
-      current.outIP ? getStashRiskResult() : null
+      current.outIP ? getStashRiskResult() : null,
+      getStashControlContext()
     ]);
     if (finished) return;
-    const [local, outbound, risk] = results.map(result => result.status === "fulfilled" ? result.value : null);
+    const [local, outbound, risk, control] = results.map(result => result.status === "fulfilled" ? result.value : null);
     const sameRisk = risk?.ip === current.outIP ? risk : null;
     const m = ip => ip ? maskIP(ip, args.maskIP) : "查询失败";
     const detail = info => (info?.location ? formatGeo(info.countryCode, info.location) : "地区查询失败") +
@@ -1033,7 +1112,9 @@ async function runStashMonitor() {
       " | 类型：" + (sameRisk?.typeText || "类型未知 · 来源未知"),
       "🅟 " + m(current.outIP) + " " + detail(outbound)];
     if (current.outIPv6) lines.push("🅟 IPv6：" + m(current.outIPv6));
+    if (control?.entranceIP) lines.push("Ⓔ " + m(control.entranceIP));
     lines.push("Ⓓ " + m(current.localIP) + " " + detail(local));
+    if (control?.policy) lines.push("规则预测（" + control.host + "）：" + (stashCacheIP(control.policy) ? m(control.policy) : control.policy));
     try { $notification.post(title, subtitle, lines.join("\n")); }
     catch (_) { IPLog.log("通知发送失败；保留基线供下次重试"); return done({}); }
   }
@@ -1320,9 +1401,9 @@ async function getStashOutboundResult(includeIPv6, detectedExit) {
 async function runStashSummary() {
   const results = await Promise.allSettled([
     getStashRiskResult(), getStashLocalResult(), getStashOutboundResult(true),
-    checkDNSLeak(args.proxy || undefined, Date.now() + 1500)
+    checkDNSLeak(args.proxy || undefined, Date.now() + 1500), getStashControlContext()
   ]);
-  const [risk, local, outbound, dns] = results.map(result => result.status === "fulfilled" ? result.value : null);
+  const [risk, local, outbound, dns, control] = results.map(result => result.status === "fulfilled" ? result.value : null);
   const m = ip => maskIP(ip, args.maskIP);
   const region = info => info?.location ? [flag(info.countryCode), info.location].filter(Boolean).join(" ") : "查询失败";
   const lines = [
@@ -1346,6 +1427,12 @@ async function runStashSummary() {
   if (resolver?.geo) lines.push("DNS 地区：" + resolver.geo);
   // 地区不能证明是否泄露；proxy 只代表调用者显式指定的策略，不推断实际节点。
   if (args.proxy) lines.push("指定策略：" + args.proxy);
+  if (control?.policy) {
+    lines.push("", "规则预测（" + control.host + "）：" + (stashCacheIP(control.policy) ? m(control.policy) : control.policy));
+    if (control.chain.length) lines.push("代理链：" + control.chain.map(name => stashCacheIP(name) ? m(name) : name).join(" → "));
+    if (control.entranceIP) lines.push("代理服务器 IP：" + m(control.entranceIP));
+  }
+  if (control?.traffic) lines.push("本机累计流量：↑ " + formatBytes(control.traffic.upload) + "  ↓ " + formatBytes(control.traffic.download));
   return done({
     title: "IP 信息卡", content: lines.join("\n"),
     backgroundColor: risk?.color || "#9E9E9E", url: "https://ippure.com"

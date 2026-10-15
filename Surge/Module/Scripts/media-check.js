@@ -256,11 +256,19 @@ class Utils {
     const decode = value => {
       try { return decodeURIComponent(value); } catch { return value; }
     };
-    String(argString || "").split("&").forEach(part => {
+    const raw = String(argString || "");
+    const split = IS_STASH ? raw.indexOf("&stash_options=") : -1;
+    (split < 0 ? raw : raw.slice(0, split)).split("&").forEach(part => {
       const at = part.indexOf("=");
       if (at < 1) return;
       result[decode(part.slice(0, at)).trim()] = decode(part.slice(at + 1));
     });
+    if (split >= 0) {
+      try {
+        const options = JSON.parse(raw.slice(split + "&stash_options=".length));
+        if (["string", "boolean"].includes(typeof options?.nfprice)) result.nfprice = String(options.nfprice);
+      } catch (_) {} // 旧版客户端未展开表单时使用静态默认参数。
+    }
     ["nfprice", "notify", "viu"].forEach(key => {
       if (result[key] !== undefined) result[key] = result[key].trim().toLowerCase();
     });

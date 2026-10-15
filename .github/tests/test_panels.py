@@ -2,6 +2,8 @@
 from pathlib import Path
 import contextlib
 import io
+import json
+import re
 import sys
 import tempfile
 import unittest
@@ -101,9 +103,46 @@ class TileConfigurationTests(unittest.TestCase):
                         'ipqs_key': 'secret-one', 'maxmind_key': 'account:secret-two'}
             result = stash._stash_panel_argument(
                 'tile=outbound&ipqs_key=old-key&maxmind_key=old-account', original, 'ip-security-panel')
-            self.assertEqual(parse_qs(result), {'tile': ['outbound'], 'risk_api': ['ippure'], 'remote_geoapi': ['ipapi-zh']})
+            self.assertEqual(parse_qs(result.partition('&stash_options=')[0]), {'tile': ['outbound'], 'risk_api': ['ippure'], 'remote_geoapi': ['ipapi-zh']})
             self.assertEqual(original['risk_api'], 'ipqs')
             self.assertEqual(original['remote_geoapi'], remote)
+
+    def test_native_forms_resolve_defaults_and_preserve_notification_contexts(self):
+        for stem in ('ip-security-panel', 'media-check-panel'):
+            config = yaml.safe_load((PANELS / (stem + '.stoverride')).read_text())
+            self.assertEqual(config['arguments-version'], 1)
+            values = {key: field.get('default') for key, field in config['arguments'].items()}
+            self.assertNotIn('ipqs_key', values)
+            self.assertNotIn('maxmind_key', values)
+            for entry in config['tiles'] + config['cron']['script']:
+                prefix, sep, suffix = entry['argument'].partition('&stash_options=')
+                if not sep: continue
+                rendered = re.sub(r'\$\{args\.(\w+)\|json\}',
+                                  lambda match: json.dumps(values[match[1]]), suffix)
+                options = json.loads(rendered)
+                args = {k: v[0] for k, v in parse_qs(prefix).items()}
+                if args.get('mode') == 'collapsed': self.assertNotIn('stash_api_secret', options)
+                if args.get('task') != 'monitor': self.assertNotIn('notify', options)
+                if stem == 'ip-security-panel' and args.get('mode') != 'collapsed':
+                    self.assertIs(options['stash_api'], False)
+                    self.assertEqual(options['stash_api_secret'], '')
+                for key, value in options.items():
+                    if key.startswith('stash_api'): continue
+                    self.assertEqual(str(value).lower(), args[key].lower())
+
+    def test_mtproto_form_requires_an_existing_europe_policy_and_keeps_typed_parameters(self):
+        config = yaml.safe_load((ROOT / 'Surge/Module/Stash/MTProto.stoverride').read_text())
+        fields = config['arguments']
+        self.assertTrue(fields['dc_europe']['required'])
+        self.assertNotIn('default', fields['dc_europe'])
+        self.assertEqual(fields['port']['value-type'], 'integer')
+        self.assertEqual(fields['port']['default'], 5753)
+        self.assertFalse(fields['ipv6']['default'])
+        self.assertRegex(fields['secret']['default'], r'^[0-9a-f]{32}$')
+        self.assertEqual(config['mtproto']['port'], '${args.port}')
+        self.assertEqual(config['mtproto']['ipv6'], '${args.ipv6}')
+        self.assertTrue(all('${args.dc_' in rule for rule in config['rules']))
+        self.assertNotIn('interface', config['mtproto'])
 
     def test_media_service_order_and_script_urls(self):
         config = yaml.safe_load((PANELS / 'media-check-panel.stoverride').read_text())
@@ -155,7 +194,7 @@ class TileConfigurationTests(unittest.TestCase):
         supported = {'notify', 'risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'}
         defaults = {key: [value] for key, value in (item.split(':', 1) for item in declaration.split(','))
                     if key in supported}
-        self.assertEqual(parse_qs(monitor['argument'], keep_blank_values=True), {
+        self.assertEqual(parse_qs(monitor['argument'].partition('&stash_options=')[0], keep_blank_values=True), {
             'task': ['monitor'], 'log': ['shared'], **defaults})
         self.assertEqual(monitor['cron'], '*/10 * * * *')
         self.assertEqual(collector['name'], 'hotkids-ip-security')

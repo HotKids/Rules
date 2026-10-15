@@ -1,6 +1,7 @@
 # 原脚本：HotKids & ChatGPT & Claude
 # 覆写的 category/icon 及兼容参数默认值由同名 .sgmodule 同步，在 Surge 源文件维护。
 # nfprice/geminiapikey 取 Surge 默认值，分别用于 Netflix/Gemini；折叠卡片保持关闭通知。
+# 支持覆写参数的客户端可在表单中开关 Netflix 价格显示；未展开参数时沿用静态默认值。
 # 独立服务卡片：与 Stash 官方 Collapsed Tiles 示例一致。
 # 默认放入“流媒体/第三方服务”页面；长按节点时经该节点检测。
 # 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
@@ -12,6 +13,12 @@ name: 'Streaming & AI Service Tiles'
 desc: 检测流媒体和 AI 服务的可用性：Netflix、Disney+、HBO Max、YouTube Premium、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit
 category: 'HotKids'
 icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/ackify.png'
+arguments-version: 1
+arguments:
+  nfprice:
+    type: switch
+    title: 显示 Netflix 价格
+    default: true
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
@@ -21,7 +28,7 @@ tiles:
     backgroundColor: '#E50914'
     collapsed: true
     url: 'https://www.netflix.com'
-    argument: 'service=netflix&mode=collapsed&notify=false&nfprice=true&log=shared'
+    argument: 'service=netflix&mode=collapsed&notify=false&nfprice=true&log=shared&stash_options={"nfprice":${args.nfprice|json}}'
   - name: hotkids-media-check-disney
     interval: 600
     title: 'Disney+'
