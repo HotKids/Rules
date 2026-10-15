@@ -81,7 +81,7 @@ DOMAIN,ads.example.invalid,REJECT
             stack.enter_context(patch.object(pipeline, 'REPO_ROOT', root))
             stack.enter_context(patch.object(pipeline, 'parse_sync_txt', return_value={'Surge': {'source': 'Surge/Profile.conf'}}))
             stack.enter_context(patch.dict(pipeline._GENERAL_INJECT, clear=True))
-            for name in ('_sync_clash', '_sync_stash', '_sync_stash_panel_metadata', '_sync_loon', '_sync_qx', '_sync_surfboard', '_sync_singbox'):
+            for name in ('_sync_clash', '_sync_stash', '_sync_stash_panel_metadata', '_sync_stash_mtproto', '_sync_loon', '_sync_qx', '_sync_surfboard', '_sync_singbox'):
                 stack.enter_context(patch.object(pipeline, name))
             for fields, expected in [('ca-p12 = rotated-fixture\nca-passphrase = false\n',
                                      {'ca': 'rotated-fixture', 'ca-passphrase': 'false'}), ('', {})]:

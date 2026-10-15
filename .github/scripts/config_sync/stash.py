@@ -77,13 +77,12 @@ def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
             defaults["remote_geoapi"] = "ipapi-zh"
         if args.get("task") == "monitor":
             keys.append("notify")
-        # event_delay / panel_interval 只参与 Surge 事件延迟与点击打码，不用于 Stash。
+        # event_delay 仅用于 Surge 事件；panel_interval 在 Stash 直接设置卡片间隔。
     elif stem == "media-check-panel":
         keys = ["notify"] if args.get("mode") != "collapsed" else []
         if args.get("service", "all") in ("all", "netflix"):
             keys.append("nfprice")
-        if args.get("service", "all") in ("all", "gemini"):
-            keys.append("geminiapikey")
+        args.pop("geminiapikey", None)
         # viu 仅供 Surge 汇总面板使用。
     else:
         return argument
@@ -106,9 +105,13 @@ def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
 def _stash_panel_schema(defaults: dict, stem: str) -> dict:
     """Stash 表单保留 Surge 的兼容默认值；本机 API 为显式开启的附加项。"""
     if stem == "media-check-panel":
-        return ({"nfprice": {"type": "switch", "title": "显示 Netflix 价格",
-                             "default": str(defaults["nfprice"]).lower() == "true"}}
-                if "nfprice" in defaults else {})
+        fields = {
+            "nfprice": ("Netflix 价格（nfprice）", "显示当地订阅价格；价格表缓存 24 小时。关闭可减少请求。"),
+            "notify": ("解锁变化通知（notify）", "每 10 分钟按当前分流检测，变化合并为一条通知；首次只记录，超时和错误不更新基线。独立卡片不触发通知。"),
+        }
+        return {key: {"type": "switch", "title": title, "description": description,
+                      "default": str(defaults[key]).lower() == "true"}
+                for key, (title, description) in fields.items() if key in defaults}
     if stem != "ip-security-panel":
         return {}
     choices = {
@@ -117,6 +120,13 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
         "remote_geoapi": ("出口地区首选", ["ipapi-zh", "ipapi", "ipinfo", "ippure"]),
         "mask_ip": ("IP 打码", ["0", "1", "2"]),
         "tw_flag": ("台湾地区旗帜", ["cn", "tw"]),
+    }
+    descriptions = {
+        "risk_api": "自动：IPPure → ProxyCheck → Scamalytics；指定来源优先，失败后尝试其余来源。Stash 仅使用免密钥服务。",
+        "local_geoapi": "默认：百度 → bilibili → ip.sb；指定来源优先，失败后按默认顺序尝试其余来源。百度提供中文省市区，bilibili 为中文，ip.sb 为英文。",
+        "remote_geoapi": "出口默认：ipapi-zh → ipapi → ipinfo；指定来源优先。ipapi-zh/ipapi 为同一接口的中英文，使用 HTTP；ipinfo 为英文，IPPure 为额外可选源。运营商优先 ipinfo，缺失时回退到地区来源。",
+        "mask_ip": "0 关闭；1 部分打码；2 全部隐藏。用于卡片和通知；Stash 不支持 Surge 的点击切换打码。",
+        "tw_flag": "cn 显示 🇨🇳，tw 显示 🇹🇼。",
     }
     schema = {}
     for key, (title, options) in choices.items():
@@ -129,11 +139,18 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
         labels = {"risk_api": {"null": "自动回退"},
                   "mask_ip": {"0": "关闭", "1": "部分打码", "2": "全部隐藏"},
                   "tw_flag": {"cn": "🇨🇳", "tw": "🇹🇼"}}.get(key, {})
-        schema[key] = {"type": "select", "title": title, "default": value,
+        schema[key] = {"type": "select", "title": f"{title}（{key}）",
+                       "description": descriptions[key], "default": value,
                        "options": [{"value": option, "label": labels.get(option, option)} for option in options]}
     if "notify" in defaults:
-        schema["notify"] = {"type": "switch", "title": "IP 变化通知",
+        schema["notify"] = {"type": "switch", "title": "IP 变化通知（notify）",
+                            "description": "每 10 分钟检查本地/出口 IP，变化时通知；首次只记录。Stash 使用定时检查，不使用 Surge 的网络变化事件延迟。独立卡片不触发通知。",
                             "default": str(defaults["notify"]).lower() != "false"}
+    if "panel_interval" in defaults:
+        schema["panel_interval"] = {"type": "input", "title": "卡片刷新间隔（panel_interval）",
+                                    "description": "单位为秒，用于四张 IP 卡片。通知仍每 10 分钟检查，日志每分钟收集。",
+                                    "value-type": "integer", "default": int(defaults["panel_interval"]),
+                                    "minimum": 1, "required": True}
     schema.update({
         "stash_api": {"type": "switch", "title": "显示本机 API 信息", "default": False,
                       "description": "可选：显示出口探测域名的规则预测和本机累计流量。需在 Stash 启用外部控制，仅用于首页和通知。"},
@@ -189,10 +206,45 @@ def _sync_stash_panel_metadata() -> None:
                 resolved = _stash_panel_argument(argument, defaults, source.stem)
                 if resolved != argument:
                     lines[index] = f"{match[1]} {_yq(resolved)}"
+        if source.stem == "ip-security-panel":
+            start, end = lines.index("tiles:"), lines.index("cron:")
+            for index in range(start, end):
+                if re.match(r"^\s+interval:", lines[index]):
+                    interval = "${args.panel_interval}" if "panel_interval" in schema else 600
+                    lines[index] = "    interval: " + (_yq(interval) if isinstance(interval, str) else str(interval))
         after = "\n".join(lines) + "\n"
         if after != before:
             target.write_text(after, encoding="utf-8")
             print(f"  ✓ {target.relative_to(REPO_ROOT)} 面板分类/图标/默认参数已同步")
+
+
+def _sync_stash_mtproto() -> None:
+    """同步 MTProto 的兼容默认值；保留 Stash 的监听方式和 IPv6 语义。"""
+    source = REPO_ROOT / "Surge/Module/MTProto.sgmodule"
+    target = REPO_ROOT / "Surge/Module/Stash/MTProto.stoverride"
+    if not source.is_file() or not target.is_file():
+        return
+    declaration = re.search(r"^#!arguments=(.*)$", source.read_text(encoding="utf-8"), re.M)
+    if not declaration:
+        return
+    defaults = dict(item.strip().split(":", 1) for item in declaration[1].split(",") if ":" in item)
+    before = target.read_text(encoding="utf-8")
+    fields = yaml.safe_load(before)["arguments"]
+    mapping = {"dc_asia": "dc5-policy", "dc_america": "dc1-policy", "dc_europe": "dc4-policy",
+               "port": "port", "secret": "secret", "dc_config_url": "dc-config-url"}
+    for key, upstream in mapping.items():
+        if upstream in defaults:
+            fields[key]["default"] = int(defaults[upstream]) if key == "port" else defaults[upstream]
+    schema = {key: fields[key] for key in ("dc_asia", "dc_america", "dc_europe", "port", "secret", "ipv6", "dc_config_url")}
+    block = yaml.safe_dump({"arguments-version": 1, "arguments": schema},
+                           allow_unicode=True, sort_keys=False, width=1000)
+    after = re.sub(r"(?ms)^arguments-version:.*?(?=^mtproto:)", lambda _: block, before)
+    if "port" in defaults and "secret" in defaults:
+        after = re.sub(r"tg://proxy\?server=127\.0\.0\.1&port=\d+&secret=[0-9a-fA-F]{32}",
+                       lambda _: f"tg://proxy?server=127.0.0.1&port={defaults['port']}&secret={defaults['secret']}", after)
+    if after != before:
+        target.write_text(after, encoding="utf-8")
+        print(f"  ✓ {target.relative_to(REPO_ROOT)} MTProto 默认参数已同步")
 
 
 def _stash_clean_nameserver(server: str) -> str:

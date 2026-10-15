@@ -7,7 +7,7 @@
  * @author HotKids & ChatGPT & Claude
  *
  * 参数：
- * - service：Stash 使用 SERVICES 中的服务 ID；空值 / all 汇总，logs 只收集日志。
+ * - service：Stash 使用 SERVICES 中的服务 ID；空值 / all 汇总，logs 只收集日志，monitor 定时检查变化。
  *   Surge 始终汇总 SERVICES 中的 11 项；viu=true 可附加 Viu，仅可用时显示。
  * - mode=collapsed：保留 Stash 长按节点上下文，忽略 proxy，关闭变化通知。
  * - proxy：URL 编码的节点或策略组；留空按客户端分流。
@@ -266,7 +266,9 @@ class Utils {
     if (split >= 0) {
       try {
         const options = JSON.parse(raw.slice(split + "&stash_options=".length));
-        if (["string", "boolean"].includes(typeof options?.nfprice)) result.nfprice = String(options.nfprice);
+        for (const key of ["nfprice", "notify"]) {
+          if (["string", "boolean"].includes(typeof options?.[key])) result[key] = String(options[key]);
+        }
       } catch (_) {} // 旧版客户端未展开表单时使用静态默认参数。
     }
     ["nfprice", "notify", "viu"].forEach(key => {
@@ -1040,13 +1042,24 @@ async function runServiceTile(service) {
       $done({});
       return;
     }
+    const monitor = IS_STASH && args.service === "monitor";
+    if (monitor) {
+      // 通知只由定时任务检查；关闭时不请求网络，也不写入基线。
+      if (typeof $script !== "object" || $script?.type !== "cron" || args.notify !== "true") {
+        $done({});
+        return;
+      }
+      args.mode = "home";
+      args.proxy = "";
+      args.notifykey = "monitor";
+    }
     if (args.mode === "collapsed") args.proxy = "";
-    if (args.service && args.service !== "all") {
+    if (args.service && args.service !== "all" && !monitor) {
       await runServiceTile(args.service);
       return;
     }
     // Netflix 价格表与各服务检测并行预取（仅在开启价格显示时）
-    const pricesPromise = args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
+    const pricesPromise = !monitor && args.nfprice !== "false" ? ServiceChecker.fetchNetflixPrices() : null;
     // 汇总与独立卡片共用服务表，顺序和新增服务只维护一次。
     const definitions = Object.entries(SERVICES);
     const viuPromise = !IS_STASH && args.viu === "true" ? ServiceChecker.checkViu() : Promise.resolve(null);
@@ -1068,6 +1081,10 @@ async function runServiceTile(service) {
       try { notifyUnlockChanges(services); }
       catch { MediaLog.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
     }
+    if (monitor) {
+      $done({});
+      return;
+    }
 
     const lines = services.map(s => Utils.buildLine(s.name, s.result, s.suffix));
     const totalCount = services.length;
@@ -1083,6 +1100,10 @@ async function runServiceTile(service) {
     });
   } catch (error) {
     MediaLog.log(`[media-check v${CONFIG.VERSION}] 脚本异常：${Utils.errorDetails(error)}`);
+    if (IS_STASH && ARGS.service === "monitor") {
+      $done({});
+      return;
+    }
     finishPanel({
       title: "❌ 检测失败",
       content: `错误: ${error.message || error}`,

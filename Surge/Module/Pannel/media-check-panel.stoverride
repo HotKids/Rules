@@ -1,11 +1,12 @@
 # 原脚本：HotKids & ChatGPT & Claude
 # 覆写的 category/icon 及兼容参数默认值由同名 .sgmodule 同步，在 Surge 源文件维护。
-# nfprice/geminiapikey 取 Surge 默认值，分别用于 Netflix/Gemini；折叠卡片保持关闭通知。
-# 支持覆写参数的客户端可在表单中开关 Netflix 价格显示；未展开参数时沿用静态默认值。
+# nfprice/notify 取 Surge 默认值；Stash 表单不包含第三方 API Key。
+# 支持覆写参数的客户端可在表单中开关 Netflix 价格和变化通知；未展开参数时沿用静态默认值。
 # 独立服务卡片：与 Stash 官方 Collapsed Tiles 示例一致。
 # 默认放入“流媒体/第三方服务”页面；长按节点时经该节点检测。
 # 如需全部显示在首页，将 collapsed 改为 false，并把 mode=collapsed 改为 mode=home。
 # 首页模式才启用 notify/proxy 参数；折叠模式不保存跨节点通知基线。
+# 变化通知由独立定时任务每 10 分钟检测，默认关闭；关闭时不发送检测请求。
 # 统一白色图标搭配品牌底色；不可用或检测异常时显示灰色。
 # Gemini：Stash iOS 首页最多 2 秒，失败后匿名文本兜底，总预算 6 秒。
 # 日志统一输出到 hotkids-media-check.log；连接时每分钟收集一次。
@@ -17,8 +18,14 @@ arguments-version: 1
 arguments:
   nfprice:
     type: switch
-    title: 显示 Netflix 价格
+    title: Netflix 价格（nfprice）
+    description: 显示当地订阅价格；价格表缓存 24 小时。关闭可减少请求。
     default: true
+  notify:
+    type: switch
+    title: 解锁变化通知（notify）
+    description: 每 10 分钟按当前分流检测，变化合并为一条通知；首次只记录，超时和错误不更新基线。独立卡片不触发通知。
+    default: false
 tiles:
   - name: hotkids-media-check-netflix
     interval: 600
@@ -100,7 +107,7 @@ tiles:
     backgroundColor: '#386EDB'
     collapsed: true
     url: 'https://gemini.google.com'
-    argument: 'service=gemini&mode=collapsed&notify=false&geminiapikey=null&log=shared'
+    argument: 'service=gemini&mode=collapsed&notify=false&log=shared'
   - name: hotkids-media-check-metaai
     interval: 600
     title: 'Meta AI'
@@ -122,12 +129,19 @@ tiles:
 
 cron:
   script:
+    - name: hotkids-media-check-notify
+      cron: '*/10 * * * *'
+      timeout: 30
+      argument: 'service=monitor&notify=false&log=shared&stash_options={"notify":${args.notify|json}}'
     - name: hotkids-media-check
       cron: '* * * * *'
       timeout: 5
       argument: 'service=logs'
 
 script-providers:
+  hotkids-media-check-notify:
+    url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
+    interval: 86400
   hotkids-media-check:
     url: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/Scripts/media-check.js
     interval: 86400

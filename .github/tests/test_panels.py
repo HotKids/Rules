@@ -93,9 +93,17 @@ class TileConfigurationTests(unittest.TestCase):
                                 self.assertEqual(args.get(key), params.get(key))
                             self.assertEqual(args.get('notify'), params.get('notify') if args.get('task') == 'monitor' else 'false')
                         else:
-                            self.assertEqual(args['notify'], 'false')
-                            for key, service in (('nfprice', 'netflix'), ('geminiapikey', 'gemini')):
-                                self.assertEqual(args.get(key), params.get(key) if args['service'] == service else None)
+                            self.assertNotIn('geminiapikey', args)
+                            self.assertEqual(args.get('notify'), params.get('notify') if args['service'] == 'monitor' else 'false')
+                            self.assertEqual(args.get('nfprice'), params.get('nfprice') if args['service'] == 'netflix' else None)
+                    if stem == 'ip-security-panel':
+                        interval = config.get('arguments', {}).get('panel_interval')
+                        if 'panel_interval' in params:
+                            self.assertEqual(interval['default'], int(params['panel_interval']))
+                            self.assertTrue(all(t['interval'] == '${args.panel_interval}' for t in config['tiles']))
+                        else:
+                            self.assertIsNone(interval)
+                            self.assertTrue(all(t['interval'] == 600 for t in config['tiles']))
 
     def test_ip_stash_sync_removes_credentials_and_replaces_keyed_source_preferences(self):
         for remote in ('maxmind', 'maxmind-zh'):
@@ -114,6 +122,7 @@ class TileConfigurationTests(unittest.TestCase):
             values = {key: field.get('default') for key, field in config['arguments'].items()}
             self.assertNotIn('ipqs_key', values)
             self.assertNotIn('maxmind_key', values)
+            self.assertNotIn('geminiapikey', values)
             for entry in config['tiles'] + config['cron']['script']:
                 prefix, sep, suffix = entry['argument'].partition('&stash_options=')
                 if not sep: continue
@@ -122,7 +131,8 @@ class TileConfigurationTests(unittest.TestCase):
                 options = json.loads(rendered)
                 args = {k: v[0] for k, v in parse_qs(prefix).items()}
                 if args.get('mode') == 'collapsed': self.assertNotIn('stash_api_secret', options)
-                if args.get('task') != 'monitor': self.assertNotIn('notify', options)
+                if args.get('task') != 'monitor' and args.get('service') != 'monitor':
+                    self.assertNotIn('notify', options)
                 if stem == 'ip-security-panel' and args.get('mode') != 'collapsed':
                     self.assertIs(options['stash_api'], False)
                     self.assertEqual(options['stash_api_secret'], '')
@@ -130,11 +140,11 @@ class TileConfigurationTests(unittest.TestCase):
                     if key.startswith('stash_api'): continue
                     self.assertEqual(str(value).lower(), args[key].lower())
 
-    def test_mtproto_form_requires_an_existing_europe_policy_and_keeps_typed_parameters(self):
+    def test_mtproto_form_follows_surge_policies_and_keeps_typed_parameters(self):
         config = yaml.safe_load((ROOT / 'Surge/Module/Stash/MTProto.stoverride').read_text())
         fields = config['arguments']
         self.assertTrue(fields['dc_europe']['required'])
-        self.assertNotIn('default', fields['dc_europe'])
+        self.assertEqual(fields['dc_europe']['default'], '🇩🇪 Germany')
         self.assertEqual(fields['port']['value-type'], 'integer')
         self.assertEqual(fields['port']['default'], 5753)
         self.assertFalse(fields['ipv6']['default'])
@@ -143,6 +153,35 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(config['mtproto']['ipv6'], '${args.ipv6}')
         self.assertTrue(all('${args.dc_' in rule for rule in config['rules']))
         self.assertNotIn('interface', config['mtproto'])
+
+    def test_mtproto_defaults_sync_preserves_stash_semantics_and_source(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            module = root / 'Surge/Module'
+            (module / 'Stash').mkdir(parents=True)
+            target = module / 'Stash/MTProto.stoverride'
+            original = (ROOT / 'Surge/Module/Stash/MTProto.stoverride').read_text()
+            target.write_text(original)
+            source = ('#!arguments=dc5-policy:Asia,dc1-policy:America,dc4-policy:Europe,'
+                      'port:6789,secret:0123456789abcdef0123456789abcdef,interface:0.0.0.0,'
+                      'ipv6:true,dc-config-url:https://example.com/dc.json\n[General]\n')
+            (module / 'MTProto.sgmodule').write_text(source)
+            with patch.object(stash, 'REPO_ROOT', root), contextlib.redirect_stdout(io.StringIO()):
+                stash._sync_stash_mtproto()
+                with patch.object(Path, 'write_text', side_effect=AssertionError('Unchanged output rewritten')):
+                    stash._sync_stash_mtproto()
+            config = yaml.safe_load(target.read_text())
+            fields = config['arguments']
+            expected = {'dc_asia': 'Asia', 'dc_america': 'America', 'dc_europe': 'Europe', 'port': 6789,
+                        'secret': '0123456789abcdef0123456789abcdef', 'ipv6': False,
+                        'dc_config_url': 'https://example.com/dc.json'}
+            self.assertEqual({key: field['default'] for key, field in fields.items()}, expected)
+            self.assertEqual(list(fields), list(expected))
+            self.assertEqual(config['icon'], yaml.safe_load(original)['icon'])
+            self.assertNotIn('interface', fields)
+            self.assertEqual((module / 'MTProto.sgmodule').read_text(), source)
+            self.assertEqual(config['rules'], yaml.safe_load(original)['rules'])
+            self.assertIn('port=6789&secret=0123456789abcdef0123456789abcdef', target.read_text())
 
     def test_media_service_order_and_script_urls(self):
         config = yaml.safe_load((PANELS / 'media-check-panel.stoverride').read_text())
@@ -158,15 +197,21 @@ class TileConfigurationTests(unittest.TestCase):
             self.assertEqual(urlsplit(provider['url']).query, '')
             self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/media-check.js'))
         jobs = config['cron']['script']
-        self.assertEqual(len(jobs), 1)
-        self.assertEqual(jobs[0]['name'], 'hotkids-media-check')
-        self.assertNotIn(jobs[0]['name'], [tile['name'] for tile in config['tiles']])
-        self.assertEqual(jobs[0]['cron'], '* * * * *')
-        self.assertEqual(jobs[0]['timeout'], 5)
-        self.assertEqual(parse_qs(jobs[0]['argument']), {'service': ['logs']})
-        provider = config['script-providers'][jobs[0]['name']]
-        self.assertEqual(urlsplit(provider['url']).query, '')
-        self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/media-check.js'))
+        self.assertEqual(len(jobs), 2)
+        monitor = next(job for job in jobs if parse_qs(job['argument'])['service'] == ['monitor'])
+        collector = next(job for job in jobs if parse_qs(job['argument'])['service'] == ['logs'])
+        self.assertEqual(monitor['cron'], '*/10 * * * *')
+        self.assertEqual(parse_qs(monitor['argument'].partition('&stash_options=')[0]),
+                         {'service': ['monitor'], 'notify': ['false'], 'log': ['shared']})
+        self.assertEqual(collector['name'], 'hotkids-media-check')
+        self.assertEqual(collector['cron'], '* * * * *')
+        self.assertEqual(collector['timeout'], 5)
+        self.assertEqual(parse_qs(collector['argument']), {'service': ['logs']})
+        for job in jobs:
+            self.assertNotIn(job['name'], [tile['name'] for tile in config['tiles']])
+            provider = config['script-providers'][job['name']]
+            self.assertEqual(urlsplit(provider['url']).query, '')
+            self.assertTrue(urlsplit(provider['url']).path.endswith('/Surge/Module/Scripts/media-check.js'))
 
     def test_ip_notification_context_is_separate_from_tiles(self):
         config = yaml.safe_load((PANELS / 'ip-security-panel.stoverride').read_text())
@@ -177,7 +222,8 @@ class TileConfigurationTests(unittest.TestCase):
         self.assertEqual(home['title'], 'IP 信息卡')
         self.assertEqual(home['icon'], 'https://ippure.com/logo.png')
         self.assertEqual(parse_qs(home['argument'])['mode'], ['home'])
-        self.assertEqual(home['interval'], 600)
+        self.assertEqual(home['interval'], '${args.panel_interval}')
+        self.assertEqual(config['arguments']['panel_interval']['default'], 600)
         self.assertTrue(all(tile['collapsed'] for tile in collapsed))
         self.assertTrue(all(parse_qs(tile['argument'])['mode'] == ['collapsed'] for tile in collapsed))
         for tile in config['tiles']:

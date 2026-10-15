@@ -8,7 +8,7 @@ const read = name => fs.readFileSync(path.join(root, 'Surge/Module/Scripts', nam
 const quiet = {log(){},error(){}};
 
 async function tile(service, response, {client="stash", argument="", store=new Map(), now, environment, scriptMeta, intercept, timers}={}) {
-  const requests = [], logs = [];
+  const requests = [], logs = [], notifications = [];
   let deadline;
   try {
     const output = await Promise.race([
@@ -27,6 +27,7 @@ async function tile(service, response, {client="stash", argument="", store=new M
           $script:{type:client==='stash'?'tile':'generic',...scriptMeta},
           $argument:`service=${service}&mode=collapsed&notify=false&nfprice=false&${argument}`,
           $httpClient:{get:request,post:request},$done:resolve,console:{...quiet,log:(...args)=>logs.push(args.join(' '))},
+          $notification:{post:(...args)=>notifications.push(args)},
           $persistentStore:{read:k=>store.get(k)||null,write:(v,k)=>{store.set(k,v);return true;}}};
         if(now)ctx.Date=class extends Date {static now(){return now();}};
         // 默认不提供计时器以覆盖 Android；时限测试注入虚拟时钟。
@@ -35,7 +36,7 @@ async function tile(service, response, {client="stash", argument="", store=new M
       }),
       new Promise((_,reject)=>{deadline=setTimeout(()=>reject(Error('tile did not finish')),2000);})
     ]);
-    return {output,requests,logs};
+    return {output,requests,logs,notifications};
   } finally {clearTimeout(deadline);}
 }
 
@@ -2128,6 +2129,51 @@ test('Stash summary, standalone cards and notifications share the Surge geograph
 });
 
 const stashForm = values => '&stash_options=' + JSON.stringify(values);
+
+test('Media monitor only runs from an enabled Stash cron; collapsed tiles keep node context', async()=>{
+  for(const options of [
+    {scriptMeta:{type:'cron'},argument:'notify=false'},
+    {scriptMeta:{type:'cron'},argument:'notify=true'+stashForm({notify:false})},
+    {scriptMeta:{type:'tile'},argument:'notify=true'},
+  ]) {
+    const store=new Map();
+    const r=await tile('monitor',{throw:Error('disabled monitor must not request')},{store,...options});
+    assert.deepEqual(JSON.parse(JSON.stringify(r.output)),{});
+    assert.equal(r.requests.length,0);assert.equal(r.notifications.length,0);assert.equal(store.size,0);
+  }
+  const store=new Map();
+  const r=await tile('spotify',{body:spotifyConfig('SG')},{store,
+    argument:'proxy=Wrong'+stashForm({notify:true,service:'monitor',mode:'home'})});
+  assert.equal(r.output.content,'SG');assert.equal(r.notifications.length,0);
+  assert.ok(![...store.keys()].some(k=>k.includes('notify')));
+  assert.ok(r.requests.every(o=>!o.headers['X-Stash-Selected-Proxy'] && !o.policy));
+});
+
+test('Media notification form enables combined change checks with an isolated baseline and no price fetch', async()=>{
+  const store=new Map();
+  const argument='mode=home&notify=false&nfprice=true&proxy=Wrong'+stashForm({notify:true});
+  const run=response=>tile('monitor',o=>o.url.includes('spotify')?response:{status:503,body:''},
+    {store,argument,scriptMeta:{type:'cron'}});
+  const first=await run({body:spotifyConfig('SG')});
+  assert.equal(first.notifications.length,0);
+  assert.ok(first.requests.length>=11);
+  assert.ok(first.requests.every(o=>!o.url.includes('latest.json')&&!o.url.includes('viu.com')));
+  assert.ok(first.requests.every(o=>!o.headers['X-Stash-Selected-Proxy']&&!o.policy));
+  const key=[...store.keys()].find(k=>k.startsWith('stash_media_check_notify_v1:'));
+  assert.equal(key,'stash_media_check_notify_v1:["monitor","routing"]:monitor');
+  assert.equal(JSON.parse(store.get(key)).Spotify,'1:SG');
+  // 手动首页和节点检测均不改写定时任务的基线。
+  await tile('spotify',{body:spotifyConfig('JP')},{store,argument:'mode=home&notify=true'});
+  assert.equal(JSON.parse(store.get(key)).Spotify,'1:SG');
+  const unknown=await run({error:'Timeout'});
+  assert.equal(unknown.notifications.length,0);
+  assert.equal(JSON.parse(store.get(key)).Spotify,'1:SG');
+  const changed=await run({body:spotifyConfig('HK')});
+  assert.equal(changed.notifications.length,1);
+  assert.equal(changed.notifications[0][0],'🎬 解锁状态变化');
+  assert.match(changed.notifications[0][2],/Spotify 区域变化 SG → HK/);
+  assert.equal((await run({body:spotifyConfig('HK')})).notifications.length,0);
+});
 const stashAPIDefaults = {stash_api:true, stash_api_url:'http://127.0.0.1:9090', stash_api_secret:'local-secret'};
 const localAPI = url => url.startsWith('http://127.0.0.1:9090/');
 
