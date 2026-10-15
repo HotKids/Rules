@@ -1,6 +1,7 @@
 name: MTProto
-desc: Telegram MTProto 代理，按机房分流。需 Stash iOS/tvOS 3.7+ 或 macOS 4.4+（Beta）；启用后用文件末尾链接导入 Telegram。
+desc: Telegram MTProto 代理，按机房分流。需使用支持 MTProto 代理服务的 Stash 版本；启用后可通过文件末尾的链接导入 Telegram。
 category: HotKids
+icon: https://cdn.jsdelivr.net/gh/selfhst/icons/png/telegram.png
 
 # 来源：Surge/Module/MTProto.sgmodule；参数按默认值展开。
 # 官方文档：https://stash.wiki/en/features/mtproto
