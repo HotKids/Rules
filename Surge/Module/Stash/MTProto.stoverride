@@ -1,0 +1,31 @@
+name: MTProto
+desc: Telegram MTProto 代理，按机房分流。需 Stash iOS/tvOS 3.7+ 或 macOS 4.4+（Beta）；启用后用文件末尾链接导入 Telegram。
+category: HotKids
+
+# 来源：Surge/Module/MTProto.sgmodule；参数按默认值展开。
+# 官方文档：https://stash.wiki/en/features/mtproto
+# Stash 不提供 interface 参数；局域网访问由“允许局域网连接”开关控制。
+mtproto:
+  port: 5753
+  # 沿用原模块示例密钥；可用 openssl rand -hex 16 生成自己的密钥，并同步修改 Telegram 设置。
+  secret: '0cedbe9e6550d2361ebc561422a34541'
+  # Stash 的 true 表示仅用 IPv6 连接机房，故默认使用 IPv4。
+  ipv6: false
+  dc-config-url: https://ruleset.skk.moe/Internal/mtproto-dc-config.json
+
+# 保留原模块按 DC 分流的规则；配置中需已有下列三个同名策略组。
+# MTProto 连接以机房 IP 匹配这些规则，无需在前面添加统一的 PROTOCOL,MTPROTO 规则。
+rules:
+  # DC5：新加坡
+  - IP-ASN,44907,🇸🇬 Singapore,no-resolve
+  - IP-ASN,62014,🇸🇬 Singapore,no-resolve
+  # DC1/DC3：迈阿密
+  - IP-ASN,59930,🇺🇸 America,no-resolve
+  # DC2/DC4：阿姆斯特丹
+  - IP-ASN,62041,🇩🇪 Germany,no-resolve
+  - IP-ASN,211157,🇩🇪 Germany,no-resolve
+  - IP-CIDR,5.28.192.0/18,🇩🇪 Germany,no-resolve
+  - IP-CIDR,109.239.140.0/24,🇩🇪 Germany,no-resolve
+
+# 本机导入链接；若更改端口或密钥，链接也需同步修改。
+# tg://proxy?server=127.0.0.1&port=5753&secret=0cedbe9e6550d2361ebc561422a34541
