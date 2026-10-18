@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-10-01 01:50:30
+# Date: 2026-10-18 16:21:07
 # Author: @HotKids
 
 [General]
@@ -117,8 +117,6 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bypass.lis
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Reroute.list, policy=🔰 Proxy, tag=Reroute, enabled=true
 # Private 私有网络
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt, policy=🔘 DIRECT, tag=Private, enabled=true
-# HTTPDNS 请求/流量阻止
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list, policy=🚧 AdGuard, tag=HTTPDNS, enabled=true
 # Advertising 广告
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt, policy=🚧 AdGuard, tag=Reject, enabled=true
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list, policy=🚧 AdGuard, tag=Adblock, enabled=true

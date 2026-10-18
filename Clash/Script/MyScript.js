@@ -256,7 +256,6 @@ function main(config) {
     'Bypass': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/Bypass.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml' },
     'Reroute': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/Reroute.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml' },
     'Private': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Private.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs' },
-    'HTTPDNS': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/HTTPDNS.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml' },
     'Reject': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Reject.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs' },
     'AdBlock': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/AdBlock.yaml', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml' },
     'Phishing': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Phishing.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs' },
@@ -296,8 +295,6 @@ function main(config) {
     'RULE-SET,Reroute,🔰 Proxy',
     // Private 私有网络
     'RULE-SET,Private,🔘 DIRECT',
-    // HTTPDNS 请求/流量阻止
-    'RULE-SET,HTTPDNS,🚧 AdGuard',
     // Advertising 广告
     'RULE-SET,Reject,🚧 AdGuard',
     'RULE-SET,AdBlock,🚧 AdGuard',

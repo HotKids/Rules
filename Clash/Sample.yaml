@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-10-13 15:57:22
+# Date: 2026-10-18 16:21:07
 # Author: @HotKids
 
 # 通用设置
@@ -563,14 +563,6 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs
     interval: 86400
 
-  HTTPDNS:
-    type: http
-    behavior: classical
-    format: yaml
-    path: ./Provider/RuleSet/HTTPDNS.yaml
-    url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml
-    interval: 86400
-
   Reject:
     type: http
     behavior: domain
@@ -793,9 +785,6 @@ rules:
 
   # Private 私有网络
   - RULE-SET,Private,🔘 DIRECT
-
-  # HTTPDNS 请求/流量阻止
-  - RULE-SET,HTTPDNS,🚧 AdGuard
 
   # Advertising 广告
   - RULE-SET,Reject,🚧 AdGuard
