@@ -19,10 +19,12 @@ DOMAIN-SUFFIX,mexc.com
 DOMAIN-SUFFIX,probit.com
 DOMAIN-SUFFIX,uniswap.org
 DOMAIN-SUFFIX,upbit.com
+
 # > Binane
 DOMAIN-SUFFIX,binance.com
 DOMAIN-SUFFIX,binance.info
 DOMAIN-SUFFIX,bnbstatic.com
+
 # > Bybit
 DOMAIN-SUFFIX,bybit.com
 DOMAIN-SUFFIX,bybit.biz
@@ -31,7 +33,11 @@ DOMAIN-SUFFIX,byapps.net
 DOMAIN-SUFFIX,byabcde.com
 DOMAIN-SUFFIX,byd3c3.com
 DOMAIN-SUFFIX,bybdc6.com
+
 # > OKX
 DOMAIN-SUFFIX,okx.com
 DOMAIN-KEYWORD,okx-dns
 DOMAIN-SUFFIX,okx.com.cdn.cloudflare.net
+DOMAIN,d2d0ol1mi8ivk8.cloudfront.net
+DOMAIN,d2nbkqf3kdkobx.cloudfront.net
+DOMAIN,d3f0nrrzpmxcu1.cloudfront.net
