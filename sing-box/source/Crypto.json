@@ -2,6 +2,13 @@
   "version": 2,
   "rules": [
     {
+      "domain": [
+        "d2d0ol1mi8ivk8.cloudfront.net",
+        "d2nbkqf3kdkobx.cloudfront.net",
+        "d3f0nrrzpmxcu1.cloudfront.net"
+      ]
+    },
+    {
       "domain_suffix": [
         "binance.com",
         "binance.info",
