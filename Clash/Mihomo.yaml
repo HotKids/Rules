@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-10-13 15:57:22
+# Date: 2026-10-18 16:21:07
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。
@@ -158,7 +158,6 @@ rule-providers:
   Bypass: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/Bypass.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Bypass.yaml}
   Reroute: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/Reroute.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reroute.yaml}
   Private: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/Private.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/private.mrs}
-  HTTPDNS: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/HTTPDNS.yaml, url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/HTTPDNS.Block.yaml}
   Reject: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/Reject.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Reject.mrs}
   AdBlock: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/AdBlock.yaml, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Block.yaml}
   Phishing: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/Phishing.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Phishing.mrs}
@@ -197,8 +196,6 @@ rules:
   - 'RULE-SET,Reroute,🔰 Proxy'
   # Private 私有网络
   - 'RULE-SET,Private,🔘 DIRECT'
-  # HTTPDNS 请求/流量阻止
-  - 'RULE-SET,HTTPDNS,🚧 AdGuard'
   # Advertising 广告
   - 'RULE-SET,Reject,🚧 AdGuard'
   - 'RULE-SET,AdBlock,🚧 AdGuard'
