@@ -34,6 +34,7 @@ payload:
   - DOMAIN-SUFFIX,byabcde.com
   - DOMAIN-SUFFIX,byd3c3.com
   - DOMAIN-SUFFIX,bybdc6.com
+  - DOMAIN,d1znqpii6yeci9.cloudfront.net
 
   # > OKX
   - DOMAIN-SUFFIX,okx.com
