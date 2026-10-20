@@ -14,7 +14,7 @@
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQS (需 Key) → ProxyCheck → IPPure → Scamalytics；risk_api 指定优先源
  *    Surge 按出口 IP 缓存 24 小时；Stash 默认 IPPure 优先，失败按 ProxyCheck → Scamalytics 回退，不使用需密钥的来源
- * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；与风险评分同样按出口 IP 24 小时缓存）
+ * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；类型与来源均已确认时按出口 IP 缓存 24 小时）
  * ⑦ 地理: 本地百度 → bilibili → ip.sb；出口 ipapi-zh → ipapi → ipinfo → MaxMind（Stash 不含 MaxMind）；参数指定首选
  * ⑧ 出口运营商: 两端优先 ipinfo.io；失败保留成功地区源或本轮出口探测的运营商
  * ⑨ DNS 解析器: edns.ip-api.com；Surge 按解析器地区作提示，未验证是否属于本地 ISP
@@ -740,7 +740,7 @@ async function getPolicyAndEntrance() {
 // 优先尝试指定源，失败后继续其余源；Stash 默认 IPPure，指定其他源时复用此流程。
 // 不填或其他值 → 四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）
 // Surge 缓存策略：出口 IP、risk_api、是否带 Key 均未变化，且缓存未超过 riskCacheTTL
-// （默认 24 小时）时直接复用，不再重新请求；IP 变化或缓存过期才会重新查询
+// （默认 24 小时）且评分有效时直接复用；未知、错误或过期缓存重新查询
 async function getRiskScore(ip) {
   const api = args.riskApi;
   const hasKey = !!args.ipqsKey;
@@ -750,7 +750,10 @@ async function getRiskScore(ip) {
     try {
       const c = JSON.parse(cached);
       const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
-      if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey && age < CONFIG.riskCacheTTL) {
+      if (c.ip === ip && (c.api || "") === api && !!c.hasKey === hasKey &&
+          Number.isFinite(c.ts) && age >= 0 && age < CONFIG.riskCacheTTL &&
+          typeof c.score === "number" && Number.isFinite(c.score) && c.score >= 0 && c.score <= 100 &&
+          ["IPQS", "ProxyCheck", "IPPure", "Scamalytics"].includes(c.source)) {
         IPLog.log("风险评分命中缓存: " + c.score + "% (" + c.source + ")，已缓存 " + age + "s");
         return { score: c.score, source: c.source };
       }
@@ -829,15 +832,18 @@ async function getRiskScore(ip) {
 }
 
 // ==================== IP 类型检测（二级回落） ====================
-// Surge IP 类型是数据源对当前地址的分类，可能变化；按出口 IP 最多缓存 24 小时，
-// 避免面板自动刷新反复消耗 IPPure 额度
+// 类型与来源均已确认时，按出口 IP 最多缓存 24 小时；不完整结果仅供本次展示，
+// 下次重新查询，也不复用旧版写入的“未知”缓存。
 async function getIPType(ip) {
+  const complete = (ipType, ipSrc) => ["住宅 IP", "机房 IP"].includes(ipType) &&
+    ["广播 IP", "原生 IP"].includes(ipSrc);
   const cached = $persistentStore.read(CONFIG.storeKeys.ipTypeCache);
   if (cached) {
     try {
       const c = JSON.parse(cached);
       const age = Math.floor(Date.now() / 1000) - (c.ts || 0);
-      if (c.ip === ip && age < CONFIG.riskCacheTTL) {
+      if (c.ip === ip && Number.isFinite(c.ts) && age >= 0 && age < CONFIG.riskCacheTTL &&
+          complete(c.ipType, c.ipSrc)) {
         IPLog.log("IP 类型命中缓存: " + c.ipType + " | " + c.ipSrc + "，已缓存 " + age + "s");
         return { ipType: c.ipType, ipSrc: c.ipSrc };
       }
@@ -845,39 +851,51 @@ async function getIPType(ip) {
   }
 
   function saveAndReturn(ipType, ipSrc) {
-    $persistentStore.write(JSON.stringify({ ip, ipType, ipSrc, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.ipTypeCache);
+    if (complete(ipType, ipSrc)) {
+      $persistentStore.write(JSON.stringify({ ip, ipType, ipSrc, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.ipTypeCache);
+    } else {
+      IPLog.log("IP 类型或来源未确认，仅展示本次结果（不缓存）");
+    }
     return { ipType, ipSrc };
   }
 
+  let ipType = "未知", ipSrc = "未知";
   const info = await getIPPureInfo();
-  if (info && info.isResidential !== undefined) {
+  if (typeof info?.isResidential === "boolean") ipType = info.isResidential ? "住宅 IP" : "机房 IP";
+  if (typeof info?.isBroadcast === "boolean") ipSrc = info.isBroadcast ? "广播 IP" : "原生 IP";
+  if (complete(ipType, ipSrc)) {
     IPLog.log("IPPure /v1/info 返回 IP 类型数据");
-    return saveAndReturn(
-      info.isResidential ? "住宅 IP" : "机房 IP",
-      info.isBroadcast ? "广播 IP" : "原生 IP"
-    );
-  }
-  IPLog.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
-
-  const html = await getIPPureCard();
-  if (html) {
-    const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
-    const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
-    IPLog.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
     return saveAndReturn(ipType, ipSrc);
   }
+  IPLog.log("IPPure /v1/info 类型或来源未确认，回落到 /v1/card");
 
-  // IPPure 全部失败后读取 ProxyCheck type；本轮已有请求则复用，否则发起一次。
-  const pc = await getProxyCheck(ip);
-  const pcType = pc?.[ip]?.type;
-  if (pcType) {
-    const ipType = /residential|wireless|mobile/i.test(pcType) ? "住宅 IP" : "机房 IP";
-    IPLog.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
-    return saveAndReturn(ipType, "未知");
+  const html = await getIPPureCard();
+  if (typeof html === "string") {
+    // 错误页或缺少分类的正文不能按默认值推断成“机房 / 原生”。
+    if (ipType === "未知") {
+      if (/住宅|\bresidential\b/i.test(html)) ipType = "住宅 IP";
+      else if (/机房|\bdata\s*cent(?:er|re)\b|\bhosting\b/i.test(html)) ipType = "机房 IP";
+    }
+    if (ipSrc === "未知") {
+      if (/广播|\b(?:broadcast|announced)\b/i.test(html)) ipSrc = "广播 IP";
+      else if (/原生|\bnative\b/i.test(html)) ipSrc = "原生 IP";
+    }
+    IPLog.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
+    if (complete(ipType, ipSrc)) return saveAndReturn(ipType, ipSrc);
   }
 
-  IPLog.log("IPPure/ProxyCheck 所有接口均失败");
-  return { ipType: "未知", ipSrc: "未知" };
+  // ProxyCheck 只能补充类型，不能确认广播 / 原生；本轮已有请求则复用。
+  if (ipType === "未知") {
+    const pc = await getProxyCheck(ip);
+    const pcType = pc?.[ip]?.type;
+    if (typeof pcType === "string") {
+      if (/residential|wireless|mobile/i.test(pcType)) ipType = "住宅 IP";
+      else if (/hosting|data\s*cent(?:er|re)|business|education|government/i.test(pcType)) ipType = "机房 IP";
+      IPLog.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
+    }
+  }
+
+  return saveAndReturn(ipType, ipSrc);
 }
 
 // ==================== DNS 泄露检测 ====================
