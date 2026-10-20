@@ -96,6 +96,145 @@ test('Unknown risk never renders a numeric score',()=>{
   assert.match(ctx.formatRisk({score:0,source:'Test'}),/^0%/);
 });
 
+test('Surge skips legacy unknown or erroneous IP type caches and retries IPPure',async()=>{
+  const now=100000000, ip='198.51.100.10';
+  for(const partial of [
+    {ipType:'机房 IP',ipSrc:'未知'},
+    {ipType:'未知',ipSrc:'原生 IP'},
+    {ipType:'Error',ipSrc:'原生 IP'},
+    {ipType:'住宅 IP',ipSrc:'Timeout'}
+  ]) {
+    const store=new Map([['ipTypeCache',JSON.stringify({ip,...partial,ts:now/1000})]]);
+    const r=await ipPanel({client:'surge',store,now,
+      ippureData:{ip,isResidential:false,isBroadcast:false,fraudScore:0}});
+    assert.ok(r.requests.some(o=>o.url==='https://my.ippure.com/v1/info'));
+    assert.match(r.output.content,/IP 类型：机房 IP \| 原生 IP/);
+    const saved=JSON.parse(store.get('ipTypeCache'));
+    assert.equal(saved.ipType,'机房 IP');assert.equal(saved.ipSrc,'原生 IP');
+  }
+});
+
+test('Surge ProxyCheck partial type stays visible without a cache and is retried next refresh',async()=>{
+  const store=new Map(), now=100000000;
+  const failed=await ipPanel({client:'surge',store,now,intercept(o,cb){
+    if(o.url.includes('ippure')) {cb(null,{status:503},'unavailable');return true;}
+    if(o.url.includes('proxycheck')) {
+      cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:12,type:'Hosting'}}));return true;
+    }
+  }});
+  assert.match(failed.output.content,/IP 类型：机房 IP \| 未知/);
+  assert.equal(store.has('ipTypeCache'),false);
+  const recovered=await ipPanel({client:'surge',store,now:now+600000,
+    ippureData:{ip:'198.51.100.10',isResidential:false,isBroadcast:false,fraudScore:12}});
+  assert.ok(recovered.requests.some(o=>o.url==='https://my.ippure.com/v1/info'));
+  assert.match(recovered.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(JSON.parse(store.get('ipTypeCache')).ipSrc,'原生 IP');
+});
+
+test('Surge does not fabricate complete types from missing booleans or a card error page',async()=>{
+  for(const info of [
+    {isResidential:false},
+    {isResidential:'false',isBroadcast:'false'},
+    {error:'upstream failed'}
+  ]) for(const errorPage of [
+    '<html><title>Service unavailable</title>Please try again</html>',
+    '<html>Hosting service unavailable; try an alternative endpoint</html>'
+  ]) {
+    const store=new Map();
+    const r=await ipPanel({client:'surge',store,now:100000000,ippureData:info,intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {
+        cb(null,{status:200},errorPage);return true;
+      }
+    }});
+    assert.match(r.output.content,/IP 类型：(?:住宅|机房) IP \| 未知/);
+    assert.equal(store.has('ipTypeCache'),false);
+  }
+});
+
+test('Surge caches complete explicit IPPure card classifications after an info failure',async()=>{
+  for(const [body,ipType,ipSrc] of [
+    ['住宅 IP · 原生 IP','住宅 IP','原生 IP'],
+    ['机房 IP · 广播 IP','机房 IP','广播 IP']
+  ]) {
+    const store=new Map();
+    const r=await ipPanel({client:'surge',store,now:100000000,intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/info') {cb(null,{status:503},'unavailable');return true;}
+      if(o.url==='https://my.ippure.com/v1/card') {cb(null,{status:200},body);return true;}
+    }});
+    assert.ok(r.output.content.includes('IP 类型：'+ipType+' | '+ipSrc));
+    const saved=JSON.parse(store.get('ipTypeCache'));
+    assert.equal(saved.ipType,ipType);assert.equal(saved.ipSrc,ipSrc);
+  }
+});
+
+test('Surge combines a verified partial info field with an explicit card supplement',async()=>{
+  const store=new Map();
+  const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{isResidential:false},intercept(o,cb){
+    if(o.url==='https://my.ippure.com/v1/card') {cb(null,{status:200},'原生 IP');return true;}
+  }});
+  assert.match(r.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  const saved=JSON.parse(store.get('ipTypeCache'));
+  assert.equal(saved.ipType,'机房 IP');assert.equal(saved.ipSrc,'原生 IP');
+});
+
+test('Surge all-failed type and risk probes remain visibly unknown without caching',async()=>{
+  const store=new Map();
+  const r=await ipPanel({client:'surge',store,now:100000000,riskFailure:true});
+  assert.match(r.output.content,/未知（检测失败）/);
+  assert.match(r.output.content,/IP 类型：未知 \| 未知/);
+  assert.equal(store.has('ipTypeCache'),false);assert.equal(store.has('riskScoreCache'),false);
+});
+
+test('Surge ignores invalid legacy risk cache values and sources before querying fresh results',async()=>{
+  const now=100000000;
+  for(const invalid of [
+    {score:null,source:'ProxyCheck'},
+    {score:'未知',source:'ProxyCheck'},
+    {score:'42',source:'ProxyCheck'},
+    {score:-1,source:'ProxyCheck'},
+    {score:101,source:'ProxyCheck'},
+    {score:0,source:'Unavailable'},
+    {score:0,source:'Error'}
+  ]) {
+    const store=new Map([['riskScoreCache',JSON.stringify({
+      ip:'198.51.100.10',api:'',hasKey:false,ts:now/1000,...invalid
+    })]]);
+    const r=await ipPanel({client:'surge',store,now});
+    assert.ok(r.requests.some(o=>o.url.includes('proxycheck')));
+    assert.match(r.output.content,/12% 极度纯净 \(ProxyCheck\)/);
+    const saved=JSON.parse(store.get('riskScoreCache'));
+    assert.equal(saved.score,12);assert.equal(saved.source,'ProxyCheck');
+  }
+});
+
+test('Surge reuses successful zero risk and complete false type results',async()=>{
+  const store=new Map(), now=100000000;
+  await ipPanel({client:'surge',store,now,
+    ippureData:{ip:'198.51.100.10',isResidential:false,isBroadcast:false,fraudScore:0},
+    intercept(o,cb){
+      if(o.url.includes('proxycheck')) {
+        cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:0,type:'Hosting'}}));return true;
+      }
+    }});
+  const cached=await ipPanel({client:'surge',store,now:now+600000,riskFailure:true});
+  assert.match(cached.output.content,/0% 极度纯净 \(ProxyCheck\)/);
+  assert.match(cached.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(cached.requests.some(o=>/ippure|proxycheck|scamalytics|ipqualityscore/.test(o.url)),false);
+});
+
+test('Stash skips unknown or error risk fields while keeping a valid false field',async()=>{
+  const now=100000000, key='stash.ip-security.last-good.v1', id='risk:198.51.100.10';
+  const store=new Map([[key,JSON.stringify({[id]:{ts:now,fields:{
+    score:{value:'未知',ts:now},isResidential:{value:'Error',ts:now},isBroadcast:{value:false,ts:now}
+  }}})]]);
+  const r=await ipPanel({store,now:now+600000,argument:'tile=risk&mode=collapsed',
+    ippureData:{ip:'198.51.100.10',fraudScore:'Error',isResidential:'未知'},intercept:failAlternativeRisk});
+  assert.match(r.output.content,/类型未知 · 原生/);
+  const fields=JSON.parse(store.get(key))[id].fields;
+  assert.deepEqual(Object.keys(fields),['isBroadcast']);assert.equal(fields.isBroadcast.value,false);
+  assert.equal(fields.isBroadcast.ts,now);
+});
+
 test('Generated Mihomo scripts run with both subscription variants',()=>{
   for(const name of fs.readdirSync(path.join(root,'Clash/Script')).filter(n=>n.endsWith('.js'))){
     const code=fs.readFileSync(path.join(root,'Clash/Script',name),'utf8');
