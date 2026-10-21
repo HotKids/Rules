@@ -885,43 +885,35 @@ async function getIPType(ip) {
     return { ipType, ipSrc };
   }
 
-  let ipType = "未知", ipSrc = "未知";
   const info = await getIPPureInfo();
-  if (typeof info?.isResidential === "boolean") ipType = info.isResidential ? "住宅 IP" : "机房 IP";
-  if (typeof info?.isBroadcast === "boolean") ipSrc = info.isBroadcast ? "广播 IP" : "原生 IP";
-  if (complete(ipType, ipSrc)) {
+  if (info && info.isResidential !== undefined) {
     IPLog.log("IPPure /v1/info 返回 IP 类型数据");
-    return saveAndReturn(ipType, ipSrc);
+    return saveAndReturn(
+      info.isResidential ? "住宅 IP" : "机房 IP",
+      info.isBroadcast ? "广播 IP" : "原生 IP"
+    );
   }
-  IPLog.log("IPPure /v1/info 类型或来源未确认，回落到 /v1/card");
+  IPLog.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
   const html = await getIPPureCard();
-  if (typeof html === "string") {
-    // card 是图片卡片地址；这里只提取可读 SVG / 文本中的明确分类，位图或错误页不能默认推断成“机房 / 原生”。
-    if (ipType === "未知") {
-      if (/住宅|\bresidential\b/i.test(html)) ipType = "住宅 IP";
-      else if (/机房|\bdata\s*cent(?:er|re)\b|\bhosting\b/i.test(html)) ipType = "机房 IP";
-    }
-    if (ipSrc === "未知") {
-      if (/广播|\b(?:broadcast|announced)\b/i.test(html)) ipSrc = "广播 IP";
-      else if (/原生|\bnative\b/i.test(html)) ipSrc = "原生 IP";
-    }
+  if (html) {
+    const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
+    const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
     IPLog.log("IPPure /v1/card 抓取结果: " + ipType + " | " + ipSrc);
-    if (complete(ipType, ipSrc)) return saveAndReturn(ipType, ipSrc);
+    return saveAndReturn(ipType, ipSrc);
   }
 
-  // ProxyCheck 只能补充类型，不能确认广播 / 原生；本轮已有请求则复用。
-  if (ipType === "未知") {
-    const pc = await getProxyCheck(ip);
-    const pcType = pc?.[ip]?.type;
-    if (typeof pcType === "string") {
-      if (/residential|wireless|mobile/i.test(pcType)) ipType = "住宅 IP";
-      else if (/hosting|data\s*cent(?:er|re)|business|education|government/i.test(pcType)) ipType = "机房 IP";
-      IPLog.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
-    }
+  // IPPure 全部失败后读取 ProxyCheck type；本轮已有请求则复用，否则发起一次。
+  const pc = await getProxyCheck(ip);
+  const pcType = pc?.[ip]?.type;
+  if (pcType) {
+    const ipType = /residential|wireless|mobile/i.test(pcType) ? "住宅 IP" : "机房 IP";
+    IPLog.log("ProxyCheck type 回退: " + pcType + " → " + ipType);
+    return saveAndReturn(ipType, "未知");
   }
 
-  return saveAndReturn(ipType, ipSrc);
+  IPLog.log("IPPure/ProxyCheck 所有接口均失败");
+  return { ipType: "未知", ipSrc: "未知" };
 }
 
 // ==================== DNS 泄露检测 ====================
