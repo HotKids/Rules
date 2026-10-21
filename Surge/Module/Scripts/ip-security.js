@@ -459,11 +459,25 @@ async function getStashControlContext() {
 // 单次运行内去重：Stash 出口、评分和类型与官方卡片一样取自同一份 IPPure 数据。
 // 不跨刷新缓存此响应，避免节点切换后沿用另一个出口。
 let _ippureInfoP = null, _ippureCardP = null, _ippureCardFailed = false;
+// 仅用于诊断输出；遵循 IP 打码参数，并隐藏响应中的凭据或跳转参数。
+function ippureLogText(value) {
+  const text = typeof value === "string" ? value : value?.byteLength !== undefined ? "[二进制正文]" : JSON.stringify(value);
+  return (text || "").slice(0, 2400)
+    .replace(/("[^"\r\n]*(?:token|secret|password|key|cookie|authorization)[^"\r\n]*"\s*:\s*")[^"]*/gi, "$1[已隐藏]")
+    .replace(/([?&][^=\s"'<>]+=)[^&\s"'<>]*/g, "$1[已隐藏]")
+    .replace(/(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}/gi,
+      value => stashCacheIP(value) ? maskIP(value, args.maskIP) : value)
+    .replace(/[\r\n\t]+/g, " ").slice(0, 600);
+}
 function getIPPureInfo() {
   return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType).then(info => {
+    const ip = stashCacheIP(info?.ip);
+    if (!isStash) IPLog.log("IPPure /v1/info 返回地址: " + (ip ? maskIP(ip, args.maskIP) : "未返回有效 IP") +
+      "; 地址族=" + (ip ? (ip.includes(":") ? "IPv6" : "IPv4") : "无法确认"));
     IPLog.log(info ? "IPPure /v1/info 分类字段: " + JSON.stringify({
       isResidential: info.isResidential, isBroadcast: info.isBroadcast
     }).slice(0, 200) : "IPPure /v1/info 未取得有效 JSON 响应");
+    if (!isStash && info && info.isResidential === undefined) IPLog.log("IPPure /v1/info 响应摘要: " + ippureLogText(info));
     return info;
   }));
 }
@@ -474,6 +488,10 @@ function getIPPureCard() {
     try {
       $httpClient.get({ url: CONFIG.urls.ipTypeCard }, (error, response, data) => {
         const status = Number(response?.status || response?.statusCode);
+        const contentType = Object.entries(response?.headers || {}).find(([name]) => name.toLowerCase() === "content-type")?.[1] || "未提供";
+        IPLog.log("IPPure /v1/card 响应: HTTP=" + (status || 0) + "; Content-Type=" + contentType +
+          "; 正文类型=" + Object.prototype.toString.call(data) + "; 长度=" + (data?.length || data?.byteLength || 0));
+        IPLog.log("IPPure /v1/card 正文摘要: " + ippureLogText(data));
         _ippureCardFailed = !!error || !(status >= 200 && status < 300);
         if (_ippureCardFailed) logHTTPFailure(CONFIG.urls.ipTypeCard, status, error);
         resolve(data || null);
@@ -871,6 +889,7 @@ async function getIPType(ip) {
       if (c.ip === ip && Number.isFinite(c.ts) && age >= 0 && age < CONFIG.riskCacheTTL &&
           complete(c.ipType, c.ipSrc)) {
         IPLog.log("IP 类型命中缓存: " + c.ipType + " | " + c.ipSrc + "，已缓存 " + age + "s");
+        IPLog.log("IPPure 地址族: 本次命中类型缓存，未请求接口；缓存未保存原响应 IP，无法确认");
         return { ipType: c.ipType, ipSrc: c.ipSrc };
       }
     } catch (e) {}
@@ -886,6 +905,9 @@ async function getIPType(ip) {
   }
 
   const info = await getIPPureInfo();
+  const infoIP = stashCacheIP(info?.ip);
+  IPLog.log("IPPure IP 对照: info=" + (infoIP ? maskIP(infoIP, args.maskIP) : "未取得 IP") +
+    "; 面板出口IPv4=" + maskIP(ip, args.maskIP) + "; " + (infoIP ? (infoIP === ip ? "一致" : "不一致") : "无法确认"));
   if (info && info.isResidential !== undefined) {
     IPLog.log("IPPure /v1/info 返回 IP 类型数据");
     return saveAndReturn(
@@ -896,6 +918,11 @@ async function getIPType(ip) {
   IPLog.log("IPPure /v1/info 未返回 IP 类型，回落到 /v1/card");
 
   const html = await getIPPureCard();
+  const cardIPs = typeof html === "string" ? [...new Set((html.match(/(?:\d{1,3}\.){3}\d{1,3}|(?:[0-9a-f]{0,4}:){2,7}[0-9a-f]{0,4}/gi) || [])
+    .map(value => stashCacheIP(value)).filter(Boolean))].slice(0, 4) : [];
+  IPLog.log("IPPure /v1/card 正文 IP 候选: " + (cardIPs.length ? cardIPs.map(value =>
+    maskIP(value, args.maskIP) + " (" + (value.includes(":") ? "IPv6" : "IPv4") + ")").join(", ") : "未取得，无法确认地址族") +
+    "; 面板出口IPv4=" + maskIP(ip, args.maskIP));
   if (html) {
     const ipType = /住宅|[Rr]esidential/.test(html) ? "住宅 IP" : "机房 IP";
     const ipSrc = /广播|[Bb]roadcast|[Aa]nnounced/.test(html) ? "广播 IP" : "原生 IP";
@@ -1569,6 +1596,8 @@ async function runStashTile() {
     return done({ title: "IP 获取失败", content: "无法获取本地或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
   }
   IPLog.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
+  IPLog.log("出口探针地址族: IPv4=" + maskIP(outIP, args.maskIP) + "; IPv6=" +
+    (outIPv6 ? maskIP(outIPv6, args.maskIP) : "未探测到"));
 
   // 3. EVENT 模式下检查 IP 是否变化
   if (!checkIPChange(localIP, outIP, outIPv6)) {
