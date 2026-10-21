@@ -14,7 +14,8 @@
  * ④ 代理策略: Surge /v1/requests/recent
  * ⑤ 风险评分: IPQS (需 Key) → ProxyCheck → IPPure → Scamalytics；risk_api 指定优先源
  *    Surge 按出口 IP 缓存 24 小时；Stash 默认 IPPure 优先，失败按 ProxyCheck → Scamalytics 回退，不使用需密钥的来源
- * ⑥ IP 类型: IPPure API → ProxyCheck type 字段回退（复用风险评分的请求；类型与来源均已确认时按出口 IP 缓存 24 小时）
+ * ⑥ IP 类型: Surge 使用 IPPure info → card → ProxyCheck type，完整结果按出口 IP 缓存 24 小时；
+ *    Stash 使用 info 的类型字段，按同一 IP 分字段保留有效结果
  * ⑦ 地理: 本地百度 → bilibili → ip.sb；出口 ipapi-zh → ipapi → ipinfo → MaxMind（Stash 不含 MaxMind）；参数指定首选
  * ⑧ 出口运营商: 两端优先 ipinfo.io；失败保留成功地区源或本轮出口探测的运营商
  * ⑨ DNS 解析器: edns.ip-api.com；Surge 按解析器地区作提示，未验证是否属于本地 ISP
@@ -29,7 +30,7 @@
  * - remote_geoapi: 出口地区首选（入口仍按选定源查询），默认 ipapi-zh → ipapi → ipinfo → maxmind；首选优先且不重复，MaxMind 无凭据跳过；Stash 不支持 MaxMind，可选 ippure。ipapi-zh=ip-api.com(中文, http 明文)，ipinfo=ipinfo.io，ipapi=ip-api.com(英文)，maxmind=GeoLite2(英文)，maxmind-zh=GeoLite2(中文优先)
  * - maxmind_key: MaxMind GeoLite 凭据，格式 account_id:license_key（仅 Surge，MaxMind 首选或回退时使用，未填跳过，免费注册 1000 次/天）
  * - mask_ip: IP 打码，0=关闭，1=部分打码，2=全部隐藏 [IP 已隐藏]，默认 0
- * - tw_flag: 台湾地区旗帜，cn(默认)=🇨🇳，tw=🇹🇼
+ * - tw_flag: 台湾地区旗帜，cn=🇨🇳，tw=🇹🇼；未传参时 Surge 默认 cn、Stash 默认 tw，配套覆写显式传入 cn
  * - event_delay: 网络变化后延迟检测（秒），默认 2 秒
  * - notify: 网络变化时是否推送通知，true(默认)=推送，false=不推送；Stash 独立定时任务比较 IP，首次仅记录
  * - panel_interval: 面板 update-interval（秒），默认 600；改了 [Panel] 的 update-interval 需同步此参数，
@@ -106,7 +107,7 @@ const CONFIG = {
     localIP: "https://api.bilibili.com/x/web-interface/zone",
     baiduGeo: (ip) => `https://opendata.baidu.com/api.php?query=${ip}&co=&resource_id=6006&oe=utf8`,
     maxmindGeo: (ip) => `https://geolite.info/geoip/v2.1/city/${ip}`,
-    // Cloudflare 官方端点，证书含 IP SAN，可直连（不经 DNS）；失败回落 ip.sb
+    // Cloudflare 官方端点使用 IP 字面地址，证书含 IP SAN，免域名解析；仍遵循现有策略，失败回落 ip.sb。
     outboundTrace: "https://1.1.1.1/cdn-cgi/trace",
     outboundTrace6: "https://[2606:4700:4700::1111]/cdn-cgi/trace",
     outboundIP: "https://api-ipv4.ip.sb/geoip",
@@ -265,20 +266,21 @@ function parseArguments() {
   // notify 参数：默认 true，仅当明确设为 "false" 时关闭通知
   const notifyVal = clean(arg.notify).toLowerCase();
   const notify = notifyVal !== "false";
+  const mode = clean(arg.mode);
+  const riskApi = clean(arg.risk_api).toLowerCase();
 
   return {
     isEvent: !isStash && arg.TYPE === "EVENT",
-    proxy: isStash && clean(arg.mode) !== "collapsed" ? clean(arg.proxy) : "",
-    mode: clean(arg.mode) === "collapsed" ? "collapsed" : "home",
+    proxy: isStash && mode !== "collapsed" ? clean(arg.proxy) : "",
+    mode: mode === "collapsed" ? "collapsed" : "home",
     tile: clean(arg.tile) || "outbound",
     task: clean(arg.task),
     log: clean(arg.log),
-    stashAPI: isStash && clean(arg.stash_api) === "true" && clean(arg.mode) !== "collapsed",
+    stashAPI: isStash && clean(arg.stash_api) === "true" && mode !== "collapsed",
     stashAPIURL: isStash ? clean(arg.stash_api_url) : "",
     stashAPISecret: isStash ? clean(arg.stash_api_secret) : "",
     ipqsKey: isStash ? "" : clean(arg.ipqs_key),
-    riskApi: isStash && clean(arg.risk_api).toLowerCase() === "ipqs" ? "ippure" :
-      clean(arg.risk_api).toLowerCase() || (isStash ? "ippure" : ""),
+    riskApi: isStash && riskApi === "ipqs" ? "ippure" : riskApi || (isStash ? "ippure" : ""),
     maxmindKey: isStash ? "" : clean(arg.maxmind_key),
     localGeoApi: clean(arg.local_geoapi) || "baidu",
     remoteGeoApi: clean(arg.remote_geoapi) || "ipapi-zh",
@@ -483,7 +485,7 @@ function getIPPureInfo() {
 }
 function getIPPureCard() {
   if (isStash) return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard));
-  // 恢复 Surge 原来的 card 读取方式：直接取原生回调正文，不在 HTTP 工具层丢弃。
+  // Surge card 直接读取原生回调正文；HTTP 错误仍保留正文，失败标记用于阻止缓存。
   return _ippureCardP || (_ippureCardP = new Promise(resolve => {
     try {
       $httpClient.get({ url: CONFIG.urls.ipTypeCard }, (error, response, data) => {
@@ -782,7 +784,7 @@ async function getPolicyAndEntrance() {
 
 // ==================== 风险评分获取 ====================
 // 优先尝试指定源，失败后继续其余源；Stash 默认 IPPure，指定其他源时复用此流程。
-// 不填或其他值 → 四级回落（IPQS → ProxyCheck → IPPure → Scamalytics）
+// Surge 不填或其他值 → IPQS → ProxyCheck → IPPure → Scamalytics；Stash 不使用 IPQS。
 // Surge 缓存策略：出口 IP、risk_api、是否带 Key 均未变化，且缓存未超过 riskCacheTTL
 // （默认 24 小时）且评分有效时直接复用；未知、错误或过期缓存重新查询
 async function getRiskScore(ip) {
@@ -875,7 +877,7 @@ async function getRiskScore(ip) {
   return { score: null, source: "Unavailable" };
 }
 
-// ==================== IP 类型检测（二级回落） ====================
+// ==================== Surge IP 类型检测：info → card → ProxyCheck ====================
 // 类型与来源均已确认时，按出口 IP 最多缓存 24 小时；不完整结果仅供本次展示，
 // 下次重新查询，也不复用旧版写入的“未知”缓存。
 async function getIPType(ip) {
@@ -1208,7 +1210,7 @@ function stashFields(values, ts = Date.now()) {
   return Object.fromEntries(Object.entries(values).map(([key, value]) => [key, { value, ts }]));
 }
 
-function stashLastGood(kind, ip, fresh, fallback = {}) {
+function stashLastGood(kind, ip, fresh) {
   const key = "stash.ip-security.last-good.v1", ttl = 86400000, now = Date.now();
   const address = stashCacheIP(ip), id = kind + ":" + address;
   const valid = (name, value) => name === "score" ?
@@ -1230,7 +1232,7 @@ function stashLastGood(kind, ip, fresh, fallback = {}) {
     let field = fresh[name];
     if (!usable(name, field)) {
       if (usable(name, previous[name])) { field = previous[name]; cached = true; }
-      else field = fallback[name];
+      else field = undefined;
     }
     if (usable(name, field)) { fields[name] = field; data[name] = field.value; }
   }
@@ -1245,7 +1247,7 @@ function stashLastGood(kind, ip, fresh, fallback = {}) {
     catch (_) { IPLog.log("上次成功结果保存失败，继续显示本次结果"); }
   }
   if (cached) IPLog.log("[IP 缓存] " + kind + "：复用同一 IP 的上次成功字段");
-  return { data, cached };
+  return { data };
 }
 
 // ==================== 面板内容构建 ====================
@@ -1272,7 +1274,7 @@ function buildOutboundSection(outIP, outIPv6, outInfo, maskMode, reverseDNS) {
   return lines;
 }
 
-function buildPanelContent({ localZh, maskMode, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
+function buildPanelContent({ localZh, maskMode, riskInfo, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak, reverseDNS, traffic }) {
   const m = (ip) => maskIP(ip, maskMode);
   const lines = [
     "IP 风控值：" + formatRisk(riskInfo),
@@ -1328,7 +1330,7 @@ function buildPanelContent({ localZh, maskMode, riskInfo, riskResult, ipType, ip
 }
 
 // ==================== 通知内容构建 ====================
-function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, riskResult, ipType, ipSrc, maskMode, dnsLeak }) {
+function sendNetworkChangeNotification({ localZh, policy, localIP, outIP, entranceIP, localInfo, entranceInfo, outInfo, riskInfo, ipType, ipSrc, maskMode, dnsLeak }) {
   if (!args.notify) {
     IPLog.log("通知已禁用 (notify=false)，跳过推送");
     return;
@@ -1574,146 +1576,146 @@ async function runStashTile() {
 // ==================== 主执行函数 ====================
 (async () => {
   try {
-  if (isStash && args.task === "logs") {
-    IPLog.collect();
-    return done({});
-  }
-  IPLog.log("=== IP 安全检测开始 (v6.4.15 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
-  if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
-  if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
-
-  // 1. EVENT 触发时延迟等待网络稳定
-  if (args.isEvent && args.eventDelay > 0) {
-    IPLog.log("等待网络稳定 " + args.eventDelay + " 秒");
-    await wait(args.eventDelay * 1000);
-  }
-
-  // 2. 获取本地/出口 IP
-  const { localIP, outIP, outIPv6, localRaw, outRaw } = await fetchIPs();
-
-  if (!localIP || !outIP) {
-    IPLog.log("IP 获取失败");
-    return done({ title: "IP 获取失败", content: "无法获取本地或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
-  }
-  IPLog.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
-  IPLog.log("出口探针地址族: IPv4=" + maskIP(outIP, args.maskIP) + "; IPv6=" +
-    (outIPv6 ? maskIP(outIPv6, args.maskIP) : "未探测到"));
-
-  // 3. EVENT 模式下检查 IP 是否变化
-  if (!checkIPChange(localIP, outIP, outIPv6)) {
-    return done({});
-  }
-
-  // 4. 并行获取：代理策略+入口 IP、风险评分、IP 类型、地理信息
-  // 入口维持指定数据源查询；出口使用独立四级回退。remote_geoapi=ipinfo → ipinfo.io, ipapi/ipapi-zh → ip-api.com(en/zh, http 明文),
-  // maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
-  let remoteGeoApi = args.remoteGeoApi;
-  if (!["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(remoteGeoApi)) {
-    IPLog.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipapi-zh");
-    remoteGeoApi = "ipapi-zh";
-  }
-  const useIpApi = remoteGeoApi.startsWith("ipapi");
-  let useMaxmind = remoteGeoApi.startsWith("maxmind");
-  const maxmindZh = remoteGeoApi === "maxmind-zh";
-  if (useMaxmind && !args.maxmindKey) {
-    IPLog.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
-    useMaxmind = false;
-  }
-  const ipApiLang = remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
-  // 非 ipinfo 数据源时补查 ipinfo：优先取运营商与 hostname，失败仍保留可用的地理源字段。
-  const needExtraOrg = useIpApi || useMaxmind;
-  const geoHeaders = useMaxmind ? { "Authorization": "Basic " + b64(args.maxmindKey) } : undefined;
-  function geoUrl(ip) {
-    if (useMaxmind) return CONFIG.urls.maxmindGeo(ip);
-    return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
-  }
-  function normalizeGeo(data) {
-    if (useMaxmind) return normalizeMaxmind(data, maxmindZh);
-    return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
-  }
-
-  // 先并行发起 geo/risk/流量 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
-  // DNS 泄露检测需要走代理策略，必须在取得 policy 后执行
-  const [riskInfo, ipTypeResult, localGeo, outGeo, trafficResult] = await Promise.all([
-    getRiskScore(outIP),
-    getIPType(outIP),
-    getLocalGeo(localRaw),
-    getOutboundGeo(outIP, normalizeIpSb(outRaw)),
-    getTrafficStats()
-  ]);
-  const localInfo = localGeo.info, localZh = localGeo.source !== "ipsb";
-  const outInfo = outGeo.info, reverseDNS = outGeo.reverseDNS;
-  if (reverseDNS) IPLog.log("反向 DNS: " + reverseDNS);
-
-  // 请求完成后查询 recent，提高捕获概率；记录仍可能缺失，内部会重试并降级。
-  const { policy, entranceIP } = await getPolicyAndEntrance();
-
-  // 当前仅在识别到代理策略时探测 DNS 解析器，并将请求指定到该策略。
-  const isDirect = !policy || policy === "DIRECT" || policy === "Unknown";
-  let dnsLeakResult = null;
-  if (!isDirect) {
-    dnsLeakResult = await checkDNSLeak(policy);
-  } else {
-    IPLog.log("当前为直连，跳过 DNS 泄露检测");
-  }
-
-  // 入口 IP 地理信息：与出口不同时才查询
-  let entranceInfo = null;
-  if (entranceIP && entranceIP !== outIP) {
-    IPLog.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
-    const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
-    if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
-    const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
-    entranceInfo = normalizeGeo(entrGeoRaw);
-    if (needExtraOrg && entranceInfo && entrOrgRaw) {
-      const orgData = normalizeIpInfo(entrOrgRaw);
-      if (orgData?.org) entranceInfo.org = orgData.org;
+    if (isStash && args.task === "logs") {
+      IPLog.collect();
+      return done({});
     }
-  }
+    IPLog.log("=== IP 安全检测开始 (v6.4.15 / " + (isStash ? "Stash / " + (args.task || args.tile) + " / " + args.mode : "Surge") + ") ===");
+    if (isStash) IPLog.log("请求线路：本地 DIRECT；出口 " + (args.proxy ? "使用参数指定的策略" : "遵循当前分流（长按测试时使用所选节点）"));
+    if (isStash) return args.task === "monitor" ? await runStashMonitor() : await runStashTile();
 
-  const riskResult = riskText(riskInfo.score);
-  const { ipType, ipSrc } = ipTypeResult;
-
-  // 5. IP 打码：mask_ip=2 锁定全隐藏；0/1 手动点击切换
-  const maskStored = parseInt($persistentStore.read(CONFIG.storeKeys.maskToggle), 10);
-  let maskMode = args.maskIP === 2 ? 2 : (Number.isInteger(maskStored) ? maskStored : args.maskIP);
-  if (args.maskIP !== 2 && !args.isEvent) {
-    const now = Math.floor(Date.now() / 1000);
-    const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
-    $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
-    const elapsed = now - lastRun;
-    const interval = args.panelInterval; // 需与 [Panel] update-interval 一致，经 panel_interval 参数传入（默认 600）
-    const tolerance = 15;
-    const remainder = elapsed % interval;
-    const isAutoRefresh = lastRun > 0 && elapsed > tolerance
-      && (remainder <= tolerance || remainder >= interval - tolerance);
-    if (lastRun > 0 && !isAutoRefresh) {
-      maskMode = maskMode === 1 ? 0 : 1;
-      $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
+    // 1. EVENT 触发时延迟等待网络稳定
+    if (args.isEvent && args.eventDelay > 0) {
+      IPLog.log("等待网络稳定 " + args.eventDelay + " 秒");
+      await wait(args.eventDelay * 1000);
     }
-  }
-  const context = { localZh, maskMode, policy, riskInfo, riskResult, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak: dnsLeakResult, reverseDNS, traffic: trafficResult };
 
-  if (finished) return;
-  if (args.isEvent) {
-    sendNetworkChangeNotification(context);
-    // 类型 / 来源或评分未知时不能记为已完成，否则相同 IP 的下次事件无法重试。
-    if (!_ippureCardFailed && typeof riskInfo.score === "number" && Number.isFinite(riskInfo.score) && riskInfo.score >= 0 && riskInfo.score <= 100 &&
-        ["住宅 IP", "机房 IP"].includes(ipType) && ["广播 IP", "原生 IP"].includes(ipSrc)) {
-      $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6, complete: true }), CONFIG.storeKeys.lastEvent);
+    // 2. 获取本地/出口 IP
+    const { localIP, outIP, outIPv6, localRaw, outRaw } = await fetchIPs();
+
+    if (!localIP || !outIP) {
+      IPLog.log("IP 获取失败");
+      return done({ title: "IP 获取失败", content: "无法获取本地或出口 IPv4", icon: "leaf", "icon-color": "#9E9E9E" });
+    }
+    IPLog.log("本地 IP: " + localIP + ", 出口 IP: " + outIP);
+    IPLog.log("出口探针地址族: IPv4=" + maskIP(outIP, args.maskIP) + "; IPv6=" +
+      (outIPv6 ? maskIP(outIPv6, args.maskIP) : "未探测到"));
+
+    // 3. EVENT 模式下检查 IP 是否变化
+    if (!checkIPChange(localIP, outIP, outIPv6)) {
+      return done({});
+    }
+
+    // 4. 先并行获取风险评分、IP 类型、地理信息和流量，再查询策略与入口 IP。
+    // 入口维持指定数据源查询；出口使用独立四级回退。remote_geoapi=ipinfo → ipinfo.io, ipapi/ipapi-zh → ip-api.com(en/zh, http 明文),
+    // maxmind/maxmind-zh → GeoLite2(en/zh, 需 key)
+    let remoteGeoApi = args.remoteGeoApi;
+    if (!["ipinfo", "ipapi", "ipapi-zh", "maxmind", "maxmind-zh"].includes(remoteGeoApi)) {
+      IPLog.log("未知 remote_geoapi: " + remoteGeoApi + "，使用 ipapi-zh");
+      remoteGeoApi = "ipapi-zh";
+    }
+    const useIpApi = remoteGeoApi.startsWith("ipapi");
+    let useMaxmind = remoteGeoApi.startsWith("maxmind");
+    const maxmindZh = remoteGeoApi === "maxmind-zh";
+    if (useMaxmind && !args.maxmindKey) {
+      IPLog.log("remote_geoapi=maxmind 需要 maxmind_key（account_id:license_key），回落 ipinfo");
+      useMaxmind = false;
+    }
+    const ipApiLang = remoteGeoApi === "ipapi-zh" ? "zh-CN" : "en";
+    // 非 ipinfo 数据源时补查 ipinfo：优先取运营商与 hostname，失败仍保留可用的地理源字段。
+    const needExtraOrg = useIpApi || useMaxmind;
+    const geoHeaders = useMaxmind ? { "Authorization": "Basic " + b64(args.maxmindKey) } : undefined;
+    function geoUrl(ip) {
+      if (useMaxmind) return CONFIG.urls.maxmindGeo(ip);
+      return useIpApi ? CONFIG.urls.ipApi(ip, ipApiLang) : CONFIG.urls.ipInfo(ip);
+    }
+    function normalizeGeo(data) {
+      if (useMaxmind) return normalizeMaxmind(data, maxmindZh);
+      return useIpApi ? normalizeIpApi(data) : normalizeIpInfo(data);
+    }
+
+    // 先并行发起 geo/risk/流量 API 请求，确保 ip.sb/ipinfo/ip-api 请求完成后再查策略
+    // DNS 泄露检测需要走代理策略，必须在取得 policy 后执行
+    const [riskInfo, ipTypeResult, localGeo, outGeo, trafficResult] = await Promise.all([
+      getRiskScore(outIP),
+      getIPType(outIP),
+      getLocalGeo(localRaw),
+      getOutboundGeo(outIP, normalizeIpSb(outRaw)),
+      getTrafficStats()
+    ]);
+    const localInfo = localGeo.info, localZh = localGeo.source !== "ipsb";
+    const outInfo = outGeo.info, reverseDNS = outGeo.reverseDNS;
+    if (reverseDNS) IPLog.log("反向 DNS: " + reverseDNS);
+
+    // 请求完成后查询 recent，提高捕获概率；记录仍可能缺失，内部会重试并降级。
+    const { policy, entranceIP } = await getPolicyAndEntrance();
+
+    // 当前仅在识别到代理策略时探测 DNS 解析器，并将请求指定到该策略。
+    const isDirect = !policy || policy === "DIRECT" || policy === "Unknown";
+    let dnsLeakResult = null;
+    if (!isDirect) {
+      dnsLeakResult = await checkDNSLeak(policy);
     } else {
-      IPLog.log("风险评分、类型或来源未确认，不保存事件完成记录，下次事件重新检测");
+      IPLog.log("当前为直连，跳过 DNS 泄露检测");
     }
-    done({});
-  } else {
-    IPLog.log("=== 面板显示 ===");
-    done({
-      title: "代理策略：" + policy,
-      content: buildPanelContent(context),
-      icon: "leaf.fill",
-      "icon-color": riskResult.color
-    });
-  }
+
+    // 入口 IP 地理信息：与出口不同时才查询
+    let entranceInfo = null;
+    if (entranceIP && entranceIP !== outIP) {
+      IPLog.log("入口 IP: " + entranceIP + " 与出口 IP 不同，查询入口地理信息");
+      const entrQueries = [httpJSON(geoUrl(entranceIP), null, geoHeaders)];
+      if (needExtraOrg) entrQueries.push(httpJSON(CONFIG.urls.ipInfo(entranceIP)));
+      const [entrGeoRaw, entrOrgRaw] = await Promise.all(entrQueries);
+      entranceInfo = normalizeGeo(entrGeoRaw);
+      if (needExtraOrg && entranceInfo && entrOrgRaw) {
+        const orgData = normalizeIpInfo(entrOrgRaw);
+        if (orgData?.org) entranceInfo.org = orgData.org;
+      }
+    }
+
+    const riskResult = riskText(riskInfo.score);
+    const { ipType, ipSrc } = ipTypeResult;
+
+    // 5. IP 打码：mask_ip=2 锁定全隐藏；0/1 手动点击切换
+    const maskStored = parseInt($persistentStore.read(CONFIG.storeKeys.maskToggle), 10);
+    let maskMode = args.maskIP === 2 ? 2 : (Number.isInteger(maskStored) ? maskStored : args.maskIP);
+    if (args.maskIP !== 2 && !args.isEvent) {
+      const now = Math.floor(Date.now() / 1000);
+      const lastRun = parseInt($persistentStore.read(CONFIG.storeKeys.lastRun), 10) || 0;
+      $persistentStore.write(String(now), CONFIG.storeKeys.lastRun);
+      const elapsed = now - lastRun;
+      const interval = args.panelInterval; // 需与 [Panel] update-interval 一致，经 panel_interval 参数传入（默认 600）
+      const tolerance = 15;
+      const remainder = elapsed % interval;
+      const isAutoRefresh = lastRun > 0 && elapsed > tolerance
+        && (remainder <= tolerance || remainder >= interval - tolerance);
+      if (lastRun > 0 && !isAutoRefresh) {
+        maskMode = maskMode === 1 ? 0 : 1;
+        $persistentStore.write(String(maskMode), CONFIG.storeKeys.maskToggle);
+      }
+    }
+    const context = { localZh, maskMode, policy, riskInfo, ipType, ipSrc, localIP, localInfo, entranceIP, entranceInfo, outIP, outIPv6, outInfo, dnsLeak: dnsLeakResult, reverseDNS, traffic: trafficResult };
+
+    if (finished) return;
+    if (args.isEvent) {
+      sendNetworkChangeNotification(context);
+      // 类型 / 来源或评分未知时不能记为已完成，否则相同 IP 的下次事件无法重试。
+      if (!_ippureCardFailed && typeof riskInfo.score === "number" && Number.isFinite(riskInfo.score) && riskInfo.score >= 0 && riskInfo.score <= 100 &&
+          ["住宅 IP", "机房 IP"].includes(ipType) && ["广播 IP", "原生 IP"].includes(ipSrc)) {
+        $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6, complete: true }), CONFIG.storeKeys.lastEvent);
+      } else {
+        IPLog.log("风险评分、类型或来源未确认，不保存事件完成记录，下次事件重新检测");
+      }
+      done({});
+    } else {
+      IPLog.log("=== 面板显示 ===");
+      done({
+        title: "代理策略：" + policy,
+        content: buildPanelContent(context),
+        icon: "leaf.fill",
+        "icon-color": riskResult.color
+      });
+    }
   } catch (e) {
     IPLog.log("未捕获异常: " + (e.message || e));
     done({ title: "检测异常", content: e.message || String(e), icon: "leaf", "icon-color": "#9E9E9E" });
