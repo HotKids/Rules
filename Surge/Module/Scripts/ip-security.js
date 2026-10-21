@@ -458,7 +458,7 @@ async function getStashControlContext() {
 
 // 单次运行内去重：Stash 出口、评分和类型与官方卡片一样取自同一份 IPPure 数据。
 // 不跨刷新缓存此响应，避免节点切换后沿用另一个出口。
-let _ippureInfoP = null, _ippureCardP = null;
+let _ippureInfoP = null, _ippureCardP = null, _ippureCardFailed = false;
 function getIPPureInfo() {
   return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType).then(info => {
     IPLog.log(info ? "IPPure /v1/info 分类字段: " + JSON.stringify({
@@ -467,7 +467,24 @@ function getIPPureInfo() {
     return info;
   }));
 }
-function getIPPureCard() { return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard)); }
+function getIPPureCard() {
+  if (isStash) return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard));
+  // 恢复 Surge 原来的 card 读取方式：直接取原生回调正文，不在 HTTP 工具层丢弃。
+  return _ippureCardP || (_ippureCardP = new Promise(resolve => {
+    try {
+      $httpClient.get({ url: CONFIG.urls.ipTypeCard }, (error, response, data) => {
+        const status = Number(response?.status || response?.statusCode);
+        _ippureCardFailed = !!error || !(status >= 200 && status < 300);
+        if (_ippureCardFailed) logHTTPFailure(CONFIG.urls.ipTypeCard, status, error);
+        resolve(data || null);
+      });
+    } catch (error) {
+      _ippureCardFailed = true;
+      logHTTPFailure(CONFIG.urls.ipTypeCard, 0, error);
+      resolve(null);
+    }
+  }));
+}
 // 同轮摘要的出口与风险回退共用一次 IPv4 探测，不跨运行保存。
 let _stashOutbound4P = null;
 
@@ -774,7 +791,7 @@ async function getRiskScore(ip) {
     score = Number(score);
     if (!Number.isFinite(score) || score < 0 || score > 100) return null;
     IPLog.log("风险评分：采用 " + source);
-    if (isStash) return { score, source };
+    if (isStash || source === "IPPure" && _ippureCardFailed) return { score, source };
     $persistentStore.write(JSON.stringify({ ip, score, source, api, hasKey, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.riskCache);
     IPLog.log("风险评分已缓存: " + score + "% (" + source + ")");
     return { score, source };
@@ -860,10 +877,10 @@ async function getIPType(ip) {
   }
 
   function saveAndReturn(ipType, ipSrc) {
-    if (complete(ipType, ipSrc)) {
+    if (complete(ipType, ipSrc) && !_ippureCardFailed) {
       $persistentStore.write(JSON.stringify({ ip, ipType, ipSrc, ts: Math.floor(Date.now() / 1000) }), CONFIG.storeKeys.ipTypeCache);
     } else {
-      IPLog.log("IP 类型或来源未确认，仅展示本次结果（不缓存）");
+      IPLog.log("IP 类型、来源或请求未确认，仅展示本次结果（不缓存）");
     }
     return { ipType, ipSrc };
   }
@@ -1660,7 +1677,7 @@ async function runStashTile() {
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
     // 类型 / 来源或评分未知时不能记为已完成，否则相同 IP 的下次事件无法重试。
-    if (typeof riskInfo.score === "number" && Number.isFinite(riskInfo.score) && riskInfo.score >= 0 && riskInfo.score <= 100 &&
+    if (!_ippureCardFailed && typeof riskInfo.score === "number" && Number.isFinite(riskInfo.score) && riskInfo.score >= 0 && riskInfo.score <= 100 &&
         ["住宅 IP", "机房 IP"].includes(ipType) && ["广播 IP", "原生 IP"].includes(ipSrc)) {
       $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6, complete: true }), CONFIG.storeKeys.lastEvent);
     } else {

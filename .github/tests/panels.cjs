@@ -167,6 +167,64 @@ test('Surge caches complete explicit IPPure card classifications after an info f
   }
 });
 
+test('Surge card fallback displays classification bodies from failed callbacks without caching them',async()=>{
+  for(const error of [null,'native client error']) {
+    const store=new Map();
+    const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{},intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {
+        cb(error,{status:400,headers:{'Content-Type':'image/svg+xml'}},'<svg><text>机房 IP · 广播 IP</text></svg>');return true;
+      }
+    }});
+    const pureRequests=r.requests.filter(o=>o.url.startsWith('https://my.ippure.com/'));
+    assert.deepEqual(pureRequests.map(o=>o.url),[
+      'https://my.ippure.com/v1/info','https://my.ippure.com/v1/card'
+    ]);
+    assert.match(r.output.content,/IP 类型：机房 IP \| 广播 IP/);
+    assert.equal(store.has('ipTypeCache'),false);
+  }
+});
+
+test('Surge failed card responses cannot cache a score or complete an event',async()=>{
+  const store=new Map();
+  const r=await ipPanel({client:'surge',store,now:100000000,virtualTimers:true,
+    argument:'TYPE=EVENT&event_delay=0.001&risk_api=ippure',ippureData:{},intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {
+        cb(null,{status:400},'机房 IP · 广播 IP · 42% 微风险');return true;
+      }
+    }});
+  assert.match(r.notifications[0][2],/风控：42% 微风险 \(IPPure\) \| 类型：机房 IP · 广播 IP/);
+  for(const key of ['ipTypeCache','riskScoreCache','lastNetworkInfoEvent'])assert.equal(store.has(key),false,key);
+});
+
+test('Surge keeps info before card and rejects non-2xx info classifications',async()=>{
+  const valid=await ipPanel({client:'surge',now:100000000,
+    ippureData:{isResidential:false,isBroadcast:false}});
+  assert.match(valid.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(valid.requests.some(o=>o.url==='https://my.ippure.com/v1/card'),false);
+  const fallback=await ipPanel({client:'surge',now:100000000,intercept(o,cb){
+    if(o.url==='https://my.ippure.com/v1/info') {
+      cb(null,{status:400},JSON.stringify({isResidential:false,isBroadcast:false}));return true;
+    }
+    if(o.url==='https://my.ippure.com/v1/card') {cb(null,{status:200},'住宅 IP · 广播 IP');return true;}
+  }});
+  assert.match(fallback.output.content,/IP 类型：住宅 IP \| 广播 IP/);
+});
+
+test('Surge card fallback never caches redirect or error bodies as a complete classification',async()=>{
+  for(const body of [
+    'Too many redirects\nPlease go to https://my.ippure.com/v1/card manually',
+    '<html>Hosting service unavailable; try an alternative endpoint</html>',
+    JSON.stringify({error:'upstream unavailable'}),'',undefined
+  ]) {
+    const store=new Map();
+    const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{},intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {cb('native client error',{status:400},body);return true;}
+    }});
+    assert.match(r.output.content,/IP 类型：(?:住宅|机房) IP \| 未知/);
+    assert.equal(store.has('ipTypeCache'),false);
+  }
+});
+
 test('Surge combines a verified partial info field with an explicit card supplement',async()=>{
   const store=new Map();
   const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{isResidential:false},intercept(o,cb){
