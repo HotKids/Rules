@@ -53,6 +53,9 @@ const COUNTRY_CODES = Object.fromEntries(
 // Claude 地区回落白名单，参考 UnlockTests/model/model.go（2026-09-30）。
 const CLAUDE_REGIONS = new Set("AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA TD CL CO KM CG CR CI HR CY CZ DK DJ DM DO EC EG SV GQ EE SZ FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LI LT LU MG MW MY MV MT MH MR MU MX FM MD MC MN ME MA MZ NA NR NP NL NZ NE NG MK NO OM PK PW PS PA PG PY PE PH PL PT QA RO RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB ZA KR ES LK SR SE CH TW TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US UY UZ VU VA VN ZM ZW".split(" "));
 
+// Gemini 地区判据：oneclickvirt/UnlockTests 的 transnation/Gemini.go 与 model/model.go（e57504e7）。
+const GEMINI_REGIONS = new Set("AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BH BD BB BE BZ BJ BM BT BO BA BW BR IO VG BN BG BF BI CV KH CM CA BQ KY CF TD CL CX CC CO KM CK CR CI HR CW CZ CD DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM HN HU IS IN ID IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA CY CG RE RO RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS KR SS ES LK SD SR SJ SE CH TW TJ TZ TH BS GM TL TG TK TO TT TN TR TM TC TV VI UG UA AE GB US UM UY UZ VU VA VE VN WF EH YE ZM ZW".split(" "));
+
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
 
@@ -727,7 +730,7 @@ class ServiceChecker {
     // 每个请求使用剩余预算；系统暂停 JS 调度时，实际墙钟耗时仍可能超过预算。
     try {
       const primary = await this.checkGeminiPrimary(started + 2000);
-      if (![STATUS.ERROR, STATUS.TIMEOUT].includes(primary.status)) return primary;
+      if (![STATUS.ERROR, STATUS.TIMEOUT].includes(primary.status) && primary.reason !== "unrecognized-homepage") return primary;
       MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页未确认（${primary.region}），启用 Stash iOS 匿名兜底；剩余预算=${Math.max(0, deadline - Date.now())}ms；免登录、免密钥，仅发送随机校验词`);
       const fallback = await this.checkGeminiAnonymous(deadline);
       if (fallback.status === STATUS.OK) return fallback;
@@ -742,7 +745,8 @@ class ServiceChecker {
     }
   }
 
-  // 恢复 Stash 排错前的主检测（c7806bc^）：一次首页及原有可选 API。
+  // 一次首页及可选 API；正常首页独立判断支持地区，并兼容旧版可用标记。
+  // 无匹配的正常首页沿用 NO；Stash iOS 仍可用匿名回复继续确认。
   // 仅 Stash iOS 传入短时限，为已实测的匿名兜底保留预算。
   static async checkGeminiPrimary(deadline) {
     let unknown = Utils.createResult(STATUS.ERROR, "Error");
@@ -758,9 +762,15 @@ class ServiceChecker {
       if (/unsupported_country|not (?:currently )?available in (?:your|this) (?:country|region)/i.test(res.body)) return Utils.createResult(STATUS.FAIL, "NO");
       const issue = Utils.responseProblem(res);
       if (issue) unknown = issue;
-      else if (/456(?:31641|17354),\s*null,\s*true/.test(res.body)) {
+      else {
         const region = Utils.country(res.body.match(/,\s*2,\s*1,\s*200,\s*"([A-Z]{2,3})"/)?.[1]);
-        return Utils.createResult(STATUS.OK, region || "OK");
+        const available = /456(?:31641|17354),\s*null,\s*true/.test(res.body);
+        const supported = res.status === 200 && GEMINI_REGIONS.has(region);
+        MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页判据：地区=${region || "未取得"}; 支持地区=${supported}; 可用标记=${available}`);
+        if (supported || available) {
+          return Utils.createResult(STATUS.OK, region || "OK");
+        }
+        if (res.status === 200) unknown = { ...Utils.createResult(STATUS.FAIL, "NO"), reason: "unrecognized-homepage" };
       }
     } catch (error) { unknown = logError("首页", error); }
     const apiKey = (ARGS.geminiapikey || "").trim();
