@@ -1396,7 +1396,37 @@ test('Gemini maps ISO regions and keeps availability without a country',async()=
     assert.equal(result.output.content,expected);
   }
   assert.equal((await tile('gemini',{body:'45631641,null,true'})).output.content,'OK');
-  assert.equal((await tile('gemini',{body:'<html>unknown</html>'})).output.content,'Error');
+  assert.equal((await tile('gemini',{body:'<html>unknown</html>'})).output.content,'NO');
+});
+test('Gemini accepts supported homepage regions without the legacy availability flags on both clients',async()=>{
+  for(const [client,environment] of [
+    ['stash',{'stash-version':'3.6.0',system:'Android'}],
+    ['stash',{'stash-version':'3.6.0',system:'iOS'}],
+    ['surge',{'surge-version':'5',system:'iOS'}]
+  ])for(const [code,expected] of [['USA','US'],['SGP','SG'],['KOR','KR'],['US','US']]) {
+    const body=`<!doctype html><html><head><title>Gemini</title></head><body><script>AF_initDataCallback({key:'ds:0',data:[null,2,1,200,"${code}"]});</script></body></html>`;
+    const r=await tile('gemini',{body},{client,environment});
+    if(client==='stash')assert.equal(r.output.content,expected);
+    else assert.match(r.output.content,new RegExp(`Gemini\\s+➟ ${expected}(?:\\n|$)`));
+    assert.equal(r.requests.filter(o=>o.url.includes('gemini.google.com')).length,1);
+    assert.doesNotMatch(r.logs.join('\n'),/匿名兜底/);
+  }
+});
+test('Gemini does not accept unsupported regions, failed responses or explicit restrictions from a country code alone',async()=>{
+  for(const [response,expected] of [
+    [{body:',2,1,200,"CHN"'},'NO'],
+    [{body:',2,1,200,"HKG"'},'NO'],
+    [{body:',2,1,200,"XXX"'},'NO'],
+    [{body:'<title>Just a moment...</title>,2,1,200,"USA"'},'Error'],
+    [{status:429,body:',2,1,200,"USA"'},'Error'],
+    [{status:403,body:',2,1,200,"USA"'},'Error'],
+    [{body:'unsupported_country ,2,1,200,"USA"'},'NO'],
+    [{body:'Gemini is not available in your country ,2,1,200,"USA"'},'NO']
+  ]) {
+    const r=await tile('gemini',response);
+    assert.equal(r.output.content,expected);
+    assert.equal(r.requests.length,1);
+  }
 });
 test('Gemini restores the original single homepage and default browser headers on Surge and Stash',async()=>{
   for(const [client,environment] of [
@@ -1423,18 +1453,18 @@ test('Gemini no longer requests the application page or diagnostic redirects on 
     ['stash',{'stash-version':'3.6.0',system:'Android'}],
     ['stash',{'stash-version':'3.6.0'}],
     ['surge',{'surge-version':'5',system:'iOS'}]
-  ])for(const response of [
-    {body:'<title>Google Gemini</title><a href="/app">Try Gemini</a>'},
-    {error:'client error (SendRequest)'},
-    {status:302,headers:{Location:'/app?hl=en'}}
+  ])for(const [response,expected] of [
+    [{body:'<title>Google Gemini</title><a href="/app">Try Gemini</a>'},'NO'],
+    [{error:'client error (SendRequest)'},'Error'],
+    [{status:302,headers:{Location:'/app?hl=en'}},'Error']
   ]) {
     const r=await tile('gemini',response,{client,environment});
     const requests=r.requests.filter(o=>o.url.includes('gemini.google.com'));
     assert.equal(requests.length,1);
     assert.equal(requests[0].url,'https://gemini.google.com');
     assert.equal(requests[0].timeout,10);
-    if(client==='stash')assert.equal(r.output.content,'Error');
-    else assert.match(r.output.content,/Gemini\s+➟ Error/);
+    if(client==='stash')assert.equal(r.output.content,expected);
+    else assert.match(r.output.content,new RegExp(`Gemini\\s+➟ ${expected}(?:\\n|$)`));
   }
 });
 test('Gemini original flags, explicit regional restrictions and unknown responses keep their results',async()=>{
@@ -1443,8 +1473,8 @@ test('Gemini original flags, explicit regional restrictions and unknown response
     [{body:'45617354,null,true'},'OK'],
     [{body:'not available in your country'},'NO'],
     [{status:429,body:'not available in your country'},'NO'],
-    [{body:'45631641,null,false 45617354,null,false ,2,1,200,"SGP"'},'Error'],
-    [{body:',2,1,200,"SGP"'},'Error'],
+    [{body:'45631641,null,false 45617354,null,false ,2,1,200,"SGP"'},'SG'],
+    [{body:',2,1,200,"SGP"'},'SG'],
     [{body:'<title>Just a moment...</title>45631641,null,true'},'Error'],
     [{status:429,body:'rate limited'},'Error'],
     [{status:403,body:'Forbidden'},'Error'],
@@ -1515,7 +1545,8 @@ test('Gemini anonymous fallback runs after one Stash iOS homepage fails',async()
 test('Gemini successful and explicitly blocked original results never start anonymous generation',async()=>{
   for(const [body,expected] of [
     ['45631641,null,true ,2,1,200,"SGP"','SG'],
-    ['Gemini is not available in your country','NO']
+    ['Gemini is not available in your country','NO'],
+    ['unsupported_country ,2,1,200,"USA"','NO']
   ]) {
     const r=await tile('gemini',{body},{environment:stashIOS});
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
@@ -1529,6 +1560,19 @@ test('Gemini successful and explicitly blocked original results never start anon
   assert.equal(api.output.content,'OK');assert.equal(api.requests.length,2);
   assert.ok(api.requests[1].timeout>0 && api.requests[1].timeout<=2);
   assert.ok(api.requests.every(o=>!o.url.includes('/StreamGenerate')));
+});
+test('Gemini keeps an unrecognized homepage as NO when the Stash iOS anonymous fallback cannot verify a reply',async()=>{
+  for(const response of [{body:'unrecognized RPC response'},{status:403,body:'Forbidden'},{error:'SendRequest'}]) {
+    const r=await tile('gemini',o=>o.url.includes('/_/')?response:{body:'<html>unknown homepage</html>'},
+      {environment:stashIOS});
+    assert.equal(r.output.content,'NO');
+    assert.equal(r.requests.length,3);
+    assert.match(r.logs.join('\n'),/首页未确认（NO）.*Stash iOS 匿名兜底/);
+    assert.match(r.logs.join('\n'),/保留原结果：NO/);
+  }
+  const network=await tile('gemini',{error:'SendRequest'},{environment:stashIOS});
+  assert.equal(network.output.content,'Error');
+  assert.equal(network.requests.length,3);
 });
 test('Gemini Android, Surge iOS and unknown platforms keep the original failure behavior',async()=>{
   for(const [client,environment] of [
