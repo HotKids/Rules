@@ -117,7 +117,7 @@ test('Surge skips legacy unknown or erroneous IP type caches and retries IPPure'
 test('Surge ProxyCheck partial type stays visible without a cache and is retried next refresh',async()=>{
   const store=new Map(), now=100000000;
   const failed=await ipPanel({client:'surge',store,now,intercept(o,cb){
-    if(o.url.includes('ippure')) {cb(null,{status:503},'unavailable');return true;}
+    if(o.url.includes('ippure')) {cb(null,{status:503},'');return true;}
     if(o.url.includes('proxycheck')) {
       cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:12,type:'Hosting'}}));return true;
     }
@@ -131,23 +131,25 @@ test('Surge ProxyCheck partial type stays visible without a cache and is retried
   assert.equal(JSON.parse(store.get('ipTypeCache')).ipSrc,'原生 IP');
 });
 
-test('Surge does not fabricate complete types from missing booleans or a card error page',async()=>{
-  for(const info of [
-    {isResidential:false},
-    {isResidential:'false',isBroadcast:'false'},
-    {error:'upstream failed'}
-  ]) for(const errorPage of [
-    '<html><title>Service unavailable</title>Please try again</html>',
-    '<html>Hosting service unavailable; try an alternative endpoint</html>'
+test('Surge preserves the historical info predicate and card classification defaults',async()=>{
+  for(const [info,expected] of [
+    [{isResidential:false},/IP 类型：机房 IP \| 原生 IP/],
+    [{isResidential:'false',isBroadcast:'false'},/IP 类型：住宅 IP \| 广播 IP/]
   ]) {
-    const store=new Map();
-    const r=await ipPanel({client:'surge',store,now:100000000,ippureData:info,intercept(o,cb){
-      if(o.url==='https://my.ippure.com/v1/card') {
-        cb(null,{status:200},errorPage);return true;
-      }
+    const r=await ipPanel({client:'surge',now:100000000,ippureData:info});
+    assert.match(r.output.content,expected);
+    assert.equal(r.requests.some(o=>o.url==='https://my.ippure.com/v1/card'),false);
+  }
+  for(const [body,expected] of [
+    ['访客 IP 信息卡片',/IP 类型：机房 IP \| 原生 IP/],
+    ['Residential visitor',/IP 类型：住宅 IP \| 原生 IP/],
+    ['Announced IPv4',/IP 类型：机房 IP \| 广播 IP/]
+  ]) {
+    const r=await ipPanel({client:'surge',now:100000000,ippureData:{},intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {cb(null,{status:200},body);return true;}
     }});
-    assert.match(r.output.content,/IP 类型：(?:住宅|机房) IP \| 未知/);
-    assert.equal(store.has('ipTypeCache'),false);
+    assert.match(r.output.content,expected);
+    assert.ok(r.store.has('ipTypeCache'));
   }
 });
 
@@ -210,7 +212,7 @@ test('Surge keeps info before card and rejects non-2xx info classifications',asy
   assert.match(fallback.output.content,/IP 类型：住宅 IP \| 广播 IP/);
 });
 
-test('Surge card fallback never caches redirect or error bodies as a complete classification',async()=>{
+test('Surge card fallback keeps failed responses uncached despite historical display defaults',async()=>{
   for(const body of [
     'Too many redirects\nPlease go to https://my.ippure.com/v1/card manually',
     '<html>Hosting service unavailable; try an alternative endpoint</html>',
@@ -220,24 +222,27 @@ test('Surge card fallback never caches redirect or error bodies as a complete cl
     const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{},intercept(o,cb){
       if(o.url==='https://my.ippure.com/v1/card') {cb('native client error',{status:400},body);return true;}
     }});
-    assert.match(r.output.content,/IP 类型：(?:住宅|机房) IP \| 未知/);
+    assert.match(r.output.content,body ? /IP 类型：机房 IP \| 原生 IP/ : /IP 类型：住宅 IP \| 未知/);
     assert.equal(store.has('ipTypeCache'),false);
   }
 });
 
-test('Surge combines a verified partial info field with an explicit card supplement',async()=>{
+test('Surge uses the historical info source default before reaching card',async()=>{
   const store=new Map();
   const r=await ipPanel({client:'surge',store,now:100000000,ippureData:{isResidential:false},intercept(o,cb){
     if(o.url==='https://my.ippure.com/v1/card') {cb(null,{status:200},'原生 IP');return true;}
   }});
   assert.match(r.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(r.requests.some(o=>o.url==='https://my.ippure.com/v1/card'),false);
   const saved=JSON.parse(store.get('ipTypeCache'));
   assert.equal(saved.ipType,'机房 IP');assert.equal(saved.ipSrc,'原生 IP');
 });
 
 test('Surge all-failed type and risk probes remain visibly unknown without caching',async()=>{
   const store=new Map();
-  const r=await ipPanel({client:'surge',store,now:100000000,riskFailure:true});
+  const r=await ipPanel({client:'surge',store,now:100000000,riskFailure:true,intercept(o,cb){
+    if(o.url==='https://my.ippure.com/v1/card') {cb('request failed',{status:503},'');return true;}
+  }});
   assert.match(r.output.content,/未知（检测失败）/);
   assert.match(r.output.content,/IP 类型：未知 \| 未知/);
   assert.equal(store.has('ipTypeCache'),false);assert.equal(store.has('riskScoreCache'),false);
@@ -1158,7 +1163,7 @@ test('Surge EVENT retries an unknown type on the same IP and deduplicates only a
   const store=new Map();
   const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
   const failed=await ipPanel({...options,intercept(o,cb){
-    if(o.url.includes('ippure')) {cb(null,{status:503},'unavailable');return true;}
+    if(o.url.includes('ippure')) {cb(null,{status:503},'');return true;}
     if(o.url.includes('proxycheck')) {
       cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:12,type:'Hosting'}}));return true;
     }
