@@ -655,7 +655,7 @@ test('Stash starts the five-second IPv4 fallback only after a native IPPure HTTP
     assert.equal(fallback.at-r.requestEvents[0].at,5000);assert.equal(fallback.timeout,5);
     assert.equal(r.elapsed,stalledFallback?10000:5000);
     assert.equal(r.requests[0].timeout,undefined);
-    assert.match(r.logs.join('\n'),/my\.ippure\.com：请求超时/);
+    assert.match(r.logs.join('\n'),/my\.ippure\.com\/v1\/info：请求超时/);
     if(stalledFallback){
       assert.equal(r.output.content,'无法获取出口 IPv4');
       assert.match(r.logs.join('\n'),/api\.ipify\.org：脚本等待期限已到/);
@@ -1096,6 +1096,93 @@ test('Surge IP panel retains policy, entrance, traffic and request routing',asyn
   assert.equal(requests.find(r=>r.url.includes('edns')).policy,'Test Proxy');
   assert.ok(requests.every(r=>!r.headers?.['X-Stash-Selected-Proxy']));
 });
+test('Surge EVENT retries an unknown type on the same IP and deduplicates only after recovery',async()=>{
+  const store=new Map();
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  const failed=await ipPanel({...options,intercept(o,cb){
+    if(o.url.includes('ippure')) {cb(null,{status:503},'unavailable');return true;}
+    if(o.url.includes('proxycheck')) {
+      cb(null,{status:200},JSON.stringify({'198.51.100.10':{risk:12,type:'Hosting'}}));return true;
+    }
+  }});
+  assert.match(failed.notifications[0][2],/类型：机房 IP · 未知/);
+  assert.equal(store.has('lastNetworkInfoEvent'),false);
+  const recovered=await ipPanel(options);
+  assert.ok(recovered.requests.some(o=>o.url==='https://my.ippure.com/v1/info'));
+  assert.match(recovered.notifications[0][2],/类型：住宅 IP · 原生 IP/);
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).complete,true);
+  const skipped=await ipPanel({...options,riskFailure:true});
+  assert.equal(skipped.notifications.length,0);
+  assert.ok(skipped.logs.includes('网络信息未变化，跳过'));
+  assert.equal(skipped.requests.some(o=>/ippure|proxycheck|scamalytics/.test(o.url)),false);
+});
+
+test('Surge EVENT retries an unknown risk score even when its IP type is complete',async()=>{
+  const store=new Map();
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  const failed=await ipPanel({...options,ippureData:{isResidential:true,isBroadcast:false},intercept(o,cb){
+    if(/proxycheck|scamalytics/.test(o.url)) {cb(null,{status:503},'unavailable');return true;}
+  }});
+  assert.match(failed.notifications[0][2],/风控：未知（检测失败） \| 类型：住宅 IP · 原生 IP/);
+  assert.equal(store.has('lastNetworkInfoEvent'),false);
+  const recovered=await ipPanel(options);
+  assert.ok(recovered.requests.some(o=>o.url.includes('proxycheck')));
+  assert.match(recovered.notifications[0][2],/风控：12% 极度纯净/);
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).complete,true);
+});
+
+test('Surge EVENT refreshes a legacy same-IP baseline once before deduplicating',async()=>{
+  const store=new Map([['lastNetworkInfoEvent',JSON.stringify({
+    localIP:'203.0.113.2',outIP:'198.51.100.10',outIPv6:null
+  })]]);
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  const refreshed=await ipPanel(options);
+  assert.ok(refreshed.requests.some(o=>o.url==='https://my.ippure.com/v1/info'));
+  assert.equal(refreshed.notifications.length,1);
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).complete,true);
+  const skipped=await ipPanel(options);
+  assert.equal(skipped.notifications.length,0);
+  assert.equal(skipped.requests.some(o=>o.url.includes('ippure')),false);
+});
+
+test('Surge EVENT failures on a changed IP preserve the last successful event baseline',async()=>{
+  const store=new Map();
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  await ipPanel(options);
+  const previous=store.get('lastNetworkInfoEvent');
+  const failed=await ipPanel({...options,outIP:'198.51.100.11',riskFailure:true});
+  assert.match(failed.notifications[0][2],/未知（检测失败）/);
+  assert.equal(store.get('lastNetworkInfoEvent'),previous);
+  const recovered=await ipPanel({...options,outIP:'198.51.100.11'});
+  assert.ok(recovered.requests.some(o=>o.url.includes('ippure')));
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).outIP,'198.51.100.11');
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).complete,true);
+});
+
+test('Surge EVENT watchdog completion cannot save a baseline for an unfinished IPPure probe',async()=>{
+  const store=new Map();
+  const options={client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store};
+  const timedOut=await ipPanel({...options,intercept(o){
+    if(o.url==='https://my.ippure.com/v1/info') return true;
+  }});
+  assert.equal(timedOut.output.title,'检测超时');
+  assert.equal(store.has('lastNetworkInfoEvent'),false);
+  const recovered=await ipPanel(options);
+  assert.ok(recovered.requests.some(o=>o.url.includes('ippure')));
+  assert.equal(JSON.parse(store.get('lastNetworkInfoEvent')).complete,true);
+});
+
+test('Surge MANUAL refresh bypasses event deduplication without changing its baseline',async()=>{
+  const store=new Map();
+  await ipPanel({client:'surge',argument:'TYPE=EVENT&event_delay=0.001',virtualTimers:true,store});
+  const previous=store.get('lastNetworkInfoEvent');
+  store.delete('ipTypeCache');
+  const manual=await ipPanel({client:'surge',virtualTimers:true,store});
+  assert.ok(manual.requests.some(o=>o.url==='https://my.ippure.com/v1/info'));
+  assert.match(manual.output.content,/IP 类型：住宅 IP \| 原生 IP/);
+  assert.equal(store.get('lastNetworkInfoEvent'),previous);
+});
+
 test('Surge notifications summarize both IPs then order risk, outbound, entrance and local details',async()=>{
   for(const [mask,ips] of [
     [0,['203.0.113.2','192.0.2.1','198.51.100.10']],

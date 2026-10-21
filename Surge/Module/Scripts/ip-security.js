@@ -326,7 +326,9 @@ if (hasTimers && !(isStash && args.task === "logs")) {
 // ==================== HTTP 工具 ====================
 function logHTTPFailure(url, status, error) {
   // 只记录站点和错误类别；完整 URL 可能含 IP 或 API Key。
-  const host = String(url).match(/^https?:\/\/([^/?#]+)/)?.[1] || "API";
+  const host = url === CONFIG.urls.ipType ? "my.ippure.com/v1/info" :
+    url === CONFIG.urls.ipTypeCard ? "my.ippure.com/v1/card" :
+    String(url).match(/^https?:\/\/([^/?#]+)/)?.[1] || "API";
   const detail = String(error || "");
   const reason = error ? (/script wait deadline/i.test(detail) ? "脚本等待期限已到" :
     /timeout|timed out/i.test(detail) ? "请求超时" :
@@ -457,7 +459,14 @@ async function getStashControlContext() {
 // 单次运行内去重：Stash 出口、评分和类型与官方卡片一样取自同一份 IPPure 数据。
 // 不跨刷新缓存此响应，避免节点切换后沿用另一个出口。
 let _ippureInfoP = null, _ippureCardP = null;
-function getIPPureInfo() { return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType)); }
+function getIPPureInfo() {
+  return _ippureInfoP || (_ippureInfoP = httpJSON(CONFIG.urls.ipType).then(info => {
+    IPLog.log(info ? "IPPure /v1/info 分类字段: " + JSON.stringify({
+      isResidential: info.isResidential, isBroadcast: info.isBroadcast
+    }).slice(0, 200) : "IPPure /v1/info 未取得有效 JSON 响应");
+    return info;
+  }));
+}
 function getIPPureCard() { return _ippureCardP || (_ippureCardP = httpRaw(CONFIG.urls.ipTypeCard)); }
 // 同轮摘要的出口与风险回退共用一次 IPv4 探测，不跨运行保存。
 let _stashOutbound4P = null;
@@ -871,7 +880,7 @@ async function getIPType(ip) {
 
   const html = await getIPPureCard();
   if (typeof html === "string") {
-    // 错误页或缺少分类的正文不能按默认值推断成“机房 / 原生”。
+    // card 是图片卡片地址；这里只提取可读 SVG / 文本中的明确分类，位图或错误页不能默认推断成“机房 / 原生”。
     if (ipType === "未知") {
       if (/住宅|\bresidential\b/i.test(html)) ipType = "住宅 IP";
       else if (/机房|\bdata\s*cent(?:er|re)\b|\bhosting\b/i.test(html)) ipType = "机房 IP";
@@ -1076,13 +1085,12 @@ function checkIPChange(localIP, outIP, outIPv6) {
     try { lastData = JSON.parse(lastEvent); } catch (e) {}
   }
 
-  if (localIP === lastData.localIP && outIP === lastData.outIP && outIPv6 === lastData.outIPv6) {
+  if (lastData.complete === true && localIP === lastData.localIP && outIP === lastData.outIP && outIPv6 === lastData.outIPv6) {
     IPLog.log("网络信息未变化，跳过");
     return false;
   }
 
-  IPLog.log("网络信息已变化");
-  $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6 }), CONFIG.storeKeys.lastEvent);
+  IPLog.log("网络信息已变化或上次检测未完成，重新检测");
   return true;
 }
 
@@ -1651,6 +1659,13 @@ async function runStashTile() {
   if (finished) return;
   if (args.isEvent) {
     sendNetworkChangeNotification(context);
+    // 类型 / 来源或评分未知时不能记为已完成，否则相同 IP 的下次事件无法重试。
+    if (typeof riskInfo.score === "number" && Number.isFinite(riskInfo.score) && riskInfo.score >= 0 && riskInfo.score <= 100 &&
+        ["住宅 IP", "机房 IP"].includes(ipType) && ["广播 IP", "原生 IP"].includes(ipSrc)) {
+      $persistentStore.write(JSON.stringify({ localIP, outIP, outIPv6, complete: true }), CONFIG.storeKeys.lastEvent);
+    } else {
+      IPLog.log("风险评分、类型或来源未确认，不保存事件完成记录，下次事件重新检测");
+    }
     done({});
   } else {
     IPLog.log("=== 面板显示 ===");
