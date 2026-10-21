@@ -131,6 +131,66 @@ test('Surge ProxyCheck partial type stays visible without a cache and is retried
   assert.equal(JSON.parse(store.get('ipTypeCache')).ipSrc,'原生 IP');
 });
 
+test('IPPure diagnostics identify IPv6 info against the panel IPv4 and expose the card failure',async()=>{
+  const store=new Map(), infoIP='2001:db8::44';
+  const r=await ipPanel({client:'surge',store,now:100000000,
+    ippureData:{ip:infoIP,countryCode:'HK'},intercept(o,cb){
+      if(o.url==='https://my.ippure.com/v1/card') {
+        cb(null,{status:400,headers:{'content-type':'text/plain'}},
+          'Too many redirects\nPlease go to https://my.ippure.com/v1/card manually');return true;
+      }
+    }});
+  const log=r.logs.filter(line=>line.startsWith('IPPure ')).join('\n');
+  assert.match(log,/返回地址: 2001:db8::44; 地址族=IPv6/);
+  assert.match(log,/info=2001:db8::44; 面板出口IPv4=198\.51\.100\.10; 不一致/);
+  assert.match(log,/HTTP=400; Content-Type=text\/plain; 正文类型=\[object String\]/);
+  assert.match(log,/Too many redirects/);assert.match(log,/正文 IP 候选: 未取得，无法确认地址族/);
+  assert.deepEqual(r.requests.filter(o=>o.url.startsWith('https://my.ippure.com/')).map(o=>o.url),[
+    'https://my.ippure.com/v1/info','https://my.ippure.com/v1/card'
+  ]);
+  assert.match(r.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(store.has('ipTypeCache'),false);
+});
+
+test('IPPure diagnostics confirm a matching IPv4 without changing a valid zero and false result',async()=>{
+  const store=new Map();
+  const r=await ipPanel({client:'surge',store,now:100000000,argument:'risk_api=ippure',
+    ippureData:{ip:'198.51.100.10',fraudScore:0,isResidential:false,isBroadcast:false}});
+  const log=r.logs.filter(line=>line.startsWith('IPPure ')).join('\n');
+  assert.match(log,/返回地址: 198\.51\.100\.10; 地址族=IPv4/);
+  assert.match(log,/info=198\.51\.100\.10; 面板出口IPv4=198\.51\.100\.10; 一致/);
+  assert.match(r.output.content,/0% 极度纯净 \(IPPure\)/);
+  assert.match(r.output.content,/IP 类型：机房 IP \| 原生 IP/);
+  assert.equal(JSON.parse(store.get('riskScoreCache')).score,0);
+  assert.equal(r.requests.filter(o=>o.url.startsWith('https://my.ippure.com/')).length,1);
+});
+
+test('IPPure diagnostics mark missing IPs and mask response addresses and credentials',async()=>{
+  const privateValues=['INFO-TOKEN','INFO-KEY','INFO-COOKIE','URL-TOKEN','URL-TRACE'];
+  for(const mask of [1,2]) {
+    const r=await ipPanel({client:'surge',now:100000000,argument:`mask_ip=${mask}`,
+      ippureData:{code:429,message:'rate limit',token:privateValues[0],api_key:privateValues[1],cookie:privateValues[2]},
+      intercept(o,cb){
+        if(o.url==='https://my.ippure.com/v1/card') {
+          cb(null,{status:400,headers:{'Content-Type':'text/plain','Set-Cookie':'HEADER-COOKIE'}},
+            'Too many redirects: 198.51.100.41 / 2001:db8::41 '+
+            'https://my.ippure.com/v1/card?token='+privateValues[3]+'&trace='+privateValues[4]);return true;
+        }
+      }});
+    const log=r.logs.filter(line=>line.startsWith('IPPure ')).join('\n');
+    assert.match(log,/返回地址: 未返回有效 IP; 地址族=无法确认/);
+    assert.match(log,/IPPure IP 对照: info=未取得 IP; .*无法确认/);
+    assert.match(log,/响应摘要: .*"code":429.*rate limit/);
+    assert.match(log,/正文 IP 候选: .*\(IPv4\).*\(IPv6\)/);
+    assert.doesNotMatch(log,/198\.51\.100\.41|2001:db8::41|HEADER-COOKIE/);
+    for(const value of privateValues)assert.equal(log.includes(value),false,value);
+    if(mask===1)assert.match(log,/198\.\*\*\*\.\*\*\*\.41/);
+    else assert.doesNotMatch(log,/198\.51\.100\.10|2001:|198\.\*\*\*\.\*\*\*\.41/);
+    const bodySummary=r.logs.find(line=>line.startsWith('IPPure /v1/card 正文摘要: '));
+    assert.ok(bodySummary.length<=630);
+  }
+});
+
 test('Surge preserves the historical info predicate and card classification defaults',async()=>{
   for(const [info,expected] of [
     [{isResidential:false},/IP 类型：机房 IP \| 原生 IP/],
