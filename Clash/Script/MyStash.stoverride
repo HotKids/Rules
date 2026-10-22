@@ -1,4 +1,4 @@
-# Date: 2026-10-18 16:21:07
+# Date: 2026-10-22 12:15:15
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -351,7 +351,7 @@ proxy-groups: #!replace
     include-all: true
     interval: 600
     lazy: true
-    filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?=.*Neburst)'
+    filter: '(?i)^(?=.*\b(?:TW|TWN)\d*\b)(?=.*Neburst|Pro)'
 
   - name: "🇯🇵 JP Relay"
     type: fallback
@@ -370,6 +370,15 @@ proxy-groups: #!replace
     interval: 600
     lazy: true
     filter: '(?i)^(?=.*\b(?:US|USA)\d*\b)(?=.*(?:GoMaMi|Pro))'
+
+  - name: "🇪🇺 EU Relay"
+    type: fallback
+    icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png
+    hidden: true
+    include-all: true
+    interval: 600
+    lazy: true
+    filter: '(?i)^(?=.*\b(?:DE)\d*\b)(?=.*(?:PS|Pro))'
 
   - name: "🇺🇳 Server"
     type: select
