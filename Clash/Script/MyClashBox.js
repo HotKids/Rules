@@ -210,7 +210,7 @@ function main(config) {
     { name: '🇨🇳 TW Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇯🇵 JP Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇺🇸 US Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
-    { name: '🇪🇺 EU Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png' },
+    { name: '🇪🇺 EU Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     // Nodes
     { name: 'Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png' },
     // Area
