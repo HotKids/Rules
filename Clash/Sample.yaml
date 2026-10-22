@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-10-18 16:21:07
+# Date: 2026-10-22 16:27:18
 # Author: @HotKids
 
 # 通用设置
@@ -747,20 +747,20 @@ rule-providers:
     url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
     interval: 86400
 
-  China ASN:
-    type: http
-    behavior: classical
-    format: yaml
-    path: ./Provider/RuleSet/China_ASN.yaml
-    url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
-    interval: 86400
-
   China IP:
     type: http
     behavior: ipcidr
     format: mrs
     path: ./Provider/RuleSet/China_IP.mrs
     url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
+    interval: 86400
+
+  China ASN:
+    type: http
+    behavior: classical
+    format: yaml
+    path: ./Provider/RuleSet/China_ASN.yaml
+    url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
     interval: 86400
 
   LAN:
@@ -848,8 +848,8 @@ rules:
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,China ASN,🔘 DIRECT,no-resolve
   - RULE-SET,China IP,🔘 DIRECT,no-resolve
+  - RULE-SET,China ASN,🔘 DIRECT,no-resolve
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT,no-resolve

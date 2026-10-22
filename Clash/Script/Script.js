@@ -266,8 +266,8 @@ function main(config) {
     'Speedtest': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Speedtest.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Speedtest.mrs' },
     'Global': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/Global.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs' },
     'China': { ...remoteRuleProvider, behavior: 'domain', format: 'mrs', path: './Provider/RuleSet/China.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs' },
-    'China ASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/China_ASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
     'China IP': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/China_IP.mrs', url: 'https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs' },
+    'China ASN': { ...remoteRuleProvider, behavior: 'classical', format: 'yaml', path: './Provider/RuleSet/China_ASN.yaml', url: 'https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml' },
     'LAN': { ...remoteRuleProvider, behavior: 'ipcidr', format: 'mrs', path: './Provider/RuleSet/LAN-e87c63f8926f.mrs', url: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@9007948f595cf1f756cd3284930f9aacd0a20166/Clash/RuleSet/lancidr.mrs' },
   };
 
@@ -328,8 +328,8 @@ function main(config) {
     'RULE-SET,Global,🔰 Proxy',
     // China Area Network
     'RULE-SET,China,🔘 DIRECT',
-    'RULE-SET,China ASN,🔘 DIRECT,no-resolve',
     'RULE-SET,China IP,🔘 DIRECT,no-resolve',
+    'RULE-SET,China ASN,🔘 DIRECT,no-resolve',
     // Local Area Network
     'RULE-SET,LAN,🔘 DIRECT,no-resolve',
     // GeoIP

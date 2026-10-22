@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-10-18 16:21:07
+# Date: 2026-10-22 16:27:18
 # Author: @HotKids
 
 [General]
@@ -166,8 +166,8 @@ https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Speedtest.
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/proxy.txt, policy=🔰 Proxy, tag=Global, enabled=true
 # China Area Network
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt, policy=🔘 DIRECT, tag=China, enabled=true
-https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=China ASN, enabled=true
 https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt, policy=🔘 DIRECT, tag=China IP, enabled=true
+https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/ASN.China.list, policy=🔘 DIRECT, tag=China ASN, enabled=true
 # Local Area Network
 https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/LAN.list, policy=🔘 DIRECT, tag=LAN, enabled=true
 

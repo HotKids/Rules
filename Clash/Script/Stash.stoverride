@@ -1,4 +1,4 @@
-# Date: 2026-10-18 16:21:07
+# Date: 2026-10-22 16:27:18
 
 name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf。
@@ -557,18 +557,18 @@ rule-providers: #!replace
     url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs
     interval: 86400
 
-  China ASN:
-    behavior: classical
-    format: yaml
-    path: ./Provider/RuleSet/China_ASN.yaml
-    url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
-    interval: 86400
-
   China IP:
     behavior: ipcidr
     format: mrs
     path: ./Provider/RuleSet/China_IP.mrs
     url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs
+    interval: 86400
+
+  China ASN:
+    behavior: classical
+    format: yaml
+    path: ./Provider/RuleSet/China_ASN.yaml
+    url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml
     interval: 86400
 
   LAN:
@@ -655,8 +655,8 @@ rules: #!replace
 
   # China Area Network
   - RULE-SET,China,🔘 DIRECT
-  - RULE-SET,China ASN,🔘 DIRECT,no-resolve
   - RULE-SET,China IP,🔘 DIRECT,no-resolve
+  - RULE-SET,China ASN,🔘 DIRECT,no-resolve
 
   # Local Area Network
   - RULE-SET,LAN,🔘 DIRECT,no-resolve
