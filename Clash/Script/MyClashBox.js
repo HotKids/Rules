@@ -153,7 +153,7 @@ function main(config) {
     'Speedtest': null,
     '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
     '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
-    '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst|Pro)',
+    '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*(?:Neburst|Pro))',
     '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
     '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     '🇪🇺 EU Relay': '(?i)^(?=.*\\b(?:DE)\\d*\\b)(?=.*(?:PS|Pro))',
