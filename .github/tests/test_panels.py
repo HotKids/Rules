@@ -53,7 +53,10 @@ class TileConfigurationTests(unittest.TestCase):
                     for stem, (original, tiles) in originals.items():
                         text = (panels / (stem + '.stoverride')).read_text()
                         actual = yaml.safe_load(text)
-                        self.assertEqual(actual, {**original, **{k: v for k, v in metadata.items() if v}})
+                        expected_metadata = {k: v for k, v in metadata.items() if v}
+                        if stem == 'ip-security-panel':
+                            expected_metadata['icon'] = 'https://ippure.com/logo.png'
+                        self.assertEqual(actual, {**original, **expected_metadata})
                         self.assertEqual(text[text.index('tiles:'):], tiles)
                         self.assertEqual((panels / (stem + '.sgmodule')).read_text(), sources[stem])
                     self.assertFalse((panels / 'surge-only.stoverride').exists())
