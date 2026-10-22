@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-10-18 16:21:07
+# Date: 2026-10-22 16:27:18
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。
@@ -181,8 +181,8 @@ rule-providers:
   Speedtest: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/Speedtest.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Clash/RuleSet/Speedtest.mrs}
   Global: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/Global.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/geolocation-!cn.mrs}
   China: {<<: *Remote, behavior: domain, format: mrs, path: ./Provider/RuleSet/China.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geosite/cn.mrs}
-  China ASN: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/China_ASN.yaml, url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml}
   China IP: {<<: *Remote, behavior: ipcidr, format: mrs, path: ./Provider/RuleSet/China_IP.mrs, url: https://fastly.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@meta/geo/geoip/cn.mrs}
+  China ASN: {<<: *Remote, behavior: classical, format: yaml, path: ./Provider/RuleSet/China_ASN.yaml, url: https://fastly.jsdelivr.net/gh/VirgilClyne/GetSomeFries@main/ruleset/ASN.China.yaml}
   LAN: {<<: *Remote, behavior: ipcidr, format: mrs, path: ./Provider/RuleSet/LAN-e87c63f8926f.mrs, url: https://fastly.jsdelivr.net/gh/HotKids/Rules@9007948f595cf1f756cd3284930f9aacd0a20166/Clash/RuleSet/lancidr.mrs}
 
 # ── 规则 ──
@@ -242,8 +242,8 @@ rules:
   - 'RULE-SET,Global,🔰 Proxy'
   # China Area Network
   - 'RULE-SET,China,🔘 DIRECT'
-  - 'RULE-SET,China ASN,🔘 DIRECT,no-resolve'
   - 'RULE-SET,China IP,🔘 DIRECT,no-resolve'
+  - 'RULE-SET,China ASN,🔘 DIRECT,no-resolve'
   # Local Area Network
   - 'RULE-SET,LAN,🔘 DIRECT,no-resolve'
   # GeoIP
