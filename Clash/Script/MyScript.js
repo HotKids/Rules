@@ -153,9 +153,10 @@ function main(config) {
     '⏱️ Speedtest': null,
     '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
     '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
-    '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst)',
+    '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*Neburst|Pro)',
     '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
     '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
+    '🇪🇺 EU Relay': '(?i)^(?=.*\\b(?:DE)\\d*\\b)(?=.*(?:PS|Pro))',
     '🇺🇳 Server': null,
     '🇭🇰 Hong Kong': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
     '🇨🇳 Taiwan': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Pro)',
@@ -209,6 +210,7 @@ function main(config) {
     { name: '🇨🇳 TW Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png' },
     { name: '🇯🇵 JP Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png' },
     { name: '🇺🇸 US Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png' },
+    { name: '🇪🇺 EU Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Loop.png' },
     // Nodes
     { name: '🇺🇳 Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Color/Club.png' },
     // Area
