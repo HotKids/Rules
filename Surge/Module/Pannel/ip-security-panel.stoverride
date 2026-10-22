@@ -1,5 +1,5 @@
 # 图标：IPPure / selfh.st
-# 覆写的 category/icon 及兼容参数默认值由同名 .sgmodule 同步，在 Surge 源文件维护。
+# 分类及兼容参数默认值由同名 .sgmodule 同步；Stash 覆写图标使用 IPPure。
 # 与 Surge 共用 ip-security.js，首页聚合卡片与三张独立折叠卡片并存。
 # 卡片间隔按 Surge 的 panel_interval 默认值同步为整数，默认 600 秒；首次检测只记录通知基线。
 # 通知展示本地/出口 IP、地区、运营商和风险，排版与 Surge 一致。
@@ -20,7 +20,7 @@
 name: 'IP Security Tiles'
 desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
 category: 'HotKids'
-icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/arrmatey.png'
+icon: 'https://ippure.com/logo.png'
 arguments-version: 1
 arguments:
   risk_api:

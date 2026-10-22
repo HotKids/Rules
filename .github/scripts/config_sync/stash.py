@@ -158,7 +158,7 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
 
 
 def _sync_stash_panel_metadata() -> None:
-    """同名 Surge 面板提供 category/icon 和参数默认值；保留 Stash 布局。"""
+    """同名 Surge 面板提供元数据和参数默认值；IP 面板保留 Stash 专用图标。"""
     panels = REPO_ROOT / "Surge/Module/Pannel"
     for source in sorted(panels.glob("*.sgmodule")):
         target = source.with_suffix(".stoverride")
@@ -171,6 +171,8 @@ def _sync_stash_panel_metadata() -> None:
             match = re.fullmatch(r"#!(category|icon|arguments)=(.*)", line)
             if match:
                 metadata.setdefault(match[1], match[2].strip())
+        if source.stem == "ip-security-panel":
+            metadata["icon"] = "https://ippure.com/logo.png"
         before = target.read_text(encoding="utf-8")
         # 只替换顶层单行元数据，不能改动 tiles 内的 icon。
         lines = [line for line in before.splitlines()
