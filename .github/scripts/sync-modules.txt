@@ -1,15 +1,17 @@
 # ════════════════════════════════════════════════════════════════
 # sync-modules.txt — 去广告 sgmodule 聚合列表
 # ════════════════════════════════════════════════════════════════
-# 用途：聚合多个第三方去广告 sgmodule 为单一模块
-# 消费：.github/scripts/sync-modules.py
+# 用途：正式版聚合 Surge 模块，Beta 将对应 Loon 插件转换后按相同格式聚合
+# 消费：.github/scripts/sync-modules.py / sync-modules-beta.py
 # 输出：Surge/Module/BlockAds.sgmodule（name/desc 手动维护，脚本不覆盖）
+# Beta：Surge/Module/BlockAdsBeta.sgmodule（头部沿用正式版，仅模块标题加 Beta）
 # 依赖：需搭配 BlockAdsBase.sgmodule 使用
 #
 # 格式：
-#   ;Loon 名称       对应插件名称，不含 _remove_ads.lpx 后缀
+#   ;Loon 名称       Action 按统一模板展开链接；名称不含 _remove_ads.lpx 后缀
 #   URL,别名         规则来源与域名关键词
 #   # URL,别名       行首 # 表示停用该条
+#   无 ;名称的条目沿用 Surge 来源；停用条目的 Loon 来源也停用
 # ════════════════════════════════════════════════════════════════
 
 ;12306
@@ -44,7 +46,7 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/百度搜索�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/百度网盘去广告.sgmodule,baidu
 ;Bilibili
 # https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/哔哩哔哩去广告.sgmodule,bili
-;Bilibili
+;BiliComic
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/哔哩哔哩漫画去广告.sgmodule,bilibili
 ;BodianMusic
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/波点音乐去广告.sgmodule,kuwo

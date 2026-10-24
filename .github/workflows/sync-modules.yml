@@ -5,9 +5,15 @@ on:
     branches: [master]
     paths:
       - 'Surge/Module/BlockAds.sgmodule'
+      - 'Surge/Module/BlockAdsBeta.sgmodule'
       - '.github/workflows/sync-modules.yml'
       - '.github/scripts/sync-modules.txt'
       - '.github/scripts/sync-modules.py'
+      - '.github/scripts/sync-modules-beta.py'
+      - '.github/scripts/convert-loon.cjs'
+      - '.github/tests/loon-convert.cjs'
+      - '.github/tests/test_blockads_aggregate.py'
+      - '.github/tests/test_blockads_beta.py'
       - '.github/scripts/_common.py'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
@@ -37,6 +43,12 @@ jobs:
       - name: Run aggregate script
         run: python3 .github/scripts/sync-modules.py
 
+      - name: Convert and aggregate Beta sources
+        run: python3 .github/scripts/sync-modules-beta.py
+
+      - name: Check Loon conversion bridge
+        run: node --test .github/tests/loon-convert.cjs
+
       - name: Validate before publishing
         run: python3 .github/scripts/validate.py
 
@@ -44,7 +56,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Surge/Module/BlockAds.sgmodule
+          git add Surge/Module/BlockAds.sgmodule Surge/Module/BlockAdsBeta.sgmodule
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else

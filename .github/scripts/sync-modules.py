@@ -183,29 +183,40 @@ def load_urls() -> list[tuple[str, str]]:
     return result
 
 
-def read_output_meta() -> dict[str, str]:
+def read_output_meta(output_file: Path | None = None) -> dict[str, str]:
+    output_file = OUTPUT_FILE if output_file is None else Path(output_file)
     meta: dict[str, str] = {}
-    if not OUTPUT_FILE.exists():
+    if not output_file.exists():
         return meta
-    for line in OUTPUT_FILE.read_text(encoding="utf-8").splitlines():
+    for line in output_file.read_text(encoding="utf-8").splitlines():
         m = _META_FIELD_RE.match(line.strip())
         if m:
             meta[m.group(1)] = m.group(2).strip()
     return meta
 
 
-def aggregate():
-    url_alias_list = load_urls()
+def aggregate(*, url_alias_list=None, source_texts=None, output_file=None,
+              metadata=None, preserve_arguments=False):
+    """聚合来源模块；可注入已转换的文本、输出位置和头部元数据。
+
+    preserve_arguments 为 true 时原样保留 metadata 中的参数头部，适用于
+    共享同一参数接口、但来源已经预先转换的合集。
+    """
+    url_alias_list = load_urls() if url_alias_list is None else url_alias_list
     if not url_alias_list:
         print("[WARN] sync-modules.txt 中无 URL 条目")
         return
 
-    existing_meta = read_output_meta()
+    output_file = OUTPUT_FILE if output_file is None else Path(output_file)
+    existing_meta = read_output_meta(output_file) if metadata is None else dict(metadata)
 
     url_list = [url for url, _ in url_alias_list]
 
-    print(f"并发拉取 {len(url_list)} 个 sgmodule …")
-    results = prefetch_urls(url_list, _UA, encode=True)
+    if source_texts is None:
+        print(f"并发拉取 {len(url_list)} 个 sgmodule …")
+        results = prefetch_urls(url_list, _UA, encode=True)
+    else:
+        results = source_texts
 
     # {section: [(name, [lines]), ...]}  按原顺序收集
     section_entries: dict[str, list[tuple[str, list[str]]]] = defaultdict(list)
@@ -310,18 +321,23 @@ def aggregate():
         out.append(f"#!remark={existing_meta['remark']}")
     # 写入合并后的 arguments：按模块顺序，每个模块先写其域名开关（display:keyword，
     # 默认值=域名关键字=启用），紧跟该模块自带的 arguments，便于辨识归属。
-    all_args: dict[str, str] = {}
-    for name in ordered_modules:
-        alias = name_to_alias.get(name)
-        display = name_to_display.get(name)
-        if alias and display not in all_args:
-            all_args[display] = f"{display}:{alias}"
-        for key, entry in module_args.get(name, []):
-            all_args.setdefault(key, entry)
-    if all_args:
-        out.append(f"#!arguments={','.join(all_args.values())}")
-    desc_parts = [_ARGS_DESC_GENERAL, *merged_args_desc.values()]
-    out.append("#!arguments-desc=" + "\\n".join(desc_parts))
+    if preserve_arguments:
+        for key in ("arguments", "arguments-desc"):
+            if key in existing_meta:
+                out.append(f"#!{key}={existing_meta[key]}")
+    else:
+        all_args: dict[str, str] = {}
+        for name in ordered_modules:
+            alias = name_to_alias.get(name)
+            display = name_to_display.get(name)
+            if alias and display not in all_args:
+                all_args[display] = f"{display}:{alias}"
+            for key, entry in module_args.get(name, []):
+                all_args.setdefault(key, entry)
+        if all_args:
+            out.append(f"#!arguments={','.join(all_args.values())}")
+        desc_parts = [_ARGS_DESC_GENERAL, *merged_args_desc.values()]
+        out.append("#!arguments-desc=" + "\\n".join(desc_parts))
     out.append(f"#!date={now}")
     out.append("")
 
@@ -370,10 +386,12 @@ def aggregate():
 
     content = "\n".join(out).rstrip("\n") + "\n"
 
-    if _write_stamped_if_changed(OUTPUT_FILE, content):
-        print(f"\n✓ {OUTPUT_FILE.relative_to(REPO_ROOT)} 已更新")
+    output_label = output_file.relative_to(REPO_ROOT) if output_file.is_relative_to(REPO_ROOT) else output_file
+    if _write_stamped_if_changed(output_file, content):
+        print(f"\n✓ {output_label} 已更新")
     else:
-        print(f"\n✓ {OUTPUT_FILE.relative_to(REPO_ROOT)} 无变化")
+        print(f"\n✓ {output_label} 无变化")
+    return content
 
 
 if __name__ == "__main__":
