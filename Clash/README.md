@@ -14,6 +14,8 @@
 
 远程导入使用 Raw 地址：[通用 JS](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Script.js)、[Stash 覆写](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride)。`My*` 版本按个人节点命名和使用习惯定制，其中 JS 定制版依赖实际内联节点，使用前需检查筛选规则。
 
+Mihomo 配置的 TUN 使用官方推荐的 [MIPS 用户态 IP 栈](https://wiki.metacubex.one/config/inbound/tun/#stack)，需内核 1.19.31+；建议使用 [1.19.33](https://github.com/MetaCubeX/mihomo/releases/tag/v1.19.33) 或更新版本，以包含近期 DoH、fake-IP 热重载和 TLS 修复。MIPS 的 TCP 拥塞控制沿用默认 CUBIC；`dns-mode` 留空，保留各平台原有的系统 DNS 配置行为。两个选项的可用值及版本要求见 [General.yaml](General.yaml) 的 TUN 注释；Stash 覆写会过滤整个 TUN 设置。
+
 ## Stash 的转换内容
 
 Stash 覆写保留基础配置的节点，并替换 hosts、DNS、策略组、规则集与规则。示例 `proxy-providers` 整块注释停用，地区组通过 `include-all: true` 与 `filter` 从基础配置选节点。

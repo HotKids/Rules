@@ -252,11 +252,21 @@ tun:
   # 启用 TUN 网卡，接管系统全量流量
   enable: true
 
-  # 网络栈模式
-  # system - 性能最高，兼容性一般
-  # gvisor - 兼容性好，性能较低
-  # mixed  - TCP 走系统栈，UDP 走 gvisor（推荐）
-  stack: mixed
+  # 网络栈模式（mips 需 Mihomo 1.19.31+）
+  # mips   - Mihomo 自研用户态 IP 栈（官方默认、推荐）
+  # system - 使用系统协议栈
+  # gvisor - 使用 gVisor 用户态协议栈
+  # mixed  - TCP 走系统栈，UDP 走 gvisor
+  stack: mips
+
+  # MIPS TCP 拥塞控制：cubic（默认）/ reno / bbr / bbr3，需 Mihomo 1.19.32+
+  # congestion-controller: cubic
+
+  # 系统 DNS 配置方式（Mihomo 1.19.33+）：disabled / native / hijack
+  # 留空保留平台默认：开启 auto-route 时 Windows/Linux 为 hijack，macOS 为 disabled
+  # native 将 TUN 地址设为系统 DNS；hijack 再拦截其他网卡的 53 端口流量
+  # hijack 在 Windows 需 strict-route，在 Linux 需 auto-redirect
+  # dns-mode: hijack
 
   # 劫持所有 DNS 请求，防止应用绕过 Clash DNS
   dns-hijack:
