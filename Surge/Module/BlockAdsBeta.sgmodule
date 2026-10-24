@@ -4,7 +4,7 @@
 #!remark=广告平台拦截器是去广告基础，优先级需置于本模块之前: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 #!arguments=12306:12306,123云盘:123pan,B612咔叽:kaji,ECOVACS HOME:eco,Foodie:kaji,IT之家:ithome,IT之家-removePinnedArticles:false,IT之家-removeAllBanners:false,Keep:gotokeep,Line:line,QQ音乐:tencentmusic,Reddit:reddit,阿里云盘:alipan,爱奇艺:iqiyi,百度地图:baidu,百度网页:baidu,百度网盘:baidu,哔哩哔哩漫画:bilibili,波点音乐:kuwo,菜鸟:cainiao,彩云天气:caiyun,财新:caixin,大麦:taobao,得物:dewu,滴滴出行:didi,叮咚买菜:ddxq,飞客:flyert,飞猪旅行:taobao,高德地图:amap,航旅纵横:umetrip,金山文档:kdocs,京东:jd,京东外卖:jd,酷安:coolapk,快递100:kuaidi100,芒果TV:tv,美图秀秀:meitu,墨迹天气:moji,拼多多:pinduoduo,起点读书:qidian,瑞幸咖啡:lkcoffee,什么值得买:smzdm,顺丰速运:sf-express,淘票票:taobao,网易有道词典:youdao,网易邮箱大师:163,微博:weibo,微信公众号:qq,喜马拉雅:ximalaya,下厨房:xiachufang,闲鱼:goofish,香港抖音:me,小黑盒:xiaoheihe,小红书:xiaohongshu,小象超市:meituan,小宇宙:xiaoyuzhoufm,萤石云视频:ys7,优酷视频:youku,知乎:zhihu,转转:zhuanzhuan
 #!arguments-desc=各参数值为对应 App 的域名关键字，默认启用；如需禁用某 App 去广告，将其改为任意非常见域名值即可（e.g. NO）。
-#!date=2026-10-24 23:16:34
+#!date=2026-10-24 23:25:38
 
 [MITM]
 hostname = %APPEND% *.{{{爱奇艺}}}.com, *.{{{微博}}}.cn, *.{{{微博}}}.com, -i.vip.{{{爱奇艺}}}.com, 114.115.217.129, 119.29.29.*, a.{{{Line}}}.me, acs.m.{{{闲鱼}}}.com, acs.m.{{{大麦}}}.com, ad.{{{12306}}}.cn, ad.{{{Line}}}-scdn.net, afd.{{{百度地图}}}.com, ai.{{{高德地图}}}.com, api-app.dc-cn.cn.{{{ECOVACS HOME}}}user.net, api.{{{阿里云盘}}}.com, api.{{{彩云天气}}}app.com, api.{{{酷安}}}.com, api.{{{Keep}}}.com, api.m.{{{京东}}}.com, api.{{{拼多多}}}.com, api.posters.{{{美图秀秀}}}.com, api.udache.com, api.{{{下厨房}}}.com, api.{{{小黑盒}}}.cn, api.{{{小宇宙}}}.com, api.{{{萤石云视频}}}.com, api.{{{知乎}}}.com, api.zuihuimai.com, api5-normal-m.amemv.com, app-api.{{{什么值得买}}}.com, app.{{{得物}}}.com, app.{{{转转}}}.com, appconf.mail.{{{网易邮箱大师}}}.com, article-api.{{{什么值得买}}}.com, as.xiaojukeji.com, awe{{{香港抖音}}}.snssdk.com, bd-api.{{{波点音乐}}}.cn, biz.cyapi.cn, bizapi.{{{阿里云盘}}}.com, businessapi.ksedt.com, buy.{{{Line}}}.me, capi.{{{瑞幸咖啡}}}.com, ccsp-egmas.{{{顺丰速运}}}.com, cdn-w.{{{彩云天气}}}app.com, center.{{{高德地图}}}.com, ci.{{{小红书}}}.com, cix.{{{Line}}}-apps.com, cn-acs.m.{{{菜鸟}}}.com, color.{{{京东外卖}}}dj.com, common.{{{滴滴出行}}}taxi.com.cn, conf.{{{滴滴出行}}}taxi.com.cn, crs-event.{{{Line}}}.me, d.{{{Line}}}-scdn.net, daijia.kuaidadi.com, damang.api.mg{{{芒果TV}}}.com, dashi.{{{网易邮箱大师}}}.com, dat.ruanmei.com, dc?.bz.mg{{{芒果TV}}}.com, dict.{{{网易有道词典}}}.com, e*.{{{财新}}}.com, e2e-mtop.{{{菜鸟}}}.com, ec-bot-obs.{{{Line}}}-scdn.net, ecom.map.{{{百度地图}}}.com, edith.{{{小红书}}}.com, f-api.{{{金山文档}}}.cn, fcard.api.{{{墨迹天气}}}.com, freight.xiaojukeji.com, g*.{{{财新}}}.com, g-acs.m.{{{闲鱼}}}.com, gl-cn-api.{{{ECOVACS HOME}}}vacs.cn, gql-fed.{{{Reddit}}}.com, gql.{{{Reddit}}}.com, gslbali.{{{喜马拉雅}}}.com, gw.{{{Line}}}.naver.jp, h5.{{{什么值得买}}}.com, haojia-api.{{{什么值得买}}}.com, haojia-cdn.{{{什么值得买}}}.com, haojia.m.{{{什么值得买}}}.com, hb-boom.api.mg{{{芒果TV}}}.com, home.{{{航旅纵横}}}.com, homepage-api.{{{什么值得买}}}.com, htwkop-st.xiaojukeji.com, htwkop.xiaojukeji.com, i.{{{萤石云视频}}}.com, info.{{{高德地图}}}.com, lan.{{{Line}}}.me, legy.{{{Line}}}-apps.com, longquan-mtop.{{{菜鸟}}}.com, m*.{{{财新}}}.com, m-cloud.{{{知乎}}}.com, m.{{{百度网页}}}.com, m.{{{拼多多}}}.net, m.{{{喜马拉雅}}}.com, m5-zb.{{{高德地图}}}.com, m5.{{{高德地图}}}.com, magev6.if.{{{起点读书}}}.com, maicai.api.{{{叮咚买菜}}}.mobi, mall.{{{小象超市}}}.com, manga.{{{哔哩哔哩漫画}}}.com, me.bz.mg{{{芒果TV}}}.com, member.{{{阿里云盘}}}.com, mme.api.{{{墨迹天气}}}.com, mobile-thor.api.mg{{{芒果TV}}}.com, mobile.{{{12306}}}.cn, mobile.api.hunan{{{芒果TV}}}.com, mobile.api.mg{{{芒果TV}}}.com, mobile.{{{喜马拉雅}}}.com, mobilehera.{{{喜马拉雅}}}.com, mobileso.bz.mg{{{芒果TV}}}.com, mobwsa.{{{喜马拉雅}}}.com, mp.weixin.{{{微信公众号}}}.com, mwsa.{{{喜马拉雅}}}.com, napi.{{{IT之家}}}.com, nbcps-mtop.{{{菜鸟}}}.com, nelo2-col.{{{Line}}}corp.com, netflow-mtop.{{{菜鸟}}}.com, newclient.map.{{{百度地图}}}.com, obs.{{{Line}}}-scdn.net, p.{{{快递100}}}.com, page-info.{{{知乎}}}.com, pan.{{{百度网盘}}}.com, poi.map.xiaojukeji.com, portal-portm.{{{小象超市}}}.com, post.m.{{{什么值得买}}}.com, psnlz.api.{{{墨迹天气}}}.com, ptf.{{{飞客}}}rip.com, push.m.{{{优酷视频}}}.com, rec.{{{小红书}}}.com, res.xiaojukeji.com, s-api.{{{什么值得买}}}.com, scdn.{{{Line}}}-apps.com, sch.{{{Line}}}.me, search.{{{喜马拉雅}}}.com, searchwsa.{{{喜马拉雅}}}.com, sns.{{{高德地图}}}.com, sns.api.{{{墨迹天气}}}.com, so.{{{小红书}}}.com, starplucker.cyapi.cn, static.{{{Line}}}-scdn.net, ucmp-static.{{{顺丰速运}}}.com, ucmp.{{{顺丰速运}}}.com, un-acs.{{{优酷视频}}}.com, user-api.{{{什么值得买}}}.com, user.api.{{{叮咚买菜}}}.mobi, uts-front.{{{Line}}}-apps.com, vdo.api.{{{墨迹天气}}}.com, w.{{{Line}}}.me, {{{微博}}}.com, www.{{{123云盘}}}.com, www.{{{百度网页}}}.com, www.{{{飞客}}}.com.cn, www.{{{金山文档}}}.cn, www.{{{小红书}}}.com, www.{{{知乎}}}.com, yongche.{{{百度地图}}}.com, ywab.reader.qq.com, zhida.{{{知乎}}}.com
@@ -1193,107 +1193,107 @@ http-response-jq (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/transfer\/getmyprofi
 # > 12306去广告 · 2026-10-02
 # desc = 过滤12306应用内广告及开屏广告
 # hostname = ad.{{{12306}}}.cn, mobile.{{{12306}}}.cn
-12306-移除12306应用内广告 = type=http-request, pattern=(?i)^https:\/\/mobile\.{{{12306}}}\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
+移除12306应用内广告 = type=http-request, pattern=(?i)^https:\/\/mobile\.{{{12306}}}\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
 
 # > IT之家去广告 · 2026-10-02
 # desc = 过滤IT之家信息流广告和文末广告，自定义移除置顶和轮播图，自定义移除项需在插件配置。
 # hostname = napi.{{{IT之家}}}.com, api.zuihuimai.com, dat.ruanmei.com
-IT之家-IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家}}}\.com\/api\/(news\/indexv2\/iphone\/\d+|topmenu\/getfeeds\?), script-path=https://kelee.one/Resource/JavaScript/IThome/IThome_remove_ads.js, requires-body=true, argument=removeAllBanners="{{{IT之家-removeAllBanners}}}"&removePinnedArticles="{{{IT之家-removePinnedArticles}}}"
+IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家}}}\.com\/api\/(news\/indexv2\/iphone\/\d+|topmenu\/getfeeds\?), script-path=https://kelee.one/Resource/JavaScript/IThome/IThome_remove_ads.js, requires-body=true, argument=removeAllBanners="{{{IT之家-removeAllBanners}}}"&removePinnedArticles="{{{IT之家-removePinnedArticles}}}"
 
 # > 阿里云盘去广告 · 2026-10-02
 # desc = 移除首页广告横幅、弹窗和顶部奖励。
 # hostname = api.{{{阿里云盘}}}.com, member.{{{阿里云盘}}}.com, bizapi.{{{阿里云盘}}}.com
-阿里云盘-移除阿里云盘广告 = type=http-response, pattern=(?i)^https:\/\/(biz)?api\.{{{阿里云盘}}}\.com\/apps\/v\d\/users?\/home\/(news|widgets), script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
-阿里云盘-移除阿里云盘广告__2 = type=http-response, pattern=(?i)^https:\/\/member\.{{{阿里云盘}}}\.com\/v1\/users\/onboard_list, script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
+移除阿里云盘广告 = type=http-response, pattern=(?i)^https:\/\/(biz)?api\.{{{阿里云盘}}}\.com\/apps\/v\d\/users?\/home\/(news|widgets), script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
+移除阿里云盘广告 = type=http-response, pattern=(?i)^https:\/\/member\.{{{阿里云盘}}}\.com\/v1\/users\/onboard_list, script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
 
 # > 百度网页去广告 · 2026-10-02
 # desc = 移除百度搜索移动端网页的首页广告信息流
 # hostname = m.{{{百度网页}}}.com, www.{{{百度网页}}}.com
-百度网页-移除百度搜索首页信息流广告 = type=http-response, pattern="(?i)^https?:\/\/(www|m)\.{{{百度网页}}}\.com\/?($|\?from=\w{8,9})", script-path=https://kelee.one/Resource/JavaScript/BaiduSearch/BaiduSearchHomePage_remove_ads.js, requires-body=true
+移除百度搜索首页信息流广告 = type=http-response, pattern="(?i)^https?:\/\/(www|m)\.{{{百度网页}}}\.com\/?($|\?from=\w{8,9})", script-path=https://kelee.one/Resource/JavaScript/BaiduSearch/BaiduSearchHomePage_remove_ads.js, requires-body=true
 
 # > 哔哩哔哩漫画去广告 · 2026-10-02
 # desc = 移除开屏广告、应用内悬浮窗、各类横幅广告、你可能喜欢、小说推荐、首页弹窗，精简首页标签、底栏活动按钮和我的页面。
 # hostname = manga.{{{哔哩哔哩漫画}}}.com
-哔哩哔哩漫画-移除顶部标签 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
-哔哩哔哩漫画-精简我的页面 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/user\.v\d\.User\/UCenterConf, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
+移除顶部标签 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
+精简我的页面 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/user\.v\d\.User\/UCenterConf, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
 
 # > 财新去广告 · 2026-10-02
 # desc = 过滤财新广告
 # hostname = e*.{{{财新}}}.com, g*.{{{财新}}}.com, m*.{{{财新}}}.com
-财新-移除财新数据通广告 = type=http-response, pattern=(?i)^https:\/\/entities\.{{{财新}}}\.com\/api\/dataplus\/columns, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
-财新-移除文末广告 = type=http-response, pattern=(?i)^https:\/\/gateway\.{{{财新}}}\.com\/api\/app-api\/(caixinapp\/appinfo|search\/getkeyword), script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
-财新-移除财新FM广告 = type=http-response, pattern=(?i)^https:\/\/gateway\.{{{财新}}}\.com\/api\/app-content\/fm\/index\/list\?, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
-财新-移除开屏广告 = type=http-response, pattern=(?i)^https:\/\/gg\.{{{财新}}}\.com\/s\?z=caixin&op=\d, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
-财新-移除正文广告 = type=http-response, pattern=(?i)^https:\/\/mappsv5\.{{{财新}}}\.com\/articlev5\/\d+\/\d+\.json$, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
-财新-移除正文广告__2 = type=http-response, pattern=(?i)^https:\/\/mapps?v5\.{{{财新}}}\.com\/(channelv5\/list|\/?index_page_v5\/)\w+, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除财新数据通广告 = type=http-response, pattern=(?i)^https:\/\/entities\.{{{财新}}}\.com\/api\/dataplus\/columns, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除文末广告 = type=http-response, pattern=(?i)^https:\/\/gateway\.{{{财新}}}\.com\/api\/app-api\/(caixinapp\/appinfo|search\/getkeyword), script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除财新FM广告 = type=http-response, pattern=(?i)^https:\/\/gateway\.{{{财新}}}\.com\/api\/app-content\/fm\/index\/list\?, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除开屏广告 = type=http-response, pattern=(?i)^https:\/\/gg\.{{{财新}}}\.com\/s\?z=caixin&op=\d, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除正文广告 = type=http-response, pattern=(?i)^https:\/\/mappsv5\.{{{财新}}}\.com\/articlev5\/\d+\/\d+\.json$, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
+移除正文广告 = type=http-response, pattern=(?i)^https:\/\/mapps?v5\.{{{财新}}}\.com\/(channelv5\/list|\/?index_page_v5\/)\w+, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
 
 # > 彩云天气去广告 · 2026-10-02
 # desc = 移除首页推广、弹窗、悬浮窗、底栏天气助手和工具箱入口，移除我的页面广告横幅。
 # hostname = biz.cyapi.cn, starplucker.cyapi.cn, api.{{{彩云天气}}}app.com, cdn-w.{{{彩云天气}}}app.com
-彩云天气-彩云天气去广告 = type=http-response, pattern=(?i)^https:\/\/(wrapper\.cyapi\.cn|api\.{{{彩云天气}}}app\.com|cdn-w\.{{{彩云天气}}}app\.com)\/v1\/activity\?, script-path=https://kelee.one/Resource/JavaScript/ColorfulClouds/ColorfulClouds_remove_ads.js, requires-body=true
+彩云天气去广告 = type=http-response, pattern=(?i)^https:\/\/(wrapper\.cyapi\.cn|api\.{{{彩云天气}}}app\.com|cdn-w\.{{{彩云天气}}}app\.com)\/v1\/activity\?, script-path=https://kelee.one/Resource/JavaScript/ColorfulClouds/ColorfulClouds_remove_ads.js, requires-body=true
 
 # > 飞客去广告 · 2026-10-02
 # desc = 移除开屏广告、首页广告、板块广告、帖内广告和我的页面广告。
 # hostname = www.{{{飞客}}}.com.cn, ptf.{{{飞客}}}rip.com
-飞客-移除板块广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?version=5, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
-飞客-移除签到弹窗广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=plugin&id=k_misign:sign, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
+移除板块广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?version=5, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
+移除签到弹窗广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=plugin&id=k_misign:sign, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
 
 # > 航旅纵横去广告 · 2026-10-02
 # desc = 过滤航旅纵横广告
 # hostname = 114.115.217.129, home.{{{航旅纵横}}}.com
-航旅纵横-移除首页广告 = type=http-response, pattern=(?i)^http?:\/\/(114\.115\.217\.129)|(home\.{{{航旅纵横}}}\.com)\/gateway\/api\/umetrip\/native$, script-path=https://kelee.one/Resource/JavaScript/Umetrip/Umetrip_remove_ads.js
+移除首页广告 = type=http-response, pattern=(?i)^http?:\/\/(114\.115\.217\.129)|(home\.{{{航旅纵横}}}\.com)\/gateway\/api\/umetrip\/native$, script-path=https://kelee.one/Resource/JavaScript/Umetrip/Umetrip_remove_ads.js
 
 # > 京东去广告 · 2026-10-02
 # desc = 移除京东开屏广告，精简我的页面产品推广。
 # hostname = api.m.{{{京东}}}.com
-京东-移除京东广告 = type=http-response, pattern=(?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome), script-path=https://kelee.one/Resource/JavaScript/JD/JD_remove_ads.js, requires-body=true
+移除京东广告 = type=http-response, pattern=(?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome), script-path=https://kelee.one/Resource/JavaScript/JD/JD_remove_ads.js, requires-body=true
 
 # > 拼多多去广告 · 2026-10-02
 # desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
 # hostname = api.{{{拼多多}}}.com, m.{{{拼多多}}}.net
-拼多多-移除扫码取件页面商品推荐及弹窗 = type=http-response, pattern=(?i)^https:\/\/m\.{{{拼多多}}}\.net\/mdkd\/package\?from_app_scan, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
+移除扫码取件页面商品推荐及弹窗 = type=http-response, pattern=(?i)^https:\/\/m\.{{{拼多多}}}\.net\/mdkd\/package\?from_app_scan, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
 
 # > 微博去广告 · 2026-10-02
 # desc = 过滤微博广告及去除各部分推广模块
 # hostname = *.{{{微博}}}.cn, *.{{{微博}}}.com, {{{微博}}}.com
-微博-移除首页推广 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:checkin\/show|client\/publisher_list|push\/active), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除首页顶部标签 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/groups\/allgroups\/v2\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:cardlist|page), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除评论区广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/comments\/build_comments\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除个人微博详情页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:container\/asyn|flowlist|flowpage), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除关注、取消关注弹窗 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/friendships\/(?:create|destroy), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除个人主页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/profile\/(?:container_timeline|dealatt|me|statuses\/tab|userinfo), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除超话搜索页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/shproxy\/chaohua\/discovery\/searchactive\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除评论区广告__2 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:comments_expand_child|container_detail_comment), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除信息流广告__2 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:container_detail\?|container_timeline(?:_hot|_topic|_topicpage|_unread)?|repost_timeline|unread_hot_timeline), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除微博详情页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:extend|show)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除视频流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/video\/(?:full_screen_stream|tiny_stream_mid_detail|tiny_stream_video_list)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除超话顶部标签 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/huati\/discovery_home_bottom_channels\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除消息页列表广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/direct_messages\/user_list\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除消息页提醒 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/messageflow\/notice\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除热门微博信息流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/search\/(?:container_timeline|finder)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除发现页搜索结果广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/searchall\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除开屏广告 preload = type=http-response, pattern=(?i)^https:\/\/bootpreload\.uve\.{{{微博}}}\.com\/v[12]\/ad\/preload, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除开屏广告 sdkad = type=http-response, pattern=(?i)^https:\/\/sdkapp\.uve\.{{{微博}}}\.com\/interface\/sdk\/sdkad\.php, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
-微博-移除开屏广告 wbapplua = type=http-response, pattern=(?i)^https:\/\/wbapp\.uve\.{{{微博}}}\.com\/(?:preload\/get_ad|wbapplua\/wbpullad\.lua), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除首页推广 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:checkin\/show|client\/publisher_list|push\/active), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除首页顶部标签 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/groups\/allgroups\/v2\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:cardlist|page), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除评论区广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/comments\/build_comments\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除个人微博详情页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:container\/asyn|flowlist|flowpage), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除关注、取消关注弹窗 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/friendships\/(?:create|destroy), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除个人主页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/profile\/(?:container_timeline|dealatt|me|statuses\/tab|userinfo), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除超话搜索页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/shproxy\/chaohua\/discovery\/searchactive\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除评论区广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:comments_expand_child|container_detail_comment), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:container_detail\?|container_timeline(?:_hot|_topic|_topicpage|_unread)?|repost_timeline|unread_hot_timeline), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除微博详情页广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/statuses\/(?:extend|show)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除视频流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/video\/(?:full_screen_stream|tiny_stream_mid_detail|tiny_stream_video_list)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除超话顶部标签 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/huati\/discovery_home_bottom_channels\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除消息页列表广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/direct_messages\/user_list\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除消息页提醒 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/messageflow\/notice\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除热门微博信息流广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/search\/(?:container_timeline|finder)\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除发现页搜索结果广告 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/searchall\?, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除开屏广告 preload = type=http-response, pattern=(?i)^https:\/\/bootpreload\.uve\.{{{微博}}}\.com\/v[12]\/ad\/preload, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除开屏广告 sdkad = type=http-response, pattern=(?i)^https:\/\/sdkapp\.uve\.{{{微博}}}\.com\/interface\/sdk\/sdkad\.php, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
+移除开屏广告 wbapplua = type=http-response, pattern=(?i)^https:\/\/wbapp\.uve\.{{{微博}}}\.com\/(?:preload\/get_ad|wbapplua\/wbpullad\.lua), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
 
 # > 小红书去广告 · 2026-10-02
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
 # hostname = ci.{{{小红书}}}.com, edith.{{{小红书}}}.com, rec.{{{小红书}}}.com, so.{{{小红书}}}.com, www.{{{小红书}}}.com
-小红书-移除图片和实况照片水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/note\/(?:imagefeed|live_photo\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除整体配置 ui = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/system\/service\/ui\/config\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除开屏广告 config = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/system_service\/config\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除开屏广告 splash_config = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v2\/system_service\/splash_config, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除详情页小部件、关注页感兴趣的人 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v2\/(?:note\/widgets|user\/followings\/followfeed), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v4\/followfeed\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除详情页感兴趣的人 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v5\/recommend\/user\/follow_recommend\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除评论区实况照片水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/(?:v1\/interaction\/comment\/video\/download|v5\/note\/comment\/list), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除图片和视频水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/(?:v2\/note\/feed|v3\/note\/videofeed), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除信息流广告__2 = type=http-response, pattern=(?i)^https:\/\/(?:edith|rec)\.{{{小红书}}}\.com\/api\/sns\/v6\/homefeed\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除搜索页广告 = type=http-response, pattern=(?i)^https:\/\/(?:edith|so)\.{{{小红书}}}\.com\/api\/sns\/v10\/search\/notes\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
-小红书-移除视频水印 = type=http-response, pattern=(?i)^https:\/\/(?:edith|rec|www)\.{{{小红书}}}\.com\/api\/sns\/(?:v4\/note\/videofeed|v10\/note\/video\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除图片和实况照片水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/note\/(?:imagefeed|live_photo\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除整体配置 ui = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/system\/service\/ui\/config\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除开屏广告 config = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/system_service\/config\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除开屏广告 splash_config = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v2\/system_service\/splash_config, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除详情页小部件、关注页感兴趣的人 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v2\/(?:note\/widgets|user\/followings\/followfeed), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v4\/followfeed\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除详情页感兴趣的人 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v5\/recommend\/user\/follow_recommend\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除评论区实况照片水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/(?:v1\/interaction\/comment\/video\/download|v5\/note\/comment\/list), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除图片和视频水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/(?:v2\/note\/feed|v3\/note\/videofeed), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除信息流广告 = type=http-response, pattern=(?i)^https:\/\/(?:edith|rec)\.{{{小红书}}}\.com\/api\/sns\/v6\/homefeed\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除搜索页广告 = type=http-response, pattern=(?i)^https:\/\/(?:edith|so)\.{{{小红书}}}\.com\/api\/sns\/v10\/search\/notes\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
+移除视频水印 = type=http-response, pattern=(?i)^https:\/\/(?:edith|rec|www)\.{{{小红书}}}\.com\/api\/sns\/(?:v4\/note\/videofeed|v10\/note\/video\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
 
 # > 小象超市去广告 · 2026-10-02
 # desc = 移除开屏广告、应用内弹窗、猜你想买、横幅推广和悬浮窗。
 # hostname = portal-portm.{{{小象超市}}}.com, mall.{{{小象超市}}}.com, businessapi.ksedt.com
-小象超市-移除下发广告 = type=http-response, pattern=(?i)^https:\/\/portal-portm\.{{{小象超市}}}\.com\/horn_ios\/mergeRequest, script-path=https://kelee.one/Resource/JavaScript/iMaiCai/iMaiCai_remove_ads.js, requires-body=true
+移除下发广告 = type=http-response, pattern=(?i)^https:\/\/portal-portm\.{{{小象超市}}}\.com\/horn_ios\/mergeRequest, script-path=https://kelee.one/Resource/JavaScript/iMaiCai/iMaiCai_remove_ads.js, requires-body=true

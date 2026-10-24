@@ -169,7 +169,7 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 [sync-modules-beta.py](sync-modules-beta.py) 读取同一清单中的 `;Loon 名称`，仅在 Action 运行时按统一模板展开来源链接。带注释停用的条目不参与转换；无对应 Loon 名称的条目沿用 Surge 来源。仓库清单和生成模块不保存展开后的 Loon 插件链接。
 
-Beta 使用固定提交及 SHA-256 校验的官方 [Script-Hub Beta](https://github.com/Script-Hub-Org/Script-Hub/blob/761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js)，参考 QingRex 的预转换方式，将 Loon 3.5.1 配置转为 Surge 后复用正式版聚合器。远程 `jq_file` 在运行时读取并内联；脚本内容和脚本 URL 沿用上游。输出 `Surge/Module/BlockAdsBeta.sgmodule`，头部参数、默认值和说明原样沿用正式版，仅模块标题追加 ` Beta`，日期按内容变化更新。App 分组、排序、域名参数开关和 MITM 合并格式与正式版相同；脚本标签添加所属 App 并去重，避免相互覆盖。
+Beta 使用固定提交及 SHA-256 校验的官方 [Script-Hub Beta](https://github.com/Script-Hub-Org/Script-Hub/blob/761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js)，参考 QingRex 的预转换方式，将 Loon 3.5.1 配置转为 Surge 后复用正式版聚合器。远程 `jq_file` 在运行时读取并内联；脚本内容和脚本 URL 沿用上游。输出 `Surge/Module/BlockAdsBeta.sgmodule`，头部参数、默认值和说明原样沿用正式版，仅模块标题追加 ` Beta`，日期按内容变化更新。App 分组、排序、域名参数开关和 MITM 合并格式与正式版相同；脚本标签与正式版一样保留上游原名。
 
 任何来源读取、解析器校验或等价转换失败都会保留已发布产物。QUIC 逻辑规则会完整保留，官方转换器无法添加的可选 `pre-matching` 标志仅记录提示。`Sync Modules` 在同一次校验及提交中更新正式版和 Beta。
 
