@@ -106,6 +106,22 @@ class PrivateGistTests(unittest.TestCase):
             self.assertFalse(publisher.publish(self.config, migrate_inline=True))
         self.assertEqual(request.call_count, 1)
 
+    def test_explicit_compact_formatting_is_published_once_and_normal_sync_preserves_it(self):
+        gist = self.gist()
+        gist['files']['mihomo.yaml']['content'] = publisher._apply_manual_proxies(
+            self.config.read_text(), gist['files']['mihomo.yaml']['content'], migrate_inline=True)
+        with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
+            self.response(gist), self.response(self.gist()),
+        ]) as request:
+            self.assertTrue(publisher.publish(self.config, compact_inline=True))
+        content = json.loads(request.call_args_list[1].args[0].data)['files']['mihomo.yaml']['content']
+        self.assertIn('- {name: Manual test node,', content)
+        self.assertEqual(yaml.safe_load(content), yaml.safe_load(gist['files']['mihomo.yaml']['content']))
+        gist['files']['mihomo.yaml']['content'] = content
+        with patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request:
+            self.assertFalse(publisher.publish(self.config))
+        self.assertEqual(request.call_count, 1)
+
     def test_invalid_manual_proxies_abort_without_logging_node_data(self):
         gist = self.gist(files={'mihomo.yaml': {'content': 'proxies: [private-node-value\n', 'truncated': False}})
         output = io.StringIO()

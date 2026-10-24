@@ -15,7 +15,7 @@ class PublishError(Exception):
     """A message safe to display in public workflow logs."""
 
 
-def _apply_manual_proxies(rendered, existing, migrate_inline=False):
+def _apply_manual_proxies(rendered, existing, migrate_inline=False, compact_inline=False):
     try:
         path = Path(__file__).with_name('render-mihomo-overlay.py')
         spec = importlib.util.spec_from_file_location('render_mihomo_overlay', path)
@@ -23,6 +23,8 @@ def _apply_manual_proxies(rendered, existing, migrate_inline=False):
         spec.loader.exec_module(renderer)
         if migrate_inline:
             existing = renderer.migrate_inline_provider(existing)
+        if compact_inline:
+            existing = renderer.compact_inline_provider(existing)
         return renderer.apply_manual_proxies(rendered, existing)
     except Exception:
         # Parser exceptions can contain private node values and source lines.
@@ -50,7 +52,7 @@ def _request(method, url, token, payload=None):
     return result
 
 
-def publish(path, migrate_inline=False):
+def publish(path, migrate_inline=False, compact_inline=False):
     gist_id = os.environ.get('MIHOMO_GIST_ID', '').strip()
     token = os.environ.get('GIST_TOKEN', '').strip()
     missing = [name for name, value in (('MIHOMO_GIST_ID', gist_id), ('GIST_TOKEN', token)) if not value]
@@ -73,7 +75,8 @@ def publish(path, migrate_inline=False):
     target = files.get('mihomo.yaml') if isinstance(files, dict) else None
     if not isinstance(target, dict) or target.get('truncated') or not isinstance(target.get('content'), str):
         raise PublishError('Cannot verify the existing mihomo.yaml; no changes published.')
-    content = _apply_manual_proxies(content, target['content'], migrate_inline=migrate_inline)
+    content = _apply_manual_proxies(content, target['content'], migrate_inline=migrate_inline,
+                                   compact_inline=compact_inline)
     if target['content'] == content:
         return False
     # PATCH leaves all other files, the description and visibility unchanged.
@@ -85,10 +88,12 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--migrate-inline', action='store_true',
                         help='One-time move of manual nodes into Manual inline Provider')
+    parser.add_argument('--compact-inline', action='store_true',
+                        help='Explicitly format each Manual payload node as one flow-style line')
     parser.add_argument('config', help='Path to the generated configuration')
     args = parser.parse_args(argv)
     try:
-        changed = publish(args.config, migrate_inline=args.migrate_inline)
+        changed = publish(args.config, migrate_inline=args.migrate_inline, compact_inline=args.compact_inline)
     except PublishError as error:
         print(str(error), file=sys.stderr)
         return 1

@@ -191,6 +191,24 @@ process.stdout.write(JSON.stringify(context.result));'''
         with self.assertRaises(ValueError):
             renderer.migrate_inline_provider(conflict)
 
+    def test_compact_inline_nodes_are_single_line_and_keep_all_values(self):
+        nodes = [{'name': 'HK test', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080,
+                  'password': 'test # : , [ ]', 'udp': True, 'headers': {'Example': 'line1\nline2'}},
+                 {'name': 'JP test', 'type': 'ss', 'port': 443, 'password': '0' * 1000}]
+        providers = {'Other': {'type': 'http', 'url': 'https://example.invalid/unchanged'},
+                     'Manual': {'type': 'inline', 'payload': nodes,
+                                'health-check': {'enable': True, 'interval': 600}}}
+        existing = yaml.safe_dump({'proxies': [], 'proxy-providers': providers},
+                                  allow_unicode=True, sort_keys=False, width=30)
+        formatted = renderer.compact_inline_provider(existing)
+        self.assertEqual(yaml.safe_load(formatted), yaml.safe_load(existing))
+        flow_nodes = [line for line in formatted.splitlines() if line.lstrip().startswith('- {name:')]
+        self.assertEqual(len(flow_nodes), 2)
+        self.assertIn('line1\\nline2', flow_nodes[0])
+        self.assertEqual(renderer.compact_inline_provider(formatted), formatted)
+        merged = renderer.apply_manual_proxies(self.rendered, formatted)
+        self.assertIn(renderer._manual_proxy_providers(formatted)[2], merged)
+
 
 if __name__ == '__main__':
     unittest.main()
