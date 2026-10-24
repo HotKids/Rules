@@ -33,11 +33,11 @@ jobs:
           --base Clash/Mihomo.yaml
           --overlay .github/scripts/sync-config/Enhanced/myscript.overlay.json
           --output "$RUNNER_TEMP/mihomo.yaml"
-      - name: Migrate nodes into the private inline Provider
+      - name: Migrate and format nodes in the private inline Provider
         env:
           MIHOMO_GIST_ID: ${{ secrets.MIHOMO_GIST_ID }}
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-        run: python3 .github/scripts/publish-mihomo-gist.py --migrate-inline "$RUNNER_TEMP/mihomo.yaml"
+        run: python3 .github/scripts/publish-mihomo-gist.py --migrate-inline --compact-inline "$RUNNER_TEMP/mihomo.yaml"
       - name: Remove temporary configuration
         if: always()
         run: rm -f "$RUNNER_TEMP/mihomo.yaml"

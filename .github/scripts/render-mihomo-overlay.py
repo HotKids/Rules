@@ -226,6 +226,38 @@ def migrate_inline_provider(existing: str) -> str:
     return result
 
 
+def compact_inline_provider(existing: str) -> str:
+    """Explicit formatting only: keep each Manual payload node on one flow-style line."""
+    original = _manual_proxy_providers(existing)
+    providers = original[3] if original is not None else None
+    provider = providers.get("Manual") if isinstance(providers, dict) else None
+    if not isinstance(provider, dict) or provider.get("type") != "inline":
+        raise ValueError("The Manual inline Provider is missing")
+    nodes = provider.get("payload")
+    if not isinstance(nodes, list) or any(not isinstance(node, dict) for node in nodes):
+        raise ValueError("The Manual payload must be a node list")
+
+    class FlowNode(dict):
+        pass
+
+    class CompactDumper(yaml.SafeDumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    CompactDumper.add_representer(FlowNode, lambda dumper, node:
+        dumper.represent_mapping('tag:yaml.org,2002:map', node, flow_style=True))
+    CompactDumper.add_representer(str, lambda dumper, value:
+        dumper.represent_scalar('tag:yaml.org,2002:str', value,
+                               style='"' if value.splitlines() != [value] else None))
+    updated = {**providers, "Manual": {**provider, "payload": [FlowNode(node) for node in nodes]}}
+    block = yaml.dump({"proxy-providers": updated}, Dumper=CompactDumper,
+                      allow_unicode=True, sort_keys=False, width=10**9)
+    if yaml.safe_load(block)["proxy-providers"] != providers:
+        raise ValueError("Compact node formatting changed provider data")
+    start, end = original[:2]
+    return existing[:start] + block + existing[end:]
+
+
 def apply_manual_proxies(rendered: str, existing: str) -> str:
     """Preserve both user-owned node source blocks and include inline nodes in pools."""
     _, _, manual, proxies = _manual_proxies(existing)
