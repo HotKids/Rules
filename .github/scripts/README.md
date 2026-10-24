@@ -139,7 +139,7 @@ URL,名称 #!remove=a.example,b.example
 | `Clash/RuleSet/` | Surge 转换或 Clash 段上游；保留各自 behavior |
 | `sing-box/source/` | 转为 sing-box 规则集 JSON |
 | `sing-box/rule-set/*.srs` | 官方 sing-box CLI 编译，版本固定 1.12.0 |
-| `Clash/RuleSet/*.mrs` | 官方 mihomo CLI 编译 domain/ipcidr，版本固定 v1.19.30；classical 不编译为 MRS |
+| `Clash/RuleSet/*.mrs` | 官方 mihomo CLI 编译 domain/ipcidr，版本固定 v1.19.33；classical 不编译为 MRS |
 
 二进制编译任一失败都会停止发布。对应源码删除后，工作流清理孤立二进制文件。升级编译版本时需同时核对 [sync-rules.yml](../workflows/sync-rules.yml) 与 [lint.yml](../workflows/lint.yml)。
 

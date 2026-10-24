@@ -373,7 +373,7 @@ test('Generated Mihomo scripts run with both subscription variants',()=>{
 async function ipPanel({client='stash', argument='', store=new Map(), outIP='198.51.100.10',
   outIPv6=null, localIP='203.0.113.2', riskFailure=false, missingNotification=false,
   notificationThrows=false, ipFailure=false, timers=false, ippureData, dnsFailure=false,
-  scriptType='tile', intercept, now, storageThrows=false, system, virtualTimers=false, recentRequests}={}) {
+  scriptType='tile', intercept, now, storageThrows=false, system, virtualTimers=false, recentRequests, apiIntercept}={}) {
   const requests=[], rawRequests=[], notifications=[], apiCalls=[], outputs=[], handles=[], logs=[], requestEvents=[], timerEvents=[];
   const nativeNow=Date.now.bind(Date);
   const clockStart=now===undefined?100000000:now;
@@ -446,6 +446,7 @@ async function ipPanel({client='stash', argument='', store=new Map(), outIP='198
           ctx.$input={purpose:'panel'};
           ctx.$httpAPI=(method,path,body,cb)=>{
             apiCalls.push(path);
+            if(apiIntercept && apiIntercept(method,path,cb,{schedule,now:testNow}))return;
             cb(path==='/v1/traffic'?{interface:{en0:{in:2048,out:1024}}}:
               {requests:recentRequests ?? [{URL:'https://ipinfo.io/test/json',policyName:'Test Proxy',remoteAddress:'192.0.2.1:443 (Proxy)'}]});
           };
@@ -2707,4 +2708,133 @@ test('Netflix Stash form overrides a static price default, while Surge ignores S
   assert.equal(r.requests.length,1);
   const s=await tile('netflix',response,{client:'surge',argument:'nfprice=false'+stashForm({nfprice:true})});
   assert.ok(s.requests.every(o=>!o.url.includes('netflix-prices')));
+});
+
+const failedSurgeGeoSources = (o,cb) => {
+  if(o.url.includes('bilibili')) {
+    cb(null,{status:200},JSON.stringify({data:{addr:'203.0.113.2'}}));return true;
+  }
+  if(o.url.includes('cdn-cgi/trace') && !o.url.includes('2606:4700')) {
+    cb(null,{status:200},'ip=198.51.100.10\n');return true;
+  }
+  if(/opendata|ip-api\.com\/json\/|ipinfo\.io|api\.ip\.sb\/geoip\//.test(o.url)) {
+    cb(null,{status:503},'');return true;
+  }
+};
+
+test('Surge local GeoIP remains unused when current country and organization sources succeed',async()=>{
+  const r=await ipPanel({client:'surge'});
+  assert.equal(r.apiCalls.some(p=>p.startsWith('/v1/geoip?')),false);
+  assert.match(r.output.content,/本地 IP：203\.0\.113\.2\n地区：🇨🇳 广东省深圳市\n运营商：中国电信/);
+  assert.match(r.output.content,/地区：🇨🇳 台北市, 台湾\n运营商：Example/);
+});
+
+test('Surge GeoIP fallback binds local, outbound and entrance results to their exact detected IPs',async()=>{
+  const byIP={
+    '203.0.113.2':{country:'CN',asn:64501,organization:'Local network'},
+    '198.51.100.10':{country:'US',asn:64502,organization:'Exit network'},
+    '192.0.2.1':{country:'DE',asn:64503,organization:'Entry network'}
+  };
+  const r=await ipPanel({client:'surge',intercept:failedSurgeGeoSources,apiIntercept(method,p,cb){
+    if(!p.startsWith('/v1/geoip?'))return;
+    assert.equal(method,'GET');
+    const ip=new URL('http://local'+p).searchParams.get('ip');
+    assert.ok(byIP[ip],ip);cb({address:ip,...byIP[ip]});return true;
+  }});
+  const lookups=r.apiCalls.filter(p=>p.startsWith('/v1/geoip?'));
+  assert.deepEqual(new Set(lookups.map(p=>new URL('http://local'+p).searchParams.get('ip'))),new Set(Object.keys(byIP)));
+  assert.equal(lookups.length,3);
+  assert.match(r.output.content,/本地 IP：203\.0\.113\.2\n地区：🇨🇳 CN\n运营商：Local network（ASN 组织）/);
+  assert.match(r.output.content,/入口 IP：192\.0\.2\.1\n地区：🇩🇪 DE\n运营商：Entry network（ASN 组织）/);
+  assert.match(r.output.content,/出口 IP：198\.51\.100\.10\n地区：🇺🇸 US\n运营商：Exit network（ASN 组织）/);
+  assert.match(r.output.content,/IP 风控值：12% 极度纯净 \(ProxyCheck\)/);
+  assert.match(r.output.content,/IP 类型：住宅 IP \| 原生 IP/);
+  assert.equal([...r.store.keys()].some(k=>/geoip|asn/i.test(k)),false);
+  for(const ip of ['198.51.100.10','192.0.2.1']) {
+    const requests=r.requests.filter(o=>o.url.includes(ip));
+    assert.ok(requests.some(o=>o.url.includes('ip-api.com')));
+    assert.ok(requests.some(o=>o.url.includes('ipinfo.io')));
+  }
+});
+
+test('Surge GeoIP only supplements absent fields and retains this run outbound probe geography',async()=>{
+  const r=await ipPanel({client:'surge',intercept(o,cb){
+    if(/ip-api\.com\/json\/|ipinfo\.io/.test(o.url)) {cb(null,{status:503},'');return true;}
+  },apiIntercept(method,p,cb){
+    if(!p.startsWith('/v1/geoip?'))return;
+    const ip=new URL('http://local'+p).searchParams.get('ip');
+    cb({address:ip,country:'US',asn:64502,organization:'ASN fallback'});return true;
+  }});
+  assert.match(r.output.content,/本地 IP：203\.0\.113\.2\n地区：🇨🇳 广东省深圳市\n运营商：中国电信/);
+  assert.equal(r.apiCalls.some(p=>p.includes('203.0.113.2')),false);
+  assert.match(r.output.content,/出口 IP：198\.51\.100\.10\n地区：🇸🇬 SG\n运营商：ASN fallback（ASN 组织）/);
+});
+
+test('Surge ignores unavailable, invalid and cross-IP local GeoIP responses without caching them',async()=>{
+  for(const response of [null,{error:'Not Found'},'invalid JSON',
+    {address:'203.0.113.99',country:'US',asn:64500,organization:'Wrong address'},
+    {address:'198.51.100.10',country:'UNKNOWN',asn:0,organization:'Unknown'}]) {
+    const r=await ipPanel({client:'surge',intercept:failedSurgeGeoSources,apiIntercept(method,p,cb){
+      if(!p.startsWith('/v1/geoip?'))return;
+      cb(response);return true;
+    }});
+    assert.doesNotMatch(r.output.content,/Wrong address|UNKNOWN|ASN 组织/);
+    assert.notEqual(r.output.title,'检测异常');
+    assert.equal([...r.store.keys()].some(k=>/geoip|asn/i.test(k)),false);
+  }
+  const thrown=await ipPanel({client:'surge',intercept:failedSurgeGeoSources,apiIntercept(method,p){
+    if(p.startsWith('/v1/geoip?'))throw Error('unsupported endpoint');
+  }});
+  assert.notEqual(thrown.output.title,'检测异常');
+});
+
+test('Surge local GeoIP never-callback requests stop at 500ms and leave ordinary detection available',async()=>{
+  const r=await ipPanel({client:'surge',virtualTimers:true,intercept:failedSurgeGeoSources,
+    apiIntercept(method,p){return p.startsWith('/v1/geoip?');}});
+  assert.notEqual(r.output.title,'检测超时');assert.notEqual(r.output.title,'检测异常');
+  assert.ok(r.elapsed<=1000,r.elapsed);
+  assert.equal(r.timerEvents.filter(e=>e.delay===500).length,3);
+  assert.match(r.output.content,/IP 类型：住宅 IP \| 原生 IP/);
+});
+
+test('Surge per-run GeoIP deduplicates the same IP but retries invalid results and respects the total deadline',async()=>{
+  const code=read('ip-security.js');
+  const part=code.slice(code.indexOf('// 仅限本轮、同一明确 IP；'),code.indexOf('async function getLocalGeo('))+
+    code.slice(code.indexOf('function stashCacheIP('),code.indexOf('function stashFields('));
+  let calls=0,now=1000,fail=false;const delays=[];
+  const ctx={isStash:false,hasTimers:true,finished:false,requestDeadline:2000,
+    Date:class extends Date{static now(){return now;}},IPLog:{log(){}},
+    setTimeout:(fn,ms)=>{delays.push(ms);return setTimeout(fn,ms);},clearTimeout,
+    $httpAPI(method,p,body,cb){calls++;cb(fail?null:{address:'203.0.113.2',country:'CN',asn:64501,organization:'Local network'});}};
+  vm.createContext(ctx);vm.runInContext(part,ctx);
+  await Promise.all([vm.runInContext("getSurgeLocalGeo('203.0.113.2')",ctx),vm.runInContext("getSurgeLocalGeo('203.0.113.2')",ctx)]);
+  assert.equal(calls,1);assert.deepEqual(delays,[500]);
+  for(const country of ['XX','ZZ','UNKNOWN']) {
+    ctx.original={country_code:country,org:'Known ISP',city:'Known city'};
+    const filled=await vm.runInContext("withSurgeGeoFallback('203.0.113.2',original)",ctx);
+    assert.equal(filled.country_code,'CN');assert.equal(filled.org,'Known ISP');assert.equal(filled.city,'Known city');
+  }
+  for(const org of ['Unknown','未知','N/A','null','错误']) {
+    ctx.original={country_code:'CN',org};
+    const filled=await vm.runInContext("withSurgeGeoFallback('203.0.113.2',original)",ctx);
+    assert.equal(filled.org,'Local network（ASN 组织）');assert.equal(filled.org_source,'surge-asn');
+  }
+  fail=true;
+  await vm.runInContext("getSurgeLocalGeo('203.0.113.3')",ctx);
+  await vm.runInContext("getSurgeLocalGeo('203.0.113.3')",ctx);
+  assert.equal(calls,3);
+  now=1875;await vm.runInContext("getSurgeLocalGeo('203.0.113.4')",ctx);
+  assert.equal(delays.at(-1),125);
+  now=1950;await vm.runInContext("getSurgeLocalGeo('203.0.113.5')",ctx);assert.equal(calls,4);
+  ctx.$httpAPI=undefined;now=1000;await vm.runInContext("getSurgeLocalGeo('203.0.113.6')",ctx);assert.equal(calls,4);
+  ctx.$httpAPI=()=>{throw Error('Stash must not use Surge API');};ctx.isStash=true;
+  const info={country_code:'',org:''};ctx.original=info;
+  assert.equal(await vm.runInContext("withSurgeGeoFallback('203.0.113.6',original)",ctx),info);
+});
+
+test('Stash geography failures never invoke the new Surge GeoIP endpoint',async()=>{
+  const r=await ipPanel({argument:'tile=summary&mode=home',intercept:failedSurgeGeoSources});
+  assert.deepEqual(r.apiCalls,[]);
+  assert.equal(r.requests.some(o=>o.url.includes('/v1/geoip')),false);
+  assert.doesNotMatch(r.output.content,/ASN 组织/);
 });

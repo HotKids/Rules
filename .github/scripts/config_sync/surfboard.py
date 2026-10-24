@@ -1,5 +1,7 @@
 """Configuration generation: surfboard."""
 
+import re
+
 from .common import (
     PendingHeaders,
     REPO_ROOT,
@@ -33,6 +35,19 @@ _SURFBOARD_KEEP_GENERAL_KEYS = frozenset({
 _SURFBOARD_GENERAL_KEY_RENAMES = {"encrypted-dns-server": "doh-server"}
 
 
+def _surfboard_test_url(value: str) -> str:
+    """Surfboard 的测速 URL 只支持 HTTP；保留同一端点的其余内容。"""
+    quote = value[:1] if value[:1] in ('"', "'") else ""
+    url = value[len(quote):]
+    return quote + "http://" + url[8:] if url.lower().startswith("https://") else value
+
+
+def _surfboard_proxy_test_url(line: str) -> str:
+    """只转换节点的 test-url 参数，不触碰订阅地址或其他 HTTPS 参数。"""
+    return re.sub(r"((?:^|,)\s*test-url\s*=\s*[\"']?)https://", r"\1http://", line,
+                  flags=re.IGNORECASE)
+
+
 # ---------------------------------------------------------------------------
 # 生成 Surfboard Profile
 # ---------------------------------------------------------------------------
@@ -48,7 +63,10 @@ def _gen_surfboard_general(lines: list[str]) -> str:
         key = key.strip()
         renamed = _SURFBOARD_GENERAL_KEY_RENAMES.get(key, key)
         if renamed in _SURFBOARD_KEEP_GENERAL_KEYS:
-            out.append(f"{renamed} = {val.strip()}")
+            value = val.strip()
+            if renamed in {"internet-test-url", "proxy-test-url"}:
+                value = _surfboard_test_url(value)
+            out.append(f"{renamed} = {value}")
     return "\n".join(out)
 
 
@@ -132,6 +150,8 @@ def _gen_surfboard_proxy_groups(
         for k, v in params.items():
             if k in _SURFBOARD_SKIP_PARAMS:
                 continue
+            if k in {"url", "test-url"}:
+                v = _surfboard_test_url(v)
             tokens.append(f"{k}={v}")
 
         out.extend(ph.flush())
@@ -214,6 +234,7 @@ def gen_surfboard_profile(
             parts.append("[General]\n" + gen_text)
     # [Proxy]：Surge 源代理，过滤掉 Surfboard 不支持的 action proxy（如 REJECT-TINYGIF）
     sb_proxy_lines = _filter_proxy_lines_for_platform(proxy_lines, _SURFBOARD_SUPPORTED_ACTIONS)
+    sb_proxy_lines = [_surfboard_proxy_test_url(line) for line in sb_proxy_lines]
     parts.append("[Proxy]\n" + "\n".join(sb_proxy_lines))
     parts.append(_gen_surfboard_proxy_groups(
         group_lines, skips, pg_inject, adblock_proxy_lines=proxy_lines, alt_groups=alt_groups))
@@ -240,8 +261,18 @@ def _sync_surfboard(
     if sb_pg_inject:
         print(f"  Surfboard pg_inject: anchor={sb_pg_inject.get('anchor')} | names={sb_pg_inject.get('names')}")
     sb_alt_groups = _parse_surge_alt_groups(REPO_ROOT / surge_src)
+    # Surfboard 无 Surge adaptive：保留原有国内 QUIC 直连、其余静态拒绝的兼容行为。
+    # 规则类型 PROTOCOL/QUIC、GEOIP 与 AND 均为 Surfboard 官方支持；旧源已有规则时不重复。
+    sb_rule_lines = rule_lines
+    if not any(line.replace(" ", "").upper().startswith("PROTOCOL,QUIC,") for line in rule_lines):
+        sb_rule_lines = [
+            "# Surfboard 不支持 Surge adaptive，保留境外 QUIC 静态拦截、国内放行",
+            "AND,((PROTOCOL,QUIC),(GEOIP,CN)),🔘 DIRECT,no-resolve",
+            "PROTOCOL,QUIC,REJECT",
+            *rule_lines,
+        ]
     sb_content = gen_surfboard_profile(
-        proxy_lines, group_lines, rule_lines, sb_skips, general_lines, sb_pg_inject,
+        proxy_lines, group_lines, sb_rule_lines, sb_skips, general_lines, sb_pg_inject,
         alt_groups=sb_alt_groups)
     changed = _write_stamped_if_changed(REPO_ROOT / sb_out, sb_content)
     print(f"  {'✓ ' + sb_out + ' 已更新' if changed else '✓ ' + sb_out + ' 无变化'}")

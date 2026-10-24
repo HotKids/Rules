@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-10-25 01:27:28
+# Date: 2026-10-25 02:10:21
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。
@@ -97,14 +97,14 @@ anchors:
   - &FilterJP '(?i)(?:🇯🇵|日本|Japan|\b(?:JP|JPN)\d*\b)'
   - &FilterUS '(?i)(?:🇺🇸|美国|United States|\b(?:US|USA)\d*\b)'
   # —— 以下自动策略锚点当前未被引用，供日后加自动/故障转移/负载均衡组时 <<: 合并 ——
-  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
-  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'http://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &UrlTest {type: url-test, interval: 300, tolerance: 20, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &FallBack {type: fallback, interval: 300, lazy: true, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
+  - &LoadBalance {type: load-balance, interval: 300, lazy: true, strategy: consistent-hashing, url: 'https://cp.cloudflare.com/generate_204', timeout: 2000, max-failed-times: 3, include-all-providers: true, hidden: true}
 
 # 本地节点（订阅覆盖此处）
 proxies: []
 # 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）
-proxy-providers: {Server: {type: http, path: ./Provider/Proxy/Server.yaml, url: 'https://sub.hotkids.me', interval: 3600, proxy: DIRECT, header: {User-Agent: [Clash/v1.18.0, mihomo/1.18.3]}, health-check: {enable: true, url: 'http://cp.cloudflare.com/generate_204', interval: 600, timeout: 5000, expected-status: 204}}}
+proxy-providers: {Server: {type: http, path: ./Provider/Proxy/Server.yaml, url: 'https://sub.hotkids.me', interval: 3600, proxy: DIRECT, header: {User-Agent: [Clash/v1.18.0, mihomo/1.18.3]}, health-check: {enable: true, url: 'https://cp.cloudflare.com/generate_204', interval: 600, timeout: 5000, expected-status: 204}}}
 
 # ── 策略组 ──
 proxy-groups:
@@ -188,7 +188,7 @@ rule-providers:
 
 # ── 规则 ──
 rules:
-  # 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
+  # 境外 QUIC（UDP 443）静态拦截、国内放行（Mihomo 无 Surge adaptive 原生支持，使用逻辑规则兼容降级）
   - 'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),⛔️ REJECT'
   # 标准 SSH 端口
   - 'AND,((DST-PORT,22),(NETWORK,TCP)),🔘 DIRECT'
