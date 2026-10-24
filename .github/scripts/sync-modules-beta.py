@@ -134,6 +134,8 @@ def convert_sources(sources, bodies, parser, http_bodies):
 def normalize_source(text, display, header_args, module_name=None):
     metadata, sections = parse_module(text)
     metadata['name'] = module_name or display + '去广告'
+    # Loon may refresh this date without changing rules; omit it from Beta groups.
+    metadata.pop('date', None)
     defaults = read_arguments(metadata.get('arguments', ''))
     retained = {}
     substitutions = {}
