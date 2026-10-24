@@ -299,7 +299,7 @@ function main(config) {
 
   // ── 规则 ──
   const rules = [
-    // 境外 QUIC（UDP 443）拦截回退 TCP、国内放行（Surge PROTOCOL,QUIC 转 Clash 无直接等价，用 mihomo 逻辑规则表达）
+    // 境外 QUIC（UDP 443）静态拦截、国内放行（Mihomo 无 Surge adaptive 原生支持，使用逻辑规则兼容降级）
     'AND,((NETWORK,UDP),(DST-PORT,443),(NOT,((OR,((GEOSITE,cn),(GEOIP,CN)))))),Reject',
     // 标准 SSH 端口
     'AND,((DST-PORT,22),(NETWORK,TCP)),Direct',

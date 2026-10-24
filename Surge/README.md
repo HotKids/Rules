@@ -14,6 +14,12 @@
 
 导入请使用对应文件的 Raw 地址，并按自己的环境配置订阅、节点与个人策略。Loon、Surfboard 的平台差异在 [同步基座](../.github/scripts/sync-config/) 中维护。
 
+主配置与 [Profile 增强模块](Module/Profile.sgmodule) 使用 HTTPS 测速地址，需 Surge iOS 5.23 / Mac 6.10 或更新版本。TLS 握手增加整体测试时间，但显示的延迟按已建立连接后的 HTTP 往返计算。Surfboard 的生成配置仅将测速地址转换回同一端点的 HTTP，保留加密 DNS 的 HTTPS 地址。
+
+QUIC 使用 `[General] block-quic = per-policy`，遵循节点的策略参数。支持自适应的新内核中，默认 `auto` 对支持 UDP 的代理采用 `adaptive`：先尝试让应用回落 TCP，无法回落时允许 QUIC；DIRECT 不拦截。`adaptive` 是代理策略参数，不是全局配置值；手动给节点设置 `on` / `off` 仍会覆盖默认行为。旧内核继续使用其自身的 `auto` 行为。主配置和增强模块均不再通过静态 QUIC 规则抢先拒绝流量，已废弃的 `[Replica]` 也已移除。参见 [Surge 全局参数](https://manual.nssurge.com/profile/general.html#block-quic) 与 [策略参数](https://manual.nssurge.com/policies/parameters.html#block-quic)。
+
+Mihomo、Stash、sing-box 的同步配置保留既有的境外 QUIC 静态限制，作为未支持 Surge 自适应机制时的兼容行为；不写入 `adaptive` 字段。Loon、Quantumult X、Surfboard 沿用各自支持的配置，不宣称等价实现了自适应回退。
+
 ## 规则与去广告模块
 
 [RULE-SET/](RULE-SET/) 包含手工规则、上游镜像和 Streaming 聚合表。上游镜像的来源、命名及排除域名在 [sync-rules.txt](../.github/scripts/sync-rules.txt) 中声明，直接编辑镜像内容会被后续下载覆盖。
@@ -46,6 +52,10 @@ Stash 流媒体卡片默认折叠在第三方服务页面；如需放到首页�
 Stash 按 JS 汇总日志：服务检测写入 `hotkids-media-check.log`，IP 首页、出口、本地、纯净度及通知写入 `hotkids-ip-security.log`，每条保留原时间和服务或任务名。各卡片及 IP 通知通过 `log=shared` 保存日志，每个服务或任务最多保留 60 条；两个独立定时任务在 VPN 连接时每分钟收集一次，无额外网络请求，因此日志最多延迟约一分钟。更新覆写后可从脚本日志页面删除已有的独立日志；存储失败时临时回落到原调用自己的日志，卡片显示不受影响。手动调用和 Surge 未开启此参数时仍直接输出日志。
 
 IP 风控的 Surge 和 Stash 版本共用 [ip-security.js](Module/Scripts/ip-security.js)。两者默认本地地理源为百度、出口地理源为 `ipapi-zh`；Surge 保留数据源选项，已有模块参数需自行检查是否仍保存旧值。
+
+Surge IP 面板保留现有地理信息来源的优先顺序；远程来源与本轮探测结果仍缺少国家或运营商时，才通过本机 `/v1/geoip?ip=…` 查询同一个 IP 的国家、ASN 和组织。该查询有短超时，仅在本轮去重，不缓存失败；旧内核不支持时直接保留原检测结果。它不提供城市、风险评分或 IP 类型，也不把另一个 IP 或地址族的数据补到当前结果。Stash 不调用 Surge 的专用接口。Surge 与 Clash 已共用 Loyalsoldier 的 Country.mmdb 来源；Surge 的 ASN 库随应用更新，不能使用 Clash 的 ASN 下载配置键。
+
+外部资源下载或更新异常时，可用 Surge [HTTP API](https://manual.nssurge.com/tools/http-api.html) 的 `GET /v1/external_resources` 手动查看 `ready`、`updatedAt`、`error` 与所属模块；需要重新下载时使用 `POST /v1/external_resources/update`，正文为 `{"key":"资源标识"}`。这些管理接口不在 IP 刷新或网络变化事件中自动调用。Mihomo 的同类查询是 `GET /providers/proxies` 与 `GET /providers/rules`，响应格式不同；其控制 API 没有可直接复用的逐 IP GeoIP/ASN 查询接口。
 
 Stash 参考 [官方 IPPure Tile](https://github.com/StashNetworks/misc/blob/main/collapsed-tiles/ippure.com-collapsed-tiles.stoverride)，优先从 `https://my.ippure.com/v1/info` 取得出口 IP，首页风控、类型和出口共用本次请求。缺少有效 IPv4 时使用 `api.ipify.org` 备用探测；首页和通知需要 IPv6 时，先复用 IPPure 返回的 IPv6，否则通过 `api6.ipify.org` 查询。Stash 不再请求 Cloudflare trace；Surge 仍保持 Cloudflare trace → ip.sb。响应只在单次脚本运行内共享，每张独立卡片刷新时都会重新确认出口，避免跨节点复用。IPPure 失败时不会用备用接口推算风险或类型。
 

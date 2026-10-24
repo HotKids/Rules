@@ -220,14 +220,14 @@ def _gen_singbox_rules(
 ) -> tuple[list[dict], list[dict]]:
     """从 Surge [Rule] 生成完整 route.rules + rule_set。
 
-    - PROTOCOL,QUIC → {protocol:quic, action:reject}
     - SSH（AND DEST-PORT 22 + TCP）→ {network:tcp, port:22, outbound:🔘 Direct}
     - RULE-SET/DOMAIN-SET 自有清单 → 我方 .srs
     - Loyalsoldier private.txt → 内建 ip_is_private
     - Loyalsoldier proxy/direct/cncidr、VirgilClyne ASN.China → SagerNet 规则集
     - 其余外部规则集（reject/HTTPDNS/ConnersHua/speedtest 等）→ 跳过
     - FINAL / IP-CIDR 保护 / 注释 → 跳过（FINAL 由基座 route.final 承载）
-    sniff / hijack-dns 属 sing-box 专属基础设施，无 Surge 等价，留在基座。
+    sniff / hijack-dns 与境外 QUIC 静态拦截留在基座；后者是 Surge adaptive
+    在 sing-box 中的兼容降级，不能依赖 Surge 源里是否仍有静态拒绝规则。
     """
     rules: list[dict] = []
     sets: list[dict] = []
@@ -246,19 +246,6 @@ def _gen_singbox_rules(
         parts = [p.strip() for p in s.split(",")]
         rtype = parts[0].upper()
 
-        if rtype == "PROTOCOL" and len(parts) > 1 and parts[1].upper() == "QUIC":
-            # 境外 QUIC 拦截、国内放行（geosite-cn/geoip-cn 反选；
-            # reject 默认方式回 RST/ICMP 促使快速回退 TCP）
-            rules.append({
-                "type": "logical",
-                "mode": "and",
-                "rules": [
-                    {"protocol": "quic"},
-                    {"rule_set": ["geosite-cn", "geoip-cn"], "invert": True},
-                ],
-                "action": "reject",
-            })
-            continue
         if rtype == "AND" and "DEST-PORT,22" in s.replace(" ", "") and "PROTOCOL,TCP" in s.replace(" ", ""):
             rules.append({"network": "tcp", "port": 22, "outbound": SB_DIRECT_TAG})
             continue

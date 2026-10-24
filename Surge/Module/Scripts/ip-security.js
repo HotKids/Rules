@@ -21,6 +21,7 @@
  * ⑨ DNS 解析器: edns.ip-api.com；Surge 按解析器地区作提示，未验证是否属于本地 ISP
  * ⑩ 反向 DNS: ipinfo.io hostname 字段
  * ⑪ 流量统计: Surge /v1/traffic API
+ * ⑫ 本机地理兜底: Surge /v1/geoip，仅补现有来源未取得的国家/ASN；不提供城市或纯净度
  *
  * 参数说明：
  * - TYPE: 设为 EVENT 表示网络变化触发（自动判断，无需手动设置）
@@ -664,6 +665,75 @@ function normalizeBilibili(data) {
   };
 }
 
+// 仅限本轮、同一明确 IP；失败不保留，Stash 不访问 Surge API。
+const surgeGeoLookups = new Map();
+function validGeoText(value) {
+  return typeof value === "string" && value.trim() &&
+    !/^(?:unknown|undefined|null|n\/a|error|timeout|未知|错误|查询失败|检测失败|请求失败|运营商未知)$/i.test(value.trim());
+}
+
+function getSurgeLocalGeo(ip) {
+  const address = stashCacheIP(ip);
+  const remaining = Math.min(500, requestDeadline - Date.now());
+  if (isStash || typeof $httpAPI !== "function" || !hasTimers || finished || !address || remaining < 100) {
+    return Promise.resolve(null);
+  }
+  if (surgeGeoLookups.has(address)) return surgeGeoLookups.get(address);
+  const lookup = new Promise(resolve => {
+    let settled = false, timer = null;
+    const complete = response => {
+      if (settled) return;
+      settled = true;
+      if (timer !== null && typeof clearTimeout === "function") clearTimeout(timer);
+      let data = response;
+      if (typeof data === "string") {
+        try { data = JSON.parse(data); } catch (_) { data = null; }
+      }
+      if (finished || !data || data.error || stashCacheIP(data.address) !== address) return resolve(null);
+      const country = typeof data.country === "string" ? data.country.trim().toUpperCase() : "";
+      const asn = Number.isInteger(data.asn) && data.asn > 0 && data.asn <= 4294967295 ? data.asn : null;
+      const organization = validGeoText(data.organization) ? data.organization.trim() : "";
+      const result = {
+        country_code: /^[A-Z]{2}$/.test(country) && !["XX", "ZZ"].includes(country) ? country : "",
+        asn, asn_organization: organization
+      };
+      resolve(result.country_code || result.asn || result.asn_organization ? result : null);
+    };
+    timer = setTimeout(() => complete(null), remaining);
+    try { $httpAPI("GET", "/v1/geoip?ip=" + encodeURIComponent(address), null, complete); }
+    catch (_) { complete(null); }
+  }).then(result => {
+    if (!result) surgeGeoLookups.delete(address);
+    return result;
+  });
+  surgeGeoLookups.set(address, lookup);
+  return lookup;
+}
+
+async function withSurgeGeoFallback(ip, info) {
+  const country = typeof info?.country_code === "string" ? info.country_code.trim().toUpperCase() : "";
+  const hasCountry = /^[A-Z]{2}$/.test(country) && !["XX", "ZZ"].includes(country);
+  const hasOrg = validGeoText(info?.org);
+  if (isStash || (hasCountry && hasOrg)) return info;
+  const local = await getSurgeLocalGeo(ip);
+  if (!local) return info;
+  if ((hasCountry || !local.country_code) && (hasOrg || (!local.asn_organization && !local.asn))) return info;
+  const result = { ...(info || {}) };
+  if (!hasCountry && local.country_code) {
+    result.country_code = local.country_code;
+    if (!validGeoText(result.country_name)) result.country_name = local.country_code;
+  }
+  if (!hasOrg && (local.asn_organization || local.asn)) {
+    // ASN 组织不等同于具体 ISP，保留来源标记并在现有运营商行内明确说明。
+    result.org = (local.asn_organization || "AS" + local.asn) + "（ASN 组织）";
+    result.org_source = "surge-asn";
+  }
+  if (local.asn) result.asn = local.asn;
+  if (local.asn_organization) result.asn_organization = local.asn_organization;
+  IPLog.log("本机 GeoIP：补充既有来源缺失的国家/ASN 信息");
+  return result;
+}
+
 async function getLocalGeo(local) {
   const ip = local?.data?.addr;
   if (!ip) return { info: null, source: "" };
@@ -688,6 +758,9 @@ async function getLocalGeo(local) {
     info.country_code = sb?.country_code || (source === "bilibili" && info.country_name !== "中国" ? "" : "CN");
   }
   if (info) IPLog.log("本地地区：采用 " + source);
+  const remoteInfo = info;
+  info = await withSurgeGeoFallback(ip, info);
+  if (!remoteInfo && info) source = "surge";
   return { info, source };
 }
 
@@ -726,6 +799,7 @@ async function getOutboundGeo(ip, probeInfo, pureInfo) {
   }
   const org = await orgPromise, orgInfo = normalizeIpInfo(org);
   if (info && orgInfo?.org) info.org = orgInfo.org;
+  info = await withSurgeGeoFallback(ip, info);
   return { info, reverseDNS: typeof org?.hostname === "string" ? org.hostname.trim() : "" };
 }
 
@@ -1671,6 +1745,7 @@ async function runStashTile() {
         const orgData = normalizeIpInfo(entrOrgRaw);
         if (orgData?.org) entranceInfo.org = orgData.org;
       }
+      entranceInfo = await withSurgeGeoFallback(entranceIP, entranceInfo);
     }
 
     const riskResult = riskText(riskInfo.score);

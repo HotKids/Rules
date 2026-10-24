@@ -16,7 +16,7 @@ import yaml
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
 import _common as common
-from config_sync import parser, common as config_common, clash, stash
+from config_sync import parser, common as config_common, clash, stash, surfboard, singbox
 
 
 def load(name):
@@ -531,6 +531,75 @@ dns:
                     once = self.generated_bytes()
                     self.generate()
                     self.assertEqual(self.generated_bytes(), once)
+
+
+class PlatformCompatibilityTests(unittest.TestCase):
+    def test_surfboard_keeps_test_urls_http_without_downgrading_dns_or_subscriptions(self):
+        text = surfboard.gen_surfboard_profile(
+            ['Node = https, proxy.example.invalid, 443, test-url="https://probe.example.invalid/204?check=1"'],
+            ['Auto = url-test, Node, url=https://probe.example.invalid/group, '
+             'policy-path=https://subscription.example.invalid/nodes',
+             'Backup = url-test, Node, url=http://probe.example.invalid/backup'],
+            ['FINAL,Auto'], [],
+            ['proxy-test-url = https://probe.example.invalid/global?check=1',
+             'encrypted-dns-server = https://resolver.example.invalid/dns-query',
+             'block-quic = per-policy'],
+        )
+        self.assertIn('proxy-test-url = http://probe.example.invalid/global?check=1', text)
+        self.assertIn('test-url="http://probe.example.invalid/204?check=1"', text)
+        self.assertIn('url=http://probe.example.invalid/group', text)
+        self.assertIn('url=http://probe.example.invalid/backup', text)
+        self.assertIn('doh-server = https://resolver.example.invalid/dns-query', text)
+        self.assertIn('policy-path=https://subscription.example.invalid/nodes', text)
+        self.assertIn('Node = https, proxy.example.invalid, 443', text)
+        self.assertNotIn('block-quic =', text)
+
+    def test_surfboard_keeps_native_static_quic_rules_when_surge_uses_adaptive(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / 'Profile.conf').write_text('[Proxy Group]\nProxy = select, 🔘 DIRECT\n')
+            with patch.object(surfboard, 'REPO_ROOT', root), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                surfboard._sync_surfboard(
+                    {'Surfboard': {'output': 'Surfboard.conf'}},
+                    ['🔘 DIRECT = direct'], ['Proxy = select, 🔘 DIRECT'], ['FINAL,Proxy'], [], 'Profile.conf')
+            text = (root / 'Surfboard.conf').read_text()
+        native = [line for line in text.splitlines() if line.startswith(('AND,', 'PROTOCOL,', 'FINAL,'))]
+        self.assertEqual(native, [
+            'AND, ((PROTOCOL, QUIC), (GEOIP, CN)), 🔘 DIRECT, no-resolve',
+            'PROTOCOL, QUIC, REJECT',
+            'FINAL, Proxy',
+        ])
+        self.assertNotIn('block-quic = adaptive', text)
+
+    def test_singbox_quic_fallback_survives_removal_of_surge_static_rules(self):
+        groups = ['🔰 Proxy = select, 🇭🇰 Hong Kong, 🔘 DIRECT',
+                  '🇺🇳 Server = select, include-all-proxies=true',
+                  '🇭🇰 Hong Kong = smart, include-other-group=🇺🇳 Server, policy-regex-filter=HK']
+        rules = [
+            'RULE-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/direct.txt,🔘 DIRECT',
+            'RULE-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/cncidr.txt,🔘 DIRECT',
+            'FINAL,🔰 Proxy',
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory) / 'config.json'
+            with patch.object(singbox, 'SB_CONFIG_OUT', target), \
+                    contextlib.redirect_stdout(io.StringIO()):
+                singbox._sync_singbox({}, groups, rules)
+                result = json.loads(target.read_text())
+                singbox._sync_singbox({}, groups, ['PROTOCOL,QUIC,REJECT-NO-DROP', *rules])
+                self.assertEqual(json.loads(target.read_text()), result)
+        generated = result['route']['rules']
+        self.assertEqual(generated[:2], [{'action': 'sniff'}, {'protocol': 'dns', 'action': 'hijack-dns'}])
+        reject = generated[2]
+        self.assertEqual(reject['action'], 'reject')
+        self.assertEqual(reject['rules'], [
+            {'protocol': 'quic'},
+            {'rule_set': ['geosite-cn', 'geoip-cn'], 'invert': True},
+        ])
+        self.assertEqual(sum(rule.get('action') == 'reject' for rule in generated), 1)
+        available = {entry['tag'] for entry in result['route']['rule_set']}
+        self.assertTrue({'geosite-cn', 'geoip-cn'} <= available)
 
 
 class StashConfigTests(unittest.TestCase):
