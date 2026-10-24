@@ -30,7 +30,7 @@ class BetaTests(unittest.TestCase):
         self.assertEqual(beta.runtime_url(sources[0]), sources[0]['surge'])
         self.assertTrue(beta.runtime_url(sources[1]).endswith('/BiliComic_remove_ads.lpx'))
 
-    def test_frozen_header_exact_app_headings_controls_and_unique_scripts(self):
+    def test_frozen_header_exact_app_headings_controls_and_upstream_script_names(self):
         stable = '''#!name=合集
 #!desc=原说明
 #!category=去广告
@@ -72,7 +72,9 @@ hostname = a.example
         self.assertIn('x=false', content)
         labels = [line.partition('=')[0].strip() for line in sections['Script'] if line and not line.startswith('#')]
         self.assertEqual(len(labels), 4)
-        self.assertEqual(len(set(labels)), 4)
+        self.assertEqual(labels, ['Same', 'Same', 'Same', 'Same'])
+        self.assertNotIn('甲-Same', content)
+        self.assertNotIn('Same__2', content)
         self.assertEqual(beta.parse_module(again)[1], sections)
 
     def test_unknown_control_or_source_binding_preserves_previous_beta(self):

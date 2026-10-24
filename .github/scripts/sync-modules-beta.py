@@ -149,20 +149,9 @@ def normalize_source(text, display, header_args, module_name=None):
         metadata.pop('arguments', None)
     # The aggregate keeps the existing human-written parameter help verbatim.
     metadata.pop('arguments-desc', None)
-    used = set()
     for section, lines in sections.items():
         for index, line in enumerate(lines):
             line = PLACEHOLDER.sub(lambda m: substitutions.get(m[1], m[0]), line)
-            if section == 'Script' and line.strip() and not line.lstrip().startswith(('#', ';', '//')):
-                label, sep, options = line.partition('=')
-                if not sep:
-                    raise ValueError(f'{display}: 脚本声明缺少标签')
-                base = display + '-' + label.strip()
-                label, number = base, 2
-                while label in used:
-                    label = f'{base}__{number}'; number += 1
-                used.add(label)
-                line = label + ' = ' + options.strip()
             lines[index] = line
     result = '\n'.join(f'#!{k}={v}' for k, v in metadata.items()) + '\n'
     for section, lines in sections.items():
@@ -198,10 +187,6 @@ def generate(sources, converted, stable_text, output=OUTPUT):
     missing = set(PLACEHOLDER.findall(content)) - set(header_args)
     if missing:
         raise ValueError('Beta 存在未定义参数: ' + ', '.join(sorted(missing)))
-    labels = [line.partition('=')[0].strip() for line in sections.get('Script', [])
-              if line.strip() and not line.lstrip().startswith(('#', ';', '//'))]
-    if len(labels) != len(set(labels)):
-        raise ValueError('Beta 存在重复脚本标签')
     if re.search(r'https?://[^\s\'"<>]*_remove_ads\.lpx', content):
         raise ValueError('Beta 产物包含不应展开的来源链接')
     if aggregator._write_stamped_if_changed(Path(output), content):
