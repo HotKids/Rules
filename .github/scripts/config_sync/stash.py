@@ -722,6 +722,10 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
 
     # 1) group_overrides：改写既有组的字段（filter 为 null 表示移除该行）
     for name, patch in (overlay.get("group_overrides") or {}).items():
+        if "filter" in patch:
+            # 与 JS 的 pool_filters 一致：显式 filter（含 null）表示加入节点池。
+            patch = dict(patch)
+            patch.setdefault("include-all", True)
         span = _stash_group_spans(lines).get(name)
         if span is None:
             raise ValueError(f"{label}: group_overrides 引用了不存在的分组 {name!r}")
