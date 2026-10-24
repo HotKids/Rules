@@ -177,6 +177,8 @@ Gist 中 `mihomo.yaml` 的顶层 `proxies` 和 `proxy-providers` 均由你手动
 
 `extra_pool_groups` 的 `insert_after` 控制分组位置，`tag` 控制该组前的分节注释。例如 Relay 首项使用 `"insert_after": "🇺🇳 Server", "tag": "Relay"`，派生 YAML/Stash 写入 `# Relay`，JS 写入 `// Relay`。修改或删除 `tag` 后注释跟随更新；它不作为代理组配置字段输出。
 
+[Migrate Mihomo Inline Provider](../workflows/migrate-mihomo-inline.yml) 是显式的一次性迁移：将手写 `proxies` 节点完整移入 `proxy-providers.Manual.payload`，保留节点参数和顺序，顶层变为 `proxies: []`，继续使用 `include-all-providers`。工作流首次添加或手动运行时执行，与普通同步共用并发锁；普通同步不执行迁移。已有 `Manual` 且仍有顶层节点时停止以防覆盖；顶层已为空时重复执行不再移动。迁移后两个区域仍由你维护，私人数据仅在 Action 进程内存中处理。
+
 ## 下载、验证与发布
 
 [_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 最多尝试三次；真实 404 不重试且保留状态码；空响应和无效内容不作为正常产物发布。超时不再写成 `upstream 404`。
