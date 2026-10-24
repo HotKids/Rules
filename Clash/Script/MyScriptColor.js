@@ -43,7 +43,10 @@ function main(config) {
   // 空列表，或全部为 direct/reject 型占位节点（部分订阅模板会注入），都视为无有效节点
   const inputProxies = Array.isArray(config.proxies) ? config.proxies : [];
   const hasRealProxy = inputProxies.some((p) => !['direct', 'reject'].includes(String(p.type || '').toLowerCase()));
-  if (!hasRealProxy) {
+  // provider 形态的订阅（无内联 proxies）同样支持：节点池分组带
+  // include-all-providers + filter，由 mihomo 运行时从 provider 收集（不排序）
+  const hasProviders = config['proxy-providers'] && Object.keys(config['proxy-providers']).length > 0;
+  if (!hasRealProxy && !hasProviders) {
     throw new Error('未找到任何代理节点，请先绑定含有效节点的订阅（如 https://sub.hotkids.me）再启用本脚本');
   }
 
@@ -234,6 +237,10 @@ function main(config) {
   for (const g of proxyGroups) {
     if (!(g.name in poolGroupFilters)) continue;
     const filter = poolGroupFilters[g.name];
+    if (hasProviders) {
+      g['include-all-providers'] = true;
+      if (filter) g.filter = filter;
+    }
     // 过滤正则可能带内联标志（如 (?i)）；JS RegExp 不支持内联标志，
     // 需拆出标志作为第二参数传入（regexp2/ICU 等其他平台原样使用）。
     let re = null;
@@ -246,6 +253,8 @@ function main(config) {
     const merged = [...base, ...matched];
     if (merged.length > 0) {
       g.proxies = merged;
+    } else if (g['include-all-providers'] && hasProviders) {
+      delete g.proxies; // 无内联匹配且订阅带 provider：交给 provider 路径在运行时填充
     } else {
       g.proxies = ['COMPATIBLE'];
     }
