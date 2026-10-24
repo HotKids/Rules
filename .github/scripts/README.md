@@ -167,6 +167,14 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 元数据可在现有 BlockAds 文件中维护；来源内容在清单中调整。聚合模块需搭配 BlockAdsBase，详见 [Surge 说明](../../Surge/README.md)。
 
+## 私人 Mihomo Gist
+
+[Sync Mihomo Gist](../workflows/sync-mihomo-gist.yml) 在 `Sync Config` 成功后，将 `Clash/Mihomo.yaml` 与 `sync-config/Enhanced/myscript.overlay.json` 合并，更新目标私密 Gist 的 `mihomo.yaml`。也可手动运行；只改生成器或工作流时会直接触发。公共基座和现有 JS/Stash 产物的生成方式不变。
+
+在仓库的 Actions Secrets 中配置 `MIHOMO_GIST_ID`（仅 ID）及 `GIST_TOKEN`（具有 `gist` 权限的 classic PAT）。不要将这些值填进工作流或公开日志。发布器只接受私密 Gist，不修改其他文件或可见性；地址、令牌和配置正文不写入日志，完整私人配置仅在发布进程内存中合并，不提交仓库，也不上传构建产物。
+
+Gist 中 `mihomo.yaml` 的顶层 `proxies` 由你手动维护，初始可为 `proxies: []`。每次同步会原样保留该节点块，按现有筛选规则把节点加入对应分组；无须另建或引用 `snell.yaml`。编辑节点后手动运行此 Action 即可刷新分组候选。`proxies` 缺失或无效时停止发布，避免用空列表覆盖手写内容。其余配置随基座和 overlay 更新，其中 `disabled_by_default` 在静态 YAML 中会实际移除对应分组和规则。
+
 ## 下载、验证与发布
 
 [_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 最多尝试三次；真实 404 不重试且保留状态码；空响应和无效内容不作为正常产物发布。超时不再写成 `upstream 404`。
