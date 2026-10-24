@@ -168,14 +168,15 @@ def _merge_mitm(
 
 
 def load_urls() -> list[tuple[str, str]]:
-    """返回 (url, alias) 列表；alias 为空字符串表示无别名。"""
+    """返回 (url, alias)；可选的中间 Loon 名称仅作对应记录。"""
     result: list[tuple[str, str]] = []
     for line in SYNC_TXT.read_text(encoding="utf-8").splitlines():
         stripped = line.strip()
         if not stripped or stripped.startswith("#"):
             continue
         if "," in stripped:
-            url, alias = stripped.split(",", 1)
+            parts = stripped.split(",")
+            url, alias = parts[0], parts[-1]
             result.append((url.strip(), alias.strip()))
         else:
             result.append((stripped, ""))
