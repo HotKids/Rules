@@ -191,6 +191,41 @@ def _manual_proxy_providers(text: str) -> tuple | None:
     return block
 
 
+def migrate_inline_provider(existing: str) -> str:
+    """One-time, explicitly requested move; normal synchronization never calls this."""
+    node_start, node_end, _, nodes = _manual_proxies(existing)
+    if not nodes:
+        return existing
+    original = _manual_proxy_providers(existing)
+    providers = dict(original[3] or {}) if original is not None else {}
+    if "Manual" in providers:
+        raise ValueError("The Manual provider already exists; no migration applied")
+    providers["Manual"] = {
+        "type": "inline", "payload": nodes,
+        "health-check": {"enable": True, "url": "http://cp.cloudflare.com/generate_204", "interval": 600},
+    }
+
+    class IndentedDumper(yaml.SafeDumper):
+        def increase_indent(self, flow=False, indentless=False):
+            return super().increase_indent(flow, False)
+
+    block = yaml.dump({"proxy-providers": providers}, Dumper=IndentedDumper,
+                      allow_unicode=True, sort_keys=False, width=1000)
+    replacements = [(node_start, node_end, "proxies: []\n")]
+    if original is not None:
+        replacements.append((*original[:2], block))
+    result = existing
+    for start, end, content in sorted(replacements, reverse=True):
+        result = result[:start] + content + result[end:]
+    if original is None:
+        at = _manual_proxies(result)[1]
+        result = result[:at] + "\n" + block + result[at:]
+    moved = _manual_proxy_providers(result)[3]
+    if _manual_proxies(result)[3] or moved != providers or moved["Manual"]["payload"] != nodes:
+        raise ValueError("Inline provider migration failed validation")
+    return result
+
+
 def apply_manual_proxies(rendered: str, existing: str) -> str:
     """Preserve both user-owned node source blocks and include inline nodes in pools."""
     _, _, manual, proxies = _manual_proxies(existing)

@@ -159,6 +159,38 @@ process.stdout.write(JSON.stringify(context.result));'''
                 renderer.apply_manual_proxies(self.rendered, existing)
             self.assertNotIn('private-test', str(failure.exception))
 
+    def test_inline_migration_preserves_all_node_parameters_and_order(self):
+        nodes = [
+            {'name': 'HK personal', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080,
+             'username': 'test: user', 'password': 'test-only # & +', 'udp': True},
+            {'name': 'JP personal', 'type': 'ss', 'server': 'example.invalid', 'port': 443,
+             'cipher': 'chacha20-ietf-poly1305', 'password': 'test-only', 'udp': False},
+        ]
+        other = {'Existing': {'type': 'http', 'url': 'https://example.invalid/keep', 'interval': 1234}}
+        for providers in (None, {}, other):
+            original = yaml.safe_dump({'proxies': nodes, 'proxy-providers': providers},
+                                      allow_unicode=True, sort_keys=False) + 'rules:\n- [old invalid rule\n'
+            migrated = renderer.migrate_inline_provider(original)
+            self.assertEqual(renderer._manual_proxies(migrated)[3], [])
+            actual = renderer._manual_proxy_providers(migrated)[3]
+            self.assertEqual(actual['Manual']['type'], 'inline')
+            self.assertEqual(actual['Manual']['payload'], nodes)
+            self.assertEqual({k: v for k, v in actual.items() if k != 'Manual'}, providers or {})
+            self.assertEqual(renderer.migrate_inline_provider(migrated), migrated)
+            final = renderer.apply_manual_proxies(self.rendered, migrated)
+            self.assertEqual(yaml.safe_load(final)['proxy-providers'], actual)
+            for group in yaml.safe_load(final)['proxy-groups']:
+                self.assertTrue(all(node['name'] not in group.get('proxies', []) for node in nodes))
+
+    def test_inline_migration_supports_missing_provider_and_rejects_name_conflict(self):
+        node = {'name': 'HK personal', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080}
+        original = yaml.safe_dump({'proxies': [node]}, allow_unicode=True)
+        migrated = renderer.migrate_inline_provider(original)
+        self.assertEqual(yaml.safe_load(migrated)['proxy-providers']['Manual']['payload'], [node])
+        conflict = yaml.safe_dump({'proxies': [node], 'proxy-providers': {'Manual': {'type': 'http'}}})
+        with self.assertRaises(ValueError):
+            renderer.migrate_inline_provider(conflict)
+
 
 if __name__ == '__main__':
     unittest.main()

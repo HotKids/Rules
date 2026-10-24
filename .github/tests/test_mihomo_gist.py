@@ -89,6 +89,23 @@ class PrivateGistTests(unittest.TestCase):
             self.assertFalse(publisher.publish(self.config))
         self.assertEqual(request.call_count, 1)
 
+    def test_explicit_inline_migration_moves_nodes_and_remains_idempotent(self):
+        gist = self.gist()
+        with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
+            self.response(gist), self.response(self.gist()),
+        ]) as request:
+            self.assertTrue(publisher.publish(self.config, migrate_inline=True))
+        content = json.loads(request.call_args_list[1].args[0].data)['files']['mihomo.yaml']['content']
+        data = yaml.safe_load(content)
+        self.assertEqual(data['proxies'], [])
+        self.assertEqual(data['proxy-providers']['Manual']['payload'][0]['name'], 'Manual test node')
+        self.assertEqual(data['proxy-providers']['Personal'], yaml.safe_load(self.providers)['proxy-providers']['Personal'])
+        self.assertNotIn('Manual test node', data['proxy-groups'][0].get('proxies', []))
+        gist['files']['mihomo.yaml']['content'] = content
+        with patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request:
+            self.assertFalse(publisher.publish(self.config, migrate_inline=True))
+        self.assertEqual(request.call_count, 1)
+
     def test_invalid_manual_proxies_abort_without_logging_node_data(self):
         gist = self.gist(files={'mihomo.yaml': {'content': 'proxies: [private-node-value\n', 'truncated': False}})
         output = io.StringIO()

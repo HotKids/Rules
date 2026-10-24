@@ -1,0 +1,43 @@
+name: Migrate Mihomo Inline Provider
+
+on:
+  workflow_dispatch:
+  # Creating this workflow performs the requested migration; normal sync is unchanged.
+  push:
+    branches: [master]
+    paths:
+      - '.github/workflows/migrate-mihomo-inline.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-mihomo-private-gist
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: master
+          persist-credentials: false
+      - name: Install generation dependencies
+        run: python3 -m pip install -r .github/scripts/requirements.txt
+      - name: Check private publication and overlay generation
+        run: python3 -m unittest discover -s .github/tests -p 'test_mihomo_*.py'
+      - name: Generate temporary configuration
+        run: >-
+          python3 .github/scripts/render-mihomo-overlay.py
+          --base Clash/Mihomo.yaml
+          --overlay .github/scripts/sync-config/Enhanced/myscript.overlay.json
+          --output "$RUNNER_TEMP/mihomo.yaml"
+      - name: Migrate nodes into the private inline Provider
+        env:
+          MIHOMO_GIST_ID: ${{ secrets.MIHOMO_GIST_ID }}
+          GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
+        run: python3 .github/scripts/publish-mihomo-gist.py --migrate-inline "$RUNNER_TEMP/mihomo.yaml"
+      - name: Remove temporary configuration
+        if: always()
+        run: rm -f "$RUNNER_TEMP/mihomo.yaml"
