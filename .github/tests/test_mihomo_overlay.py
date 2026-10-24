@@ -38,11 +38,45 @@ process.stdout.write(JSON.stringify(context.result));'''
         expected = json.loads(result.stdout)
         groups = [{k: v for k, v in g.items() if k not in ('include-all-providers', 'filter')}
                   for g in actual['proxy-groups']]
-        self.assertEqual(groups, expected['proxy-groups'])
+        self.assertEqual({g['name']: g for g in groups}, {g['name']: g for g in expected['proxy-groups']})
         self.assertEqual(actual['rules'], expected['rules'])
         self.assertEqual(actual['rule-providers'], expected['rule-providers'])
         self.assertEqual(actual['proxies'], nodes)
         self.assertEqual(actual['proxy-providers'], yaml.safe_load(self.base)['proxy-providers'])
+
+    def test_region_and_relay_anchors_stay_in_header_after_manual_node_merge(self):
+        merged = renderer.apply_manual_proxies(self.rendered,
+            'proxies:\n- {name: HK Pro, type: socks5, server: example.invalid, port: 1080}\n')
+        for text in (self.rendered, merged):
+            tokens = list(yaml.scan(text))
+            anchors = {t.value: t.start_mark.index for t in tokens if isinstance(t, yaml.AnchorToken)}
+            references = [t for t in tokens if isinstance(t, yaml.AliasToken) and t.value.startswith('Filter')]
+            self.assertEqual(len(references), 13)
+            self.assertIn('FilterHKRelay', anchors)
+            self.assertIn('FilterRelay', anchors)
+            for reference in references:
+                self.assertLess(anchors[reference.value], text.index('\nproxies:'))
+            self.assertEqual(text.count('&FilterHKRelay '), 1)
+            self.assertIn('filter: *FilterHKRelay', text)
+            self.assertNotRegex(text, r'(?m)^  - \{.*filter: [^*]')
+            data = yaml.safe_load(text)
+            groups = {g['name']: g for g in data['proxy-groups']}
+            for spec in self.overlay['extra_pool_groups']:
+                self.assertEqual(groups[spec['name']]['filter'], spec['filter'])
+
+    def test_relay_section_follows_nodes_and_precedes_area(self):
+        for text in (self.rendered, renderer.apply_manual_proxies(self.rendered, 'proxies: []\n')):
+            self.assertEqual(text.count('  # Relay\n'), 1)
+            nodes = text.index('  # Nodes\n')
+            relay = text.index('  # Relay\n')
+            area = text.index('  # Area\n')
+            self.assertLess(nodes, relay)
+            self.assertLess(relay, area)
+            names = [g['name'] for g in yaml.safe_load(text)['proxy-groups']]
+            expected = ['🇸🇱 Relay', '🇭🇰 HK Relay', '🇨🇳 TW Relay', '🇯🇵 JP Relay', '🇺🇸 US Relay', '🇪🇺 EU Relay']
+            server = names.index('🇺🇳 Server')
+            self.assertEqual(names[server + 1:server + 7], expected)
+            self.assertEqual(names[server + 7], '🇭🇰 Hong Kong')
 
     def test_manual_block_survives_sync_even_if_old_generated_rules_are_invalid(self):
         block = 'proxies:  # user-managed\n  - {name: HK HKT, type: socks5, server: example.invalid, port: 1080, password: "private-test"}\n'

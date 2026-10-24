@@ -15,6 +15,61 @@ from config_sync.clash import (
     _yaml_flow,
     _yaml_sq,
 )
+from config_sync.common import _REGION_CODE, strip_emoji
+
+
+def _filter_anchors(prefix: str, groups: list[dict]) -> tuple[str, dict[str, str]]:
+    """Keep final region/Relay filters in the base's anchor section."""
+    declarations, references = {}, {}
+    codes = {**_REGION_CODE, "England": "UK", "Germany": "DE"}
+    for group in sorted(groups, key=lambda g: "Relay" in g["name"]):
+        if not group.get("filter"):
+            continue
+        name = strip_emoji(group["name"])
+        suffix = codes.get(name, "".join(re.findall(r"[A-Za-z0-9]+", name))) or "Group"
+        anchor = "Filter" + suffix
+        while anchor in declarations:
+            anchor += "Group"
+        declarations[anchor] = group["filter"]
+        references[group["name"]] = anchor
+    lines = prefix.splitlines()
+    indices = [i for i, line in enumerate(lines) if re.match(r"^  - &Filter\w+\s", line)]
+    if declarations and not indices:
+        raise ValueError("Missing Mihomo filter anchor section")
+    if indices:
+        at = indices[0]
+        lines = [line for i, line in enumerate(lines) if i not in indices]
+        lines[at:at] = [f"  - &{name} {_yaml_sq(value)}" for name, value in declarations.items()]
+    lines = ["  # 地区与 Relay 节点筛选正则（基座叠加 overlay 后的结果）"
+             if line.startswith("  # 地区节点筛选正则") else line for line in lines]
+    return "\n".join(lines) + "\n", references
+
+
+def _group_lines(source: str, groups: list[dict], references: dict[str, str]) -> list[str]:
+    comments = _scan_sample_item_comments(source, "proxy-groups")
+    lines = ["# ── 策略组 ──", "proxy-groups:"]
+    has_region = bool(re.search(r"(?m)^  - &Region\s", source))
+    relay_heading = False
+    for group in groups:
+        if group["name"].endswith(" Relay"):
+            if not relay_heading:
+                lines.append("  # Relay")
+                relay_heading = True
+        else:
+            lines.extend("  " + line for line in comments.get(group["name"], []))
+        parts = []
+        for key, value in _ordered_group(group).items():
+            if has_region and group.get("include-all-providers") and key == "name":
+                parts += [f"name: {_yaml_flow(value)}", "<<: *Region"]
+            elif has_region and group.get("include-all-providers") and (
+                    key == "include-all-providers" or key == "type" and value == "select"):
+                continue
+            elif key == "filter" and group["name"] in references:
+                parts.append(f"filter: *{references[group['name']]}")
+            else:
+                parts.append(f"{key}: {_yaml_flow(value)}")
+        lines.append("  - {" + ", ".join(parts) + "}")
+    return lines
 
 
 def render(base: str, overlay: dict, label: str) -> str:
@@ -44,6 +99,11 @@ def render(base: str, overlay: dict, label: str) -> str:
     if set(disabled) - optional:
         raise ValueError("disabled_by_default references a missing or required group")
     _apply_overlay(groups, pools, rules, structural, {"remove_groups": disabled}, label)
+    relays = [g for g in groups if g["name"].endswith(" Relay")]
+    if relays:
+        groups[:] = [g for g in groups if g not in relays]
+        at = next(i for i, g in enumerate(groups) if strip_emoji(g["name"]) == "Server") + 1
+        groups[at:at] = relays
     for group in groups:
         if group["name"] not in pools:
             continue
@@ -70,16 +130,14 @@ def render(base: str, overlay: dict, label: str) -> str:
     if any(r.split(",")[_rule_policy_index(r.split(","))] not in known for r in rules):
         raise ValueError("A rule references an undefined policy")
 
-    # Retain the base settings, anchors and subscription declarations verbatim.
+    # Retain base settings/subscriptions; update filter anchors to their final values.
     prefix, separator, _ = base.partition("# ── 策略组 ──")
     if not separator:
         raise ValueError("Missing Mihomo proxy group section")
+    prefix, references = _filter_anchors(prefix, groups)
+    data["anchors"] = yaml.safe_load(prefix)["anchors"]
     header = f"# Personal Mihomo configuration: Clash/Mihomo.yaml + {label}\n"
-    lines = [header + prefix.rstrip(), "", "# ── 策略组 ──", "proxy-groups:"]
-    comments = _scan_sample_item_comments(base, "proxy-groups")
-    for group in groups:
-        lines.extend("  " + line for line in comments.get(group["name"], []))
-        lines.append("  - " + _yaml_flow(_ordered_group(group)))
+    lines = [header + prefix.rstrip(), "", *_group_lines(base, groups, references)]
     lines.extend(["", "# ── 规则集 ──", "rule-providers:"])
     for name, spec in providers.items():
         lines.append("  " + _yaml_flow(name) + ": " + _yaml_flow(spec))
@@ -143,11 +201,12 @@ def apply_manual_proxies(rendered: str, existing: str) -> str:
             candidates.extend(name for name in matched if name not in candidates)
             if candidates:
                 group["proxies"] = candidates
-        comments = _scan_sample_item_comments(rendered, "proxy-groups")
-        lines = ["# ── 策略组 ──", "proxy-groups:"]
-        for group in groups:
-            lines.extend("  " + line for line in comments.get(group["name"], []))
-            lines.append("  - " + _yaml_flow(_ordered_group(group)))
+        references = {}
+        for line in rendered.splitlines():
+            if not (match := re.search(r"^  - \{name: (.*?), .*\bfilter: \*(Filter\w+)", line)):
+                continue
+            references[yaml.safe_load(match[1])] = match[2]
+        lines = _group_lines(rendered, groups, references)
         start = result.index("# ── 策略组 ──")
         end = result.index("# ── 规则集 ──")
         result = result[:start] + "\n".join(lines) + "\n\n" + result[end:]
