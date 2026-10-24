@@ -43,6 +43,7 @@ class BetaTests(unittest.TestCase):
 # > 乙去广告 · 2026-01-01
 '''
         source = '''#!name=新上游名称
+#!date=2026-10-02 13:57:49
 #!arguments=switch:false
 [Rule]
 DOMAIN,ads.a.example,REJECT
@@ -58,7 +59,8 @@ hostname = a.example
             content = beta.generate(entries, {'one': source, 'two': source.replace('a.example', 'b.example')}, stable, target)
             self.assertEqual(target.read_text(), content)
             saved = target.read_bytes()
-            again = beta.generate(entries, {'one': source, 'two': source.replace('a.example', 'b.example')}, stable, target)
+            refreshed = source.replace('2026-10-02 13:57:49', '2027-01-01 00:00:00')
+            again = beta.generate(entries, {'one': refreshed, 'two': refreshed.replace('a.example', 'b.example')}, stable, target)
             self.assertEqual(target.read_bytes(), saved)
         old, _ = beta.parse_module(stable)
         actual, sections = beta.parse_module(content)
@@ -67,6 +69,8 @@ hostname = a.example
         self.assertEqual(actual['name'], '合集 Beta')
         self.assertIn('# > 甲 去广告', content)
         self.assertNotIn('# > 甲 去广告 Beta', content)
+        self.assertNotRegex(content, r'(?m)^# > .* · \d{4}-\d{2}-\d{2}')
+        self.assertIn('date', actual)
         self.assertIn('x={{{甲-switch}}}', content)
         self.assertIn('ads.{{{甲}}}.example', content)
         self.assertIn('x=false', content)

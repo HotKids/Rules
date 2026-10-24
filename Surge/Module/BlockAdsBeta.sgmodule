@@ -4,33 +4,33 @@
 #!remark=广告平台拦截器是去广告基础，优先级需置于本模块之前: https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule
 #!arguments=12306:12306,123云盘:123pan,B612咔叽:kaji,ECOVACS HOME:eco,Foodie:kaji,IT之家:ithome,IT之家-removePinnedArticles:false,IT之家-removeAllBanners:false,Keep:gotokeep,Line:line,QQ音乐:tencentmusic,Reddit:reddit,阿里云盘:alipan,爱奇艺:iqiyi,百度地图:baidu,百度网页:baidu,百度网盘:baidu,哔哩哔哩漫画:bilibili,波点音乐:kuwo,菜鸟:cainiao,彩云天气:caiyun,财新:caixin,大麦:taobao,得物:dewu,滴滴出行:didi,叮咚买菜:ddxq,飞客:flyert,飞猪旅行:taobao,高德地图:amap,航旅纵横:umetrip,金山文档:kdocs,京东:jd,京东外卖:jd,酷安:coolapk,快递100:kuaidi100,芒果TV:tv,美图秀秀:meitu,墨迹天气:moji,拼多多:pinduoduo,起点读书:qidian,瑞幸咖啡:lkcoffee,什么值得买:smzdm,顺丰速运:sf-express,淘票票:taobao,网易有道词典:youdao,网易邮箱大师:163,微博:weibo,微信公众号:qq,喜马拉雅:ximalaya,下厨房:xiachufang,闲鱼:goofish,香港抖音:me,小黑盒:xiaoheihe,小红书:xiaohongshu,小象超市:meituan,小宇宙:xiaoyuzhoufm,萤石云视频:ys7,优酷视频:youku,知乎:zhihu,转转:zhuanzhuan
 #!arguments-desc=各参数值为对应 App 的域名关键字，默认启用；如需禁用某 App 去广告，将其改为任意非常见域名值即可（e.g. NO）。
-#!date=2026-10-24 23:25:38
+#!date=2026-10-24 23:30:00
 
 [MITM]
 hostname = %APPEND% *.{{{爱奇艺}}}.com, *.{{{微博}}}.cn, *.{{{微博}}}.com, -i.vip.{{{爱奇艺}}}.com, 114.115.217.129, 119.29.29.*, a.{{{Line}}}.me, acs.m.{{{闲鱼}}}.com, acs.m.{{{大麦}}}.com, ad.{{{12306}}}.cn, ad.{{{Line}}}-scdn.net, afd.{{{百度地图}}}.com, ai.{{{高德地图}}}.com, api-app.dc-cn.cn.{{{ECOVACS HOME}}}user.net, api.{{{阿里云盘}}}.com, api.{{{彩云天气}}}app.com, api.{{{酷安}}}.com, api.{{{Keep}}}.com, api.m.{{{京东}}}.com, api.{{{拼多多}}}.com, api.posters.{{{美图秀秀}}}.com, api.udache.com, api.{{{下厨房}}}.com, api.{{{小黑盒}}}.cn, api.{{{小宇宙}}}.com, api.{{{萤石云视频}}}.com, api.{{{知乎}}}.com, api.zuihuimai.com, api5-normal-m.amemv.com, app-api.{{{什么值得买}}}.com, app.{{{得物}}}.com, app.{{{转转}}}.com, appconf.mail.{{{网易邮箱大师}}}.com, article-api.{{{什么值得买}}}.com, as.xiaojukeji.com, awe{{{香港抖音}}}.snssdk.com, bd-api.{{{波点音乐}}}.cn, biz.cyapi.cn, bizapi.{{{阿里云盘}}}.com, businessapi.ksedt.com, buy.{{{Line}}}.me, capi.{{{瑞幸咖啡}}}.com, ccsp-egmas.{{{顺丰速运}}}.com, cdn-w.{{{彩云天气}}}app.com, center.{{{高德地图}}}.com, ci.{{{小红书}}}.com, cix.{{{Line}}}-apps.com, cn-acs.m.{{{菜鸟}}}.com, color.{{{京东外卖}}}dj.com, common.{{{滴滴出行}}}taxi.com.cn, conf.{{{滴滴出行}}}taxi.com.cn, crs-event.{{{Line}}}.me, d.{{{Line}}}-scdn.net, daijia.kuaidadi.com, damang.api.mg{{{芒果TV}}}.com, dashi.{{{网易邮箱大师}}}.com, dat.ruanmei.com, dc?.bz.mg{{{芒果TV}}}.com, dict.{{{网易有道词典}}}.com, e*.{{{财新}}}.com, e2e-mtop.{{{菜鸟}}}.com, ec-bot-obs.{{{Line}}}-scdn.net, ecom.map.{{{百度地图}}}.com, edith.{{{小红书}}}.com, f-api.{{{金山文档}}}.cn, fcard.api.{{{墨迹天气}}}.com, freight.xiaojukeji.com, g*.{{{财新}}}.com, g-acs.m.{{{闲鱼}}}.com, gl-cn-api.{{{ECOVACS HOME}}}vacs.cn, gql-fed.{{{Reddit}}}.com, gql.{{{Reddit}}}.com, gslbali.{{{喜马拉雅}}}.com, gw.{{{Line}}}.naver.jp, h5.{{{什么值得买}}}.com, haojia-api.{{{什么值得买}}}.com, haojia-cdn.{{{什么值得买}}}.com, haojia.m.{{{什么值得买}}}.com, hb-boom.api.mg{{{芒果TV}}}.com, home.{{{航旅纵横}}}.com, homepage-api.{{{什么值得买}}}.com, htwkop-st.xiaojukeji.com, htwkop.xiaojukeji.com, i.{{{萤石云视频}}}.com, info.{{{高德地图}}}.com, lan.{{{Line}}}.me, legy.{{{Line}}}-apps.com, longquan-mtop.{{{菜鸟}}}.com, m*.{{{财新}}}.com, m-cloud.{{{知乎}}}.com, m.{{{百度网页}}}.com, m.{{{拼多多}}}.net, m.{{{喜马拉雅}}}.com, m5-zb.{{{高德地图}}}.com, m5.{{{高德地图}}}.com, magev6.if.{{{起点读书}}}.com, maicai.api.{{{叮咚买菜}}}.mobi, mall.{{{小象超市}}}.com, manga.{{{哔哩哔哩漫画}}}.com, me.bz.mg{{{芒果TV}}}.com, member.{{{阿里云盘}}}.com, mme.api.{{{墨迹天气}}}.com, mobile-thor.api.mg{{{芒果TV}}}.com, mobile.{{{12306}}}.cn, mobile.api.hunan{{{芒果TV}}}.com, mobile.api.mg{{{芒果TV}}}.com, mobile.{{{喜马拉雅}}}.com, mobilehera.{{{喜马拉雅}}}.com, mobileso.bz.mg{{{芒果TV}}}.com, mobwsa.{{{喜马拉雅}}}.com, mp.weixin.{{{微信公众号}}}.com, mwsa.{{{喜马拉雅}}}.com, napi.{{{IT之家}}}.com, nbcps-mtop.{{{菜鸟}}}.com, nelo2-col.{{{Line}}}corp.com, netflow-mtop.{{{菜鸟}}}.com, newclient.map.{{{百度地图}}}.com, obs.{{{Line}}}-scdn.net, p.{{{快递100}}}.com, page-info.{{{知乎}}}.com, pan.{{{百度网盘}}}.com, poi.map.xiaojukeji.com, portal-portm.{{{小象超市}}}.com, post.m.{{{什么值得买}}}.com, psnlz.api.{{{墨迹天气}}}.com, ptf.{{{飞客}}}rip.com, push.m.{{{优酷视频}}}.com, rec.{{{小红书}}}.com, res.xiaojukeji.com, s-api.{{{什么值得买}}}.com, scdn.{{{Line}}}-apps.com, sch.{{{Line}}}.me, search.{{{喜马拉雅}}}.com, searchwsa.{{{喜马拉雅}}}.com, sns.{{{高德地图}}}.com, sns.api.{{{墨迹天气}}}.com, so.{{{小红书}}}.com, starplucker.cyapi.cn, static.{{{Line}}}-scdn.net, ucmp-static.{{{顺丰速运}}}.com, ucmp.{{{顺丰速运}}}.com, un-acs.{{{优酷视频}}}.com, user-api.{{{什么值得买}}}.com, user.api.{{{叮咚买菜}}}.mobi, uts-front.{{{Line}}}-apps.com, vdo.api.{{{墨迹天气}}}.com, w.{{{Line}}}.me, {{{微博}}}.com, www.{{{123云盘}}}.com, www.{{{百度网页}}}.com, www.{{{飞客}}}.com.cn, www.{{{金山文档}}}.cn, www.{{{小红书}}}.com, www.{{{知乎}}}.com, yongche.{{{百度地图}}}.com, ywab.reader.qq.com, zhida.{{{知乎}}}.com
 
 [Rule]
-# > 12306去广告 · 2026-10-02
+# > 12306去广告
 # desc = 过滤12306应用内广告及开屏广告
 DOMAIN,ad.{{{12306}}}.cn,DIRECT,extended-matching
 
-# > B612咔叽去广告 · 2026-10-02
+# > B612咔叽去广告
 # desc = 移除开屏广告、弹窗及拍摄页面底部横幅广告。
 DOMAIN,api-ad.{{{B612咔叽}}}cam.com,REJECT,extended-matching,pre-matching
 DOMAIN,zjres-ad.{{{B612咔叽}}}cam.com,REJECT,extended-matching,pre-matching
 DOMAIN,popup-api.b612{{{B612咔叽}}}.com,REJECT,extended-matching,pre-matching
 
-# > Foodie去广告 · 2026-10-02
+# > Foodie去广告
 # desc = 移除开屏广告和弹窗广告
 DOMAIN,api-ad.{{{Foodie}}}cam.com,REJECT,extended-matching,pre-matching
 DOMAIN,zjres-ad.{{{Foodie}}}cam.com,REJECT,extended-matching,pre-matching
 DOMAIN,popup-api.b612{{{Foodie}}}.com,REJECT,extended-matching,pre-matching
 
-# > Keep去广告 · 2026-10-02
+# > Keep去广告
 # desc = 移除开屏广告、搜索推荐和弹窗广告，精简底栏和首页标签。移除关注推荐、文章相关推荐和信息流中的课程推广。
 DOMAIN,kad.{{{Keep}}}.com,REJECT,extended-matching,pre-matching
 
-# > Line去广告 · 2026-10-02
+# > Line去广告
 # desc = 移除Line各类广告
 URL-REGEX,"^https:\/\/a\.{{{Line}}}\.me\/er\/lads\/v\d\/ei\?",REJECT-TINYGIF
 URL-REGEX,"^https:\/\/a\.{{{Line}}}\.me\/er\/l.*\/v\d\/event\/image",REJECT-TINYGIF
@@ -53,7 +53,7 @@ URL-REGEX,"^https:\/\/web-mmap-pay\.{{{Line}}}-apps\.com\/tw\/liff\/campaign\/v\
 URL-REGEX,"^https:\/\/scdn\.{{{Line}}}-apps\.com\/lan\/image\/line\/bannerImageEvent\/",REJECT-DROP
 URL-REGEX,"^https:\/\/scdn\.{{{Line}}}-apps\.com\/lan\/document\/pageEvent\/line\/ios\/",REJECT-DROP
 
-# > QQ音乐去广告 · 2026-10-02
+# > QQ音乐去广告
 # desc = 过滤QQ音乐广告
 DOMAIN,adstats.{{{QQ音乐}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,ad.{{{QQ音乐}}}.com,REJECT,extended-matching,pre-matching
@@ -67,11 +67,11 @@ DOMAIN,tmead.y.qq.com,REJECT,extended-matching,pre-matching
 DOMAIN,tmeadbak.y.qq.com,REJECT,extended-matching,pre-matching
 DOMAIN,tmeadquic.y.qq.com,REJECT,extended-matching,pre-matching
 
-# > 阿里云盘去广告 · 2026-10-02
+# > 阿里云盘去广告
 # desc = 移除首页广告横幅、弹窗和顶部奖励。
 IP-CIDR,203.107.1.1/24,REJECT,no-resolve
 
-# > 爱奇艺去广告 · 2026-10-02
+# > 爱奇艺去广告
 # desc = 移除开屏广告、焦点图广告、瀑布流广告、搜索页面广告、移除青少年弹窗，精简底栏和我的页面。
 IP-CIDR,103.44.59.54/32,REJECT,no-resolve
 IP-CIDR,111.63.147.158/32,REJECT,no-resolve
@@ -80,33 +80,33 @@ DOMAIN-SUFFIX,cupid.{{{爱奇艺}}}.com,DIRECT,extended-matching
 DOMAIN,api.{{{爱奇艺}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,access.if.{{{爱奇艺}}}.com,REJECT,extended-matching,pre-matching
 
-# > 彩云天气去广告 · 2026-10-02
+# > 彩云天气去广告
 # desc = 移除首页推广、弹窗、悬浮窗、底栏天气助手和工具箱入口，移除我的页面广告横幅。
 DOMAIN,abyss.cyapi.cn,REJECT,extended-matching,pre-matching
 DOMAIN,ad.cyapi.cn,REJECT,extended-matching,pre-matching
 DOMAIN,gather.colorfulclouds.net,REJECT,extended-matching,pre-matching
 
-# > 滴滴出行去广告 · 2026-10-02
+# > 滴滴出行去广告
 # desc = 移除开屏广告、弹窗广告、横幅推广，精简我的页面。
 DOMAIN,gwp.xiaojukeji.com,REJECT,extended-matching,pre-matching
 DOMAIN,gwpgz.{{{滴滴出行}}}taxi.com.cn,REJECT,extended-matching,pre-matching
 DOMAIN,adtrack.xiaojukeji.com,REJECT,extended-matching,pre-matching
 
-# > 叮咚买菜去广告 · 2026-10-02
+# > 叮咚买菜去广告
 # desc = 移除开屏广告、弹窗推广、搜索推荐、信息流广告、悬浮广告、各页面购物推荐、精简我的页面，移除底栏和各页面AI入口。
 DOMAIN,trackercollect.{{{叮咚买菜}}}.mobi,REJECT,extended-matching,pre-matching
 DOMAIN,ddfs-public.ddimg.mobi,REJECT,extended-matching,pre-matching
 DOMAIN,rttrack.{{{叮咚买菜}}}.mobi,REJECT,extended-matching,pre-matching
 
-# > 航旅纵横去广告 · 2026-10-02
+# > 航旅纵横去广告
 # desc = 过滤航旅纵横广告
 URL-REGEX,"^http?:\/\/(discardrp|startup)\.{{{航旅纵横}}}\.com\/gateway\/api\/umetrip\/native",REJECT
 
-# > 京东去广告 · 2026-10-02
+# > 京东去广告
 # desc = 移除京东开屏广告，精简我的页面产品推广。
 URL-REGEX,"^http:\/\/\w{32}\.{{{京东}}}debug\.com\/diagnose\?",REJECT
 
-# > 芒果TV去广告 · 2026-10-02
+# > 芒果TV去广告
 # desc = 移除开屏广告、信息流广告、播放页广告，精简我的页面。
 DOMAIN,credits.bz.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,credits2.bz.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
@@ -122,11 +122,11 @@ DOMAIN,rprain.log.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,vip.bz.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN-SUFFIX,da.mg{{{芒果TV}}}.com,REJECT,extended-matching,pre-matching
 
-# > 美图秀秀去广告 · 2026-10-02
+# > 美图秀秀去广告
 # desc = 移除开屏广告、横幅推广，精简我的页面。
 DOMAIN,adui.tg.{{{美图秀秀}}}.com,REJECT,extended-matching,pre-matching
 
-# > 拼多多去广告 · 2026-10-02
+# > 拼多多去广告
 # desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
 AND,((URL-REGEX,"^http:\/\/((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\/d(\d)?"),(USER-AGENT,"*com.xunmeng.{{{拼多多}}}*")),REJECT
 AND,((URL-REGEX,"^http:\/\/\[[0-9a-fA-F:]+\]\/d(\d)?\?"),(USER-AGENT,"*com.xunmeng.{{{拼多多}}}*")),REJECT
@@ -146,21 +146,21 @@ DOMAIN,ta-a.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,meta.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,apm-a.{{{拼多多}}}.com,REJECT,extended-matching,pre-matching
 
-# > 什么值得买去广告 · 2026-10-02
+# > 什么值得买去广告
 # desc = 移除开屏广告、信息流广告、各类横幅广告、搜索页广告、文章内广告，移除活动皮肤、精简我的页面。
 DOMAIN,adx-api.zdmimg.com,REJECT,extended-matching,pre-matching
 
-# > 微博去广告 · 2026-10-02
+# > 微博去广告
 # desc = 过滤微博广告及去除各部分推广模块
 DOMAIN-SUFFIX,uve.{{{微博}}}.com,DIRECT,extended-matching
 DOMAIN,huodong.{{{微博}}}.cn,REJECT,extended-matching,pre-matching
 DOMAIN-SUFFIX,biz.{{{微博}}}.com,REJECT,extended-matching,pre-matching
 
-# > 微信公众号去广告 · 2026-10-02
+# > 微信公众号去广告
 # desc = 过滤微信公众号广告
 DOMAIN-SUFFIX,wxs.{{{微信公众号}}}.com,REJECT,extended-matching,pre-matching
 
-# > 喜马拉雅去广告 · 2026-10-02
+# > 喜马拉雅去广告
 # desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
 DOMAIN,adse.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,adsehera.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
@@ -168,7 +168,7 @@ DOMAIN,adse.wsa.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,adbehavior.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,adbehavior.wsa.{{{喜马拉雅}}}.com,REJECT,extended-matching,pre-matching
 
-# > 香港抖音去广告 · 2026-10-02
+# > 香港抖音去广告
 # desc = 精简左右侧边栏、移除底栏切换，其余内容后续再完善。
 AND,((IP-CIDR,101.126.58.201/32,no-resolve),(DEST-PORT,6443)),REJECT
 AND,((IP-CIDR,110.249.199.75/32,no-resolve),(DEST-PORT,6443)),REJECT
@@ -177,11 +177,11 @@ AND,((IP-CIDR,111.63.61.101/32,no-resolve),(DEST-PORT,6443)),REJECT
 AND,((IP-CIDR,220.243.141.0/32,no-resolve),(DEST-PORT,6443)),REJECT
 AND,((OR,((DOMAIN-SUFFIX,bytegecko.com,extended-matching),(DOMAIN-SUFFIX,byteeffecttos.com,extended-matching))),(DOMAIN-KEYWORD,ncdn,extended-matching)),REJECT,pre-matching
 
-# > 小红书去广告 · 2026-10-02
+# > 小红书去广告
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
 AND,((PROTOCOL,QUIC),(DOMAIN-SUFFIX,{{{小红书}}}.com,extended-matching)),REJECT
 
-# > 优酷视频去广告 · 2026-10-02
+# > 优酷视频去广告
 # desc = 移除开屏广告、视频广告、信息流广告。其余广告由于请求已加密，故无法移除。
 DOMAIN,push.m.{{{优酷视频}}}.com,DIRECT,extended-matching
 DOMAIN,un-acs.{{{优酷视频}}}.com,DIRECT,extended-matching
@@ -209,20 +209,20 @@ DOMAIN,pre-acs.{{{优酷视频}}}.com,REJECT,extended-matching,pre-matching
 DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 
 [Map Local]
-# > 123云盘去广告 · 2026-10-02
+# > 123云盘去广告
 # desc = 移除开屏广告、应用内横幅广告。
 (?i)^https:\/\/www\.{{{123云盘}}}\.com\/api\/config\/get data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > ECOVACS HOME去广告 · 2026-10-02
+# > ECOVACS HOME去广告
 # desc = 移除横幅推广，精简底栏。
 (?i)^https:\/\/api-app\.dc-cn\.cn\.{{{ECOVACS HOME}}}user\.net\/api\/ecms\/app\/ad\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/gl-cn-api\.{{{ECOVACS HOME}}}vacs\.cn\/v1\/private\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > IT之家去广告 · 2026-10-02
+# > IT之家去广告
 # desc = 过滤IT之家信息流广告和文末广告，自定义移除置顶和轮播图，自定义移除项需在插件配置。
 (?i)^https?:\/\/dat\.ruanmei\.com\/ithome\/money\/acd\.json$ data-type=text data="" status-code=404
 
-# > Keep去广告 · 2026-10-02
+# > Keep去广告
 # desc = 移除开屏广告、搜索推荐和弹窗广告，精简底栏和首页标签。移除关注推荐、文章相关推荐和信息流中的课程推广。
 (?i)^https:\/\/api\.{{{Keep}}}\.com\/op-engine-webapp\/v1\/ad\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{Keep}}}\.com\/search\/v6\/default\/keyword\/list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -233,7 +233,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/api\.{{{Keep}}}\.com\/search\/v4\/hotHashtag\/list$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{Keep}}}\.com\/search\/v4\/hotword\/list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > Line去广告 · 2026-10-02
+# > Line去广告
 # desc = 移除Line各类广告
 (?i)^https:\/\/gw\.{{{Line}}}\.naver\.jp\/ext\/lgfp\/lad\/v\d$ data-type=text data="" status-code=404
 (?i)^https:\/\/gw\.{{{Line}}}\.naver\.jp\/lass\/api\/v\d\/ads$ data-type=text data="" status-code=404
@@ -250,12 +250,12 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/static\.{{{Line}}}-scdn\.net\/ad-sdk\/ data-type=text data="" status-code=404
 (?i)^https:\/\/scdn\.{{{Line}}}-apps\.com\/appresources\/moretab\/list\.json data-type=text data="" status-code=404
 
-# > 阿里云盘去广告 · 2026-10-02
+# > 阿里云盘去广告
 # desc = 移除首页广告横幅、弹窗和顶部奖励。
 (?i)^https:\/\/member\.{{{阿里云盘}}}\.com\/v2\/activity\/sign_in_luckyBottle data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{阿里云盘}}}\.com\/adrive\/v1\/file\/getTopFolders data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 爱奇艺去广告 · 2026-10-02
+# > 爱奇艺去广告
 # desc = 移除开屏广告、焦点图广告、瀑布流广告、搜索页面广告、移除青少年弹窗，精简底栏和我的页面。
 (?i)^https?:\/\/iface2\.{{{爱奇艺}}}\.com\/control\/3\.0\/init_proxy\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/act\.vip\.{{{爱奇艺}}}\.com\/interact\/api\/v2\/show\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -263,7 +263,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https?:\/\/iface2\.{{{爱奇艺}}}\.com\/video\/3\.0\/v_interface_proxy\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/iface2\.{{{爱奇艺}}}\.com\/views_pop\/3\.0\/pop_control\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 百度地图去广告 · 2026-10-02
+# > 百度地图去广告
 # desc = 移除开屏广告、出行页面推广、周边页面推广、打车页面推广，精简我的页面。此插件需要IPA签名方可使用，App Store用户请勿使用此插件，务必点击下方主页链接查看详细教程。
 (?i)^https:\/\/afd\.{{{百度地图}}}\.com\/afd\/entry\?action=(update|query) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/yongche\.{{{百度地图}}}\.com\/gomarketing\/api\/popup\/getentrancecordovaurl$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -273,7 +273,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/ecom\.map\.{{{百度地图}}}\.com\/ad-ops\/afd\/popup\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/maphotel\.{{{百度地图}}}\.com\/hotel\/goextranet\/activity\/detail\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 百度网盘去广告 · 2026-10-02
+# > 百度网盘去广告
 # desc = 移除开屏广告、首页卡片广告、传输页面广告、各类弹窗，精简侧拉抽屉和我的页面。
 (?i)^https:\/\/pan\.{{{百度网盘}}}\.com\/api\/getconfig\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/pan\.{{{百度网盘}}}\.com\/api\/getsyscfg\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -283,7 +283,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/pan\.{{{百度网盘}}}\.com\/api\/plugin\/get\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/pan\.{{{百度网盘}}}\.com\/recommend\/query\/list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 哔哩哔哩漫画去广告 · 2026-10-02
+# > 哔哩哔哩漫画去广告
 # desc = 移除开屏广告、应用内悬浮窗、各类横幅广告、你可能喜欢、小说推荐、首页弹窗，精简首页标签、底栏活动按钮和我的页面。
 (?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/GetActivityTab data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/GetBubbles data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -297,7 +297,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/AppInit data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/ListFlash data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 波点音乐去广告 · 2026-10-02
+# > 波点音乐去广告
 # desc = 精简应用配置，禁用P2P传输。移除开屏广告、横幅推广、悬浮广告、歌曲广告、商城入口、搜索推广、评论区推广、试听语音提醒。
 (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/(play|service|advert)\/advert\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/service\/banner\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -311,14 +311,14 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/pay\/vip\/invitation\/assist\/popup\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/pay\/h5\/common\/popup\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 菜鸟去广告 · 2026-10-02
+# > 菜鸟去广告
 # desc = 过滤菜鸟广告
 (?i)^https:\/\/nbcps-mtop\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.nbcps\.presentation\.fetch\.cn data-type=text data="" status-code=404
 (?i)^https:\/\/netflow-mtop\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.guoguo\.nbnetflow\.ads\.index data-type=text data="" status-code=404
 (?i)^https:\/\/cn-acs\.m\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.adkeyword\.get\.cn data-type=text data="" status-code=404
 (?i)^https:\/\/cn-acs\.m\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.guoguo\.nbnetflow\.ads\.m?show data-type=text data="" status-code=404
 
-# > 财新去广告 · 2026-10-02
+# > 财新去广告
 # desc = 过滤财新广告
 (?i)^https:\/\/entities\.{{{财新}}}\.com\/api\/(dataplus\/promotionHints|public\/push\/appIndex|public\/recommendNews) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/gateway\.{{{财新}}}\.com\/api\/app-api\/cxAdInfo\/selectIndexAdInfo data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -326,17 +326,17 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/gg\.{{{财新}}}\.com\/s\?z=caixin&slot=\d+ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/msgapi\.{{{财新}}}\.com\/msg_api\/annmsg\/annlist data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 彩云天气去广告 · 2026-10-02
+# > 彩云天气去广告
 # desc = 移除首页推广、弹窗、悬浮窗、底栏天气助手和工具箱入口，移除我的页面广告横幅。
 (?i)^https:\/\/biz\.cyapi\.cn\/(p\/v1\/entries|p\/v1\/trial_card\/info|v2\/product) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/starplucker\.cyapi\.cn\/v3\/(config\/cypage\/\w+\/conditions|notification\/message_center|operation\/homefeatures) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 大麦去广告 · 2026-10-02
+# > 大麦去广告
 # desc = 移除开屏广告、轮播图广告和弹窗广告，移除搜索填充词和专属推荐。
 (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.wireless\.home\.welcome\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.mec\.popup\.get\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 得物去广告 · 2026-10-02
+# > 得物去广告
 # desc = 移除开屏广告、弹窗、搜索词填充、热搜榜、猜你想搜、推荐关注、推荐信息流，精简消息中心和我的页面。
 (?i)^https:\/\/app\.{{{得物}}}\.com\/api\/v1\/app\/advertisement\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/app\.{{{得物}}}\.com\/hacking-newbie\/v1\/app\/coupon\/module\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -347,7 +347,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/app\.{{{得物}}}\.com\/sns-rec\/v1\/search\/word-skip\/new-list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/app\.{{{得物}}}\.com\/sns-rec\/v1\/search\/hotword-list\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 滴滴出行去广告 · 2026-10-02
+# > 滴滴出行去广告
 # desc = 移除开屏广告、弹窗广告、横幅推广，精简我的页面。
 (?i)^https:\/\/res\.xiaojukeji\.com\/resapi\/activity\/mget\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/res\.xiaojukeji\.com\/resapi\/activity\/mget$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -359,7 +359,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/htwkop-st\.xiaojukeji\.com\/gateway\?api=cms\.htw\.delivery\.batch data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/freight\.xiaojukeji\.com\/gateway\?api=freight\.d\.core\.multiDisplayV\d data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 叮咚买菜去广告 · 2026-10-02
+# > 叮咚买菜去广告
 # desc = 移除开屏广告、弹窗推广、搜索推荐、信息流广告、悬浮广告、各页面购物推荐、精简我的页面，移除底栏和各页面AI入口。
 (?i)^https?:\/\/119\.29\.29\.\d+\/d data-type=text data="" status-code=200
 (?i)^https?:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/advert\/ data-type=text data="" status-code=404
@@ -374,14 +374,14 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/user\.api\.{{{叮咚买菜}}}\.mobi\/userportal-service\/api\/v1\/user\/queryMyPage\/\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/guide-service\/userLike\/flowData$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 飞客去广告 · 2026-10-02
+# > 飞客去广告
 # desc = 移除开屏广告、首页广告、板块广告、帖内广告和我的页面广告。
 (?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=advis data-type=text data="" status-code=404
 (?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=vip_coupon data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/ptf\.{{{飞客}}}rip\.com\/static\/img\/common\/ic_plate_mine_button\.png data-type=tiny-gif status-code=200
 (?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=getdata data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 飞猪旅行去广告 · 2026-10-02
+# > 飞猪旅行去广告
 # desc = 移除开屏广告、精简我的页面。
 (?i)^https:\/\/acs\.m\.{{{飞猪旅行}}}\.com\/gw\/mtop\.fliggy\.crm\.screen\.allresource\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{飞猪旅行}}}\.com\/gw\/mtop\.fliggy\.crm\.screen\.predict\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -389,7 +389,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/acs\.m\.{{{飞猪旅行}}}\.com\/gw\/mtop\.trip\.my\.recommendcard\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{飞猪旅行}}}\.com\/gw\/mtop\.fliggy\.recommend\.common\.guess\.tab\.feeds\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 高德地图去广告 · 2026-10-20
+# > 高德地图去广告
 # desc = 移除开屏广告、首页推荐、搜索推荐、打车广告、地点推荐及广告，精简我的页面。
 (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/valueadded\/alimama\/splash_screen\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/faas\/amap-navigation\/main-page-assets\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -399,32 +399,32 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/info_bff\/rankingCard\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/shield\/search_business\/process\/marketingOperationStructured\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 金山文档去广告 · 2026-10-02
+# > 金山文档去广告
 # desc = 移除首页横幅推广、表单收集页面推广和我的页面推广。
 (?i)^https:\/\/www\.{{{金山文档}}}\.cn\/kdg\/api\/v1\/cards\/type\/3\?iosVer=\d+\.\d+\.\d+&isGetList=1 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/www\.{{{金山文档}}}\.cn\/kdg\/api\/v1\/cards\/type\/27\?iosVer=\d+\.\d+\.\d+&isGetList=1 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/f-api\.{{{金山文档}}}\.cn\/godfather\/api\/thirdparty\/v1\/viewpager\?showLocal=mobileWebIndex data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 京东去广告 · 2026-10-02
+# > 京东去广告
 # desc = 移除京东开屏广告，精简我的页面产品推广。
 (?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(searchBoxWord|stationPullService|uniformRecommend[06]) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 京东外卖去广告 · 2026-10-02
+# > 京东外卖去广告
 # desc = 移除首页推广、点评页面非美食内容、购物车及我的页面推荐、搜索发现、搜索榜单，精简我的页面。
 (?i)^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=uniformRecommend data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=search_recommendRanking$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 酷安去广告 · 2026-10-02
+# > 酷安去广告
 # desc = 过滤酷安广告
 (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/search\?.*type=hotSearch data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 快递100去广告 · 2026-10-02
+# > 快递100去广告
 # desc = 移除横幅广告、弹窗广告，精简首页。
 (?i)^https?:\/\/p\.{{{快递100}}}\.com\/advertisement\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/p\.{{{快递100}}}\.com\/e-commerce\/act\/actInfo\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/p\.{{{快递100}}}\.com\/apicenter\/card\.dox data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 芒果TV去广告 · 2026-10-02
+# > 芒果TV去广告
 # desc = 移除开屏广告、信息流广告、播放页广告，精简我的页面。
 (?i)^https:\/\/dc\.bz\.mg{{{芒果TV}}}\.com\/dynamic\/v\d\/skin\/config\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/dc\.bz\.mg{{{芒果TV}}}\.com\/dynamic\/v\d\/channel\/ads\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -434,7 +434,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/mobile\.api\.mg{{{芒果TV}}}\.com\/v\d\/mobile\/checkUpdate\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/mobileso\.bz\.mg{{{芒果TV}}}\.com\/mobile\/recommend\/v\d\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 墨迹天气去广告 · 2026-10-02
+# > 墨迹天气去广告
 # desc = 移除天气页面横幅、工具栏，移除时景关注页面推荐，精简我的页面。
 (?i)^https:\/\/fcard\.api\.{{{墨迹天气}}}\.com\/flycard\/flyCard\? data-type=text data="" status-code=404
 (?i)^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/card\/subscribe$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -443,7 +443,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/vdo\.api\.{{{墨迹天气}}}\.com\/shortvideo\/zone\/follow_src_zone\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/sns\.api\.{{{墨迹天气}}}\.com\/user\/dynamic_v9\/json\/someone_interest\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 拼多多去广告 · 2026-10-02
+# > 拼多多去广告
 # desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
 (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/unrated_order_for_unreceived_tab\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/query_order_list_tabs_element\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -466,7 +466,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/buffon\/nasus\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/caterham\/v2\/query\/goods_detail_with_tags\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 起点读书去广告 · 2026-10-02
+# > 起点读书去广告
 # desc = 移除起点读书开屏广告、每日导读、各类弹窗、文末广告、搜索填充词，精简我的页面。
 (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v4\/client\/getsplashscreen\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/adv\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -482,7 +482,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/followsubscribe\/showChapterEndModule\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/young\/getconf$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 瑞幸咖啡去广告 · 2026-10-02
+# > 瑞幸咖啡去广告
 # desc = 移除开屏广告、弹窗和各类横幅推广。
 (?i)^https:\/\/capi\.{{{瑞幸咖啡}}}\.com\/resource\/m\/growUp\/calendarList data-type=text data="" status-code=404
 (?i)^https:\/\/capi\.{{{瑞幸咖啡}}}\.com\/resource\/m\/promotion\/giftCard\/topPage data-type=text data="" status-code=404
@@ -493,7 +493,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/capi\.{{{瑞幸咖啡}}}\.com\/resource\/m\/eorder\/product\/popAppTagProductList data-type=text data="" status-code=404
 (?i)^https:\/\/capi\.{{{瑞幸咖啡}}}\.com\/resource\/m\/sys\/app\/adposNew data-type=text data="" status-code=404
 
-# > 什么值得买去广告 · 2026-10-02
+# > 什么值得买去广告
 # desc = 移除开屏广告、信息流广告、各类横幅广告、搜索页广告、文章内广告，移除活动皮肤、精简我的页面。
 (?i)^https:\/\/app-api\.{{{什么值得买}}}\.com\/util\/loading\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/app-api\.{{{什么值得买}}}\.com\/mychannel\/list$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -503,32 +503,32 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/s-api\.{{{什么值得买}}}\.com\/sou\/search_default_keyword\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/s-api\.{{{什么值得买}}}\.com\/sou\/popup_coupon\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 顺丰速运去广告 · 2026-10-02
+# > 顺丰速运去广告
 # desc = 移除开屏广告、首页下拉抽屉、首页推广、应用内悬浮窗、横幅广告，移除主题，精简我的页面。
 (?i)^https:\/\/ccsp-egmas\.{{{顺丰速运}}}\.com\/cx-app-base\/base\/app\/ad\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/ucmp\.{{{顺丰速运}}}\.com\/proxy\/esgcempcore\/memberGoods\/pointMallService\/goodsList$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/ucmp(-static)?\.{{{顺丰速运}}}\.com\/proxy\/ccspBase\/module-config\/(login\/)?query\? data-type=text data="{\"version\":\"2.0\",\"success\":true,\"obj\":[{\"positionName\":\"APP2025\",\"positionChannel\":\"app\",\"sceneList\":[{\"urlType\":\"webview\",\"sceneCode\":\"ddcb36295d5d2939ba4bbe2e5e02a4d8\",\"extendField1\":\"{\\\"boundApp\\\":\\\"Android,iOS\\\"}\",\"id\":29130,\"extendFieldOneDTO\":{\"boundApp\":\"Android,iOS\"},\"seq\":0,\"sceneName\":\"寄快递\",\"updateTime\":\"2026-02-06 18:55:15\",\"url\":\"{ \\\"needLogin\\\": true, \\\"classify\\\": \\\"MY_SERVICE\\\", \\\"params\\\": { \\\"jumpName\\\": \\\"快速寄件\\" status-code=200 header="Content-Type:application/json"
 
-# > 淘票票去广告 · 2026-10-02
+# > 淘票票去广告
 # desc = 移除开屏广告、悬浮广告、轮播图广告和弹窗广告，移除搜索填充词和为你推荐。
 (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.life\.popup\.get\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopindependentadvertiseapi\.queryadvertise\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopitemadvertiseapi\.queryadvertise\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 网易有道词典去广告 · 2026-10-02
+# > 网易有道词典去广告
 # desc = 移除开屏广告、弹窗广告、右上角推广。
 (?i)^https:\/\/dict\.{{{网易有道词典}}}\.com\/vip\/activity\/startup\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/dict\.{{{网易有道词典}}}\.com\/vip\/activity\/retention\/configs\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/dict\.{{{网易有道词典}}}\.com\/vip\/activity\/retention\/match\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/dict\.{{{网易有道词典}}}\.com\/vip\/user\/paid\/guide\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 网易邮箱大师去广告 · 2026-10-02
+# > 网易邮箱大师去广告
 # desc = 移除网易邮箱大师开屏广告、签到任务提醒，精简侧拉抽屉和我的页面。
 (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/http\/urlConfig\.do$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/dashi\.{{{网易邮箱大师}}}\.com\/task-center-api\/fapi\/task\/list$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailoperating\/mailmaster\/api\/operator\/get$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 微博去广告 · 2026-10-02
+# > 微博去广告
 # desc = 过滤微博广告及去除各部分推广模块
 (?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:ug\/checkin\/list|push\/daily|push\/info) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/!\/live\/media_homelist\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -549,12 +549,12 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/card\.{{{微博}}}\.com\/article\/m\/aj\/(?:reward|uvead) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/{{{微博}}}\.com\/ttarticle\/x\/m\/aj\/(?:reward|uvead) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 微信公众号去广告 · 2026-10-02
+# > 微信公众号去广告
 # desc = 过滤微信公众号广告
 (?i)^https:\/\/mp\.weixin\.{{{微信公众号}}}\.com\/mp\/(cps_product_info|getappmsgad|jsmonitor|masonryfeed|relatedarticle)\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/mp\.weixin\.{{{微信公众号}}}\.com\/mp\/relatedsearchword data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 喜马拉雅去广告 · 2026-10-02
+# > 喜马拉雅去广告
 # desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
 (?i)^https:\/\/(search|searchwsa)\.{{{喜马拉雅}}}\.com\/hub\/(guideWord|hotWord)V\d\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-feed\/v\d\/scene\/listen\/refresh\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -572,14 +572,14 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/subscribe\/v\d\/subscribe\/recommend\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/purchased\/recommend\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 下厨房去广告 · 2026-10-02
+# > 下厨房去广告
 # desc = 移除开屏广告、页面推广及横幅，精简首页标签。
 (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/ad\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/account\/feeds_v7\.json data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/homepage1810\/init_page\.json data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/mark_mission\/get_sticker_info\.json data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 闲鱼去广告 · 2026-10-02
+# > 闲鱼去广告
 # desc = 移除开屏广告、商品信息流广告、关注推荐、搜索栏填充词、首页签到入口及悬浮广告，精简我的页面。
 (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlecommerce\.splash\.ads\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idle\.user\.strategy\.list\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -589,17 +589,17 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlemtopsearch\.search\.shade\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idle\.playboy\.recommend\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 香港抖音去广告 · 2026-10-02
+# > 香港抖音去广告
 # desc = 精简左右侧边栏、移除底栏切换，其余内容后续再完善。
 (?i)^https:\/\/api5-normal-lq\.amemv\.com\/api\/ad\/ data-type=text data="" status-code=404
 (?i)^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/api\/ad\/ data-type=text data="" status-code=404
 (?i)^https:\/\/zlink\.ugsdk\.cn\/ad\/ data-type=text data="" status-code=404
 
-# > 小黑盒去广告 · 2026-10-02
+# > 小黑盒去广告
 # desc = 移除开屏广告和热点板块信息流广告
 (?i)^https:\/\/api\.{{{小黑盒}}}\.cn\/account\/get_ads_info_v2 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 小红书去广告 · 2026-10-02
+# > 小红书去广告
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
 (?i)^https:\/\/ci\.{{{小红书}}}\.com\/system_config\/watermark data-type=tiny-gif status-code=200
 (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/surprisebox\/(?:get_style|open|submit_action) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -607,7 +607,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/(?:v2\/guide\/user_banner|v3\/note\/guide) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/www\.{{{小红书}}}\.com\/api\/sns\/(?:v1\/ads\/resource|v2\/hey\/\w+\/hey_gallery) data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 小象超市去广告 · 2026-10-02
+# > 小象超市去广告
 # desc = 移除开屏广告、应用内弹窗、猜你想买、横幅推广和悬浮窗。
 (?i)^https:\/\/mall\.{{{小象超市}}}\.com\/api\/c\/homepage\/splash data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/mall\.{{{小象超市}}}\.com\/api\/c\/homepage\/bubble\/operate\/info data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -617,14 +617,14 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/mall\.{{{小象超市}}}\.com\/api\/c\/poi\/\d+\/personal\/recommend data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/businessapi\.ksedt\.com\/signupindex\/jxlist data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 小宇宙去广告 · 2026-10-02
+# > 小宇宙去广告
 # desc = 移除开屏广告、搜索框推荐词和AI总结。
 (?i)^https:\/\/api\.{{{小宇宙}}}\.com\/v\d\/flash data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{小宇宙}}}\.com\/v\d\/ai data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{小宇宙}}}\.com\/v\d\/search\/get data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https?:\/\/api\.{{{小宇宙}}}\.com\/v\d\/category data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 萤石云视频去广告 · 2026-10-02
+# > 萤石云视频去广告
 # desc = 移除开屏广告、首页推广、我的页面推广。
 (?i)^https:\/\/api\.{{{萤石云视频}}}\.com\/api\/ads data-type=text data="" status-code=404
 (?i)^https:\/\/i\.{{{萤石云视频}}}\.com\/api\/user\/tabList data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -633,7 +633,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/api\.{{{萤石云视频}}}\.com\/v3\/configurations\/gray\/info\?grayTypes=185 data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{萤石云视频}}}\.com\/v3\/videoclips\/square\/video\/query data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 知乎去广告 · 2026-10-02
+# > 知乎去广告
 # desc = 移除HTTPDNS和QUIC传输配置，移除开屏广告、信息流广告、回答页广告，移除回答页下的相关回答、专栏卡片及圈子卡片，移除直答页面推荐知识库和提问推荐，移除评论区评论氛围满意度调查，精简首页顶部标签及我的页面。
 (?i)^https:\/\/api\.{{{知乎}}}\.com\/ad-style-service\/request$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{知乎}}}\.com\/commercial_api\/ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -651,7 +651,7 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/api\.{{{知乎}}}\.com\/kvip\/right\/my_card\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/api\.{{{知乎}}}\.com\/unlimited\/go\/my_card\/v\d\? data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
-# > 转转去广告 · 2026-10-02
+# > 转转去广告
 # desc = 移除开屏广告、应用内悬浮窗、信息流推广、商品推荐、首页弹窗，精简我的页面。
 (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/v2\/zzlogic\/getOpenScreen$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/v2\/zzinfoshow\/getwindvanecardv2$ data-type=text data="{}" status-code=200 header="Content-Type:application/json"
@@ -665,16 +665,16 @@ DOMAIN,youku-acs.m.taobao.com,REJECT,extended-matching,pre-matching
 (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/v2\/zzinfoshow\/getchoicegoodsinfos\? data-type=text data="{\"respCode\":0,\"respData\":{},\"errorMsg\":\"\",\"errMsg\":\"\"}" status-code=200 header="Content-Type:application/json"
 
 [Body Rewrite]
-# > 12306去广告 · 2026-10-02
+# > 12306去广告
 # desc = 过滤12306应用内广告及开屏广告
 http-response-jq (?i)^https:\/\/ad\.{{{12306}}}\.cn\/ad\/ser\/getAdList$ 'delpaths([["materialsList"]])'
 http-response-jq (?i)^https:\/\/ad\.{{{12306}}}\.cn\/ad\/ser\/getAdList$ 'delpaths([["advertParam"]])'
 
-# > ECOVACS HOME去广告 · 2026-10-02
+# > ECOVACS HOME去广告
 # desc = 移除横幅推广，精简底栏。
 http-response-jq (?i)^https:\/\/gl-cn-api\.{{{ECOVACS HOME}}}vacs\.cn\/v3\/private\/ '.data.navigateInfoResponseList |= map(select(.positionType == "Robot" or .positionType == "Mine"))'
 
-# > Keep去广告 · 2026-10-02
+# > Keep去广告
 # desc = 移除开屏广告、搜索推荐和弹窗广告，精简底栏和首页标签。移除关注推荐、文章相关推荐和信息流中的课程推广。
 http-response-jq (?i)^https:\/\/api\.{{{Keep}}}\.com\/op-engine-webapp\/v1\/configs$ 'delpaths([["data","adTimeoutReport"]])'
 http-response-jq (?i)^https:\/\/api\.{{{Keep}}}\.com\/op-engine-webapp\/v1\/configs$ 'delpaths([["data","spotShowReport"]])'
@@ -723,11 +723,11 @@ http-response-jq (?i)^https:\/\/api\.{{{Keep}}}\.com\/twins\/v4\/feed\/entryDeta
 http-response-jq (?i)^https:\/\/api\.{{{Keep}}}\.com\/config\/v3\/basic\? '.data.bottomBarControl.tabs |= map(select(.tabType | . == "home" or . == "schedule" or . == "dynamic_sports" or . == "personal")) | .data.homeTabs |= map(select(.type | . == "socialTab" or . == "union_feed_all" or . == "homeRecommend" or . == "suitTab" or . == "union_feed_route"))'
 http-response-jq (?i)^https:\/\/api\.{{{Keep}}}\.com\/pencil-webapp\/play\/v1\/games\? '.data.games[].microGames[] |= if .leftIcon? and .leftIcon.type == "aiMode" then del(.leftIcon) else . end'
 
-# > Reddit去广告 · 2026-10-02
+# > Reddit去广告
 # desc = 过滤应用内推广，阻止NSFW提示。
 http-response-jq (?i)^https?:\/\/gql(-fed)?\.{{{Reddit}}}\.com 'walk(   if type == "object" then      (if .isNsfw == true then .isNsfw = false else . end)     | (if .isNsfwMediaBlocked == true then .isNsfwMediaBlocked = false else . end)     | (if .isNsfwContentShown == false then .isNsfwContentShown = true else . end)      | (if (.commentsPageAds | type == "array") then (.commentsPageAds = []) else . end)      | (if ( (.node | type == "object") and (.node.cells | type == "array") and (.node.cells | any(.__typename? == "AdMetadataCell" or .isAdPost? == true)) ) then empty else . end)     | (if (.node | type == "object") and (.node.adPayload | type == "object") then empty else . end)     | (if .__typename == "AdPost" then empty else . end)   else .  end)'
 
-# > 爱奇艺去广告 · 2026-10-02
+# > 爱奇艺去广告
 # desc = 移除开屏广告、焦点图广告、瀑布流广告、搜索页面广告、移除青少年弹窗，精简底栏和我的页面。
 http-response-jq (?i)^https:\/\/cards\.{{{爱奇艺}}}\.com\/views_home\/3\.0\/qy_home\? 'delpaths([["base","statistics"]])'
 http-response-jq (?i)^https:\/\/cards\.{{{爱奇艺}}}\.com\/views_home\/3\.0\/qy_home\? 'del(.cards[] | select(.alias_name == "focus" or .alias_name == "ad_mobile_flow" or .alias_name == "ad_trueview"))'
@@ -751,7 +751,7 @@ http-response-jq (?i)^https?:\/\/(kjp|t7z)\.cupid\.{{{爱奇艺}}}\.com\/mixer\?
 http-response-jq (?i)^https?:\/\/search\.video\.{{{爱奇艺}}}\.com\/q\? 'delpaths([["data"]])'
 http-response-jq (?i)^https?:\/\/iface2\.{{{爱奇艺}}}\.com\/aggregate\/3\.0\/getMyMenus\? '.data |= map(select(.statistic.block != "wd_liebiao_2") | select(all(.menuList[]?.statistic2.block; . != "wd_liebiao_3")))'
 
-# > 百度地图去广告 · 2026-10-02
+# > 百度地图去广告
 # desc = 移除开屏广告、出行页面推广、周边页面推广、打车页面推广，精简我的页面。此插件需要IPA签名方可使用，App Store用户请勿使用此插件，务必点击下方主页链接查看详细教程。
 http-response-jq (?i)^https:\/\/newclient\.map\.{{{百度地图}}}\.com\/feed\/govui\/rich_content 'delpaths([["data"]])'
 http-response-jq (?i)^https:\/\/newclient\.map\.{{{百度地图}}}\.com\/client\/noticebar\/get\? 'delpaths([["content","multi_data"]])'
@@ -762,11 +762,11 @@ http-response-jq (?i)^https:\/\/newclient\.map\.{{{百度地图}}}\.com\/living\
 http-response-jq (?i)^https:\/\/newclient\.map\.{{{百度地图}}}\.com\/living\/nearby\/api\? 'delpaths([["Result","cards",5]])'
 http-response-jq (?i)^https:\/\/newclient\.map\.{{{百度地图}}}\.com\/living\/nearby\/api\? 'delpaths([["Result","cards",9]])'
 
-# > 百度网盘去广告 · 2026-10-02
+# > 百度网盘去广告
 # desc = 移除开屏广告、首页卡片广告、传输页面广告、各类弹窗，精简侧拉抽屉和我的页面。
 http-response-jq (?i)^https:\/\/pan\.{{{百度网盘}}}\.com\/feed\/kingkongdistrict\? '.data.data |= map(select(.type != "novel" and .type != "shortplay" and .type != "print" and .type != "job_hunt"))'
 
-# > 波点音乐去广告 · 2026-10-02
+# > 波点音乐去广告
 # desc = 精简应用配置，禁用P2P传输。移除开屏广告、横幅推广、悬浮广告、歌曲广告、商城入口、搜索推广、评论区推广、试听语音提醒。
 http-response-jq (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/service\/conf\/all\? 'delpaths([["data","groupSign","adStartAppDialog"]])'
 http-response-jq (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/service\/conf\/all\? 'delpaths([["data","groupSign","adGuideTest"]])'
@@ -798,27 +798,27 @@ http-response-jq (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/service\/mu
 http-response-jq (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/comments\/v3\/topInfo\? 'delpaths([["data","putao"]])'
 http-response-jq (?i)^https:\/\/bd-api\.{{{波点音乐}}}\.cn\/api\/comments\/v3\/topInfo\? 'delpaths([["data","bannerVos"]])'
 
-# > 菜鸟去广告 · 2026-10-02
+# > 菜鸟去广告
 # desc = 过滤菜鸟广告
 http-response-jq (?i)^https:\/\/(cn-acs\.m|e2e-mtop)\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.app\.e2e\.engine\.page\.fetch 'del(.data.data.data.mainSearch.bizData.searchContents, .data.data.data.operationList)'
 http-response-jq (?i)^https:\/\/e2e-mtop\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.app\.e2e\.engine\.page\.fetch\.cn 'del(.data.data.banner, .data.data.activity, .data.data.vip)'
 http-response-jq (?i)^https:\/\/longquan-mtop\.{{{菜鸟}}}\.com\/gw\/mtop\.com\.{{{菜鸟}}}\.longquan\.place\.getpageresourcecontent\.cn 'del(.data.result.placeContentMap["780001"].contentList)'
 http-response-jq (?i)^https:\/\/netflow-mtop\.{{{菜鸟}}}\.com\/gw\/mtop\.{{{菜鸟}}}\.guoguo\.nbnetflow\.ads 'if .data.result[0].materialId == "39017" then . else .data = {} end'
 
-# > 大麦去广告 · 2026-10-02
+# > 大麦去广告
 # desc = 移除开屏广告、轮播图广告和弹窗广告，移除搜索填充词和专属推荐。
 http-response-jq (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.wireless\.user\.my\.content\.get\/ 'delpaths([["data","banner"]])'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.wireless\.user\.my\.content\.get\/ 'delpaths([["data","performFilmVip","userProfitList"]])'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.wireless\.mypage\.feed\/ 'delpaths([["data","feedCard"]])'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{大麦}}}\.com\/gw\/mtop\.damai\.mec\.aristotle\.get\/ 'delpaths([["data","data","top","keywords"]])'
 
-# > 得物去广告 · 2026-10-02
+# > 得物去广告
 # desc = 移除开屏广告、弹窗、搜索词填充、热搜榜、猜你想搜、推荐关注、推荐信息流，精简消息中心和我的页面。
 http-response-jq (?i)^https:\/\/app\.{{{得物}}}\.com\/api\/v1\/app\/biz-aggregate\/me\/user-index\? '.data.modules |= map(if .key == "wallet" then .data.menus |= map(select(.key == "coupon" or .key == "allowance" or .key == "gift" or .key == "balance")) else . end) | .data.modules |= map(select(.key != "merchant" and .key != "discountCoupon"))'
 http-response-jq (?i)^https:\/\/app\.{{{得物}}}\.com\/api\/v1\/app\/account\/wallet\/page\/entrance\? '.data.groupInfoDTOS |= map(.moduleInfoDTO = {assetModule: .moduleInfoDTO.assetModule}) | .data.moduleNames = [.data.moduleNames[] | select(. == "assetModule")] | . as $full | $full | .data.groupNames |= (map(select(. == "MAIN" or . == "ASYNC_COMMON" or . == "ASYNC_GOODS_FEEDS")))'
 http-response-jq (?i)^https:\/\/app\.{{{得物}}}\.com\/identify-discovery\/v1\/discovery\/index\? '.data.groups |= map(.items |= map(select(.title == "消息中心")))'
 
-# > 滴滴出行去广告 · 2026-10-02
+# > 滴滴出行去广告
 # desc = 移除开屏广告、弹窗广告、横幅推广，精简我的页面。
 http-response-jq (?i)^https:\/\/as\.xiaojukeji\.com\/ep\/as\/toggles\? '.data |= map(select(.name != "isUseNetConnectivity") | .assign.args.rootca_pin = 0 | .assign.args.sni_list = {})'
 http-response-jq (?i)^https:\/\/conf\.{{{滴滴出行}}}taxi\.com\.cn\/homepage\/v\d\/other\/slow\? 'delpaths([["data","order_cards","new_loss_banner_card"]])'
@@ -845,7 +845,7 @@ http-response-jq (?i)^https:\/\/poi\.map\.xiaojukeji\.com\/mapapi\/startinfo\?ap
 http-response-jq (?i)^https:\/\/poi\.map\.xiaojukeji\.com\/mapapi\/poiinfo\?product_id 'delpaths([["rec_destination"]])'
 http-response-jq (?i)^https:\/\/common\.{{{滴滴出行}}}taxi\.com\.cn\/user_common\/itineraryList\? 'del(.data.tab_nav[]?.tab_param)'
 
-# > 叮咚买菜去广告 · 2026-10-02
+# > 叮咚买菜去广告
 # desc = 移除开屏广告、弹窗推广、搜索推荐、信息流广告、悬浮广告、各页面购物推荐、精简我的页面，移除底栏和各页面AI入口。
 http-response-jq (?i)^https:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/homeApi\/categoriesNewDetail\? 'delpaths([["data","ad_info"]])'
 http-response-jq (?i)^https:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/tool\/getConfig\? 'delpaths([["data","ai_enter_config"]])'
@@ -856,7 +856,7 @@ http-response-jq (?i)^https:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/guide-ser
 http-response-jq (?i)^https?:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/homeApi\/bottomNavi 'del(.data.adId?) | if (.data.bottom_list? | length > 0) then .data.bottom_list |= map(select(.type != "eatwhat")) else . end'
 http-response-jq (?i)^https?:\/\/maicai\.api\.{{{叮咚买菜}}}\.mobi\/homeApi\/homeFlowDetail 'walk(if type == "object" and has("list") then .list |= map(if type == "object" and has("multi_advertise_data_list") then del(.multi_advertise_data_list) else . end) else . end)'
 
-# > 高德地图去广告 · 2026-10-20
+# > 高德地图去广告
 # desc = 移除开屏广告、首页推荐、搜索推荐、打车广告、地点推荐及广告，精简我的页面。
 http-response-jq (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/shield\/frogserver\/aocs\/updatable\/1\? 'delpaths([["data","adStatementConfig"]])'
 http-response-jq (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/shield\/frogserver\/aocs\/updatable\/1\? 'delpaths([["data","adCustomerRetainArchitecture"]])'
@@ -916,13 +916,13 @@ http-response-jq (?i)^https:\/\/info\.{{{高德地图}}}\.com\/ws\/shield\/searc
 http-response-jq (?i)^https:\/\/info\.{{{高德地图}}}\.com\/ws\/shield\/search\/poi\/detail\? 'def keep_skeleton:   IN(     "baseInfo",                    # 地点本体：名称/坐标/评分/标签/图标     "poiDetailCommonConfig",       # 详情页通用配置（含上滑引导文案）     "navbarMore",                  # 右上角更多菜单     "backToTop",                   # 回到顶部     "poiDetailBottomBar",          # 底部操作栏（导航/电话/收藏）     "poiMapModule",                # 地点在哪：地图与静态位置图     "anchor",                      # 页内锚点跳转     "reSortContentAndSimilar",     # 内容排序策略开关，本身不是内容     "comprehensiveEditEntrance",   # 编辑/纠错入口     "functionZone",                # 功能区（写评价/订座/预约）     "poiTipBar",                   # 顶部提示条：本店 IM 咨询入口     "floatTelButton",              # 悬浮电话按钮     "footer_tel_button",           # 吸底电话按钮     "footer_retain_button"         # 吸底留存按钮   );                                                            # end def keep_skeleton     def keep_ugc:   IN(     "attractGalleryInfo",          # 顶部图集     "combineReviews",              # 评价     "evaluateVO", "reviews",       # 评价数据     "inviteReview",                # 邀请评价     "seriousPublicExperience", "societyPublicExperience",     "poiDetailRankUpCard",         # 榜单/排名     "travelGuideAndQa",            # 旅行攻略与问答     "poiDetailAQModule",           # 详情页问答     "AIStreetTips",                # 扫街锦囊：AI 生成的地点提示     "expertNote",                  # 达人笔记     "recommend_food",              # 网友推荐菜：本店菜品     "shopNews",                    # 本店动态     "mallNews",                    # 本商场动态     "shopBaseCase"                 # 本店案例   );                                                            # end def keep_ugc     def keep_intro:   IN(     "wikiInfo", "wikiInfoBelow",     "poiDetailNote", "poiDetailWikiAndLOI"   );                                                            # end def keep_intro     def keep_poi_data:   IN(     "human_traffic",               # 人流量     "floorGuideGbf",               # 楼层/商铺导览     "houseEvaluationInfo",         # 本楼盘测评     "residentialOwnersVO",         # 本小区业主信息     "realtorRealStep",             # 本楼盘成交步骤     "houseOfficeInfo", "houseOfficeService",     "houseOfficeBrandIntroduction", "houseOfficeNotice",     "newHouseDetailInfo", "house_apart_info",     "scenic_mustplay",             # 本景点必玩     "hotelGraphicDetail", "homestayGraphicDetail",     "hotelFacilities", "hotelMustRead",     "shoppingMallEvent"            # 本商场活动   );                                                            # end def keep_poi_data     def keep_service:   IN(     "enhanceIMQuestions",          # 本店咨询引导问题     "enhanceCustomerServicePoiModule",   # 本店 AI 客服     "aiAgentFooterBar",            # 本店 AI 客服吸底条     "imBottomGuide",               # 本店 IM 引导     "enhanceCustomerServiceFixedBottom",     "shopBasePerson",              # 本店技师/顾问     "shopServiceBffvo",            # 本店服务     "service_process",             # 本店服务流程     "shopCourseList",              # 本店课程     "poiDetailJobList", "jobRec",  # 本店招聘     "shop_vip_card",               # 本店会员卡     "shopStdActivity",             # 本店活动     "privateSphereChannel",        # 本店私域渠道     "kaShopService", "ka_not_enter",   # KA 商家服务与状态提示     "company1688Info",             # 本店的 1688 店铺信息     "thirdparty_info",             # 本店第三方信息     "expressEntryCard",            # 快捷入口     "poi_intercept",               # 地点状态提示（停业/迁址等）     "aiAgentEntry", "commonAiAgent", "poiCardAiAgentEntryV2"   # AI 助手入口   );                                                            # end def keep_service     def keep_guide:   IN(     "storeDirections",             # 到店导航     "shopFindWayGuide"             # 找店指引   );                                                            # end def keep_guide     def keep_compliance:   IN(     "shopQualifications", "businessQualifications",     "legal_document", "home_legal_document", "rec_legal_document",     "business_scope", "governmentInformation",     "official_account", "merchantSettlement", "shop_settlement"   );                                                            # end def keep_compliance      def keep_booking:   IN(     "scenic_ticket",               # 本景点门票     "movieBookingShelf",           # 本影院影票     "hotelRooms",                  # 本酒店房型     "ktvBookingShelf",             # 本店包间     "venueBookingShelfModule",     # 本店场地     "reserveShelf",                # 本店预订     "DinnerBottomBar",             # 本店订座底部条     "poiDetailAppointmentRegister" # 到店预约登记   );                                                            # end def keep_booking  def keep_module:   keep_skeleton or keep_ugc or keep_intro or keep_poi_data   or keep_service or keep_guide or keep_compliance or keep_booking;  def keep_ref:   (type == "string") and keep_module;                          # end def keep_ref  def at($keys):   reduce $keys[] as $k (.; if type == "object" then .[$k] else null end);      def filter_refs:   if type == "array"   then map(select((type != "string") or keep_module))   else . end;                                                  # end def filter_refs      def anchor_item_kept:   (type == "object")   and ((.anchor | type) == "array")   and any(.anchor[]; keep_ref);                                # end def anchor_item_kept     def panel_item_kept:   if (type == "object") and ((.modulesMap | type) == "array")   then any(.modulesMap[]; keep_ref)   else true end;                                               # end def panel_item_kept    def trim_detail:    if (.data | type) == "object" then      (if (.data.regions | type) == "object" then        .data.regions |= with_entries(.value |= filter_refs)      else . end)      | (if (.data.modules | type) == "object" then          .data.modules |= with_entries(select(.key | keep_module))        else . end)      | (if (at(["data", "meta", "half_hidden_modules"]) | type) == "array" then          .data.meta.half_hidden_modules |= filter_refs        else . end)       | (if (at(["data", "modules", "baseInfo", "data", "user"]) | type) == "object" then          .data.modules.baseInfo.data.user |= del(.userLocRgeo, .homeInfo, .companyInfo)        else . end)      | (if (at(["data", "modules", "anchor", "data", "items"]) | type) == "array" then          .data.modules.anchor.data.items |= map(select(anchor_item_kept))        else . end)      | (if (at(["data", "modules", "poiDetailCommonConfig", "data",                "swipeUpPanelConfig", "swipeUpPanelTextList"]) | type) == "array" then          .data.modules.poiDetailCommonConfig.data.swipeUpPanelConfig            .swipeUpPanelTextList |= map(select(panel_item_kept))        else . end)    else . end;                                                  # end def trim_detail  trim_detail'
 http-response-jq (?i)^https:\/\/m5\.{{{高德地图}}}\.com\/ws\/smartui\/near_recommend\? 'delpaths([["data","operation_activity"]])'
 
-# > 京东去广告 · 2026-10-02
+# > 京东去广告
 # desc = 移除京东开屏广告，精简我的页面产品推广。
 http-response-jq (?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if ((getpath(["data","JDMessage","socketmonitor"]) // {}) | has("isSocketEstablishedAhead")) then (setpath(["data","JDMessage","socketmonitor","isSocketEstablishedAhead"]; 0)) else . end'
 http-response-jq (?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if ((getpath(["data","JDMessage","socketmonitor"]) // {}) | has("isSocketReport")) then (setpath(["data","JDMessage","socketmonitor","isSocketReport"]; 0)) else . end'
 http-response-jq (?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=basicConfig 'if ((getpath(["data","JDHttpToolKit","httpdns"]) // {}) | has("httpdns")) then (setpath(["data","JDHttpToolKit","httpdns","httpdns"]; 0)) else . end'
 
-# > 京东外卖去广告 · 2026-10-02
+# > 京东外卖去广告
 # desc = 移除首页推广、点评页面非美食内容、购物车及我的页面推荐、搜索发现、搜索榜单，精简我的页面。
 http-response-jq (?i)^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=hours_home$ 'del(.result.config.searchFloor.data[].searchWords) | .result.data |= map(if .tnConfigVO?.businessCode == "nearby_HourlyGo_Operation_Tags" then empty else . end)'
 http-response-jq (?i)^https:\/\/color\.{{{京东外卖}}}dj\.com\/client\.action\?functionId=wmHome$ '(.floors |= map(del(.data.tnData.newsInfo?))) | .floors |= (map(select(.mId != "newWalletIdFloor" and .mId != "recommendfloor"))) | .floors |= (map(.data |= (if .tnData? then del(.tnData.cardList, .tnData.cardListStatic, .tnData.walletList) else . end)))'
@@ -930,7 +930,7 @@ http-response-jq (?i)^https:\/\/api\.m\.{{{京东外卖}}}\.com\/client\.action$
 http-response-jq (?i)^https:\/\/api\.m\.{{{京东外卖}}}\.com\/client\.action$ 'delpaths([["data","wishlistDTO","bubbleTip"]])'
 http-response-jq (?i)^https:\/\/api\.m\.{{{京东外卖}}}\.com\/client\.action$ '.data.tabList |= (map(select(.code == "recommendation" or .code == "find_food")) | map(if .code == "recommendation" then .dpHomeFeedTabResultDTOList = .dpHomeFeedTabResultDTOList[0:2] else . end | .dpHomeBannerResultDTOList = []))'
 
-# > 酷安去广告 · 2026-10-02
+# > 酷安去广告
 # desc = 过滤酷安广告
 http-response-jq (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/feed\/detail\? '.data.hotReplyRows |= if . then map(select(.id?)) else . end | .data.topReplyRows |= if . then map(select(.id?)) else . end | reduce ("detailSponsorCard", "include_goods", "include_goods_ids") as $key (.; .data[$key]=[])'
 http-response-jq (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/feed\/replyList 'if .data? and ((.data | type) == "array") and (.data | length > 0) then .data |= map(select(.id?)) else . end'
@@ -939,7 +939,7 @@ http-response-jq (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/page\/dataList 'if (
 http-response-jq (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/main\/indexV8 '.data |= (if length > 0 then map(select((.entityTemplate != "sponsorCard") and ([8639,29349,33006,32557] | index(.entityId) | not) and ((.title // "" | test("值得买|红包")) | not))) else . end)'
 http-response-jq (?i)^https:\/\/api\.{{{酷安}}}\.com\/v6\/main\/init '.data |= map(select(.entityId? | [944,945,6390] | index(.) | not) | if .entityId == 20131 then .entities |= map(select(.title != "酷品")) else . end)'
 
-# > 快递100去广告 · 2026-10-02
+# > 快递100去广告
 # desc = 移除横幅广告、弹窗广告，精简首页。
 http-response-jq (?i)^https?:\/\/p\.{{{快递100}}}\.com\/mobile\/mobileapi\.do$ 'delpaths([["adsplash"]])'
 http-response-jq (?i)^https?:\/\/p\.{{{快递100}}}\.com\/mobile\/mobileapi\.do$ 'delpaths([["adIsConsumable"]])'
@@ -957,7 +957,7 @@ http-response-jq (?i)^https?:\/\/p\.{{{快递100}}}\.com\/mobile\/mobileapi\.do$
 http-response-jq (?i)^https?:\/\/p\.{{{快递100}}}\.com\/mobile\/mobileapi\.do$ 'delpaths([["adShowAgainTime"]])'
 http-response-jq (?i)^https?:\/\/p\.{{{快递100}}}\.com\/apicenter\/xcx\.dox 'delpaths([["data","secondMenuList"]])'
 
-# > 芒果TV去广告 · 2026-10-02
+# > 芒果TV去广告
 # desc = 移除开屏广告、信息流广告、播放页广告，精简我的页面。
 http-response-jq (?i)^https?:\/\/mobile\.api\.(mg{{{芒果TV}}}|hunan{{{芒果TV}}})\.com\/mobile\/config\? 'if ((getpath(["data"]) // {}) | has("dc_adConfig")) then (setpath(["data","dc_adConfig"]; 0)) else . end'
 http-response-jq (?i)^https?:\/\/mobile\.api\.(mg{{{芒果TV}}}|hunan{{{芒果TV}}})\.com\/mobile\/config\? 'if ((getpath(["data"]) // {}) | has("XmsellSwitch")) then (setpath(["data","XmsellSwitch"]; 0)) else . end'
@@ -983,15 +983,15 @@ http-response-jq (?i)^https:\/\/mobile-thor\.api\.mg{{{芒果TV}}}\.com\/v\d+\/v
 http-response-jq (?i)^https:\/\/mobile-thor\.api\.mg{{{芒果TV}}}\.com\/v\d+\/vod\/info\? '.data.tabs |= map(select(.name == "视频" or .name == "讨论")) | .data.template.modules |= map(if .clipInfo.ext?.ipPublishEntrance then .clipInfo |= del(.ext) else . end) | .data.template.modules |= map(select(.dataType == 101 or .dataType == 201)) | .data.template.modules |= map(.media.list |= (if type == "array" then map(select(.type != 0)) else . end))'
 http-response-jq (?i)^https:\/\/comment\.mg{{{芒果TV}}}\.com\/v\d\/comment\/getCommentList\? '.data.list |= map(select(.type == 0))'
 
-# > 美图秀秀去广告 · 2026-10-02
+# > 美图秀秀去广告
 # desc = 移除开屏广告、横幅推广，精简我的页面。
 http-response-jq (?i)^https:\/\/api\.posters\.{{{美图秀秀}}}\.com\/common\/init\.json 'delpaths([["data","vip"]])'
 
-# > 墨迹天气去广告 · 2026-10-02
+# > 墨迹天气去广告
 # desc = 移除天气页面横幅、工具栏，移除时景关注页面推荐，精简我的页面。
 http-response-jq (?i)^https:\/\/mme\.api\.{{{墨迹天气}}}\.com\/json\/entrance\/list$ 'del(.entrance_region_res_list[] | select(.region_name == "皇冠区域" or .region_name == "banner区")) | .entrance_region_res_list[].entrance_res_list |= if . then map(select(.entrance_name | . != "墨迹钱包" and . != "墨圈")) else . end'
 
-# > 拼多多去广告 · 2026-10-02
+# > 拼多多去广告
 # desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
 http-response-jq (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","dy_module","irregular_banner_dy"]])'
 http-response-jq (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/alexa\/homepage\/hub\? 'delpaths([["result","icon_set"]])'
@@ -1012,7 +1012,7 @@ http-response-jq (?i)^https:\/\/api\.{{{拼多多}}}\.com\/order\/ 'delpaths([["
 http-response-jq (?i)^https:\/\/api\.{{{拼多多}}}\.com\/order\/ 'delpaths([["shipping","banner_above_recommend"]])'
 http-response-jq (?i)^https:\/\/api\.{{{拼多多}}}\.com\/api\/aristotle\/order_list_v4\? '.orders |= map(.order_buttons |= map(del(.order_growth_tip)))'
 
-# > 起点读书去广告 · 2026-10-02
+# > 起点读书去广告
 # desc = 移除起点读书开屏广告、每日导读、各类弹窗、文末广告、搜索填充词，精简我的页面。
 http-response-jq (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/client\/getconf$ 'if ((getpath(["Data"]) // {}) | has("WolfEye")) then (setpath(["Data","WolfEye"]; 0)) else . end'
 http-response-jq (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v1\/client\/getconf$ 'if ((getpath(["Data","CloudSetting"]) // {}) | has("TeenShowFreq")) then (setpath(["Data","CloudSetting","TeenShowFreq"]; 0)) else . end'
@@ -1023,7 +1023,7 @@ http-response-jq (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\
 http-response-jq (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v2\/dailyrecommend\/getdailyrecommend\? 'if ((getpath(["Data"]) // {}) | has("Items")) then (setpath(["Data","Items"]; "[]")) else . end'
 http-response-jq (?i)^https:\/\/magev6\.if\.{{{起点读书}}}\.com\/argus\/api\/v3\/user\/getaccountpage\? 'delpaths([["Data","BenefitButtonList"]])'
 
-# > 什么值得买去广告 · 2026-10-02
+# > 什么值得买去广告
 # desc = 移除开屏广告、信息流广告、各类横幅广告、搜索页广告、文章内广告，移除活动皮肤、精简我的页面。
 http-response-jq (?i)^https:\/\/app-api\.{{{什么值得买}}}\.com\/util\/update$ 'if ((getpath(["data"]) // {}) | has("silence_local_push")) then (setpath(["data","silence_local_push"]; 0)) else . end'
 http-response-jq (?i)^https:\/\/app-api\.{{{什么值得买}}}\.com\/util\/update$ 'if ((getpath(["data"]) // {}) | has("baichuan_redirect_switch")) then (setpath(["data","baichuan_redirect_switch"]; 0)) else . end'
@@ -1054,29 +1054,29 @@ http-response-jq (?i)^https:\/\/haojia-cdn\.{{{什么值得买}}}\.com\/preload\
 http-response-jq (?i)^https:\/\/post\.m\.{{{什么值得买}}}\.com\/ajax_app\/ajax_get_footer_list\? 'delpaths([["data","tuiguang_ad"]])'
 http-response-jq (?i)^https:\/\/post\.m\.{{{什么值得买}}}\.com\/ajax_app\/ajax_get_footer_list\? 'delpaths([["data","activity_banner"]])'
 
-# > 顺丰速运去广告 · 2026-10-02
+# > 顺丰速运去广告
 # desc = 移除开屏广告、首页下拉抽屉、首页推广、应用内悬浮窗、横幅广告，移除主题，精简我的页面。
 http-response-jq (?i)^https:\/\/ccsp-egmas\.{{{顺丰速运}}}\.com\/cx-app-base\/base\/app\/appHomeConfig\/query$ '.obj |= map(select(.position != 2))'
 
-# > 淘票票去广告 · 2026-10-02
+# > 淘票票去广告
 # desc = 移除开屏广告、悬浮广告、轮播图广告和弹窗广告，移除搜索填充词和为你推荐。
 http-response-jq (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig\/ 'delpaths([["data","returnValue","floatingBanner"]])'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig\/ 'delpaths([["data","returnValue","searchShadeList"]])'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.mtopintegrationapi\.homeconfig\/ '.data.returnValue.topTab |= map(select(.activeImage | not)) | .data.returnValue.topTab |= map(del(.backgroundColor))'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{淘票票}}}\.com\/gw\/mtop\.film\.life\.aristotle\.get\/ 'def filter_nodes: map(if .data.componentId? and (.data.componentId | type == "string") and (.data.componentId | (contains("tpp_banner") or . == "tpp_guess_like")) then empty else .nodes |= (if . then filter_nodes else . end) end); .data.nodes |= (if . then filter_nodes else . end)'
 
-# > 网易有道词典去广告 · 2026-10-02
+# > 网易有道词典去广告
 # desc = 移除开屏广告、弹窗广告、右上角推广。
 http-response-jq (?i)^https:\/\/dict\.{{{网易有道词典}}}\.com\/homepage\/toolbar\/get\/ 'delpaths([["data","vipTag"]])'
 
-# > 网易邮箱大师去广告 · 2026-10-02
+# > 网易邮箱大师去广告
 # desc = 移除网易邮箱大师开屏广告、签到任务提醒，精简侧拉抽屉和我的页面。
 http-response-jq (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/page\/v2\/conf\.do$ 'delpaths([["data","functionOperatorInfoList"]])'
 http-response-jq (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/page\/v2\/conf\.do$ 'delpaths([["data","memberOperator"]])'
 http-response-jq (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/page\/v2\/conf\.do$ 'delpaths([["data","activityTabInfoList"]])'
 http-response-jq (?i)^https:\/\/appconf\.mail\.{{{网易邮箱大师}}}\.com\/mailmaster\/api\/config\/function\.do$ '.data.config[] |= if .result.tools then .result.tools |= map(select(.name == "邮件追踪" or .name == "替身邮箱")) else . end | del(.data.config[] | select(.functionName == "Function-AD"))'
 
-# > 喜马拉雅去广告 · 2026-10-02
+# > 喜马拉雅去广告
 # desc = 移除开屏广告、播放器广告、各类推荐内容，精简频道和我的页面。
 http-response-jq (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-feed\/v\d\/mix\/ '.heData |= map(select(.item.list[].bizType != "SceneListenCard"))'
 http-response-jq (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/discovery-category\/customCategories\/ '.categoryList |= map(.itemList |= map(select(.title | test("直播|123狂欢节|SVIP"; "i") | not))) | .customCategoryList |= map(select(.title | test("直播|123狂欢节|SVIP"; "i") | not))'
@@ -1088,7 +1088,7 @@ http-response-jq (?i)^https:\/\/mobwsa\.{{{喜马拉雅}}}\.com\/mobile-playpage
 http-response-jq (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/homePage\/ 'delpaths([["data","freeListenV2"]])'
 http-response-jq (?i)^https:\/\/(mobile|mobilehera|mobwsa)\.{{{喜马拉雅}}}\.com\/mobile-user\/v\d\/homePage\/ '.data.serviceModule.entrances |= map(select(.name == "全部服务"))'
 
-# > 下厨房去广告 · 2026-10-02
+# > 下厨房去广告
 # desc = 移除开屏广告、页面推广及横幅，精简首页标签。
 http-response-jq (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/homepage\/paged_waterfall_recommendations\.json$ 'del(.multiplex_cells[] | select(.recommendation_cell.impression_sensor_events[]?.properties.target_type? == "ad"))'
 http-response-jq (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/config\/get\.json$ 'delpaths([["content","recipe_ad"]])'
@@ -1101,7 +1101,7 @@ http-response-jq (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/config\/get\.json
 http-response-jq (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/config\/get\.json$ 'delpaths([["content","ad_sdk_text_removal_keywords"]])'
 http-response-jq (?i)^https:\/\/api\.{{{下厨房}}}\.com\/v2\/homepage\/ranking_list\/paged_homepage_ranking_list_section_v2\.json$ '.cells |= map(del(.side_slip_activity_cell, .dish_square_cell))'
 
-# > 闲鱼去广告 · 2026-10-02
+# > 闲鱼去广告
 # desc = 移除开屏广告、商品信息流广告、关注推荐、搜索栏填充词、首页签到入口及悬浮广告，精简我的页面。
 http-response-jq (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlehome\.home\.nextfresh\/ '.data.homeTopList |= map(select(.sectionType == "kingkongDo")) | .data.sections |= map(select(.data.clickParam.args.cardType as $ct | $ct != "homeMultiBanner" and $ct != "mamaAD")) | .data.sections |= map(select((.template.name|type=="string")and(.template.name=="idlefish_home_new_commodity_card"or(.template.name|contains("fish_home_tags_item_card")))))'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlehome\.widget\.refresh\.get\/ '.data.homeTopList |= map(select(.sectionType == "kingkongDo"))'
@@ -1121,7 +1121,7 @@ http-response-jq (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idl
 http-response-jq (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idlemtopsearch\.item\.search\.activate\/ '.data.cardList |= map(if has("cardData") and (.cardData | has("hotwords")) then .cardData |= del(.hotwords) else . end)'
 http-response-jq (?i)^https:\/\/acs\.m\.{{{闲鱼}}}\.com\/gw\/mtop\.taobao\.idle\.trade\.full\.info\/ '.data.components |= map(select(.render | . == "orderStatusVO" or . == "addressInfoVO" or . == "orderInfoVO"))'
 
-# > 香港抖音去广告 · 2026-10-02
+# > 香港抖音去广告
 # desc = 精简左右侧边栏、移除底栏切换，其余内容后续再完善。
 http-response-jq (?i)^https:\/\/((awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)|api5-normal-m\.amemv\.com)\/aweme\/homepage\/sidebar_data\/\? 'delpaths([["data_map","recently_apps"]])'
 http-response-jq (?i)^https:\/\/((awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)|api5-normal-m\.amemv\.com)\/aweme\/homepage\/sidebar_data\/\? 'delpaths([["data_map","recently_users"]])'
@@ -1130,11 +1130,11 @@ http-response-jq (?i)^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-
 http-response-jq (?i)^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend 'if ((getpath(["data","/service/settings/v3/","body","data","settings"]) // {}) | has("homepage_two_session_tab_skin_2025")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_two_session_tab_skin_2025"]; false)) else . end'
 http-response-jq (?i)^https:\/\/(awe{{{香港抖音}}}\.snssdk\.com|api5-normal-m\.amemv\.com)\/tfe\/api\/request_combine\/v1\/\?need_personal_recommend 'if ((getpath(["data","/service/settings/v3/","body","data","settings"]) // {}) | has("homepage_tab_skin_enable")) then (setpath(["data","/service/settings/v3/","body","data","settings","homepage_tab_skin_enable"]; false)) else . end'
 
-# > 小黑盒去广告 · 2026-10-02
+# > 小黑盒去广告
 # desc = 移除开屏广告和热点板块信息流广告
 http-response-jq (?i)^https:\/\/api\.{{{小黑盒}}}\.cn\/bbs\/app\/feeds\/news '.result.links |= map(if .content_type == 27 then del(.title, .ad_pm, .img_gif, .idea_id, .ad_report, .label, .source, .intranet_only, .ad_cm, .content_type, .PROTOCOL, .img, .ad_ratio) else . end)'
 
-# > 小红书去广告 · 2026-10-02
+# > 小红书去广告
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
 http-response-jq (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/search\/banner_list$ 'if ((getpath([]) // {}) | has("data")) then (setpath(["data"]; "{}")) else . end'
 http-response-jq (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/search\/hot_list$ 'if ((getpath(["data"]) // {}) | has("items")) then (setpath(["data","items"]; "[]")) else . end'
@@ -1142,11 +1142,11 @@ http-response-jq (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v4\/searc
 http-response-jq (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v4\/search\/trending\? 'if ((getpath(["data"]) // {}) | has("queries")) then (setpath(["data","queries"]; "[]")) else . end'
 http-response-jq (?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v4\/search\/trending\? 'if ((getpath(["data"]) // {}) | has("hint_word")) then (setpath(["data","hint_word"]; "{}")) else . end'
 
-# > 小宇宙去广告 · 2026-10-02
+# > 小宇宙去广告
 # desc = 移除开屏广告、搜索框推荐词和AI总结。
 http-response-jq (?i)^https:\/\/api\.{{{小宇宙}}}\.com\/v1\/discovery-feed\/list '.data |= map(select(.type != "DISCOVERY_HEADER" and .type != "DISCOVERY_BANNER"))'
 
-# > 优酷视频去广告 · 2026-10-02
+# > 优酷视频去广告
 # desc = 移除开屏广告、视频广告、信息流广告。其余广告由于请求已加密，故无法移除。
 http-response-jq (?i)^https:\/\/un-acs\.{{{优酷视频}}}\.com\/gw\/mtop\.{{{优酷视频}}}\.play\.ups\.appinfo\.get 'delpaths([["data","data","ad"]])'
 http-response-jq (?i)^https:\/\/un-acs\.{{{优酷视频}}}\.com\/gw\/mtop\.{{{优酷视频}}}\.play\.ups\.appinfo\.get 'delpaths([["data","data","watermark"]])'
@@ -1154,7 +1154,7 @@ http-response-jq (?i)^https:\/\/un-acs\.{{{优酷视频}}}\.com\/gw\/mtop\.{{{�
 http-response-jq (?i)^https:\/\/push\.m\.{{{优酷视频}}}\.com\/collect-api\/get_push_interval_config_wx\? 'delpaths([["data","tipContent"]])'
 http-response-jq (?i)^https:\/\/push\.m\.{{{优酷视频}}}\.com\/collect-api\/get_push_interval_config_wx\? 'delpaths([["data","tipContentNew"]])'
 
-# > 知乎去广告 · 2026-10-02
+# > 知乎去广告
 # desc = 移除HTTPDNS和QUIC传输配置，移除开屏广告、信息流广告、回答页广告，移除回答页下的相关回答、专栏卡片及圈子卡片，移除直答页面推荐知识库和提问推荐，移除评论区评论氛围满意度调查，精简首页顶部标签及我的页面。
 http-response-jq (?i)^https:\/\/m-cloud\.{{{知乎}}}\.com\/api\/cloud\/zhihu\/config\/all\? 'def drop_keys: {"km_httpdns_new_config_tars":true,"preFetchHttpDns":true,"httpdns_detector_use_concurrent":true,"httpdns_use_memory_cache":true,"httpdns_new_config_tars":true,"coreNetworkConf_useTars":true,"km_coreNetworkConf_useTars":true,"sugarQuicConfig":true,"quic_dns_detect_enable":true,"quicMixAB":true,"quic_downgrade_enable":true,"quic_priority_strategy":true,"quic_check_health_enable":true,"tquic_configuration":true,"networkExprimentList":true,"tars_ab_list":true,"zaSetExtraRequestHeader":true}; .data.configs |= map(select((drop_keys[.configKey] // false) | not) | if (.configValue | type) == "object" then del(.configValue.delayHttpdns, .configValue.dnsParser, .configValue.HTTPDNS) else . end)'
 http-response-jq (?i)^https:\/\/api\.{{{知乎}}}\.com\/root\/tab\/v\d(?:\?.+)?$ '.tab_list |= map(select(.tab_type == "follow" or .tab_type == "recommend" or .tab_type == "hot" or .tab_type == "ring_tab"))'
@@ -1176,7 +1176,7 @@ http-response-jq (?i)^https:\/\/api\.{{{知乎}}}\.com\/search\/tabs\? '.data |=
 http-response-jq (?i)^https:\/\/api\.{{{知乎}}}\.com\/people\/self$ 'delpaths([["vip_info","entrance_new","right_button"]])'
 http-response-jq (?i)^https:\/\/api\.{{{知乎}}}\.com\/people\/self$ 'delpaths([["vip_info","entrance_v2"]])'
 
-# > 转转去广告 · 2026-10-02
+# > 转转去广告
 # desc = 移除开屏广告、应用内悬浮窗、信息流推广、商品推荐、首页弹窗，精简我的页面。
 http-response-jq (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/v2\/zzlogic\/mycontinenthomepage\? 'delpaths([["respData","topOpera","leftOpera"]])'
 http-response-jq (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/v2\/zzlogic\/mycontinenthomepage\? 'delpaths([["respData","topOpera","rightOpera2"]])'
@@ -1190,34 +1190,34 @@ http-response-jq (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/transfer\/getmyprofi
 http-response-jq (?i)^https:\/\/app\.{{{转转}}}\.com\/zz\/transfer\/getmyprofilev3$ 'del(.respData.itemGroupList[].itemList[] | select(.name == "天天赚钱" or .name == "借钱")) | del(.respData.itemGroupList[] | select(.groupType == 15))'
 
 [Script]
-# > 12306去广告 · 2026-10-02
+# > 12306去广告
 # desc = 过滤12306应用内广告及开屏广告
 # hostname = ad.{{{12306}}}.cn, mobile.{{{12306}}}.cn
 移除12306应用内广告 = type=http-request, pattern=(?i)^https:\/\/mobile\.{{{12306}}}\.cn\/otsmobile\/app\/mgs\/mgw\.htm$, script-path=https://kelee.one/Resource/JavaScript/12306/12306_remove_ads.js
 
-# > IT之家去广告 · 2026-10-02
+# > IT之家去广告
 # desc = 过滤IT之家信息流广告和文末广告，自定义移除置顶和轮播图，自定义移除项需在插件配置。
 # hostname = napi.{{{IT之家}}}.com, api.zuihuimai.com, dat.ruanmei.com
 IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家}}}\.com\/api\/(news\/indexv2\/iphone\/\d+|topmenu\/getfeeds\?), script-path=https://kelee.one/Resource/JavaScript/IThome/IThome_remove_ads.js, requires-body=true, argument=removeAllBanners="{{{IT之家-removeAllBanners}}}"&removePinnedArticles="{{{IT之家-removePinnedArticles}}}"
 
-# > 阿里云盘去广告 · 2026-10-02
+# > 阿里云盘去广告
 # desc = 移除首页广告横幅、弹窗和顶部奖励。
 # hostname = api.{{{阿里云盘}}}.com, member.{{{阿里云盘}}}.com, bizapi.{{{阿里云盘}}}.com
 移除阿里云盘广告 = type=http-response, pattern=(?i)^https:\/\/(biz)?api\.{{{阿里云盘}}}\.com\/apps\/v\d\/users?\/home\/(news|widgets), script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
 移除阿里云盘广告 = type=http-response, pattern=(?i)^https:\/\/member\.{{{阿里云盘}}}\.com\/v1\/users\/onboard_list, script-path=https://kelee.one/Resource/JavaScript/AliYunDrive/AliYunDrive_remove_ads.js, requires-body=true
 
-# > 百度网页去广告 · 2026-10-02
+# > 百度网页去广告
 # desc = 移除百度搜索移动端网页的首页广告信息流
 # hostname = m.{{{百度网页}}}.com, www.{{{百度网页}}}.com
 移除百度搜索首页信息流广告 = type=http-response, pattern="(?i)^https?:\/\/(www|m)\.{{{百度网页}}}\.com\/?($|\?from=\w{8,9})", script-path=https://kelee.one/Resource/JavaScript/BaiduSearch/BaiduSearchHomePage_remove_ads.js, requires-body=true
 
-# > 哔哩哔哩漫画去广告 · 2026-10-02
+# > 哔哩哔哩漫画去广告
 # desc = 移除开屏广告、应用内悬浮窗、各类横幅广告、你可能喜欢、小说推荐、首页弹窗，精简首页标签、底栏活动按钮和我的页面。
 # hostname = manga.{{{哔哩哔哩漫画}}}.com
 移除顶部标签 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/comic\.v\d\.Comic\/GetClassPageAllTabs, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
 精简我的页面 = type=http-response, pattern=(?i)^https:\/\/manga\.{{{哔哩哔哩漫画}}}\.com\/twirp\/user\.v\d\.User\/UCenterConf, script-path=https://kelee.one/Resource/JavaScript/BiliComic/BiliComic_remove_ads.js, requires-body=true
 
-# > 财新去广告 · 2026-10-02
+# > 财新去广告
 # desc = 过滤财新广告
 # hostname = e*.{{{财新}}}.com, g*.{{{财新}}}.com, m*.{{{财新}}}.com
 移除财新数据通广告 = type=http-response, pattern=(?i)^https:\/\/entities\.{{{财新}}}\.com\/api\/dataplus\/columns, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
@@ -1227,33 +1227,33 @@ IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家
 移除正文广告 = type=http-response, pattern=(?i)^https:\/\/mappsv5\.{{{财新}}}\.com\/articlev5\/\d+\/\d+\.json$, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
 移除正文广告 = type=http-response, pattern=(?i)^https:\/\/mapps?v5\.{{{财新}}}\.com\/(channelv5\/list|\/?index_page_v5\/)\w+, script-path=https://kelee.one/Resource/JavaScript/CaixinMedia/CaixinMedia_remove_ads.js, requires-body=true
 
-# > 彩云天气去广告 · 2026-10-02
+# > 彩云天气去广告
 # desc = 移除首页推广、弹窗、悬浮窗、底栏天气助手和工具箱入口，移除我的页面广告横幅。
 # hostname = biz.cyapi.cn, starplucker.cyapi.cn, api.{{{彩云天气}}}app.com, cdn-w.{{{彩云天气}}}app.com
 彩云天气去广告 = type=http-response, pattern=(?i)^https:\/\/(wrapper\.cyapi\.cn|api\.{{{彩云天气}}}app\.com|cdn-w\.{{{彩云天气}}}app\.com)\/v1\/activity\?, script-path=https://kelee.one/Resource/JavaScript/ColorfulClouds/ColorfulClouds_remove_ads.js, requires-body=true
 
-# > 飞客去广告 · 2026-10-02
+# > 飞客去广告
 # desc = 移除开屏广告、首页广告、板块广告、帖内广告和我的页面广告。
 # hostname = www.{{{飞客}}}.com.cn, ptf.{{{飞客}}}rip.com
 移除板块广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?version=5, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
 移除签到弹窗广告 = type=http-response, pattern=(?i)^https:\/\/www\.{{{飞客}}}\.com\.cn\/api\/mobile\/index\.php\?module=plugin&id=k_misign:sign, script-path=https://kelee.one/Resource/JavaScript/FlyerTea/FlyerTea_remove_ads.js, requires-body=true
 
-# > 航旅纵横去广告 · 2026-10-02
+# > 航旅纵横去广告
 # desc = 过滤航旅纵横广告
 # hostname = 114.115.217.129, home.{{{航旅纵横}}}.com
 移除首页广告 = type=http-response, pattern=(?i)^http?:\/\/(114\.115\.217\.129)|(home\.{{{航旅纵横}}}\.com)\/gateway\/api\/umetrip\/native$, script-path=https://kelee.one/Resource/JavaScript/Umetrip/Umetrip_remove_ads.js
 
-# > 京东去广告 · 2026-10-02
+# > 京东去广告
 # desc = 移除京东开屏广告，精简我的页面产品推广。
 # hostname = api.m.{{{京东}}}.com
 移除京东广告 = type=http-response, pattern=(?i)^https:\/\/api\.m\.{{{京东}}}\.com\/client\.action\?functionId=(deliverLayer|getTabHomeInfo|myOrderInfo|orderTrackBusiness|personinfoBusiness|start|welcomeHome), script-path=https://kelee.one/Resource/JavaScript/JD/JD_remove_ads.js, requires-body=true
 
-# > 拼多多去广告 · 2026-10-02
+# > 拼多多去广告
 # desc = 移除开屏广告、底栏多多视频、会场入口、聊天页面精选推荐及推广，精简首页和个人中心。
 # hostname = api.{{{拼多多}}}.com, m.{{{拼多多}}}.net
 移除扫码取件页面商品推荐及弹窗 = type=http-response, pattern=(?i)^https:\/\/m\.{{{拼多多}}}\.net\/mdkd\/package\?from_app_scan, script-path=https://kelee.one/Resource/JavaScript/PinDuoDuo/PinDuoDuo_remove_ads.js, requires-body=true
 
-# > 微博去广告 · 2026-10-02
+# > 微博去广告
 # desc = 过滤微博广告及去除各部分推广模块
 # hostname = *.{{{微博}}}.cn, *.{{{微博}}}.com, {{{微博}}}.com
 移除首页推广 = type=http-response, pattern=(?i)^https:\/\/api\.{{{微博}}}\.cn\/2\/(?:checkin\/show|client\/publisher_list|push\/active), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
@@ -1277,7 +1277,7 @@ IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家
 移除开屏广告 sdkad = type=http-response, pattern=(?i)^https:\/\/sdkapp\.uve\.{{{微博}}}\.com\/interface\/sdk\/sdkad\.php, script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
 移除开屏广告 wbapplua = type=http-response, pattern=(?i)^https:\/\/wbapp\.uve\.{{{微博}}}\.com\/(?:preload\/get_ad|wbapplua\/wbpullad\.lua), script-path=https://kelee.one/Resource/JavaScript/Weibo/Weibo_remove_ads.js, requires-body=true
 
-# > 小红书去广告 · 2026-10-02
+# > 小红书去广告
 # desc = 过滤信息流推广，移除图片及视频水印，如有异常，请先清除缓存再尝试。
 # hostname = ci.{{{小红书}}}.com, edith.{{{小红书}}}.com, rec.{{{小红书}}}.com, so.{{{小红书}}}.com, www.{{{小红书}}}.com
 移除图片和实况照片水印 = type=http-response, pattern=(?i)^https:\/\/edith\.{{{小红书}}}\.com\/api\/sns\/v1\/note\/(?:imagefeed|live_photo\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
@@ -1293,7 +1293,7 @@ IT之家去广告 = type=http-response, pattern=(?i)^https:\/\/napi\.{{{IT之家
 移除搜索页广告 = type=http-response, pattern=(?i)^https:\/\/(?:edith|so)\.{{{小红书}}}\.com\/api\/sns\/v10\/search\/notes\?, script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
 移除视频水印 = type=http-response, pattern=(?i)^https:\/\/(?:edith|rec|www)\.{{{小红书}}}\.com\/api\/sns\/(?:v4\/note\/videofeed|v10\/note\/video\/save), script-path=https://kelee.one/Resource/JavaScript/RedPaper/RedPaper_remove_ads.js, requires-body=true
 
-# > 小象超市去广告 · 2026-10-02
+# > 小象超市去广告
 # desc = 移除开屏广告、应用内弹窗、猜你想买、横幅推广和悬浮窗。
 # hostname = portal-portm.{{{小象超市}}}.com, mall.{{{小象超市}}}.com, businessapi.ksedt.com
 移除下发广告 = type=http-response, pattern=(?i)^https:\/\/portal-portm\.{{{小象超市}}}\.com\/horn_ios\/mergeRequest, script-path=https://kelee.one/Resource/JavaScript/iMaiCai/iMaiCai_remove_ads.js, requires-body=true
