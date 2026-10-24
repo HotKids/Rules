@@ -8,11 +8,14 @@ import unittest
 
 import yaml
 
+from copy import deepcopy
+
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / '.github/scripts'))
 spec = importlib.util.spec_from_file_location('render_mihomo_overlay', ROOT / '.github/scripts/render-mihomo-overlay.py')
 renderer = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(renderer)
+from config_sync import clash, stash
 
 
 class MihomoOverlayTests(unittest.TestCase):
@@ -38,7 +41,7 @@ process.stdout.write(JSON.stringify(context.result));'''
         expected = json.loads(result.stdout)
         groups = [{k: v for k, v in g.items() if k not in ('include-all-providers', 'filter')}
                   for g in actual['proxy-groups']]
-        self.assertEqual({g['name']: g for g in groups}, {g['name']: g for g in expected['proxy-groups']})
+        self.assertEqual(groups, expected['proxy-groups'])
         self.assertEqual(actual['rules'], expected['rules'])
         self.assertEqual(actual['rule-providers'], expected['rule-providers'])
         self.assertEqual(actual['proxies'], nodes)
@@ -77,6 +80,25 @@ process.stdout.write(JSON.stringify(context.result));'''
             server = names.index('🇺🇳 Server')
             self.assertEqual(names[server + 1:server + 7], expected)
             self.assertEqual(names[server + 7], '🇭🇰 Hong Kong')
+
+    def test_tag_is_configurable_comment_metadata_across_outputs(self):
+        overlay = deepcopy(self.overlay)
+        first = next(g for g in overlay['extra_pool_groups'] if g['name'] == '🇸🇱 Relay')
+        first['tag'] = 'Transit'
+        native = renderer.render(self.base, overlay, 'myscript.overlay.json')
+        self.assertIn('  # Transit\n', native)
+        self.assertNotIn('  # Relay\n', native)
+        script, state = clash._gen_clash_script_js(self.base, overlay=overlay, overlay_label='test')
+        inherited, _ = clash._gen_clash_script_js(self.base, overlay={'output': 'test.js'},
+                                                 overlay_label='child', base_state=state)
+        for text in (script, inherited):
+            self.assertIn('    // Transit\n', text)
+            self.assertNotIn('_tag:', text)
+        source = (ROOT / 'Clash/Script/Stash.stoverride').read_text().splitlines()
+        text = '\n'.join(stash._stash_apply_overlay(source, overlay, 'test'))
+        self.assertIn('  # Transit\n', text)
+        for config in (yaml.safe_load(native), yaml.safe_load(text)):
+            self.assertTrue(all('tag' not in g and '_tag' not in g for g in config['proxy-groups']))
 
     def test_manual_block_survives_sync_even_if_old_generated_rules_are_invalid(self):
         block = 'proxies:  # user-managed\n  - {name: HK HKT, type: socks5, server: example.invalid, port: 1080, password: "private-test"}\n'

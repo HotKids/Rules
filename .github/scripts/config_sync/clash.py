@@ -698,9 +698,16 @@ def _ordered_group(g: dict) -> dict:
     """组键序规范化为锚点版风格：name, type, proxies, hidden, …extras…, icon（icon 垫底）。
     使输出与来源（Sample.yaml / Mihomo.yaml，二者键序不同）及 overlay 声明顺序无关。"""
     head = [k for k in ("name", "type", "proxies", "hidden") if k in g]
-    extras = [k for k in g if k not in ("name", "type", "proxies", "hidden", "icon")]
+    extras = [k for k in g if k not in ("name", "type", "proxies", "hidden", "icon", "_tag")]
     tail = ["icon"] if "icon" in g else []
     return {k: g[k] for k in head + extras + tail}
+
+
+def _overlay_tag(value, label: str) -> str:
+    """分节标签只生成注释，禁止换行进入脚本或 YAML 正文。"""
+    if not isinstance(value, str) or value and value.splitlines() != [value]:
+        raise ValueError(f"{label} 的 extra_pool_groups.tag 必须是单行字符串")
+    return value.strip()
 
 
 def _rule_policy_index(parts: list[str]) -> int:
@@ -746,6 +753,7 @@ def _apply_overlay(
       之前/之后插入新地区（如 🔰 Proxy 的候选里插入 🇬🇧 England / 🇩🇪 Germany）。
     - extra_pool_groups：整个新增的池分组（Relay 中转链、新地区），插入到指定锚点
       分组之后，并登记进 pool_filters（运行时按 filter 从 config.proxies 里挑节点）。
+      可选 tag 是分组前的分节注释，内部以 _tag 随 extends 继承，不进入运行配置。
     - move_after：把一个既有分组（结构性池组，无法用 group_proxies_insert 挪位置）
       挪到另一个分组之后，纯粹调整展示顺序，不影响候选列表/规则。
     - rules_insert：在锚点规则（before/after 子串匹配某条规则）前/后插入自定义
@@ -851,7 +859,12 @@ def _apply_overlay(
             )
         anchor_name = spec.pop("insert_after")
         filter_ = spec.pop("filter", None)
+        tag = _overlay_tag(spec.pop("tag", ""), overlay_label)
+        if "_tag" in spec:
+            raise ValueError(f"{overlay_label} 的 extra_pool_groups 不能声明内部字段 _tag")
         new_group = spec  # 剩余字段（name/type/icon/hidden/tolerance…）直接作为分组定义
+        if tag:
+            new_group["_tag"] = tag
         idx = next((j for j, g in enumerate(groups) if g["name"] == anchor_name), None)
         if idx is None:
             raise ValueError(
@@ -1279,6 +1292,8 @@ def _gen_clash_script_js(
     for g in groups:
         for cline in group_cmts.get(g["name"], group_cmts.get(rename_rev.get(g["name"], ""), [])):
             lines.append(f"    {cline.replace('#', '//', 1)}")
+        if g.get("_tag"):
+            lines.append(f"    // {g['_tag']}")
         lines.append(f"    {_to_js_inline(_ordered_group(g))},")
     lines.append("  ];")
     lines.append("")

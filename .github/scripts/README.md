@@ -175,6 +175,8 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 Gist 中 `mihomo.yaml` 的顶层 `proxies` 由你手动维护，初始可为 `proxies: []`。每次同步会原样保留该节点块，按现有筛选规则把节点加入对应分组；无须另建或引用 `snell.yaml`。编辑节点后手动运行此 Action 即可刷新分组候选。`proxies` 缺失或无效时停止发布，避免用空列表覆盖手写内容。其余配置随基座和 overlay 更新，其中 `disabled_by_default` 在静态 YAML 中会实际移除对应分组和规则。
 
+`extra_pool_groups` 的 `insert_after` 控制分组位置，`tag` 控制该组前的分节注释。例如 Relay 首项使用 `"insert_after": "🇺🇳 Server", "tag": "Relay"`，派生 YAML/Stash 写入 `# Relay`，JS 写入 `// Relay`。修改或删除 `tag` 后注释跟随更新；它不作为代理组配置字段输出。
+
 ## 下载、验证与发布
 
 [_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 最多尝试三次；真实 404 不重试且保留状态码；空响应和无效内容不作为正常产物发布。超时不再写成 `upstream 404`。
