@@ -45,18 +45,15 @@ def _filter_anchors(prefix: str, groups: list[dict]) -> tuple[str, dict[str, str
     return "\n".join(lines) + "\n", references
 
 
-def _group_lines(source: str, groups: list[dict], references: dict[str, str]) -> list[str]:
+def _group_lines(source: str, groups: list[dict], references: dict[str, str],
+                 tags: dict[str, str] | None = None) -> list[str]:
     comments = _scan_sample_item_comments(source, "proxy-groups")
     lines = ["# ── 策略组 ──", "proxy-groups:"]
     has_region = bool(re.search(r"(?m)^  - &Region\s", source))
-    relay_heading = False
     for group in groups:
-        if group["name"].endswith(" Relay"):
-            if not relay_heading:
-                lines.append("  # Relay")
-                relay_heading = True
-        else:
-            lines.extend("  " + line for line in comments.get(group["name"], []))
+        if tags and group["name"] in tags:
+            lines.append("  # " + tags[group["name"]])
+        lines.extend("  " + line for line in comments.get(group["name"], []))
         parts = []
         for key, value in _ordered_group(group).items():
             if has_region and group.get("include-all-providers") and key == "name":
@@ -99,11 +96,7 @@ def render(base: str, overlay: dict, label: str) -> str:
     if set(disabled) - optional:
         raise ValueError("disabled_by_default references a missing or required group")
     _apply_overlay(groups, pools, rules, structural, {"remove_groups": disabled}, label)
-    relays = [g for g in groups if g["name"].endswith(" Relay")]
-    if relays:
-        groups[:] = [g for g in groups if g not in relays]
-        at = next(i for i, g in enumerate(groups) if strip_emoji(g["name"]) == "Server") + 1
-        groups[at:at] = relays
+    tags = {g["name"]: g.pop("_tag") for g in groups if "_tag" in g}
     for group in groups:
         if group["name"] not in pools:
             continue
@@ -137,7 +130,7 @@ def render(base: str, overlay: dict, label: str) -> str:
     prefix, references = _filter_anchors(prefix, groups)
     data["anchors"] = yaml.safe_load(prefix)["anchors"]
     header = f"# Personal Mihomo configuration: Clash/Mihomo.yaml + {label}\n"
-    lines = [header + prefix.rstrip(), "", *_group_lines(base, groups, references)]
+    lines = [header + prefix.rstrip(), "", *_group_lines(base, groups, references, tags)]
     lines.extend(["", "# ── 规则集 ──", "rule-providers:"])
     for name, spec in providers.items():
         lines.append("  " + _yaml_flow(name) + ": " + _yaml_flow(spec))

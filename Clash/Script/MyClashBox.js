@@ -151,13 +151,13 @@ function main(config) {
   const poolGroupFilters = {
     'Mail': null,
     'Speedtest': null,
+    'Server': '(?i)^(?!.*dns)',
     '🇸🇱 Relay': '(?i)^(?=.*(?:GoMaMi|Neburst|Pro))',
     '🇭🇰 HK Relay': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     '🇨🇳 TW Relay': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?=.*(?:Neburst|Pro))',
     '🇯🇵 JP Relay': '(?i)^(?=.*\\b(?:JP|JPN)\\d*\\b)(?=.*Pro)',
     '🇺🇸 US Relay': '(?i)^(?=.*\\b(?:US|USA)\\d*\\b)(?=.*(?:GoMaMi|Pro))',
     '🇪🇺 EU Relay': '(?i)^(?=.*\\b(?:DE)\\d*\\b)(?=.*(?:PS|Pro))',
-    'Server': '(?i)^(?!.*dns)',
     'Hong Kong': '(?i)^(?=.*\\b(?:HK|HKG)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
     'Taiwan': '(?i)^(?=.*\\b(?:TW|TWN)\\d*\\b)(?!.*Pro)',
     'Singapore': '(?i)^(?=.*\\b(?:SG|SGP)\\d*\\b)(?!.*GoMaMi)(?!.*Pro)',
@@ -205,14 +205,15 @@ function main(config) {
     { name: 'Reject', type: 'select', proxies: ['REJECT'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png' },
     // REJECT-DROP
     { name: 'Reject-Drop', type: 'select', proxies: ['REJECT-DROP'], hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Reject.png' },
+    // Nodes
+    { name: 'Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png' },
+    // Relay
     { name: '🇸🇱 Relay', type: 'url-test', hidden: true, tolerance: 50, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇭🇰 HK Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇨🇳 TW Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇯🇵 JP Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇺🇸 US Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
     { name: '🇪🇺 EU Relay', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Protect.png' },
-    // Nodes
-    { name: 'Server', type: 'select', icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Global.png' },
     // Area
     { name: 'Hong Kong', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/HK.png' },
     { name: 'Taiwan', type: 'fallback', hidden: true, icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Flags/TW.png' },

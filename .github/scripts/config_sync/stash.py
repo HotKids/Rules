@@ -8,6 +8,7 @@ from urllib.parse import parse_qsl, quote, urlencode
 
 import yaml
 
+from .clash import _overlay_tag
 from .common import (
     REPO_ROOT,
     _write_stamped_if_changed,
@@ -771,7 +772,18 @@ def _stash_apply_overlay(lines: list[str], overlay: dict, label: str) -> list[st
         if anchor not in spans:
             raise ValueError(f"{label}: extra_pool_groups 的锚点分组 {anchor!r} 不存在")
         at = spans[anchor][1]
-        lines[at:at] = _stash_render_group(g)
+        # 下一组的前导分节注释不属于锚点组，追加组时留在下一组前。
+        while at > spans[anchor][0] + 1 and (
+                not lines[at - 1].strip() or lines[at - 1].startswith("  #")):
+            at -= 1
+        rendered = _stash_render_group(g)
+        tag = _overlay_tag(g.get("tag", ""), label)
+        if tag:
+            rendered.insert(0, f"  # {tag}")
+        after_blanks = at
+        while after_blanks < spans[anchor][1] and not lines[after_blanks].strip():
+            after_blanks += 1
+        lines[at:after_blanks] = [""] + rendered
         notes.append(f"新增分组 {g['name']}")
 
     # 4) rules_insert：在锚点规则前/后插入
