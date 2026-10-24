@@ -49,6 +49,7 @@ class PrivateGistTests(unittest.TestCase):
             '    type: http\n'
             '    url: "https://example.invalid/private?token=test-only"\n'
             '    interval: 4321\n')
+        self.stash_base = SCRIPTS.parents[1] / 'Clash/Script/MyStash.stoverride'
         environment = patch.dict(os.environ, {'MIHOMO_GIST_ID': 'a' * 32, 'GIST_TOKEN': 'dummy-test-token'})
         environment.start()
         self.addCleanup(environment.stop)
@@ -61,6 +62,13 @@ class PrivateGistTests(unittest.TestCase):
 
     def response(self, payload):
         return io.BytesIO(json.dumps(payload).encode())
+
+    def inline_gist(self):
+        node = {'name': 'HK shared test', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080}
+        content = yaml.safe_dump({'proxies': [], 'proxy-providers': {
+            'Manual': {'type': 'inline', 'payload': [node]}}}, sort_keys=False)
+        return self.gist(files={'mihomo.yaml': {'content': content, 'truncated': False},
+                                'other.yaml': {'content': 'leave this private file untouched'}})
 
     def test_update_only_the_requested_file_without_changing_visibility(self):
         with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
@@ -88,6 +96,63 @@ class PrivateGistTests(unittest.TestCase):
         with patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request:
             self.assertFalse(publisher.publish(self.config))
         self.assertEqual(request.call_count, 1)
+
+    def test_both_configs_are_published_atomically_from_the_same_manual_nodes(self):
+        gist = self.inline_gist()
+        with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
+            self.response(gist), self.response(gist),
+        ]) as request:
+            self.assertTrue(publisher.publish(self.config, stash_base=self.stash_base))
+        self.assertEqual(request.call_count, 2)
+        update = request.call_args_list[1].args[0]
+        self.assertEqual(update.get_method(), 'PATCH')
+        payload = json.loads(update.data)
+        self.assertEqual(set(payload), {'files'})
+        self.assertEqual(set(payload['files']), {'mihomo.yaml', 'stash.yaml'})
+        mihomo = yaml.safe_load(payload['files']['mihomo.yaml']['content'])
+        stash = yaml.safe_load(payload['files']['stash.yaml']['content'])
+        original = yaml.safe_load(gist['files']['mihomo.yaml']['content'])
+        self.assertEqual(mihomo['proxy-providers'], original['proxy-providers'])
+        self.assertEqual(stash['proxies'], original['proxy-providers']['Manual']['payload'])
+        self.assertEqual(stash['proxy-groups'], yaml.safe_load(self.stash_base.read_text())['proxy-groups'])
+
+    def test_stash_can_be_created_or_updated_when_mihomo_is_unchanged(self):
+        for existing in (None, {'content': 'proxies: []\n', 'truncated': False}):
+            with self.subTest(existing=existing):
+                gist = self.inline_gist()
+                gist['files']['mihomo.yaml']['content'] = publisher._apply_manual_proxies(
+                    self.config.read_text(), gist['files']['mihomo.yaml']['content'])
+                if existing is not None:
+                    gist['files']['stash.yaml'] = existing
+                with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
+                    self.response(gist), self.response(gist),
+                ]) as request:
+                    self.assertTrue(publisher.publish(self.config, stash_base=self.stash_base))
+                update = json.loads(request.call_args_list[1].args[0].data)
+                self.assertEqual(set(update['files']), {'stash.yaml'})
+                gist['files']['stash.yaml'] = update['files']['stash.yaml']
+                with patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request:
+                    self.assertFalse(publisher.publish(self.config, stash_base=self.stash_base))
+                self.assertEqual(request.call_count, 1)
+
+    def test_stash_render_failure_prevents_partial_mihomo_publication_and_hides_details(self):
+        invalid = self.config.with_name('invalid.stoverride')
+        invalid.write_text('proxy-groups: [private-stash-value\n')
+        output = io.StringIO()
+        with patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(self.inline_gist())) as request, contextlib.redirect_stderr(output):
+            self.assertEqual(publisher.main(['--stash-base', str(invalid), str(self.config)]), 1)
+        self.assertEqual(request.call_count, 1)
+        self.assertIn('no changes published', output.getvalue())
+        self.assertNotIn('private-stash-value', output.getvalue())
+
+    def test_unverifiable_existing_stash_stops_before_any_patch(self):
+        for target in ({'content': 'partial', 'truncated': True}, {'content': None}, 'invalid', None):
+            gist = self.inline_gist()
+            gist['files']['stash.yaml'] = target
+            with self.subTest(target=target), patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request:
+                with self.assertRaises(publisher.PublishError):
+                    publisher.publish(self.config, stash_base=self.stash_base)
+                self.assertEqual(request.call_count, 1)
 
     def test_explicit_inline_migration_moves_nodes_and_remains_idempotent(self):
         gist = self.gist()

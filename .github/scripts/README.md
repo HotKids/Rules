@@ -177,6 +177,12 @@ Gist 中 `mihomo.yaml` 的顶层 `proxies` 和 `proxy-providers` 均由你手动
 
 `extra_pool_groups` 的 `insert_after` 控制分组位置，`tag` 控制该组前的分节注释。例如 Relay 首项使用 `"insert_after": "🇺🇳 Server", "tag": "Relay"`，派生 YAML/Stash 写入 `# Relay`，JS 写入 `// Relay`。修改或删除 `tag` 后注释跟随更新；它不作为代理组配置字段输出。
 
+同一私密 Gist 的 `stash.yaml` 从 `Clash/Script/MyStash.stoverride` 生成，节点只读取最终 `mihomo.yaml`：顶层节点和内联 Provider 的 `payload` 按原顺序合并到 Stash 顶层 `proxies`，每个节点一行，参数保持原值。Stash 文件移除覆写展示元数据及合并标记，其余设置、策略、规则沿用 MyStash；不向仓库或构建产物写入私人节点。
+
+只需维护 Gist 的 `mihomo.yaml` 节点。`Sync Mihomo Gist` 每天北京时间 12:00 检查一次（cron 为 UTC `0 4 * * *`），配置生成成功后及手动运行时也会同步两份文件；Gist 编辑本身不会触发仓库事件，定时执行时间可能受 GitHub 调度影响。内容相同不重复写入。两个生成文件在同一个 PATCH 中更新，其余 Gist 文件保持原样。
+
+当前节点复用支持顶层节点、内联 Provider，以及具有 URL 的 HTTP Provider（`header` 转为 Stash `headers`，延迟测试由 MyStash 策略组管理）。无法跨设备读取本地 file Provider；尚未支持的 Provider 筛选或覆盖选项会停止发布，避免静默漏掉节点。Stash 的 `stash.yaml` 是派生产物，请在 `mihomo.yaml` 维护节点。
+
 [Migrate Mihomo Inline Provider](../workflows/migrate-mihomo-inline.yml) 是显式的一次性迁移：将手写 `proxies` 节点完整移入 `proxy-providers.Manual.payload`，保留节点参数和顺序，顶层变为 `proxies: []`，继续使用 `include-all-providers`。工作流首次添加或手动运行时执行，与普通同步共用并发锁；普通同步不执行迁移。已有 `Manual` 且仍有顶层节点时停止以防覆盖；顶层已为空时重复执行不再移动。迁移后两个区域仍由你维护，私人数据仅在 Action 进程内存中处理。
 
 该迁移工作流同时显式整理 `Manual.payload`：每个节点使用一行 `- {name: ..., type: ...}`，参数和顺序保持一致。常规同步不重新排版，继续原样保留你的手动格式。

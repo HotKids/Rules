@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Update only mihomo.yaml in a private Gist; never print its contents or URL."""
+"""Update private client configurations without printing their contents or URL."""
 import argparse
 import importlib.util
 import json
@@ -31,6 +31,20 @@ def _apply_manual_proxies(rendered, existing, migrate_inline=False, compact_inli
         raise PublishError('Cannot preserve the manual proxies/proxy-providers blocks; no changes published.') from None
 
 
+def _render_stash(base_path, mihomo):
+    try:
+        path = Path(__file__).with_name('render-stash-gist.py')
+        spec = importlib.util.spec_from_file_location('render_stash_gist', path)
+        renderer = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(renderer)
+        content = renderer.render(Path(base_path).read_text(encoding='utf-8'), mihomo)
+        if not isinstance(content, str) or not content.strip():
+            raise ValueError('Empty Stash output')
+        return content
+    except Exception:
+        raise PublishError('Cannot generate stash.yaml; no changes published.') from None
+
+
 def _request(method, url, token, payload=None):
     body = None if payload is None else json.dumps(payload, ensure_ascii=False).encode('utf-8')
     request = urllib.request.Request(url, data=body, method=method, headers={
@@ -52,7 +66,7 @@ def _request(method, url, token, payload=None):
     return result
 
 
-def publish(path, migrate_inline=False, compact_inline=False):
+def publish(path, migrate_inline=False, compact_inline=False, stash_base=None):
     gist_id = os.environ.get('MIHOMO_GIST_ID', '').strip()
     token = os.environ.get('GIST_TOKEN', '').strip()
     missing = [name for name, value in (('MIHOMO_GIST_ID', gist_id), ('GIST_TOKEN', token)) if not value]
@@ -77,10 +91,22 @@ def publish(path, migrate_inline=False, compact_inline=False):
         raise PublishError('Cannot verify the existing mihomo.yaml; no changes published.')
     content = _apply_manual_proxies(content, target['content'], migrate_inline=migrate_inline,
                                    compact_inline=compact_inline)
-    if target['content'] == content:
+    changes = {}
+    if target['content'] != content:
+        changes['mihomo.yaml'] = {'content': content}
+    if stash_base is not None:
+        stash_target = files.get('stash.yaml')
+        if 'stash.yaml' in files and (
+                not isinstance(stash_target, dict) or stash_target.get('truncated')
+                or not isinstance(stash_target.get('content'), str)):
+            raise PublishError('Cannot verify the existing stash.yaml; no changes published.')
+        stash_content = _render_stash(stash_base, content)
+        if stash_target is None or stash_target['content'] != stash_content:
+            changes['stash.yaml'] = {'content': stash_content}
+    if not changes:
         return False
-    # PATCH leaves all other files, the description and visibility unchanged.
-    _request('PATCH', url, token, {'files': {'mihomo.yaml': {'content': content}}})
+    # One PATCH publishes both derived files together and leaves every other file intact.
+    _request('PATCH', url, token, {'files': changes})
     return True
 
 
@@ -90,10 +116,13 @@ def main(argv=None):
                         help='One-time move of manual nodes into Manual inline Provider')
     parser.add_argument('--compact-inline', action='store_true',
                         help='Explicitly format each Manual payload node as one flow-style line')
+    parser.add_argument('--stash-base', type=Path,
+                        help='Public MyStash override used to generate stash.yaml in memory')
     parser.add_argument('config', help='Path to the generated configuration')
     args = parser.parse_args(argv)
     try:
-        changed = publish(args.config, migrate_inline=args.migrate_inline, compact_inline=args.compact_inline)
+        changed = publish(args.config, migrate_inline=args.migrate_inline, compact_inline=args.compact_inline,
+                          stash_base=args.stash_base)
     except PublishError as error:
         print(str(error), file=sys.stderr)
         return 1

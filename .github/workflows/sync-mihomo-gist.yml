@@ -2,14 +2,20 @@ name: Sync Mihomo Gist
 
 on:
   workflow_dispatch:
+  # Gist edits do not emit repository events; 04:00 UTC = 12:00 Asia/Shanghai daily.
+  schedule:
+    - cron: '0 4 * * *'
   push:
     branches: [master]
     paths:
       - 'Clash/Mihomo.yaml'
+      - 'Clash/Script/MyStash.stoverride'
       - '.github/scripts/render-mihomo-overlay.py'
+      - '.github/scripts/render-stash-gist.py'
       - '.github/scripts/publish-mihomo-gist.py'
       - '.github/tests/test_mihomo_overlay.py'
       - '.github/tests/test_mihomo_gist.py'
+      - '.github/tests/test_mihomo_stash.py'
       - '.github/scripts/requirements.txt'
       - '.github/workflows/sync-mihomo-gist.yml'
   # Overlay changes trigger Sync Config first. Wait for its validated base output.
@@ -49,7 +55,7 @@ jobs:
         env:
           MIHOMO_GIST_ID: ${{ secrets.MIHOMO_GIST_ID }}
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-        run: python3 .github/scripts/publish-mihomo-gist.py "$RUNNER_TEMP/mihomo.yaml"
+        run: python3 .github/scripts/publish-mihomo-gist.py --stash-base Clash/Script/MyStash.stoverride "$RUNNER_TEMP/mihomo.yaml"
       - name: Remove temporary configuration
         if: always()
         run: rm -f "$RUNNER_TEMP/mihomo.yaml"
