@@ -127,6 +127,9 @@ def render(base: str, overlay: dict, label: str) -> str:
     prefix, separator, _ = base.partition("# ── 策略组 ──")
     if not separator:
         raise ValueError("Missing Mihomo proxy group section")
+    prefix = prefix.replace("# 本地节点（订阅覆盖此处）", "# 本地节点（手动维护，同步保留）", 1)
+    prefix = prefix.replace("# 服务器订阅配置（每小时更新，健康检查用 Cloudflare 204）",
+                            "# 服务器订阅配置（手动维护，同步保留）", 1)
     prefix, references = _filter_anchors(prefix, groups)
     data["anchors"] = yaml.safe_load(prefix)["anchors"]
     header = f"# Personal Mihomo configuration: Clash/Mihomo.yaml + {label}\n"
@@ -145,11 +148,14 @@ def render(base: str, overlay: dict, label: str) -> str:
     return result
 
 
-def _manual_proxies(text: str) -> tuple[int, int, str, list[dict]]:
-    """Read only this top-level block; old unrelated YAML errors must not lose nodes."""
-    matches = list(re.finditer(r"(?m)^proxies:[^\n]*(?:\n|$)", text))
+def _editable_block(text: str, key: str, required: bool = False) -> tuple | None:
+    """Read one top-level block without parsing unrelated generated sections."""
+    escaped = re.escape(key)
+    matches = list(re.finditer(rf"(?m)^(?:{escaped}|'{escaped}'|\"{escaped}\")\s*:[^\n]*(?:\n|$)", text))
+    if not matches and not required:
+        return None
     if len(matches) != 1:
-        raise ValueError("Expected one editable proxies block")
+        raise ValueError(f"Expected one editable {key} block")
     start, after_key = matches[0].span()
     following = re.search(r"(?m)^(?:[A-Za-z_][\w-]*|'[^'\n]+'|\"[^\"\n]+\")\s*:", text[after_key:])
     end = after_key + following.start() if following else len(text)
@@ -160,9 +166,15 @@ def _manual_proxies(text: str) -> tuple[int, int, str, list[dict]]:
         end -= len(lines.pop())
     block = text[start:end]
     try:
-        proxies = yaml.safe_load(block)["proxies"]
+        value = yaml.safe_load(block)[key]
     except (yaml.YAMLError, KeyError, TypeError):
-        raise ValueError("Cannot parse the editable proxies block; nothing was published") from None
+        raise ValueError(f"Cannot parse the editable {key} block; nothing was published") from None
+    return start, end, block, value
+
+
+def _manual_proxies(text: str) -> tuple[int, int, str, list[dict]]:
+    """Validate the required user-owned node list, retaining its source text."""
+    start, end, block, proxies = _editable_block(text, "proxies", required=True)
     if not isinstance(proxies, list) or any(
             not isinstance(p, dict) or not isinstance(p.get("name"), str) or not p["name"]
             for p in proxies):
@@ -172,11 +184,27 @@ def _manual_proxies(text: str) -> tuple[int, int, str, list[dict]]:
     return start, end, block, proxies
 
 
+def _manual_proxy_providers(text: str) -> tuple | None:
+    block = _editable_block(text, "proxy-providers")
+    if block is not None and not isinstance(block[3], dict):
+        raise ValueError("Editable proxy-providers must be a mapping")
+    return block
+
+
 def apply_manual_proxies(rendered: str, existing: str) -> str:
-    """Preserve the Gist's editable proxies verbatim and include those nodes in pools."""
+    """Preserve both user-owned node source blocks and include inline nodes in pools."""
     _, _, manual, proxies = _manual_proxies(existing)
+    providers = _manual_proxy_providers(existing)
     start, end, _, _ = _manual_proxies(rendered)
     result = rendered[:start] + manual.rstrip("\n") + "\n" + rendered[end:]
+    generated_providers = _editable_block(result, "proxy-providers")
+    provider_text = providers[2].rstrip("\n") + "\n" if providers is not None else ""
+    if generated_providers is not None:
+        start, end = generated_providers[:2]
+        result = result[:start] + provider_text + result[end:]
+    elif provider_text:
+        at = result.index("# ── 策略组 ──")
+        result = result[:at] + provider_text + "\n" + result[at:]
     try:
         data = yaml.safe_load(result)
         groups = data["proxy-groups"]
@@ -207,7 +235,7 @@ def apply_manual_proxies(rendered: str, existing: str) -> str:
             raise ValueError("Manual node merge failed validation")
     except (yaml.YAMLError, KeyError, TypeError, ValueError, re.error):
         # Never expose node credentials through parser messages or tracebacks.
-        raise ValueError("Cannot merge the editable proxies block; nothing was published") from None
+        raise ValueError("Cannot merge the editable proxies/proxy-providers blocks; nothing was published") from None
     return result
 
 

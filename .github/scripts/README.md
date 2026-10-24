@@ -173,7 +173,7 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 在仓库的 Actions Secrets 中配置 `MIHOMO_GIST_ID`（仅 ID）及 `GIST_TOKEN`（具有 `gist` 权限的 classic PAT）。不要将这些值填进工作流或公开日志。发布器只接受私密 Gist，不修改其他文件或可见性；地址、令牌和配置正文不写入日志，完整私人配置仅在发布进程内存中合并，不提交仓库，也不上传构建产物。
 
-Gist 中 `mihomo.yaml` 的顶层 `proxies` 由你手动维护，初始可为 `proxies: []`。每次同步会原样保留该节点块，按现有筛选规则把节点加入对应分组；无须另建或引用 `snell.yaml`。编辑节点后手动运行此 Action 即可刷新分组候选。`proxies` 缺失或无效时停止发布，避免用空列表覆盖手写内容。其余配置随基座和 overlay 更新，其中 `disabled_by_default` 在静态 YAML 中会实际移除对应分组和规则。
+Gist 中 `mihomo.yaml` 的顶层 `proxies` 和 `proxy-providers` 均由你手动维护，初始可为 `proxies: []`、`proxy-providers: {}`。每次同步原样保留这两个块，按现有筛选规则把节点加入对应分组；无须另建或引用 `snell.yaml`。主动清空或删除 `proxy-providers` 后不会重新填入基座默认订阅。编辑节点后手动运行此 Action 即可刷新分组候选。手动块无效或 `proxies` 缺失时停止发布，避免用默认值覆盖手写内容。其余配置随基座和 overlay 更新，其中 `disabled_by_default` 在静态 YAML 中会实际移除对应分组和规则。
 
 `extra_pool_groups` 的 `insert_after` 控制分组位置，`tag` 控制该组前的分节注释。例如 Relay 首项使用 `"insert_after": "🇺🇳 Server", "tag": "Relay"`，派生 YAML/Stash 写入 `# Relay`，JS 写入 `// Relay`。修改或删除 `tag` 后注释跟随更新；它不作为代理组配置字段输出。
 

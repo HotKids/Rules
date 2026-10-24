@@ -43,13 +43,19 @@ class PrivateGistTests(unittest.TestCase):
             '    type: socks5\n'
             '    server: example.invalid\n'
             '    port: 1080\n')
+        self.providers = (
+            'proxy-providers: # keep my source\n'
+            '  Personal:\n'
+            '    type: http\n'
+            '    url: "https://example.invalid/private?token=test-only"\n'
+            '    interval: 4321\n')
         environment = patch.dict(os.environ, {'MIHOMO_GIST_ID': 'a' * 32, 'GIST_TOKEN': 'dummy-test-token'})
         environment.start()
         self.addCleanup(environment.stop)
 
     def gist(self, **changes):
         return {'public': False, 'files': {
-            'mihomo.yaml': {'content': self.manual + 'rules: []\n', 'truncated': False},
+            'mihomo.yaml': {'content': self.manual + self.providers + 'rules: []\n', 'truncated': False},
             'other.yaml': {'content': 'keep this file'},
         }, **changes}
 
@@ -69,8 +75,10 @@ class PrivateGistTests(unittest.TestCase):
         self.assertEqual(set(payload['files']), {'mihomo.yaml'})
         content = payload['files']['mihomo.yaml']['content']
         self.assertIn(self.manual, content)
+        self.assertIn(self.providers, content)
         parsed = yaml.safe_load(content)
         self.assertEqual(parsed['proxies'][0]['name'], 'Manual test node')
+        self.assertEqual(parsed['proxy-providers'], yaml.safe_load(self.providers)['proxy-providers'])
         self.assertIn('Manual test node', parsed['proxy-groups'][0]['proxies'])
 
     def test_identical_configuration_does_not_publish_again(self):
@@ -89,6 +97,18 @@ class PrivateGistTests(unittest.TestCase):
         self.assertEqual(request.call_count, 1)
         self.assertNotIn('private-node-value', output.getvalue())
         self.assertIn('no changes published', output.getvalue())
+
+    def test_invalid_manual_providers_abort_without_logging_source_details(self):
+        for providers in ('proxy-providers: [private-provider-value\n',
+                          'proxy-providers: [private-provider-value]\n',
+                          'proxy-providers: {}\nproxy-providers: {}\n'):
+            gist = self.gist(files={'mihomo.yaml': {'content': self.manual + providers, 'truncated': False}})
+            output = io.StringIO()
+            with self.subTest(providers=providers), patch.object(publisher.urllib.request, 'urlopen', return_value=self.response(gist)) as request, contextlib.redirect_stderr(output):
+                self.assertEqual(publisher.main([str(self.config)]), 1)
+            self.assertEqual(request.call_count, 1)
+            self.assertNotIn('private-provider-value', output.getvalue())
+            self.assertIn('no changes published', output.getvalue())
 
     def test_existing_errors_outside_manual_proxies_do_not_block_preservation(self):
         gist = self.gist(files={'mihomo.yaml': {

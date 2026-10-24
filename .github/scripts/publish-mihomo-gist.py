@@ -24,7 +24,7 @@ def _apply_manual_proxies(rendered, existing):
         return renderer.apply_manual_proxies(rendered, existing)
     except Exception:
         # Parser exceptions can contain private node values and source lines.
-        raise PublishError('Cannot preserve the manual proxies block; no changes published.') from None
+        raise PublishError('Cannot preserve the manual proxies/proxy-providers blocks; no changes published.') from None
 
 
 def _request(method, url, token, payload=None):
