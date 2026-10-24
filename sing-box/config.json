@@ -154,7 +154,8 @@
       "type": "selector",
       "tag": "⏱️ Speedtest",
       "outbounds": [
-        "🇺🇳 Server"
+        "🔰 Proxy",
+        "🔘 Direct"
       ]
     },
     {
