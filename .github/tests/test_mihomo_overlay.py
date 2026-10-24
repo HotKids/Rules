@@ -101,6 +101,24 @@ process.stdout.write(JSON.stringify(context.result));'''
         for config in (yaml.safe_load(native), yaml.safe_load(text)):
             self.assertTrue(all('tag' not in g and '_tag' not in g for g in config['proxy-groups']))
 
+    def test_stash_explicit_filter_enrolls_mail_without_overwriting_sources_or_static_choices(self):
+        source = (ROOT / 'Clash/Script/Stash.stoverride').read_text().splitlines()
+        for value in (None, '(?i)HK'):
+            overlay = {'stash_output': 'Clash/Script/MyStash.stoverride',
+                       'group_overrides': {'📧 Mail': {'filter': value}}}
+            original = deepcopy(overlay)
+            config = yaml.safe_load('\n'.join(stash._stash_apply_overlay(source, overlay, 'test')))
+            mail = next(g for g in config['proxy-groups'] if g['name'] == '📧 Mail')
+            self.assertIs(mail['include-all'], True)
+            self.assertEqual(mail['proxies'], ['🔰 Proxy', '🔘 DIRECT'])
+            if value is None:
+                self.assertNotIn('filter', mail)
+            else:
+                self.assertEqual(mail['filter'], value)
+            self.assertNotIn('proxies', config)
+            self.assertNotIn('proxy-providers', config)
+            self.assertEqual(overlay, original)
+
     def test_manual_block_survives_sync_even_if_old_generated_rules_are_invalid(self):
         block = 'proxies:  # user-managed\n  - {name: HK HKT, type: socks5, server: example.invalid, port: 1080, password: "private-test"}\n'
         existing = block + 'rules:\n  - "invalid quote\n'
