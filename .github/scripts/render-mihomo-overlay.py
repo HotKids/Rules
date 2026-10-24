@@ -186,8 +186,8 @@ def _manual_proxies(text: str) -> tuple[int, int, str, list[dict]]:
 
 def _manual_proxy_providers(text: str) -> tuple | None:
     block = _editable_block(text, "proxy-providers")
-    if block is not None and not isinstance(block[3], dict):
-        raise ValueError("Editable proxy-providers must be a mapping")
+    if block is not None and block[3] is not None and not isinstance(block[3], dict):
+        raise ValueError("Editable proxy-providers must be a mapping or empty")
     return block
 
 
