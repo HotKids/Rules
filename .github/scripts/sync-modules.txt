@@ -132,4 +132,3 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/优酷视频�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/知乎去广告.sgmodule,zhihu
 ;ZhuanZhuan
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/转转去广告.sgmodule,zhuanzhuan
-https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/Official/中国联通去广告.sgmodule,10010
