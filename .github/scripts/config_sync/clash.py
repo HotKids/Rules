@@ -582,7 +582,8 @@ _CLASH_BASE_SECTIONS: list[tuple[str, list[tuple[str, list[str]]]]] = [
     ]),
     ("TUN", [
         ("tun", [
-            "接管系统全量流量；stack mixed（TCP 系统栈 + UDP gvisor，推荐）；dns-hijack 劫持 53 端口防绕过；",
+            "接管系统全量流量；stack mips（Mihomo 自研用户态 IP 栈，需 1.19.31+）；TCP 拥塞控制默认 cubic；",
+            "dns-mode 留空保留平台默认；dns-hijack 劫持 53 端口防绕过；",
             "auto-route/auto-redirect 自动配路由与透明代理（仅 Linux）；strict-route 防 IP 泄漏；",
             "EIM NAT 改善游戏/VOIP/WebRTC 打洞；disable-icmp-forwarding 关闭 ICMP 代答，让 ping 反映真实链路",
         ]),
