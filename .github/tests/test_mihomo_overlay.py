@@ -139,14 +139,15 @@ process.stdout.write(JSON.stringify(context.result));'''
         self.assertEqual(renderer.apply_manual_proxies(changed, updated), updated)
 
     def test_empty_or_removed_manual_providers_never_restore_the_base_default(self):
-        for providers in ('proxy-providers: {} # deliberately empty\n', ''):
+        for providers in ('proxy-providers: {} # deliberately empty\n',
+                          'proxy-providers: # deliberately blank\n', ''):
             existing = 'proxies: [] # deliberately empty\n' + providers
             merged = renderer.apply_manual_proxies(self.rendered, existing)
             data = yaml.safe_load(merged)
             self.assertIn('proxies: [] # deliberately empty\n', merged)
             if providers:
                 self.assertIn(providers, merged)
-                self.assertEqual(data['proxy-providers'], {})
+                self.assertEqual(data['proxy-providers'], yaml.safe_load(providers)['proxy-providers'])
             else:
                 self.assertNotIn('proxy-providers', data)
             self.assertNotIn('https://sub.hotkids.me', merged)

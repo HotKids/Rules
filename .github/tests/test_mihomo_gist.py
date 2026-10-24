@@ -132,6 +132,18 @@ class PrivateGistTests(unittest.TestCase):
         self.assertIn(manual, content)
         self.assertEqual(yaml.safe_load(content)['proxies'], [])
 
+    def test_blank_provider_value_is_preserved_without_filling_the_default(self):
+        manual = self.manual + 'proxy-providers: # left blank by user\n'
+        gist = self.gist(files={'mihomo.yaml': {'content': manual + 'rules: []\n', 'truncated': False}})
+        with patch.object(publisher.urllib.request, 'urlopen', side_effect=[
+            self.response(gist), self.response(self.gist()),
+        ]) as request:
+            self.assertTrue(publisher.publish(self.config))
+        content = json.loads(request.call_args_list[1].args[0].data)['files']['mihomo.yaml']['content']
+        self.assertIn(manual, content)
+        self.assertIsNone(yaml.safe_load(content)['proxy-providers'])
+        self.assertNotIn('https://example.invalid/sub', content)
+
     def test_public_or_unverifiable_target_never_receives_a_patch(self):
         for gist in (self.gist(public=True), self.gist(public=None), self.gist(files={}),
                      self.gist(files={'mihomo.yaml': {'content': 'partial', 'truncated': True}})):
