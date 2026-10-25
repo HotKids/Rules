@@ -11,55 +11,73 @@ on:
       - '.github/scripts/sync-modules.py'
       - '.github/scripts/sync-modules-beta.py'
       - '.github/scripts/convert-loon.cjs'
+      - '.github/scripts/module_convert.py'
       - '.github/tests/loon-convert.cjs'
       - '.github/tests/test_blockads_aggregate.py'
       - '.github/tests/test_blockads_beta.py'
       - '.github/scripts/_common.py'
+      - '.github/scripts/publish-generated.py'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
+      - '.github/actions/**'
   schedule:
-    - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
+    - cron: '27 16 * * *'   # UTC+8 00:27，与规则同步错峰
   workflow_dispatch:
 
 permissions:
   contents: write
 
-# 与 sync-rules / sync-config 共用同一组，串行化对 master 的 push，避免并发 push 冲突
+# 整个工作流持有队列锁；两个独立发布 job 依次获取最新 master。
 concurrency:
   group: push-master
   cancel-in-progress: false
   queue: max
 
 jobs:
-  sync:
+  formal:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: master
-      - name: Install validation dependencies
-        run: python3 -m pip install -r .github/scripts/requirements.txt
-
-      - name: Run aggregate script
+          fetch-depth: 0
+          filter: blob:none
+      - uses: ./.github/actions/setup-runtime
+      - name: Capture generation inputs
+        run: python3 .github/scripts/publish-generated.py capture --kind modules-formal --state "$RUNNER_TEMP/formal-publish.json"
+      - name: Aggregate formal sources
         run: python3 .github/scripts/sync-modules.py
+      - name: Validate formal publication
+        run: python3 .github/scripts/validate.py
+      - name: Publish validated formal module
+        run: >-
+          python3 .github/scripts/publish-generated.py publish
+          --state "$RUNNER_TEMP/formal-publish.json"
+          --message "chore: sync modules [auto]"
 
-      - name: Convert and aggregate Beta sources
-        run: python3 .github/scripts/sync-modules-beta.py
-
+  beta:
+    needs: formal
+    if: always() && !cancelled()
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: master
+          fetch-depth: 0
+          filter: blob:none
+      - uses: ./.github/actions/setup-runtime
+      - name: Capture generation inputs
+        run: python3 .github/scripts/publish-generated.py capture --kind modules-beta --state "$RUNNER_TEMP/beta-publish.json"
       - name: Check Loon conversion bridge
         run: node --test .github/tests/loon-convert.cjs
-
-      - name: Validate before publishing
+      - name: Convert and aggregate Beta sources
+        run: python3 .github/scripts/sync-modules-beta.py
+      - name: Validate Beta publication
         run: python3 .github/scripts/validate.py
-
-      - name: Commit & push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Surge/Module/BlockAds.sgmodule Surge/Module/BlockAdsBeta.sgmodule
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: sync modules [auto]"
-            git push
-          fi
+      - name: Publish validated Beta module
+        run: >-
+          python3 .github/scripts/publish-generated.py publish
+          --state "$RUNNER_TEMP/beta-publish.json"
+          --message "chore: sync beta modules [auto]"

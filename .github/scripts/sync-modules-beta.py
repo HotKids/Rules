@@ -2,6 +2,7 @@
 """Convert annotated Loon sources at runtime and reuse the regular aggregator."""
 import argparse
 from concurrent.futures import ThreadPoolExecutor
+from functools import lru_cache
 import hashlib
 import importlib.util
 import json
@@ -19,6 +20,8 @@ LISTING = Path(__file__).with_name('sync-modules.txt')
 STABLE = ROOT / 'Surge/Module/BlockAds.sgmodule'
 OUTPUT = ROOT / 'Surge/Module/BlockAdsBeta.sgmodule'
 LOON_TEMPLATE = 'https://kelee.one/Tool/Loon/Lpx/{name}_remove_ads.lpx'
+# This full UA is accepted by the download endpoint. It identifies the HTTP
+# client, not the Loon grammar supported by the separately pinned parser.
 LOON_UA = 'Loon/3.3.0 CFNetwork/1498.700.2 Darwin/23.6.0'
 PARSER_URL = ('https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/'
               '761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js')
@@ -28,11 +31,35 @@ PLACEHOLDER = re.compile(r'\{\{\{([^{}]+)\}\}\}')
 PM_ADVISORY = '逻辑运算符 AND 中的所有子规则必须是支持 pre-matching 的类型, 但 PROTOCOL 不支持'
 
 
+@lru_cache(maxsize=1)
 def load_aggregator():
     spec = importlib.util.spec_from_file_location('blockads_aggregator', Path(__file__).with_name('sync-modules.py'))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
+
+
+def diagnostic_tail(value, *, max_lines=8):
+    """Keep a bounded stderr tail without source URLs, query values or credentials."""
+    if isinstance(value, bytes):
+        value = value.decode('utf-8', errors='replace')
+    text = str(value or '')
+    text = re.sub(r'\x1b\[[0-?]*[ -/]*[@-~]', '', text)
+    text = re.sub(r'[\x00-\x08\x0b-\x1f\x7f]', '', text)
+    # Match plain, JSON-escaped and percent-encoded URLs before truncating;
+    # cutting first could leave an unrecognizable URL/query fragment behind.
+    text = re.sub(r'https?(?::|%(?:25)*3a)(?:\\?/|%(?:25)*2f){2}[^\s<>\'"]*',
+                  '[URL]', text, flags=re.I)
+    text = re.sub(r'[^\s<>\'"=]*_remove_ads\.lpx[^\s<>\'"]*', '[URL]', text, flags=re.I)
+    text = re.sub(r'\b(?:Bearer|Basic)\s+[^\s,;\'"<>]+', '[CREDENTIAL]', text, flags=re.I)
+    text = re.sub(r'(\b(?:proxy-authorization|authorization|set-cookie|cookie)\b[\'\"]?\s*[:=]\s*)[^\r\n]+',
+                  r'\1[REDACTED]', text, flags=re.I)
+    text = re.sub(r'''([?&;][^?&;=\s]{1,100}=)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^&#\s]*)''',
+                  r'\1[REDACTED]', text)
+    text = re.sub(r'''(\b[\w-]*(?:password|passwd|token|secret|api[-_]?key|psk|localtext)\b["']?\s*(?:[:=]|%(?:25)*3[ad])\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;]+)''',
+                  r'\1[REDACTED]', text, flags=re.I)
+    lines = [line.strip() for line in text.splitlines() if line.strip()]
+    return '\n'.join(line[:240] for line in lines[-max_lines:])
 
 
 def read_sources(path=LISTING):
@@ -103,11 +130,17 @@ def convert_sources(sources, bodies, parser, http_bodies):
     with tempfile.TemporaryDirectory(prefix='blockads-beta-') as directory:
         path = Path(directory) / 'parser.js'
         path.write_text(parser, encoding='utf-8')
-        run = subprocess.run(['node', str(Path(__file__).with_name('convert-loon.cjs')), '--parser', str(path)],
-                             input=json.dumps({'sources': batch, 'httpBodies': http_bodies}),
-                             text=True, capture_output=True, timeout=180)
+        try:
+            run = subprocess.run(['node', str(Path(__file__).with_name('convert-loon.cjs')), '--parser', str(path)],
+                                 input=json.dumps({'sources': batch, 'httpBodies': http_bodies}),
+                                 text=True, capture_output=True, timeout=180)
+        except subprocess.TimeoutExpired as error:
+            detail = diagnostic_tail(error.stderr)
+            raise RuntimeError('Script-Hub 转换进程超时，保留现有 Beta' + ('\n' + detail if detail else '')) from None
     if run.returncode:
-        raise RuntimeError('Script-Hub 转换进程失败，保留现有 Beta')
+        detail = diagnostic_tail(run.stderr)
+        raise RuntimeError(f'Script-Hub 转换进程失败 (exit {run.returncode})，保留现有 Beta'
+                           + ('\n' + detail if detail else ''))
     results = json.loads(run.stdout)['results']
     if len(results) != len(batch) or [r.get('id') for r in results] != [s['id'] for s in batch]:
         raise ValueError('Script-Hub 返回的来源不完整')
@@ -223,6 +256,7 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as error:
-        message = re.sub(r'https?://[^\s\'"<>]+', '[URL]', str(error))
+        # Keep the failure summary above the already bounded eight-line stderr.
+        message = diagnostic_tail(error, max_lines=9)
         print('BlockAds Beta: ' + message, file=sys.stderr)
         sys.exit(1)

@@ -3,13 +3,14 @@
 Surge RULE-SET 同步脚本
 
 功能：
-1. 拉取 sync-rules.txt 外部规则（Surge section → Surge/RULE-SET；Clash section → Clash/sing-box）
+1. 统一下载 sync-rules.txt 规则与模块，再生成各自的产物
 2. 地区合集 ↔ 独立子项双向同步
 3. 独立子项 → 重建 Streaming.list
 4. Surge → QX / Clash / sing-box 格式转换（# >> Clash 条目已由 Step 1 直接写入，跳过）
-5. 清理已删除的规则文件
+5. 按生成归属与内容指纹清理已删除来源的产物
 """
 
+import hashlib
 import json
 import os
 import re
@@ -30,6 +31,70 @@ CLASH_DIR = REPO_ROOT / "Clash" / "RuleSet"
 SINGBOX_DIR = REPO_ROOT / "sing-box" / "source"
 SYNC_RULES_TXT = REPO_ROOT / ".github" / "scripts" / "sync-rules.txt"
 _UA = "sync-rules/1.0"
+RULE_OWNERS_FILE = ".github/scripts/sync-rules-owned.json"
+_rule_owner_root = None
+_rule_owner_files = None
+
+
+def _valid_rule_output(relative):
+    path = Path(relative)
+    if path.is_absolute() or ".." in path.parts or "\\" in relative:
+        return False
+    formats = {
+        "Surge/RULE-SET": {".list"},
+        "Quantumult/X/Filter": {".list"},
+        "Clash/RuleSet": {".yaml", ".txt"},
+        "sing-box/source": {".json"},
+    }
+    return any(relative.startswith(prefix + "/") and path.suffix in suffixes
+               for prefix, suffixes in formats.items())
+
+
+def _rule_owners():
+    global _rule_owner_root, _rule_owner_files
+    root = REPO_ROOT.resolve()
+    if _rule_owner_root != root or _rule_owner_files is None:
+        path = root / RULE_OWNERS_FILE
+        state = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {"version": 1, "files": {}}
+        if not isinstance(state, dict) or state.get("version") != 1 or not isinstance(state.get("files"), dict):
+            raise ValueError("Invalid sync-rules ownership record; refusing to guess which files may be removed")
+        files = state["files"]
+        if any(not isinstance(name, str) or not _valid_rule_output(name) or
+               not isinstance(digest, str) or not re.fullmatch(r"[0-9a-f]{64}", digest)
+               for name, digest in files.items()):
+            raise ValueError("Invalid path or fingerprint in sync-rules ownership record")
+        _rule_owner_root, _rule_owner_files = root, dict(files)
+    return _rule_owner_files
+
+
+def _write_rule_output(path, content):
+    relative = path.relative_to(REPO_ROOT).as_posix()
+    if not _valid_rule_output(relative) or path.is_symlink() or not path.resolve().is_relative_to(REPO_ROOT.resolve()):
+        raise ValueError(f"Invalid generated rule path: {relative}")
+    owners = _rule_owners()
+    changed = write_if_changed(path, content)
+    # Register unchanged legacy files only after this run has actually generated
+    # and checked their contents; an arbitrary 'fork from' comment proves nothing.
+    owners[relative] = hashlib.sha256(content.encode("utf-8")).hexdigest()
+    return changed
+
+
+def _remove_owned_rule(relative):
+    owners = _rule_owners()
+    path = REPO_ROOT / relative
+    if not path.exists():
+        owners.pop(relative, None)
+        return False
+    if path.is_symlink() or not path.is_file() or not path.resolve().is_relative_to(REPO_ROOT.resolve()):
+        raise ValueError(f"Refusing to remove an unsafe generated path: {relative}")
+    if hashlib.sha256(path.read_bytes()).hexdigest() != owners[relative]:
+        print(f"  [WARN] {relative} 已被手动修改，保留文件并解除自动清理归属")
+        owners.pop(relative, None)
+        return False
+    path.unlink()
+    owners.pop(relative, None)
+    print(f"  ✗ 删除 {relative}（本轮不再生成）")
+    return True
 
 
 def _recently_changed_files() -> set[str]:
@@ -56,11 +121,11 @@ def _recently_changed_files() -> set[str]:
             changed.update(git("ls-files").splitlines())
         else:
             git("merge-base", "--is-ancestor", base, "HEAD")
-            changed.update(git("diff", "--name-only", base, "HEAD").splitlines())
+            changed.update(git("diff", "--no-renames", "--name-only", base, "HEAD").splitlines())
     elif not event:
         changed.update(git("diff-tree", "--root", "--no-commit-id", "-r",
                            "--name-only", "HEAD").splitlines())
-    changed.update(git("diff", "--name-only", "HEAD").splitlines())
+    changed.update(git("diff", "--no-renames", "--name-only", "HEAD").splitlines())
     return changed
 
 # ─── QX 不支持的规则类型 ──────────────────────────────────────────────
@@ -238,25 +303,80 @@ def _assert_consistent_aggregate(path: Path, stems: list[str]) -> None:
 
 
 def _check_idle_streaming() -> None:
-    """Scheduled/manual jobs must not consume unprocessed aggregate edits.
+    """Reject unprocessed edits before downloading or replacing any upstreams.
 
     A job may acquire the shared queue after a user push but before its matching
     sync run. Check the committed inputs before fetching/writing any upstreams.
     """
-    if os.environ.get("SYNC_EVENT_NAME") not in {"schedule", "workflow_dispatch"} or os.environ.get("SYNC_BASE_SHA"):
-        return
     placeholders = scan_streaming_placeholders()
     stems = sorted({stem for members in placeholders.values() for stem in members})
     total = SURGE_DIR / "Streaming.list"
-    if stems and total.exists():
-        _assert_consistent_aggregate(total, stems)
+    aggregates = [(total, stems)] if stems and total.exists() else []
     for region, members in placeholders.items():
         path = SURGE_DIR / f"Streaming_{region}.list"
         if region and path.exists():
+            aggregates.append((path, members))
+    event, base = os.environ.get("SYNC_EVENT_NAME", ""), os.environ.get("SYNC_BASE_SHA", "")
+    if event in {"schedule", "workflow_dispatch"} and not base:
+        for path, members in aggregates:
             _assert_consistent_aggregate(path, members)
+    elif event == "push" or base:
+        changed = _recently_changed_files()  # also verifies reachable push history
+        if base and set(base) != {"0"}:
+            _assert_no_prior_streaming_edits(base, changed, aggregates, placeholders)
 
 
-def sync_streaming() -> None:
+def _assert_no_prior_streaming_edits(base, changed, aggregates, placeholders):
+    """Do not discard an inconsistent aggregate already present at event.before.
+
+    A later push may change a member, not just an unrelated file. Its changed-file
+    set cannot establish the direction of an older failed edit. A now-consistent
+    aggregate (for example one processed by an earlier queued bot run) is safe.
+    """
+    inconsistent = []
+    for path, members in aggregates:
+        expected = "\n".join(read_standalone(stem) or "" for stem in members)
+        if _streaming_sections(path.read_text(encoding="utf-8")) != _streaming_sections(expected):
+            inconsistent.append(path)
+    if not inconsistent:
+        return
+
+    def git(*args):
+        return subprocess.run(["git", *args], cwd=REPO_ROOT, check=True,
+                              capture_output=True, text=True).stdout
+
+    source_dir = SURGE_DIR.relative_to(REPO_ROOT)
+    tracked = set(git("ls-tree", "-r", "--name-only", base, "--", source_dir.as_posix()).splitlines())
+    # Include removed/renamed members and changed region markers from the push,
+    # so a normal deletion or a region change is compared with the old membership.
+    candidates = {source_dir / f"{stem}.list" for members in placeholders.values() for stem in members}
+    candidates.update(Path(path) for path in changed
+                      if Path(path).parent == source_dir and Path(path).suffix == ".list"
+                      and not Path(path).stem.startswith("Streaming"))
+    prior_members = {}
+    prior_texts = {}
+    for path in sorted(candidates):
+        if path.as_posix() not in tracked:
+            continue
+        text = git("show", f"{base}:{path.as_posix()}")
+        marker = next((match for line in text.splitlines()
+                       if (match := STREAMING_PLACEHOLDER_RE.match(line.strip()))), None)
+        if marker:
+            prior_members.setdefault(marker[1] or "", []).append(path.stem)
+            prior_texts[path.stem] = text
+    for path in inconsistent:
+        rel = path.relative_to(REPO_ROOT).as_posix()
+        if rel not in tracked:
+            continue  # a newly introduced aggregate has no earlier edit to lose
+        region = path.stem[len("Streaming_"):] if path.stem.startswith("Streaming_") else None
+        members = (sorted(prior_texts) if region is None else sorted(prior_members.get(region, [])))
+        old_expected = "\n".join(prior_texts[stem] for stem in members)
+        if _streaming_sections(git("show", f"{base}:{rel}")) != _streaming_sections(old_expected):
+            raise ValueError(f"{path.name} 在本次 push 基准中已有未完成的 Streaming 编辑；"
+                             "请重跑原失败任务，或先对齐合集与成员，未执行覆盖")
+
+
+def sync_streaming(*, prechecked: bool = False) -> None:
     """Streaming 三层双向同步：总合集 ↔ 地区合集 ↔ 独立子项，以独立子项为枢纽。
 
     同步方向由 push 完整范围与工作区改动决定（本地可用 SYNC_BASE_SHA）：
@@ -266,6 +386,9 @@ def sync_streaming() -> None:
     - 无改动（cron/首次）  → 从独立子项重建所有合集（或从地区合集提取首次建档）
     """
     print("\n── Step 2/3: Streaming 三层同步 ──")
+
+    if not prechecked:
+        _check_idle_streaming()
 
     changed = _recently_changed_files()
     placeholders = scan_streaming_placeholders()
@@ -427,7 +550,7 @@ def parse_and_rule(raw: str):
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Step 3: Surge → QX / Clash / sing-box
+#  Step 4: Surge → QX / Clash / sing-box
 # ═══════════════════════════════════════════════════════════════════════
 
 class PendingSection:
@@ -676,7 +799,7 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None,
 
     # QX / Clash / sing-box 输出全部摊平（不保留子目录结构）
     qx_content = (convert_qx_domainset if is_domainset else convert_qx)(lines, stem)
-    if write_if_changed(QX_DIR / f"{stem}.list", qx_content):
+    if _write_rule_output(QX_DIR / f"{stem}.list", qx_content):
         print(f"    ✓ QX:      {stem}.list")
         updated += 1
 
@@ -697,7 +820,7 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None,
                 if extra:
                     lines_extra = "\n".join(f"  - {t},{v}" for t, v in extra)
                     clash_body = clash_body.rstrip("\n") + "\n" + lines_extra + "\n"
-        if write_if_changed(CLASH_DIR / f"{stem}.yaml", clash_body):
+        if _write_rule_output(CLASH_DIR / f"{stem}.yaml", clash_body):
             print(f"    ✓ Clash:   {stem}.yaml")
             updated += 1
 
@@ -705,7 +828,7 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None,
         companion = None if is_domainset else CLASH_CIDR_COMPANION.get(stem)
         if companion:
             cidr_body = convert_ipcidr_to_clash(text)
-            if cidr_body and write_if_changed(CLASH_DIR / companion, cidr_body):
+            if cidr_body and _write_rule_output(CLASH_DIR / companion, cidr_body):
                 print(f"    ✓ Clash:   {companion}")
                 updated += 1
 
@@ -713,19 +836,19 @@ def process_file(surge_file: Path, clash_override: set[str] | None = None,
         sb_content = (convert_domain_payload_to_singbox(clash_body) if is_domainset
                       else convert_classical_payload_to_singbox(clash_body, f"{stem}.json"))
         if sb_content:
-            if write_if_changed(SINGBOX_DIR / f"{stem}.json", sb_content):
+            if _write_rule_output(SINGBOX_DIR / f"{stem}.json", sb_content):
                 print(f"    ✓ sing-box: {stem}.json")
                 updated += 1
 
     return updated
 
 
-def convert_all():
+def convert_all(rules=None):
     """遍历 Surge/RULE-SET 所有 .list（含子目录），逐文件转换。"""
     print("\n── Step 4: Surge → QX / Clash / sing-box ──")
 
     # # >> Clash 条目优先级高于 Surge 自动转换（Clash/sing-box 已由 Step 1 写入）
-    rules_txt = parse_sync_rules()
+    rules_txt = parse_sync_rules() if rules is None else rules
     clash_override = {e["name"] for e in rules_txt["clash"]}
     # # >> Surge Domain-Set 条目按 domain 语义派生（文件名 stem 匹配，与输出摊平规则一致）
     domainset_stems = {e["name"].rsplit("/", 1)[-1] for e in rules_txt["surge_domainset"]}
@@ -745,49 +868,51 @@ def convert_all():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Step 4: 清理已删除的文件
+#  Step 5: 清理已删除的文件
 # ═══════════════════════════════════════════════════════════════════════
 
-def cleanup_stale():
-    """QX/Clash/sing-box 中存在但 Surge 中已无对应源的文件 → 删除。
-    同时清理 Surge/RULE-SET/ 中以前由 # >> Surge 拉取、现已从 sync-rules.txt 移除的文件
-    （通过 '### fork from' 首行识别为外部来源）。
+def cleanup_stale(rules=None):
+    """Remove fingerprinted outputs whose source no longer generates them.
+
+    Existing files with a third-party fork comment are not adopted here. They
+    become managed only after a real generation pass reproduces their contents.
+    This also covers JSON outputs and CIDR companion .txt files without adding
+    format-specific comments to every generated artifact.
     """
     print("\n── Step 5: 清理已删除的文件 ──")
-
-    sync_rules = parse_sync_rules()
-    # 当前 sync-rules.txt 管理的 stems（含 Domain-Set 段）
-    surge_managed = {e["name"] for e in sync_rules["surge"] + sync_rules["surge_domainset"]}
-    clash_managed = {e["name"] for e in sync_rules["clash"]}
-
-    # 清理 Surge/RULE-SET/ 中不再被 # >> Surge 管理的外部拉取文件
-    for sf in sorted(SURGE_DIR.rglob("*.list")):
-        rel = str(sf.relative_to(SURGE_DIR).with_suffix(""))
-        if rel in surge_managed:
-            continue
-        try:
-            first_line = sf.read_text(encoding="utf-8").splitlines()[0].strip()
-        except (IndexError, OSError):
-            continue
-        if first_line.startswith("### fork from "):
-            sf.unlink()
-            print(f"  ✗ 删除 {sf.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除）")
-
-    # QX / Clash / sing-box：保留有 Surge 源（摊平，用 stem）或 # >> Clash 管理（保留路径）的文件
-    surge_stems = {sf.stem for sf in SURGE_DIR.rglob("*.list")}
-    keep = surge_stems | clash_managed
-
+    rules = parse_sync_rules() if rules is None else rules
+    owners = _rule_owners()
+    managed_sources = {f"Surge/RULE-SET/{entry['name']}.list"
+                       for section in ("surge", "surge_domainset")
+                       for entry in rules.get(section, [])}
     deleted = 0
-    for target_dir, ext in [(QX_DIR, ".list"), (CLASH_DIR, ".yaml"), (SINGBOX_DIR, ".json")]:
-        if not target_dir.exists():
-            continue
-        for f in sorted(target_dir.rglob(f"*{ext}")):
-            rel = str(f.relative_to(target_dir).with_suffix(""))
-            if rel not in keep:
-                f.unlink()
-                print(f"  ✗ 删除 {f.relative_to(REPO_ROOT)}")
-                deleted += 1
+    for relative in list(owners):
+        if relative.startswith("Surge/RULE-SET/") and relative not in managed_sources:
+            deleted += _remove_owned_rule(relative)
 
+    source_files = list(SURGE_DIR.rglob("*.list"))
+    domainset_stems = {entry["name"].rsplit("/", 1)[-1]
+                       for entry in rules.get("surge_domainset", [])}
+    clash_overrides = {entry["name"] for entry in rules.get("clash", [])}
+    expected = set(managed_sources)
+    for source in source_files:
+        expected.update({f"Quantumult/X/Filter/{source.stem}.list",
+                         f"Clash/RuleSet/{source.stem}.yaml",
+                         f"sing-box/source/{source.stem}.json"})
+        companion = CLASH_CIDR_COMPANION.get(source.stem)
+        relative = source.relative_to(SURGE_DIR).with_suffix("").as_posix()
+        if (companion and source.stem not in domainset_stems and relative not in clash_overrides
+                and _extract_cidrs(source.read_text(encoding="utf-8"))):
+            expected.add(f"Clash/RuleSet/{companion}")
+    for entry in rules.get("clash", []):
+        expected.update({f"Clash/RuleSet/{entry['name']}.yaml",
+                         f"sing-box/source/{entry['name']}.json"})
+    for relative in list(owners):
+        if relative not in expected:
+            deleted += _remove_owned_rule(relative)
+    state = {"version": 1, "files": dict(sorted(owners.items()))}
+    write_if_changed(REPO_ROOT / RULE_OWNERS_FILE,
+                     json.dumps(state, ensure_ascii=False, indent=2) + "\n")
     if not deleted:
         print("  无需清理")
 
@@ -1037,7 +1162,7 @@ def convert_classical_payload_to_singbox(text: str, name: str = "") -> str | Non
             if rules else None)
 
 
-def fetch_external_rules():
+def fetch_external_rules(rules=None, prefetched=None):
     """拉取 sync-rules.txt 外部规则。
 
     # >> Surge  → Surge/RULE-SET/<name>.list（首行加 fork header，Step 4 正常转换）
@@ -1045,7 +1170,7 @@ def fetch_external_rules():
                   Step 4 对同名 Surge 文件跳过 Clash/sing-box 输出）
     """
     print("\n── Step 1: 拉取外部规则 ──")
-    rules = parse_sync_rules()
+    rules = parse_sync_rules() if rules is None else rules
 
     if not rules["surge"] and not rules["surge_domainset"] and not rules["clash"]:
         print("  sync-rules.txt 无规则条目")
@@ -1055,7 +1180,8 @@ def fetch_external_rules():
     all_urls = list({e["url"] for e in rules["surge"] + rules["surge_domainset"] + rules["clash"]})
     if all_urls:
         print(f"  并发下载 {len(all_urls)} 个 URL …")
-    prefetched = prefetch_urls(all_urls, _UA) if all_urls else {}
+    if prefetched is None:
+        prefetched = prefetch_urls(all_urls, _UA) if all_urls else {}
 
     # ── # >> Surge / # >> Surge Domain-Set section（同名多 URL 合并去重）──
     surge_groups: dict[str, list[str]] = defaultdict(list)
@@ -1101,7 +1227,7 @@ def fetch_external_rules():
         rule_lines.insert(0, f"# > {header}")
 
         content = "### fork from " + " & ".join(fork_urls) + "\n" + "\n".join(rule_lines) + "\n"
-        if write_if_changed(SURGE_DIR / f"{name}.list", content):
+        if _write_rule_output(SURGE_DIR / f"{name}.list", content):
             print(f"    ✓ Surge/RULE-SET/{name}.list")
         else:
             print(f"    ✓ {name}.list 无变化")
@@ -1140,7 +1266,7 @@ def fetch_external_rules():
 
         body = "payload:\n" + "\n".join(f"  - {r}" for r in all_rules) + "\n"
         clash_content = "### fork from " + " & ".join(fork_urls) + "\n" + body
-        if write_if_changed(CLASH_DIR / f"{name}.yaml", clash_content):
+        if _write_rule_output(CLASH_DIR / f"{name}.yaml", clash_content):
             print(f"    ✓ Clash:    {name}.yaml")
         else:
             print(f"    ✓ Clash:    {name}.yaml 无变化")
@@ -1149,7 +1275,7 @@ def fetch_external_rules():
         sb_content = (convert_domain_payload_to_singbox(body) if name in clash_domainset_names
                       else convert_classical_payload_to_singbox(body, f"{name}.json"))
         if sb_content:
-            if write_if_changed(SINGBOX_DIR / f"{name}.json", sb_content):
+            if _write_rule_output(SINGBOX_DIR / f"{name}.json", sb_content):
                 print(f"    ✓ sing-box: {name}.json")
             else:
                 print(f"    ✓ sing-box: {name}.json 无变化")
@@ -1158,20 +1284,24 @@ def fetch_external_rules():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-#  Main
-def fetch_external_modules():
+#  Step 1b: Module generation
+# ═══════════════════════════════════════════════════════════════════════
+
+def fetch_external_modules(rules=None, prefetched=None):
     """Generate current outputs, then remove obsolete files owned by this generator."""
     print("\n── Step 1b: 同步 Surge / Stash 模块 ──")
     if not SYNC_RULES_TXT.is_file():
         raise FileNotFoundError(f"模块清单不存在，保留现有文件：{SYNC_RULES_TXT}")
-    entries = parse_sync_rules().get("module", [])
+    rules = parse_sync_rules() if rules is None else rules
+    entries = rules.get("module", [])
     if not entries:
         print("  sync-rules.txt 无 Module 条目")
     groups = {}
     for entry in entries:
         for target in module_targets(entry["name"]):
             groups.setdefault(target, []).append(entry)
-    prefetched = prefetch_urls([e["url"] for e in entries], _UA, encode=True)
+    if prefetched is None:
+        prefetched = prefetch_urls([e["url"] for e in entries], _UA, encode=True)
     outputs = {}
     # Validate every source and conversion before writing any module in the batch.
     for target, sources in groups.items():
@@ -1210,23 +1340,29 @@ def main():
     print("  Rules 同步脚本")
     print("=" * 60)
 
-    # Fail before any upstream write if a scheduled run encounters pending edits.
+    # Fail before any upstream write if older Streaming edits are unresolved.
     _check_idle_streaming()
 
+    rules = parse_sync_rules()
+    urls = [entry["url"] for section in ("surge", "surge_domainset", "clash", "module")
+            for entry in rules.get(section, [])]
+    # Complete one deduplicated batch before any rule or module output is written.
+    prefetched = prefetch_urls(urls, _UA, encode=True)
+
     # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
-    fetch_external_rules()
+    fetch_external_rules(rules, prefetched)
 
     # Step 1b: 拉取外部 sgmodule
-    fetch_external_modules()
+    fetch_external_modules(rules, prefetched)
 
     # Step 2/3: Streaming 三层双向同步
-    sync_streaming()
+    sync_streaming(prechecked=True)
 
     # Step 4: Surge → QX / Clash / sing-box
-    convert_all()
+    convert_all(rules)
 
     # Step 5: 清理
-    cleanup_stale()
+    cleanup_stale(rules)
 
     print(f"\n{'=' * 60}")
     print("  完成")

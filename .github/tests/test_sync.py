@@ -50,8 +50,8 @@ class DownloadTests(unittest.TestCase):
             self.assertIsNone(error.exception.status)
 
     def test_empty_response_is_failure(self):
-        response = io.BytesIO(b' \n')
-        with patch.object(common.urllib.request, 'urlopen', return_value=response):
+        with patch.object(common.urllib.request, 'urlopen',
+                          side_effect=lambda *_a, **_k: io.BytesIO(b' \n')), patch.object(common.time, 'sleep'):
             with self.assertRaises(common.DownloadError):
                 common.fetch_url('https://example.invalid', 'test')
 

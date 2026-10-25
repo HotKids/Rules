@@ -1,15 +1,7 @@
 name: 🐳
 
-# 手动触发：把指定分支的所有提交信息（含 merge commit）统一改写成 🐳，然后 force-push。
-#
-# ⚠️ 这是「历史改写 + 强制推送」，请知悉后果：
-#   - 该分支上所有提交的 SHA 都会改变；
-#   - 原始提交信息被 🐳 覆盖、不可找回；
-#   - 已 clone / fork 的副本需要重新同步（旧历史失效）；
-#   - 若目标分支开启了「禁止 force-push」保护，本 workflow 会失败；
-#   - 若有基于该分支的开启中 PR，其 diff 基线会变动。
-#   仅在自己的仓库、明确知道后果时使用。
-
+# 仅手动触发。将指定分支的提交信息统一为 🐳；已完成的历史前缀不重复处理。
+# 改写后需重新同步本地副本，现有 PR 的历史基线也可能改变。
 on:
   workflow_dispatch:
     inputs:
@@ -21,9 +13,6 @@ on:
 permissions:
   contents: write
 
-# 与 sync-rules / sync-modules / sync-config 共用同一组，串行化对 master 的写操作。
-# whale 会 force-push 改写历史，若与自动同步的 push 并发，可能把同步刚提交的 commit
-# 覆盖丢失——必须纳入同一并发组串行执行。
 concurrency:
   group: push-master
   cancel-in-progress: false
@@ -32,29 +21,69 @@ concurrency:
 jobs:
   whale:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
-      - name: Checkout（完整历史，force-push 需要全量提交）
-        uses: actions/checkout@v5
+      - name: Checkout complete commit history
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: ${{ inputs.branch }}
           fetch-depth: 0
+          filter: blob:none
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.12'
 
-      - name: 提交信息全部改成 🐳
-        env:
-          # filter-branch 已被 git 标记为不推荐，此处仅改 message、无需装 git-filter-repo；
-          # 设此环境变量抑制那条警告横幅。
-          FILTER_BRANCH_SQUELCH_WARNING: "1"
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -B whale-work
-          # --msg-filter 从 stdin 读原始信息、输出新信息；这里忽略原文、每个提交都输出 🐳。
-          # 对 root 提交与 merge 提交同样生效。已是 🐳 的提交结果不变（幂等）。
-          git filter-branch -f --msg-filter 'printf "🐳\n"' -- HEAD
-
-      - name: Force-push 回目标分支
-        # 分支名经 env 传入并用 shell 变量引用，避免 ${{ }} 直接插值进命令行造成注入。
+      - name: Identify unchanged history prefix
+        id: history
         env:
           BRANCH: ${{ inputs.branch }}
-        run: git push --force origin "HEAD:${BRANCH}"
+        run: |
+          set -euo pipefail
+          git check-ref-format --branch "$BRANCH" >/dev/null
+          python3 - <<'PY'
+          import os, subprocess
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True).strip()
+          original = git('rev-parse', 'HEAD')
+          records = git('log', '--format=%H%x00%B%x00', 'HEAD').split('\0')
+          commits = [(records[i].strip(), records[i + 1].strip())
+                     for i in range(0, len(records) - 1, 2)]
+          boundary = ''
+          for sha, message in commits:
+              if message == '🐳':
+                  # A manually named commit is not proof its ancestors were rewritten.
+                  messages = git('log', '--format=%B%x00', sha).split('\0')
+                  if all(message.strip() == '🐳' for message in messages if message.strip()):
+                      boundary = sha
+                      break
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'original={original}\n')
+              output.write(f'boundary={boundary}\n')
+          print('Preserving completed history prefix.' if boundary else 'No completed prefix; rewriting full history.')
+          PY
+
+      - name: Rewrite remaining commit messages
+        env:
+          FILTER_BRANCH_SQUELCH_WARNING: '1'
+          ORIGINAL_SHA: ${{ steps.history.outputs.original }}
+          BOUNDARY_SHA: ${{ steps.history.outputs.boundary }}
+        run: |
+          set -euo pipefail
+          if [ "$BOUNDARY_SHA" = "$ORIGINAL_SHA" ]; then
+            echo 'All commit messages are already current.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git checkout -B whale-work
+          revision=HEAD
+          if [ -n "$BOUNDARY_SHA" ]; then revision="${BOUNDARY_SHA}..HEAD"; fi
+          git filter-branch -f --msg-filter 'printf "🐳\n"' -- "$revision"
+
+      - name: Publish only if target branch has not moved
+        env:
+          BRANCH: ${{ inputs.branch }}
+          ORIGINAL_SHA: ${{ steps.history.outputs.original }}
+        run: |
+          set -euo pipefail
+          git push --force-with-lease="refs/heads/${BRANCH}:${ORIGINAL_SHA}" origin "HEAD:refs/heads/${BRANCH}"

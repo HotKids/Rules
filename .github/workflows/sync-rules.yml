@@ -13,8 +13,12 @@ on:
       - '.github/workflows/sync-rules.yml'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
+      - '.github/scripts/publish-generated.py'
+      - '.github/scripts/install-cores.py'
+      - '.github/scripts/toolchain.json'
+      - '.github/actions/**'
   schedule:
-    - cron: '0 16 * * *'   # 每天 UTC 16:00 = UTC+8 00:00
+    - cron: '7 16 * * *'   # UTC+8 00:07，与模块同步错峰
   workflow_dispatch:
 
 permissions:
@@ -29,13 +33,19 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: master
           fetch-depth: 0
-      - name: Install validation dependencies
-        run: python3 -m pip install -r .github/scripts/requirements.txt
+          filter: blob:none
+      - uses: ./.github/actions/setup-runtime
+      - uses: ./.github/actions/install-cores
+        with:
+          tools: sing-box mihomo
+      - name: Capture generation inputs
+        run: python3 .github/scripts/publish-generated.py capture --kind rules --state "$RUNNER_TEMP/rules-publish.json"
 
       - name: Run sync script
         env:
@@ -45,25 +55,15 @@ jobs:
         run: python3 .github/scripts/sync-rules.py
 
       - name: Compile sing-box binary rule-sets (.srs)
-        env:
-          # sing-box 官方 CLI 版本（用于 rule-set compile）。source .json 声明
-          # version:2（需 sing-box ≥1.10），此处固定版本以保证 .srs 产物可复现，
-          # 升级内核时手动 bump 即可（与 lint.yml 的 sing-box check 保持同版本）。
-          SING_BOX_VERSION: "1.12.0"
         run: |
           set -euo pipefail
-          url="https://github.com/SagerNet/sing-box/releases/download/v${SING_BOX_VERSION}/sing-box-${SING_BOX_VERSION}-linux-amd64.tar.gz"
-          curl -fsSL "$url" -o /tmp/sing-box.tgz
-          tar -xzf /tmp/sing-box.tgz -C /tmp
-          SB="/tmp/sing-box-${SING_BOX_VERSION}-linux-amd64/sing-box"
-          "$SB" version
-
+          sing-box version
           mkdir -p sing-box/rule-set
           # 源 .json → 二进制 .srs（compile 保留 source 声明的 version）；
           # 任一文件编译失败即让整步失败（while 在管道子 shell 内，需显式 exit）
           find sing-box/source -maxdepth 1 -name '*.json' -print0 | while IFS= read -r -d '' f; do
             stem="$(basename "$f" .json)"
-            "$SB" rule-set compile --output "sing-box/rule-set/${stem}.srs" "$f" || exit 1
+            sing-box rule-set compile --output "sing-box/rule-set/${stem}.srs" "$f" || exit 1
           done
           # 清理孤儿 .srs（对应 source .json 已删除）
           find sing-box/rule-set -maxdepth 1 -name '*.srs' -print0 | while IFS= read -r -d '' s; do
@@ -72,16 +72,9 @@ jobs:
           done
 
       - name: Compile mihomo binary rule-sets (.mrs)
-        env:
-          # mihomo 官方 CLI（用于 convert-ruleset）：mrs 只支持 domain / ipcidr 两种
-          # behavior。固定版本以保证 .mrs 产物可复现（与上方 sing-box 的固定版本
-          # 策略一致）；升级内核时手动 bump 即可。
-          MIHOMO_VERSION: "v1.19.33"
         run: |
           set -euo pipefail
-          curl -fsSL "https://github.com/MetaCubeX/mihomo/releases/download/${MIHOMO_VERSION}/mihomo-linux-amd64-${MIHOMO_VERSION}.gz" | gunzip > /tmp/mihomo
-          chmod +x /tmp/mihomo
-          /tmp/mihomo -v
+          mihomo -v
 
           # 扫描 Clash/RuleSet 产物：payload 条目无逗号 → domain / 含 CIDR → ipcidr，
           # classical（带规则类型前缀）跳过；同名 .mrs 与源文件并存，孤儿 .mrs 清理
@@ -98,7 +91,7 @@ jobs:
                   continue  # 空文件或 classical（TYPE,value）
               behavior = "ipcidr" if re.match(r"^[0-9a-fA-F:.]+/\d+$", first.strip("'\"")) else "domain"
               out = d / f"{src.stem}.mrs"
-              subprocess.run(["/tmp/mihomo", "convert-ruleset", behavior, "yaml", str(src), str(out)],
+              subprocess.run(["mihomo", "convert-ruleset", behavior, "yaml", str(src), str(out)],
                              check=True)
               compiled.add(out.name)
               print(f"  ✓ {out} ({behavior})")
@@ -111,14 +104,8 @@ jobs:
       - name: Validate before publishing
         run: python3 .github/scripts/validate.py
 
-      - name: Commit & push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Surge/RULE-SET/ Surge/Module/ Quantumult/X/Filter/ Clash/RuleSet/ sing-box/source/ sing-box/rule-set/
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: sync rules and Surge / Stash modules [auto]"
-            git push
-          fi
+      - name: Publish validated rules
+        run: >-
+          python3 .github/scripts/publish-generated.py publish
+          --state "$RUNNER_TEMP/rules-publish.json"
+          --message "chore: sync rules and Surge / Stash modules [auto]"

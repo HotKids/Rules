@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const {convertBatch} = require('../scripts/convert-loon.cjs');
+const {convertBatch, redact} = require('../scripts/convert-loon.cjs');
 
 const source = (id, body = '#!name=Example\n[Rule]\nDOMAIN,example.invalid,REJECT') => ({id, body});
 
@@ -32,6 +32,25 @@ test('unsupported notifications remain visible with all diagnostic URLs redacted
   assert.ok(result.diagnostics.every(d => d.level === 'warning'));
   assert.doesNotMatch(JSON.stringify(result.diagnostics), /https?:/);
   assert.match(JSON.stringify(result.diagnostics), /不支持以下内容/);
+});
+
+test('diagnostics redact encoded source URLs, query values and credentials', () => {
+  const url = 'https://example.invalid/private_remove_ads.lpx?access=source-private#fragment-private';
+  const text = [url, encodeURIComponent(url), encodeURIComponent(encodeURIComponent(url)),
+    'https:\\/\\/example.invalid/escaped?value=escaped-private',
+    'Lpx/Private_remove_ads.lpx?value=path-private',
+    '?anything=query-private&another=another-private',
+    'token="token-private" api_key=key-private password=pass-private psk=psk-private',
+    'GIST_TOKEN=gist-private accessToken=access-private ?label="spaced private"',
+    '{"secret":"json-private"}',
+    'Authorization: Bearer auth-private',
+    'Cookie: session=cookie-private',
+    '\x1b[31mTypeError: parser.compile is not a function\x1b[0m',
+  ].join('\n');
+  const safe = redact(text);
+  assert.doesNotMatch(safe, /private|example\.invalid|session|\x1b/i);
+  assert.match(safe, /TypeError: parser\.compile is not a function/);
+  assert.match(safe, /\[URL\]/);
 });
 
 test('parser errors, malformed results, and timeouts do not stop later sources', async () => {

@@ -10,6 +10,11 @@ import sys
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
+YAML_LOADER = getattr(yaml, 'CSafeLoader', yaml.SafeLoader)
+
+
+def load_yaml(text):
+    return yaml.load(text, Loader=YAML_LOADER)
 
 
 def run(*command):
@@ -33,7 +38,7 @@ def main():
         for p in sorted((ROOT / folder).rglob('*')):
             if p.name == 'snell-panel-ci.yml': continue
             if p.suffix in ('.yaml', '.yml', '.stoverride'):
-                data = yaml.safe_load(p.read_text(encoding='utf-8')); counts['yaml'] += 1
+                data = load_yaml(p.read_text(encoding='utf-8')); counts['yaml'] += 1
                 if p.suffix == '.stoverride':
                     if not isinstance(data, dict): raise ValueError(f'{p}: expected mapping')
                     providers = data.get('script-providers', {})
@@ -48,8 +53,8 @@ def main():
                             raise ValueError(f'{p}: missing script provider for {job.get("name")}')
             if p.suffix == '.json':
                 json.loads(p.read_text(encoding='utf-8')); counts['json'] += 1
-    sample = yaml.safe_load((ROOT/'Clash/Sample.yaml').read_text())
-    mihomo = yaml.safe_load((ROOT/'Clash/Mihomo.yaml').read_text())
+    sample = load_yaml((ROOT/'Clash/Sample.yaml').read_text())
+    mihomo = load_yaml((ROOT/'Clash/Mihomo.yaml').read_text())
     mihomo.pop('anchors', None)
     for group in sample['proxy-groups']:
         if group.get('use') == ['Server']:

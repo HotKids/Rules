@@ -1,0 +1,25 @@
+name: Install pinned validation cores
+description: Download fixed core releases, verify SHA-256 and add their executables to PATH.
+inputs:
+  tools:
+    description: Space-separated sing-box and/or mihomo; both selects both cores.
+    required: false
+    default: both
+outputs:
+  bin-dir:
+    description: Directory added to PATH.
+    value: ${{ steps.install.outputs.bin-dir }}
+  sing-box-path:
+    description: Installed sing-box executable, empty when not selected.
+    value: ${{ steps.install.outputs.sing-box-path }}
+  mihomo-path:
+    description: Installed mihomo executable, empty when not selected.
+    value: ${{ steps.install.outputs.mihomo-path }}
+runs:
+  using: composite
+  steps:
+    - id: install
+      shell: bash
+      env:
+        CORE_TOOLS: ${{ inputs.tools }}
+      run: python3 "$GITHUB_ACTION_PATH/../../scripts/install-cores.py" --tools "$CORE_TOOLS"

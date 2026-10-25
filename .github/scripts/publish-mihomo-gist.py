@@ -15,16 +15,16 @@ class PublishError(Exception):
     """A message safe to display in public workflow logs."""
 
 
-def _apply_manual_proxies(rendered, existing, migrate_inline=False, compact_inline=False):
+def _apply_manual_proxies(rendered, existing, migrate_inline=False, compact_inline=False, provider_name=None):
     try:
         path = Path(__file__).with_name('render-mihomo-overlay.py')
         spec = importlib.util.spec_from_file_location('render_mihomo_overlay', path)
         renderer = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(renderer)
         if migrate_inline:
-            existing = renderer.migrate_inline_provider(existing)
+            existing = renderer.migrate_inline_provider(existing, provider_name)
         if compact_inline:
-            existing = renderer.compact_inline_provider(existing)
+            existing = renderer.compact_inline_provider(existing, provider_name)
         return renderer.apply_manual_proxies(rendered, existing)
     except Exception:
         # Parser exceptions can contain private node values and source lines.
@@ -66,7 +66,7 @@ def _request(method, url, token, payload=None):
     return result
 
 
-def publish(path, migrate_inline=False, compact_inline=False, stash_base=None):
+def publish(path, migrate_inline=False, compact_inline=False, stash_base=None, provider_name=None):
     gist_id = os.environ.get('MIHOMO_GIST_ID', '').strip()
     token = os.environ.get('GIST_TOKEN', '').strip()
     missing = [name for name, value in (('MIHOMO_GIST_ID', gist_id), ('GIST_TOKEN', token)) if not value]
@@ -90,7 +90,7 @@ def publish(path, migrate_inline=False, compact_inline=False, stash_base=None):
     if not isinstance(target, dict) or target.get('truncated') or not isinstance(target.get('content'), str):
         raise PublishError('Cannot verify the existing mihomo.yaml; no changes published.')
     content = _apply_manual_proxies(content, target['content'], migrate_inline=migrate_inline,
-                                   compact_inline=compact_inline)
+                                   compact_inline=compact_inline, provider_name=provider_name)
     changes = {}
     if target['content'] != content:
         changes['mihomo.yaml'] = {'content': content}
@@ -113,16 +113,18 @@ def publish(path, migrate_inline=False, compact_inline=False, stash_base=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--migrate-inline', action='store_true',
-                        help='One-time move of manual nodes into Manual inline Provider')
+                        help='Explicitly move top-level nodes into a selected inline provider')
     parser.add_argument('--compact-inline', action='store_true',
-                        help='Explicitly format each Manual payload node as one flow-style line')
+                        help='Explicitly format inline payload nodes as flow-style lines')
+    parser.add_argument('--provider-name',
+                        help='Optional target; migration auto-selects a unique existing inline provider')
     parser.add_argument('--stash-base', type=Path,
                         help='Public MyStash override used to generate stash.yaml in memory')
     parser.add_argument('config', help='Path to the generated configuration')
     args = parser.parse_args(argv)
     try:
         changed = publish(args.config, migrate_inline=args.migrate_inline, compact_inline=args.compact_inline,
-                          stash_base=args.stash_base)
+                          stash_base=args.stash_base, provider_name=args.provider_name)
     except PublishError as error:
         print(str(error), file=sys.stderr)
         return 1
