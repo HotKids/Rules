@@ -1,0 +1,16 @@
+name: Set up validation runtime
+description: Fixed Python and Node versions shared by generators and validation
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: '3.12'
+        cache: pip
+        cache-dependency-path: .github/scripts/requirements.txt
+    - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+      with:
+        node-version: '22'
+    - name: Install validation dependencies
+      shell: bash
+      run: python3 -m pip install --disable-pip-version-check -r .github/scripts/requirements.txt

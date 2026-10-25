@@ -11,17 +11,23 @@ on:
       - 'Clash/General.yaml'
       - '.github/scripts/sync-config.py'
       - '.github/scripts/config_sync/**'
+      - '.github/scripts/_common.py'
       - '.github/scripts/module_convert.py' # BlockAdsBase 的 MITM CA 同步
       - '.github/workflows/sync-config.yml'
       - '.github/scripts/sync-config.txt'
       - '.github/scripts/sync-config/**'
       - '.github/scripts/validate.py'
       - '.github/scripts/requirements.txt'
+      - '.github/scripts/publish-generated.py'
+      - '.github/scripts/install-cores.py'
+      - '.github/scripts/toolchain.json'
+      - '.github/actions/**'
   workflow_dispatch:
   # Sync Rules 使用 GITHUB_TOKEN 提交产物，其 push 不会触发另一个工作流。
   # 等编译产物发布成功，再同步 LAN 的不可变 CDN 地址。
   workflow_run:
-    workflows: [Sync Rules]
+    workflows: [Sync Rules, '🐳']
+    branches: [master]
     types: [completed]
 
 permissions:
@@ -35,15 +41,21 @@ concurrency:
 
 jobs:
   sync:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: master
           fetch-depth: 0
-      - name: Install validation dependencies
-        run: python3 -m pip install -r .github/scripts/requirements.txt
+          filter: blob:none
+      - uses: ./.github/actions/setup-runtime
+      - uses: ./.github/actions/install-cores
+        with:
+          tools: sing-box
+      - name: Capture generation inputs
+        run: python3 .github/scripts/publish-generated.py capture --kind config --state "$RUNNER_TEMP/config-publish.json"
 
       - name: Run sync script
         run: python3 .github/scripts/sync-config.py
@@ -51,14 +63,11 @@ jobs:
       - name: Validate before publishing
         run: python3 .github/scripts/validate.py
 
-      - name: Commit & push
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Clash/Sample.yaml Clash/Mihomo.yaml Clash/Script/ Surge/Balloon.lcf Quantumult/Sample.conf Surge/Surfboard.conf sing-box/config.json Surge/Module/Profile.sgmodule Surge/Module/Pannel/*.stoverride Surge/Module/Stash/
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "chore: sync configurations and Stash panel metadata [auto]"
-            git push
-          fi
+      - name: Validate sing-box config before publishing
+        run: sing-box check -c sing-box/config.json
+
+      - name: Publish validated configurations
+        run: >-
+          python3 .github/scripts/publish-generated.py publish
+          --state "$RUNNER_TEMP/config-publish.json"
+          --message "chore: sync configurations and Stash panel metadata [auto]"

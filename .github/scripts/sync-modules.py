@@ -13,7 +13,7 @@ from collections import defaultdict
 
 from pypinyin import lazy_pinyin
 
-from _common import prefetch_urls
+from _common import prefetch_urls, write_if_changed
 
 _UA = "sync-modules/1.0"
 
@@ -31,14 +31,7 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
     （重写时保留 content 里的当前时间）。避免上游无变化时，聚合时间戳
     每日刷新导致的空提交（#!date= 每次都是当前时间，会误判为有变化）。
     与 sync-config.py 的 _write_stamped_if_changed 同一策略。"""
-    if filepath.exists():
-        existing = filepath.read_text(encoding="utf-8")
-        norm = "#!date=__NORM__"
-        if _DATE_LINE_RE.sub(norm, existing) == _DATE_LINE_RE.sub(norm, content):
-            return False
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text(content, encoding="utf-8")
-    return True
+    return write_if_changed(filepath, content, normalize_patterns=(_DATE_LINE_RE,))
 
 _MITM_BOOL_KEYS = {"skip-server-cert-verify", "h2", "tcp-connection"}
 

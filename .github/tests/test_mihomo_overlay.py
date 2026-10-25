@@ -188,12 +188,12 @@ process.stdout.write(JSON.stringify(context.result));'''
         for providers in (None, {}, other):
             original = yaml.safe_dump({'proxies': nodes, 'proxy-providers': providers},
                                       allow_unicode=True, sort_keys=False) + 'rules:\n- [old invalid rule\n'
-            migrated = renderer.migrate_inline_provider(original)
+            migrated = renderer.migrate_inline_provider(original, provider_name='Snell')
             self.assertEqual(renderer._manual_proxies(migrated)[3], [])
             actual = renderer._manual_proxy_providers(migrated)[3]
-            self.assertEqual(actual['Manual']['type'], 'inline')
-            self.assertEqual(actual['Manual']['payload'], nodes)
-            self.assertEqual({k: v for k, v in actual.items() if k != 'Manual'}, providers or {})
+            self.assertEqual(actual['Snell']['type'], 'inline')
+            self.assertEqual(actual['Snell']['payload'], nodes)
+            self.assertEqual({k: v for k, v in actual.items() if k != 'Snell'}, providers or {})
             self.assertEqual(renderer.migrate_inline_provider(migrated), migrated)
             final = renderer.apply_manual_proxies(self.rendered, migrated)
             self.assertEqual(yaml.safe_load(final)['proxy-providers'], actual)
@@ -203,11 +203,42 @@ process.stdout.write(JSON.stringify(context.result));'''
     def test_inline_migration_supports_missing_provider_and_rejects_name_conflict(self):
         node = {'name': 'HK personal', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080}
         original = yaml.safe_dump({'proxies': [node]}, allow_unicode=True)
-        migrated = renderer.migrate_inline_provider(original)
-        self.assertEqual(yaml.safe_load(migrated)['proxy-providers']['Manual']['payload'], [node])
-        conflict = yaml.safe_dump({'proxies': [node], 'proxy-providers': {'Manual': {'type': 'http'}}})
         with self.assertRaises(ValueError):
-            renderer.migrate_inline_provider(conflict)
+            renderer.migrate_inline_provider(original)
+        migrated = renderer.migrate_inline_provider(original, provider_name='New pool')
+        self.assertEqual(yaml.safe_load(migrated)['proxy-providers']['New pool']['payload'], [node])
+        conflict = yaml.safe_dump({'proxies': [node], 'proxy-providers': {'New pool': {'type': 'http'}}})
+        with self.assertRaises(ValueError):
+            renderer.migrate_inline_provider(conflict, provider_name='New pool')
+
+    def test_inline_migration_discovers_renamed_provider_and_appends_without_loss(self):
+        old = {'name': 'JP old', 'type': 'socks5', 'port': 1080}
+        new = {'name': 'HK new', 'type': 'socks5', 'port': 2080}
+        for name in ('Snell', 'Personal 2027', '我的节点'):
+            providers = {name: {'type': 'inline', 'payload': [old], 'interval': 123},
+                         'Remote': {'type': 'http', 'url': 'https://example.invalid/sub'}}
+            original = yaml.safe_dump({'proxies': deepcopy([old, new]), 'proxy-providers': providers},
+                                      allow_unicode=True, sort_keys=False)
+            with self.subTest(name=name):
+                result = yaml.safe_load(renderer.migrate_inline_provider(original))
+                self.assertEqual(result['proxies'], [])
+                self.assertEqual(result['proxy-providers'][name]['payload'], [old, new])
+                self.assertEqual(result['proxy-providers'][name]['interval'], 123)
+                self.assertEqual(result['proxy-providers']['Remote'], providers['Remote'])
+
+    def test_inline_migration_rejects_ambiguous_target_and_conflicting_nodes(self):
+        node = {'name': 'HK', 'type': 'socks5', 'port': 1080}
+        providers = {name: {'type': 'inline', 'payload': []} for name in ('A', 'B')}
+        original = yaml.safe_dump({'proxies': [node], 'proxy-providers': providers})
+        with self.assertRaises(ValueError):
+            renderer.migrate_inline_provider(original)
+        chosen = yaml.safe_load(renderer.migrate_inline_provider(original, provider_name='B'))
+        self.assertEqual(chosen['proxy-providers']['A']['payload'], [])
+        self.assertEqual(chosen['proxy-providers']['B']['payload'], [node])
+        providers['B']['payload'] = [{**node, 'port': 2080}]
+        conflict = yaml.safe_dump({'proxies': [node], 'proxy-providers': providers})
+        with self.assertRaises(ValueError):
+            renderer.migrate_inline_provider(conflict, provider_name='B')
 
     def test_compact_inline_nodes_are_single_line_and_keep_all_values(self):
         nodes = [{'name': 'HK test', 'type': 'socks5', 'server': 'example.invalid', 'port': 1080,
@@ -223,6 +254,23 @@ process.stdout.write(JSON.stringify(context.result));'''
         flow_nodes = [line for line in formatted.splitlines() if line.lstrip().startswith('- {name:')]
         self.assertEqual(len(flow_nodes), 2)
         self.assertIn('line1\\nline2', flow_nodes[0])
+        self.assertEqual(renderer.compact_inline_provider(formatted), formatted)
+        merged = renderer.apply_manual_proxies(self.rendered, formatted)
+        self.assertIn(renderer._manual_proxy_providers(formatted)[2], merged)
+
+    def test_compact_discovers_all_renamed_inline_providers_and_keeps_order(self):
+        providers = {
+            'Snell': {'type': 'inline', 'payload': [{'name': 'Z first', 'port': 1080}]},
+            'Remote': {'type': 'http', 'url': 'https://example.invalid/sub'},
+            '任意新名字': {'type': 'inline', 'payload': [{'name': 'A second', 'port': 2080}]},
+        }
+        existing = yaml.safe_dump({'proxies': [], 'proxy-providers': providers},
+                                  allow_unicode=True, sort_keys=False)
+        formatted = renderer.compact_inline_provider(existing)
+        data = yaml.safe_load(formatted)
+        self.assertEqual(data['proxy-providers'], providers)
+        self.assertEqual(list(data['proxy-providers']), list(providers))
+        self.assertLess(formatted.index('- {name: Z first'), formatted.index('- {name: A second'))
         self.assertEqual(renderer.compact_inline_provider(formatted), formatted)
         merged = renderer.apply_manual_proxies(self.rendered, formatted)
         self.assertIn(renderer._manual_proxy_providers(formatted)[2], merged)

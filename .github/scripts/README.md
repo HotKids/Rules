@@ -19,7 +19,7 @@
 
 ## 本地命令
 
-环境：Python 3.12+、Node.js 20+。在仓库根目录运行：
+环境：Python 3.12+、Node.js 22。CI 通过共享 Action 固定 Python 3.12 / Node.js 22，并缓存 Python 依赖。在仓库根目录运行：
 
 ```bash
 python3 -m pip install -r .github/scripts/requirements.txt
@@ -77,7 +77,7 @@ SRS/MRS 编译与 sing-box 完整配置检查由工作流调用官方内核执�
 | `# > Rename` | 策略/Provider 名称映射 |
 | `# > Gist` | Raw 地址的反代设置 |
 
-Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则块支持多段锚点。具体格式和现有例子在清单顶部说明中保留。远程 include 下载失败即中止生成。
+Builtin 中的 `# 说明 // 关键词` 以段落注释为插入锚点；规则块支持多段锚点。具体格式和现有例子在清单顶部说明中保留。远程 include 使用公共下载重试；下载失败、目标段缺失或段内只有空行/注释均中止生成，无效内容不进入缓存。
 
 ### 私人 overlay
 
@@ -99,11 +99,11 @@ Stash 基座转换保留可沿用的源内容、注释与排版：境外 QUIC �
 
 两份 Stash 配置覆写的 MITM 证书由同一 `Sync Config` 工作流同步：`Surge/Profile.conf` 的 `[MITM] ca-p12` → `http.ca`，`ca-passphrase` → `http.ca-passphrase`。`MyStash.stoverride` 从基座继承同一证书，不另维护副本。`http` 按子键合并，保留基础配置及其他覆写中的 MITM 域名、重写和脚本；按官方示例放在通用设置之后、Hosts/DNS/代理与规则之前，内部采用 force-http-engine、ca、ca-passphrase、mitm 的顺序；同时将模板 `[General]` 实际声明的 `force-http-engine-hosts` 同步为 `http.force-http-engine`，域名和端口表达式保持原值并去重，参照 [Stash 强制 HTTP 引擎文档](https://stash.wiki/http-engine/force-http-engine)。只转换模板已有的受支持字段；没写的设置不补入，不转译模块域名或 `h2`、`skip-server-cert-verify`。字段依据 [Stash MITM 文档](https://stash.wiki/http-engine/mitm)，设备仍须安装并信任对应 CA。修改或删除源字段后重新生成，两份产物都会跟随更新；同步日志不输出证书和密码。
 
-自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明。生成器将 Fastly 的 LAN 分支地址固定为对应规则产物最后一次提交的版本，避免 CDN 分支缓存继续返回旧地址段；工作区产物未提交或无法取得 Git 历史时停止生成，不发布旧版本。Sync Rules 成功发布编译产物后会触发 Sync Config，未来上游修改会同步到新的不可变地址。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。生成配置需要完整 Git 历史（`fetch-depth: 0`）。
+自有 LAN 的下载地址由 `sync-config.txt` 的 Builtin Mapping 声明。生成器将 Fastly 的 LAN 分支地址固定为对应规则产物最后一次提交的版本，避免 CDN 分支缓存继续返回旧地址段；工作区产物未提交或无法取得 Git 历史时停止生成，不发布旧版本。Sync Rules 成功发布编译产物后会触发 Sync Config，未来上游修改会同步到新的不可变地址。其本地缓存文件名包含 `Surge/RULE-SET/LAN.list` 有效规则的摘要：地址段变化会生成新缓存路径，避免客户端继续载入旧 LAN 规则；仅修改注释或空行不会换版本。Mihomo、JS 和 Stash 继承同一地址与缓存路径。生成配置需要完整提交历史（`fetch-depth: 0`），工作流使用 `filter: blob:none`，历史文件内容按需读取。
 
 ## 规则同步
 
-[sync-rules.py](sync-rules.py) 依次拉取外部规则与镜像模块、处理 Streaming 双向同步、转换 QX/Clash/sing-box 格式、清理不再需要的产物。
+[sync-rules.py](sync-rules.py) 每次只解析一次清单，将外部规则与镜像模块合并预下载；全部成功后处理 Streaming 双向同步、转换 QX/Clash/sing-box 格式、清理不再需要的产物。
 
 ### 上游清单
 
@@ -132,6 +132,7 @@ URL,名称 #!remove=a.example,b.example
 
 - push 通过 `SYNC_BASE_SHA`（事件 before）到实际检出 HEAD 的完整差异决定方向，`SYNC_EVENT_SHA` 验证触发提交仍在当前历史中，覆盖多提交与排队期间的新修改。
 - 总表/地区表与对应成员同时修改且内容不一致时中止。先对齐两侧，或只保留一处编辑，再重新运行。
+- push 的基准提交已经存在未完成的合集/成员差异时中止，防止上次失败留下的编辑被后续无关 push 或成员修改覆盖；先处理那次未完成的同步。
 - 定时/手动 CI 不重新解释最后一次提交。如果下载前发现合集与成员已不一致，会停止，给对应 push 任务保留待处理编辑。
 - 本地默认使用 HEAD 和工作区差异；多提交场景可显式运行 `SYNC_BASE_SHA=<基准提交> python3 .github/scripts/sync-rules.py`。
 
@@ -145,7 +146,9 @@ URL,名称 #!remove=a.example,b.example
 | `sing-box/rule-set/*.srs` | 官方 sing-box CLI 编译，版本固定 1.12.0 |
 | `Clash/RuleSet/*.mrs` | 官方 mihomo CLI 编译 domain/ipcidr，版本固定 v1.19.33；classical 不编译为 MRS |
 
-二进制编译任一失败都会停止发布。对应源码删除后，工作流清理孤立二进制文件。升级编译版本时需同时核对 [sync-rules.yml](../workflows/sync-rules.yml) 与 [lint.yml](../workflows/lint.yml)。
+二进制编译任一失败都会停止发布。对应源码删除后，工作流清理孤立二进制文件。编译器版本、下载地址和 SHA-256 集中维护在 [toolchain.json](toolchain.json)，由 [install-cores](../actions/install-cores/action.yml) 校验后安装；升级时一并更新官方校验值。Sync Config 和 Lint 都使用同一安装器执行 `sing-box check`，校验失败不能发布配置。
+
+[sync-rules-owned.json](sync-rules-owned.json) 记录同步器实际管理的规则文件，清理只针对注册产物，包含 CIDR 的 `.txt` 伴生文件；手工文件仅有 `### fork from` 注释不会被认领或删除。
 
 ## Surge / Stash 模块同步
 
@@ -175,7 +178,9 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 Beta 使用固定提交及 SHA-256 校验的官方 [Script-Hub Beta](https://github.com/Script-Hub-Org/Script-Hub/blob/761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js)，参考 QingRex 的预转换方式，将 Loon 3.5.1 配置转为 Surge 后复用正式版聚合器。远程 `jq_file` 在运行时读取并内联；脚本内容和脚本 URL 沿用上游。输出 `Surge/Module/BlockAdsBeta.sgmodule`，头部参数、默认值和说明原样沿用正式版，仅模块标题追加 ` Beta`，模块日期按内容变化更新。Beta 忽略上游日期字段，App 分组不显示日期，避免上游只刷新日期时产生空更新。App 分组、排序、域名参数开关和 MITM 合并格式与正式版相同；脚本标签与正式版一样保留上游原名。
 
-任何来源读取、解析器校验或等价转换失败都会保留已发布产物。QUIC 逻辑规则会完整保留，官方转换器无法添加的可选 `pre-matching` 标志仅记录提示。`Sync Modules` 在同一次校验及提交中更新正式版和 Beta。
+任何来源读取、解析器校验或等价转换失败都会保留对应的已发布产物。QUIC 逻辑规则会完整保留，官方转换器无法添加的可选 `pre-matching` 标志仅记录提示。兼容请求 UA `Loon/3.3.0` 不代表解析语法版本。转换失败会显示脱敏后的有限 stderr 尾部，便于定位错误。
+
+`Sync Modules` 的正式版和 Beta 分成两个独立校验、发布的 job，Beta 在正式版结束后重新读取最新 master；一方失败不会阻止另一方发布，失败 job 仍保留红灯。Beta 在下载转换前先检查 Loon 桥接器。
 
 ## 私人 Mihomo Gist
 
@@ -193,23 +198,26 @@ Gist 中 `mihomo.yaml` 的顶层 `proxies` 和 `proxy-providers` 均由你手动
 
 当前节点复用支持顶层节点、内联 Provider，以及具有 URL 的 HTTP Provider（`header` 转为 Stash `headers`，延迟测试由 MyStash 策略组管理）。无法跨设备读取本地 file Provider；尚未支持的 Provider 筛选或覆盖选项会停止发布，避免静默漏掉节点。Stash 的 `stash.yaml` 是派生产物，请在 `mihomo.yaml` 维护节点。
 
-[Migrate Mihomo Inline Provider](../workflows/migrate-mihomo-inline.yml) 是显式的一次性迁移：将手写 `proxies` 节点完整移入 `proxy-providers.Manual.payload`，保留节点参数和顺序，顶层变为 `proxies: []`，继续使用 `include-all-providers`。工作流首次添加或手动运行时执行，与普通同步共用并发锁；普通同步不执行迁移。已有 `Manual` 且仍有顶层节点时停止以防覆盖；顶层已为空时重复执行不再移动。迁移后两个区域仍由你维护，私人数据仅在 Action 进程内存中处理。
+原一次性迁移工作流已合并进 `Sync Mihomo Gist` 的手动选项，`migrate_inline` 和 `compact_inline` 默认均关闭。迁移会将顶层 `proxies` 追加到已有内联 Provider 的 `payload`，原参数、顺序和其他 Provider 保持不变，顶层变为 `proxies: []`。相同节点只保留一次，同名但参数冲突时停止发布。
 
-该迁移工作流同时显式整理 `Manual.payload`：每个节点使用一行 `- {name: ..., type: ...}`，参数和顺序保持一致。常规同步不重新排版，继续原样保留你的手动格式。
+不再依赖 `Manual`、`Snell` 等固定名称：迁移默认识别唯一的 `type: inline` Provider；没有或存在多个内联 Provider 时，用可选 `provider_name` 明确目标，也可显式命名新建一个。目标必须是内联类型。单行排版默认识别所有内联 Provider，节点使用 `- {name: ..., type: ...}`；也可按名称指定一个。后续改名不会影响普通同步或自动识别，节点及 Provider 顺序不会重排。普通同步继续原样保留两个手工区块；这些显式操作仅在 Action 进程内存中处理私人数据。
 
 ## 下载、验证与发布
 
-[_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 最多尝试三次；真实 404 不重试且保留状态码；空响应和无效内容不作为正常产物发布。超时不再写成 `upstream 404`。
+[_common.py](_common.py) 在一批来源全部成功后才返回给生成器。网络错误、408、429、5xx 和空响应最多尝试三次，并受总时间预算约束；`Retry-After` 支持秒数和 HTTP 日期、最多等待 30 秒。真实 404 和编码错误不重试。空响应和无效内容不作为正常产物发布，错误日志隐藏 URL 中的凭证、查询参数和片段。共享写入工具支持日期归一化比较，避免仅日期变化产生空提交。
 
 | 工作流 | 主要触发条件 | 发布前处理 |
 |---|---|---|
-| Lint Scripts | 配置、维护脚本、面板、清单与相关工作流变动；PR；手动 | 重生配置、共享验证、sing-box check |
-| Sync Config | 主配置、平台基座、overlay 与生成器变动；手动 | 生成配置并验证 |
-| Sync Rules | Surge 规则、来源清单与同步器变动；每天 UTC 16:00；手动 | 同步、编译 SRS/MRS、验证 |
-| Sync Modules | BlockAds 元数据、来源清单与聚合器变动；每天 UTC 16:00；手动 | 聚合并验证 |
+| Lint Scripts | 配置、维护脚本、面板、清单与相关工作流变动；PR；手动 | 重生配置、共享验证、sing-box check；同一 ref 取消旧验证 |
+| Sync Config | 主配置、平台基座、overlay 与生成器变动；master 的 Sync Rules / 🐳 成功后；手动 | 生成配置、共享验证、sing-box check |
+| Sync Rules | Surge 规则、来源清单与同步器变动；每天 UTC 16:07；手动 | 同步、编译 SRS/MRS、验证 |
+| Sync Modules | BlockAds 元数据、来源清单与聚合器变动；每天 UTC 16:27；手动 | 正式版与 Beta 各自聚合、验证、发布 |
+| Sync Mihomo Gist | 基座/发布器变动；Sync Config 成功后；每天 UTC 04:00；手动 | 合并与节点保护测试，同次更新 mihomo.yaml / stash.yaml |
 
-共享验证入口、依赖及测试变动也会触发同步工作流。完整路径过滤以 [workflows/](../workflows/) 为准；面板修改不再无关地触发全部模块下载。
+共享验证入口和依赖变动会触发相应同步工作流；测试变动始终触发 Lint，模块专用测试另触发 Sync Modules。完整路径过滤以 [workflows/](../workflows/) 为准；面板修改不再无关地触发全部模块下载。
 
-三个同步任务和既有手动历史工作流共用 `push-master`，启用 `queue: max`。同步提交只允许快进推送；运行期间出现外部提交时保留远端，任务失败后可重新运行。自动生成提交不依赖再次触发 push CI，因此每个发布任务都在提交前运行 [validate.py](validate.py)。
+三个同步任务和既有手动历史工作流共用 `push-master`，启用 `queue: max`。任务捕获生成输入后再验证发布；远端仅发生明确无关的文档等修改时有限重试，输入或产物发生变化则停止，要求重新生成。推送前确认远端仍为本地提交祖先，并绑定已校验的远端 SHA，避免在竞态中覆盖变化。自动生成提交不依赖再次触发 push CI，因此每个发布任务都在提交前运行 [validate.py](validate.py)。
+
+工作流设置 job 超时，第三方 Action 固定到提交，由 Dependabot 提醒更新。Lint 保留广泛的脚本/测试覆盖以防漏验，通过取消同一 ref 的旧运行减少重复。定时规则和模块任务错峰，但 GitHub 不保证准点；Gist 保留北京时间中午 12 点。手动 🐳 历史维护保留祖先已全部完成清理的前缀，只改写其后的提交，并使用租约保护；普通同步不执行历史改写。当前客户端 URL 保持原样，大产物迁移到独立发布分支涉及 URL 迁移，暂不自动执行。
 
 修改转换或检测逻辑时，在 [tests/](../tests/) 增加对应行为的回归样例，再执行验证。模拟测试覆盖边界行为；实际客户端兼容性、节点可用性和第三方接口变化仍需结合运行结果判断。

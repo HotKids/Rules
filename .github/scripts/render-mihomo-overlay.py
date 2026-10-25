@@ -191,19 +191,53 @@ def _manual_proxy_providers(text: str) -> tuple | None:
     return block
 
 
-def migrate_inline_provider(existing: str) -> str:
+def _provider_name(providers: dict, name: str | None) -> str:
+    if name is not None:
+        if not isinstance(name, str) or not name.strip() or re.search(r"[\r\n\x00]", name):
+            raise ValueError("Invalid target provider name")
+        return name.strip()
+    inline = [key for key, value in providers.items()
+              if isinstance(value, dict) and value.get("type") == "inline"]
+    if len(inline) != 1:
+        raise ValueError("Specify a provider name when there is no unique inline provider")
+    return inline[0]
+
+
+def _inline_nodes(provider: dict) -> list[dict]:
+    nodes = provider.get("payload")
+    if not isinstance(nodes, list) or any(
+            not isinstance(node, dict) or not isinstance(node.get("name"), str) or not node["name"]
+            for node in nodes):
+        raise ValueError("The inline payload must be a list of named nodes")
+    if len({node["name"] for node in nodes}) != len(nodes):
+        raise ValueError("Duplicate inline node names")
+    return nodes
+
+
+def migrate_inline_provider(existing: str, provider_name: str | None = None) -> str:
     """One-time, explicitly requested move; normal synchronization never calls this."""
     node_start, node_end, _, nodes = _manual_proxies(existing)
     if not nodes:
         return existing
     original = _manual_proxy_providers(existing)
     providers = dict(original[3] or {}) if original is not None else {}
-    if "Manual" in providers:
-        raise ValueError("The Manual provider already exists; no migration applied")
-    providers["Manual"] = {
-        "type": "inline", "payload": nodes,
-        "health-check": {"enable": True, "url": "http://cp.cloudflare.com/generate_204", "interval": 600},
-    }
+    name = _provider_name(providers, provider_name)
+    provider = providers.get(name)
+    if provider is not None and (not isinstance(provider, dict) or provider.get("type") != "inline"):
+        raise ValueError("The target provider must be inline")
+    if provider is None:
+        provider = {"type": "inline", "payload": [], "health-check": {
+            "enable": True, "url": "https://cp.cloudflare.com/generate_204", "interval": 600}}
+    combined = list(_inline_nodes(provider))
+    known = {node["name"]: node for node in combined}
+    for node in nodes:
+        if node["name"] in known:
+            if known[node["name"]] != node:
+                raise ValueError("Conflicting node names prevent migration")
+        else:
+            combined.append(node)
+            known[node["name"]] = node
+    providers[name] = {**provider, "payload": combined}
 
     class IndentedDumper(yaml.SafeDumper):
         def increase_indent(self, flow=False, indentless=False):
@@ -221,21 +255,21 @@ def migrate_inline_provider(existing: str) -> str:
         at = _manual_proxies(result)[1]
         result = result[:at] + "\n" + block + result[at:]
     moved = _manual_proxy_providers(result)[3]
-    if _manual_proxies(result)[3] or moved != providers or moved["Manual"]["payload"] != nodes:
+    if _manual_proxies(result)[3] or moved != providers or moved[name]["payload"] != combined:
         raise ValueError("Inline provider migration failed validation")
     return result
 
 
-def compact_inline_provider(existing: str) -> str:
-    """Explicit formatting only: keep each Manual payload node on one flow-style line."""
+def compact_inline_provider(existing: str, provider_name: str | None = None) -> str:
+    """Explicit formatting only; discover inline providers without relying on names."""
     original = _manual_proxy_providers(existing)
     providers = original[3] if original is not None else None
-    provider = providers.get("Manual") if isinstance(providers, dict) else None
-    if not isinstance(provider, dict) or provider.get("type") != "inline":
-        raise ValueError("The Manual inline Provider is missing")
-    nodes = provider.get("payload")
-    if not isinstance(nodes, list) or any(not isinstance(node, dict) for node in nodes):
-        raise ValueError("The Manual payload must be a node list")
+    providers = providers if isinstance(providers, dict) else {}
+    names = [_provider_name(providers, provider_name)] if provider_name is not None else [
+        name for name, value in providers.items()
+        if isinstance(value, dict) and value.get("type") == "inline"]
+    if not names:
+        return existing
 
     class FlowNode(dict):
         pass
@@ -249,7 +283,12 @@ def compact_inline_provider(existing: str) -> str:
     CompactDumper.add_representer(str, lambda dumper, value:
         dumper.represent_scalar('tag:yaml.org,2002:str', value,
                                style='"' if value.splitlines() != [value] else None))
-    updated = {**providers, "Manual": {**provider, "payload": [FlowNode(node) for node in nodes]}}
+    updated = dict(providers)
+    for name in names:
+        provider = providers.get(name)
+        if not isinstance(provider, dict) or provider.get("type") != "inline":
+            raise ValueError("The target provider must be inline")
+        updated[name] = {**provider, "payload": [FlowNode(node) for node in _inline_nodes(provider)]}
     block = yaml.dump({"proxy-providers": updated}, Dumper=CompactDumper,
                       allow_unicode=True, sort_keys=False, width=10**9)
     if yaml.safe_load(block)["proxy-providers"] != providers:

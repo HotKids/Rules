@@ -15,7 +15,15 @@ const WARNING = /转换提示|不是.*内置策略|警告|warning/i;
 function redact(value) {
   // Error notifications can contain the entire request URL, including localtext.
   // Diagnostics must never expose source addresses or repeat a whole plugin.
-  return String(value).replace(/https?:\/\/[^\s<>"']+/gi, '[URL]');
+  return String(value)
+    .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
+    .replace(/[\x00-\x08\x0b-\x1f\x7f]/g, '')
+    .replace(/https?(?::|%(?:25)*3a)(?:\\?\/|%(?:25)*2f){2}[^\s<>"']*/gi, '[URL]')
+    .replace(/[^\s<>"'=]*_remove_ads\.lpx[^\s<>"']*/gi, '[URL]')
+    .replace(/\b(?:Bearer|Basic)\s+[^\s,;"'<>]+/gi, '[CREDENTIAL]')
+    .replace(/(\b(?:proxy-authorization|authorization|set-cookie|cookie)\b["']?\s*[:=]\s*)[^\r\n]+/gi, '$1[REDACTED]')
+    .replace(/([?&;][^?&;=\s]{1,100}=)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^&#\s]*)/g, '$1[REDACTED]')
+    .replace(/(\b[\w-]*(?:password|passwd|token|secret|api[-_]?key|psk|localtext)\b["']?\s*(?:[:=]|%(?:25)*3[ad])\s*)(?:"(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*'|[^\s,;]+)/gi, '$1[REDACTED]');
 }
 
 async function convertSource(parser, source, {httpBodies = {}, timeoutMs = 10000} = {}) {

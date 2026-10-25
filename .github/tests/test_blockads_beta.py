@@ -9,6 +9,7 @@ import sys
 import tempfile
 import unittest
 from unittest.mock import patch
+from urllib.parse import quote
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
@@ -118,6 +119,56 @@ hostname = a.example
         with patch.object(beta.subprocess, 'run', return_value=result(beta.PM_ADVISORY, '[Rule]\nDOMAIN,a,REJECT')):
             with self.assertRaisesRegex(ValueError, 'QUIC'):
                 beta.convert_sources(entries, {'one': 'source'}, 'parser', {})
+
+    def test_converter_failure_keeps_only_safe_bounded_stderr_tail(self):
+        source_url = 'https://example.invalid/private_remove_ads.lpx?access=source-secret#fragment-secret'
+        stderr = '\n'.join([
+            *['old line ' + str(index) for index in range(20)],
+            '\x1b[31mTypeError: parser.compile is not a function\x1b[0m',
+            source_url,
+            quote(source_url, safe=''),
+            quote(quote(source_url, safe=''), safe=''),
+            'api_key="key-secret" token=token-secret password=pass-secret',
+            '{"secret":"json-secret", "psk":"psk-secret"} ?trace=query-secret&mode=another-secret',
+            'Authorization: Bearer auth-secret',
+            'at convertSource (convert-loon.cjs:12:3) ' + 'x' * 500,
+        ])
+        result = subprocess.CompletedProcess([], 1, 'stdout-source-secret', stderr)
+        with patch.object(beta.subprocess, 'run', return_value=result):
+            with self.assertRaises(RuntimeError) as failure:
+                beta.convert_sources([{'id': 'one', 'name': 'A'}], {'one': 'source'}, 'parser', {})
+        message = str(failure.exception)
+        self.assertIn('exit 1', message)
+        self.assertIn('TypeError: parser.compile is not a function', message)
+        self.assertIn('convert-loon.cjs:12:3', message)
+        self.assertNotIn('old line', message)
+        self.assertNotIn('secret', message.replace('"secret"', ''))
+        self.assertNotIn('example.invalid', message)
+        self.assertNotIn('stdout-', message)
+        self.assertNotIn('\x1b', message)
+        self.assertLess(len(message), 2000)
+        self.assertTrue(all(len(line) <= 240 for line in message.splitlines()[1:]))
+
+    def test_converter_timeout_redacts_byte_stderr_without_using_stdout(self):
+        timeout = subprocess.TimeoutExpired('node', 180, output=b'stdout-private',
+                                            stderr=b'Error: timeout\ntoken=timeout-private')
+        with patch.object(beta.subprocess, 'run', side_effect=timeout):
+            with self.assertRaisesRegex(RuntimeError, '超时') as failure:
+                beta.convert_sources([{'id': 'one', 'name': 'A'}], {'one': 'source'}, 'parser', {})
+        message = str(failure.exception)
+        self.assertIn('Error: timeout', message)
+        self.assertNotIn('private', message)
+
+    def test_diagnostic_tail_masks_standalone_paths_and_query_fragments(self):
+        text = beta.diagnostic_tail('Lpx/Private_remove_ads.lpx?api_key=one\n'
+                                    '?anything=two&another=three\n'
+                                    'token%3Dfour localtext%253Dsix\n'
+                                    'Cookie: session=five; other=value\n'
+                                    'GIST_TOKEN=seven accessToken=eight ?label="nine ten"')
+        self.assertNotRegex(text, r'Private|one|two|three|four|five|six|seven|eight|nine|ten|session')
+
+    def test_aggregator_is_loaded_once_without_renaming_the_cli(self):
+        self.assertIs(beta.load_aggregator(), beta.load_aggregator())
 
 
 if __name__ == '__main__':

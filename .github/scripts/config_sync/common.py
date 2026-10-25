@@ -7,6 +7,8 @@ import ipaddress
 import re
 import subprocess
 
+from _common import write_if_changed
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 
 
@@ -100,20 +102,8 @@ def _write_stamped_if_changed(filepath: Path, content: str) -> bool:
     - 否则 → 写入（当前时间）
     """
     content = _inject_general(content)
-    now = datetime.now(_CST).strftime("%Y-%m-%d %H:%M:%S")
-    stamped = _DATE_LINE_RE.sub(f"# Date: {now}", content, count=1)
-    if filepath.exists():
-        existing = filepath.read_text(encoding="utf-8")
-        placeholder = "# Date: __NORM__"
-        if (_DATE_LINE_RE.sub(placeholder, existing, count=1)
-                == _DATE_LINE_RE.sub(placeholder, content, count=1)):
-            return False
-    filepath.parent.mkdir(parents=True, exist_ok=True)
-    filepath.write_text(stamped, encoding="utf-8")
-    return True
-
-
-# 无 Date 行场景下的按需写入复用 _common.write_if_changed（见顶部 import _write_if_changed）
+    return write_if_changed(filepath, _stamp_date(content),
+                            normalize_patterns=(_DATE_LINE_RE,), normalize_count=1)
 
 
 _GIST_RAW_RE = re.compile(r"https://raw\.githubusercontent\.com/([^/\s]+)/([^/\s]+)/([^/\s]+)/")

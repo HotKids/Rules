@@ -3,6 +3,7 @@
 from pathlib import Path
 import re
 import urllib.request
+from _common import DownloadError, fetch_url, safe_url
 from .common import (
     REPO_ROOT,
     SYNC_CONFIG_TXT,
@@ -422,17 +423,15 @@ def _fetch_remote_section(url: str, section: str) -> list[str]:
     """获取远程 URL，提取指定 [section] 段落的内容行（不含段落标题行）。"""
     if url not in _url_cache:
         try:
-            with urllib.request.urlopen(url, timeout=15) as resp:  # noqa: S310
-                _url_cache[url] = resp.read().decode("utf-8")
-        except Exception as e:
+            content = fetch_url(url, "sync-config/1.0", timeout=15)
+        except DownloadError as e:
             # 拉取失败若继续，会生成并提交缺失整段（如 QX 的 [dns] 块）的配置。
             # 直接中止让 workflow 失败，避免把残缺配置 push 到 master。
             raise RuntimeError(
-                f"远程包含拉取失败，中止同步以避免提交缺失段落的配置: {url}: {e}"
+                f"远程包含拉取失败，中止同步以避免提交缺失段落的配置: {e}"
             ) from e
-    content = _url_cache[url]
-    if not content:
-        return []
+    else:
+        content = _url_cache[url]
     result: list[str] = []
     in_target = False
     for line in content.splitlines():
@@ -444,6 +443,11 @@ def _fetch_remote_section(url: str, section: str) -> list[str]:
             break
         if in_target:
             result.append(line)
+    if not any(line.strip() and not line.strip().startswith(("#", ";", "//")) for line in result):
+        _url_cache.pop(url, None)
+        raise RuntimeError(f"远程包含缺少有效 [{section}] 段，中止同步: {safe_url(url)}")
+    # Only usable content can enter the cache. An invalid section cannot poison retries.
+    _url_cache[url] = content
     return result
 
 

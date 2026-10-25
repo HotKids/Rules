@@ -2,6 +2,19 @@ name: Sync Mihomo Gist
 
 on:
   workflow_dispatch:
+    inputs:
+      migrate_inline:
+        description: Move existing top-level proxies into an inline provider
+        type: boolean
+        default: false
+      compact_inline:
+        description: Format inline payload nodes as single-line mappings
+        type: boolean
+        default: false
+      provider_name:
+        description: Optional target inline provider name for migration
+        type: string
+        default: ''
   # Gist edits do not emit repository events; 04:00 UTC = 12:00 Asia/Shanghai daily.
   schedule:
     - cron: '0 4 * * *'
@@ -17,6 +30,7 @@ on:
       - '.github/tests/test_mihomo_gist.py'
       - '.github/tests/test_mihomo_stash.py'
       - '.github/scripts/requirements.txt'
+      - '.github/actions/setup-runtime/**'
       - '.github/workflows/sync-mihomo-gist.yml'
   # Overlay changes trigger Sync Config first. Wait for its validated base output.
   # The bot's generated commit does not itself trigger another push workflow.
@@ -31,18 +45,19 @@ permissions:
 concurrency:
   group: sync-mihomo-private-gist
   cancel-in-progress: false
+  queue: max
 
 jobs:
   sync:
     if: github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'master')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           ref: master
           persist-credentials: false
-      - name: Install generation dependencies
-        run: python3 -m pip install -r .github/scripts/requirements.txt
+      - uses: ./.github/actions/setup-runtime
       - name: Check private publication and overlay generation
         run: python3 -m unittest discover -s .github/tests -p 'test_mihomo_*.py'
       - name: Generate temporary configuration
@@ -55,7 +70,16 @@ jobs:
         env:
           MIHOMO_GIST_ID: ${{ secrets.MIHOMO_GIST_ID }}
           GIST_TOKEN: ${{ secrets.GIST_TOKEN }}
-        run: python3 .github/scripts/publish-mihomo-gist.py --stash-base Clash/Script/MyStash.stoverride "$RUNNER_TEMP/mihomo.yaml"
+          MIGRATE_INLINE: ${{ inputs.migrate_inline }}
+          COMPACT_INLINE: ${{ inputs.compact_inline }}
+          PROVIDER_NAME: ${{ inputs.provider_name }}
+        run: |
+          set -euo pipefail
+          options=()
+          if [ "$MIGRATE_INLINE" = true ]; then options+=(--migrate-inline); fi
+          if [ "$COMPACT_INLINE" = true ]; then options+=(--compact-inline); fi
+          if [ -n "$PROVIDER_NAME" ]; then options+=(--provider-name "$PROVIDER_NAME"); fi
+          python3 .github/scripts/publish-mihomo-gist.py "${options[@]}" --stash-base Clash/Script/MyStash.stoverride "$RUNNER_TEMP/mihomo.yaml"
       - name: Remove temporary configuration
         if: always()
         run: rm -f "$RUNNER_TEMP/mihomo.yaml"

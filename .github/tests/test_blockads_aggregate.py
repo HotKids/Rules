@@ -93,6 +93,16 @@ class AggregateInputTests(unittest.TestCase):
         fetch.assert_not_called()
         self.assertEqual(self.output.read_text(encoding="utf-8"), "previous complete output")
 
+    def test_date_only_refresh_preserves_bytes_but_rule_change_writes_new_stamp(self):
+        old = '#!name=Fixture\n#!date=2026-01-01 12:00:00\n[Rule]\nDOMAIN,old.example,REJECT\n'
+        self.output.write_text(old, encoding="utf-8")
+        refreshed = old.replace('2026-01-01', '2026-01-02')
+        self.assertFalse(self.module._write_stamped_if_changed(self.output, refreshed))
+        self.assertEqual(self.output.read_bytes(), old.encode())
+        changed = refreshed.replace('old.example', 'new.example')
+        self.assertTrue(self.module._write_stamped_if_changed(self.output, changed))
+        self.assertEqual(self.output.read_bytes(), changed.encode())
+
 
 if __name__ == "__main__":
     unittest.main()
