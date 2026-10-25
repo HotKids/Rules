@@ -42,6 +42,8 @@ https://raw.githubusercontent.com/kokoryh/Sparkle/master/release/surge/module/bi
 https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule,CloudMusic #!name=网易云音乐去广告 #!desc=网易云音乐去广告，部分 App 需清除缓存或重新安装后才会生效 #!author=Keywos #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/NeteaseCloudMusic.png #!category=去广告
 https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/split/partX/Xiaohongshu.sgmodule,RedNote #!name=小红书去广告 #!desc=小红书去广告，部分 App 需清除缓存或重新安装后才会生效 #!author=fmz200 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/RedPaper.png #!category=去广告
 https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/weibo.module,Weibo #!name=微博去广告 #!desc=微博去广告，部分 App 需清除缓存或重新安装后才会生效 #!author=fmz200 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Weibo.png #!category=去广告
+https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet,Meituan.sgmodule #!name=美团去广告 #!category=去广告
+https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/helloobike.snippet,HelloBike.sgmodule #!name=哈啰出行去广告 #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/高德地图去广告.sgmodule,Amap.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/百度网盘去广告.sgmodule,BaiduNetdisk.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/菜鸟去广告.sgmodule,Cainiao.stoverride #!category=去广告
@@ -51,5 +53,3 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/喜马拉雅�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/闲鱼去广告.sgmodule,IdleFish.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/芒果TV去广告.sgmodule,MangoTV.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/下厨房去广告.sgmodule,Xiachufang.stoverride #!category=去广告
-https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet,Meituan #!name=美团去广告 #!category=去广告
-https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/helloobike.snippet,HelloBike #!name=哈啰出行去广告 #!category=去广告
