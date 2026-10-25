@@ -44,12 +44,50 @@ ip6-cidr,2001:db8::1/128,reject,no-resolve
             "DOMAIN-WILDCARD,mquic-*.example.invalid,REJECT",
             "DOMAIN-SUFFIX,example.invalid,DIRECT",
             "DOMAIN-KEYWORD,advert,Named Policy",
-            "IP-CIDR,192.0.2.1/32,REJECT",
+            "IP-CIDR,192.0.2.1/32,REJECT,no-resolve",
             "IP-CIDR6,2001:db8::1/128,REJECT,no-resolve",
         ])
         self.assertNotIn("extended-matching", actual)
         self.assertNotIn("pre-matching", actual)
-        self.assertEqual(actual.count("no-resolve"), 1)
+        self.assertEqual(actual.count("no-resolve"), 2)
+
+    def test_cidr_rejects_add_no_resolve_once_for_both_address_families(self):
+        for kind, network in (("ip-cidr", "192.0.2.1/32"),
+                              ("ip6-cidr", "2001:db8::1/128"),
+                              ("ip-cidr6", "2001:db8::1/128")):
+            for policy in ("reject", "ReJeCt", "reject-drop", "reject-tinygif", "REJECT-NO-DROP"):
+                for existing in ("", ",NO-RESOLVE"):
+                    with self.subTest(kind=kind, policy=policy, existing=existing):
+                        _, sections = parse_module(convert_qx_module(f"{kind},{network},{policy}{existing}\n"))
+                        fields = sections["Rule"][0].split(",")
+                        self.assertEqual(fields[0], "IP-CIDR" if kind == "ip-cidr" else "IP-CIDR6")
+                        self.assertEqual(fields[1], network)
+                        self.assertEqual(fields[2], policy.upper())
+                        self.assertEqual(fields[3:], ["no-resolve"])
+
+    def test_other_policies_and_rule_types_keep_their_resolution_behavior(self):
+        source = """ip-cidr,192.0.2.0/24,direct
+ip6-cidr,2001:db8::/32,Proxy
+ip-cidr6,2001:db8:1::/48,Custom Group
+ip-cidr,198.51.100.0/24,REJECT-CUSTOM
+geoip,CN,reject
+ip-asn,64512,reject
+host,ads.example.invalid,reject
+"""
+        _, sections = parse_module(convert_qx_module(source))
+        self.assertEqual(sections["Rule"], [
+            "IP-CIDR,192.0.2.0/24,DIRECT",
+            "IP-CIDR6,2001:db8::/32,Proxy",
+            "IP-CIDR6,2001:db8:1::/48,Custom Group",
+            "IP-CIDR,198.51.100.0/24,REJECT-CUSTOM",
+            "GEOIP,CN,REJECT",
+            "IP-ASN,64512,REJECT",
+            "DOMAIN,ads.example.invalid,REJECT",
+        ])
+
+    def test_explicit_no_resolve_on_non_reject_cidr_is_preserved(self):
+        _, sections = parse_module(convert_qx_module("ip-cidr,192.0.2.0/24,direct,NO-RESOLVE\n"))
+        self.assertEqual(sections["Rule"], ["IP-CIDR,192.0.2.0/24,DIRECT,no-resolve"])
 
     def test_native_sections_take_precedence_over_shared_rules_and_url_text(self):
         for source in (

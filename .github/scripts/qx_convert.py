@@ -37,6 +37,8 @@ _SURGE_SECTIONS = {
 }
 _REWRITE_RE = re.compile(r"^(\S+)\s+url\s+(\S+)(?:\s+(.*))?$", re.I)
 _POLICIES = {"reject", "reject-drop", "reject-tinygif", "direct"}
+_CIDR_TYPES = {"ip-cidr", "ip6-cidr", "ip-cidr6"}
+_CIDR_REJECT_POLICIES = {"REJECT", "REJECT-DROP", "REJECT-TINYGIF", "REJECT-NO-DROP"}
 
 
 def is_qx_module(text: str) -> bool:
@@ -257,8 +259,13 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
                 raise _error(number, "unsupported filter flag")
             if flags and kind not in {"ip-cidr", "ip6-cidr", "ip-cidr6", "geoip", "ip-asn"}:
                 raise _error(number, "no-resolve does not apply to this filter")
-            add("Rule", ",".join([_RULE_TYPES[kind], fields[1], _policy(fields[2])]
-                                 + [flag.lower() for flag in flags]))
+            policy = _policy(fields[2])
+            flags = [flag.lower() for flag in flags]
+            # Modules precede the profile's domain rules. CIDR rejects should
+            # inspect known destination IPs without forcing DNS for every domain.
+            if kind in _CIDR_TYPES and policy in _CIDR_REJECT_POLICIES and "no-resolve" not in flags:
+                flags.append("no-resolve")
+            add("Rule", ",".join([_RULE_TYPES[kind], fields[1], policy] + flags))
             active += 1
             continue
         raise _error(number, "unsupported executable directive")

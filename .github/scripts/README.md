@@ -162,7 +162,7 @@ URL,名称 #!remove=a.example,b.example
 
 Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继续放在 `Pannel/`。
 
-Module 来源也支持 QX `.snippet`：先经 [qx_convert.py](qx_convert.py) 转成 Surge 配置，再复用现有输出器。清单格式仍为 `URL,输出名 #!name=标题 #!category=分类`；例如 `Meituan.sgmodule`、`HelloBike.sgmodule` 只生成 Surge 模块，不指定后缀仍同时生成两种格式。转换保留规则范围、正则和顺序，不额外添加 `no-resolve` 或 `pre-matching`。HTTP 200 拦截使用空响应映射，echo 脚本使用请求脚本返回模拟响应；未知可执行项中止同步，避免发布缺项配置。
+Module 来源也支持 QX `.snippet`：先经 [qx_convert.py](qx_convert.py) 转成 Surge 配置，再复用现有输出器。清单格式仍为 `URL,输出名 #!name=标题 #!category=分类`；例如 `Meituan.sgmodule`、`HelloBike.sgmodule` 只生成 Surge 模块，不指定后缀仍同时生成两种格式。转换保留规则值、正则和顺序；IPv4/IPv6 CIDR 的内置 REJECT 系列规则统一补上 `no-resolve`，已有标记不重复。这样仍可匹配已知目标 IP，但不为未解析域名主动触发 DNS。DIRECT、代理、自定义策略以及 GEOIP/IP-ASN 的解析行为保持来源设置，不额外添加 `pre-matching`。HTTP 200 拦截使用空响应映射，echo 脚本使用请求脚本返回模拟响应；未知可执行项中止同步，避免发布缺项配置。
 
 QX 引用的 JS 先由 [qx_compat.py](qx_compat.py) 保守检查兼容性：可确认仅使用共享接口和正文返回的脚本直接保留上游地址；涉及 QX 专属接口、echo 或无法确认的写法，才经 [qx_scripts.py](qx_scripts.py) 和 [qx-runtime.js](qx-runtime.js) 生成本地适配文件。判定不使用 App 名称或域名白名单。原生 Surge 来源继续引用上游脚本，不进入这条转换链。
 
