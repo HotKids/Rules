@@ -10,6 +10,7 @@
 | Mihomo 与 Stash 共用的通用设置（模式、日志、Hosts、DNS 等） | [Clash/General.yaml](../../Clash/General.yaml) |
 | 平台输出路径、排除项、URL 映射、重命名 | [sync-config.txt](sync-config.txt) |
 | 各平台静态基座 | [sync-config/](sync-config/) 的 ini 文件 |
+| Profile 增强模块的元数据、参数与合并操作符 | [profile-module.ini](sync-config/profile-module.ini) |
 | `My*` 私人差异 | [sync-config/Enhanced/](sync-config/Enhanced/) 的 overlay JSON |
 | 手工规则与 Streaming 成员 | [Surge/RULE-SET/](../../Surge/RULE-SET/) |
 | 上游规则及镜像模块 | [sync-rules.txt](sync-rules.txt) |
@@ -47,12 +48,15 @@ SRS/MRS 编译与 sing-box 完整配置检查由工作流调用官方内核执�
 |---|---|
 | [parser.py](config_sync/parser.py) | 平台清单、基座与 Surge 源解析 |
 | [common.py](config_sync/common.py) | 路径、公共分组/规则工具与输出格式 |
+| [profile_module.py](config_sync/profile_module.py) | Surge Profile 增强模块，保留模块参数和列表合并方式 |
 | [clash.py](config_sync/clash.py) | Clash/Mihomo YAML、增强 JS 和结构化 overlay |
 | [stash.py](config_sync/stash.py) | Stash 转译及保留注释的 overlay |
 | [loon.py](config_sync/loon.py)、[qx.py](config_sync/qx.py)、[surfboard.py](config_sync/surfboard.py)、[singbox.py](config_sync/singbox.py) | 各平台输出 |
 | [pipeline.py](config_sync/pipeline.py) | 按依赖顺序组织生成 |
 
-产物包括 `Clash/Sample.yaml`、`Mihomo.yaml`、`Clash/Script/` 的 JS/Stash 覆写、`Surge/Balloon.lcf`、`Surge/Surfboard.conf`、`Quantumult/Sample.conf` 和 `sing-box/config.json`。没有实质变化时保留原时间戳，避免空提交。
+产物包括 `Surge/Module/Profile.sgmodule`、`Clash/Sample.yaml`、`Mihomo.yaml`、`Clash/Script/` 的 JS/Stash 覆写、`Surge/Balloon.lcf`、`Surge/Surfboard.conf`、`Quantumult/Sample.conf` 和 `sing-box/config.json`。没有实质变化时保留原时间戳，避免空提交。
+
+`Profile.sgmodule` 从 `Surge/Profile.conf` 同步 `[General]`、`[Host]`，以及 `[Rule]` 开头至 `Bogus`（含）的一整段规则，仅排除标准 SSH 端口规则。Bypass、Reroute、Private 和 HTTPDNS 等内容保留源中的启用状态、顺序及附加选项；Ponte、节点、策略组、脚本、MITM 和 `Bogus` 后续规则不生成。[profile-module.ini](sync-config/profile-module.ini) 单独维护元数据、参数、`[Rule Selection]` 的结束边界和 `[General]` 的 `%APPEND%` / `%INSERT%` 操作符。参数声明为 `PROXY:Proxy,DIRECT:Direct,REJECT:Reject`；`[Rule Policy]` 将对应策略映射到参数，`Bogus` 仍保留 `REJECT-DROP`。域名列表默认追加，DNS、开关和端口等普通设置覆盖。主配置、生成器及模板都已处于 `Sync Config` 的触发范围内；工作流会提交生成后的模块，修改产物本身不会反向修改主配置或模板。
 
 `Pannel/` 内已有同名 `.stoverride` 的面板，其顶层 `category`、`icon` 由 `.sgmodule` 的 `#!category`、`#!icon` 同步。只在 Surge 源文件维护这两个字段，修改会触发 `Sync Config`；源中删除或留空也会移除 Stash 对应字段。卡片内部的图标、名称、描述及布局仍由 Stash 面板维护。
 

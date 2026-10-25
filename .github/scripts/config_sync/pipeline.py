@@ -18,6 +18,9 @@ from .parser import (
     parse_surge_profile,
     parse_sync_txt,
 )
+from .profile_module import (
+    _sync_profile_module,
+)
 from .qx import (
     _sync_qx,
 )
@@ -53,6 +56,7 @@ def main() -> None:
     _GENERAL_INJECT.clear()
     _GENERAL_INJECT.update(_build_general_inject(general_lines))
 
+    _sync_profile_module(config)
     _sync_clash(config, proxy_lines, group_lines, rule_lines)
     _sync_stash(config, general_lines)  # 依赖 _sync_clash 的产物，必须排在其后
     _sync_stash_panel_metadata()

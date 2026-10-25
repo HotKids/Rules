@@ -4,7 +4,7 @@ on:
   push:
     branches: [master]
     paths:
-      - 'Surge/Profile.conf' # 跨客户端配置上游；Stash 同步策略/规则和强制 HTTP 引擎列表
+      - 'Surge/Profile.conf' # 跨客户端配置及 Profile 增强模块上游
       - 'Surge/Module/Pannel/*.sgmodule' # 同名 Stash 面板的分类、图标和默认参数上游
       - 'Surge/Module/MTProto.sgmodule' # Stash MTProto 的兼容参数默认值
       # clash.ini 通过 << 内嵌 General.yaml，改它同样要重新生成
@@ -55,7 +55,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add Clash/Sample.yaml Clash/Mihomo.yaml Clash/Script/ Surge/Balloon.lcf Quantumult/Sample.conf Surge/Surfboard.conf sing-box/config.json Surge/Module/Pannel/*.stoverride Surge/Module/Stash/
+          git add Clash/Sample.yaml Clash/Mihomo.yaml Clash/Script/ Surge/Balloon.lcf Quantumult/Sample.conf Surge/Surfboard.conf sing-box/config.json Surge/Module/Profile.sgmodule Surge/Module/Pannel/*.stoverride Surge/Module/Stash/
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
