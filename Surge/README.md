@@ -15,7 +15,7 @@
 
 导入请使用对应文件的 Raw 地址，并按自己的环境配置订阅、节点与个人策略。Loon、Surfboard 的平台差异在 [同步基座](../.github/scripts/sync-config/) 中维护。
 
-`Module/Profile.sgmodule` 由 `Sync Config` 从主配置生成，同步 `[General]`、`[Host]`，以及 `[Rule]` 开头至 `Bogus`（含）的一整段规则，仅排除标准 SSH 端口规则。Bypass、Reroute、Private 和 HTTPDNS 等内容均保留源中的启用状态、顺序和附加选项；Ponte、节点、策略组、脚本、MITM 及 `Bogus` 之后的规则不生成。模块元数据、参数、规则边界和 `%APPEND%` / `%INSERT%` 操作符在 [profile-module.ini](../.github/scripts/sync-config/profile-module.ini) 维护。`PROXY`、`DIRECT`、`REJECT` 参数默认分别为 `Proxy`、`Direct`、`Reject`，`Bogus` 保持源规则的 `REJECT-DROP`；域名列表默认追加，DNS、开关、端口等普通设置按主配置覆盖。修改主配置或模板都会触发生成，直接编辑模块产物会被下次同步覆盖。
+`Module/Profile.sgmodule` 由 `Sync Config` 从主配置生成，同步 `[General]`、`[Host]`，以及 `[Rule]` 开头至 `Bogus`（含）的一整段规则，仅排除标准 SSH 端口规则。Bypass、Reroute、Private 和 HTTPDNS 等内容均保留源中的启用状态、顺序和附加选项；Ponte、节点、策略组、脚本、MITM 及 `Bogus` 之后的规则不生成。模块元数据、参数、规则边界和 `%APPEND%` / `%INSERT%` 操作符在 [profile-module.ini](../.github/scripts/sync-config/profile-module.ini) 维护。`PROXY`、`DIRECT`、`REJECT` 参数默认分别为 `🔰 Proxy`、`🔘 DIRECT`、`⛔️ REJECT`，`Bogus` 保持源规则的 `REJECT-DROP`；域名列表默认追加，DNS、开关、端口等普通设置按主配置覆盖。修改主配置或模板都会触发生成，直接编辑模块产物会被下次同步覆盖。
 
 主配置与 [Profile 增强模块](Module/Profile.sgmodule) 使用 HTTPS 测速地址，需 Surge iOS 5.23 / Mac 6.10 或更新版本。TLS 握手增加整体测试时间，但显示的延迟按已建立连接后的 HTTP 往返计算。Surfboard 的生成配置仅将测速地址转换回同一端点的 HTTP，保留加密 DNS 的 HTTPS 地址。
 
