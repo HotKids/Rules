@@ -50,6 +50,7 @@ class QxSyncTests(unittest.TestCase):
         self.stack.enter_context(patch.object(self.runner, "REPO_ROOT", self.root))
         self.stack.enter_context(patch.object(self.runner, "SYNC_RULES_TXT", self.listing))
         self.stack.enter_context(patch.object(self.runner, "SURGE_DIR", self.root / "Surge/RULE-SET"))
+        self.stack.enter_context(patch.object(qx_scripts, "can_use_upstream", return_value=False))
         self.stack.enter_context(contextlib.redirect_stdout(io.StringIO()))
 
     def snapshot(self):
@@ -61,6 +62,25 @@ class QxSyncTests(unittest.TestCase):
             self.rules["module"], texts or {SOURCE_URL: QX_SOURCE}, self.root,
             download or (lambda urls: {url: SOURCE_JS for url in urls}))
 
+    def run_bundle(self, content, context):
+        harness = r"""
+const fs = require('node:fs');
+const vm = require('node:vm');
+const input = JSON.parse(fs.readFileSync(0, 'utf8'));
+const values = {};
+let result, count = 0;
+const context = {...input.context, calls: [],
+  $persistentStore: {read: key => values[key] ?? null, write: (value, key) => { values[key] = value; return true; }},
+  $done: value => { result = value; count++; },
+};
+vm.runInNewContext(input.content, context);
+process.stdout.write(JSON.stringify({result, count, calls: context.calls}));
+"""
+        run = subprocess.run(["node", "-e", harness],
+                             input=json.dumps({"content": content, "context": context}),
+                             text=True, capture_output=True, check=True, timeout=10)
+        return json.loads(run.stdout)
+
     def test_all_modes_share_url_namespace_and_preserve_exact_upstream_js(self):
         other = "https://example.invalid/other.snippet"
         self.rules["module"].append({"url": other, "name": "Other.sgmodule", "overrides": {}})
@@ -69,7 +89,7 @@ class QxSyncTests(unittest.TestCase):
         calls = []
         plan = self.prepare(texts, lambda urls: calls.append(urls) or {JS_URL: SOURCE_JS})
         self.assertEqual(calls, [[JS_URL]])
-        self.assertEqual(len(plan.scripts), 4)
+        self.assertEqual(set(plan.scripts), {"Surge/Module/Scripts/generic.js", "Surge/Module/Scripts/other.js"})
         labels = []
         for converted in plan.converted.values():
             labels.extend(line.split(" = ", 1)[0] for line in converted.splitlines()
@@ -77,10 +97,11 @@ class QxSyncTests(unittest.TestCase):
         self.assertEqual(len(labels), len(set(labels)))
         namespace = "qx-" + hashlib.sha256(JS_URL.encode()).hexdigest()
         for relative, content in plan.scripts.items():
-            self.assertRegex(relative, r"^Surge/Module/Scripts/qx-[0-9a-f]{64}\.js$")
+            self.assertRegex(relative, r"^Surge/Module/Scripts/[a-z]+\.js$")
             self.assertIn(json.dumps(namespace), content)
             extracted = content.split("// BEGIN UPSTREAM SOURCE\n", 1)[1].split("\n// END UPSTREAM SOURCE", 1)[0]
             self.assertEqual(extracted, SOURCE_JS)
+            self.assertEqual(content.count("// BEGIN UPSTREAM SOURCE\n"), 1)
             self.assertNotIn("$argument =", content)
             self.assertNotIn(JS_URL, content)
         self.assertEqual(self.snapshot(), {"sync-rules.txt": self.listing.read_bytes()})
@@ -105,7 +126,7 @@ class QxSyncTests(unittest.TestCase):
         with patch.object(self.runner, "prefetch_urls", side_effect=download):
             self.runner.fetch_external_modules()
         self.assertEqual(calls, [[SOURCE_URL], [JS_URL]])
-        self.assertEqual(len(list((self.root / "Surge/Module/Scripts").glob("qx-*.js"))), 3)
+        self.assertEqual([path.name for path in (self.root / "Surge/Module/Scripts").glob("*.js")], ["generic.js"])
 
     def test_complete_wrapper_preserves_argument_strict_mode_and_local_declarations(self):
         source = ("'use strict';\nconst module = {};\n"
@@ -199,9 +220,15 @@ process.stdout.write(JSON.stringify({result, preference: values.fixture}));
     def test_cleanup_requires_ownership_and_matching_bytes_and_preserves_manual_scripts(self):
         plan = self.prepare()
         self.runner.fetch_external_modules(self.rules, {SOURCE_URL: QX_SOURCE}, prepared_qx=plan)
-        scripts = sorted(self.root.glob("Surge/Module/Scripts/qx-*.js"))
+        scripts = sorted(self.root.glob("Surge/Module/Scripts/*.js"))
         edited = scripts[0]
         edited.write_text(edited.read_text() + "// local edit\n")
+        legacy = self.root / (qx_scripts.SCRIPT_DIRECTORY + "/qx-" + "e" * 64 + ".js")
+        legacy.write_text(qx_scripts.GENERATED_HEADER + "\n// previous wrapper\n")
+        registry = self.root / qx_scripts.OWNERS_FILE
+        state = json.loads(registry.read_text())
+        state["files"][legacy.relative_to(self.root).as_posix()] = hashlib.sha256(legacy.read_bytes()).hexdigest()
+        registry.write_text(json.dumps(state))
         manual = self.root / "Surge/Module/Scripts/ip-security.js"
         manual.write_text("manual script")
         unknown = self.root / (qx_scripts.SCRIPT_DIRECTORY + "/qx-" + "f" * 64 + ".js")
@@ -211,20 +238,21 @@ process.stdout.write(JSON.stringify({result, preference: values.fixture}));
         self.runner.fetch_external_modules(self.rules, {})
         for path, content in expected.items():
             self.assertEqual(path.read_bytes(), content)
+        self.assertFalse(legacy.exists())
         self.assertTrue(all(not path.exists() for path in scripts[1:]))
         self.assertEqual(json.loads((self.root / qx_scripts.OWNERS_FILE).read_text())["files"], {})
 
     def test_local_edits_and_invalid_registry_refuse_the_whole_batch(self):
         plan = self.prepare()
         self.runner.fetch_external_modules(self.rules, {SOURCE_URL: QX_SOURCE}, prepared_qx=plan)
-        script = next(self.root.glob("Surge/Module/Scripts/qx-*.js"))
+        script = next(self.root.glob("Surge/Module/Scripts/*.js"))
         script.write_text(script.read_text() + "// locally changed\n")
         before = self.snapshot()
         with self.assertRaisesRegex(ValueError, "local edits"):
             self.prepare()
         self.assertEqual(before, self.snapshot())
         registry = self.root / qx_scripts.OWNERS_FILE
-        registry.write_text(json.dumps({"version": 1, "files": {"Surge/Module/Scripts/ip-security.js": "f" * 64}}))
+        registry.write_text(json.dumps({"version": 1, "files": {"Surge/Module/Scripts/Ip-security.js": "f" * 64}}))
         before = self.snapshot()
         with self.assertRaisesRegex(ValueError, "ownership path"):
             self.prepare()
@@ -240,7 +268,7 @@ process.stdout.write(JSON.stringify({result, preference: values.fixture}));
     def test_owned_symlink_is_rejected_before_module_writes_or_cleanup(self):
         plan = self.prepare()
         self.runner.fetch_external_modules(self.rules, {SOURCE_URL: QX_SOURCE}, prepared_qx=plan)
-        script = next(self.root.glob("Surge/Module/Scripts/qx-*.js"))
+        script = next(self.root.glob("Surge/Module/Scripts/*.js"))
         script.unlink()
         manual = self.root / "manual.js"
         manual.write_text("manual content")
@@ -251,6 +279,115 @@ process.stdout.write(JSON.stringify({result, preference: values.fixture}));
             self.runner.fetch_external_modules(self.rules, {})
         self.assertEqual(before, self.snapshot())
         self.assertTrue(script.is_symlink())
+
+    def test_compatible_js_keeps_upstream_url_and_removes_old_owned_wrappers(self):
+        old = self.root / (qx_scripts.SCRIPT_DIRECTORY + "/qx-" + "a" * 64 + ".js")
+        old.parent.mkdir(parents=True)
+        old.write_text(qx_scripts.GENERATED_HEADER + "\n// obsolete generated wrapper\n")
+        manual = old.parent / "manual.js"
+        manual.write_text("// user script")
+        registry = self.root / qx_scripts.OWNERS_FILE
+        registry.parent.mkdir(parents=True)
+        registry.write_text(json.dumps({"version": 1, "files": {
+            old.relative_to(self.root).as_posix(): hashlib.sha256(old.read_bytes()).hexdigest(),
+            manual.relative_to(self.root).as_posix(): hashlib.sha256(manual.read_bytes()).hexdigest(),
+        }}))
+        text = "\ufeff#!name = 中文标题\n^https://example.invalid/ url script-response-body " + JS_URL + "\n"
+        with patch.object(qx_scripts, "can_use_upstream", return_value=True):
+            plan = self.prepare({SOURCE_URL: text})
+        self.assertEqual(plan.scripts, {})
+        converted = plan.source_text(SOURCE_URL, "Generic.sgmodule", "")
+        self.assertIn("中文标题_1 = type=http-response", converted)
+        self.assertIn("script-path=" + JS_URL, converted)
+        self.assertNotIn(qx_scripts.RAW_SCRIPT_BASE, converted)
+        self.runner.fetch_external_modules(self.rules, {SOURCE_URL: text}, prepared_qx=plan)
+        self.assertFalse(old.exists())
+        self.assertEqual(manual.read_text(), "// user script")
+        self.assertEqual(json.loads(registry.read_text())["files"], {})
+
+    def test_one_incompatible_mode_adapts_every_reference_to_the_same_js(self):
+        calls = []
+        def compatible(source, mode):
+            calls.append(mode)
+            return mode != "echo"
+        with patch.object(qx_scripts, "can_use_upstream", side_effect=compatible):
+            plan = self.prepare()
+        text = plan.source_text(SOURCE_URL, "Generic.sgmodule", "")
+        self.assertEqual(text.count("script-path=" + qx_scripts.RAW_SCRIPT_BASE + "generic.js"), 3)
+        self.assertNotIn(JS_URL, text)
+        self.assertIn("echo", calls)
+
+    def test_sources_merge_into_one_bundle_with_effective_title_and_cumulative_labels(self):
+        other = "https://example.invalid/another.snippet"
+        other_js = "https://example.invalid/another.js"
+        self.rules["module"][0]["overrides"] = {"name": "有效模块"}
+        self.rules["module"].append({"url": other, "name": "Generic.sgmodule", "overrides": {"name": "ignored"}})
+        texts = {SOURCE_URL: QX_SOURCE,
+                 other: "[task_local]\n0 0 * * * " + other_js + ", tag=Daily\n"}
+        plan = self.prepare(texts)
+        self.assertEqual(list(plan.scripts), ["Surge/Module/Scripts/generic.js"])
+        self.assertIn("有效模块_1 = ", plan.source_text(SOURCE_URL, "Generic.sgmodule", ""))
+        self.assertIn("有效模块_4 = ", plan.source_text(other, "Generic.sgmodule", ""))
+        self.assertNotIn("ignored_", plan.source_text(other, "Generic.sgmodule", ""))
+        self.assertEqual(next(iter(plan.scripts.values())).count("// BEGIN UPSTREAM SOURCE\n"), 2)
+
+    def test_bundle_collisions_refuse_the_complete_batch(self):
+        for names in (("Alpha.sgmodule", "alpha.sgmodule"),
+                      ("one/Alpha.sgmodule", "two/Alpha.sgmodule")):
+            with self.subTest(names=names):
+                self.rules["module"] = [{"url": SOURCE_URL, "name": name, "overrides": {}} for name in names]
+                before = self.snapshot()
+                with self.assertRaisesRegex(ValueError, "basenames collide"):
+                    self.prepare()
+                self.assertEqual(before, self.snapshot())
+
+    def test_same_stem_formats_share_only_an_identical_bundle(self):
+        self.rules["module"][0]["name"] = "Generic"
+        plan = self.prepare()
+        self.assertEqual(list(plan.scripts), ["Surge/Module/Scripts/generic.js"])
+        self.assertEqual(plan.source_text(SOURCE_URL, "Generic.sgmodule", ""),
+                         plan.source_text(SOURCE_URL, "Generic.stoverride", ""))
+        self.rules["module"] = [{"url": SOURCE_URL, "name": "Generic.sgmodule", "overrides": {"name": "First"}},
+                                {"url": SOURCE_URL, "name": "Generic.stoverride", "overrides": {"name": "Second"}}]
+        with self.assertRaisesRegex(ValueError, "conflicting bundles"):
+            self.prepare()
+
+    def test_dispatch_selects_only_one_source_by_label_or_unique_http_route(self):
+        other = "https://example.invalid/other.snippet"
+        other_js = "https://example.invalid/other.js"
+        self.rules["module"][0]["overrides"] = {"name": "路由模块"}
+        self.rules["module"].append({"url": other, "name": "Generic.sgmodule", "overrides": {}})
+        first = ("[rewrite_local]\n^https://example.invalid/(a|ambiguous)$ url script-request-body " + JS_URL
+                 + "\n^https://example.invalid/(a|ambiguous)$ url script-response-body " + JS_URL + "\n")
+        second = ("[rewrite_local]\n^https://example.invalid/(b|ambiguous)$ url script-request-body " + other_js
+                  + "\n[task_local]\n0 0 * * * " + other_js + ", tag=Daily\n")
+        bodies = {JS_URL: "globalThis.calls.push('one'); $done({body: 'one:' + $argument});",
+                  other_js: "globalThis.calls.push('two'); $done({body: 'two:' + $argument});"}
+        plan = self.prepare({SOURCE_URL: first, other: second}, lambda _urls: bodies)
+        content = next(iter(plan.scripts.values()))
+        cases = [
+            ({"$script": {"name": "路由模块_3"}, "$request": {"url": "https://example.invalid/a"}}, "two"),
+            ({"$request": {"url": "https://example.invalid/a"}}, "one"),
+            ({"$request": {"url": "https://example.invalid/a"}, "$response": {"body": "body"}}, "one"),
+            ({"$script": {"name": "renamed"}, "$request": {"url": "https://example.invalid/b"}}, "two"),
+            ({"$script": {"name": "路由模块_4", "type": "cron"}}, "two"),
+        ]
+        for context, selected in cases:
+            with self.subTest(context=context):
+                context["$argument"] = "user-value"
+                actual = self.run_bundle(content, context)
+                self.assertEqual(actual, {"result": {"body": selected + ":user-value"}, "count": 1, "calls": [selected]})
+        for context in ({"$request": {"url": "https://example.invalid/ambiguous"}},
+                        {"$script": {"type": "cron"}},
+                        {"$request": {"url": "https://example.invalid/unknown"}}):
+            self.assertEqual(self.run_bundle(content, context), {"result": {}, "count": 1, "calls": []})
+
+    def test_prepared_batch_rejects_changed_output_name_or_title(self):
+        plan = self.prepare()
+        for changes in ({"name": "Changed.sgmodule"}, {"overrides": {"name": "Changed"}}):
+            changed = [{**self.rules["module"][0], **changes}]
+            with self.assertRaisesRegex(ValueError, "does not match"):
+                plan.validate_inputs(self.root, changed, {SOURCE_URL: QX_SOURCE})
 
 
 if __name__ == "__main__":

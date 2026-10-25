@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections import OrderedDict
 import re
+import unicodedata
 from urllib.parse import urlsplit
 
 
@@ -96,25 +97,51 @@ def _csv_value(value: str, number: int) -> str:
     return '"' + value + '"' if "," in value else value
 
 
+def _script_prefix(value: str) -> str:
+    """Keep human-readable module titles while excluding label syntax hazards."""
+    if not isinstance(value, str):
+        raise ValueError("QX script prefix must be a safe module title")
+    if any(char in "=," or unicodedata.category(char) in {"Cc", "Cs", "Zl", "Zp"}
+           for char in value):
+        raise ValueError("QX script prefix must be a safe module title")
+    value = value.strip()
+    if not value or len(value) > 256 or value.startswith(("#", ";", "//")):
+        raise ValueError("QX script prefix must be a safe module title")
+    return value
+
+
 def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_LIMIT,
-                      script_prefix: str = "qx-script") -> str:
+                      script_prefix: str | None = None, script_start: int = 0) -> str:
     """Return a Surge module, optionally mapping ``script_url(url, kind)``.
 
     Kinds are request, request-body, response, response-body, echo and cron.
     Echo remains a distinct mapper kind although its Surge type is http-request.
     This lets the JS runtime convert QX's flat mock response without inventing a
     private ``argument`` parameter or changing the upstream script's arguments.
-    Callers can derive ``script_prefix`` from the source URL to avoid collisions
-    between installed modules without renaming scripts on metadata-only updates.
+    Script labels use the effective module title and a one-based suffix without
+    zero padding, e.g. ``Module title_1``. By default the title comes from the
+    source metadata (or QX when absent); callers merging multiple sources can
+    pass the effective title and continue numbering with ``script_start``.
     """
     if not isinstance(text, str) or not text.strip():
         raise ValueError("QX module is empty")
     if not isinstance(body_limit, int) or isinstance(body_limit, bool) or body_limit <= 0:
         raise ValueError("QX body limit must be a positive number of bytes")
-    if not isinstance(script_prefix, str) or not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9_-]{0,79}", script_prefix):
-        raise ValueError("QX script prefix must be a safe identifier")
+    if not isinstance(script_start, int) or isinstance(script_start, bool) or script_start < 0:
+        raise ValueError("QX script start must be a nonnegative integer")
+    source_lines = text.lstrip("\ufeff").splitlines()
+    if script_prefix is None:
+        script_prefix = "QX"
+        for raw in source_lines:
+            line = raw.strip()
+            if line.startswith("#!"):
+                key, sep, value = line[2:].partition("=")
+                if sep and key.strip() == "name":
+                    script_prefix = value.strip() or "QX"
+                    break
+    script_prefix = _script_prefix(script_prefix)
     metadata, sections = OrderedDict(), OrderedDict()
-    preamble, current, scripts, active = [], None, 0, 0
+    preamble, current, scripts, active = [], None, script_start, 0
 
     def add(section, line):
         sections.setdefault(section, []).append(line)
@@ -123,7 +150,7 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
         original = _script_url(value, number)
         return _script_url(script_url(original, kind) if script_url else original, number)
 
-    for number, raw in enumerate(text.lstrip("\ufeff").splitlines(), 1):
+    for number, raw in enumerate(source_lines, 1):
         line = raw.strip()
         if not line:
             continue
@@ -169,7 +196,7 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
                 if requires_body:
                     options += ["requires-body=true", f"max-size={body_limit}"]
                 options.append(f"script-path={_csv_value(url, number)}")
-                add("Script", f"{script_prefix}-{scripts:03d} = " + ",".join(options))
+                add("Script", f"{script_prefix}_{scripts} = " + ",".join(options))
             elif action in {"reject-200", "reject-dict", "reject-array", "reject-img"}:
                 if value:
                     raise _error(number, "unexpected value after a reject action")
@@ -213,7 +240,7 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
                 # Preserve a tag as a comment, not an unchecked script label.
                 if options.get("tag"):
                     add("Script", "# " + options["tag"])
-                add("Script", f'{script_prefix}-{scripts:03d} = type=cron,cronexp="{cron}",'
+                add("Script", f'{script_prefix}_{scripts} = type=cron,cronexp="{cron}",'
                     f'script-path={_csv_value(mapped_url(url, "cron", number), number)}')
             active += 1
             continue

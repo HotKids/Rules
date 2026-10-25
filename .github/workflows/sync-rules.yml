@@ -9,6 +9,7 @@ on:
       - '.github/scripts/sync-rules.py'
       - '.github/scripts/module_convert.py'
       - '.github/scripts/qx_convert.py'
+      - '.github/scripts/qx_compat.py'
       - '.github/scripts/qx_scripts.py'
       - '.github/scripts/qx-runtime.js'
       - '.github/tests/test_qx_*.py'

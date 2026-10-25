@@ -1310,7 +1310,7 @@ def fetch_external_modules(rules=None, prefetched=None, *, prepared_qx=None):
     outputs = {}
     # Validate every source and conversion before writing any module in the batch.
     for target, sources in groups.items():
-        module = merge_modules([(e["url"], prepared_qx.converted.get(e["url"], prefetched.get(e["url"]) or ""), e["overrides"])
+        module = merge_modules([(e["url"], prepared_qx.source_text(e["url"], target, prefetched.get(e["url"]) or ""), e["overrides"])
                                 for e in sources])
         if target.endswith(".stoverride"):
             content, warnings = render_stash(module, target)

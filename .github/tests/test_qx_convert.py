@@ -66,24 +66,62 @@ ip6-cidr,2001:db8::1/128,reject,no-resolve
                 self.assertFalse(is_qx_module(source))
         self.assertTrue(is_qx_module("ip-cidr,192.0.2.1/32,reject\n[MITM]\nhostname = example.invalid\n"))
 
-    def test_caller_stable_prefix_prevents_cross_module_script_name_collisions(self):
+    def test_caller_title_prefix_prevents_cross_module_script_name_collisions(self):
         source = """#!update=2026-01-01
 ^https://example.invalid/ url script-response-body https://example.invalid/script.js
 """
         labels = []
-        for prefix in ("qx-abcdef12", "qx-12345678"):
+        for prefix in ("哈啰出行去广告", "🎬 Video App [签到]"):
             actual = convert_qx_module(source, script_prefix=prefix)
             _, sections = parse_module(actual)
             names = [line.split("=", 1)[0].strip() for line in sections["Script"] if line.strip()]
-            self.assertEqual(names, [prefix + "-001"])
+            self.assertEqual(names, [prefix + "_1"])
             _, updated = parse_module(convert_qx_module(
                 source.replace("2026-01-01", "2026-01-02"), script_prefix=prefix))
             self.assertEqual(updated["Script"], sections["Script"])
             labels.append(set(names))
         self.assertFalse(labels[0] & labels[1])
-        for prefix in ("", "a b", "a\nb", "a=type", "a,pattern", "a/../b", "a" * 81, None):
+        for prefix in ("", "a\nb", "a=type", "a,pattern", "a" * 257, "# disabled", " ; disabled", "// disabled", "a\tlabel", "a\u2028label", "Title\n", "\tTitle", "Title\r"):
             with self.subTest(prefix=prefix), self.assertRaises(ValueError):
                 convert_qx_module(source, script_prefix=prefix)
+
+    def test_default_labels_use_metadata_title_then_qx_fallback_without_zero_padding(self):
+        rewrite = "^https://example.invalid/ url script-response-body https://example.invalid/a.js\n"
+        for metadata, expected in (
+            ("#!name = 哈啰出行去广告\n", "哈啰出行去广告_1"),
+            ("#!name = 🎬 Video App [签到]\n", "🎬 Video App [签到]_1"),
+            ("#!author=Upstream\n", "QX_1"),
+            ("#!name=\n", "QX_1"),
+        ):
+            with self.subTest(metadata=metadata):
+                _, sections = parse_module(convert_qx_module(metadata + rewrite))
+                self.assertEqual(sections["Script"][0].split("=", 1)[0].strip(), expected)
+        # Metadata placement cannot change the chosen title.
+        self.assertIn("Late title_1 =", convert_qx_module(rewrite + "#!name=Late title\n"))
+        self.assertIn("Override title_1 =", convert_qx_module("#!name=Source title\n" + rewrite,
+                                                             script_prefix="Override title"))
+
+    def test_merged_sources_can_continue_one_based_numbers_across_http_and_cron(self):
+        source = """#!name=Source title
+^https://example.invalid/ url script-response-body https://example.invalid/a.js
+[task_local]
+1 0 * * * https://example.invalid/task.js, enabled=true
+2 0 * * * https://example.invalid/disabled.js, enabled=false
+"""
+        converted = convert_qx_module(source, script_prefix="Merged title", script_start=9)
+        _, sections = parse_module(converted)
+        labels = [line.split("=", 1)[0].strip() for line in sections["Script"] if line.strip() and not line.startswith("#")]
+        self.assertEqual(labels, ["Merged title_10", "Merged title_11"])
+        self.assertNotIn("Merged title_12", converted)
+        for start in (-1, 1.5, True, "0", None):
+            with self.subTest(start=start), self.assertRaises(ValueError):
+                convert_qx_module(source, script_start=start)
+
+    def test_unsafe_source_title_cannot_become_an_executable_or_disabled_label(self):
+        rewrite = "^https://example.invalid/ url script-response-body https://example.invalid/a.js\n"
+        for title in ("# disabled", "; disabled", "// disabled", "injected=type", "bad,title", "bad\ttitle"):
+            with self.subTest(title=title), self.assertRaises(ValueError):
+                convert_qx_module("#!name=" + title + "\n" + rewrite)
 
     def test_script_callback_keeps_stage_and_upstream_url(self):
         calls = []

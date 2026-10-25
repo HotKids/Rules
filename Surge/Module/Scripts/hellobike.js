@@ -184,8 +184,8 @@ function createQxRuntime(native, mode, namespace) {
   })};
   return {request, response, prefs, notify, task, done};
 }
-const bridge = createQxRuntime(native, "response-body", "qx-d081c9f5d4c720632ae64f775626c4c973ce67bd361de8794c6e1ef67d4f74a2");
-return (function ($request, $response, $prefs, $notify, $task, $done) {
+const sources = [
+function ($request, $response, $prefs, $notify, $task, $done) {
 return (function () {
 // BEGIN UPSTREAM SOURCE
 (function(){var HBE_AES;
@@ -752,10 +752,32 @@ return module.exports;}());hbeFinal=hbeCleanResponse();}catch(hbeInitError){hbeF
 
 // END UPSTREAM SOURCE
 }).call(this);
-}).call(this, bridge.request, bridge.response, bridge.prefs, bridge.notify, bridge.task, bridge.done);
+}
+];
+const routes = [{"name": "哈啰出行去广告_1", "type": "http-request", "pattern": "^https:\\/\\/resource\\.51downapp\\.cn\\/f414fbc17c411b4e986ba8891c738a49\\.json\\?(?:[^#]*&)?md5=e5230c919f7e3f3af3256161fbfaa0e2&(?:[^#]*&)?hbe_qx_ui=1\\.3$", "mode": "echo", "source": 0, "namespace": "qx-d081c9f5d4c720632ae64f775626c4c973ce67bd361de8794c6e1ef67d4f74a2"}, {"name": "哈啰出行去广告_2", "type": "http-response", "pattern": "^https:\\/\\/api\\.hellobike\\.com(?::443)?\\/secretkey(?:\\?|$)", "mode": "response-body", "source": 0, "namespace": "qx-d081c9f5d4c720632ae64f775626c4c973ce67bd361de8794c6e1ef67d4f74a2"}, {"name": "哈啰出行去广告_3", "type": "http-request", "pattern": "^https?:\\/\\/(?:api|marketingapi|entertainment)\\.hellobike\\.com(?::\\d+)?\\/api(?:\\?|$)", "mode": "request-body", "source": 0, "namespace": "qx-d081c9f5d4c720632ae64f775626c4c973ce67bd361de8794c6e1ef67d4f74a2"}, {"name": "哈啰出行去广告_4", "type": "http-response", "pattern": "^https?:\\/\\/(?:api|marketingapi|entertainment)\\.hellobike\\.com(?::\\d+)?\\/api(?:\\?|$)", "mode": "response-body", "source": 0, "namespace": "qx-d081c9f5d4c720632ae64f775626c4c973ce67bd361de8794c6e1ef67d4f74a2"}];
+const label = native.script && native.script.name;
+let matches = typeof label === 'string' ? routes.filter(route => route.name === label) : [];
+if (matches.length === 0) {
+  const declared = native.script && native.script.type;
+  const stage = ['http-request', 'http-response', 'cron'].includes(declared) ? declared
+    : native.response ? 'http-response' : native.request ? 'http-request' : 'cron';
+  const url = native.request && native.request.url;
+  matches = routes.filter(route => {
+    if (stage === 'cron' || route.type !== stage || typeof url !== 'string') return false;
+    try { return new RegExp(route.pattern).test(url); } catch (_) { return false; }
+  });
+  // Overlapping patterns for the same source and mode execute identical code.
+  matches = matches.filter((route, index, all) => all.findIndex(other =>
+    other.source === route.source && other.mode === route.mode) === index);
+}
+if (matches.length !== 1) return native.done({});
+const route = matches[0];
+const bridge = createQxRuntime(native, route.mode, route.namespace);
+return sources[route.source].call(this, bridge.request, bridge.response, bridge.prefs, bridge.notify, bridge.task, bridge.done);
 })({
 request: typeof $request === 'undefined' ? undefined : $request,
 response: typeof $response === 'undefined' ? undefined : $response,
+script: typeof $script === 'undefined' ? undefined : $script,
 persistentStore: typeof $persistentStore === 'undefined' ? undefined : $persistentStore,
 notification: typeof $notification === 'undefined' ? undefined : $notification,
 httpClient: typeof $httpClient === 'undefined' ? undefined : $httpClient,
