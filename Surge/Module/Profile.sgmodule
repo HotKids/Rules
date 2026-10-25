@@ -1,7 +1,10 @@
 #!name=Profile Module
 #!desc=General Settings Enhanced
 #!category=HotKids
-#!arguments=PROXY:🔰 Proxy,DIRECT:🔘 DIRECT,REJECT:⛔️ REJECT
+#!arguments=PROXY:Proxy,DIRECT:Direct,REJECT:Reject
+#!arguments-desc=PROXY、DIRECT、REJECT 分别填写所用配置中的代理、直连、拒绝策略名，默认 Proxy、Direct、Reject。Bogus 保持源规则的 REJECT-DROP。
+
+# 自动生成：设置与规则跟随 Surge/Profile.conf；模块参数和合并方式在 .github/scripts/sync-config/profile-module.ini 维护。
 
 [General]
 # 通用设置
@@ -56,7 +59,7 @@ http-api-web-dashboard = true
 # > 跳过代理
 # 跳过某个域名或者 IP 段，这些目标主机将不会由 Surge Proxy 处理
 # macOS 版本中，如果启用了 Set as System Proxy，这些值会被写入到系统网络代理设置
-skip-proxy = localhost, *.local, *.lan, *.home, *.portal.*, captive.*, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, ::1/128, fe80::/10
+skip-proxy = %APPEND% localhost, *.local, *.lan, *.home, *.home.arpa, *.portal.*, captive.*, 10.0.0.0/8, 100.64.0.0/10, 127.0.0.0/8, 169.254.0.0/16, 172.16.0.0/12, 192.168.0.0/16, ::1/128, fe80::/10
 
 # > 排除简单主机名
 exclude-simple-hostnames = true
@@ -80,7 +83,7 @@ read-etc-hosts = true
 
 # > Hijack DNS
 # 劫持所有发往 53 端口的 DNS 查询，防止设备使用硬编码 DNS
-hijack-dns = *:53
+hijack-dns = %APPEND% *:53
 
 # > Fake-IP 池
 # 旁路由模式推荐开启
@@ -97,12 +100,12 @@ show-error-page-for-reject = true
 # > Always Real IP Hosts
 # 要求 Surge 返回真正的 IP 地址，而不是 Fake-IP
 # DNS 数据包将被转发到上游 DNS 服务器
-always-real-ip = *.lan, *.local, *.localhost, *.home.arpa, *.msftncsi.com, *.msftconnecttest.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, *.turn.twilio.com, *.stun.twilio.com, stun.syncthing.net, stun.*, *.stun.*.*, 127.*.*.*.sslip.io, 127-*-*-*.sslip.io, *.127.*.*.*.sslip.io, *-127-*-*-*.sslip.io, 127.*.*.*.nip.io, 127-*-*-*.nip.io, *.127.*.*.*.nip.io, *-127-*-*-*.nip.io, time.*.com, time.*.gov, time.*.apple.com, ntp.*.com, *.mcdn.bilivideo.cn, localhost.*.qq.com, connectivitycheck.gstatic.com, captive.apple.com, *.spotify.com, *.battlenet.com.cn, *.blizzard.com
+always-real-ip = %APPEND% *.lan, *.local, *.localhost, *.home.arpa, *.msftncsi.com, *.msftconnecttest.com, *.srv.nintendo.net, *.stun.playstation.net, xbox.*.microsoft.com, *.xboxlive.com, *.turn.twilio.com, *.stun.twilio.com, stun.syncthing.net, stun.*, *.stun.*.*, 127.*.*.*.sslip.io, 127-*-*-*.sslip.io, *.127.*.*.*.sslip.io, *-127-*-*-*.sslip.io, 127.*.*.*.nip.io, 127-*-*-*.nip.io, *.127.*.*.*.nip.io, *-127-*-*-*.nip.io, time.*.com, time.*.gov, time.*.apple.com, ntp.*.com, *.mcdn.bilivideo.cn, localhost.*.qq.com, connectivitycheck.gstatic.com, captive.apple.com, *.spotify.com, *.battlenet.com.cn, *.blizzard.com
 
 # > TCP Force HTTP Hosts
 # 让 Surge 把 TCP 连接当作 HTTP 请求来处理
 # Surge HTTP 引擎将处理这些请求，所有的高级功能如捕获、重写和脚本等都可以使用
-force-http-engine-hosts = *.ott.cibntv.net, *.tc.qq.com, *.douyinvod.com, *.douyin.com, api*.amemv.com, *.xhscdn.com, *.xiaohongshu.com, *.bilibili.com, *.kuaishou.com, *.jd.com, *.pinduoduo.com, *.music.163.com, wmapi.meituan.com
+force-http-engine-hosts = %APPEND% *.ott.cibntv.net, *.tc.qq.com, *.douyinvod.com, *.douyin.com, api*.amemv.com, *.xhscdn.com, *.xiaohongshu.com, *.bilibili.com, *.kuaishou.com, *.jd.com, *.pinduoduo.com, *.music.163.com, wmapi.meituan.com
 
 # > VIF Included Routes
 # 默认情况下，Surge VIF 接口会声明自己是默认路由
@@ -123,24 +126,20 @@ udp-priority = true
 udp-policy-not-supported-behaviour = REJECT
 
 [Host]
-# https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/plugin/DNS.plugin
 
 [Rule]
-# 标准 SSH 端口
-AND,((DEST-PORT,22),(PROTOCOL,TCP)),{{{DIRECT}}}
-
 # Unbreak 后续规则修正，修复因规则拦截或分流不当导致的功能异常
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bypass.list,{{{DIRECT}}}
 RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Reroute.list,{{{PROXY}}}
+
 # Private 私有网络
 DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/private.txt,{{{DIRECT}}}
-# HTTPDNS 请求/流量阻止 
-RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,{{{REJECT}}}
+# HTTPDNS 请求/流量阻止
+# RULE-SET,https://raw.githubusercontent.com/VirgilClyne/GetSomeFries/main/ruleset/HTTPDNS.Block.list,{{{REJECT}}}
 # Advertising 广告
-DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,{{{REJECT}}}
-RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list,{{{REJECT}}}
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Advertising.list,{{{REJECT}}}
-# Privacy 隐私
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Tracking.list,{{{REJECT}}}
-# Hijacking 运营商劫持或恶意网站
-RULE-SET,https://raw.githubusercontent.com/ConnersHua/RuleGo/master/Surge/Ruleset/Extra/Reject/Malicious.list,{{{REJECT}}}
+DOMAIN-SET,https://raw.githubusercontent.com/Loyalsoldier/surge-rules/release/reject.txt,{{{REJECT}}},extended-matching
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Block.list,{{{REJECT}}},extended-matching
+# Phishing 钓鱼网站
+DOMAIN-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Phishing.list,{{{REJECT}}},extended-matching
+# Bogus IP NXDOMAIN 劫持/僵尸网络 C2
+RULE-SET,https://raw.githubusercontent.com/HotKids/Rules/master/Surge/RULE-SET/Bogus.list,REJECT-DROP,no-resolve,pre-matching
