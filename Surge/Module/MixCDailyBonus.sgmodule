@@ -1,0 +1,18 @@
+#!name=🛍️ 一点万象 [签到]
+#!desc=每日定时签到一点万象。开启 MITM 后，进入 App 签到页捕获登录参数；定时任务使用本机已保存的参数签到。\n登录态失效时，重新进入 App 签到页更新参数。
+#!author=怎么肥事
+#!arguments=签到时间:1 0 * * *,禁用脚本:mixcapp
+#!arguments-desc=签到时间：Cron 表达式，默认每日 00:01。\n\n禁用脚本：填 mixcapp 启用抓参；不想再抓时改为 # 即可禁用捕获脚本与对应 MITM（cron 仍用已存参数运行）。停止签到请关闭定时任务或整个模块。
+#!category=HotKids
+
+### fork from https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/mixc_signin.js
+
+[Script]
+# 每日定时签到，使用已捕获的登录参数
+一点万象[签到] = type=cron,cronexp="{{{签到时间}}}",wake-system=1,script-update-interval=0,timeout=30,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/mixc_signin.js
+
+# 进入 App 签到页时捕获参数并透传，不触发额外签到
+一点万象[签到捕获] = type=http-request,pattern=^https?:\/\/app\.{{{禁用脚本}}}\.com\/mixc\/gateway,requires-body=1,timeout=10,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/mixc_signin.js
+
+[MITM]
+hostname = %APPEND% app.{{{禁用脚本}}}.com
