@@ -97,11 +97,11 @@ class ProfileModuleTests(unittest.TestCase):
             'DOMAIN-SET,https://example.invalid/reject.txt,{{{REJECT}}},extended-matching',
             'RULE-SET,https://example.invalid/Block.list,{{{REJECT}}},extended-matching',
             'DOMAIN-SET,https://example.invalid/Phishing.list,{{{REJECT}}},extended-matching',
-            'RULE-SET,https://example.invalid/Bogus.list,REJECT-DROP,no-resolve,pre-matching',
+            'RULE-SET,https://example.invalid/Bogus.list,{{{REJECT}}},no-resolve,pre-matching',
         ])
         self.assertIn('# RULE-SET,https://example.invalid/HTTPDNS.list,{{{REJECT}}}', result)
         disabled = PROFILE.replace('RULE-SET,https://example.invalid/Bogus.list', '# RULE-SET,https://example.invalid/Bogus.list')
-        self.assertIn('# RULE-SET,https://example.invalid/Bogus.list,REJECT-DROP',
+        self.assertIn('# RULE-SET,https://example.invalid/Bogus.list,{{{REJECT}}}',
                       profile_module.render_profile_module(disabled, TEMPLATE))
 
     def test_logical_rules_before_the_boundary_keep_subrules_and_flags(self):
