@@ -51,5 +51,5 @@ https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/喜马拉雅�
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/闲鱼去广告.sgmodule,IdleFish.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/芒果TV去广告.sgmodule,MangoTV.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/下厨房去广告.sgmodule,Xiachufang.stoverride #!category=去广告
-https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet #!name=美团去广告 #!category=去广告
-https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/helloobike.snippet #!name=哈啰出行去广告 #!category=去广告
+https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet,Meituan #!name=美团去广告 #!category=去广告
+https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/helloobike.snippet,HelloBike #!name=哈啰出行去广告 #!category=去广告
