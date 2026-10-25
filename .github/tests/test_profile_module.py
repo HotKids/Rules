@@ -65,7 +65,7 @@ class ProfileModuleTests(unittest.TestCase):
     def test_general_tracks_source_but_keeps_the_template_merge_operations(self):
         template = TEMPLATE.replace('skip-proxy = %APPEND%', 'skip-proxy = %INSERT%')
         result = profile_module.render_profile_module(PROFILE, template)
-        self.assertIn('#!arguments=PROXY:Proxy,DIRECT:Direct,REJECT:Reject', result)
+        self.assertIn('#!arguments=PROXY:🔰 Proxy,DIRECT:🔘 DIRECT,REJECT:⛔️ REJECT', result)
         self.assertIn('skip-proxy = %INSERT% localhost, *.lan', result)
         self.assertIn('always-real-ip = %APPEND% *.example.invalid', result)
         self.assertIn('hijack-dns = %APPEND% *:53', result)

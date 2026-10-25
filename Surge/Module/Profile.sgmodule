@@ -1,8 +1,8 @@
 #!name=Profile Module
 #!desc=General Settings Enhanced
 #!category=HotKids
-#!arguments=PROXY:Proxy,DIRECT:Direct,REJECT:Reject
-#!arguments-desc=PROXY、DIRECT、REJECT 分别填写所用配置中的代理、直连、拒绝策略名，默认 Proxy、Direct、Reject。Bogus 保持源规则的 REJECT-DROP。
+#!arguments=PROXY:🔰 Proxy,DIRECT:🔘 DIRECT,REJECT:⛔️ REJECT
+#!arguments-desc=PROXY、DIRECT、REJECT 分别填写所用配置中的代理、直连、拒绝策略名，默认 🔰 Proxy、🔘 DIRECT、⛔️ REJECT。Bogus 保持源规则的 REJECT-DROP。
 
 # 自动生成：设置与规则跟随 Surge/Profile.conf；模块参数和合并方式在 .github/scripts/sync-config/profile-module.ini 维护。
 
