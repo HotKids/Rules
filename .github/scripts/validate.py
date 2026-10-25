@@ -31,7 +31,7 @@ def main():
     for folder in ('.github/scripts', '.github/tests'):
         for p in sorted((ROOT / folder).rglob('*.py')):
             ast.parse(p.read_text(encoding='utf-8'), filename=str(p)); counts['python'] += 1
-    for folder in ('Clash/Script', 'Surge/Module/Scripts'):
+    for folder in ('Clash/Script', 'Surge/Module/Scripts', '.github/scripts'):
         for p in sorted((ROOT / folder).glob('*.js')):
             run('node', '--check', str(p)); counts['javascript'] += 1
     for folder in ('.github', 'Clash', 'Surge/Module', 'sing-box'):
@@ -62,6 +62,7 @@ def main():
     if sample != mihomo: raise ValueError('Sample.yaml and Mihomo.yaml differ semantically')
     run(sys.executable, '-m', 'unittest', 'discover', '-s', '.github/tests', '-p', 'test_*.py')
     run('node', '--test', '.github/tests/panels.cjs')
+    run('node', '--test', '.github/tests/qx-runtime.cjs')
     print('Validation passed:', counts)
 
 

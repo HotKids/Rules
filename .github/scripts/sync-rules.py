@@ -22,6 +22,7 @@ from pathlib import Path
 from _common import write_if_changed, prefetch_urls
 from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash, apply_stash_ca
 from config_sync.parser import parse_surge_profile
+from qx_scripts import prepare_qx_modules
 
 # ─── 目录配置 ─────────────────────────────────────────────────────────
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
@@ -1287,7 +1288,7 @@ def fetch_external_rules(rules=None, prefetched=None):
 #  Step 1b: Module generation
 # ═══════════════════════════════════════════════════════════════════════
 
-def fetch_external_modules(rules=None, prefetched=None):
+def fetch_external_modules(rules=None, prefetched=None, *, prepared_qx=None):
     """Generate current outputs, then remove obsolete files owned by this generator."""
     print("\n── Step 1b: 同步 Surge / Stash 模块 ──")
     if not SYNC_RULES_TXT.is_file():
@@ -1302,10 +1303,14 @@ def fetch_external_modules(rules=None, prefetched=None):
             groups.setdefault(target, []).append(entry)
     if prefetched is None:
         prefetched = prefetch_urls([e["url"] for e in entries], _UA, encode=True)
+    if prepared_qx is None:
+        prepared_qx = prepare_qx_modules(entries, prefetched, REPO_ROOT,
+                                        lambda urls: prefetch_urls(urls, _UA, encode=True))
+    prepared_qx.validate_inputs(REPO_ROOT, entries, prefetched)
     outputs = {}
     # Validate every source and conversion before writing any module in the batch.
     for target, sources in groups.items():
-        module = merge_modules([(e["url"], prefetched.get(e["url"]) or "", e["overrides"])
+        module = merge_modules([(e["url"], prepared_qx.converted.get(e["url"], prefetched.get(e["url"]) or ""), e["overrides"])
                                 for e in sources])
         if target.endswith(".stoverride"):
             content, warnings = render_stash(module, target)
@@ -1320,6 +1325,7 @@ def fetch_external_modules(rules=None, prefetched=None):
         if target.endswith(".stoverride"):
             output_dir /= "Stash"
         outputs[output_dir / target] = content
+    prepared_qx.write_scripts()
     for path, content in outputs.items():
         changed = write_if_changed(path, content)
         print(f"  {'✓' if changed else '·'} {path.relative_to(REPO_ROOT)} {'已更新' if changed else '无变化'}")
@@ -1331,6 +1337,7 @@ def fetch_external_modules(rules=None, prefetched=None):
         if GENERATED_HEADER in path.read_text(encoding="utf-8").splitlines():
             path.unlink()
             print(f"  ✗ 删除 {path.relative_to(REPO_ROOT)}（已从 sync-rules.txt 移除或改名）")
+    prepared_qx.finish()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -1348,12 +1355,16 @@ def main():
             for entry in rules.get(section, [])]
     # Complete one deduplicated batch before any rule or module output is written.
     prefetched = prefetch_urls(urls, _UA, encode=True)
+    # QX snippets may refer to additional JavaScript. Complete that entire
+    # download/conversion batch before allowing the first rule/module write.
+    prepared_qx = prepare_qx_modules(rules.get("module", []), prefetched, REPO_ROOT,
+                                    lambda urls: prefetch_urls(urls, _UA, encode=True))
 
     # Step 1: 拉取外部规则（Surge 文件 + Clash 直转）
     fetch_external_rules(rules, prefetched)
 
     # Step 1b: 拉取外部 sgmodule
-    fetch_external_modules(rules, prefetched)
+    fetch_external_modules(rules, prefetched, prepared_qx=prepared_qx)
 
     # Step 2/3: Streaming 三层双向同步
     sync_streaming(prechecked=True)

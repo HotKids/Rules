@@ -162,6 +162,14 @@ URL,名称 #!remove=a.example,b.example
 
 Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继续放在 `Pannel/`。
 
+Module 来源也支持 QX `.snippet`：先经 [qx_convert.py](qx_convert.py) 转成 Surge 配置，再复用现有输出器。清单格式仍为 `URL,输出名 #!name=标题 #!category=分类`；例如 `Meituan.sgmodule`、`HelloBike.sgmodule` 只生成 Surge 模块，不指定后缀仍同时生成两种格式。转换保留规则范围、正则和顺序，不额外添加 `no-resolve` 或 `pre-matching`。HTTP 200 拦截使用空响应映射，echo 脚本使用请求脚本返回模拟响应；未知可执行项中止同步，避免发布缺项配置。
+
+QX 引用的 JS 统一经 [qx_scripts.py](qx_scripts.py) 和 [qx-runtime.js](qx-runtime.js) 转换到 `Surge/Module/Scripts/qx-*.js`，生成模块引用本仓库的地址。运行时适配存储、通知、HTTP 请求、状态码和完成回调，原脚本正文逐字保留，不按 App 名称、域名或函数名修改净化和加密逻辑。原生 Surge 来源继续引用上游脚本，不进入这条转换链。来源配置决定各模块的稳定脚本标签，原 JS 地址与运行阶段决定包装文件名；同一 JS 的请求/响应共享上下文命名空间，日期变化不会单独改变标签或路径。
+
+Surge 响应阶段缺少请求正文时，通用运行时可通过其稳定请求 ID 恢复本机缓存：最多 16 槽，180 秒有效，单条请求正文不超过 1 MiB；同时核对完整 ID、脚本来源、URL 和方法。缓存不会写入仓库或日志，也不注入网络请求头；碰撞、过期、超限或缺少可确认的 ID 时不猜测关联。Stash 仅使用平台实际提供的请求正文或数字会话号，不假定其未获文档确认的 ID 行为。
+
+源配置和全部次级 JS 均完成下载、转换及语法检查后才开始写入规则与模块；同步期间不执行第三方脚本。[qx-scripts-owned.json](qx-scripts-owned.json) 按完整 SHA-256 记录包装文件，只清理本转换器生成且内容未被手改的旧文件，保留其他脚本。
+
 多个来源指向同一个输出文件时按清单顺序合并，不再互相覆盖。`name`、`desc`、`author`、`category` 等元信息取第一个条目，先应用它的行内 `#!key=value` 覆盖；后面的元信息不覆盖、不补齐。规则保持先后顺序并去重，MITM/强制 HTTP 域名合并，重名脚本自动加后缀。参数默认值属于执行配置：保留后续独有参数，同名参数取首个；Stash 使用这些默认值，Surge 继续保留参数占位符。
 
 转换包括域名/IP/端口/逻辑规则、URL/Header/Body 重写（含 jq）、文本/Base64/tiny-gif Map Local、HTTP/cron 脚本、MITM 域名及强制 HTTP 引擎。`requires-body` 和 `binary-body-mode` 转为 Stash 字段，`engine=webview` 对应 Stash 3.6+ 的 `webkit`。Map Local 用原生 `http.mock`，不引入额外脚本。脚本 URL 保持上游来源，转换不保证脚本内部所有 Surge 专用 API 都能在 Stash 运行。

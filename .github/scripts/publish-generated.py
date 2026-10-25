@@ -16,6 +16,7 @@ OUTPUTS = {
         "Surge/RULE-SET/", "Surge/Module/", "Quantumult/X/Filter/",
         "Clash/RuleSet/", "sing-box/source/", "sing-box/rule-set/",
         ".github/scripts/sync-rules-owned.json",
+        ".github/scripts/qx-scripts-owned.json",
     ),
     "config": (
         "Clash/Sample.yaml", "Clash/Mihomo.yaml", "Clash/Script/",

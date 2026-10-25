@@ -177,7 +177,7 @@ class RulesBatchTests(unittest.TestCase):
             events.append('download')
             return batch
         def stage(name):
-            def apply(rules, prefetched):
+            def apply(rules, prefetched, **kwargs):
                 self.assertIs(rules, self.rules)
                 self.assertIs(prefetched, batch)
                 events.append(name)

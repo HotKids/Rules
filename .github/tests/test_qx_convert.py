@@ -1,0 +1,221 @@
+"""QX configuration conversion is generic, strict, ordered and offline."""
+import sys
+from pathlib import Path
+import unittest
+
+import yaml
+
+SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
+sys.path.insert(0, str(SCRIPTS))
+from qx_convert import convert_qx_module, is_qx_module, QX_BODY_LIMIT
+from module_convert import parse_module, render_stash, merge_modules
+
+
+class QXModuleTests(unittest.TestCase):
+    def test_recognition_does_not_reclassify_native_surge(self):
+        for source in (
+            "#!name=Fixture\nhost,ads.example.invalid,reject\n",
+            "[rewrite_local]\n# disabled\n",
+            "^https://example.invalid url script-response-body https://example.invalid/task.js\n",
+        ):
+            self.assertTrue(is_qx_module(source))
+        for source in (
+            "#!name=Surge\n[Rule]\nDOMAIN,ads.example.invalid,REJECT\n",
+            "[MITM]\nhostname = ads.example.invalid\n",
+            "# host,disabled.example.invalid,reject\n",
+        ):
+            self.assertFalse(is_qx_module(source))
+
+    def test_filter_types_order_policies_and_flags_are_preserved(self):
+        source = """#!name = Fixture
+#!author = Upstream
+host,exact.example.invalid,reject
+host-wildcard,mquic-*.example.invalid,reject
+host-suffix,example.invalid,direct
+host-keyword,advert,Named Policy
+ip-cidr,192.0.2.1/32,reject
+ip6-cidr,2001:db8::1/128,reject,no-resolve
+"""
+        actual = convert_qx_module(source)
+        metadata, sections = parse_module(actual)
+        self.assertEqual(metadata, {"name": "Fixture", "author": "Upstream"})
+        self.assertEqual(sections["Rule"], [
+            "DOMAIN,exact.example.invalid,REJECT",
+            "DOMAIN-WILDCARD,mquic-*.example.invalid,REJECT",
+            "DOMAIN-SUFFIX,example.invalid,DIRECT",
+            "DOMAIN-KEYWORD,advert,Named Policy",
+            "IP-CIDR,192.0.2.1/32,REJECT",
+            "IP-CIDR6,2001:db8::1/128,REJECT,no-resolve",
+        ])
+        self.assertNotIn("extended-matching", actual)
+        self.assertNotIn("pre-matching", actual)
+        self.assertEqual(actual.count("no-resolve"), 1)
+
+    def test_native_sections_take_precedence_over_shared_rules_and_url_text(self):
+        for source in (
+            "[Rule]\nIP-CIDR,192.0.2.1/32,REJECT\nIP-CIDR6,2001:db8::/32,REJECT\n",
+            "[rule]\nip-cidr,192.0.2.1/32,REJECT\n",
+            "[Rule]\nURL-REGEX,^https://example.invalid/ url script-response-body https://example.invalid/a.js,REJECT\n",
+            "[Script]\n^https://example.invalid/ url script-response-body https://example.invalid/a.js\n",
+            "[URL Rewrite]\n^https://example.invalid/ - reject\n",
+            "[General]\n# Shared section appears later\n[MITM]\nhostname = example.invalid\n",
+            "[Ruleset Private]\nIP-CIDR,192.0.2.1/32\n",
+            "[rewrite_local]\n^https://example.invalid/ url reject\n[Rule]\nIP-CIDR,192.0.2.1/32,REJECT\n",
+        ):
+            with self.subTest(source=source):
+                self.assertFalse(is_qx_module(source))
+        self.assertTrue(is_qx_module("ip-cidr,192.0.2.1/32,reject\n[MITM]\nhostname = example.invalid\n"))
+
+    def test_caller_stable_prefix_prevents_cross_module_script_name_collisions(self):
+        source = """#!update=2026-01-01
+^https://example.invalid/ url script-response-body https://example.invalid/script.js
+"""
+        labels = []
+        for prefix in ("qx-abcdef12", "qx-12345678"):
+            actual = convert_qx_module(source, script_prefix=prefix)
+            _, sections = parse_module(actual)
+            names = [line.split("=", 1)[0].strip() for line in sections["Script"] if line.strip()]
+            self.assertEqual(names, [prefix + "-001"])
+            _, updated = parse_module(convert_qx_module(
+                source.replace("2026-01-01", "2026-01-02"), script_prefix=prefix))
+            self.assertEqual(updated["Script"], sections["Script"])
+            labels.append(set(names))
+        self.assertFalse(labels[0] & labels[1])
+        for prefix in ("", "a b", "a\nb", "a=type", "a,pattern", "a/../b", "a" * 81, None):
+            with self.subTest(prefix=prefix), self.assertRaises(ValueError):
+                convert_qx_module(source, script_prefix=prefix)
+
+    def test_script_callback_keeps_stage_and_upstream_url(self):
+        calls = []
+        def script_url(url, kind):
+            calls.append((url, kind))
+            return "https://converted.example.invalid/" + kind + ".js"
+        source = "\n".join(
+            f"^https://example.invalid/{kind} url script-{kind} https://upstream.example.invalid/rewrite.js"
+            for kind in ("request-header", "request-body", "response-header", "response-body", "echo-response"))
+        actual = convert_qx_module(source, script_url=script_url)
+        _, sections = parse_module(actual)
+        self.assertEqual([kind for _, kind in calls], ["request", "request-body", "response", "response-body", "echo"])
+        self.assertTrue(all(url == "https://upstream.example.invalid/rewrite.js" for url, _ in calls))
+        self.assertEqual(len(sections["Script"]), 5)
+        self.assertNotIn("requires-body", sections["Script"][0])
+        self.assertIn("type=http-request", sections["Script"][-1])
+        self.assertIn("requires-body=true", sections["Script"][-1])
+        self.assertEqual(actual.count(f"max-size={QX_BODY_LIMIT}"), 3)
+        self.assertNotIn("argument=", actual)
+        self.assertNotIn("sessionIndex", actual)
+
+    def test_200_mock_is_not_an_ordinary_reject_and_renders_as_stash_mock(self):
+        source = """#!name=Fixture
+^https://ads.example.invalid/empty url reject-200
+^https://ads.example.invalid/object url reject-dict
+^https://ads.example.invalid/array url reject-array
+^https://ads.example.invalid/image url reject-img
+hostname = ads.example.invalid
+"""
+        converted = convert_qx_module(source)
+        self.assertNotIn("[Rule]", converted)
+        self.assertNotIn(" - reject", converted)
+        self.assertIn("hostname = %APPEND% ads.example.invalid", converted)
+        stash, warnings = render_stash(merge_modules([("fixture", converted, {})]), "Fixture.stoverride")
+        self.assertEqual(warnings, [])
+        mocks = yaml.safe_load(stash)["http"]["mock"]
+        self.assertEqual([mock["status-code"] for mock in mocks], [200] * 4)
+        self.assertEqual([mock.get("text") for mock in mocks[:3]], ["", "{}", "[]"])
+        self.assertIn("base64", mocks[-1])
+
+    def test_patterns_and_script_urls_remain_exact(self):
+        pattern = r"^https?:\/\/(?:api|marketingapi)\.example\.invalid(?::\d+)?\/api(?:\?|$)"
+        url = "https://example.invalid/remote.js?value=a%2Cb&v=1#fragment"
+        result = convert_qx_module(f"{pattern} url script-response-body {url}\n")
+        self.assertIn("pattern=" + pattern + ",", result)
+        self.assertIn("script-path=" + url, result)
+        self.assertEqual(convert_qx_module(f"{pattern} url script-response-body {url}\n"), result)
+
+    def test_comma_bearing_script_fields_are_quoted_without_changing_regex(self):
+        pattern = r"^https://api\.example\.invalid/items/\d{1,3}(?:,tail)?$"
+        url = "https://example.invalid/first,second.js"
+        converted = convert_qx_module(f"{pattern} url script-response-body {url}\n")
+        self.assertIn(f'pattern="{pattern}",', converted)
+        self.assertIn(f'script-path="{url}"', converted)
+        stash, warnings = render_stash(merge_modules([("fixture", converted, {})]), "Fixture.stoverride")
+        self.assertEqual(warnings, [])
+        data = yaml.safe_load(stash)
+        self.assertEqual(data["http"]["script"][0]["match"], pattern)
+        self.assertEqual(next(iter(data["script-providers"].values()))["url"], url)
+
+    def test_ambiguous_script_field_quotes_fail_without_escaping_upstream_regex(self):
+        for source in (
+            '^https://example.invalid/[^"x]{1,3} url script-response-body https://example.invalid/a.js',
+            '^https://example.invalid/ url script-response-body https://example.invalid/a"b.js',
+        ):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "losslessly"):
+                convert_qx_module(source)
+
+    def test_option_looking_commas_fail_instead_of_truncating_script_fields(self):
+        for source in (
+            "^https://example.invalid/a,name=b url script-response-body https://example.invalid/a.js",
+            "^https://example.invalid/a,script-path=b url script-response-body https://example.invalid/a.js",
+            "^https://example.invalid/ url script-response-body https://example.invalid/a.js?first=1,name=b",
+        ):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "losslessly"):
+                convert_qx_module(source)
+
+    def test_sectioned_filters_rewrites_and_tasks(self):
+        source = """#!name=Fixture
+[filter_local]
+host,ads.example.invalid,reject
+[rewrite_local]
+^http://example.invalid/ url 302 https://example.invalid/
+[task_local]
+1 0 * * * https://example.invalid/task.js, tag=Nightly, enabled=true
+2 0 * * * https://example.invalid/disabled.js, enabled=false
+[mitm]
+hostname = example.invalid, api.example.invalid
+"""
+        called = []
+        def mapper(url, kind):
+            called.append((url, kind))
+            return url
+        actual = convert_qx_module(source, script_url=mapper)
+        _, sections = parse_module(actual)
+        self.assertEqual([line for line in sections["URL Rewrite"] if line],
+                         ["^http://example.invalid/ https://example.invalid/ 302"])
+        self.assertEqual(called, [("https://example.invalid/task.js", "cron")])
+        self.assertIn('cronexp="1 0 * * *"', actual)
+        self.assertNotIn("disabled.js", actual)
+
+    def test_unknown_or_invalid_executable_content_fails_without_source_leakage(self):
+        invalid = (
+            "^https://example.invalid/private?token=credential url script-response-body file:///private.js",
+            "^https://example.invalid/private?token=credential url body-replace private",
+            "host,ads.example.invalid,reject,force-cellular",
+            "[rewrite_local]\nhost,ads.example.invalid,reject",
+            "[filter_local]\n^https://example.invalid/ url reject",
+            "[general]\nprivate=credential",
+            "hostname = example.invalid,,",
+            "unrecognized,private,credential",
+            "^https://example.invalid/ url reject-200 unexpected",
+            "[task_local]\n1 0 * * * https://example.invalid/task.js, tag=private, unknown=credential",
+        )
+        for source in invalid:
+            with self.subTest(source=source), self.assertRaises(ValueError) as error:
+                convert_qx_module(source)
+            self.assertNotIn("private", str(error.exception))
+            self.assertNotIn("credential", str(error.exception))
+            self.assertNotIn("https://", str(error.exception))
+        for value in ("", "# only a comment", "#!name=metadata only"):
+            with self.assertRaises(ValueError):
+                convert_qx_module(value)
+
+    def test_invalid_mapped_url_and_limit_fail_before_output(self):
+        source = "^https://example.invalid/ url script-response-body https://example.invalid/script.js"
+        with self.assertRaises(ValueError):
+            convert_qx_module(source, script_url=lambda *_args: "file:///not-published.js")
+        for limit in (0, -1, True, "4194304"):
+            with self.subTest(limit=limit), self.assertRaises(ValueError):
+                convert_qx_module(source, body_limit=limit)
+
+
+if __name__ == "__main__":
+    unittest.main()
