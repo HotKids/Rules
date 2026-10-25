@@ -8,17 +8,19 @@
 ### fork from https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet
 
 [Rule]
-DOMAIN,shark-mt.meituan.com,REJECT
-DOMAIN,shark-default.meituan.com,REJECT
-DOMAIN,shark-dp.meituan.com,REJECT
-DOMAIN,shark-ps.meituan.com,REJECT
-DOMAIN,shark-wm.sankuai.com,REJECT
-DOMAIN,shark.dianping.com,REJECT
-DOMAIN-WILDCARD,mquic-*.meituan.com,REJECT
-DOMAIN,httpdnsmultiapi.meituan.com,REJECT
-DOMAIN,httpdnsmultiapivip.meituan.com,REJECT
-DOMAIN,dnspod.meituan.httpdns.qcloud.com,REJECT
-DOMAIN,dnspod.meituan.httpdns.start.qcloud.com,REJECT
+DOMAIN,shark-mt.meituan.com,REJECT,extended-matching
+DOMAIN,shark-default.meituan.com,REJECT,extended-matching
+DOMAIN,shark-dp.meituan.com,REJECT,extended-matching
+DOMAIN,shark-ps.meituan.com,REJECT,extended-matching
+DOMAIN,shark-wm.sankuai.com,REJECT,extended-matching
+DOMAIN,shark.dianping.com,REJECT,extended-matching
+DOMAIN-WILDCARD,mquic-*.meituan.com,REJECT,extended-matching
+DOMAIN,httpdnsmultiapi.meituan.com,REJECT,extended-matching
+DOMAIN,httpdnsmultiapivip.meituan.com,REJECT,extended-matching
+DOMAIN,httpdns.meituan.com,REJECT,extended-matching
+DOMAIN,httpdnsvip.meituan.com,REJECT,extended-matching
+DOMAIN,dnspod.meituan.httpdns.qcloud.com,REJECT,extended-matching
+DOMAIN,dnspod.meituan.httpdns.start.qcloud.com,REJECT,extended-matching
 IP-CIDR,202.90.108.13/32,REJECT,no-resolve
 IP-CIDR,202.90.110.46/32,REJECT,no-resolve
 IP-CIDR,202.90.108.69/32,REJECT,no-resolve
@@ -39,10 +41,23 @@ IP-CIDR,101.50.8.64/32,REJECT,no-resolve
 IP-CIDR,103.63.160.64/32,REJECT,no-resolve
 IP-CIDR,103.63.160.69/32,REJECT,no-resolve
 IP-CIDR,103.37.155.77/32,REJECT,no-resolve
+IP-CIDR,103.37.155.60/32,REJECT,no-resolve
+IP-CIDR,111.230.0.200/32,REJECT,no-resolve
+IP-CIDR,139.9.47.231/32,REJECT,no-resolve
+IP-CIDR,121.37.4.167/32,REJECT,no-resolve
+IP-CIDR,119.29.126.219/32,REJECT,no-resolve
+IP-CIDR,106.55.217.56/32,REJECT,no-resolve
+IP-CIDR,103.37.152.224/32,REJECT,no-resolve
 IP-CIDR,119.29.48.215/32,REJECT,no-resolve
 IP-CIDR,42.193.128.160/32,REJECT,no-resolve
 IP-CIDR6,2405:1480:3000:303b::303b/128,REJECT,no-resolve
 IP-CIDR6,2405:1480:1000:3::1e/128,REJECT,no-resolve
+IP-CIDR6,2405:1480:1000:4::15/128,REJECT,no-resolve
+IP-CIDR6,2402:4e00:40:40::2:373/128,REJECT,no-resolve
+
+[URL Rewrite]
+^https?:\/\/(httpdns|httpdnsvip|httpdnsmultiapi|httpdnsmultiapivip)\.meituan\.com\/ - reject
+^http:\/\/103\.37\.155\.60\/fetch - reject
 
 [Script]
 美团去广告_1 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/aggroup\/indexTab,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
@@ -55,4 +70,4 @@ IP-CIDR6,2405:1480:1000:3::1e/128,REJECT,no-resolve
 美团去广告_8 = type=http-response,pattern=^https?:\/\/mop\.meituan\.com\/api\/entryModule\/startupPicture,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
 
 [MITM]
-hostname = %APPEND% apimobile.meituan.com, feedguess.meituan.com, mop.meituan.com, mt-personalcenter.meituan.com, assistify.meituan.com
+hostname = %APPEND% apimobile.meituan.com, feedguess.meituan.com, mop.meituan.com, mt-personalcenter.meituan.com, assistify.meituan.com, httpdns.meituan.com, httpdnsmultiapi.meituan.com

@@ -38,7 +38,8 @@ _SURGE_SECTIONS = {
 _REWRITE_RE = re.compile(r"^(\S+)\s+url\s+(\S+)(?:\s+(.*))?$", re.I)
 _POLICIES = {"reject", "reject-drop", "reject-tinygif", "direct"}
 _CIDR_TYPES = {"ip-cidr", "ip6-cidr", "ip-cidr6"}
-_CIDR_REJECT_POLICIES = {"REJECT", "REJECT-DROP", "REJECT-TINYGIF", "REJECT-NO-DROP"}
+_DOMAIN_TYPES = {"host", "host-suffix", "host-keyword", "host-wildcard"}
+_REJECT_POLICIES = {"REJECT", "REJECT-DROP", "REJECT-TINYGIF", "REJECT-NO-DROP"}
 
 
 def is_qx_module(text: str) -> bool:
@@ -254,17 +255,22 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
                 raise _error(number, "filter appears outside filter_local")
             if len(fields) < 3 or any(not value for value in fields):
                 raise _error(number, "invalid filter rule")
-            flags = fields[3:]
-            if any(value.lower() != "no-resolve" for value in flags):
+            flags = [flag.lower() for flag in fields[3:]]
+            if any(flag not in {"no-resolve", "extended-matching"} for flag in flags):
                 raise _error(number, "unsupported filter flag")
-            if flags and kind not in {"ip-cidr", "ip6-cidr", "ip-cidr6", "geoip", "ip-asn"}:
+            if "no-resolve" in flags and kind not in _CIDR_TYPES | {"geoip", "ip-asn"}:
                 raise _error(number, "no-resolve does not apply to this filter")
+            if "extended-matching" in flags and kind not in _DOMAIN_TYPES:
+                raise _error(number, "extended-matching does not apply to this filter")
             policy = _policy(fields[2])
-            flags = [flag.lower() for flag in flags]
             # Modules precede the profile's domain rules. CIDR rejects should
             # inspect known destination IPs without forcing DNS for every domain.
-            if kind in _CIDR_TYPES and policy in _CIDR_REJECT_POLICIES and "no-resolve" not in flags:
+            if kind in _CIDR_TYPES and policy in _REJECT_POLICIES and "no-resolve" not in flags:
                 flags.append("no-resolve")
+            # Domain rejects also inspect sniffed SNI/Host when clients connect
+            # by IP, while routing and custom policies retain source semantics.
+            if kind in _DOMAIN_TYPES and policy in _REJECT_POLICIES and "extended-matching" not in flags:
+                flags.append("extended-matching")
             add("Rule", ",".join([_RULE_TYPES[kind], fields[1], policy] + flags))
             active += 1
             continue

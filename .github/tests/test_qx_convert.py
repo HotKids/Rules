@@ -40,14 +40,14 @@ ip6-cidr,2001:db8::1/128,reject,no-resolve
         metadata, sections = parse_module(actual)
         self.assertEqual(metadata, {"name": "Fixture", "author": "Upstream"})
         self.assertEqual(sections["Rule"], [
-            "DOMAIN,exact.example.invalid,REJECT",
-            "DOMAIN-WILDCARD,mquic-*.example.invalid,REJECT",
+            "DOMAIN,exact.example.invalid,REJECT,extended-matching",
+            "DOMAIN-WILDCARD,mquic-*.example.invalid,REJECT,extended-matching",
             "DOMAIN-SUFFIX,example.invalid,DIRECT",
             "DOMAIN-KEYWORD,advert,Named Policy",
             "IP-CIDR,192.0.2.1/32,REJECT,no-resolve",
             "IP-CIDR6,2001:db8::1/128,REJECT,no-resolve",
         ])
-        self.assertNotIn("extended-matching", actual)
+        self.assertEqual(actual.count("extended-matching"), 2)
         self.assertNotIn("pre-matching", actual)
         self.assertEqual(actual.count("no-resolve"), 2)
 
@@ -82,8 +82,49 @@ host,ads.example.invalid,reject
             "IP-CIDR,198.51.100.0/24,REJECT-CUSTOM",
             "GEOIP,CN,REJECT",
             "IP-ASN,64512,REJECT",
-            "DOMAIN,ads.example.invalid,REJECT",
+            "DOMAIN,ads.example.invalid,REJECT,extended-matching",
         ])
+
+    def test_domain_rejects_add_extended_matching_once_for_all_domain_types(self):
+        kinds = {"host": "DOMAIN", "host-suffix": "DOMAIN-SUFFIX",
+                 "host-keyword": "DOMAIN-KEYWORD", "host-wildcard": "DOMAIN-WILDCARD"}
+        for kind, target in kinds.items():
+            for policy in ("reject", "ReJeCt", "reject-drop", "reject-tinygif", "REJECT-NO-DROP"):
+                for existing in ("", ",EXTENDED-MATCHING"):
+                    with self.subTest(kind=kind, policy=policy, existing=existing):
+                        _, sections = parse_module(convert_qx_module(f"{kind},ads.example.invalid,{policy}{existing}\n"))
+                        self.assertEqual(sections["Rule"],
+                            [f"{target},ads.example.invalid,{policy.upper()},extended-matching"])
+
+    def test_domain_routing_and_custom_policies_do_not_gain_extended_matching(self):
+        source = """host,direct.example.invalid,direct
+host-suffix,proxy.example.invalid,Proxy
+host-keyword,custom,Custom Group
+host-wildcard,*.custom.example.invalid,REJECT-CUSTOM
+"""
+        _, sections = parse_module(convert_qx_module(source))
+        self.assertEqual(sections["Rule"], [
+            "DOMAIN,direct.example.invalid,DIRECT",
+            "DOMAIN-SUFFIX,proxy.example.invalid,Proxy",
+            "DOMAIN-KEYWORD,custom,Custom Group",
+            "DOMAIN-WILDCARD,*.custom.example.invalid,REJECT-CUSTOM",
+        ])
+
+    def test_explicit_extended_matching_is_preserved_and_rejected_on_ip_rules(self):
+        _, sections = parse_module(convert_qx_module(
+            "host,direct.example.invalid,direct,EXTENDED-MATCHING\n"))
+        self.assertEqual(sections["Rule"], ["DOMAIN,direct.example.invalid,DIRECT,extended-matching"])
+        for kind, value in (("ip-cidr", "192.0.2.0/24"), ("ip6-cidr", "2001:db8::/32"),
+                            ("geoip", "CN"), ("ip-asn", "64512")):
+            with self.subTest(kind=kind), self.assertRaisesRegex(ValueError, "does not apply"):
+                convert_qx_module(f"{kind},{value},reject,extended-matching\n")
+
+    def test_stash_output_omits_the_surge_extended_matching_parameter(self):
+        converted = convert_qx_module("host,ads.example.invalid,reject\n")
+        module = merge_modules([("https://example.invalid/source.snippet", converted, {})])
+        rendered, _warnings = render_stash(module, "Example.stoverride")
+        self.assertEqual(yaml.safe_load(rendered)["rules"], ["DOMAIN,ads.example.invalid,REJECT"])
+        self.assertNotIn("extended-matching", rendered)
 
     def test_explicit_no_resolve_on_non_reject_cidr_is_preserved(self):
         _, sections = parse_module(convert_qx_module("ip-cidr,192.0.2.0/24,direct,NO-RESOLVE\n"))
