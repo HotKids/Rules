@@ -16,100 +16,105 @@ http:
   - ci.xiaohongshu.com
   - rec.xiaohongshu.com
   - so.xiaohongshu.com
+  - edith.rnote.com
+  - www.rnote.com
+  - ci.rnote.com
+  - so.rnote.com
+  - rec.rnote.com
   mock:
-  - match: ^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/surprisebox\/(?:get_style|open|submit_action)
+  - match: ^https:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v1\/surprisebox\/(?:get_style|open|submit_action)
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/www\.xiaohongshu\.com\/api\/marketing\/box\/trigger\?
+  - match: ^https?:\/\/www\.(xiaohongshu|rnote)\.com\/api\/marketing\/box\/trigger\?
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/guide\?
+  - match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/note\/guide\?
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/detailfeed\/preload\?
+  - match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/note\/detailfeed\/preload\?
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/guide\/user_banner
+  - match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/guide\/user_banner
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/www\.xiaohongshu\.com\/api\/sns\/(v\d+\/ads\/resource|v\d+\/hey\/\w+\/hey_gallery)
+  - match: ^https?:\/\/www\.(xiaohongshu|rnote)\.com\/api\/sns\/(v\d+\/ads\/resource|v\d+\/hey\/\w+\/hey_gallery)
     text: '{}'
     status-code: 200
     headers:
       Content-Type: application/json
-  - match: ^https?:\/\/ci\.xiaohongshu\.com\/system_config\/watermark
+  - match: ^https?:\/\/ci\.(xiaohongshu|rnote)\.com\/system_config\/watermark
     base64: R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7
     status-code: 200
     headers:
       Content-Type: image/gif
   script:
   - name: RedNote-小红书搜索页
-    match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/(banner|hot)_list
+    match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/search\/(banner|hot)_list
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书搜索页__2
-    match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/(hint|trending)\?
+    match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/search\/(hint|trending)\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书搜索页__3
-    match: ^https?:\/\/(so|edith)\.xiaohongshu\.com\/api\/sns\/v\d+\/search\/notes\?
+    match: ^https?:\/\/(so|edith)\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/search\/notes\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书开屏广告
-    match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/system_service\/config\?
+    match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/system_service\/config\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书开屏广告__2
-    match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/system_service\/splash_config
+    match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/system_service\/splash_config
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书详情页
-    match: ^https?:\/\/edith\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/widgets
+    match: ^https?:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/note\/widgets
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书图片视频水印
-    match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/note\/(imagefeed|live_photo\/save)
+    match: ^https?:\/\/(edith|rec|www)\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/note\/(imagefeed|live_photo\/save)
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书图片视频水印__2
-    match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/v\d+\/(followfeed|homefeed)\?
+    match: ^https?:\/\/(edith|rec|www)\.(xiaohongshu|rnote)\.com\/api\/sns\/v\d+\/(followfeed|homefeed)\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书图片视频水印__3
-    match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/(v2\/note\/feed|v3\/note\/videofeed)\?
+    match: ^https?:\/\/(edith|rec|www)\.(xiaohongshu|rnote)\.com\/api\/sns\/(v2\/note\/feed|v3\/note\/videofeed)\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书图片视频水印__4
-    match: ^https?:\/\/(edith|rec|www)\.xiaohongshu\.com\/api\/sns\/(v4\/note\/videofeed|v10\/note\/video\/save)\?
+    match: ^https?:\/\/(edith|rec|www)\.(xiaohongshu|rnote)\.com\/api\/sns\/(v4\/note\/videofeed|v10\/note\/video\/save)\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书评论区去水印存储
-    match: ^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/(v5\/note\/comment\/list|v3\/note\/comment\/sub_comments)\?
+    match: ^https:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/(v5\/note\/comment\/list|v3\/note\/comment\/sub_comments)\?
     type: response
     require-body: true
     timeout: 60
   - name: RedNote-小红书评论区去水印下载
-    match: ^https:\/\/edith\.xiaohongshu\.com\/api\/sns\/v1\/interaction\/comment\/video\/download\?
+    match: ^https:\/\/edith\.(xiaohongshu|rnote)\.com\/api\/sns\/v1\/interaction\/comment\/video\/download\?
     type: response
     require-body: true
     timeout: 60
