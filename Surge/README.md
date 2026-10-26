@@ -22,6 +22,8 @@ Surge 主配置及 Profile 模块使用 HTTPS 测速，需 Surge iOS 5.23 / Mac 
 
 ## 去广告
 
+> **去广告规则及脚本由对应上游项目维护，本仓库仅作收录、同步及格式适配。去广告效果或脚本逻辑问题，请向对应上游仓库反馈，来源见模块注释。**
+
 导入 [BlockAdsBase.sgmodule](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Module/BlockAdsBase.sgmodule)，并选择以下一份合集；基础模块优先级须高于合集。
 
 | 模块 | 说明 |
@@ -58,7 +60,7 @@ Stash IP 变化通知默认开启，每 10 分钟检查，首次成功检测仅�
 
 默认检测 Netflix、Disney+、HBO Max、YouTube Premium、Spotify、TikTok、ChatGPT、Claude、Gemini、Meta AI、Reddit，共 11 项。Surge 另可启用 Viu；Stash 提供 11 张独立卡片。
 
-结果显示地区或状态：`No` / `NO` 为明确受限，`TO` 为超时，`Error` 为响应无法确认。实际使用还受账号、订阅及浏览器验证影响。检测参考 [Stash 官方示例](https://github.com/StashNetworks/misc/tree/main/collapsed-tiles) 与 [UnlockTests](https://github.com/oneclickvirt/UnlockTests/tree/main/transnation)。
+结果显示地区或状态：`NO` 为明确受限，`TO` 为超时，`ER` 为响应无法确认或请求错误。实际使用还受账号、订阅及浏览器验证影响。检测参考 [Stash 官方示例](https://github.com/StashNetworks/misc/tree/main/collapsed-tiles) 与 [UnlockTests](https://github.com/oneclickvirt/UnlockTests/tree/main/transnation)。
 
 参数支持 Netflix 价格与解锁变化通知。Stash 通知独立运行，默认关闭；启用后每 10 分钟检查，首次仅建立基线，超时及错误不触发变化通知。
 

@@ -51,12 +51,38 @@ test('Unavailable service uses NO and grey',async()=>{
 });
 test('HTTP 503 remains an error',async()=>{
   const {output}=await tile('spotify',{status:503});
-  assert.equal(output.content,'Error');assert.equal(output.backgroundColor,'#8E8E93');
+  assert.equal(output.content,'ER');assert.equal(output.backgroundColor,'#8E8E93');
 });
 test('Missing timer error is not mislabeled timeout',async()=>{
   const {output}=await tile('spotify',{error:'ReferenceError: setTimeout is not defined'});
-  assert.equal(output.content,'Error');
+  assert.equal(output.content,'ER');
 });
+test('Media display normalizes shared status labels while preserving result details',()=>{
+  const source=read('media-check.js'),entry=source.lastIndexOf('(async () => {');
+  assert.ok(entry>0,'media script entry must exist');
+  const ctx={$environment:{},console:quiet};vm.createContext(ctx);
+  vm.runInContext(source.slice(0,entry)+'\nglobalThis.format=Utils.buildContent.bind(Utils);globalThis.status=STATUS;',ctx);
+  const {FAIL,ERROR,TIMEOUT,OK,COMING}=ctx.status;
+  for(const [status,region,expected] of [
+    [FAIL,undefined,'NO'],[FAIL,'','NO'],[FAIL,'No','NO'],[FAIL,'no','NO'],[FAIL,'NO','NO'],
+    [ERROR,undefined,'ER'],[ERROR,'','ER'],[ERROR,'Error','ER'],[ERROR,'error','ER'],
+    [TIMEOUT,'Timeout','TO'],[ERROR,'Invalid Key','Invalid Key'],
+    [FAIL,'HK (Originals)','HK (Originals)'],[OK,'ER','ER'],[OK,'HK','HK'],
+    [COMING,'Web Only','Web Only']
+  ]) assert.equal(ctx.format({status,region}),expected,`${status}: ${region}`);
+  assert.equal(ctx.format({status:OK,region:'HK'},'118 HKD'),'HK | 118 HKD');
+});
+test('Surge summary and Stash cards share NO ER and TO display labels',async()=>{
+  for(const [response,expected] of [
+    [{body:'Spotify is not available in your country'},'NO'],
+    [{status:503},'ER'],[{error:'request timed out'},'TO']
+  ]) for(const client of ['stash','surge']) {
+    const {output}=await tile('spotify',response,{client});
+    if(client==='stash') assert.equal(output.content,expected);
+    else assert.match(output.content,new RegExp(`Spotify\\s+➟ ${expected}(?:\\n|$)`));
+  }
+});
+
 test('YouTube explicit unsupported country beats country code',async()=>{
   const {output,requests}=await tile('youtube',{body:'"countryCode":"HK" YouTube Premium is not available in your country'});
   assert.equal(requests.length,1);assert.equal(output.content,'NO');
@@ -1389,7 +1415,7 @@ test('Spotify reads market without atob and ignores alternate country links',asy
     {body:'<link rel="alternate" href="https://www.spotify.com/us/premium/"><link rel="canonical" href="https://www.spotify.com/hk-zh/premium/">'});
   assert.equal(fallback.output.content,'HK');
   for(const body of ['<a href="https://www.spotify.com/us/">US</a>','<script id="appServerConfig">bad encoding!</script>','<html>unknown</html>'])
-    assert.equal((await tile('spotify',{body})).output.content,'Error');
+    assert.equal((await tile('spotify',{body})).output.content,'ER');
 });
 test('Gemini maps ISO regions and keeps availability without a country',async()=>{
   for(const [code,expected] of [['KOR','KR'],['AUT','AT'],['CHE','CH'],['CHN','CN'],['HKG','HK'],['SGP','SG'],['US','US'],['XXX','OK']]) {
@@ -1418,9 +1444,9 @@ test('Gemini does not accept unsupported regions, failed responses or explicit r
     [{body:',2,1,200,"CHN"'},'NO'],
     [{body:',2,1,200,"HKG"'},'NO'],
     [{body:',2,1,200,"XXX"'},'NO'],
-    [{body:'<title>Just a moment...</title>,2,1,200,"USA"'},'Error'],
-    [{status:429,body:',2,1,200,"USA"'},'Error'],
-    [{status:403,body:',2,1,200,"USA"'},'Error'],
+    [{body:'<title>Just a moment...</title>,2,1,200,"USA"'},'ER'],
+    [{status:429,body:',2,1,200,"USA"'},'ER'],
+    [{status:403,body:',2,1,200,"USA"'},'ER'],
     [{body:'unsupported_country ,2,1,200,"USA"'},'NO'],
     [{body:'Gemini is not available in your country ,2,1,200,"USA"'},'NO']
   ]) {
@@ -1456,8 +1482,8 @@ test('Gemini no longer requests the application page or diagnostic redirects on 
     ['surge',{'surge-version':'5',system:'iOS'}]
   ])for(const [response,expected] of [
     [{body:'<title>Google Gemini</title><a href="/app">Try Gemini</a>'},'NO'],
-    [{error:'client error (SendRequest)'},'Error'],
-    [{status:302,headers:{Location:'/app?hl=en'}},'Error']
+    [{error:'client error (SendRequest)'},'ER'],
+    [{status:302,headers:{Location:'/app?hl=en'}},'ER']
   ]) {
     const r=await tile('gemini',response,{client,environment});
     const requests=r.requests.filter(o=>o.url.includes('gemini.google.com'));
@@ -1476,10 +1502,10 @@ test('Gemini original flags, explicit regional restrictions and unknown response
     [{status:429,body:'not available in your country'},'NO'],
     [{body:'45631641,null,false 45617354,null,false ,2,1,200,"SGP"'},'SG'],
     [{body:',2,1,200,"SGP"'},'SG'],
-    [{body:'<title>Just a moment...</title>45631641,null,true'},'Error'],
-    [{status:429,body:'rate limited'},'Error'],
-    [{status:403,body:'Forbidden'},'Error'],
-    [{status:503},'Error'],
+    [{body:'<title>Just a moment...</title>45631641,null,true'},'ER'],
+    [{status:429,body:'rate limited'},'ER'],
+    [{status:403,body:'Forbidden'},'ER'],
+    [{status:503},'ER'],
     [{error:'request timed out'},'TO']
   ]) {
     const r=await tile('gemini',response);
@@ -1488,7 +1514,7 @@ test('Gemini original flags, explicit regional restrictions and unknown response
   }
 });
 test('Gemini original optional API follows one failed homepage and keeps its separate timeout',async()=>{
-  for(const [response,expected] of [[{body:{models:[]}},'OK'],[{status:429,body:'rate limited'},'Error'],
+  for(const [response,expected] of [[{body:{models:[]}},'OK'],[{status:429,body:'rate limited'},'ER'],
     [{status:400,body:'API_KEY_INVALID'},'Invalid Key'],[{status:400,body:'User location is not supported'},'NO']]) {
     const r=await tile('gemini',o=>o.url.includes('generativelanguage')?response:{body:'unknown page'},
       {argument:'geminiapikey=example'});
@@ -1500,7 +1526,7 @@ test('Gemini original optional API follows one failed homepage and keeps its sep
   const api=await tile('gemini',o=>o.url.includes('generativelanguage')?
     {error:`failed https://generativelanguage.googleapis.com/v1beta/models?key=${key}`}:{body:'unknown'},
     {argument:`geminiapikey=${key}`});
-  assert.equal(api.output.content,'Error');assert.match(api.logs.join('\n'),/API失败；阶段=callback.*failed/);
+  assert.equal(api.output.content,'ER');assert.match(api.logs.join('\n'),/API失败；阶段=callback.*failed/);
   assert.doesNotMatch(api.logs.join('\n'),/SECRET-KEY|key=/);
 });
 const stashIOS = {'stash-version':'3.6.0','stash-build':'1316',system:'iOS'};
@@ -1572,7 +1598,7 @@ test('Gemini keeps an unrecognized homepage as NO when the Stash iOS anonymous f
     assert.match(r.logs.join('\n'),/保留原结果：NO/);
   }
   const network=await tile('gemini',{error:'SendRequest'},{environment:stashIOS});
-  assert.equal(network.output.content,'Error');
+  assert.equal(network.output.content,'ER');
   assert.equal(network.requests.length,3);
 });
 test('Gemini Android, Surge iOS and unknown platforms keep the original failure behavior',async()=>{
@@ -1694,12 +1720,12 @@ test('Gemini requires a current structured reply, not request reflection, stale 
   ]) {
     const r=await tile('gemini',o=>o.url.includes('/StreamGenerate')?{body:bodyOf(o)}:geminiAnonymousResponse(o),
       {environment:stashIOS});
-    assert.equal(r.output.content,'Error');assert.equal(r.output.backgroundColor,'#8E8E93');
+    assert.equal(r.output.content,'ER');assert.equal(r.output.backgroundColor,'#8E8E93');
   }
   for(const response of [{status:403},{status:302},{status:429},{error:'SendRequest'}]) {
     const r=await tile('gemini',o=>o.url.includes('/StreamGenerate')?{body:geminiGenerated(o),...response}:geminiAnonymousResponse(o),
       {environment:stashIOS});
-    assert.equal(r.output.content,'Error');
+    assert.equal(r.output.content,'ER');
   }
 });
 test('Gemini location failure never invalidates a verified anonymous reply or fabricates a country',async()=>{
@@ -1731,14 +1757,14 @@ test('Media request diagnostics preserve native errors and identify the failing 
   const malformedHeaders={status:200};
   Object.defineProperty(malformedHeaders,'headers',{get(){throw new TypeError('headers conversion failed');}});
   for(const [response,phase,detail,expected] of [
-    [{error:'Connection reset by peer'},'callback',/Connection reset by peer/,'Error'],
-    [{error:{domain:'NSURLErrorDomain',code:-1200,localizedDescription:'TLS handshake failed'}},'callback',/code=-1200; domain=NSURLErrorDomain/,'Error'],
+    [{error:'Connection reset by peer'},'callback',/Connection reset by peer/,'ER'],
+    [{error:{domain:'NSURLErrorDomain',code:-1200,localizedDescription:'TLS handshake failed'}},'callback',/code=-1200; domain=NSURLErrorDomain/,'ER'],
     [{error:{domain:'NSURLErrorDomain',code:-1001}},'callback',/code=-1001/,'TO'],
-    [{rawResponse:null},'response',/missing response/,'Error'],
-    [{rawResponse:{}},'response',/missing HTTP status/,'Error'],
-    [{status:0},'response',/missing HTTP status/,'Error'],
-    [{rawResponse:malformedHeaders},'response',/TypeError.*headers conversion failed/,'Error'],
-    [{throw:new TypeError('native request conversion failed')},'request',/TypeError.*native request conversion failed/,'Error'],
+    [{rawResponse:null},'response',/missing response/,'ER'],
+    [{rawResponse:{}},'response',/missing HTTP status/,'ER'],
+    [{status:0},'response',/missing HTTP status/,'ER'],
+    [{rawResponse:malformedHeaders},'response',/TypeError.*headers conversion failed/,'ER'],
+    [{throw:new TypeError('native request conversion failed')},'request',/TypeError.*native request conversion failed/,'ER'],
   ]) {
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
@@ -1786,7 +1812,7 @@ test('Media error logs retain bounded causes and survive cycles and unsafe gette
     [functionSource,/Native source unavailable/],
   ]) {
     const r=await tile('gemini',{error});
-    assert.equal(r.output.content,'Error');assert.equal(r.requests.length,1);
+    assert.equal(r.output.content,'ER');assert.equal(r.requests.length,1);
     const log=r.logs.join('\n');assert.match(log,details);
     assert.match(log,/错误类型=object/);
     assert.doesNotMatch(log,/OUT-OF-BOUND|GETTER-PRIVATE|FUNCTION-BODY-PRIVATE|function source/);
@@ -1801,7 +1827,7 @@ test('Media error logs retain bounded causes and survive cycles and unsafe gette
     'Authorization: Bearer PRIVATE-BEARER; Authorization=Basic PRIVATE-BASIC; cookie=PRIVATE-COOKIE',
     cause:{message:`key=${token}; source detail`},headers:{Authorization:'NEVER-LOG-HEADER'},body:'NEVER-LOG-BODY'}},
     {argument:`geminiapikey=${token}`});
-  assert.equal(privateError.output.content,'Error');assert.equal(privateError.requests.length,1);
+  assert.equal(privateError.output.content,'ER');assert.equal(privateError.requests.length,1);
   assert.match(privateError.logs.join('\n'),/source detail/);
   assert.doesNotMatch(privateError.logs.join('\n'),/PRIVATE-USER|PRIVATE-PASSWORD|PRIVATE-QUERY|PRIVATE-BEARER|PRIVATE-BASIC|PRIVATE-COOKIE|PRIVATE-API-KEY|NEVER-LOG-HEADER|NEVER-LOG-BODY/);
 });
@@ -1822,7 +1848,7 @@ test('Shared media logs merge services, retain records and do not request the ne
   const store=new Map();
   const spotify=await tile('spotify',{body:spotifyConfig('SG')},{argument:'log=shared',store});
   const gemini=await tile('gemini',{error:{domain:'NSURLErrorDomain',code:-1200,message:'TLS handshake failed'}},{argument:'log=shared',store});
-  assert.equal(spotify.output.content,'SG');assert.equal(gemini.output.content,'Error');
+  assert.equal(spotify.output.content,'SG');assert.equal(gemini.output.content,'ER');
   assert.deepEqual(spotify.logs,[]);assert.deepEqual(gemini.logs,[]);
   const before=new Map(store);
   const collected=await tile('logs',{throw:new Error('collector must not send HTTP')},{store});
@@ -1854,8 +1880,8 @@ test('Shared media logging stays bounded, redacts keys and survives unavailable 
 });
 test('AI services keep unknown HTTP failures and missing regional evidence as Error',async()=>{
   for(const service of ['chatgpt','claude','gemini'])for(const [status,body,expected] of [
-    [403,'<title>Just a moment...</title>','Error'],[429,'too many requests','Error'],
-    [403,'Forbidden','Error']]) {
+    [403,'<title>Just a moment...</title>','ER'],[429,'too many requests','ER'],
+    [403,'Forbidden','ER']]) {
     const result=await tile(service,o=>o.url.includes('trace')?{error:'Timeout'}:{status,body});
     assert.equal(result.output.content,expected,service);assert.equal(result.output.backgroundColor,'#8E8E93');
   }
@@ -1896,7 +1922,7 @@ test('Netflix prices have a short timeout and use cached data on refresh failure
   assert.equal(r.output.content,'HK | 118 HKD');
 });
 test('Disney requires explicit support flags and does not invent coming status',async()=>{
-  for(const [flag,expected] of [[true,'SG'],[false,'NO'],['true','SG'],['false','NO'],[undefined,'Error']]) {
+  for(const [flag,expected] of [[true,'SG'],[false,'NO'],['true','SG'],['false','NO'],[undefined,'ER']]) {
     const r=await tile('disney',o=>o.url.includes('graphql')?
       {body:{extensions:{sdk:{session:{inSupportedLocation:flag,location:{countryCode:'SG'}}}}}}:
       {status:403,body:'Forbidden'});
@@ -1909,7 +1935,7 @@ test('YouTube uses one normal request and can recover a failed primary probe',as
   const fallback=await tile('youtube',o=>o.headers.Cookie?{body:'purchaseButtonOverride "contentRegion":"SG"'}:{error:'Timeout'});
   assert.equal(fallback.output.content,'SG');assert.equal(fallback.requests.length,2);
   for(const body of ['"contentRegion":"SG"','<html>unknown</html>'])
-    assert.equal((await tile('youtube',{body})).output.content,'Error');
+    assert.equal((await tile('youtube',{body})).output.content,'ER');
 });
 test('Meta AI shows legal redirect region and tolerates a failed optional lookup',async()=>{
   for(const legal of [{url:'https://www.meta.com/sg/legal/',body:'Legal'},
@@ -1923,12 +1949,12 @@ test('Meta AI shows legal redirect region and tolerates a failed optional lookup
 });
 test('Meta AI home fallback requires evidence and distinguishes blocked/rate-limited pages',async()=>{
   for(const [home,expected] of [[{body:'KadabraRootContainer "code":"en_US"'},'US'],
-    [{body:'GeoBlockedErrorRoot'},'NO'],[{body:'AbraRateLimitedErrorRoot'},'Error'],
-    [{status:403,body:'Forbidden'},'Error'],[{body:'<title>Just a moment...</title>'},'Error'],[{body:'generic home'},'Error']]) {
+    [{body:'GeoBlockedErrorRoot'},'NO'],[{body:'AbraRateLimitedErrorRoot'},'ER'],
+    [{status:403,body:'Forbidden'},'ER'],[{body:'<title>Just a moment...</title>'},'ER'],[{body:'generic home'},'ER']]) {
     const r=await tile('metaai',o=>o.url.endsWith('/ajax')?{status:403,body:'Forbidden'}:home);
     assert.equal(r.output.content,expected);
   }
-  assert.equal((await tile('metaai',{status:429,body:'slow down'})).output.content,'Error');
+  assert.equal((await tile('metaai',{status:429,body:'slow down'})).output.content,'ER');
 });
 test('TikTok checks fallback status, regions and explicit Hong Kong restriction',async()=>{
   const first=await tile('tiktok',{body:'"region":"SG"'});assert.equal(first.output.content,'SG');assert.equal(first.requests.length,1);
@@ -1937,8 +1963,8 @@ test('TikTok checks fallback status, regions and explicit Hong Kong restriction'
   for(const response of [{status:200,body:'https://www.tiktok.com/hk/notfound'},
     {status:404,url:'https://www.tiktok.com/hk/notfound',body:'Not found'}])assert.equal((await tile('tiktok',response)).output.content,'NO');
   const rejected=await tile('tiktok',o=>o.url.endsWith('/explore')?{body:'unknown'}:{status:403,body:'"region":"US"'});
-  assert.equal(rejected.output.content,'Error');
-  assert.equal((await tile('tiktok',{body:'<title>Just a moment...</title>'})).output.content,'Error');
+  assert.equal(rejected.output.content,'ER');
+  assert.equal((await tile('tiktok',{body:'<title>Just a moment...</title>'})).output.content,'ER');
 });
 test('Surge and Stash summaries include all eleven services in the requested order',async()=>{
   const response=o=>{
@@ -2206,8 +2232,8 @@ test('Netflix accepts known video markup and prioritizes request country',async(
   }
 });
 test('Reddit distinguishes rate limiting, explicit blocks and unknown responses',async()=>{
-  for(const [status,body,expected] of [[429,'slow down','Error'],[403,'You have been blocked','NO'],
-    [403,'Forbidden','Error'],[200,'<title>Just a moment...</title>','Error'],[200,'Welcome','OK']]) {
+  for(const [status,body,expected] of [[429,'slow down','ER'],[403,'You have been blocked','NO'],
+    [403,'Forbidden','ER'],[200,'<title>Just a moment...</title>','ER'],[200,'Welcome','OK']]) {
     assert.equal((await tile('reddit',{status,body})).output.content,expected);
   }
 });
@@ -2239,13 +2265,13 @@ test('Pixel generic App probe denial must not become a false Web Only result',as
   }
 });
 test('Claude retains regional fallback for a browser challenge, without treating generic 403 as success',async()=>{
-  for(const [trace,expected] of [[{body:'loc=US\n'},'US'],[{body:'loc=HK\n'},'Error'],[{error:'Timeout'},'Error']]) {
+  for(const [trace,expected] of [[{body:'loc=US\n'},'US'],[{body:'loc=HK\n'},'ER'],[{error:'Timeout'},'ER']]) {
     const r=await tile('claude',o=>o.url.includes('/trace')?trace:pixelResponses['claude-login']);
     assert.equal(r.output.content,expected);
   }
   for(const login of [{status:403,body:'Forbidden'},{status:429,body:'<title>Just a moment...</title>'}]) {
     const r=await tile('claude',o=>o.url.includes('/trace')?{body:'loc=US\n'}:login);
-    assert.equal(r.output.content,'Error');
+    assert.equal(r.output.content,'ER');
   }
   const restricted=await tile('claude',o=>o.url.includes('/trace')?{body:'loc=US\n'}:{status:403,body:'app-unavailable-in-region'});
   assert.equal(restricted.output.content,'NO');
@@ -2261,12 +2287,12 @@ test('Meta AI accepts the captured endpoint authentication response, not arbitra
   const region=await tile('metaai',o=>o.url.endsWith('/ajax')?pixelResponses['meta-ajax']:
     {body:'<link rel="canonical" href="https://www.meta.com/us/legal/">'});
   assert.equal(region.output.content,'US');
-  const bad=await tile('metaai',{status:401,body:'Unauthorized'});assert.equal(bad.output.content,'Error');
+  const bad=await tile('metaai',{status:401,body:'Unauthorized'});assert.equal(bad.output.content,'ER');
 });
 test('TikTok HK about page is unavailable; infrastructure ALISG is never a user region',async()=>{
   const r=await tile('tiktok',pixelResponses['tiktok-explore']);
   assert.equal(r.output.content,'NO');assert.equal(r.requests.length,1);
-  assert.equal((await tile('tiktok',pixelResponses['tiktok-home'])).output.content,'Error');
+  assert.equal((await tile('tiktok',pixelResponses['tiktok-home'])).output.content,'ER');
   assert.equal((await tile('tiktok',pixelResponses['tiktok-sg'])).output.content,'SG');
 });
 

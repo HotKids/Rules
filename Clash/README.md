@@ -48,4 +48,4 @@
 
 例如 [GenAI.yaml](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/RuleSet/GenAI.yaml) 使用 `behavior: classical`、`format: yaml`，在 `rules` 中以 `RULE-SET,Provider名称,策略名` 引用。
 
-Stash 须使用支持的文本格式，不引用 mihomo `.mrs` 文件。
+Stash 支持 `domain`、`ipcidr` 类型的 MRS 规则集；`classical` 使用 YAML 或 text。配置方式参见 [Stash 官方文档](https://stash.wiki/rules/rule-set)。

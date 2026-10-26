@@ -396,9 +396,9 @@ class Utils {
     const statusMap = {
       [STATUS.OK]: result.region || "OK",
       [STATUS.COMING]: (result.region?.includes("(") || result.region?.includes(" ")) ? result.region : `${result.region || "N/A"} (Coming)`,
-      [STATUS.FAIL]: result.region || "No",
+      [STATUS.FAIL]: !result.region || /^no$/i.test(result.region) ? "NO" : result.region,
       [STATUS.TIMEOUT]: "TO",
-      [STATUS.ERROR]: result.region || "Error"
+      [STATUS.ERROR]: !result.region || /^error$/i.test(result.region) ? "ER" : result.region
     };
     
     // FAIL 可显示服务返回的具体限制原因。
@@ -1029,10 +1029,9 @@ async function runServiceTile(service) {
     try { notifyUnlockChanges([{ name: definition.title, result }]); }
     catch { MediaLog.log("[media-check] 通知或状态存储失败，继续显示面板。"); }
   }
-  const content = Utils.buildContent(result, suffix);
   finishPanel({
     title: definition.title,
-    content: content === "No" ? "NO" : content,
+    content: Utils.buildContent(result, suffix),
     // icon 由覆写配置提供，更新状态时保留各服务的 Logo。
     // 可用或部分可用显示品牌色；不可用及检测异常显示灰色。
     backgroundColor: result.status === STATUS.OK || result.status === STATUS.COMING
