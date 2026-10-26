@@ -32,6 +32,8 @@
 
 规则及去广告合集自动同步上游，客户端按刷新设置获取更新。部分模块需清除 App 缓存或重新安装后生效，应用更新亦可能影响效果。
 
-自建仓库及私人 Gist 发布见 [自定义与自动更新](.github/scripts/README.md)。其他工具：[subconverter 配置](subconverter/README.md)、[Snell / SS2022 节点管理](snell-panel/README.md)。
+自建仓库及私人 Gist 发布见 [自定义与自动更新](.github/scripts/README.md)。节点管理工具见 [Snell / SS2022 面板](snell-panel/README.md)。
+
+[subconverter（仅存档）](subconverter/README.md)：相关配置已弃用，不再维护或更新。大多数现代客户端及工具已具备订阅与配置处理能力，通常无需依赖此类转换工具。
 
 规则、脚本及图标来源见文件注释，使用条件以原项目说明为准。
