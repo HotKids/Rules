@@ -4,25 +4,25 @@
 
 ## 使用配置
 
-导入 [Sample.conf 的 Raw 地址](https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/Sample.conf)，将 `[server_remote]` 中的示例订阅地址替换为自己的订阅，再检查策略组是否匹配节点名称。
+导入 [Sample.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/Sample.conf)，替换 `[server_remote]` 中的示例订阅，并核对策略组筛选与节点名称。
 
-配置按港、台、新、日、美等地区分组筛选节点。空分组通常需要检查订阅是否已下载，以及节点名是否包含对应的地区标记。DNS、远程规则和重写可按个人需要调整；修改后请保存自己的配置副本，以免重新下载时丢失。
+地区组按港、台、新、日、美等名称标记筛选。分组为空时，须检查订阅下载状态及节点命名。DNS、规则与重写可按需调整；定制配置应另存副本，避免远程更新覆盖。
 
-需要 MITM 功能时，请使用自己的证书，并按 Quantumult X 的提示完成安装与信任。
+启用 MITM 前，须安装并信任自有证书。
 
 ## 单独使用分流规则
 
-[X/Filter/](X/Filter/) 提供 Quantumult X 格式的 `.list` 规则。打开所需文件，复制 Raw 地址，在 `[filter_remote]` 中引用；用 `force-policy` 指定当前配置中已有的策略。
+复制 [X/Filter/](X/Filter/) 中所需 `.list` 文件的 Raw 地址，在 `[filter_remote]` 中引用；`force-policy` 须指定已有策略。
 
-例如将 AI 服务流量交给名为 `Proxy` 的策略：
+以下示例将 AI 服务流量分配至 `Proxy`：
 
 ```ini
 [filter_remote]
 https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/X/Filter/GenAI.list, tag=GenAI, force-policy=Proxy, enabled=true
 ```
 
-各平台支持的规则类型不同，请使用本目录的 QX 格式文件，避免直接导入 Surge 或 mihomo 的规则集。
+须使用本目录的 QX 格式，避免直接导入其他平台规则。
 
 ## 图标
 
-[X/Images/](X/Images/) 包含彩色图标、旗帜等资源。打开图片后复制 Raw 地址，即可填入客户端支持的图标字段；这些资源也可用于 Surge、mihomo 和 Stash。
+[X/Images/](X/Images/) 提供彩色图标及旗帜。复制图片 Raw 地址，填入客户端图标字段；亦可用于 Surge、mihomo 与 Stash。

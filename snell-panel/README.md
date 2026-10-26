@@ -1,12 +1,12 @@
 # Snell Panel
 
-用于管理自己的 Snell V5 / V6 和 SS2022 服务器。部署后可在网页中添加节点、获取服务器安装命令、查看状态，并生成订阅链接。
+Snell V5 / V6 与 SS2022 节点管理面板，支持节点配置、服务器安装命令、状态查询及订阅生成。
 
-本项目基于 [missuo/snell-panel](https://github.com/missuo/snell-panel) 重构，并在 `HotKids/Rules` 仓库内继续维护。
+本项目基于 [missuo/snell-panel](https://github.com/missuo/snell-panel) 重构，在本仓库持续维护。
 
-## 部署面板
+## 部署
 
-准备一个可使用 Workers 和 D1 的 Cloudflare 账号，以及装有 Git、Node.js 20+ 的 macOS 或 Linux 环境。部署脚本会检查依赖，并按提示安装 Bun。
+部署环境需具备 Git、Node.js 20+，支持 macOS 或 Linux；Cloudflare 账号需开通 Workers 和 D1。脚本将检查依赖并提示安装 Bun。
 
 ```bash
 git clone https://github.com/HotKids/Rules snell-panel-source
@@ -15,32 +15,32 @@ cd snell-panel
 ./deploy.sh
 ```
 
-按终端提示授权 Cloudflare、创建或选择 D1 数据库，并设置 `ACCESS_TOKEN` 和 `API_TOKEN`。部署完成后，打开终端显示的面板地址，使用 `ACCESS_TOKEN` 登录。
+按提示授权 Cloudflare、创建或选择 D1 数据库，并设置 `ACCESS_TOKEN`、`API_TOKEN`。部署后访问终端显示的地址，使用 `ACCESS_TOKEN` 登录。
 
-`ACCESS_TOKEN` 用于登录和管理面板；`API_TOKEN` 用于服务端操作。请保存自己设置的值；Cloudflare 无法读回已保存的 secret 原文。部署摘要默认隐藏完整值，需要在本机查看本次生成的值时，可用 `./deploy.sh --show-secrets`。
+`ACCESS_TOKEN` 用于面板管理，`API_TOKEN` 用于服务端操作，均需自行保存；Cloudflare 不支持读取已保存的 secret 原文。部署摘要默认隐藏凭据，可通过 `./deploy.sh --show-secrets` 在本机查看本次生成值。
 
-没有浏览器的远程主机可以使用有 Workers、D1 权限的 Cloudflare API Token，设置 `CLOUDFLARE_API_TOKEN` 后再部署，详见[部署说明](docs/DEPLOY.md)。
+无浏览器环境可设置具有 Workers、D1 权限的 `CLOUDFLARE_API_TOKEN` 后部署，详见[部署说明](docs/DEPLOY.md)。
 
-## 添加节点与订阅
+## 节点与订阅
 
-1. 登录面板，点击 **Add node**，填写名称并选择 Snell 版本或 SS2022 加密方式。IP 和端口可以预填。
-2. 在新节点上点击 **Provision**，复制安装命令，在对应的 Linux 服务器上以 root 身份执行。服务器需要使用 systemd，并能访问面板及软件下载地址。
-3. 等待安装完成、节点显示为 **active**，再点击 **Subscription**，选择 Surge、Shadowrocket 或 Mihomo 格式，复制链接到客户端。
+1. 点击 **Add node**，填写名称，选择 Snell 版本或 SS2022 加密方式；IP、端口可预填。
+2. 点击节点的 **Provision**，在对应 Linux 服务器上以 root 身份执行安装命令。服务器需使用 systemd，并可访问面板及软件下载地址。
+3. 节点显示 **active** 后，点击 **Subscription**，选择 Surge、Shadowrocket 或 Mihomo 格式，将订阅链接导入客户端。
 
-订阅仅包含已启用且安装成功的节点。可以按名称筛选、控制旗帜显示；Surge 格式还可填写 `underlying-proxy`。选择订阅格式后，仍需确认客户端支持所选协议、版本和加密方式。
+订阅仅包含已启用且安装成功的节点，支持名称筛选、旗帜显示及 Surge `underlying-proxy` 设置。客户端须支持所选协议、版本和加密方式。
 
-节点菜单支持改名、从订阅中隐藏、添加中转记录，以及为 Snell V5 生成升级到 V6 的命令。安装和升级命令需要到服务器上执行；添加中转记录后，端口转发也需自行配置。
+节点菜单提供改名、隐藏、中转记录及 Snell V5 升级 V6 命令。安装与升级命令均需在服务器执行，中转端口转发需另行配置。
 
-订阅链接包含访问凭据。需要更换时，在 **Subscription** 中点击 **Reset token**，再更新客户端里的链接；旧链接会立即失效。
+订阅链接含访问凭据。点击 **Reset token** 后，旧链接立即失效，须同步更新客户端订阅。
 
-## 更新面板
+## 更新
 
 ```bash
 cd snell-panel
 ./update.sh
 ```
 
-保留完整的 Git 仓库和上述软链接，便于脚本获取更新。更新默认保留现有登录凭据；如提示有未提交修改，请先处理本地修改再重试。
+更新需保留完整 Git 仓库及上述软链接；如存在未提交修改，应处理后重试。现有登录凭据默认保留。
 
 ## 备份与恢复
 
@@ -50,13 +50,10 @@ cd snell-panel
 ./restore.sh backups/备份文件.sql
 ```
 
-备份保存在 `backups/` 中。恢复会向当前配置的远程 D1 数据库写入数据，运行时会要求确认；它不会恢复服务器上的代理程序，也不会恢复 Cloudflare 中的 secret。
+备份位于 `backups/`。恢复经确认后写入当前配置的远程 D1 数据库，不包含服务器代理程序或 Cloudflare secret。
 
-## 遇到问题
+## 故障排查
 
-部署或访问异常时，在项目目录运行 `./doctor.sh`，按检查结果处理。已有 D1 数据库可在部署时复用，无需先删除数据库。
+部署或访问异常时，运行 `./doctor.sh` 并按结果处理。现有 D1 数据库可直接复用。旧安装若仅保留独立子目录，需按上述方式重新克隆，并保留原数据库配置后部署。
 
-如果旧安装只有单独复制出来的 `snell-panel` 子目录，请按上面的 Git 克隆方式重新准备代码，并保留原数据库配置后部署。
-
-更多说明：[部署](docs/DEPLOY.md) · [更新](docs/UPDATE.md) · [备份](docs/BACKUP.md) · [凭据](docs/SECURITY.md)。
-
+相关说明：[部署](docs/DEPLOY.md) · [更新](docs/UPDATE.md) · [备份](docs/BACKUP.md) · [凭据](docs/SECURITY.md)。

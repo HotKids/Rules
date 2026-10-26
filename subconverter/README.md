@@ -1,19 +1,19 @@
 # subconverter 订阅转换配置
 
-将自己的节点订阅转换为带分组和分流规则的配置时，可把本目录文件作为 subconverter 的远程配置（`external-config`）。这里提供旧版分组方案；新用户可先从[仓库首页](../README.md)选择对应客户端的配置。
+本目录提供 subconverter 远程配置（`external-config`），用于生成节点分组与分流规则。配置沿用旧版方案，首次使用可优先选择[当前客户端配置](../README.md)。
 
-## 选择配置
+## 配置选择
 
 | 文件 | 台湾分组与节点旗帜显示 |
 |---|---|
 | [config1.ini](config1.ini) | 🇨🇳 Taiwan |
 | [config2.ini](config2.ini) | 🇹🇼 Taiwan |
 
-两份文件还存在少量节点名称匹配关键字差异。
+两份配置另有少量节点名称匹配差异。
 
-## 使用方法
+## 使用方式
 
-在自己使用的 subconverter 服务或转换前端中填写原始订阅、选择目标客户端，再将以下一个地址填入「远程配置」或「外部配置」字段：
+在 subconverter 服务或前端填写节点订阅、选择目标客户端，将下列任一地址填入「远程配置」或「外部配置」字段：
 
 ```text
 https://raw.githubusercontent.com/HotKids/Rules/master/subconverter/config1.ini
@@ -23,8 +23,8 @@ https://raw.githubusercontent.com/HotKids/Rules/master/subconverter/config1.ini
 https://raw.githubusercontent.com/HotKids/Rules/master/subconverter/config2.ini
 ```
 
-直接调用 subconverter 时，使用 `config` 参数传入对应地址，并按转换服务要求进行 URL 编码。转换后导入客户端，检查节点是否进入预期地区分组，再选择各服务使用的策略。
+直接调用接口时，通过 `config` 参数传入地址，并按服务要求进行 URL 编码。导入转换结果后，检查地区分组并选择服务策略。
 
-这两份文件会生成分流规则并替换原订阅中的规则，也会为节点添加旗帜、调整部分名称。它们不提供节点或订阅转换服务；地区分组依赖节点名称中的关键字。
+转换将替换原订阅规则，为节点添加旗帜并调整部分名称；地区筛选依赖节点命名。本目录不提供节点或转换服务。
 
-本目录保留的策略和规则与仓库当前主配置不同，部分规则、基座仍引用历史地址。若转换失败或分组不符合预期，请先检查远程文件能否获取及节点命名是否匹配，或改用[当前配置入口](../README.md)。
+部分规则与基座仍引用历史地址。转换失败或分组异常时，应检查远程地址和节点名称，或改用[当前配置](../README.md)。
