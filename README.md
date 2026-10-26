@@ -8,7 +8,7 @@
 
 | 客户端 | 配置入口 | 使用说明 |
 |---|---|---|
-| Surge | [Sample.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Sample.conf) | [配置、模块与面板](Surge/README.md) |
+| Surge | [Profile.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Profile.conf) | [配置、模块与面板](Surge/README.md) |
 | Mihomo | [Mihomo.yaml](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Mihomo.yaml) | [配置与覆写](Clash/README.md) |
 | Stash | [Stash.stoverride](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride) | [叠加到已有节点配置](Clash/README.md) |
 | Quantumult X | [Sample.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/Sample.conf) | [配置、规则与图标](Quantumult/README.md) |
