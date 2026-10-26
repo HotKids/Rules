@@ -20,9 +20,8 @@ LISTING = Path(__file__).with_name('sync-modules.txt')
 STABLE = ROOT / 'Surge/Module/BlockAds.sgmodule'
 OUTPUT = ROOT / 'Surge/Module/BlockAdsBeta.sgmodule'
 LOON_TEMPLATE = 'https://kelee.one/Tool/Loon/Lpx/{name}_remove_ads.lpx'
-# This full UA is accepted by the download endpoint. It identifies the HTTP
-# client, not the Loon grammar supported by the separately pinned parser.
-LOON_UA = 'Loon/3.3.0 CFNetwork/1498.700.2 Darwin/23.6.0'
+# Request Loon 3.5.1 sources to match the pinned parser's v2 grammar support.
+LOON_UA = 'Loon/3.5.1 CFNetwork/1498.700.2 Darwin/23.6.0'
 PARSER_URL = ('https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/'
               '761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js')
 PARSER_SHA256 = '189d66701c9119ae5ce638278f531b35e8ba41e2372c7e55f8fa9d0dc58823d5'

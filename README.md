@@ -1,44 +1,35 @@
 # HotKids / Rules
 
-自用的代理配置、分流规则、模块、面板脚本与图标库，覆盖 Surge、mihomo、Stash、Quantumult X、Loon、Surfboard 和 sing-box。
+代理客户端配置、分流规则、去广告模块、检测面板与图标。按所用客户端选择下方入口；节点与订阅需自行准备。
 
 ## 使用入口
 
-| 客户端 / 用途 | 文件 | 使用方式 |
+| 客户端 | 配置入口 | 使用说明 |
 |---|---|---|
-| Surge | [Sample.conf](Surge/Sample.conf) / [Profile.conf](Surge/Profile.conf) | 示例入口与主配置 |
-| Clash/mihomo | [Sample.yaml](Clash/Sample.yaml) / [Mihomo.yaml](Clash/Mihomo.yaml) | 两种排版，配置内容等价 |
-| Quantumult X | [Sample.conf](Quantumult/Sample.conf) | 完整示例配置 |
-| Loon | [Balloon.lcf](Surge/Balloon.lcf) | 完整示例配置 |
-| Surfboard | [Surfboard.conf](Surge/Surfboard.conf) | 完整示例配置 |
-| sing-box | [config.json](sing-box/config.json) | 含示例节点的配置模板，使用前替换节点 |
+| Surge | [Sample.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Sample.conf) | [配置、模块与面板](Surge/README.md) |
+| Mihomo | [Mihomo.yaml](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Mihomo.yaml) | [配置与覆写](Clash/README.md) |
+| Stash | [Stash.stoverride](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride) | [叠加到已有节点配置](Clash/README.md) |
+| Quantumult X | [Sample.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Quantumult/Sample.conf) | [配置、规则与图标](Quantumult/README.md) |
+| Loon | [Balloon.lcf](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Balloon.lcf) | [配置使用说明](Surge/README.md) |
+| Surfboard | [Surfboard.conf](https://raw.githubusercontent.com/HotKids/Rules/master/Surge/Surfboard.conf) | [配置使用说明](Surge/README.md) |
+| sing-box | [config.json](https://raw.githubusercontent.com/HotKids/Rules/master/sing-box/config.json) | [配置模板与规则集](sing-box/README.md) |
 
-远程导入使用文件的 **Raw 地址**，例如：[Stash 配置覆写](https://raw.githubusercontent.com/HotKids/Rules/master/Clash/Script/Stash.stoverride)。示例配置中的订阅、节点和个人策略需要按自己的环境调整；名称以 `My` 开头的版本包含个人定制。
+## 开始使用
 
-## 修改哪里
+1. 打开对应客户端的使用说明，选择完整配置、覆写或单独规则集。
+2. 完整配置需填写自己的订阅或节点；覆写需绑定到已有节点的配置。名称以 `My` 开头的文件包含个人定制，使用前先检查策略组与筛选条件。
+3. 远程导入使用上表链接或文件页面的 **Raw 地址**。需要自行修改完整配置时，先保存副本，避免远程更新覆盖本地编辑。
 
-配置以 [Surge/Profile.conf](Surge/Profile.conf) 为主要来源，同时读取平台基座、映射和 overlay。规则既有手工维护项，也有上游镜像，不能把所有生成文件当作独立源文件编辑。
+## 按需添加
 
-| 需要调整的内容 | 维护位置 |
-|---|---|
-| 通用策略组、分流、Surge 设置 | [Surge/Profile.conf](Surge/Profile.conf) |
-| 平台基础设置、差异与 URL 映射 | [.github/scripts/sync-config/](.github/scripts/sync-config/) 与 [sync-config.txt](.github/scripts/sync-config.txt)；Clash 通用设置还读取 [General.yaml](Clash/General.yaml) |
-| `My*` 私人定制 | [Enhanced/*.overlay.json](.github/scripts/sync-config/Enhanced/) |
-| 手工规则与 Streaming 成员 | [Surge/RULE-SET/](Surge/RULE-SET/) |
-| 上游规则、镜像模块与过滤项 | [sync-rules.txt](.github/scripts/sync-rules.txt) |
-| BlockAds 聚合来源 | [sync-modules.txt](.github/scripts/sync-modules.txt) |
-| 面板与检测逻辑 | [Surge/Module/Pannel/](Surge/Module/Pannel/) 与 [Scripts/](Surge/Module/Scripts/) |
-| 图标 | [Quantumult/X/Images/](Quantumult/X/Images/) |
+- **去广告与检测面板**：见 [Surge / Stash 模块说明](Surge/README.md)。启用需要 MITM 的模块前，须在客户端安装并信任自己的证书；具体要求和参数以模块说明为准。
+- **分流规则**：[Surge](Surge/RULE-SET/)、[Mihomo / Stash](Clash/RuleSet/)、[Quantumult X](Quantumult/X/Filter/)、[sing-box](sing-box/README.md)。选择对应客户端支持的格式，并在规则中指定自己的策略。
+- **图标**：[图标目录与地址写法](Quantumult/README.md)。
 
-其他平台的配置、规则以及 `.srs` / `.mrs` 由脚本生成，直接修改会被后续同步覆盖。维护流程、失败处理和验证命令见 [同步脚本说明](.github/scripts/README.md)。
+## 更新与自定义
 
-## 目录说明
+规则和去广告合集会自动同步上游，客户端按各自的刷新设置获取更新。应用更新后，去广告效果也可能变化；首次启用部分模块需要清除 App 缓存或重新安装，详见模块说明。
 
-- [Surge](Surge/README.md)：主配置、模块、面板与手工规则。
-- [Clash / mihomo / Stash](Clash/README.md)：配置、覆写与规则集。
-- [Quantumult X](Quantumult/README.md)：配置、规则与共享图标。
-- [sing-box](sing-box/README.md)：配置模板与源码/二进制规则集。
-- [subconverter](subconverter/README.md)：保留的旧转换配置。
-- [snell-panel](snell-panel/README.md)：独立的 Snell / SS2022 节点管理项目。
+需要在自己的仓库自动更新配置或发布私人 Gist，见 [自定义与自动更新](.github/scripts/README.md)。另有 [旧版 subconverter 配置](subconverter/README.md) 和 [Snell / SS2022 节点管理工具](snell-panel/README.md)。
 
-上游规则和脚本的来源保留在清单及文件注释中；具体使用条件以各来源项目说明为准。
+上游规则、脚本和图标的来源见各文件注释与目录说明，使用条件以原项目说明为准。
