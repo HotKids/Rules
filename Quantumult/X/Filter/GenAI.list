@@ -1,5 +1,4 @@
 ## GenAI
-
 # Apple Intelligence
 # https://support.apple.com/zh-cn/101555
 # 搜索服务，包括 Siri、聚焦、查询、Safari 浏览器、新闻、信息和音乐
@@ -17,9 +16,6 @@ DOMAIN,gspe1-ssl.ls.apple.com,GenAI
 # CloudKit 内容，包括 XProtect 更新和语音控制资源
 DOMAIN-SUFFIX,gateway.icloud.com,GenAI
 
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/apple-intelligence
-DOMAIN,apple-relay.mask.apple-dns.net,GenAI
-
 # Anthropic
 # > Claude
 DOMAIN-SUFFIX,clau.de,GenAI
@@ -29,13 +25,6 @@ DOMAIN-SUFFIX,anthropic.com,GenAI
 DOMAIN-SUFFIX,claudeusercontent.com,GenAI
 IP-CIDR,160.79.104.0/21,GenAI,no-resolve
 IP6-CIDR,2607:6bc0::/32,GenAI,no-resolve
-
-# https://code.claude.com/docs/en/network-config
-DOMAIN-SUFFIX,claudemcpcontent.com,GenAI
-# https://code.claude.com/docs/en/desktop
-DOMAIN-SUFFIX,claude.app,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/anthropic
-DOMAIN,servd-anthropic-website.b-cdn.net,GenAI
 
 # OpenAI
 # > ChatGPT
@@ -59,179 +48,16 @@ DOMAIN,openaicomproductionae4b.blob.core.windows.net,GenAI
 DOMAIN-KEYWORD,openaiapi,GenAI
 DOMAIN-KEYWORD,openaicom,GenAI
 
-# https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
-DOMAIN-SUFFIX,oaistatsig.com,GenAI
-DOMAIN,cdn.openaimerge.com,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/openai
-DOMAIN,openaiassets.blob.core.windows.net,GenAI
-DOMAIN-SUFFIX,openai.org,GenAI
-# > ChatGPT Voice
-# https://openai.com/chatgpt-voice.json
-# IP snapshot: 2026-10-25T19:25:06.552421+00:00
-IP-CIDR,102.37.57.54/32,GenAI,no-resolve
-IP-CIDR,13.71.25.29/32,GenAI,no-resolve
-IP-CIDR,13.78.198.12/32,GenAI,no-resolve
-IP-CIDR,130.33.52.154/32,GenAI,no-resolve
-IP-CIDR,132.196.88.56/32,GenAI,no-resolve
-IP-CIDR,134.138.48.201/32,GenAI,no-resolve
-IP-CIDR,134.138.49.186/32,GenAI,no-resolve
-IP-CIDR,134.138.49.233/32,GenAI,no-resolve
-IP-CIDR,134.138.50.236/32,GenAI,no-resolve
-IP-CIDR,135.220.40.201/32,GenAI,no-resolve
-IP-CIDR,137.116.45.81/32,GenAI,no-resolve
-IP-CIDR,158.158.104.5/32,GenAI,no-resolve
-IP-CIDR,158.158.96.28/32,GenAI,no-resolve
-IP-CIDR,172.166.108.88/32,GenAI,no-resolve
-IP-CIDR,172.178.132.252/32,GenAI,no-resolve
-IP-CIDR,172.183.195.174/32,GenAI,no-resolve
-IP-CIDR,172.184.108.82/32,GenAI,no-resolve
-IP-CIDR,172.184.136.176/32,GenAI,no-resolve
-IP-CIDR,172.196.32.32/32,GenAI,no-resolve
-IP-CIDR,172.196.43.226/32,GenAI,no-resolve
-IP-CIDR,172.198.75.176/32,GenAI,no-resolve
-IP-CIDR,172.200.47.199/32,GenAI,no-resolve
-IP-CIDR,172.202.168.144/32,GenAI,no-resolve
-IP-CIDR,172.202.169.179/32,GenAI,no-resolve
-IP-CIDR,172.202.23.232/32,GenAI,no-resolve
-IP-CIDR,172.203.39.49/32,GenAI,no-resolve
-IP-CIDR,172.204.26.194/32,GenAI,no-resolve
-IP-CIDR,172.207.173.200/32,GenAI,no-resolve
-IP-CIDR,172.212.177.184/32,GenAI,no-resolve
-IP-CIDR,172.212.183.151/32,GenAI,no-resolve
-IP-CIDR,172.212.186.208/32,GenAI,no-resolve
-IP-CIDR,172.214.226.198/32,GenAI,no-resolve
-IP-CIDR,172.214.254.250/32,GenAI,no-resolve
-IP-CIDR,191.232.190.216/32,GenAI,no-resolve
-IP-CIDR,191.233.251.27/32,GenAI,no-resolve
-IP-CIDR,191.235.237.21/32,GenAI,no-resolve
-IP-CIDR,20.113.195.227/32,GenAI,no-resolve
-IP-CIDR,20.113.199.182/32,GenAI,no-resolve
-IP-CIDR,20.113.207.178/32,GenAI,no-resolve
-IP-CIDR,20.113.209.102/32,GenAI,no-resolve
-IP-CIDR,20.114.70.148/32,GenAI,no-resolve
-IP-CIDR,20.162.96.163/32,GenAI,no-resolve
-IP-CIDR,20.165.158.214/32,GenAI,no-resolve
-IP-CIDR,20.168.48.117/32,GenAI,no-resolve
-IP-CIDR,20.171.138.58/32,GenAI,no-resolve
-IP-CIDR,20.171.252.186/32,GenAI,no-resolve
-IP-CIDR,20.184.36.134/32,GenAI,no-resolve
-IP-CIDR,20.195.180.205/32,GenAI,no-resolve
-IP-CIDR,20.195.185.53/32,GenAI,no-resolve
-IP-CIDR,20.195.188.94/32,GenAI,no-resolve
-IP-CIDR,20.196.195.248/32,GenAI,no-resolve
-IP-CIDR,20.197.179.218/32,GenAI,no-resolve
-IP-CIDR,20.199.240.35/32,GenAI,no-resolve
-IP-CIDR,20.203.144.245/32,GenAI,no-resolve
-IP-CIDR,20.203.145.145/32,GenAI,no-resolve
-IP-CIDR,20.210.247.237/32,GenAI,no-resolve
-IP-CIDR,20.211.232.159/32,GenAI,no-resolve
-IP-CIDR,20.215.248.137/32,GenAI,no-resolve
-IP-CIDR,20.215.253.155/32,GenAI,no-resolve
-IP-CIDR,20.215.254.178/32,GenAI,no-resolve
-IP-CIDR,20.215.51.56/32,GenAI,no-resolve
-IP-CIDR,20.219.100.169/32,GenAI,no-resolve
-IP-CIDR,20.219.102.5/32,GenAI,no-resolve
-IP-CIDR,20.219.124.186/32,GenAI,no-resolve
-IP-CIDR,20.226.41.247/32,GenAI,no-resolve
-IP-CIDR,20.226.51.38/32,GenAI,no-resolve
-IP-CIDR,20.226.74.46/32,GenAI,no-resolve
-IP-CIDR,20.229.39.104/32,GenAI,no-resolve
-IP-CIDR,20.234.111.90/32,GenAI,no-resolve
-IP-CIDR,20.242.106.26/32,GenAI,no-resolve
-IP-CIDR,20.248.121.10/32,GenAI,no-resolve
-IP-CIDR,20.253.201.211/32,GenAI,no-resolve
-IP-CIDR,20.29.94.5/32,GenAI,no-resolve
-IP-CIDR,20.42.209.232/32,GenAI,no-resolve
-IP-CIDR,20.42.216.2/32,GenAI,no-resolve
-IP-CIDR,20.45.59.121/32,GenAI,no-resolve
-IP-CIDR,20.55.129.73/32,GenAI,no-resolve
-IP-CIDR,20.66.44.126/32,GenAI,no-resolve
-IP-CIDR,20.70.109.186/32,GenAI,no-resolve
-IP-CIDR,20.74.221.21/32,GenAI,no-resolve
-IP-CIDR,20.89.216.20/32,GenAI,no-resolve
-IP-CIDR,20.9.65.240/32,GenAI,no-resolve
-IP-CIDR,4.151.150.176/32,GenAI,no-resolve
-IP-CIDR,4.151.178.112/32,GenAI,no-resolve
-IP-CIDR,4.151.200.38/32,GenAI,no-resolve
-IP-CIDR,4.151.50.34/32,GenAI,no-resolve
-IP-CIDR,4.155.146.196/32,GenAI,no-resolve
-IP-CIDR,4.155.233.173/32,GenAI,no-resolve
-IP-CIDR,4.190.204.74/32,GenAI,no-resolve
-IP-CIDR,4.197.155.147/32,GenAI,no-resolve
-IP-CIDR,4.197.172.116/32,GenAI,no-resolve
-IP-CIDR,4.197.185.255/32,GenAI,no-resolve
-IP-CIDR,4.201.155.22/32,GenAI,no-resolve
-IP-CIDR,4.201.169.177/32,GenAI,no-resolve
-IP-CIDR,4.201.186.94/32,GenAI,no-resolve
-IP-CIDR,4.213.138.217/32,GenAI,no-resolve
-IP-CIDR,4.217.222.97/32,GenAI,no-resolve
-IP-CIDR,4.217.235.100/32,GenAI,no-resolve
-IP-CIDR,4.218.14.95/32,GenAI,no-resolve
-IP-CIDR,4.225.200.166/32,GenAI,no-resolve
-IP-CIDR,4.242.133.59/32,GenAI,no-resolve
-IP-CIDR,4.245.198.13/32,GenAI,no-resolve
-IP-CIDR,4.246.114.35/32,GenAI,no-resolve
-IP-CIDR,4.255.228.31/32,GenAI,no-resolve
-IP-CIDR,40.118.236.137/32,GenAI,no-resolve
-IP-CIDR,48.193.41.165/32,GenAI,no-resolve
-IP-CIDR,51.103.128.240/32,GenAI,no-resolve
-IP-CIDR,51.107.175.203/32,GenAI,no-resolve
-IP-CIDR,51.116.220.101/32,GenAI,no-resolve
-IP-CIDR,51.4.112.173/32,GenAI,no-resolve
-IP-CIDR,51.57.68.153/32,GenAI,no-resolve
-IP-CIDR,51.57.79.182/32,GenAI,no-resolve
-IP-CIDR,52.143.181.161/32,GenAI,no-resolve
-IP-CIDR,52.182.134.239/32,GenAI,no-resolve
-IP-CIDR,52.188.151.95/32,GenAI,no-resolve
-IP-CIDR,52.230.89.145/32,GenAI,no-resolve
-IP-CIDR,52.233.253.172/32,GenAI,no-resolve
-IP-CIDR,52.243.62.231/32,GenAI,no-resolve
-IP-CIDR,52.253.104.78/32,GenAI,no-resolve
-IP-CIDR,57.154.22.182/32,GenAI,no-resolve
-IP-CIDR,57.154.40.120/32,GenAI,no-resolve
-IP-CIDR,57.154.42.34/32,GenAI,no-resolve
-IP-CIDR,57.154.55.99/32,GenAI,no-resolve
-IP-CIDR,57.154.67.255/32,GenAI,no-resolve
-IP-CIDR,68.155.152.41/32,GenAI,no-resolve
-IP-CIDR,68.221.176.216/32,GenAI,no-resolve
-IP-CIDR,68.221.200.92/32,GenAI,no-resolve
-IP-CIDR,70.153.147.32/32,GenAI,no-resolve
-IP-CIDR,70.153.148.19/32,GenAI,no-resolve
-IP-CIDR,72.146.20.246/32,GenAI,no-resolve
-IP-CIDR,72.146.45.116/32,GenAI,no-resolve
-IP-CIDR,74.225.202.57/32,GenAI,no-resolve
-IP-CIDR,74.225.219.218/32,GenAI,no-resolve
-IP-CIDR,74.248.120.121/32,GenAI,no-resolve
-IP-CIDR,74.248.136.89/32,GenAI,no-resolve
-IP-CIDR,74.248.148.7/32,GenAI,no-resolve
-IP-CIDR,74.249.241.198/32,GenAI,no-resolve
-IP-CIDR,74.7.32.33/32,GenAI,no-resolve
-IP-CIDR,74.7.32.69/32,GenAI,no-resolve
-IP-CIDR,85.211.180.16/32,GenAI,no-resolve
-IP-CIDR,85.211.241.13/32,GenAI,no-resolve
-IP-CIDR,85.211.245.237/32,GenAI,no-resolve
-IP-CIDR,9.160.160.178/32,GenAI,no-resolve
-IP-CIDR,9.160.163.154/32,GenAI,no-resolve
-IP-CIDR,9.160.164.236/32,GenAI,no-resolve
-IP-CIDR,9.160.165.37/32,GenAI,no-resolve
-IP-CIDR,9.205.154.223/32,GenAI,no-resolve
-IP-CIDR,9.205.159.112/32,GenAI,no-resolve
-IP-CIDR,9.205.159.128/32,GenAI,no-resolve
-IP-CIDR,9.205.159.144/32,GenAI,no-resolve
-
 # Cloudflare
 # > AI Gateway
 DOMAIN,gateway.ai.cloudflare.com,GenAI
 
 # Cursor
-# https://cursor.com/docs/enterprise/network-configuration
 DOMAIN-SUFFIX,cursor-cdn.com,GenAI
 DOMAIN-SUFFIX,cursor.com,GenAI
 DOMAIN-SUFFIX,cursor.sh,GenAI
 DOMAIN-SUFFIX,cursorapi.com,GenAI
 DOMAIN-SUFFIX,cursorvm.com,GenAI
-
-DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com,GenAI
 
 # Google
 # > AI Studio
@@ -241,9 +67,6 @@ DOMAIN,aistudio.google.com,GenAI
 DOMAIN,alkalicore-pa.clients6.google.com,GenAI
 DOMAIN,alkalimakersuite-pa.clients6.google.com,GenAI
 DOMAIN,aida.googleapis.com,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN-SUFFIX,ai.studio,GenAI
-DOMAIN,webchannel-alkalimakersuite-pa.clients6.google.com,GenAI
 # > DeepMind
 DOMAIN-SUFFIX,deepmind.com,GenAI
 DOMAIN-SUFFIX,deepmind.google,GenAI
@@ -254,71 +77,19 @@ DOMAIN-SUFFIX,generativelanguage.googleapis.com,GenAI
 DOMAIN,ai.google.dev,GenAI
 DOMAIN,bard.google.com,GenAI
 DOMAIN,gemini.google.com,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN-SUFFIX,gemini.google,GenAI
-DOMAIN,gemini.gstatic.com,GenAI
-DOMAIN,robinfrontend-pa.googleapis.com,GenAI
-DOMAIN,geminiweb-pa.clients.google.com,GenAI
-DOMAIN,geminiweb-pa.clients6.google.com,GenAI
-DOMAIN,appsgenaiserver-pa.clients.google.com,GenAI
-DOMAIN,appsgenaiserver-pa.clients6.google.com,GenAI
-DOMAIN,appsgenaiserver-pa.googleapis.com,GenAI
 # > NotebookLM
 DOMAIN-KEYWORD,notebooklm.google,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN,notebooklm-pa.googleapis.com,GenAI
-DOMAIN-SUFFIX,labstailwind.pa.googleapis.com,GenAI
-# https://support.google.com/notebooklm/answer/14276468
-DOMAIN-SUFFIX,notebook.google,GenAI
-DOMAIN,notebook.google.com,GenAI
 # > Search Labs
 DOMAIN-KEYWORD,labs.google,GenAI
-
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN-SUFFIX,flow.google,GenAI
-DOMAIN,flow.google.com,GenAI
-DOMAIN,aisandbox-pa.googleapis.com,GenAI
-# > Gemini Code Assist
-# https://docs.cloud.google.com/gemini/docs/codeassist/set-up-gemini
-DOMAIN,cloudaicompanion.googleapis.com,GenAI
-DOMAIN,cloudcode-pa.googleapis.com,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN,daily-cloudcode-pa.googleapis.com,GenAI
-DOMAIN,aicode.googleapis.com,GenAI
-# > Jules
-# https://jules.google/docs/
-DOMAIN-SUFFIX,jules.google,GenAI
-DOMAIN,jules.google.com,GenAI
-# > Opal
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN-SUFFIX,opal.google,GenAI
-DOMAIN,opal.google.com,GenAI
-# > Antigravity
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN,antigravity-pa.googleapis.com,GenAI
-DOMAIN,antigravity.googleapis.com,GenAI
-DOMAIN-SUFFIX,antigravity.google,GenAI
-DOMAIN-SUFFIX,antigravity-unleash.goog,GenAI
-# > Stitch
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/google-deepmind
-DOMAIN,stitch.withgoogle.com,GenAI
 
 # JetBrains AI
 DOMAIN-SUFFIX,grazie.ai,GenAI
 DOMAIN-SUFFIX,jetbrains.ai,GenAI
 DOMAIN-SUFFIX,grazie.aws.intellij.net,GenAI
 
-# https://youtrack.jetbrains.com/articles/SUPPORT-A-297/How-to-allow-access-to-JetBrains-AI-Assistant-Junie-in-the-company-network-firewall-proxy
-DOMAIN,api.jetbrains.cloud,GenAI
-DOMAIN,cdn.agentclientprotocol.com,GenAI
-DOMAIN,frameworks.jetbrains.com,GenAI
-
 # Meta
 DOMAIN-SUFFIX,meta.ai,GenAI
 DOMAIN,imagine.meta.com,GenAI
-
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/meta
-DOMAIN-SUFFIX,metaaivm.com,GenAI
 
 # Microsoft
 # > Copilot
@@ -329,13 +100,8 @@ DOMAIN,copilot-proxy.githubusercontent.com,GenAI
 # > GitHub Copilot
 DOMAIN-SUFFIX,githubcopilot.com,GenAI
 
-# https://github.com/v2fly/domain-list-community/blob/master/data/github-copilot
-DOMAIN,copilot-workspace.githubnext.com,GenAI
-DOMAIN,copilotprodattachments.blob.core.windows.net,GenAI
-# https://docs.github.com/en/copilot/reference/copilot-allowlist-reference
-DOMAIN,copilot-telemetry.githubusercontent.com,GenAI
-
-# Groq
+# NVIDIA
+# > Groq
 DOMAIN-SUFFIX,groq.com,GenAI
 
 # Perplexity
@@ -343,186 +109,11 @@ DOMAIN-SUFFIX,perplexity.ai,GenAI
 DOMAIN-SUFFIX,pplx.ai,GenAI
 DOMAIN,pplx-res.cloudinary.com,GenAI
 
-# https://www.perplexity.ai/hub/blog/introducing-perplexity-labs
-DOMAIN-SUFFIX,perplexity.com,GenAI
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/perplexity
-DOMAIN,ppl-ai-file-upload.s3.amazonaws.com,GenAI
-
 # xAI
 DOMAIN-SUFFIX,x.ai,GenAI
 DOMAIN-SUFFIX,grok.com,GenAI
 DOMAIN-SUFFIX,grokipedia.com,GenAI
 
-# https://raw.githubusercontent.com/v2fly/domain-list-community/master/data/xai
-DOMAIN,grok.x.com,GenAI
-# https://cursor.com/help/troubleshooting/sign-in-domains
-DOMAIN-SUFFIX,spacex.ai,GenAI
-DOMAIN-SUFFIX,grokusercontent.com,GenAI
-
 # Canva
 # > Affinity
 DOMAIN,d3ssuo6fbvr.cloudfront.net,GenAI
-
-# Windsurf
-# https://github.com/v2fly/domain-list-community/blob/master/data/windsurf
-DOMAIN-SUFFIX,codeium.com,GenAI
-DOMAIN-SUFFIX,codeiumdata.com,GenAI
-DOMAIN-SUFFIX,windsurf.build,GenAI
-DOMAIN-SUFFIX,windsurf.com,GenAI
-
-# Tabnine
-# https://docs.tabnine.com/main/getting-started/tabnine-cli/troubleshooting/faq
-DOMAIN-SUFFIX,tabnine.com,GenAI
-
-# Amazon Q
-# https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/firewall.html
-DOMAIN-SUFFIX,codewhisperer.us-east-1.amazonaws.com,GenAI
-DOMAIN-SUFFIX,q.us-east-1.amazonaws.com,GenAI
-DOMAIN,q-developer-integration.us-east-1.api.aws,GenAI
-DOMAIN,idetoolkits-hostedfiles.amazonaws.com,GenAI
-DOMAIN,idetoolkits.amazonwebservices.com,GenAI
-DOMAIN,aws-toolkit-language-servers.amazonaws.com,GenAI
-DOMAIN,aws-language-servers.us-east-1.amazonaws.com,GenAI
-
-# v0
-# https://vercel.com/blog/v0-app
-DOMAIN-SUFFIX,v0.dev,GenAI
-DOMAIN-SUFFIX,v0.app,GenAI
-
-# Bolt
-# https://bolt.new/
-DOMAIN-SUFFIX,bolt.new,GenAI
-
-# Lovable
-# https://docs.lovable.dev/introduction/welcome
-DOMAIN-SUFFIX,lovable.dev,GenAI
-
-# OpenCode
-# https://opencode.ai/docs/
-DOMAIN-SUFFIX,opencode.ai,GenAI
-
-# Amp
-# https://ampcode.com/docs
-DOMAIN-SUFFIX,ampcode.com,GenAI
-
-# Augment Code
-# https://docs.augmentcode.com/introduction
-DOMAIN-SUFFIX,augmentcode.com,GenAI
-
-# Kiro
-# https://kiro.dev/docs/privacy-and-security/firewalls/
-DOMAIN-SUFFIX,kiro.dev,GenAI
-
-# Mistral
-# https://docs.mistral.ai/api
-DOMAIN-SUFFIX,mistral.ai,GenAI
-
-# Cohere
-# https://docs.cohere.com/docs/compatibility-api
-DOMAIN-SUFFIX,cohere.ai,GenAI
-# https://docs.cohere.com/v2/reference/generate-stream-v1
-DOMAIN-SUFFIX,cohere.com,GenAI
-
-# Hugging Face
-# https://github.com/v2fly/domain-list-community/blob/master/data/huggingface
-DOMAIN-SUFFIX,huggingface.co,GenAI
-DOMAIN-SUFFIX,hf.co,GenAI
-DOMAIN-SUFFIX,hf.space,GenAI
-
-# OpenRouter
-# https://openrouter.ai/developers
-DOMAIN-SUFFIX,openrouter.ai,GenAI
-
-# Poe
-# https://github.com/v2fly/domain-list-community/blob/master/data/poe
-DOMAIN-SUFFIX,poe.com,GenAI
-DOMAIN-SUFFIX,poecdn.net,GenAI
-
-# Together AI
-# https://github.com/togethercomputer/together-typescript/blob/main/src/client.ts
-DOMAIN-SUFFIX,together.ai,GenAI
-
-# Fireworks AI
-# https://docs.fireworks.ai/getting-started/quickstart
-DOMAIN-SUFFIX,fireworks.ai,GenAI
-
-# Replicate
-# https://replicate.com/docs/topics/predictions/output-files
-DOMAIN-SUFFIX,replicate.com,GenAI
-DOMAIN-SUFFIX,replicate.delivery,GenAI
-
-# DeepInfra
-# https://deepinfra.com/docs/inference
-DOMAIN-SUFFIX,deepinfra.com,GenAI
-
-# Cerebras
-# https://github.com/v2fly/domain-list-community/blob/master/data/cerebras
-DOMAIN-SUFFIX,cerebras.ai,GenAI
-
-# fal
-# https://fal.ai/models/openrouter/router
-DOMAIN-SUFFIX,fal.ai,GenAI
-DOMAIN-SUFFIX,fal.run,GenAI
-# https://fal.ai/models/fal-ai/latentsync/api
-DOMAIN-SUFFIX,fal.media,GenAI
-
-# NVIDIA
-# https://docs.nvidia.com/nemo/retriever/latest/extraction/ngc-api-key/
-DOMAIN,build.nvidia.com,GenAI
-DOMAIN,integrate.api.nvidia.com,GenAI
-DOMAIN,ai.api.nvidia.com,GenAI
-# https://docs.nvidia.com/nemo/retriever/latest/reference/retriever-cli-quickstart/
-DOMAIN,inference-api.nvidia.com,GenAI
-# https://docs.nvidia.com/vss/2.3.0/content/installation-remote-docker-compose.html
-DOMAIN,grpc.nvcf.nvidia.com,GenAI
-
-# Midjourney
-# https://docs.midjourney.com/hc/en-us/articles/33329261836941-Getting-Started-Guide
-DOMAIN-SUFFIX,midjourney.com,GenAI
-
-# Runway
-# https://docs.dev.runwayml.com/api/
-DOMAIN-SUFFIX,runwayml.com,GenAI
-
-# Stability AI
-# https://platform.stability.ai/docs/getting-started
-DOMAIN-SUFFIX,stability.ai,GenAI
-# https://stability.ai/guides/make-your-first-mix-with-stable-audio
-DOMAIN-SUFFIX,stableaudio.com,GenAI
-
-# Black Forest Labs / FLUX
-# https://docs.bfl.ai/quick_start/introduction
-DOMAIN-SUFFIX,bfl.ai,GenAI
-
-# ElevenLabs
-# https://github.com/v2fly/domain-list-community/blob/master/data/elevenlabs
-DOMAIN-SUFFIX,elevenlabs.com,GenAI
-DOMAIN-SUFFIX,elevenlabs.io,GenAI
-
-# Suno
-# https://help.suno.com/en/articles/2462273
-DOMAIN-SUFFIX,suno.com,GenAI
-
-# Udio
-# https://help.udio.com/en/articles/10739104-creating-a-udio-account
-DOMAIN-SUFFIX,udio.com,GenAI
-
-# Leonardo
-# https://docs.leonardo.ai/reference/getmodels
-DOMAIN-SUFFIX,leonardo.ai,GenAI
-
-# Krea
-# https://www.krea.ai/docs
-DOMAIN-SUFFIX,krea.ai,GenAI
-
-# Ideogram
-# https://docs.ideogram.ai/quick-start-guide
-DOMAIN-SUFFIX,ideogram.ai,GenAI
-
-# Luma
-# https://docs.lumalabs.ai/docs/video-generation
-DOMAIN-SUFFIX,lumalabs.ai,GenAI
-
-# Character.AI
-# https://support.character.ai/hc/en-us
-DOMAIN-SUFFIX,character.ai,GenAI
