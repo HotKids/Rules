@@ -6,6 +6,29 @@ function createQxRuntime(native, mode, namespace) {
   'use strict';
   const own = (value, key) => value != null && Object.prototype.hasOwnProperty.call(value, key);
   const clone = value => value && typeof value === 'object' ? Object.assign({}, value) : value;
+  const requestFields = ['id', 'url', 'method', 'headers', 'body', 'bodyBytes', 'sessionIndex'];
+  const responseFields = ['url', 'method', 'status', 'statusCode', 'headers', 'body', 'bodyBytes', 'sessionIndex'];
+  const cloneHost = (value, fields = []) => {
+    if (!value || typeof value !== 'object') return value;
+    let keys = [];
+    try { keys = Object.keys(value); } catch (_) {}
+    try {
+      keys = keys.concat(Object.getOwnPropertySymbols(value).filter(key =>
+        Object.prototype.propertyIsEnumerable.call(value, key)));
+    } catch (_) {}
+    for (const key of fields) if (!keys.includes(key)) keys.push(key);
+    const result = {};
+    for (const key of keys) {
+      // Native script objects may expose documented fields as prototype getters
+      // or non-enumerable properties. One failed getter must not discard others.
+      try {
+        const item = value[key];
+        if (typeof item !== 'undefined' || key in value) Object.defineProperty(result, key,
+          {value: item, writable: true, enumerable: true, configurable: true});
+      } catch (_) {}
+    }
+    return result;
+  };
   const copyBytes = value => {
     if (value == null || typeof value !== 'object') return null;
     try {
@@ -55,12 +78,23 @@ function createQxRuntime(native, mode, namespace) {
     const text = parts.join('');
     return text.charCodeAt(0) === 65279 ? text.slice(1) : text;
   }
-  const exposeBody = value => {
+  const exposeBody = (value, copiedBytes) => {
     if (!value || typeof value !== 'object') return value;
-    const data = copyBytes(value.bodyBytes) || copyBytes(value.body);
+    const data = copiedBytes || copyBytes(value.bodyBytes) || copyBytes(value.body);
     if (data) {
-      value.bodyBytes = data.buffer;
-      if (typeof value.body !== 'string') value.body = utf8Text(data);
+      // Keep the text snapshot private: changing bodyBytes must not change body.
+      value.bodyBytes = new Uint8Array(data).buffer;
+      if (typeof value.body !== 'string') {
+        let text, resolved = false;
+        Object.defineProperty(value, 'body', {
+          enumerable: true, configurable: true,
+          get() {
+            if (!resolved) { text = utf8Text(data); resolved = true; }
+            return text;
+          },
+          set(next) { text = next; resolved = true; },
+        });
+      }
     }
     return value;
   };
@@ -77,10 +111,11 @@ function createQxRuntime(native, mode, namespace) {
     return value;
   };
   const stage = String(mode || '').replace(/-body$/, '');
-  const request = exposeBody(clone(native.request));
-  const response = exposeBody(clone(native.response));
-  if (request && request.headers) request.headers = clone(request.headers);
-  if (response && response.headers) response.headers = clone(response.headers);
+  const originalRequest = cloneHost(native.request, requestFields);
+  const request = exposeBody(clone(originalRequest));
+  const response = exposeBody(cloneHost(native.response, responseFields));
+  if (request && request.headers) request.headers = cloneHost(request.headers);
+  if (response && response.headers) response.headers = cloneHost(response.headers);
   const store = native.persistentStore;
   const contextPrefix = 'HotKidsQxRequestContextV1_';
   const slots = 16;
@@ -151,14 +186,15 @@ function createQxRuntime(native, mode, namespace) {
         || typeof record.body !== 'string' || bytes(record.body) > maxBody
         || !record.headers || typeof record.headers !== 'object' || Array.isArray(record.headers)
         || bytes(JSON.stringify(record.headers)) > maxHeaders) return;
-    if (typeof request.body === 'undefined') request.body = record.body;
+    const body = Object.getOwnPropertyDescriptor(request, 'body');
+    if (!body || own(body, 'value') && typeof body.value === 'undefined') request.body = record.body;
     if (typeof request.headers === 'undefined') request.headers = record.headers;
     if (typeof request.method === 'undefined') request.method = record.method;
   }
   if (stage === 'response') restoreContext();
   function rememberContext(result) {
-    if (!contextKey || !native.request || result.response || result.abort) return;
-    const original = native.request;
+    if (!contextKey || !originalRequest || result.response || result.abort) return;
+    const original = originalRequest;
     const body = own(result, 'body') ? result.body : original.body;
     const headers = own(result, 'headers') ? result.headers : original.headers;
     const url = own(result, 'url') ? result.url : original.url;
@@ -238,15 +274,17 @@ function createQxRuntime(native, mode, namespace) {
     try {
       native.httpClient[method](outgoing, (error, reply, data) => {
         if (error || !reply) return reject({error: String(error || 'No HTTP response')});
-        const result = clone(reply);
+        const result = cloneHost(reply, responseFields);
+        if (result.headers) result.headers = cloneHost(result.headers);
         if (!own(result, 'statusCode')) result.statusCode = result.status;
         if (!own(result, 'status')) result.status = result.statusCode;
         if (typeof data === 'string') result.body = data;
         else if (data != null) {
           const binary = copyBytes(data);
           if (binary) {
-            result.bodyBytes = binary.buffer;
-            result.body = utf8Text(binary);
+            delete result.bodyBytes;
+            result.body = binary;
+            exposeBody(result, binary);
           } else if (!own(result, 'body')) result.body = '';
         } else if (!own(result, 'body')) result.body = '';
         resolve(result);

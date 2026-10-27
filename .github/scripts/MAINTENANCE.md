@@ -166,7 +166,7 @@ Module 来源也支持 QX `.snippet`：先经 [qx_convert.py](qx_convert.py) 转
 
 QX 引用的 JS 先由 [qx_compat.py](qx_compat.py) 保守检查兼容性：可确认仅使用共享接口和正文返回的脚本直接保留上游地址；涉及 QX 专属接口、echo 或无法确认的写法，才经 [qx_scripts.py](qx_scripts.py) 和 [qx-runtime.js](qx-runtime.js) 生成本地适配文件。判定不使用 App 名称或域名白名单。原生 Surge 来源继续引用上游脚本，不进入这条转换链。
 
-读取 `$request.bodyBytes` / `$response.bodyBytes` 的 QX 正文脚本自动启用 Surge `binary-body-mode`，Stash 对应 `binary-mode`。通用运行时提供原始字节的 `bodyBytes` 与 UTF-8 文本 `body`，兼容同一脚本中的二进制和文本分支；二进制输出规范为 `Uint8Array`，保留切片范围，不修改上游 JS。识别基于宿主 API 访问，不按应用或域名定制。转换默认不输出 `max-size`，由客户端采用自身默认值；显式传入转换接口的正文上限仍可保留，原生 Surge 来源已有的设置不变。
+读取 `$request.bodyBytes` / `$response.bodyBytes` 的 QX 正文脚本自动启用 Surge `binary-body-mode`，Stash 对应 `binary-mode`。通用运行时显式读取宿主公开字段，保留非枚举属性及原型 getter；提供原始字节的 `bodyBytes` 与按需解码的 UTF-8 文本 `body`，仅访问字节时不生成文本，兼容同一脚本中的二进制和文本分支；二进制输出规范为 `Uint8Array`，保留切片范围，不修改上游 JS。识别基于宿主 API 访问，不按应用或域名定制。转换默认不输出 `max-size`，由客户端采用自身默认值；显式传入转换接口的正文上限仍可保留，原生 Surge 来源已有的设置不变。
 
 适配文件放在 `Surge/Module/Scripts/`，按输出模块文件名去掉后缀并全部小写，例如 `HelloBike.sgmodule` 对应 `hellobike.js`。同一模块的多个来源和执行阶段由单一文件分派，原脚本正文逐字保留；运行时适配存储、通知、HTTP 请求、状态码和完成回调，不修改应用的净化或加密逻辑。脚本标签采用有效 `#!name` 加连续序号，例如 `哈啰出行去广告_1`、`哈啰出行去广告_2`；清单行内的 `#!name` 优先，序号从 1 开始且不补零。同一原 JS 的请求/响应继续共享上下文命名空间。
 

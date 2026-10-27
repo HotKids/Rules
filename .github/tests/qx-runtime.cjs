@@ -9,7 +9,7 @@ const runtime = fs.readFileSync(path.join(__dirname, '../scripts/qx-runtime.js')
 const plain = value => JSON.parse(JSON.stringify(value));
 function execute(source, {mode = 'response-body', request, response, store = new Map(),
                           namespace = 'test-source', now = 2000000000000,
-                          platform = 'surge', httpClient, storage} = {}) {
+                          platform = 'surge', httpClient, storage, globals = {}} = {}) {
   const outputs = [], notifications = [], requests = [], logs = [];
   class Clock extends Date { static now() { return now; } }
   const native = {request, response, platform,
@@ -23,7 +23,7 @@ function execute(source, {mode = 'response-body', request, response, store = new
   };
   const wrapped = `(function(native) {\n${runtime}\nconst bridge = createQxRuntime(native, ${JSON.stringify(mode)}, ${JSON.stringify(namespace)});\n` +
     `(function($request,$response,$prefs,$notify,$task,$done){\n${source}\n}).call(this,bridge.request,bridge.response,bridge.prefs,bridge.notify,bridge.task,bridge.done);\n})(native);`;
-  vm.runInNewContext(wrapped, {native, Date: Clock, Uint8Array,
+  vm.runInNewContext(wrapped, {native, Date: Clock, Uint8Array, ...globals,
     console: {log: (...args) => logs.push(args), warn: (...args) => logs.push(args), error: (...args) => logs.push(args)}}, {timeout: 2000});
   return {outputs, notifications, requests, logs, store, native};
 }
@@ -32,6 +32,13 @@ const request = (id = 'opaque-request-A', body = 'request-body') => ({
 });
 const responseRequest = value => { const result = {...value}; delete result.body; return result; };
 const observedBody = '$done(typeof $request.body === "undefined" ? {} : {body:$request.body});';
+function decodingSpy() {
+  let calls = 0;
+  const constructor = value => String(value);
+  Object.setPrototypeOf(constructor, String);
+  constructor.fromCodePoint = (...points) => { calls++; return String.fromCodePoint(...points); };
+  return {constructor, calls: () => calls};
+}
 
 test('request context restores a body by the full opaque native ID without mutating inputs', () => {
   const req = request(), store = new Map();
@@ -204,6 +211,144 @@ test('binary request and response bodies expose exact bytes and UTF-8 text witho
   }
 });
 
+test('host fields remain readable when non-enumerable or inherited from native prototypes', () => {
+  for (const shape of ['nonenumerable value', 'nonenumerable getter', 'prototype getter']) {
+    const reads = {};
+    const host = values => {
+      const result = {extra: 'keep'}, fields = {};
+      for (const [key, value] of Object.entries(values)) {
+        fields[key] = shape === 'nonenumerable value' ? {value, configurable: true} :
+          {get() { reads[key] = (reads[key] || 0) + 1; return value; }, configurable: true};
+      }
+      if (shape === 'prototype getter') Object.setPrototypeOf(result, Object.defineProperties({}, fields));
+      else Object.defineProperties(result, fields);
+      return result;
+    };
+    const reqValues = {id: 'host-id', url: 'https://example.invalid/request', method: 'POST',
+      sessionIndex: 19, headers: {'X-Request': 'keep'}, body: new Uint8Array(Buffer.from('request 中文'))};
+    const resValues = {url: 'https://example.invalid/response', method: 'POST', status: 200,
+      statusCode: 201, sessionIndex: 19, headers: {'X-Response': 'keep'}, body: new Uint8Array(Buffer.from('response 🙂'))};
+    const req = host(reqValues), res = host(resValues);
+    const result = execute('$done({body:JSON.stringify({request:[$request.id,$request.url,$request.method,$request.sessionIndex,' +
+      '$request.headers["X-Request"],$request.body,$request.extra],response:[$response.url,$response.method,$response.status,' +
+      '$response.statusCode,$response.sessionIndex,$response.headers["X-Response"],$response.body,$response.extra]})});',
+      {request: req, response: res});
+    assert.deepEqual(JSON.parse(result.outputs[0].body), {
+      request: ['host-id', reqValues.url, 'POST', 19, 'keep', 'request 中文', 'keep'],
+      response: [resValues.url, 'POST', 200, 201, 19, 'keep', 'response 🙂', 'keep'],
+    });
+    if (shape !== 'nonenumerable value') assert.equal(reads.body, 2, 'each native body is read once');
+    assert.equal(reqValues.headers['X-Request'], 'keep');
+    assert.equal(resValues.headers['X-Response'], 'keep');
+  }
+});
+
+test('throwing native getters do not discard other fields or successful completions', () => {
+  const req = {...request(), extra: 'request-meta'};
+  Object.defineProperty(req, 'broken', {enumerable: true, get() { throw Error('unavailable extra'); }});
+  Object.defineProperty(req, 'headers', {enumerable: false, get() { throw Error('unavailable headers'); }});
+  delete req.method;
+  Object.setPrototypeOf(req, {get method() { throw Error('unavailable method'); }});
+  const res = {extra: 'response-meta', body: new Uint8Array(Buffer.from('readable'))};
+  Object.defineProperty(res, 'status', {enumerable: false, get() { throw Error('unavailable status'); }});
+  Object.setPrototypeOf(res, {get statusCode() { return 206; }, get headers() { return {'X-Actual': 'keep'}; }});
+  const result = execute('$done({body:JSON.stringify([$request.url,$request.extra,$request.method,$request.headers,' +
+    '$response.statusCode,$response.headers["X-Actual"],$response.body,$response.extra])});', {request: req, response: res});
+  assert.deepEqual(JSON.parse(result.outputs[0].body), [req.url, 'request-meta', null, null, 206, 'keep', 'readable', 'response-meta']);
+  const rewritten = execute('$done({body:"rewritten"});', {mode: 'request-body', request: req});
+  assert.equal(rewritten.outputs[0].body, 'rewritten');
+  assert.equal(rewritten.store.size, 0);
+  const unavailable = {};
+  for (const key of ['url', 'body', 'headers']) Object.defineProperty(unavailable, key,
+    {get() { throw Error('unavailable native field'); }});
+  const missing = execute('$done({body:JSON.stringify([$request.url||"missing",typeof $response.body])});',
+    {request: unavailable, response: unavailable});
+  assert.deepEqual(JSON.parse(missing.outputs[0].body), ['missing', 'undefined']);
+});
+
+test('documented host fields can be read even when enumeration and has checks omit them', () => {
+  const body = new Uint8Array(Buffer.from('host data'));
+  const native = values => new Proxy(values, {ownKeys: () => [], has: () => false,
+    get: (target, key) => target[key]});
+  const result = execute('$done({body:JSON.stringify([$request.url,$request.method,$request.headers.Example,' +
+    '$response.url,$response.statusCode,$response.headers.Result,$response.body])});', {
+    request: native({url: 'https://example.invalid/request', method: 'POST', headers: {Example: 'keep'}}),
+    response: native({url: 'https://example.invalid/response', status: 202, headers: {Result: 'keep'}, body}),
+  });
+  assert.deepEqual(JSON.parse(result.outputs[0].body), ['https://example.invalid/request', 'POST', 'keep',
+    'https://example.invalid/response', 202, 'keep', 'host data']);
+});
+
+test('native getter snapshots preserve string-cache contents without reading them again', () => {
+  let bodyReads = 0, methodReads = 0;
+  const original = {id: 'getter-cache', url: request().url, headers: {Actual: 'keep'}};
+  Object.setPrototypeOf(original, {
+    get body() { bodyReads++; return 'original-body'; },
+    get method() { methodReads++; return 'POST'; },
+  });
+  const store = new Map();
+  execute('$request.body="facade-only";$done({});', {mode: 'request-body', request: original, store});
+  assert.equal(bodyReads, 1); assert.equal(methodReads, 1);
+  const later = execute(observedBody, {request: {id: 'getter-cache', url: original.url, method: 'POST'}, store});
+  assert.equal(later.outputs[0].body, 'original-body');
+});
+
+test('binary-only access never decodes text, including when an old string context exists', () => {
+  const store = new Map(), original = request('lazy-context', 'old string');
+  execute('$done({});', {mode: 'request-body', request: original, store});
+  const spy = decodingSpy(), data = Uint8Array.from([0, 255, 128, 65]);
+  const result = execute('$done({bodyBytes:$response.bodyBytes});',
+    {request: {...original, body: data}, response: {body: data}, store, globals: {String: spy.constructor}});
+  assert.equal(spy.calls(), 0);
+  assert.deepEqual(Array.from(result.outputs[0].body), [0, 255, 128, 65]);
+});
+
+test('invalid bodyBytes do not prevent restoring the existing string-only request context', () => {
+  for (const bodyBytes of ['invalid bytes', {}, null]) for (const explicitBody of [false, true]) {
+    const store = new Map(), original = request();
+    execute('$done({});', {mode: 'request-body', request: original, store});
+    const incoming = {...responseRequest(original), bodyBytes};
+    if (explicitBody) incoming.body = undefined;
+    const result = execute(observedBody, {request: incoming, store});
+    assert.equal(result.outputs[0].body, 'request-body');
+  }
+});
+
+test('binary text is decoded once and its lazy accessor supports assignment and Object.assign', () => {
+  const spy = decodingSpy(), data = new Uint8Array(Buffer.from('中文🙂'));
+  const result = execute('const first=$response.body,reads=decodeCalls();' +
+    'new Uint8Array($response.bodyBytes).fill(0);const second=$response.body;' +
+    'const copied=Object.assign({},$response);Object.assign($response,{body:"override"});' +
+    '$done({body:JSON.stringify([first,second,copied.body,$response.body,reads,decodeCalls()])});',
+    {response: {body: data}, globals: {String: spy.constructor, decodeCalls: spy.calls}});
+  const [first, second, copied, overridden, firstReads, lastReads] = JSON.parse(result.outputs[0].body);
+  assert.deepEqual([first, second, copied, overridden], ['中文🙂', '中文🙂', '中文🙂', 'override']);
+  assert.ok(firstReads > 0); assert.equal(firstReads, lastReads);
+  assert.deepEqual(Array.from(data), [...Buffer.from('中文🙂')]);
+  const unaccessed = decodingSpy();
+  const setFirst = execute('Object.assign($response,{body:"assigned first"});$done({body:$response.body});',
+    {response: {body: data}, globals: {String: unaccessed.constructor}});
+  assert.equal(setFirst.outputs[0].body, 'assigned first');
+  assert.equal(unaccessed.calls(), 0);
+});
+
+test('mutating bodyBytes before the first text read does not change its original text snapshot', () => {
+  for (const mode of ['request-body', 'response-body']) {
+    const spy = decodingSpy(), data = new Uint8Array(Buffer.from('原始文本🙂'));
+    const target = mode === 'request-body' ? '$request' : '$response';
+    const result = execute(`new Uint8Array(${target}.bodyBytes).fill(0);` +
+      `const before=decodeCalls(),text=${target}.body;$done({body:JSON.stringify([before,text,` +
+      `Array.from(new Uint8Array(${target}.bodyBytes))])});`,
+      {mode, request: {...request(), body: data}, response: mode === 'response-body' ? {body: data} : undefined,
+        globals: {String: spy.constructor, decodeCalls: spy.calls}});
+    const [before, text, bytes] = JSON.parse(result.outputs[0].body);
+    assert.equal(before, 0); assert.ok(spy.calls() > 0);
+    assert.equal(text, '原始文本🙂');
+    assert.deepEqual(bytes, new Array(data.length).fill(0));
+    assert.deepEqual(Array.from(data), [...Buffer.from('原始文本🙂')]);
+  }
+});
+
 test('binary views retain their byte ranges and facade mutations never touch native inputs', () => {
   const data = [0, 255, 128, 65, 0, 127, 1, 254];
   const factories = [
@@ -328,6 +473,43 @@ test('HTTP facade preserves byte slices in both directions and provides a text v
   assert.equal(actual.text, responseText);
   assert.deepEqual(actual.bytes, [...Buffer.from(responseText)]);
   assert.equal(padded[0], 0); assert.equal(padded[padded.length - 1], 0);
+});
+
+test('HTTP reply host fields survive native getters and binary-only consumers never decode text', async () => {
+  const spy = decodingSpy(), headers = {Result: 'native'}, bytes = Uint8Array.from([0, 255, 128, 7]);
+  let statusReads = 0;
+  const reply = {extra: 'keep'};
+  Object.defineProperty(reply, 'broken', {enumerable: true, get() { throw Error('unavailable extra'); }});
+  Object.setPrototypeOf(reply, {
+    get status() { statusReads++; return 207; },
+    get headers() { return headers; },
+    get url() { return 'https://example.invalid/final'; },
+  });
+  const result = execute('$task.fetch({url:"https://example.invalid"}).then(r=>{' +
+    'r.headers.Result="facade-only";$done({bodyBytes:r.bodyBytes,headers:{Status:r.status+"/"+r.statusCode,' +
+    'URL:r.url,Extra:r.extra}});});',
+    {mode: 'cron', httpClient: {get: (_, callback) => callback(null, reply, bytes)}, globals: {String: spy.constructor}});
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(spy.calls(), 0);
+  assert.equal(statusReads, 1);
+  assert.deepEqual(Array.from(result.outputs[0].body), [0, 255, 128, 7]);
+  assert.deepEqual(plain(result.outputs[0].headers), {
+    Status: '207/207', URL: 'https://example.invalid/final', Extra: 'keep',
+  });
+  assert.equal(headers.Result, 'native');
+});
+
+test('HTTP binary text remains an isolated snapshot when bytes change before its first read', async () => {
+  const spy = decodingSpy(), bytes = new Uint8Array(Buffer.from('HTTP 原文🙂'));
+  const result = execute('$task.fetch({url:"https://example.invalid"}).then(r=>{' +
+    'new Uint8Array(r.bodyBytes).fill(0);$done({body:r.body});});',
+    {mode: 'cron', httpClient: {get: (_, callback) => callback(null, {status: 200}, bytes)},
+      globals: {String: spy.constructor}});
+  assert.equal(spy.calls(), 0);
+  await new Promise(resolve => setImmediate(resolve));
+  assert.equal(result.outputs[0].body, 'HTTP 原文🙂');
+  assert.ok(spy.calls() > 0);
+  assert.deepEqual(Array.from(bytes), [...Buffer.from('HTTP 原文🙂')]);
 });
 
 const fixture = process.env.QX_RUNTIME_UPSTREAM;
