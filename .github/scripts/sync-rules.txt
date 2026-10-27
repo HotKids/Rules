@@ -43,6 +43,7 @@ https://raw.githubusercontent.com/Keywos/rule/main/script/wy/wy.sgmodule,CloudMu
 https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/split/partX/Xiaohongshu.sgmodule,RedNote #!name=小红书去广告 #!desc=小红书去广告，部分 App 需清除缓存或重新安装后才会生效 #!author=fmz200 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/RedPaper.png #!category=去广告
 https://raw.githubusercontent.com/fmz200/wool_scripts/main/Surge/module/weibo.module,Weibo #!name=微博去广告 #!desc=微博去广告，部分 App 需清除缓存或重新安装后才会生效 #!author=fmz200 #!icon=https://raw.githubusercontent.com/luestr/IconResource/main/App_icon/120px/Weibo.png #!category=去广告
 https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/MT.snippet,Meituan.sgmodule #!name=美团去广告 #!desc=美团去广告，部分 App 需清除缓存或重新安装后才会生效。⚠️ 私有协议接口可能导致部分用户无法联网，遇此情况请禁用本模块。 #!category=去广告
+https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/TxvideoAD.snippet,TencentVideo.sgmodule #!name=腾讯视频去广告 #!category=去广告
 https://raw.githubusercontent.com/ZenmoFeiShi/Qx/main/helloobike.snippet,HelloBike.sgmodule #!name=哈啰出行去广告 #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/高德地图去广告.sgmodule,Amap.stoverride #!category=去广告
 https://raw.githubusercontent.com/QingRex/LoonKissSurge/main/Surge/百度网盘去广告.sgmodule,BaiduNetdisk.stoverride #!category=去广告
