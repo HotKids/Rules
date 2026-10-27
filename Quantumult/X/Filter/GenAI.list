@@ -59,17 +59,6 @@ DOMAIN-KEYWORD,openaicom,GenAI
 # > AI Gateway
 DOMAIN,gateway.ai.cloudflare.com,GenAI
 
-# Cursor
-# https://cursor.com/docs/enterprise/network-configuration
-# https://cursor.com/help/troubleshooting/sign-in-domains
-DOMAIN-SUFFIX,cursor-cdn.com,GenAI
-DOMAIN-SUFFIX,cursor.com,GenAI
-DOMAIN-SUFFIX,cursor.sh,GenAI
-DOMAIN-SUFFIX,cursorapi.com,GenAI
-DOMAIN-SUFFIX,cursorvm.com,GenAI
-DOMAIN,accounts.spacex.ai,GenAI
-DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com,GenAI
-
 # Google
 # > AI Studio
 DOMAIN-SUFFIX,generativeai.google,GenAI
@@ -128,11 +117,19 @@ DOMAIN-SUFFIX,pplx.ai,GenAI
 DOMAIN,pplx-res.cloudinary.com,GenAI
 
 # xAI
+# https://cursor.com/docs/enterprise/network-configuration
 # https://cursor.com/help/troubleshooting/sign-in-domains
+DOMAIN-SUFFIX,cursor-cdn.com,GenAI
+DOMAIN-SUFFIX,cursor.com,GenAI
+DOMAIN-SUFFIX,cursor.sh,GenAI
+DOMAIN-SUFFIX,cursorapi.com,GenAI
+DOMAIN-SUFFIX,cursorvm.com,GenAI
 DOMAIN-SUFFIX,grok.com,GenAI
 DOMAIN-SUFFIX,grokipedia.com,GenAI
 DOMAIN-SUFFIX,grokusercontent.com,GenAI
 DOMAIN-SUFFIX,x.ai,GenAI
+DOMAIN,accounts.spacex.ai,GenAI
+DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com,GenAI
 
 # Canva
 # > Affinity

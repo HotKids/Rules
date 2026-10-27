@@ -62,17 +62,6 @@ payload:
   # > AI Gateway
   - DOMAIN,gateway.ai.cloudflare.com
 
-  # Cursor
-  # https://cursor.com/docs/enterprise/network-configuration
-  # https://cursor.com/help/troubleshooting/sign-in-domains
-  - DOMAIN-SUFFIX,cursor-cdn.com
-  - DOMAIN-SUFFIX,cursor.com
-  - DOMAIN-SUFFIX,cursor.sh
-  - DOMAIN-SUFFIX,cursorapi.com
-  - DOMAIN-SUFFIX,cursorvm.com
-  - DOMAIN,accounts.spacex.ai
-  - DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com
-
   # Google
   # > AI Studio
   - DOMAIN-SUFFIX,generativeai.google
@@ -131,11 +120,19 @@ payload:
   - DOMAIN,pplx-res.cloudinary.com
 
   # xAI
+  # https://cursor.com/docs/enterprise/network-configuration
   # https://cursor.com/help/troubleshooting/sign-in-domains
+  - DOMAIN-SUFFIX,cursor-cdn.com
+  - DOMAIN-SUFFIX,cursor.com
+  - DOMAIN-SUFFIX,cursor.sh
+  - DOMAIN-SUFFIX,cursorapi.com
+  - DOMAIN-SUFFIX,cursorvm.com
   - DOMAIN-SUFFIX,grok.com
   - DOMAIN-SUFFIX,grokipedia.com
   - DOMAIN-SUFFIX,grokusercontent.com
   - DOMAIN-SUFFIX,x.ai
+  - DOMAIN,accounts.spacex.ai
+  - DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com
 
   # Canva
   # > Affinity
