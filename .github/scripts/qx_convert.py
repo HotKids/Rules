@@ -12,7 +12,7 @@ import unicodedata
 from urllib.parse import urlsplit
 
 
-QX_BODY_LIMIT = 4 * 1024 * 1024
+QX_BODY_LIMIT = None
 _RULE_TYPES = {
     "host": "DOMAIN", "host-suffix": "DOMAIN-SUFFIX",
     "host-keyword": "DOMAIN-KEYWORD", "host-wildcard": "DOMAIN-WILDCARD",
@@ -113,11 +113,14 @@ def _script_prefix(value: str) -> str:
     return value
 
 
-def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_LIMIT,
-                      script_prefix: str | None = None, script_start: int = 0) -> str:
+def convert_qx_module(text: str, *, script_url=None, body_limit: int | None = QX_BODY_LIMIT,
+                      binary_body_urls=(), script_prefix: str | None = None, script_start: int = 0) -> str:
     """Return a Surge module, optionally mapping ``script_url(url, kind)``.
 
     Kinds are request, request-body, response, response-body, echo and cron.
+    Body limits are omitted by default so the client controls buffering. Explicit
+    positive limits remain available to callers. binary_body_urls names original
+    JS URLs whose body routes require the QX byte/text facade.
     Echo remains a distinct mapper kind although its Surge type is http-request.
     This lets the JS runtime convert QX's flat mock response without inventing a
     private ``argument`` parameter or changing the upstream script's arguments.
@@ -128,10 +131,11 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
     """
     if not isinstance(text, str) or not text.strip():
         raise ValueError("QX module is empty")
-    if not isinstance(body_limit, int) or isinstance(body_limit, bool) or body_limit <= 0:
+    if body_limit is not None and (not isinstance(body_limit, int) or isinstance(body_limit, bool) or body_limit <= 0):
         raise ValueError("QX body limit must be a positive number of bytes")
     if not isinstance(script_start, int) or isinstance(script_start, bool) or script_start < 0:
         raise ValueError("QX script start must be a nonnegative integer")
+    binary_body_urls = frozenset(binary_body_urls)
     source_lines = text.lstrip("\ufeff").splitlines()
     if script_prefix is None:
         script_prefix = "QX"
@@ -193,11 +197,16 @@ def convert_qx_module(text: str, *, script_url=None, body_limit: int = QX_BODY_L
             action = action.lower()
             if action in _SCRIPT_TYPES:
                 kind, requires_body, mapper_kind = _SCRIPT_TYPES[action]
-                url = mapped_url(value, mapper_kind, number)
+                original = _script_url(value, number)
+                url = mapped_url(original, mapper_kind, number)
                 scripts += 1
                 options = [f"type={kind}", f"pattern={_csv_value(pattern, number)}"]
                 if requires_body:
-                    options += ["requires-body=true", f"max-size={body_limit}"]
+                    options.append("requires-body=true")
+                    if original in binary_body_urls:
+                        options.append("binary-body-mode=true")
+                    if body_limit is not None:
+                        options.append(f"max-size={body_limit}")
                 options.append(f"script-path={_csv_value(url, number)}")
                 add("Script", f"{script_prefix}_{scripts} = " + ",".join(options))
             elif action in {"reject-200", "reject-dict", "reject-array", "reject-img"}:

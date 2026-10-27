@@ -7,7 +7,7 @@ import yaml
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-from qx_convert import convert_qx_module, is_qx_module, QX_BODY_LIMIT
+from qx_convert import convert_qx_module, is_qx_module
 from module_convert import parse_module, render_stash, merge_modules
 
 
@@ -218,7 +218,7 @@ host-wildcard,*.custom.example.invalid,REJECT-CUSTOM
         self.assertNotIn("requires-body", sections["Script"][0])
         self.assertIn("type=http-request", sections["Script"][-1])
         self.assertIn("requires-body=true", sections["Script"][-1])
-        self.assertEqual(actual.count(f"max-size={QX_BODY_LIMIT}"), 3)
+        self.assertNotIn("max-size=", actual)
         self.assertNotIn("argument=", actual)
         self.assertNotIn("sessionIndex", actual)
 
@@ -233,6 +233,7 @@ hostname = ads.example.invalid
         converted = convert_qx_module(source)
         self.assertNotIn("[Rule]", converted)
         self.assertNotIn(" - reject", converted)
+
         self.assertIn("hostname = %APPEND% ads.example.invalid", converted)
         stash, warnings = render_stash(merge_modules([("fixture", converted, {})]), "Fixture.stoverride")
         self.assertEqual(warnings, [])
@@ -240,6 +241,23 @@ hostname = ads.example.invalid
         self.assertEqual([mock["status-code"] for mock in mocks], [200] * 4)
         self.assertEqual([mock.get("text") for mock in mocks[:3]], ["", "{}", "[]"])
         self.assertIn("base64", mocks[-1])
+
+    def test_binary_mode_is_per_original_url_and_body_limits_are_opt_in(self):
+        binary = "https://example.invalid/bytes.js"
+        text = "https://example.invalid/text.js"
+        source = (f"^https://example.invalid/a url script-response-body {binary}\n"
+                  f"^https://example.invalid/b url script-response-body {text}\n"
+                  f"^https://example.invalid/c url script-response-header {binary}\n")
+        actual = convert_qx_module(source, binary_body_urls={binary},
+                                   script_url=lambda *_: "https://example.invalid/bundle.js")
+        _, sections = parse_module(actual)
+        self.assertEqual(actual.count("binary-body-mode=true"), 1)
+        self.assertIn("binary-body-mode=true", sections["Script"][0])
+        self.assertNotIn("binary-body-mode", sections["Script"][1])
+        self.assertNotIn("binary-body-mode", sections["Script"][2])
+        self.assertNotIn("max-size=", actual)
+        explicit = convert_qx_module(source, body_limit=16384, binary_body_urls={binary})
+        self.assertEqual(explicit.count("max-size=16384"), 2)
 
     def test_patterns_and_script_urls_remain_exact(self):
         pattern = r"^https?:\/\/(?:api|marketingapi)\.example\.invalid(?::\d+)?\/api(?:\?|$)"

@@ -60,14 +60,14 @@ IP-CIDR6,2402:4e00:40:40::2:373/128,REJECT,no-resolve
 ^http:\/\/103\.37\.155\.60\/fetch - reject
 
 [Script]
-美团去广告_1 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/aggroup\/indexTab,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_2 = type=http-response,pattern=^https?:\/\/feedguess\.meituan\.com\/lycoris\/scene\/(gwc_feed1_2265|personalcenter_2154)(\?|$),requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_3 = type=http-response,pattern=^https?:\/\/mt-personalcenter\.meituan\.com\/usercenter\/display,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_4 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/defaultword,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_5 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/hotword\/city\/divide\/hotrecommend\/,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_6 = type=http-response,pattern=^https?:\/\/assistify\.meituan\.com\/assistant\/getAppClientHornConfig,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_7 = type=http-response,pattern=^https?:\/\/mop\.meituan\.com\/mop\/entry\/shoppingCartEntry,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
-美团去广告_8 = type=http-response,pattern=^https?:\/\/mop\.meituan\.com\/api\/entryModule\/startupPicture,requires-body=true,max-size=4194304,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_1 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/aggroup\/indexTab,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_2 = type=http-response,pattern=^https?:\/\/feedguess\.meituan\.com\/lycoris\/scene\/(gwc_feed1_2265|personalcenter_2154)(\?|$),requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_3 = type=http-response,pattern=^https?:\/\/mt-personalcenter\.meituan\.com\/usercenter\/display,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_4 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/defaultword,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_5 = type=http-response,pattern=^https?:\/\/apimobile\.meituan\.com\/group\/v1\/deal\/searchpage\/hotword\/city\/divide\/hotrecommend\/,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_6 = type=http-response,pattern=^https?:\/\/assistify\.meituan\.com\/assistant\/getAppClientHornConfig,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_7 = type=http-response,pattern=^https?:\/\/mop\.meituan\.com\/mop\/entry\/shoppingCartEntry,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
+美团去广告_8 = type=http-response,pattern=^https?:\/\/mop\.meituan\.com\/api\/entryModule\/startupPicture,requires-body=true,script-path=https://raw.githubusercontent.com/ZenmoFeiShi/Qx/refs/heads/main/MT.js
 
 [MITM]
 hostname = %APPEND% apimobile.meituan.com, feedguess.meituan.com, mop.meituan.com, mt-personalcenter.meituan.com, assistify.meituan.com, httpdns.meituan.com, httpdnsmultiapi.meituan.com

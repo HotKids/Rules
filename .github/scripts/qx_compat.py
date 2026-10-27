@@ -7,6 +7,7 @@ may deliberately cause a conservative false negative.
 """
 from __future__ import annotations
 
+import ast
 import re
 
 
@@ -206,3 +207,96 @@ def can_use_upstream(source: str, mode: str) -> bool:
         if following in _ASSIGNMENTS:
             return False
     return done_count > 0
+
+
+def _literal_property(tokens):
+    """Resolve literal string concatenation in a computed property only."""
+    if not tokens or len(tokens) % 2 == 0:
+        return None
+    values = []
+    for index, (kind, value) in enumerate(tokens):
+        if index % 2:
+            if value != "+": return None
+        elif kind != "string" or len(value) > 128:
+            return None
+        else:
+            try: decoded = ast.literal_eval(value)
+            except (SyntaxError, ValueError): return None
+            if not isinstance(decoded, str): return None
+            values.append(decoded)
+    return "".join(values)
+
+
+def requires_binary_body(source: str) -> bool:
+    """Detect native QX byte-body access without executing the script.
+
+    Inspect direct/optional properties, literal computed properties, simple
+    host aliases and destructuring. Other objects' bodyBytes fields, comments,
+    strings do not select native binary mode. Dynamic computed host properties
+    and unrecognized lexical forms with possible host byte access are rejected
+    before publication instead of silently using text mode.
+    """
+    tokens = _tokens(source)
+    if tokens is None:
+        if "bodyBytes" in source and re.search(r"\$(?:request|response)\b", source):
+            raise ValueError("Cannot determine QX binary body requirements")
+        return False
+    hosts = {"$request", "$response"}
+    # A conservative alias overapproximation cannot change the script source;
+    # it only requests both byte and text input views from the shared runtime.
+    changed = True
+    while changed:
+        changed = False
+        for index, (kind, value) in enumerate(tokens):
+            if kind != "identifier" or value not in hosts:
+                continue
+            before, after = index - 1, index + 1
+            while before >= 0 and tokens[before][1] == "(": before -= 1
+            while after < len(tokens) and tokens[after][1] == ")": after += 1
+            direct_object = after == len(tokens) or tokens[after][1] in {";", ","}
+            if direct_object and before >= 1 and tokens[before][1] == "=":
+                target_kind, target = tokens[before - 1]
+                prior = tokens[before - 2][1] if before >= 2 else None
+                if target_kind == "identifier" and prior not in {".", "?."} and target not in hosts:
+                    hosts.add(target); changed = True
+    for index, (kind, value) in enumerate(tokens):
+        if kind != "identifier" or value not in hosts:
+            continue
+        if index and tokens[index - 1][1] in {".", "?."}:
+            continue
+        after = index + 1
+        while after < len(tokens) and tokens[after][1] == ")": after += 1
+        if after < len(tokens) and tokens[after][1] in {".", "?."}:
+            after += 1
+            if after < len(tokens) and tokens[after] == ("identifier", "bodyBytes"):
+                # A plain assignment does not read the native body.
+                if after + 1 == len(tokens) or tokens[after + 1][1] != "=":
+                    return True
+        if after < len(tokens) and tokens[after][1] == "[":
+            end = _closing(tokens, after)
+            if end is not None and (end + 1 == len(tokens) or tokens[end + 1][1] != "="):
+                property_name = _literal_property(tokens[after + 1:end])
+                if property_name is None:
+                    raise ValueError("Cannot determine QX binary body requirements")
+                if property_name == "bodyBytes":
+                    return True
+        # const {bodyBytes: bytes} = $response (including a simple host alias).
+        before = index - 1
+        while before >= 0 and tokens[before][1] == "(": before -= 1
+        if before >= 1 and tokens[before][1] == "=" and tokens[before - 1][1] == "}":
+            end = before - 1
+            start = next((j for j in range(end - 1, -1, -1)
+                          if tokens[j][1] == "{" and _closing(tokens, j) == end), None)
+            if start is not None:
+                depth, at_key = 0, True
+                for key_kind, key in tokens[start + 1:end]:
+                    if not depth:
+                        if key == ",": at_key = True
+                        elif at_key:
+                            if (key_kind == "identifier" and key == "bodyBytes"
+                                    or key_kind == "string" and _literal_property([(key_kind, key)]) == "bodyBytes"):
+                                return True
+                            at_key = False
+                    if key in {"{", "[", "("}: depth += 1
+                    elif key in {"}", "]", ")"}: depth -= 1
+    return False

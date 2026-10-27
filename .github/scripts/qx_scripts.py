@@ -15,7 +15,7 @@ from urllib.parse import urlsplit
 from _common import write_if_changed
 from module_convert import module_targets, parse_module, _options
 from qx_convert import convert_qx_module, is_qx_module
-from qx_compat import can_use_upstream
+from qx_compat import can_use_upstream, requires_binary_body
 
 
 OWNERS_FILE = ".github/scripts/qx-scripts-owned.json"
@@ -238,7 +238,7 @@ def prepare_qx_modules(entries, prefetched, root, download_scripts):
             raise ValueError("QX script labels collide with native scripts in the same module")
         plans[target] = (source_plans, routes)
 
-    bodies, direct = {}, set()
+    bodies, direct, binary = {}, set(), set()
     if references:
         urls = list(dict.fromkeys(url for url, _mode in references))
         bodies = download_scripts(urls)
@@ -253,6 +253,8 @@ def prepare_qx_modules(entries, prefetched, root, download_scripts):
             # proxy script scope. A standalone function body avoids rejecting
             # valid local declarations while still parsing without execution.
             _validate_script("(function () {\n" + body + "\n});\n", identifier)
+            if requires_binary_body(body):
+                binary.add(url)
             modes = {mode for ref, mode in references if ref == url}
             if all(can_use_upstream(body, mode) for mode in modes):
                 direct.add(url)
@@ -280,7 +282,7 @@ def prepare_qx_modules(entries, prefetched, root, download_scripts):
             bundle_url = RAW_SCRIPT_BASE + basename
         for url, (title, start) in source_plans.items():
             converted[(target, url)] = convert_qx_module(
-                sources[url], script_prefix=title, script_start=start,
+                sources[url], script_prefix=title, script_start=start, binary_body_urls=binary,
                 script_url=lambda original, _mode: original if original in direct else bundle_url)
     owners = _read_owners(root)
     batch = PreparedQxModules(root, entries, sources, converted, scripts, owners)

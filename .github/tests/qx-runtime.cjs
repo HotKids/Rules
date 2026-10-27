@@ -187,6 +187,110 @@ test('request mocks do not capture bodies and done completes only once', () => {
   assert.equal(result.store.size, 0);
 });
 
+test('binary request and response bodies expose exact bytes and UTF-8 text without browser APIs', () => {
+  const text = '中文🙂\0' + 'a'.repeat(8191) + '🧪结束', data = Buffer.from(text);
+  for (const platform of ['surge', 'stash']) for (const mode of ['request-body', 'response-body']) {
+    const padded = new Uint8Array(data.length + 4); padded.set(data, 2);
+    const input = padded.subarray(2, padded.length - 2), original = Array.from(padded);
+    const target = mode === 'request-body' ? '$request' : '$response';
+    const result = execute(`$done({body:JSON.stringify({text:${target}.body,` +
+      `bytes:Array.from(new Uint8Array(${target}.bodyBytes)),decoder:typeof TextDecoder})});`,
+      {mode, platform, request: {...request(), body: input}, response: mode === 'response-body' ? {body: input} : undefined});
+    const actual = JSON.parse(result.outputs[0].body);
+    assert.equal(actual.text, text);
+    assert.deepEqual(actual.bytes, [...data]);
+    assert.equal(actual.decoder, 'undefined');
+    assert.deepEqual(Array.from(padded), original);
+  }
+});
+
+test('binary views retain their byte ranges and facade mutations never touch native inputs', () => {
+  const data = [0, 255, 128, 65, 0, 127, 1, 254];
+  const factories = [
+    () => Uint8Array.from(data).buffer,
+    () => Uint8Array.from([9, ...data, 8]).subarray(1, 9),
+    () => new DataView(Uint8Array.from([9, ...data, 8]).buffer, 1, 8),
+    () => new Uint16Array(Uint8Array.from([9, 9, ...data, 8, 8]).buffer, 2, 4),
+    () => vm.runInNewContext('new Uint8Array(' + JSON.stringify([9, ...data, 8]) + ').subarray(1,9)'),
+  ];
+  for (const make of factories) {
+    const input = make(), raw = ArrayBuffer.isView(input)
+      ? new Uint8Array(input.buffer, input.byteOffset, input.byteLength) : new Uint8Array(input);
+    const result = execute('const b=new Uint8Array($response.bodyBytes);' +
+      'const before=Array.from(b);b[0]=99;$response.body="changed";' +
+      '$done({body:JSON.stringify(before)});', {response: {body: input}});
+    assert.deepEqual(JSON.parse(result.outputs[0].body), data);
+    assert.deepEqual(Array.from(raw), data);
+  }
+  const buffer = Uint8Array.from(data).buffer;
+  const explicit = execute('$done({body:JSON.stringify({text:$response.body,bytes:Array.from(new Uint8Array($response.bodyBytes))})});',
+    {response: {body: 'native-text', bodyBytes: buffer}});
+  assert.deepEqual(JSON.parse(explicit.outputs[0].body), {text: 'native-text', bytes: data});
+});
+
+test('UTF-8 replacement decoding agrees with the standard while preserving every raw byte', () => {
+  const samples = [[239, 187, 191, 65], [239, 187, 191, 239, 187, 191],
+    [226, 40, 161], [224, 159, 128], [237, 160, 128], [244, 144, 128, 128],
+    [225, 128], [194, 65], [240, 159, 167, 170], [244, 143, 191, 191], []];
+  for (let byte = 0; byte < 256; byte++) samples.push([byte]);
+  let seed = 123456789;
+  for (let index = 0; index < 256; index++) {
+    const bytes = [];
+    for (let n = 0; n < index % 17; n++) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; bytes.push(seed >>> 24); }
+    samples.push(bytes);
+  }
+  const context = {samples, Uint8Array};
+  vm.runInNewContext(runtime + '\nglobalThis.results=samples.map(sample=>{' +
+    'const bridge=createQxRuntime({response:{body:new Uint8Array(sample)}});' +
+    'return {text:bridge.response.body,bytes:Array.from(new Uint8Array(bridge.response.bodyBytes))};});', context);
+  const expected = samples.map(sample => ({text: new TextDecoder().decode(Uint8Array.from(sample)), bytes: sample}));
+  assert.deepEqual(plain(context.results), expected);
+});
+
+test('binary completions normalize ArrayBuffers and sliced views to isolated Uint8Arrays', () => {
+  const expressions = ['bytes.buffer.slice(1,5)', 'bytes.subarray(1,5)',
+    'new DataView(bytes.buffer,1,4)', 'new Uint16Array(bytes.buffer,2,2)'];
+  for (const expression of expressions) for (const mode of ['request-body', 'response-body', 'echo']) {
+    const expected = expression.includes('Uint16Array') ? [255, 128, 7, 88] : [0, 255, 128, 7];
+    const result = execute('const bytes=new Uint8Array([99,0,255,128,7,88]);' +
+      `const value={bodyBytes:${expression}};$done(value);` +
+      'if(!Object.prototype.hasOwnProperty.call(value,"bodyBytes"))throw Error("mutated result");' +
+      'bytes.fill(42);$done({body:"ignored"});', {mode, request: request()});
+    assert.equal(result.outputs.length, 1);
+    const actual = mode === 'echo' ? result.outputs[0].response : result.outputs[0];
+    assert.equal(Object.prototype.toString.call(actual.body), '[object Uint8Array]');
+    assert.deepEqual(Array.from(actual.body), expected);
+    assert.equal(Object.prototype.hasOwnProperty.call(actual, 'bodyBytes'), false);
+    assert.equal(result.store.size, 0);
+  }
+  const bytesBody = execute('$done({body:new Uint8Array([0,255]).buffer});');
+  assert.equal(Object.prototype.toString.call(bytesBody.outputs[0].body), '[object Uint8Array]');
+  assert.deepEqual(Array.from(bytesBody.outputs[0].body), [0, 255]);
+  const invalid = execute('$done({bodyBytes:"not an ArrayBuffer"});');
+  assert.deepEqual(plain(invalid.outputs), [{}]);
+});
+
+test('one binary route can process a JSON text view and leave other bytes untouched', () => {
+  const result = execute('const body=JSON.parse($response.body);body.tab_gray=false;' +
+    '$done({body:JSON.stringify(body)});', {response: {body: new Uint8Array(Buffer.from('{"tab_gray":true,"label":"中文"}'))}});
+  assert.deepEqual(JSON.parse(result.outputs[0].body), {tab_gray: false, label: '中文'});
+  const passthrough = execute('$done({});', {response: {body: Uint8Array.from([0, 255, 1])}});
+  assert.deepEqual(plain(passthrough.outputs), [{}]);
+  const text = execute('if(Object.prototype.hasOwnProperty.call($response,"bodyBytes"))throw Error("added bytes to text");$done({body:$response.body});',
+    {response: {body: 'unchanged text'}});
+  assert.equal(text.outputs[0].body, 'unchanged text');
+});
+
+test('binary request data is never persisted as lossy text in the string-only context cache', () => {
+  for (const source of ['$done({});', '$done({bodyBytes:$request.bodyBytes});']) {
+    const original = {...request(), body: Uint8Array.from([0, 255, 128, 65])}, store = new Map();
+    execute(source, {mode: 'request-body', request: original, store});
+    assert.equal(store.size, 0);
+    const later = execute(observedBody, {request: responseRequest(original), store});
+    assert.deepEqual(plain(later.outputs), [{}]);
+  }
+});
+
 test('HTTP facade dispatches methods, resolves response status and rejects network failures', async () => {
   const original = {url: 'https://example.invalid', method: 'PUT', headers: {Example: 'keep'}};
   const httpClient = {put: (options, callback) => {
@@ -204,6 +308,26 @@ test('HTTP facade dispatches methods, resolves response status and rejects netwo
     {mode: 'cron', httpClient: {get: (_, callback) => callback('offline')}});
   await new Promise(resolve => setImmediate(resolve));
   assert.equal(failed.outputs[0].body, 'offline');
+});
+
+test('HTTP facade preserves byte slices in both directions and provides a text view', async () => {
+  const responseText = '{"label":"中文🙂"}', bytes = new Uint8Array(Buffer.from(responseText));
+  const padded = new Uint8Array(bytes.length + 2); padded.set(bytes, 1);
+  const httpClient = {post: (options, callback) => {
+    assert.equal(Object.prototype.toString.call(options.body), '[object Uint8Array]');
+    assert.deepEqual(Array.from(options.body), [0, 255, 128]);
+    assert.equal(Object.prototype.hasOwnProperty.call(options, 'bodyBytes'), false);
+    callback(null, {status: 200}, new DataView(padded.buffer, 1, bytes.length));
+  }};
+  const result = execute('const bytes=new Uint8Array([99,0,255,128,88]);' +
+    'const options={url:"https://example.invalid",method:"POST",bodyBytes:bytes.subarray(1,4)};' +
+    '$task.fetch(options).then(r=>$done({body:JSON.stringify({text:r.body,bytes:Array.from(new Uint8Array(r.bodyBytes))})}));' +
+    'if(!Object.prototype.hasOwnProperty.call(options,"bodyBytes"))throw Error("mutated HTTP options");', {mode: 'cron', httpClient});
+  await new Promise(resolve => setImmediate(resolve));
+  const actual = JSON.parse(result.outputs[0].body);
+  assert.equal(actual.text, responseText);
+  assert.deepEqual(actual.bytes, [...Buffer.from(responseText)]);
+  assert.equal(padded[0], 0); assert.equal(padded[padded.length - 1], 0);
 });
 
 const fixture = process.env.QX_RUNTIME_UPSTREAM;

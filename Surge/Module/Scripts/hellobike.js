@@ -6,9 +6,79 @@ function createQxRuntime(native, mode, namespace) {
   'use strict';
   const own = (value, key) => value != null && Object.prototype.hasOwnProperty.call(value, key);
   const clone = value => value && typeof value === 'object' ? Object.assign({}, value) : value;
+  const copyBytes = value => {
+    if (value == null || typeof value !== 'object') return null;
+    try {
+      let view;
+      if (ArrayBuffer.isView(value)) view = new Uint8Array(value.buffer, value.byteOffset, value.byteLength);
+      else if (Object.prototype.toString.call(value) === '[object ArrayBuffer]') view = new Uint8Array(value);
+      else return null;
+      return new Uint8Array(view);
+    } catch (_) { return null; }
+  };
+  function utf8Text(value) {
+    // Follow UTF-8 replacement decoding without depending on browser TextDecoder.
+    // The separate byte view always retains the original, potentially non-text data.
+    let code = 0, needed = 0, seen = 0, lower = 128, upper = 191, chunk = '';
+    const parts = [];
+    const append = point => {
+      chunk += String.fromCodePoint(point);
+      if (chunk.length >= 8192) { parts.push(chunk); chunk = ''; }
+    };
+    for (let index = 0; index < value.length; index++) {
+      const byte = value[index];
+      if (needed === 0) {
+        if (byte < 128) append(byte);
+        else if (byte >= 194 && byte <= 223) { needed = 1; code = byte & 31; }
+        else if (byte >= 224 && byte <= 239) {
+          needed = 2; code = byte & 15;
+          if (byte === 224) lower = 160;
+          if (byte === 237) upper = 159;
+        } else if (byte >= 240 && byte <= 244) {
+          needed = 3; code = byte & 7;
+          if (byte === 240) lower = 144;
+          if (byte === 244) upper = 143;
+        } else append(65533);
+        continue;
+      }
+      if (byte < lower || byte > upper) {
+        code = needed = seen = 0; lower = 128; upper = 191;
+        append(65533); index--;
+        continue;
+      }
+      lower = 128; upper = 191;
+      code = (code << 6) | (byte & 63);
+      if (++seen === needed) { append(code); code = needed = seen = 0; }
+    }
+    if (needed) append(65533);
+    parts.push(chunk);
+    const text = parts.join('');
+    return text.charCodeAt(0) === 65279 ? text.slice(1) : text;
+  }
+  const exposeBody = value => {
+    if (!value || typeof value !== 'object') return value;
+    const data = copyBytes(value.bodyBytes) || copyBytes(value.body);
+    if (data) {
+      value.bodyBytes = data.buffer;
+      if (typeof value.body !== 'string') value.body = utf8Text(data);
+    }
+    return value;
+  };
+  const nativeBody = value => {
+    if (!own(value, 'body') && own(value, 'bodyBytes')) {
+      const data = copyBytes(value.bodyBytes);
+      if (!data) throw new TypeError('Invalid binary body');
+      value.body = data;
+    } else if (own(value, 'body')) {
+      const data = copyBytes(value.body);
+      if (data) value.body = data;
+    }
+    delete value.bodyBytes;
+    return value;
+  };
   const stage = String(mode || '').replace(/-body$/, '');
-  const request = clone(native.request);
-  const response = clone(native.response);
+  const request = exposeBody(clone(native.request));
+  const response = exposeBody(clone(native.response));
   if (request && request.headers) request.headers = clone(request.headers);
   if (response && response.headers) response.headers = clone(response.headers);
   const store = native.persistentStore;
@@ -111,9 +181,7 @@ function createQxRuntime(native, mode, namespace) {
     return null;
   };
   const normalize = value => {
-    const result = value && typeof value === 'object' ? clone(value) : {};
-    if (!own(result, 'body') && own(result, 'bodyBytes')) result.body = result.bodyBytes;
-    delete result.bodyBytes;
+    const result = nativeBody(value && typeof value === 'object' ? clone(value) : {});
     if (own(result, 'status')) {
       const number = status(result.status);
       if (number == null) return {};
@@ -159,8 +227,8 @@ function createQxRuntime(native, mode, namespace) {
     const outgoing = typeof options === 'string' ? {url: options} : clone(options);
     if (!outgoing || typeof outgoing.url !== 'string') return reject({error: 'Invalid HTTP request'});
     if (outgoing.headers) outgoing.headers = clone(outgoing.headers);
-    if (!own(outgoing, 'body') && own(outgoing, 'bodyBytes')) outgoing.body = outgoing.bodyBytes;
-    delete outgoing.bodyBytes;
+    try { nativeBody(outgoing); }
+    catch (_) { return reject({error: 'Invalid binary body'}); }
     if (outgoing.opts && typeof outgoing.opts === 'object') {
       if (!own(outgoing, 'policy') && own(outgoing.opts, 'policy')) outgoing.policy = outgoing.opts.policy;
       if (!own(outgoing, 'auto-redirect') && own(outgoing.opts, 'redirection')) outgoing['auto-redirect'] = outgoing.opts.redirection;
@@ -175,8 +243,11 @@ function createQxRuntime(native, mode, namespace) {
         if (!own(result, 'status')) result.status = result.statusCode;
         if (typeof data === 'string') result.body = data;
         else if (data != null) {
-          result.bodyBytes = data;
-          if (!own(result, 'body')) result.body = '';
+          const binary = copyBytes(data);
+          if (binary) {
+            result.bodyBytes = binary.buffer;
+            result.body = utf8Text(binary);
+          } else if (!own(result, 'body')) result.body = '';
         } else if (!own(result, 'body')) result.body = '';
         resolve(result);
       });

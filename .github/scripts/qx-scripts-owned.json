@@ -1,7 +1,7 @@
 {
   "version": 1,
   "files": {
-    "Surge/Module/Scripts/hellobike.js": "d31b5cb9253af4011a7ec5375f0abb532dc7d3911bff6049e698b8c04915d3b1",
-    "Surge/Module/Scripts/tencentvideo.js": "585c7a3cfe1fd3955cabd7a82a985445a21927784bf74b8ed94e65e4e092ca76"
+    "Surge/Module/Scripts/hellobike.js": "78cea303a0fa1f480985ee2074a364443a2217e16cdd643843fab3d3492953ee",
+    "Surge/Module/Scripts/tencentvideo.js": "ea5d06adc2f03242597fa14e6ebbf667fc0083cb1f90a6bbb1728c8a854495da"
   }
 }

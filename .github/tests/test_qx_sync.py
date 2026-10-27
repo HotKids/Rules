@@ -16,6 +16,7 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 sys.path.insert(0, str(SCRIPTS))
 import _common
 import qx_scripts
+from qx_compat import can_use_upstream
 
 
 SOURCE_URL = "https://example.invalid/example.snippet"
@@ -116,6 +117,50 @@ process.stdout.write(JSON.stringify({result, count, calls: context.calls}));
         before = self.snapshot()
         self.runner.fetch_external_modules(self.rules, texts, prepared_qx=plan)
         self.assertEqual(before, self.snapshot())
+
+    def test_binary_modes_follow_the_original_source_url_and_render_for_both_clients(self):
+        text_url = "https://example.invalid/plain.js"
+        binary_source = ('$done({bodyBytes: typeof $response === "undefined" '
+                         '? $request.bodyBytes : $response.bodyBytes});')
+        plain_source = '$done({body:$response.body});'
+        source = ("#!name=Mixed fixture\n"
+                  f"^https://example.invalid/a url script-request-body {JS_URL}\n"
+                  f"^https://example.invalid/a url script-response-body {JS_URL}\n"
+                  f"^https://example.invalid/plain url script-response-body {text_url}\n"
+                  "hostname = example.invalid\n")
+        self.rules["module"][0]["name"] = "Generic"
+        with patch.object(qx_scripts, "can_use_upstream", side_effect=can_use_upstream):
+            plan = self.prepare({SOURCE_URL: source}, lambda _urls: {JS_URL: binary_source, text_url: plain_source})
+        converted = plan.source_text(SOURCE_URL, "Generic.sgmodule", "")
+        scripts = [line for line in converted.splitlines() if " = type=" in line]
+        self.assertEqual(converted.count("binary-body-mode=true"), 2)
+        self.assertTrue(all("binary-body-mode=true" in line for line in scripts[:2]))
+        self.assertNotIn("binary-body-mode", scripts[2])
+        self.assertIn("script-path=" + text_url, scripts[2])
+        self.assertNotIn("max-size=", converted)
+        bundle = next(iter(plan.scripts.values()))
+        self.assertIn("// BEGIN UPSTREAM SOURCE\n" + binary_source + "\n// END UPSTREAM SOURCE", bundle)
+        self.assertNotIn(plain_source, bundle)
+        self.runner.fetch_external_modules(self.rules, {SOURCE_URL: source}, prepared_qx=plan)
+        import yaml
+        stash = yaml.safe_load((self.root / "Surge/Module/Stash/Generic.stoverride").read_text())
+        jobs = stash["http"]["script"]
+        self.assertEqual([job.get("binary-mode", False) for job in jobs], [True, True, False])
+        self.assertTrue(all("max-size" not in job for job in jobs))
+        before = self.snapshot()
+        self.runner.fetch_external_modules(self.rules, {SOURCE_URL: source}, prepared_qx=plan)
+        self.assertEqual(before, self.snapshot())
+
+    def test_unrecognized_binary_inspection_fails_before_any_output_changes(self):
+        module = self.root / "Surge/Module/Generic.sgmodule"
+        module.parent.mkdir(parents=True)
+        module.write_text("previous module")
+        before = self.snapshot()
+        for source in ('const value=`${$response.bodyBytes}`; $done({body:value});',
+                       'const key="bodyBytes"; $done({body:$response[key]});'):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "binary body requirements"):
+                self.prepare(download=lambda _urls: {JS_URL: source})
+            self.assertEqual(before, self.snapshot())
 
     def test_standalone_call_downloads_configs_then_one_deduplicated_script_batch(self):
         calls = []

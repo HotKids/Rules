@@ -4,7 +4,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
-from qx_compat import can_use_upstream
+from qx_compat import can_use_upstream, requires_binary_body
 
 
 SHARED = r'''
@@ -20,6 +20,50 @@ else {
 
 
 class QxCompatibilityTests(unittest.TestCase):
+    def test_native_byte_access_selects_binary_mode_without_app_names(self):
+        for source in (
+            '$done({bodyBytes:$request.bodyBytes});',
+            'const bytes=$response?.bodyBytes; $done({});',
+            'const bytes=($response)["bodyBytes"]; $done({});',
+            'const bytes=$request?.["body"+"Bytes"]; $done({});',
+            'const original=$request; const alias=original; $done({bodyBytes:alias.bodyBytes});',
+            'const {bodyBytes:bytes}=$response',
+            'const {headers, "bodyBytes":bytes}=$request; $done({});',
+        ):
+            with self.subTest(source=source):
+                self.assertTrue(requires_binary_body(source))
+                self.assertFalse(can_use_upstream(source, "response-body"))
+
+    def test_non_native_bytes_mentions_do_not_select_binary_mode(self):
+        for source in (
+            '// $response.bodyBytes\n$done({body:$response.body});',
+            'const note="$request.bodyBytes"; $done({});',
+            'const pattern=/\\$response.bodyBytes/; $done({});',
+            'const response={bodyBytes:1}; $done({body:response.bodyBytes});',
+            'const url=$request.url; const part=url.split("/")[index]; $done({body:part});',
+            'const {body:bodyBytes}=$response; $done({body:bodyBytes});',
+            'const {headers:{bodyBytes}}=$response; $done({});',
+            '$task.fetch({url:"https://example.invalid"}).then(r=>$done({bodyBytes:r.bodyBytes}));',
+            'const note=`ordinary ${value}`; $done({body:$response.body});',
+            '$response.bodyBytes=new ArrayBuffer(0); $done({});',
+        ):
+            with self.subTest(source=source):
+                self.assertFalse(requires_binary_body(source))
+
+    def test_dynamic_computed_native_reads_fail_instead_of_assuming_text_mode(self):
+        for source in (
+            'const key="bodyBytes"; $done({body:$response[key]});',
+            'const req=$request; $done({body:req[property]});',
+            '$done({body:$response?.[getProperty()]});',
+        ):
+            with self.subTest(source=source), self.assertRaisesRegex(ValueError, "binary body requirements"):
+                requires_binary_body(source)
+        self.assertFalse(requires_binary_body('$response[property]=value; $done({});'))
+
+    def test_unknown_lexical_forms_with_possible_host_bytes_fail_before_publication(self):
+        with self.assertRaisesRegex(ValueError, "binary body requirements"):
+            requires_binary_body('const text=`${$response.bodyBytes}`; $done({body:text});')
+
     def test_shared_body_script_and_input_guards_can_keep_the_upstream_url(self):
         self.assertTrue(can_use_upstream(SHARED, "response-body"))
         self.assertTrue(can_use_upstream('$done({body:$request.body});', "request-body"))
