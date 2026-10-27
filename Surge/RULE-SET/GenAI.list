@@ -18,35 +18,42 @@ DOMAIN-SUFFIX,gateway.icloud.com
 
 # Anthropic
 # > Claude
+// https://code.claude.com/docs/en/network-config
+// https://code.claude.com/docs/en/desktop
+DOMAIN-SUFFIX,anthropic.com
 DOMAIN-SUFFIX,clau.de
 DOMAIN-SUFFIX,claude.ai
+DOMAIN-SUFFIX,claude.app
 DOMAIN-SUFFIX,claude.com
-DOMAIN-SUFFIX,anthropic.com
+DOMAIN-SUFFIX,claudemcpcontent.com
 DOMAIN-SUFFIX,claudeusercontent.com
 IP-CIDR,160.79.104.0/21,no-resolve
 IP-CIDR6,2607:6bc0::/32,no-resolve
 
 # OpenAI
 # > ChatGPT
+// https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
 AND,((DOMAIN-KEYWORD,openaicom-api-), (DOMAIN-SUFFIX,azurefd.net))
 AND,((DOMAIN-KEYWORD,chatgpt-async-webps-prod-), (DOMAIN-SUFFIX,webpubsub.azure.com))
-DOMAIN,chatgpt.livekit.cloud
-DOMAIN,host.livekit.cloud
-DOMAIN,turn.livekit.cloud
 DOMAIN-SUFFIX,chat.com
 DOMAIN-SUFFIX,chatgpt.com
 DOMAIN-SUFFIX,livekit.cloud
 DOMAIN-SUFFIX,oaistatic.com
+DOMAIN-SUFFIX,oaistatsig.com
 DOMAIN-SUFFIX,oaiusercontent.com
 DOMAIN-SUFFIX,openai.com
 DOMAIN-SUFFIX,sora.com
-DOMAIN,api.statsig.com
 DOMAIN,api-iam.intercom.io
+DOMAIN,api.statsig.com
+DOMAIN,cdn.openaimerge.com
+DOMAIN,chatgpt.livekit.cloud
+DOMAIN,host.livekit.cloud
 DOMAIN,o33249.ingest.sentry.io
 DOMAIN,openai.com.cdn.cloudflare.net
 DOMAIN,openaiapi-site.azureedge.net
-DOMAIN,production-openaicom-storage.azureedge.net
 DOMAIN,openaicomproductionae4b.blob.core.windows.net
+DOMAIN,production-openaicom-storage.azureedge.net
+DOMAIN,turn.livekit.cloud
 DOMAIN-KEYWORD,openaiapi
 DOMAIN-KEYWORD,openaicom
 
@@ -55,11 +62,15 @@ DOMAIN-KEYWORD,openaicom
 DOMAIN,gateway.ai.cloudflare.com
 
 # Cursor
+// https://cursor.com/docs/enterprise/network-configuration
+// https://cursor.com/help/troubleshooting/sign-in-domains
 DOMAIN-SUFFIX,cursor-cdn.com
 DOMAIN-SUFFIX,cursor.com
 DOMAIN-SUFFIX,cursor.sh
 DOMAIN-SUFFIX,cursorapi.com
 DOMAIN-SUFFIX,cursorvm.com
+DOMAIN,accounts.spacex.ai
+DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com
 
 # Google
 # > AI Studio
@@ -85,9 +96,13 @@ DOMAIN-KEYWORD,notebooklm.google
 DOMAIN-KEYWORD,labs.google
 
 # JetBrains AI
+// https://youtrack.jetbrains.com/articles/SUPPORT-A-297/How-to-allow-access-to-JetBrains-AI-Assistant-Junie-in-the-company-network-firewall-proxy
 DOMAIN-SUFFIX,grazie.ai
-DOMAIN-SUFFIX,jetbrains.ai
 DOMAIN-SUFFIX,grazie.aws.intellij.net
+DOMAIN-SUFFIX,jetbrains.ai
+DOMAIN,api.jetbrains.cloud
+DOMAIN,cdn.agentclientprotocol.com
+DOMAIN,frameworks.jetbrains.com
 
 # Meta
 DOMAIN-SUFFIX,meta.ai
@@ -98,9 +113,12 @@ DOMAIN,imagine.meta.com
 DOMAIN,copilot.microsoft.com
 DOMAIN,sydney.bing.com
 DOMAIN,www.bing.com
-DOMAIN,copilot-proxy.githubusercontent.com
 # > GitHub Copilot
+// https://docs.github.com/en/copilot/reference/copilot-allowlist-reference
 DOMAIN-SUFFIX,githubcopilot.com
+DOMAIN,copilot-proxy.githubusercontent.com
+DOMAIN,copilot-telemetry.githubusercontent.com
+DOMAIN,origin-tracker.githubusercontent.com
 
 # NVIDIA
 # > Groq
@@ -112,9 +130,11 @@ DOMAIN-SUFFIX,pplx.ai
 DOMAIN,pplx-res.cloudinary.com
 
 # xAI
-DOMAIN-SUFFIX,x.ai
+// https://cursor.com/help/troubleshooting/sign-in-domains
 DOMAIN-SUFFIX,grok.com
 DOMAIN-SUFFIX,grokipedia.com
+DOMAIN-SUFFIX,grokusercontent.com
+DOMAIN-SUFFIX,x.ai
 
 # Canva
 # > Affinity

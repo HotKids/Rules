@@ -18,33 +18,40 @@ DOMAIN-SUFFIX,gateway.icloud.com,GenAI
 
 # Anthropic
 # > Claude
+# https://code.claude.com/docs/en/network-config
+# https://code.claude.com/docs/en/desktop
+DOMAIN-SUFFIX,anthropic.com,GenAI
 DOMAIN-SUFFIX,clau.de,GenAI
 DOMAIN-SUFFIX,claude.ai,GenAI
+DOMAIN-SUFFIX,claude.app,GenAI
 DOMAIN-SUFFIX,claude.com,GenAI
-DOMAIN-SUFFIX,anthropic.com,GenAI
+DOMAIN-SUFFIX,claudemcpcontent.com,GenAI
 DOMAIN-SUFFIX,claudeusercontent.com,GenAI
 IP-CIDR,160.79.104.0/21,GenAI,no-resolve
 IP6-CIDR,2607:6bc0::/32,GenAI,no-resolve
 
 # OpenAI
 # > ChatGPT
-DOMAIN,chatgpt.livekit.cloud,GenAI
-DOMAIN,host.livekit.cloud,GenAI
-DOMAIN,turn.livekit.cloud,GenAI
+# https://help.openai.com/en/articles/9247338-network-recommendations-for-chatgpt-errors-on-web-and-apps
 DOMAIN-SUFFIX,chat.com,GenAI
 DOMAIN-SUFFIX,chatgpt.com,GenAI
 DOMAIN-SUFFIX,livekit.cloud,GenAI
 DOMAIN-SUFFIX,oaistatic.com,GenAI
+DOMAIN-SUFFIX,oaistatsig.com,GenAI
 DOMAIN-SUFFIX,oaiusercontent.com,GenAI
 DOMAIN-SUFFIX,openai.com,GenAI
 DOMAIN-SUFFIX,sora.com,GenAI
-DOMAIN,api.statsig.com,GenAI
 DOMAIN,api-iam.intercom.io,GenAI
+DOMAIN,api.statsig.com,GenAI
+DOMAIN,cdn.openaimerge.com,GenAI
+DOMAIN,chatgpt.livekit.cloud,GenAI
+DOMAIN,host.livekit.cloud,GenAI
 DOMAIN,o33249.ingest.sentry.io,GenAI
 DOMAIN,openai.com.cdn.cloudflare.net,GenAI
 DOMAIN,openaiapi-site.azureedge.net,GenAI
-DOMAIN,production-openaicom-storage.azureedge.net,GenAI
 DOMAIN,openaicomproductionae4b.blob.core.windows.net,GenAI
+DOMAIN,production-openaicom-storage.azureedge.net,GenAI
+DOMAIN,turn.livekit.cloud,GenAI
 DOMAIN-KEYWORD,openaiapi,GenAI
 DOMAIN-KEYWORD,openaicom,GenAI
 
@@ -53,11 +60,15 @@ DOMAIN-KEYWORD,openaicom,GenAI
 DOMAIN,gateway.ai.cloudflare.com,GenAI
 
 # Cursor
+# https://cursor.com/docs/enterprise/network-configuration
+# https://cursor.com/help/troubleshooting/sign-in-domains
 DOMAIN-SUFFIX,cursor-cdn.com,GenAI
 DOMAIN-SUFFIX,cursor.com,GenAI
 DOMAIN-SUFFIX,cursor.sh,GenAI
 DOMAIN-SUFFIX,cursorapi.com,GenAI
 DOMAIN-SUFFIX,cursorvm.com,GenAI
+DOMAIN,accounts.spacex.ai,GenAI
+DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com,GenAI
 
 # Google
 # > AI Studio
@@ -83,9 +94,13 @@ DOMAIN-KEYWORD,notebooklm.google,GenAI
 DOMAIN-KEYWORD,labs.google,GenAI
 
 # JetBrains AI
+# https://youtrack.jetbrains.com/articles/SUPPORT-A-297/How-to-allow-access-to-JetBrains-AI-Assistant-Junie-in-the-company-network-firewall-proxy
 DOMAIN-SUFFIX,grazie.ai,GenAI
-DOMAIN-SUFFIX,jetbrains.ai,GenAI
 DOMAIN-SUFFIX,grazie.aws.intellij.net,GenAI
+DOMAIN-SUFFIX,jetbrains.ai,GenAI
+DOMAIN,api.jetbrains.cloud,GenAI
+DOMAIN,cdn.agentclientprotocol.com,GenAI
+DOMAIN,frameworks.jetbrains.com,GenAI
 
 # Meta
 DOMAIN-SUFFIX,meta.ai,GenAI
@@ -96,9 +111,12 @@ DOMAIN,imagine.meta.com,GenAI
 DOMAIN,copilot.microsoft.com,GenAI
 DOMAIN,sydney.bing.com,GenAI
 DOMAIN,www.bing.com,GenAI
-DOMAIN,copilot-proxy.githubusercontent.com,GenAI
 # > GitHub Copilot
+# https://docs.github.com/en/copilot/reference/copilot-allowlist-reference
 DOMAIN-SUFFIX,githubcopilot.com,GenAI
+DOMAIN,copilot-proxy.githubusercontent.com,GenAI
+DOMAIN,copilot-telemetry.githubusercontent.com,GenAI
+DOMAIN,origin-tracker.githubusercontent.com,GenAI
 
 # NVIDIA
 # > Groq
@@ -110,9 +128,11 @@ DOMAIN-SUFFIX,pplx.ai,GenAI
 DOMAIN,pplx-res.cloudinary.com,GenAI
 
 # xAI
-DOMAIN-SUFFIX,x.ai,GenAI
+# https://cursor.com/help/troubleshooting/sign-in-domains
 DOMAIN-SUFFIX,grok.com,GenAI
 DOMAIN-SUFFIX,grokipedia.com,GenAI
+DOMAIN-SUFFIX,grokusercontent.com,GenAI
+DOMAIN-SUFFIX,x.ai,GenAI
 
 # Canva
 # > Affinity
