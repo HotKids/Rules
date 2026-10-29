@@ -6,11 +6,14 @@ from functools import lru_cache
 import hashlib
 import importlib.util
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
+import unicodedata
+from urllib.parse import urlsplit
 
 from _common import fetch_url
 from module_convert import parse_module
@@ -19,7 +22,7 @@ ROOT = Path(__file__).resolve().parents[2]
 LISTING = Path(__file__).with_name('sync-modules.txt')
 STABLE = ROOT / 'Surge/Module/BlockAds.sgmodule'
 OUTPUT = ROOT / 'Surge/Module/BlockAdsBeta.sgmodule'
-LOON_TEMPLATE = 'https://kelee.one/Tool/Loon/Lpx/{name}_remove_ads.lpx'
+SOURCE_TEMPLATE_ENV = 'BLOCKADS_BETA_SOURCE_TEMPLATE'
 # Request Loon 3.5.1 sources to match the pinned parser's v2 grammar support.
 LOON_UA = 'Loon/3.5.1 CFNetwork/1498.700.2 Darwin/23.6.0'
 PARSER_URL = ('https://raw.githubusercontent.com/Script-Hub-Org/Script-Hub/'
@@ -83,11 +86,41 @@ def read_sources(path=LISTING):
     return sources
 
 
-def runtime_url(source):
-    return LOON_TEMPLATE.format(name=source['name']) if source['name'] else source['surge']
+def source_template():
+    """Read the private download template without echoing its value on failure."""
+    template = os.environ.get(SOURCE_TEMPLATE_ENV, '')
+    if not template:
+        raise ValueError(f'未配置 {SOURCE_TEMPLATE_ENV}，保留现有 Beta')
+    try:
+        if (len(template) > 8192 or '\\' in template
+                or any(unicodedata.category(char).startswith('C') or char.isspace() for char in template)
+                or re.search(r'%(?:0[0-9a-f]|1[0-9a-f]|7f)', template, re.I)
+                or template.count('{name}') != 1
+                or re.search(r'[{}]', template.replace('{name}', ''))):
+            raise ValueError
+        parsed = urlsplit(template)
+        if (parsed.scheme != 'https' or not parsed.hostname
+                or parsed.username is not None or parsed.password is not None
+                or '{name}' not in parsed.path or parsed.fragment):
+            raise ValueError
+        # Accessing port also rejects invalid/out-of-range authority values.
+        parsed.port
+    except (ValueError, UnicodeError):
+        raise ValueError(f'{SOURCE_TEMPLATE_ENV} 无效，保留现有 Beta') from None
+    return template
+
+
+def runtime_url(source, template=None):
+    if not source['name']:
+        return source['surge']
+    if not re.fullmatch(r'[A-Za-z0-9_-]+', source['name']):
+        raise ValueError('Loon 名称无效')
+    return (source_template() if template is None else template).replace('{name}', source['name'])
 
 
 def download_sources(sources, cache=None):
+    # Validate before starting any worker, including passthrough-source downloads.
+    template = source_template() if not cache and any(s['name'] for s in sources) else None
     def get(source):
         name = source['name'] or 'ChinaUnicom'
         if cache:
@@ -95,7 +128,7 @@ def download_sources(sources, cache=None):
             text = path.read_text(encoding='utf-8')
         else:
             try:
-                text = fetch_url(runtime_url(source), LOON_UA, encode=True)
+                text = fetch_url(runtime_url(source, template), LOON_UA, encode=True, log_retries=False)
             except Exception as error:
                 status = getattr(error, 'status', None)
                 raise RuntimeError(f'{name}: 来源读取失败' + (f' (HTTP {status})' if status else '')) from None
@@ -246,7 +279,7 @@ def main():
     else:
         urls = list(dict.fromkeys(m[2] for body in bodies.values() for m in JQ_FILE.finditer(body)))
         with ThreadPoolExecutor(max_workers=8) as pool:
-            dependencies = dict(zip(urls, pool.map(lambda url: fetch_url(url, LOON_UA, encode=True), urls)))
+            dependencies = dict(zip(urls, pool.map(lambda url: fetch_url(url, LOON_UA, encode=True, log_retries=False), urls)))
     converted = convert_sources(sources, bodies, parser, dependencies)
     generate(sources, converted, STABLE.read_text(encoding='utf-8'))
 

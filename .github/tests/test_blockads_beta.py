@@ -3,6 +3,7 @@ import contextlib
 import importlib.util
 import io
 import json
+import os
 from pathlib import Path
 import subprocess
 import sys
@@ -10,9 +11,11 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from urllib.parse import quote
+from urllib.error import URLError
 
 SCRIPTS = Path(__file__).resolve().parents[1] / 'scripts'
 sys.path.insert(0, str(SCRIPTS))
+import _common as common
 spec = importlib.util.spec_from_file_location('blockads_beta', SCRIPTS / 'sync-modules-beta.py')
 beta = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(beta)
@@ -29,7 +32,75 @@ class BetaTests(unittest.TestCase):
         self.assertEqual([s['name'] for s in sources], [None, 'BiliComic'])
         self.assertEqual([s['alias'] for s in sources], ['passthrough', 'comic'])
         self.assertEqual(beta.runtime_url(sources[0]), sources[0]['surge'])
-        self.assertTrue(beta.runtime_url(sources[1]).endswith('/BiliComic_remove_ads.lpx'))
+        with patch.dict(os.environ, {beta.SOURCE_TEMPLATE_ENV: 'https://example.invalid/plugins/{name}.lpx'}, clear=True):
+            self.assertEqual(beta.runtime_url(sources[1]), 'https://example.invalid/plugins/BiliComic.lpx')
+
+    def test_missing_or_invalid_template_stops_before_any_download_or_generation(self):
+        entries = [{'id': 'one', 'name': None, 'surge': 'https://example.invalid/pass.sgmodule', 'alias': 'pass'},
+                   {'id': 'two', 'name': 'Named', 'surge': 'https://example.invalid/named.sgmodule', 'alias': 'named'}]
+        invalid = ['', 'http://private.invalid/{name}.lpx', 'https://user:private@private.invalid/{name}.lpx',
+                   'https://private.invalid/no-placeholder.lpx', 'https://private.invalid/{name}/{name}.lpx',
+                   'https://private.invalid/{name.__class__}.lpx', 'https://private.invalid/{name!r}.lpx',
+                   'https://private.invalid/{name:>8}.lpx', 'https://private.invalid/{name}.lpx#private',
+                   'https://private.invalid:bad/{name}.lpx', 'https://private.invalid:65536/{name}.lpx',
+                   'https://private.invalid\\other/{name}.lpx', 'https://private.invalid/\n{name}.lpx',
+                   'https://private.invalid/\x85{name}.lpx', 'https://private.invalid/\u200b{name}.lpx',
+                   'https://private.invalid/%0a{name}.lpx', 'https://{name}.private.invalid/a.lpx',
+                   'https://private.invalid/a.lpx?name={name}']
+        for template in invalid:
+            with self.subTest(template=template), patch.dict(os.environ, {beta.SOURCE_TEMPLATE_ENV: template}, clear=True), \
+                    patch.object(sys, 'argv', ['sync-modules-beta.py']), \
+                    patch.object(beta, 'read_sources', return_value=entries), \
+                    patch.object(beta, 'ThreadPoolExecutor') as pool, patch.object(beta, 'fetch_url') as fetch, \
+                    patch.object(beta, 'generate') as generate:
+                with self.assertRaises(ValueError) as failure:
+                    beta.main()
+                self.assertIn(beta.SOURCE_TEMPLATE_ENV, str(failure.exception))
+                self.assertNotIn('private.invalid', str(failure.exception))
+                self.assertNotIn('user:', str(failure.exception))
+                pool.assert_not_called()
+                fetch.assert_not_called()
+                generate.assert_not_called()
+
+    def test_passthrough_and_cached_sources_do_not_need_the_private_template(self):
+        entry = {'id': 'one', 'name': None, 'surge': 'https://example.invalid/pass.sgmodule'}
+        body = '#!name=Cached\n[Rule]\nDOMAIN,example.invalid,REJECT\n'
+        with patch.dict(os.environ, {}, clear=True), patch.object(beta, 'fetch_url', return_value=body) as fetch:
+            self.assertEqual(beta.runtime_url(entry), entry['surge'])
+            self.assertEqual(beta.download_sources([entry]), {'one': body})
+            fetch.assert_called_once_with(entry['surge'], beta.LOON_UA, encode=True, log_retries=False)
+        named = {**entry, 'name': 'Cached'}
+        with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {}, clear=True), \
+                patch.object(beta, 'fetch_url') as fetch:
+            (Path(directory) / 'Cached.lpx').write_text(body)
+            self.assertEqual(beta.download_sources([named], cache=directory), {'one': body})
+            fetch.assert_not_called()
+
+    def test_private_template_expands_only_the_named_source_and_download_errors_are_safe(self):
+        template = 'https://private.invalid/plugins/{name}.lpx?access=private-access'
+        entry = {'id': 'one', 'name': 'Named', 'surge': 'https://example.invalid/fallback.sgmodule'}
+        with patch.dict(os.environ, {beta.SOURCE_TEMPLATE_ENV: template}, clear=True):
+            self.assertEqual(beta.runtime_url(entry), 'https://private.invalid/plugins/Named.lpx?access=private-access')
+            error = common.DownloadError(beta.runtime_url(entry), 'private failure', 503)
+            with patch.object(beta, 'fetch_url', side_effect=error) as fetch:
+                with self.assertRaisesRegex(RuntimeError, 'Named: 来源读取失败 \\(HTTP 503\\)') as failure:
+                    beta.download_sources([entry])
+                self.assertNotIn('private', str(failure.exception))
+                fetch.assert_called_once_with(beta.runtime_url(entry), beta.LOON_UA, encode=True, log_retries=False)
+
+    def test_private_download_retry_logging_can_be_disabled_without_changing_retries(self):
+        url = 'https://example.invalid/private-template.lpx?access=private-access'
+        for log_retries in (True, False):
+            with self.subTest(log_retries=log_retries), contextlib.redirect_stderr(io.StringIO()) as stderr, \
+                    patch.object(common.urllib.request, 'urlopen', side_effect=[URLError('temporary'), io.BytesIO(b'body')]) as download, \
+                    patch.object(common.time, 'sleep'):
+                options = {} if log_retries else {'log_retries': False}
+                self.assertEqual(common.fetch_url(url, 'test-agent', attempts=2, **options), 'body')
+                self.assertEqual(download.call_count, 2)
+            if log_retries:
+                self.assertIn(url.split('?', 1)[0], stderr.getvalue())
+            else:
+                self.assertEqual(stderr.getvalue(), '')
 
     def test_frozen_header_exact_app_headings_controls_and_upstream_script_names(self):
         stable = '''#!name=合集

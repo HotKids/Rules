@@ -80,12 +80,14 @@ def _retry_after(headers) -> float | None:
 
 
 def fetch_url(url: str, ua: str, *, encode: bool = False, timeout: float = 30,
-              attempts: int = 3, total_timeout: float | None = None) -> str:
+              attempts: int = 3, total_timeout: float | None = None,
+              log_retries: bool = True) -> str:
     """Return nonempty UTF-8 text, or raise with the actual HTTP/network error.
 
     Retry empty bodies, transport errors, 408, 429 and 5xx. Retry-After is
     capped at 30 seconds; all requests and waits share a finite time budget.
     Real 404 and Unicode errors fail immediately.
+    Private callers may suppress retry diagnostics without changing retries.
     """
     target = encode_url(url) if encode else url
     attempts = max(1, attempts)
@@ -127,7 +129,8 @@ def fetch_url(url: str, ua: str, *, encode: bool = False, timeout: float = 30,
         delay = min(2 ** attempt, 4) if delay is None else delay
         if delay >= deadline - time.monotonic():
             raise error
-        print(f"  [RETRY {attempt + 1}/{attempts - 1}] {error}", file=sys.stderr)
+        if log_retries:
+            print(f"  [RETRY {attempt + 1}/{attempts - 1}] {error}", file=sys.stderr)
         time.sleep(delay)
     raise AssertionError("unreachable")
 

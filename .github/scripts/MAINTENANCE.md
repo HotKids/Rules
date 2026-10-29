@@ -186,7 +186,7 @@ Surge 响应阶段缺少请求正文时，通用运行时可通过其稳定请�
 
 元数据可在现有 BlockAds 文件中维护；来源内容在清单中调整。聚合模块需搭配 BlockAdsBase，详见 [Surge 说明](../../Surge/README.md)。
 
-[sync-modules-beta.py](sync-modules-beta.py) 读取同一清单中的 `;Loon 名称`，仅在 Action 运行时按统一模板展开来源链接。带注释停用的条目不参与转换；无对应 Loon 名称的条目沿用 Surge 来源。仓库清单和生成模块不保存展开后的 Loon 插件链接。
+[sync-modules-beta.py](sync-modules-beta.py) 读取同一清单中的 `;Loon 名称`，由 Action 将同名 Secret 注入 `BLOCKADS_BETA_SOURCE_TEMPLATE` 环境变量，仅在转换步骤按模板展开下载入口。模板必须是 HTTPS URL，路径中仅有一个 `{name}` 占位符；不接受用户信息、控制字符或其他格式占位符。未配置或配置无效时，在任何下载前停止，保留现有 Beta；本地 `--cache` 验证不需要此配置。带注释停用的条目不参与转换；无对应 Loon 名称的条目沿用 Surge 来源。公开同步代码和清单不保存 Loon 下载入口，来源下载及远程依赖下载的重试日志不输出地址；成品的上游脚本直链和署名保持。
 
 Beta 使用固定提交及 SHA-256 校验的官方 [Script-Hub Beta](https://github.com/Script-Hub-Org/Script-Hub/blob/761f7864785d032cd1d1d616e5a298a0c07aae7d/Rewrite-Parser.beta.js)，参考 QingRex 的预转换方式，将 Loon 3.5.1 配置转为 Surge 后复用正式版聚合器。远程 `jq_file` 在运行时读取并内联；脚本内容和脚本 URL 沿用上游。输出 `Surge/Module/BlockAdsBeta.sgmodule`，头部参数、默认值和说明原样沿用正式版，仅模块标题追加 ` Beta`，模块日期按内容变化更新。Beta 忽略上游日期字段，App 分组不显示日期，避免上游只刷新日期时产生空更新。App 分组、排序、域名参数开关和 MITM 合并格式与正式版相同；脚本标签与正式版一样保留上游原名。
 

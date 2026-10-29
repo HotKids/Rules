@@ -73,6 +73,8 @@ jobs:
       - name: Check Loon conversion bridge
         run: node --test .github/tests/loon-convert.cjs
       - name: Convert and aggregate Beta sources
+        env:
+          BLOCKADS_BETA_SOURCE_TEMPLATE: ${{ secrets.BLOCKADS_BETA_SOURCE_TEMPLATE }}
         run: python3 .github/scripts/sync-modules-beta.py
       - name: Validate Beta publication
         run: python3 .github/scripts/validate.py
