@@ -87,7 +87,7 @@ http:
     argument: '{"purifyComment":1,"logLevel":"4"}'
     engine: webkit
   - name: Bilibili-bilibili.airborne
-    match: ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.community\.service\.dm\.v1\.DM\/DmSegMobile$
+    match: ^https:\/\/(?:grpc\.biliapi\.net|app\.bilibili\.com)\/bilibili\.(?:community\.service\.dm\.v1\.DM\/DmSegMobile|app\.playerunite\.v1\.Player\/PlayViewUnite)$
     type: request
     require-body: true
     binary-mode: true
