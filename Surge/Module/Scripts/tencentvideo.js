@@ -298,9 +298,9 @@ function ($request, $response, $prefs, $notify, $task, $done) {
 return (function () {
 // BEGIN UPSTREAM SOURCE
 (() => {
-  const TAB_DROP_KEYS = ["smallvideo_entrance", "goods_entrance"];
-  const TAB_DROP_TITLES = ["短剧", "好物"];
-  const TAB_CUT_WHITELIST = "0;2;4";
+  const TAB_DROP_KEYS = ["smallvideo_entrance", "goods_entrance", "vip_entrance"];
+  const TAB_DROP_TITLES = ["短剧", "好物", "会员专区"];
+  const TAB_CUT_WHITELIST = "0;4";
   const AD_ANY = ["AdResponseInfo", "InnerAdPromotionEventList", "InnerAdCommonPromotionEventActivityList", "LoadingConfig", "PreloadResourceInfo", "AdFeedInfo"];
   const DROP_MODULES = ["user_center_more_function"];
   const AD_MODULE_IDS = ["outerPaster"];
@@ -763,6 +763,23 @@ return (function () {
     if (!fr) return null;
     const hd = parse(u8, fr.hs, fr.he), fn = hd && hd.find(x => x.f === 7 && x.w === 2);
     const func = fn ? ascii(u8, fn.vs, fn.e) : null;
+    if (func && /\/getNaviPage$/.test(func) && find(u8, utf8("page_id"), fr.he, u8.length) >= 0 && find(u8, utf8("bottom"), fr.he, u8.length) >= 0) {
+      const key = utf8("data_identifier"), kp = find(u8, key, fr.he, u8.length);
+      if (kp >= 0) {
+        const out = u8.slice();
+        let p = kp + key.length;
+        while (p < out.length && (out[p] < 48 || out[p] > 57)) p++;
+        const s = p;
+        while (p < out.length && out[p] >= 48 && out[p] <= 57) p++;
+        if (p > s) {
+          const id = utf8(("0000000000000000000" + Date.now()).slice(-(p - s)));
+          if (id.length === p - s) {
+            out.set(id, s);
+            return gz ? gzip(out) : out;
+          }
+        }
+      }
+    }
     if (!func || BLOCK_FUNCS.indexOf(func) < 0) return null;
     const nb = utf8(func.slice(func.lastIndexOf("/") + 1)), out = u8.slice();
     for (let p = fr.hs; (p = find(out, nb, p, fr.he)) >= 0; p += nb.length) out[p] = out[p] === 0x58 ? 0x59 : 0x58;
