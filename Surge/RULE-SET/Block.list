@@ -51,7 +51,7 @@ DOMAIN,mobads.baidu.com
 DOMAIN-SUFFIX,pos.baidu.com
 DOMAIN-SUFFIX,union.baidu.cn
 DOMAIN-SUFFIX,union.baidu.com
-IP-CIDR,180.76.76.200/32
+IP-CIDR,180.76.76.200/32,no-resolve
 
 # > Bilibili
 DOMAIN,mall.bilibili.com
@@ -109,8 +109,8 @@ DOMAIN,dns.jd.com
 DOMAIN,dsp-x.jd.com
 DOMAIN,janapi.jd.com
 DOMAIN,xlog.jd.com
-IP-CIDR,101.124.19.122/32
-IP-CIDR6,2402:db40:5100:1011::5/128
+IP-CIDR,101.124.19.122/32,no-resolve
+IP-CIDR6,2402:db40:5100:1011::5/128,no-resolve
 
 # > Keep
 DOMAIN,httpdns.calorietech.com
@@ -206,8 +206,8 @@ DOMAIN,badjs.weixinbridge.com
 # > Weibo
 DOMAIN,huodong.weibo.cn
 DOMAIN-SUFFIX,biz.weibo.com
-IP-CIDR,39.97.130.51/32
-IP-CIDR,39.97.128.148/32
+IP-CIDR,39.97.130.51/32,no-resolve
+IP-CIDR,39.97.128.148/32,no-resolve
 
 # > WeTV
 DOMAIN,btrace.wetvinfo.com
@@ -237,9 +237,9 @@ DOMAIN,crash2.zhihu.com
 DOMAIN,mqtt.zhihu.com
 DOMAIN,sugar.zhihu.com
 DOMAIN,zxid-m.mobileservice.cn
-IP-CIDR,103.41.167.237/32
-IP-CIDR,118.89.204.198/32
-IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128
+IP-CIDR,103.41.167.237/32,no-resolve
+IP-CIDR,118.89.204.198/32,no-resolve
+IP-CIDR6,2402:4e00:1200:ed00:0:9089:6dac:96b6/128,no-resolve
 
 # > 10000
 DOMAIN,ad.21cn.com

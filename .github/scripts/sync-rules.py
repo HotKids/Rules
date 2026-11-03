@@ -20,7 +20,7 @@ from collections import defaultdict
 from pathlib import Path
 
 from _common import write_if_changed, prefetch_urls
-from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash, apply_stash_ca
+from module_convert import GENERATED_HEADER, module_targets, merge_modules, render_surge, render_stash, apply_stash_ca, _rule_parts
 from config_sync.parser import parse_surge_profile
 from qx_scripts import prepare_qx_modules
 
@@ -642,7 +642,9 @@ def convert_qx(lines: list[str], policy: str) -> str:
             continue
 
         value = parts[1] if len(parts) > 1 else ""
-        no_resolve = len(parts) > 2 and parts[2].lower() == "no-resolve"
+        no_resolve = (any(part.lower() == "no-resolve" for part in parts[2:])
+                      if rule_type in ("IP-CIDR", "IP-CIDR6")
+                      else len(parts) > 2 and parts[2].lower() == "no-resolve")
 
         if rule_type in ("IP-CIDR", "IP-CIDR6", "IP6-CIDR", "GEOIP", "IP-ASN"):
             # QX uses IP6-CIDR instead of Surge/Clash's IP-CIDR6
@@ -997,6 +999,85 @@ def _is_clash_payload(text: str) -> bool:
     return False
 
 
+def ensure_cidr_no_resolve(line: str) -> str:
+    """Add only missing CIDR flags, retaining rule layout and inline comments."""
+    def rewrite(value):
+        match = re.match(r"\s*(IP-CIDR6?|AND|OR|NOT)\s*,", value, re.I)
+        kind = match[1].upper() if match else None
+        if kind in ("IP-CIDR", "IP-CIDR6"):
+            # Mask quoted policy text only for option detection. The original
+            # string is retained, including escaped quotes and backslashes.
+            quoted = r"\"(?:\\.|[^\"\\])*\"|'(?:\\.|[^'\\])*'"
+            fields = _rule_parts(re.sub(quoted, '\"\"', value))
+            if len(fields) < 2 or not fields[1] or any(field.lower() == "no-resolve" for field in fields[2:]):
+                return value
+            body = value.rstrip()
+            return body + ("" if body.endswith(",") else ",") + "no-resolve" + value[len(body):]
+        if kind not in ("AND", "OR", "NOT") and not value.lstrip().startswith("("):
+            return value
+        # Logical rules own their options: descend into CIDR leaves instead of
+        # adding a flag to the outer AND/OR/NOT expression or its other rules.
+        out, start, opening, depth, quote, escaped = [], 0, 0, 0, None, False
+        for index, char in enumerate(value):
+            if quote:
+                if escaped:
+                    escaped = False
+                elif char == "\\":
+                    escaped = True
+                elif char == quote:
+                    quote = None
+            elif char in "\"'":
+                quote = char
+            elif char == "(":
+                if depth == 0:
+                    opening = index
+                depth += 1
+            elif char == ")" and depth:
+                depth -= 1
+                if depth == 0:
+                    out.extend((value[start:opening + 1], rewrite(value[opening + 1:index]), ")"))
+                    start = index + 1
+        return "".join(out) + value[start:]
+
+    # Surge requires whitespace before an inline comment delimiter. Do not
+    # mistake quoted policy names or URL/regex fragments for comment markers.
+    quote, escaped = None, False
+    for index, char in enumerate(line):
+        if quote:
+            if escaped:
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote:
+                quote = None
+        elif char in "\"'":
+            quote = char
+        elif (index == 0 or line[index - 1].isspace()) and (char in "#;" or line.startswith("//", index)):
+            return rewrite(line[:index]) + line[index:]
+    return rewrite(line)
+
+
+def normalize_local_surge_cidrs():
+    """Keep local source files and generated sources consistent before export."""
+    owners = _rule_owners()
+    for path in sorted(SURGE_DIR.rglob("*.list")):
+        if path.is_symlink() or not path.resolve().is_relative_to(REPO_ROOT.resolve()):
+            raise ValueError(f"Unsafe Surge rule path: {path.relative_to(REPO_ROOT)}")
+        original = path.read_bytes()
+        text = original.decode("utf-8")
+        updated = "".join(ensure_cidr_no_resolve(line) for line in text.splitlines(keepends=True))
+        if updated == text:
+            continue
+        content = updated.encode("utf-8")
+        path.write_bytes(content)
+        relative = path.relative_to(REPO_ROOT).as_posix()
+        # Only a verified, already managed source keeps its generated ownership.
+        # Normalizing a hand-maintained file must never adopt its other edits.
+        if owners.get(relative) == hashlib.sha256(original).hexdigest():
+            owners[relative] = hashlib.sha256(content).hexdigest()
+        print(f"  ✓ {relative} 补齐 CIDR no-resolve")
+
+
 def normalize_surge_rules(text: str) -> str | None:
     """规范化 Surge 规则文本为项目风格。
     保留 '# > Section' header，剥掉其他来源注释，输出干净规则行。
@@ -1014,7 +1095,7 @@ def normalize_surge_rules(text: str) -> str | None:
             if re.match(r"^#\s*>(?!>)\s*\S", stripped):
                 out.append(stripped)
             continue
-        out.append(stripped)
+        out.append(ensure_cidr_no_resolve(stripped))
     return ("\n".join(out) + "\n") if out else None
 
 
@@ -1368,6 +1449,9 @@ def main():
 
     # Step 2/3: Streaming 三层双向同步
     sync_streaming(prechecked=True)
+
+    # Normalize both imported and handwritten CIDRs before deriving clients.
+    normalize_local_surge_cidrs()
 
     # Step 4: Surge → QX / Clash / sing-box
     convert_all(rules)
