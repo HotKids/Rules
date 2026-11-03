@@ -298,9 +298,9 @@ function ($request, $response, $prefs, $notify, $task, $done) {
 return (function () {
 // BEGIN UPSTREAM SOURCE
 (() => {
-  const TAB_DROP_KEYS = ["smallvideo_entrance", "goods_entrance", "vip_entrance"];
-  const TAB_DROP_TITLES = ["短剧", "好物", "会员专区"];
-  const TAB_CUT_WHITELIST = "0;4";
+  const TAB_DROP_KEYS = ["smallvideo_entrance", "goods_entrance"];
+  const TAB_DROP_TITLES = ["短剧", "好物"];
+  const TAB_CUT_WHITELIST = "0;2;4";
   const AD_ANY = ["AdResponseInfo", "InnerAdPromotionEventList", "InnerAdCommonPromotionEventActivityList", "LoadingConfig", "PreloadResourceInfo", "AdFeedInfo"];
   const DROP_MODULES = ["user_center_more_function"];
   const AD_MODULE_IDS = ["outerPaster"];
@@ -330,6 +330,7 @@ return (function () {
   const JCE_ROLL_ADS = [129278, 130273];
   // 暂停广告，body tag1.tag1 为包着广告单列表的 simple list
   const JCE_PAUSE_AD = 129196;
+  const JCE_SPLASH = 129279;
   const DROP = {};
 
   function utf8(s) {
@@ -945,11 +946,19 @@ return (function () {
     edits.set(w, nw);
     return jRebuild(b, s, e, fs, edits);
   }
+  function fixSplash(b, s, e) {
+    if (find(b, utf8("ad_splash"), s, e) < 0 && find(b, utf8("SpaServerData"), s, e) < 0) return null;
+    const fs = jFields(b, s, e), edits = new Map();
+    for (const x of fs) {
+      if ((x.tag === 2 || x.tag === 3 || x.tag === 4) && x.t === 9 && jInt(b, x.vs) > 0) edits.set(x, concat([new Uint8Array(jHeadEnc(x.tag, 9)), jIntEnc(0, 0)]));
+    }
+    return edits.size ? jRebuild(b, s, e, fs, edits) : null;
+  }
   function onJce(raw) {
     const b = raw, n = b.length;
     if (n < 100 || b[0] !== 0x13 || u32(b, 1) !== n || b[n - 1] !== 0x03) return null;
     const cmd = (b[8] << 16) | (b[9] << 8) | b[10];
-    const fix = cmd === JCE_TEEN_CONFIG ? fixTeenConfig : cmd === JCE_PLAY_TIPS ? fixPlayTips : JCE_ROLL_ADS.indexOf(cmd) >= 0 ? fixRollAds : cmd === JCE_PAUSE_AD ? fixPauseAd : null;
+    const fix = cmd === JCE_TEEN_CONFIG ? fixTeenConfig : cmd === JCE_PLAY_TIPS ? fixPlayTips : JCE_ROLL_ADS.indexOf(cmd) >= 0 ? fixRollAds : cmd === JCE_PAUSE_AD ? fixPauseAd : cmd === JCE_SPLASH ? fixSplash : null;
     if (!fix) return null;
     const gz = find(b, new Uint8Array([0x1f, 0x8b, 0x08]), 60, Math.min(n, 140));
     if (gz < 4) return null;
