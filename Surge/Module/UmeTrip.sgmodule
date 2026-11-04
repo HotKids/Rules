@@ -18,7 +18,7 @@ DOMAIN,analytics.umetrip.com,REJECT,extended-matching,pre-matching
 ^https?:\/\/oss\.umetrip\.com\/fs\/advert\/polite data-type=text data="{}" status-code=200 header="Content-Type:application/json"
 
 [Script]
-航旅纵横去广告_1 = type=http-response, pattern=(?i)^https?:\/\/(bkclient|umerp|home|umehome)\.umetrip\.com(\.cn)?\/gateway\/api\/umetrip\/native(?:\?.*)?$, script-path=https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/umetrip.js, requires-body=true, binary-body-mode=true, timeout=30, engine=webview
+航旅纵横去广告_1 = type=http-response, pattern=(?i)^https?:\/\/(bkclient|umerp|home|umehome|sns|appmsg)\.umetrip\.com(\.cn)?\/gateway\/api\/umetrip\/native(?:\?.*)?$, script-path=https://raw.githubusercontent.com/HotKids/Rules/refs/heads/master/Surge/Module/Scripts/umetrip.js, requires-body=true, binary-body-mode=true, timeout=30, engine=webview
 
 [MITM]
-hostname = %APPEND% umerp.umetrip.com, umerp.umetrip.com.cn, home.umetrip.com, bkclient.umetrip.com.cn, discardrp.umetrip.com, startup.umetrip.com, oss.umetrip.com, umehome.umetrip.com
+hostname = %APPEND% umerp.umetrip.com, umerp.umetrip.com.cn, home.umetrip.com, bkclient.umetrip.com.cn, discardrp.umetrip.com, startup.umetrip.com, oss.umetrip.com, umehome.umetrip.com, sns.umetrip.com, appmsg.umetrip.com
