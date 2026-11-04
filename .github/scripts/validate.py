@@ -63,6 +63,8 @@ def main():
     run(sys.executable, '-m', 'unittest', 'discover', '-s', '.github/tests', '-p', 'test_*.py')
     run('node', '--test', '.github/tests/panels.cjs')
     run('node', '--test', '.github/tests/qx-runtime.cjs')
+    run('node', '--test', '.github/tests/loon-runtime.cjs')
+    run('node', '--test', '.github/tests/loon-convert.cjs')
     print('Validation passed:', counts)
 
 

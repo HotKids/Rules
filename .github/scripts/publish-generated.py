@@ -17,6 +17,7 @@ OUTPUTS = {
         "Clash/RuleSet/", "sing-box/source/", "sing-box/rule-set/",
         ".github/scripts/sync-rules-owned.json",
         ".github/scripts/qx-scripts-owned.json",
+        ".github/scripts/loon-scripts-owned.json",
     ),
     "config": (
         "Clash/Sample.yaml", "Clash/Mihomo.yaml", "Clash/Script/",

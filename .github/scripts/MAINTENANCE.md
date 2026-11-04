@@ -166,6 +166,8 @@ Stash 转换模块统一存放在 `Surge/Module/Stash/`；两份面板覆写继�
 
 Module 来源也支持 QX `.snippet`：先经 [qx_convert.py](qx_convert.py) 转成 Surge 配置，再复用现有输出器。清单格式仍为 `URL,输出名 #!name=标题 #!category=分类`；例如 `Meituan.sgmodule`、`HelloBike.sgmodule` 只生成 Surge 模块，不指定后缀仍同时生成两种格式。转换保留规则值、正则和顺序；四类域名规则的内置 REJECT 系列统一补上 `extended-matching`，增加 TLS SNI / HTTP Host 匹配。IPv4/IPv6 CIDR 的内置 REJECT 系列统一补上 `no-resolve`，不为未解析域名主动触发 DNS。已有标记不重复添加，DIRECT、代理、自定义策略以及 GEOIP/IP-ASN 保持来源设置，不额外添加 `pre-matching`。原生 Surge 模块继续保留上游参数。HTTP 200 拦截使用空响应映射，echo 脚本使用请求脚本返回模拟响应；未知可执行项中止同步，避免发布缺项配置。
 
+Module 来源支持 Loon `.plugin`、`.lpx` 及可确认的 Loon 脚本语法，由 [loon_convert.py](loon_convert.py) 调用同一固定版本、校验 SHA-256 的本地 Script-Hub 转换器。`original` 说明追加到 `desc`，`tag` 映射为 `category`（显式分类及清单覆盖优先），输出移除 `original`、`tag`、`loon_version`。可确认兼容的 JS 保留上游直链；其余受支持脚本由 [loon_scripts.py](loon_scripts.py) 和 [loon-runtime.js](loon-runtime.js) 生成独立适配，保留原业务源码及原生二进制正文，只归一完成回调的状态码和模拟响应结构；需要 WebAPI 时设置对应脚本引擎。Loon 和 QX 各自管理适配文件归属，名称冲突在写入前拒绝；来源转换、远程 jq 依赖及全部 JS 准备完成后才写入产物。未知配置或 API 不静默发布。
+
 QX 引用的 JS 先由 [qx_compat.py](qx_compat.py) 保守检查兼容性：可确认仅使用共享接口和正文返回的脚本直接保留上游地址；涉及 QX 专属接口、echo 或无法确认的写法，才经 [qx_scripts.py](qx_scripts.py) 和 [qx-runtime.js](qx-runtime.js) 生成本地适配文件。判定不使用 App 名称或域名白名单。原生 Surge 来源继续引用上游脚本，不进入这条转换链。
 
 读取 `$request.bodyBytes` / `$response.bodyBytes` 的 QX 正文脚本自动启用 Surge `binary-body-mode`，Stash 对应 `binary-mode`。通用运行时显式读取宿主公开字段，保留非枚举属性及原型 getter；提供原始字节的 `bodyBytes` 与按需解码的 UTF-8 文本 `body`，仅访问字节时不生成文本，兼容同一脚本中的二进制和文本分支；二进制输出规范为 `Uint8Array`，保留切片范围，不修改上游 JS。识别基于宿主 API 访问，不按应用或域名定制。转换默认不输出 `max-size`，由客户端采用自身默认值；显式传入转换接口的正文上限仍可保留，原生 Surge 来源已有的设置不变。
