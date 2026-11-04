@@ -28,8 +28,9 @@ http:
   - www.bilibili.com
   - line3-h5-mobile-api.biligame.com
   body-rewrite:
-  - ^https:\/\/api\.live\.bilibili\.com\/xlive\/open-interface\/v2\/tracker\/conf\? response-jq .data.domains=["wss://tracker.chat.bilibili.com"]
-  - ^https:\/\/api\.bilibili\.com\/x\/pd-proxy\/tracker\? response-jq .data[][]?="stun.chat.bilibili.com:3478"
+  - ^http:\/\/[^?]+\/resolve\?host= response-jq .dns[]? |= (.ips = [] | .ttl = 86400)
+  - ^https:\/\/api\.live\.bilibili\.com\/xlive\/open-interface\/v2\/tracker\/conf\? response-jq .data.domains = ["wss://tracker.chat.bilibili.com"]
+  - ^https:\/\/api\.bilibili\.com\/x\/pd-proxy\/tracker\? response-jq .data[][]? = "stun.chat.bilibili.com:3478"
   - ^https:\/\/api\.bilibili\.com\/pgc\/view\/v2\/app\/season\? response-jq del(.data.payment)
   - ^https:\/\/api\.bilibili\.com\/pgc\/page\/channel\? response-jq .data.modules |= map(select(.type != "TIP") | if .type == "BANNER" then .module_data.items |= map(select(.url | startswith("https://www.bilibili.com/blackboard/era/") | not)) else . end)
   mock:
@@ -115,7 +116,7 @@ http:
     max-size: 0
     engine: webkit
   - name: Bilibili-bilibili.webpage
-    match: ^https:\/\/www\.bilibili\.com\/blackboard\/era\/.+\.html\?
+    match: ^https:\/\/www\.bilibili\.com\/blackboard\/era\/[^?]+\.html\?
     type: response
     require-body: true
     max-size: 0
@@ -152,6 +153,7 @@ script-providers:
     interval: 86400
 rules:
 - DOMAIN,bsbsb.top,DIRECT
+- DOMAIN,dns.google,${args.early_reject}
 - DOMAIN,api.biliapi.com,${args.early_reject}
 - DOMAIN,app.biliapi.com,${args.early_reject}
 - DOMAIN,api.biliapi.net,${args.early_reject}
