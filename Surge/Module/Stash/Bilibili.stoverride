@@ -28,7 +28,7 @@ http:
   - www.bilibili.com
   - line3-h5-mobile-api.biligame.com
   body-rewrite:
-  - ^http:\/\/[^?]+\/resolve\?host= response-jq .dns[]? |= (.ips = [] | .ttl = 86400)
+  - ^http:\/\/[^?]+\/resolve\?host=(?:ap[ip]\.bilibili\.com|grpc\.biliapi\.net|api\.live\.bilibili\.com) response-jq .dns[]? |= (.ips = [] | .ttl = 86400)
   - ^https:\/\/api\.live\.bilibili\.com\/xlive\/open-interface\/v2\/tracker\/conf\? response-jq .data.domains = ["wss://tracker.chat.bilibili.com"]
   - ^https:\/\/api\.bilibili\.com\/x\/pd-proxy\/tracker\? response-jq .data[][]? = "stun.chat.bilibili.com:3478"
   - ^https:\/\/api\.bilibili\.com\/pgc\/view\/v2\/app\/season\? response-jq del(.data.payment)
