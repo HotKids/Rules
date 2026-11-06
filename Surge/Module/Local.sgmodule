@@ -1,13 +1,16 @@
 #!name=Local Network
 #!desc=个人向直连规则，适用于本地网络、局域网设备及文件传输等需要绕过代理的场景
 #!category=HotKids
-#!arguments=SSID:JOEY,HotspotSSID:HotspotSSID
-#!arguments-desc=SSID:家庭 Wi-Fi 名称,HotspotSSID:可自定义设备热点名称
+#!arguments=SSID:JOEY,HotspotSSID:HotspotSSID,CELLULAR:TYPE:CELLULAR
+#!arguments-desc=SSID:家庭 Wi-Fi 名称,HotspotSSID:可自定义设备热点名称,CELLULAR:蜂窝网络匹配条件
 
 [Rule]
 # CARRIER 匹配：由于 iOS 限制，该参数现已废弃
 // 3HK
 // CELLULAR-CARRIER,454-03,DIRECT
+
+#CELLULAR
+SUBNET,{{{CELLULAR}}},DIRECT
 
 # Home Wi-Fi
 SUBNET,SSID:{{{SSID}}},DIRECT
