@@ -1418,7 +1418,7 @@ test('Spotify reads market without atob and ignores alternate country links',asy
     assert.equal((await tile('spotify',{body})).output.content,'ER');
 });
 test('Gemini maps ISO regions and keeps availability without a country',async()=>{
-  for(const [code,expected] of [['KOR','KR'],['AUT','AT'],['CHE','CH'],['CHN','CN'],['HKG','HK'],['SGP','SG'],['US','US'],['XXX','OK']]) {
+  for(const [code,expected] of [['KOR','KR'],['AUT','AT'],['CHE','CH'],['CHN','CN'],['HKG','HK（API NO）'],['SGP','SG'],['US','US'],['XXX','OK']]) {
     const result=await tile('gemini',{body:`45617354,null,true ,2,1,200,"${code}"`});
     assert.equal(result.output.content,expected);
   }
@@ -1430,7 +1430,7 @@ test('Gemini accepts supported homepage regions without the legacy availability 
     ['stash',{'stash-version':'3.6.0',system:'Android'}],
     ['stash',{'stash-version':'3.6.0',system:'iOS'}],
     ['surge',{'surge-version':'5',system:'iOS'}]
-  ])for(const [code,expected] of [['USA','US'],['SGP','SG'],['KOR','KR'],['US','US']]) {
+  ])for(const [code,expected] of [['USA','US'],['SGP','SG'],['KOR','KR'],['US','US'],['HKG','HK（API NO）'],['HK','HK（API NO）']]) {
     const body=`<!doctype html><html><head><title>Gemini</title></head><body><script>AF_initDataCallback({key:'ds:0',data:[null,2,1,200,"${code}"]});</script></body></html>`;
     const r=await tile('gemini',{body},{client,environment});
     if(client==='stash')assert.equal(r.output.content,expected);
@@ -1439,11 +1439,31 @@ test('Gemini accepts supported homepage regions without the legacy availability 
     assert.doesNotMatch(r.logs.join('\n'),/匿名兜底/);
   }
 });
+test('Gemini Hong Kong homepage success does not call the configured API or anonymous fallback',async()=>{
+  for(const [client,environment] of [
+    ['stash',{'stash-version':'3.6.0',system:'Android'}],
+    ['stash',{'stash-version':'3.6.0',system:'iOS'}],
+    ['surge',{'surge-version':'5',system:'iOS'}]
+  ])for(const code of ['HKG','HK']) {
+    const r=await tile('gemini',o=>o.url==='https://gemini.google.com'?
+      {body:`,2,1,200,"${code}"`}:{status:503,body:'Unexpected fallback request'},
+      {client,environment,argument:'geminiapikey=example'});
+    if(client==='stash')assert.equal(r.output.content,'HK（API NO）');
+    else assert.match(r.output.content,/Gemini\s+➟ HK（API NO）(?:\n|$)/);
+    assert.equal(r.requests.filter(o=>o.url.includes('gemini.google.com')).length,1);
+    assert.ok(r.requests.every(o=>!o.url.includes('generativelanguage.googleapis.com')));
+    assert.doesNotMatch(r.logs.join('\n'),/匿名兜底/);
+  }
+});
 test('Gemini does not accept unsupported regions, failed responses or explicit restrictions from a country code alone',async()=>{
   for(const [response,expected] of [
     [{body:',2,1,200,"CHN"'},'NO'],
-    [{body:',2,1,200,"HKG"'},'NO'],
     [{body:',2,1,200,"XXX"'},'NO'],
+    [{status:403,body:',2,1,200,"HKG"'},'ER'],
+    [{status:429,body:',2,1,200,"HKG"'},'ER'],
+    [{body:'<title>Just a moment...</title>,2,1,200,"HKG"'},'ER'],
+    [{body:'unsupported_country ,2,1,200,"HKG"'},'NO'],
+    [{body:'Gemini is not available in your country ,2,1,200,"HKG"'},'NO'],
     [{body:'<title>Just a moment...</title>,2,1,200,"USA"'},'ER'],
     [{status:429,body:',2,1,200,"USA"'},'ER'],
     [{status:403,body:',2,1,200,"USA"'},'ER'],
@@ -1568,6 +1588,16 @@ test('Gemini anonymous fallback runs after one Stash iOS homepage fails',async()
   assert.match(r.logs.join('\n'),/候选回复=1; 本次校验词匹配=true; RPC错误码=无/);
   assert.match(r.logs.join('\n'),/匿名文本回复验证成功；地区=US/);
   assert.doesNotMatch(r.logs.join('\n'),/CHECK_[A-F0-9]{8}|f\.req=/);
+});
+test('Gemini verified Hong Kong anonymous reply shows the API availability note without an API request',async()=>{
+  const r=await tile('gemini',o=>o.url.includes('/batchexecute')?
+    {body:geminiLocation('Hong Kong')}:geminiAnonymousResponse(o),{environment:stashIOS});
+  assert.equal(r.output.content,'HK（API NO）');
+  assert.equal(r.output.backgroundColor,'#386EDB');
+  assert.equal(r.requests.length,3);
+  assert.ok(r.requests.every(o=>!o.url.includes('generativelanguage.googleapis.com')));
+  assert.match(r.logs.join('\n'),/本次校验词匹配=true/);
+  assert.match(r.logs.join('\n'),/匿名文本回复验证成功；地区=HK/);
 });
 test('Gemini successful and explicitly blocked original results never start anonymous generation',async()=>{
   for(const [body,expected] of [

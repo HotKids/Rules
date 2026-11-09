@@ -4,7 +4,8 @@
  * @changelog (latest 3 versions)
  * - 2.3 (2026-11-09)
  *   适配 Stash 独立卡片、汇总、长按节点检测及统一日志收集；统一 NO / ER / TO 状态显示。
- *   完善 Gemini 的 Stash iOS 检测与限时匿名兜底；保留错误不更新通知基线的行为。
+ *   完善 Gemini 的 Stash iOS 检测与限时匿名兜底；香港网页可用时显示 HK（API NO）。
+ *   保留错误不更新通知基线的行为。
  *   修复 HBO Max 新版 geoData 与地区 Cookie 解析，保留旧页面兼容。
  * @source https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
@@ -58,8 +59,9 @@ const COUNTRY_CODES = Object.fromEntries(
 // Claude 地区回落白名单，参考 UnlockTests/model/model.go（2026-09-30）。
 const CLAUDE_REGIONS = new Set("AL DZ AD AO AG AR AM AU AT AZ BS BH BD BB BE BZ BJ BT BO BA BW BR BN BG BF BI CV KH CM CA TD CL CO KM CG CR CI HR CY CZ DK DJ DM DO EC EG SV GQ EE SZ FJ FI FR GA GM GE DE GH GR GD GT GN GW GY HT HN HU IS IN ID IQ IE IL IT JM JP JO KZ KE KI KW KG LA LV LB LS LR LI LT LU MG MW MY MV MT MH MR MU MX FM MD MC MN ME MA MZ NA NR NP NL NZ NE NG MK NO OM PK PW PS PA PG PY PE PH PL PT QA RO RW KN LC VC WS SM ST SA SN RS SC SL SG SK SI SB ZA KR ES LK SR SE CH TW TJ TZ TH TL TG TO TT TN TR TM TV UG UA AE GB US UY UZ VU VA VN ZM ZW".split(" "));
 
-// Gemini 地区判据：oneclickvirt/UnlockTests 的 transnation/Gemini.go 与 model/model.go（e57504e7）。
-const GEMINI_REGIONS = new Set("AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BH BD BB BE BZ BJ BM BT BO BA BW BR IO VG BN BG BF BI CV KH CM CA BQ KY CF TD CL CX CC CO KM CK CR CI HR CW CZ CD DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM HN HU IS IN ID IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA CY CG RE RO RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS KR SS ES LK SD SR SJ SE CH TW TJ TZ TH BS GM TL TG TK TO TT TN TR TM TC TV VI UG UA AE GB US UM UY UZ VU VA VE VN WF EH YE ZM ZW".split(" "));
+// Gemini 网页地区判据：以 UnlockTests（e57504e7）为基础，香港按 Google 官方名单补充（2026-11-09）。
+// https://support.google.com/gemini/answer/13575153?hl=en；此名单不用于 API 检测。
+const GEMINI_REGIONS = new Set("AX AL DZ AS AD AO AI AQ AG AR AM AW AU AT AZ BH BD BB BE BZ BJ BM BT BO BA BW BR IO VG BN BG BF BI CV KH CM CA BQ KY CF TD CL CX CC CO KM CK CR CI HR CW CZ CD DK DJ DM DO EC EG SV GQ ER EE SZ ET FK FO FJ FI FR GF PF TF GA GE DE GH GI GR GL GD GP GU GT GG GN GW GY HT HM HN HK HU IS IN ID IQ IE IM IL IT JM JP JE JO KZ KE KI XK KW KG LA LV LB LS LR LY LI LT LU MG MW MY MV ML MT MH MQ MR MU YT MX FM MD MC MN ME MS MA MZ MM NA NR NP NL NC NZ NI NE NG NU NF MK MP NO OM PK PW PS PA PG PY PE PH PN PL PT PR QA CY CG RE RO RW BL SH KN LC MF PM VC WS SM ST SA SN RS SC SL SG SX SK SI SB SO ZA GS KR SS ES LK SD SR SJ SE CH TW TJ TZ TH BS GM TL TG TK TO TT TN TR TM TC TV VI UG UA AE GB US UM UY UZ VU VA VE VN WF EH YE ZM ZW".split(" "));
 
 // 面板参数（脚本级解析一次，主流程与 checkGemini 共用）
 let ARGS = {};
@@ -775,6 +777,12 @@ class ServiceChecker {
     } catch (error) { return Utils.errorResult(error); }
   }
 
+  // 香港网页已开放，API 官方地区名单仍未包含香港；注记不代表发起了 API 探测。
+  // https://ai.google.dev/gemini-api/docs/available-regions
+  static geminiWebResult(region) {
+    return Utils.createResult(STATUS.OK, region === "HK" ? "HK（API NO）" : region || "OK");
+  }
+
   /**
    * Gemini 解锁检测
    * Stash iOS：首页最多 2 秒，未知结果转匿名兜底，共用 6 秒预算。
@@ -825,7 +833,7 @@ class ServiceChecker {
         const supported = res.status === 200 && GEMINI_REGIONS.has(region);
         MediaLog.log(`[Gemini v${CONFIG.VERSION}] 首页判据：地区=${region || "未取得"}; 支持地区=${supported}; 可用标记=${available}`);
         if (supported || available) {
-          return Utils.createResult(STATUS.OK, region || "OK");
+          return this.geminiWebResult(region);
         }
         if (res.status === 200) unknown = { ...Utils.createResult(STATUS.FAIL, "NO"), reason: "unrecognized-homepage" };
       }
@@ -938,7 +946,7 @@ class ServiceChecker {
             typeof row[0] === "string" && row[0].length <= 160) {
           const name = row[0].split(",").pop().trim();
           // Washington, USA / United States；只匹配确切国家名或 ISO 码，不从城市猜地区。
-          region = Utils.country(name) || ({ "united states": "US", "united states of america": "US", "united kingdom": "GB", "uk": "GB" })[name.toLowerCase()] || "";
+          region = Utils.country(name) || ({ "united states": "US", "united states of america": "US", "united kingdom": "GB", "uk": "GB", "hong kong": "HK" })[name.toLowerCase()] || "";
           if (!region && typeof Intl !== "undefined" && typeof Intl.DisplayNames === "function") {
             const names = new Intl.DisplayNames(["en"], { type: "region" });
             region = Object.keys(COUNTRY_CODES).find(code => names.of(code).toLowerCase() === name.toLowerCase()) || "";
@@ -947,7 +955,7 @@ class ServiceChecker {
       } catch (_) {}
     }
     log(`匿名文本回复验证成功；地区=${region || "未知"}；地区仅用于显示`);
-    return { ...Utils.createResult(STATUS.OK, region || "OK"), reason: "anonymous-text" };
+    return { ...this.geminiWebResult(region), reason: "anonymous-text" };
   }
 
 
