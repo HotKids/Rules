@@ -97,9 +97,9 @@ payload:
   # Meta
   # https://muse.ai/
   - DOMAIN-SUFFIX,ecto1usercontent.com
-  - DOMAIN-SUFFIX,meta.ai
   - DOMAIN-SUFFIX,metaaiusercontent.com
   - DOMAIN-SUFFIX,metaaivm.com
+  - DOMAIN-SUFFIX,meta.ai
   - DOMAIN-SUFFIX,muse.ai
   - DOMAIN,auth.meta.com
   - DOMAIN,imagine.meta.com
