@@ -1418,7 +1418,7 @@ test('Spotify reads market without atob and ignores alternate country links',asy
     assert.equal((await tile('spotify',{body})).output.content,'ER');
 });
 test('Gemini maps ISO regions and keeps availability without a country',async()=>{
-  for(const [code,expected] of [['KOR','KR'],['AUT','AT'],['CHE','CH'],['CHN','CN'],['HKG','HK（API NO）'],['SGP','SG'],['US','US'],['XXX','OK']]) {
+  for(const [code,expected] of [['KOR','KR'],['AUT','AT'],['CHE','CH'],['CHN','CN'],['HKG','HK（API: NO）'],['SGP','SG'],['US','US'],['XXX','OK']]) {
     const result=await tile('gemini',{body:`45617354,null,true ,2,1,200,"${code}"`});
     assert.equal(result.output.content,expected);
   }
@@ -1430,7 +1430,7 @@ test('Gemini accepts supported homepage regions without the legacy availability 
     ['stash',{'stash-version':'3.6.0',system:'Android'}],
     ['stash',{'stash-version':'3.6.0',system:'iOS'}],
     ['surge',{'surge-version':'5',system:'iOS'}]
-  ])for(const [code,expected] of [['USA','US'],['SGP','SG'],['KOR','KR'],['US','US'],['HKG','HK（API NO）'],['HK','HK（API NO）']]) {
+  ])for(const [code,expected] of [['USA','US'],['SGP','SG'],['KOR','KR'],['US','US'],['HKG','HK（API: NO）'],['HK','HK（API: NO）']]) {
     const body=`<!doctype html><html><head><title>Gemini</title></head><body><script>AF_initDataCallback({key:'ds:0',data:[null,2,1,200,"${code}"]});</script></body></html>`;
     const r=await tile('gemini',{body},{client,environment});
     if(client==='stash')assert.equal(r.output.content,expected);
@@ -1448,8 +1448,8 @@ test('Gemini Hong Kong homepage success does not call the configured API or anon
     const r=await tile('gemini',o=>o.url==='https://gemini.google.com'?
       {body:`,2,1,200,"${code}"`}:{status:503,body:'Unexpected fallback request'},
       {client,environment,argument:'geminiapikey=example'});
-    if(client==='stash')assert.equal(r.output.content,'HK（API NO）');
-    else assert.match(r.output.content,/Gemini\s+➟ HK（API NO）(?:\n|$)/);
+    if(client==='stash')assert.equal(r.output.content,'HK（API: NO）');
+    else assert.match(r.output.content,/Gemini\s+➟ HK（API: NO）(?:\n|$)/);
     assert.equal(r.requests.filter(o=>o.url.includes('gemini.google.com')).length,1);
     assert.ok(r.requests.every(o=>!o.url.includes('generativelanguage.googleapis.com')));
     assert.doesNotMatch(r.logs.join('\n'),/匿名兜底/);
@@ -1592,7 +1592,7 @@ test('Gemini anonymous fallback runs after one Stash iOS homepage fails',async()
 test('Gemini verified Hong Kong anonymous reply shows the API availability note without an API request',async()=>{
   const r=await tile('gemini',o=>o.url.includes('/batchexecute')?
     {body:geminiLocation('Hong Kong')}:geminiAnonymousResponse(o),{environment:stashIOS});
-  assert.equal(r.output.content,'HK（API NO）');
+  assert.equal(r.output.content,'HK（API: NO）');
   assert.equal(r.output.backgroundColor,'#386EDB');
   assert.equal(r.requests.length,3);
   assert.ok(r.requests.every(o=>!o.url.includes('generativelanguage.googleapis.com')));
