@@ -4,7 +4,7 @@
  * @changelog (latest 3 versions)
  * - 2.3 (2026-11-09)
  *   适配 Stash 独立卡片、汇总、长按节点检测及统一日志收集；统一 NO / ER / TO 状态显示。
- *   完善 Gemini 的 Stash iOS 检测与限时匿名兜底；香港网页可用时显示 HK（API: NO）。
+ *   完善 Gemini 的 Stash iOS 检测与限时匿名兜底；香港网页可用时显示 HK | API: NO。
  *   保留错误不更新通知基线的行为。
  *   修复 HBO Max 新版 geoData 与地区 Cookie 解析，保留旧页面兼容。
  * @source https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
@@ -780,7 +780,7 @@ class ServiceChecker {
   // 香港网页已开放，API 官方地区名单仍未包含香港；注记不代表发起了 API 探测。
   // https://ai.google.dev/gemini-api/docs/available-regions
   static geminiWebResult(region) {
-    return Utils.createResult(STATUS.OK, region === "HK" ? "HK（API: NO）" : region || "OK");
+    return Utils.createResult(STATUS.OK, region === "HK" ? "HK | API: NO" : region || "OK");
   }
 
   /**
