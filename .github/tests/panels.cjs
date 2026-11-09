@@ -1769,7 +1769,7 @@ test('Media request diagnostics preserve native errors and identify the failing 
     const r=await tile('gemini',response),log=r.logs.join('\n');
     assert.equal(r.output.content,expected);assert.equal(r.requests.length,1);
     assert.match(log,new RegExp(`阶段=${phase}`));assert.match(log,detail);
-    assert.match(log,/Gemini v2\.2\.11.*首页失败/);
+    assert.match(log,/Gemini v\d+(?:\.\d+)*.*首页失败/);
     assert.match(log,/Gemini.*检测完成/);
   }
 });
@@ -1928,6 +1928,153 @@ test('Disney requires explicit support flags and does not invent coming status',
       {status:403,body:'Forbidden'});
     assert.equal(r.output.content,expected);
   }
+});
+const hboLegacyPage=pageProps=>'<script id="__NEXT_DATA__">'+JSON.stringify({props:{pageProps}})+'</script>';
+test('HBO Max preserves explicit legacy availability and partner results',async()=>{
+  for(const [pageProps,expected] of [
+    [{userCountry:'SG',isUserOutOfRegion:false},'SG'],
+    [{userCountry:'HK',isUserOutOfRegion:true},'NO'],
+    [{userCountry:'JP',isUserOutOfRegion:true},'JP (U-NEXT)'],
+    [{userCountry:'CA',isUserOutOfRegion:true},'CA (Crave)'],
+    [{userCountry:'KR',isUserOutOfRegion:true},'KR (Coupang Play)']]) {
+    const r=await tile('hbomax',{body:hboLegacyPage(pageProps)});
+    assert.equal(r.output.title,'HBO Max');
+    assert.equal(r.output.content,expected);
+  }
+});
+test('HBO Max distinguishes unavailable page data and HTTP errors from request timeouts',async()=>{
+  for(const response of [
+    {body:'<html>Welcome</html>'},
+    {body:hboLegacyPage(null)},
+    {body:'<script id="__NEXT_DATA__">{invalid JSON</script>'},
+    {body:hboLegacyPage({userCountry:'SG',isUserOutOfRegion:false,isCMSErrorPage:true})},
+    ...[403,429,500,503].map(status=>({status,body:hboLegacyPage({userCountry:'SG',isUserOutOfRegion:false})}))]) {
+    const r=await tile('hbomax',response);
+    assert.equal(r.output.content,'ER');
+    assert.equal(r.output.backgroundColor,'#8E8E93');
+  }
+  const timeout=await tile('hbomax',{error:'request timed out'});
+  assert.equal(timeout.output.content,'TO');
+  assert.equal(timeout.output.backgroundColor,'#8E8E93');
+});
+test('HBO Max never takes legacy availability or country from nested navigation data',async()=>{
+  for(const pageProps of [
+    {navigation:{userCountry:'SG',isUserOutOfRegion:false}},
+    {userCountry:'SG',navigation:{isUserOutOfRegion:false}},
+    {isUserOutOfRegion:false,footer:{userCountry:'SG'}},
+    {userCountry:'SG',isUserOutOfRegion:'false'},
+    {isUserOutOfRegion:false}]) {
+    assert.equal((await tile('hbomax',{body:hboLegacyPage(pageProps)})).output.content,'ER');
+  }
+  const r=await tile('hbomax',{body:hboLegacyPage({
+    userCountry:'SG',isUserOutOfRegion:false,
+    navigation:{userCountry:'US',isUserOutOfRegion:true},footer:{countryCode:'JP'}
+  })});
+  assert.equal(r.output.content,'SG');
+});
+const hboGeoPage=({brand={},pageLocales={},pageProps={}}={})=>hboLegacyPage({
+  geoData:JSON.stringify({
+    brand:{defaultLang:{sg:'en'},region:{asia:['sg']},territory:{},...brand},
+    pageLocales:{availableLocales:['sg/en'],canBeOutOfRegion:false,pathname:'/',...pageLocales}
+  }),...pageProps
+});
+test('HBO Max reads the viewer country from first and later response cookies with one eight-second request',async()=>{
+  for(const cookies of [
+    'countryCode=SG; Path=/; Secure',
+    'session=opaque; Path=/, countryCode=sg; Path=/',
+    ['session=opaque; Path=/','countryCode=SG; Path=/'],
+    'session=opaque; Expires=Wed, 21 Oct 2026 07:28:00 GMT; Path=/, countryCode=SG; Path=/',
+    ['session=opaque; Expires=Wed, 21 Oct 2026 07:28:00 GMT; Path=/','countryCode=SG; Path=/'],
+    ['countryCode=SG; Path=/','countryCode=sg; Path=/']]) {
+    const r=await tile('hbomax',{body:hboGeoPage(),headers:{'Set-Cookie':cookies}});
+    assert.equal(r.output.content,'SG');
+    assert.equal(r.requests.length,1);
+    assert.equal(r.requests[0].timeout,8);
+    assert.equal(r.requests[0]['auto-cookie'],false);
+  }
+});
+test('HBO Max rejects missing ambiguous and embedded country cookies without borrowing static countries',async()=>{
+  const body=hboGeoPage({pageProps:{supportedCountries:[{countryCode:'SG'}],navigation:{countryCode:'SG'}}});
+  for(const cookies of [undefined,'session=opaque; Path=/',
+    'session=countryCode=SG; Path=/', 'othercountryCode=SG; Path=/',
+    'session=opaque; Path=/countryCode=SG', 'countryCode=SGP; Path=/',
+    'countryCode=; Path=/', ['countryCode=SG; Path=/','countryCode=US; Path=/']]) {
+    const r=await tile('hbomax',{body,headers:cookies===undefined?{}:{'Set-Cookie':cookies}});
+    assert.equal(r.output.content,'ER');
+  }
+});
+test('HBO Max requires a valid serialized geoData configuration',async()=>{
+  for(const geoData of ['{invalid JSON','null','{}',{brand:{},pageLocales:{}}]) {
+    const r=await tile('hbomax',{body:hboLegacyPage({geoData}),headers:{'Set-Cookie':'countryCode=SG'}});
+    assert.equal(r.output.content,'ER');
+  }
+});
+test('HBO Max keeps explicit geoData unavailability and partner hints separate from unknown locales',async()=>{
+  for(const [country,expected] of [['DE','NO'],['JP','JP (U-NEXT)'],['CA','CA (Crave)'],['KR','KR (Coupang Play)']]) {
+    const r=await tile('hbomax',{body:hboGeoPage(),headers:{'Set-Cookie':`countryCode=${country}`}});
+    assert.equal(r.output.content,expected);
+  }
+  const unavailable=await tile('hbomax',{
+    body:hboGeoPage({pageLocales:{pathname:'/geo-availability'}}),headers:{'Set-Cookie':'countryCode=SG'}
+  });
+  assert.equal(unavailable.output.content,'NO');
+  for(const canBeOutOfRegion of [false,true]) {
+    const unknown=await tile('hbomax',{
+      body:hboGeoPage({pageLocales:{availableLocales:['us/en'],canBeOutOfRegion}}),
+      headers:{'Set-Cookie':'countryCode=SG'}
+    });
+    assert.equal(unknown.output.content,'ER');
+  }
+});
+test('HBO Max uses territory aliases for locale routing while displaying the actual viewer country',async()=>{
+  const r=await tile('hbomax',{
+    body:hboGeoPage({brand:{defaultLang:{},region:{americas:['us']},territory:{us:['pr']}},
+      pageLocales:{availableLocales:['us/en']}}),
+    headers:{'Set-Cookie':'countryCode=PR'}
+  });
+  assert.equal(r.output.content,'PR');
+  assert.match(r.logs.join('\n'),/访问地区=PR; 路由地区=us; locale=us\/en/);
+});
+test('HBO Max requires the current viewer locale publication window to be valid',async()=>{
+  const now=Date.parse('2026-11-09T12:00:00Z');
+  const before=new Date(now-60000).toISOString(),after=new Date(now+60000).toISOString();
+  for(const [windows,expected] of [
+    [{'sg/en':[before,after]},'SG'],
+    [{'sg/en':[before,null]},'SG'],
+    [{'sg/en':[null,after]},'SG'],
+    [{'sg/en':[after,null]},'ER'],
+    [{'sg/en':[null,before]},'ER'],
+    [{'sg/en':['invalid date',after]},'ER'],
+    [{'sg/en':[before,'invalid date']},'ER'],
+    [{'sg/en':'not a window'},'ER'],
+    [{'sg/en':[before,after,after]},'ER'],
+    [{'sg/en':[before,123]},'ER'],
+    ['not a windows map','ER']]) {
+    const r=await tile('hbomax',{
+      body:hboGeoPage({pageLocales:{windows}}),headers:{'Set-Cookie':'countryCode=SG'}
+    },{now:()=>now});
+    assert.equal(r.output.content,expected);
+  }
+});
+test('HBO Max unknown geoData and timeout results preserve the last valid notification baseline',async()=>{
+  const store=new Map(),argument='mode=home&notify=false'+stashForm({notify:true});
+  const run=response=>tile('monitor',o=>o.url.includes('hbomax')?response:{status:503,body:''},
+    {store,argument,scriptMeta:{type:'cron'}});
+  const first=await run({body:hboGeoPage(),headers:{'Set-Cookie':'countryCode=SG'}});
+  assert.equal(first.notifications.length,0);
+  const key=[...store.keys()].find(k=>k.startsWith('stash_media_check_notify_v1:'));
+  assert.equal(JSON.parse(store.get(key))['HBO Max'],'1:SG');
+  for(const response of [{body:hboGeoPage()},{error:'Timeout'}]) {
+    const unknown=await run(response);
+    assert.equal(unknown.notifications.length,0);
+    assert.equal(JSON.parse(store.get(key))['HBO Max'],'1:SG');
+  }
+  const changed=await run({
+    body:hboGeoPage({brand:{defaultLang:{us:'en'},region:{americas:['us']}},pageLocales:{availableLocales:['us/en']}}),
+    headers:{'Set-Cookie':'countryCode=US'}
+  });
+  assert.equal(changed.notifications.length,1);
+  assert.match(changed.notifications[0][2],/HBO Max 区域变化 SG → US/);
 });
 test('YouTube uses one normal request and can recover a failed primary probe',async()=>{
   const primary=await tile('youtube',{body:'ad-free "INNERTUBE_CONTEXT_GL": "HK"'});

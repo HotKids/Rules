@@ -1,6 +1,11 @@
 /**
  * 流媒体与 AI 服务检测；Surge 汇总面板 / Stash 独立卡片或汇总。
- * @version 2.2.11 (2026-10-01)
+ * @version 2.3 (2026-11-09)
+ * @changelog (latest 3 versions)
+ * - 2.3 (2026-11-09)
+ *   适配 Stash 独立卡片、汇总、长按节点检测及统一日志收集；统一 NO / ER / TO 状态显示。
+ *   完善 Gemini 的 Stash iOS 检测与限时匿名兜底；保留错误不更新通知基线的行为。
+ *   修复 HBO Max 新版 geoData 与地区 Cookie 解析，保留旧页面兼容。
  * @source https://github.com/HotKids/Rules/blob/master/Surge/Module/Scripts/media-check.js
  * @reference https://github.com/StashNetworks/misc/tree/main/collapsed-tiles
  *            https://github.com/oneclickvirt/UnlockTests/tree/main/transnation
@@ -36,7 +41,7 @@ function finishPanel({ backgroundColor, ...panel }) {
 
 // 全局配置常量
 const CONFIG = {
-  VERSION: "2.2.11",
+  VERSION: "2.3",
   UA: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   TIMEOUT: 8000,
   CHROME_VERSION: "131.0.6778"
@@ -554,9 +559,10 @@ class ServiceChecker {
 
   /**
    * HBO Max 解锁检测
-   * 参考 OpenClash 的 userCountry / isUserOutOfRegion 判据：
-   * https://github.com/vernesong/OpenClash/blob/master/luci-app-openclash/root/usr/share/openclash/openclash_streaming_unlock.lua
-   * 只读取 __NEXT_DATA__.props.pageProps，避免误取导航菜单或嵌套配置中的地区。
+   * 兼容旧版 userCountry / isUserOutOfRegion，以及新版 geoData 与 countryCode Cookie。
+   * 新版地区、territory、locale 和有效期判据来自官网地区跳转脚本：
+   * https://www.hbomax.com/dotcom/js/geo-redirect-34b1fb1d18.js
+   * 只读取明确的页面配置和本次响应 Cookie，避免误取导航菜单中的地区。
    * HTTP 异常、缺失字段及页面解析失败属于未知状态，不代表地区受限。
    * JP / CA / KR 保留第三方平台提示；此检测不验证账号播放或第三方平台解锁。
    * @returns {Promise<Object>} 检测结果
@@ -565,6 +571,12 @@ class ServiceChecker {
     const unknown = reason => {
       MediaLog.log("[media-check][HBO Max] " + reason);
       return Utils.createResult(STATUS.ERROR, "Error");
+    };
+    const unavailable = region => {
+      const partners = { JP: "U-NEXT", CA: "Crave", KR: "Coupang Play" };
+      return Object.prototype.hasOwnProperty.call(partners, region)
+        ? Utils.createResult(STATUS.COMING, `${region} (${partners[region]})`)
+        : Utils.createResult(STATUS.FAIL, "NO");
     };
     try {
       const res = await Utils.request({ url: "https://www.hbomax.com/" });
@@ -579,17 +591,62 @@ class ServiceChecker {
       const region = typeof page.userCountry === "string" ? page.userCountry.trim().toUpperCase() : "";
       const hasRegion = /^[A-Z]{2}$/.test(region);
       const outOfRegion = page.isUserOutOfRegion;
-      if (outOfRegion !== true && outOfRegion !== false) return unknown("Missing availability flag");
-
-      if (outOfRegion) {
-        const partners = { JP: "U-NEXT", CA: "Crave", KR: "Coupang Play" };
-        if (hasRegion && Object.prototype.hasOwnProperty.call(partners, region)) {
-          return Utils.createResult(STATUS.COMING, `${region} (${partners[region]})`);
-        }
-        return Utils.createResult(STATUS.FAIL, "NO");
+      if (outOfRegion === true) return unavailable(hasRegion ? region : "");
+      if (outOfRegion === false) {
+        if (!hasRegion) return unknown("Missing user country");
+        return Utils.createResult(STATUS.OK, region);
       }
-      if (!hasRegion) return unknown("Missing user country");
-      return Utils.createResult(STATUS.OK, region);
+
+      // 新页面把站点地区配置序列化到 geoData；它本身不包含访问者国家。
+      if (typeof page.geoData !== "string") return unknown("Missing availability flag");
+      let geo;
+      try { geo = JSON.parse(page.geoData); }
+      catch { return unknown("Invalid geoData JSON"); }
+      const record = value => value !== null && typeof value === "object" && !Array.isArray(value);
+      const brand = geo?.brand, locales = geo?.pageLocales;
+      const countryMap = value => record(value) && Object.values(value).every(countries =>
+        Array.isArray(countries) && countries.every(country => typeof country === "string" && /^[a-z]{2}$/.test(country)));
+      if (!record(brand?.defaultLang) || !countryMap(brand?.region) || !Object.keys(brand.region).length
+        || !countryMap(brand?.territory) || !record(locales) || !Array.isArray(locales.availableLocales)
+        || !locales.availableLocales.every(locale => typeof locale === "string")
+        || typeof locales.canBeOutOfRegion !== "boolean" || typeof locales.pathname !== "string") {
+        return unknown("Invalid geoData configuration");
+      }
+
+      // Cookie 由本次官网响应提供；不使用 cookie jar、静态国家列表或其它服务的地区。
+      const cookies = Array.from((res.headers["set-cookie"] || "").matchAll(
+        /(?:^|[,\r\n])\s*countryCode=([^;,\s]*)/g), match => match[1]);
+      if (!cookies.length || cookies.some(country => !/^[A-Za-z]{2}$/.test(country))
+        || new Set(cookies.map(country => country.toLowerCase())).size !== 1) {
+        return unknown("Missing or ambiguous countryCode response Cookie");
+      }
+      const viewerCountry = cookies[0].toUpperCase();
+      const findCountry = (map, country) => Object.keys(map).find(key => map[key].includes(country));
+      const routeCountry = findCountry(brand.territory, viewerCountry.toLowerCase()) || viewerCountry.toLowerCase();
+      if (!/^[a-z]{2}$/.test(routeCountry)) return unknown("Invalid territory country");
+      const language = brand.defaultLang[routeCountry] || "en";
+      if (typeof language !== "string" || !/^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(language)) {
+        return unknown("Invalid country language");
+      }
+      const locale = `${routeCountry}/${language.toLowerCase()}`;
+      const inBrandRegion = findCountry(brand.region, routeCountry) !== undefined;
+      const geoUnavailable = /^\/geo-availability(?:\/|$)/.test(locales.pathname);
+      MediaLog.log(`[media-check][HBO Max] geoData; 访问地区=${viewerCountry}; 路由地区=${routeCountry}; locale=${locale}; 品牌地区=${inBrandRegion}`);
+      // 官网明确将品牌地区之外的访问者导向 /geo-availability。
+      if (!inBrandRegion || geoUnavailable) return unavailable(viewerCountry);
+
+      if (!locales.availableLocales.includes(locale)) return unknown("Missing viewer locale");
+      if (locales.windows != null && !record(locales.windows)) return unknown("Invalid locale windows");
+      const window = locales.windows?.[locale];
+      if (window != null) {
+        if (!Array.isArray(window) || window.length > 2
+          || window.some(value => value != null && typeof value !== "string")) return unknown("Invalid locale window");
+        const start = window[0] ? Date.parse(window[0]) : 0;
+        const end = window[1] ? Date.parse(window[1]) : Infinity;
+        if (Number.isNaN(start) || Number.isNaN(end)) return unknown("Invalid locale window dates");
+        if (Date.now() < start || Date.now() > end) return unknown("Viewer locale outside publication window");
+      }
+      return Utils.createResult(STATUS.OK, viewerCountry);
     } catch (error) {
       return Utils.errorResult(error);
     }
