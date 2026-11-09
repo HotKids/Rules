@@ -115,7 +115,7 @@ test('friDay success and already-signed save the date',async()=>{
 });
 test('Unknown risk never renders a numeric score',()=>{
   const code=read('ip-security.js');const part=code.slice(code.indexOf('function riskText('),code.indexOf('function maskIP('));
-  const ctx={CONFIG:{riskLevels:[{max:100,label:'Risk',color:'#123456'}]}};
+  const ctx={CONFIG:{riskLevels:[{max:100,label:'Risk',color:'#123456'}]},t:value=>value};
   vm.createContext(ctx);vm.runInContext(part,ctx);
   assert.equal(ctx.formatRisk({score:null,source:'Unavailable'}),'未知（检测失败）');
   assert.equal(ctx.riskText(null).color,'#9E9E9E');
@@ -2499,6 +2499,179 @@ test('Surge and Stash explicit local geography selection skips Baidu and respect
     assert.ok(!r.requests.some(o=>o.url.includes('opendata')));
     assert.match(r.output.content,source==='ipsb'?/Selected City[\s\S]*Selected ISP/:/深圳[\s\S]*中国电信/);
     if(client==='stash')assert.equal(r.requests.find(o=>o.url.includes('ip.sb')).timeout,5);
+  }
+});
+
+const ipApiGeoRequests=requests=>requests.filter(({url})=>{
+  const target=new URL(url);
+  return target.hostname==='ip-api.com'&&target.pathname.startsWith('/json/');
+});
+test('IP language simplified automatic defaults preserve existing panel results and request routing',async()=>{
+  for(const client of ['surge','stash']) for(const tile of client==='surge'?['summary']:['summary','local','outbound','risk']) {
+    const argument=`tile=${tile}&mode=${tile==='summary'?'home':'collapsed'}&notify=false`;
+    const before=await ipPanel({client,now:100000000,argument:argument+'&local_geoapi=baidu&remote_geoapi=ipapi-zh'});
+    const after=await ipPanel({client,now:100000000,argument:argument+'&lang=zh-Hans&local_geoapi=auto&remote_geoapi=auto'});
+    assert.equal(JSON.stringify(after.output),JSON.stringify(before.output));
+    const route=o=>[o.url.replace(/\/\/[^/]+\.edns\.ip-api\.com(?=\/|$)/,'//[probe].edns.ip-api.com'),o.policy,o.headers];
+    assert.equal(JSON.stringify(after.requests.map(route)),JSON.stringify(before.requests.map(route)));
+  }
+});
+test('IP language automatic geography preferences follow language on Surge and Stash',async()=>{
+  for(const client of ['surge','stash']) for(const lang of ['zh-Hans','zh-Hant','en']) {
+    const r=await ipPanel({client,argument:`tile=summary&mode=home&notify=false&lang=${lang}&local_geoapi=auto&remote_geoapi=auto`});
+    assert.equal(r.requests.some(o=>o.url.includes('opendata.baidu')),lang!=='en');
+    const queries=ipApiGeoRequests(r.requests);
+    assert.ok(queries.length>0);
+    assert.ok(queries.every(o=>new URL(o.url).searchParams.get('lang')===(lang==='en'?'en':'zh-CN')));
+    assert.ok(r.requests.some(o=>o.url.includes('ip.sb')));
+    const localRequest=r.requests.find(o=>o.url.includes('bilibili'));
+    assert.equal(client==='surge'?localRequest.policy:localRequest.headers['X-Stash-Selected-Proxy'],'DIRECT');
+  }
+});
+test('IP language leaves explicitly selected geography sources and returned names unchanged',async()=>{
+  for(const client of ['surge','stash']) for(const [lang,local,remote] of [
+    ['en','baidu','ipapi-zh'],['zh-Hans','ipsb','ipapi'],['zh-Hant','ipsb','ipapi']]) {
+    const r=await ipPanel({client,
+      argument:`tile=summary&mode=home&notify=false&lang=${lang}&local_geoapi=${local}&remote_geoapi=${remote}`});
+    assert.equal(r.requests.some(o=>o.url.includes('opendata.baidu')),local==='baidu');
+    assert.ok(ipApiGeoRequests(r.requests).every(o=>
+      new URL(o.url).searchParams.get('lang')===(remote==='ipapi-zh'?'zh-CN':'en')));
+    assert.match(r.output.content,local==='baidu'?/广东省深圳市/:/Shenzhen/);
+    assert.match(r.output.content,/Example/);
+  }
+});
+test('IP language native Stash form overrides static language and automatic source preferences',async()=>{
+  const r=await ipPanel({
+    argument:'tile=summary&mode=home&notify=false&lang=zh-Hans&local_geoapi=baidu&remote_geoapi=ipapi-zh'+
+      stashForm({lang:'en',local_geoapi:'auto',remote_geoapi:'auto'})
+  });
+  assert.ok(!r.requests.some(o=>o.url.includes('opendata.baidu')));
+  assert.ok(ipApiGeoRequests(r.requests).every(o=>new URL(o.url).searchParams.get('lang')==='en'));
+  assert.match(r.output.content,/Shenzhen/);
+});
+test('IP language renders English panel labels while preserving custom source geography and policy names',async()=>{
+  for(const client of ['surge','stash']) {
+    const r=await ipPanel({client,
+      argument:'tile=summary&mode=home&notify=false&lang=en&local_geoapi=baidu&remote_geoapi=ipapi-zh'});
+    for(const label of ['Local IP','Outbound IP','Location','ISP','IP risk score','IP type']) {
+      assert.ok(r.output.content.includes(label+': '),label);
+    }
+    assert.match(r.output.content,/广东省深圳市/);
+    assert.doesNotMatch(r.output.content,/IP 风控值|IP 类型|住宅 IP|机房 IP|广播 IP|原生 IP/);
+    if(client==='surge') {
+      assert.equal(r.output.title,'Proxy policy: Test Proxy');
+      assert.match(r.output.content,/Entry IP: 192\.0\.2\.1/);
+    }
+  }
+});
+test('IP language traditional automatic geography is rendered without altering explicit source names',async()=>{
+  for(const client of ['surge','stash']) {
+    const run=sources=>ipPanel({client,
+      argument:'tile=summary&mode=home&notify=false&lang=zh-Hant&'+sources});
+    const automatic=await run('local_geoapi=auto&remote_geoapi=auto');
+    assert.match(automatic.output.content,/地區：/);
+    assert.match(automatic.output.content,/廣東省深圳市/);
+    assert.match(automatic.output.content,/(?:臺|台)灣/);
+    const explicit=await run('local_geoapi=baidu&remote_geoapi=ipapi-zh');
+    assert.match(explicit.output.content,/地區：/);
+    assert.match(explicit.output.content,/广东省深圳市/);
+    assert.match(explicit.output.content,/台湾/);
+    assert.match(automatic.output.content,/Example/);
+    assert.match(explicit.output.content,/Example/);
+  }
+});
+test('IP language never translates user policy names or provider organization names',async()=>{
+  const policy='住宅 IP · 香港',organization='广播 IP Telecom';
+  for(const lang of ['zh-Hans','zh-Hant','en']) {
+    const r=await ipPanel({client:'surge',argument:`lang=${lang}&notify=false`,
+      recentRequests:[{URL:'https://ipinfo.io/test/json',policyName:policy,remoteAddress:'192.0.2.1:443 (Proxy)'}],
+      intercept(o,cb){
+        if(o.url.includes('ipinfo')) {
+          cb(null,{status:200},JSON.stringify({country:'SG',city:'Singapore',org:'AS64500 '+organization}));return true;
+        }
+      }});
+    assert.ok(r.output.title.endsWith(policy));
+    assert.ok(r.output.content.includes(organization));
+  }
+});
+test('IP language does not rewrite risk and type caches or change their identity and Taiwan flag settings',async()=>{
+  const now=100000000,ip='198.51.100.10';
+  const cached={riskScoreCache:JSON.stringify({ip,score:12,source:'ProxyCheck',api:'',hasKey:false,ts:now/1000-60}),
+    ipTypeCache:JSON.stringify({ip,ipType:'机房 IP',ipSrc:'广播 IP',ts:now/1000-60})};
+  const store=new Map(Object.entries(cached));
+  for(const lang of ['zh-Hans','zh-Hant','en']) {
+    const r=await ipPanel({client:'surge',store,now,
+      argument:`lang=${lang}&local_geoapi=baidu&remote_geoapi=ipapi-zh&tw_flag=tw&notify=false`});
+    for(const [key,value] of Object.entries(cached))assert.equal(store.get(key),value);
+    assert.ok(!r.requests.some(o=>/ippure|proxycheck|scamalytics|ipqualityscore/.test(o.url)));
+    assert.match(r.output.title,/Test Proxy$/);
+    assert.match(r.output.content,/12%/);assert.match(r.output.content,/ProxyCheck/);
+    assert.match(r.output.content,/🇹🇼/);
+    assert.equal(r.output['icon-color'],'#0D6E3D');
+  }
+});
+test('IP language changes alone never reset notification baselines or create network-change alerts',async()=>{
+  const stashStore=new Map();
+  const first=await ipPanel({store:stashStore,scriptType:'cron',argument:'task=monitor&notify=true&lang=zh-Hans'});
+  assert.equal(first.notifications.length,0);
+  const stashKey=[...stashStore.keys()].find(k=>k.includes('monitor.v2'));
+  const stashBaseline=stashStore.get(stashKey);
+  for(const lang of ['zh-Hant','en']) {
+    const r=await ipPanel({store:stashStore,scriptType:'cron',argument:`task=monitor&notify=true&lang=${lang}`});
+    assert.equal(r.notifications.length,0);assert.equal(stashStore.get(stashKey),stashBaseline);
+  }
+  const surgeStore=new Map(),argument='TYPE=EVENT&event_delay=0.001&notify=true';
+  await ipPanel({client:'surge',store:surgeStore,virtualTimers:true,argument:argument+'&lang=zh-Hans'});
+  const surgeBaseline=surgeStore.get('lastNetworkInfoEvent');
+  assert.equal(JSON.parse(surgeBaseline).complete,true);
+  for(const lang of ['zh-Hant','en']) {
+    const r=await ipPanel({client:'surge',store:surgeStore,virtualTimers:true,argument:argument+'&lang='+lang});
+    assert.equal(r.notifications.length,0);assert.equal(surgeStore.get('lastNetworkInfoEvent'),surgeBaseline);
+  }
+});
+test('IP language real network changes use English and traditional notification labels',async()=>{
+  for(const client of ['surge','stash']) for(const [lang,title,risk,type,level] of [
+    ['en','🔄 Network changed','Risk: ','Type: ','Very clean'],
+    ['zh-Hant','🔄 網路已切換','風險：','類型：','極度純淨']]) {
+    const store=new Map(),argument=(client==='surge'?'TYPE=EVENT&event_delay=0.001':'task=monitor')+
+      '&notify=true&lang='+lang;
+    const run=options=>ipPanel({client,store,argument,scriptType:'cron',virtualTimers:client==='surge',...options});
+    await run({outIP:'198.51.100.10'});
+    const changed=await run({outIP:'198.51.100.11'});
+    assert.equal(changed.notifications.length,1);
+    const [heading,subtitle,body]=changed.notifications[0];
+    assert.equal(heading,title+(client==='surge'?' | Test Proxy':''));
+    assert.match(subtitle,/198\.51\.100\.11/);
+    const firstLine=body.split('\n')[0];
+    assert.ok(firstLine.startsWith('🅟 '+risk));
+    assert.ok(firstLine.includes(' | '+type));
+    assert.ok(firstLine.includes(level));
+    assert.match(firstLine,/12%/);
+    if(lang==='en')assert.match(firstLine,/Residential.*Native/);
+  }
+});
+test('IP language unknown risk and type notification labels stay localized after a real IP change',async()=>{
+  for(const client of ['surge','stash']) for(const [lang,title,risk,type,unknown] of [
+    ['en','🔄 Network changed','Risk: ','Type: ','Unknown (check failed)'],
+    ['zh-Hant','🔄 網路已切換','風險：','類型：','未知（檢測失敗）']]) {
+    const store=new Map(),argument=(client==='surge'?'TYPE=EVENT&event_delay=0.001':'task=monitor')+
+      '&notify=true&lang='+lang;
+    const run=options=>ipPanel({client,store,argument,scriptType:'cron',virtualTimers:client==='surge',...options});
+    await run({outIP:'198.51.100.10'});
+    const changed=await run({outIP:'198.51.100.11',riskFailure:true,intercept(o,cb){
+      if(o.url.includes('ippure')) {cb(null,{status:503},'');return true;}
+    }});
+    assert.equal(changed.notifications.length,1);
+    const [heading,,body]=changed.notifications[0];
+    assert.equal(heading,title+(client==='surge'?' | Test Proxy':''));
+    const firstLine=body.split('\n')[0];
+    assert.ok(firstLine.startsWith('🅟 '+risk+unknown));
+    assert.ok(firstLine.includes(' | '+type));
+    assert.doesNotMatch(firstLine,/\d+%/);
+    if(client==='stash') {
+      assert.ok(firstLine.includes(lang==='en'?'Unknown type':'類型未知'));
+      assert.ok(firstLine.includes(lang==='en'?'Unknown origin':'來源未知'));
+    } else assert.ok(firstLine.endsWith(lang==='en'?'Unknown · Unknown':'未知 · 未知'));
   }
 });
 

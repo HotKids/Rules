@@ -4,13 +4,14 @@
 # 卡片间隔按 Surge 的 panel_interval 默认值同步为整数，默认 600 秒；首次检测只记录通知基线。
 # 通知展示本地/出口 IP、地区、运营商和风险，排版与 Surge 一致。
 # 本地卡片显示直连公网 IP；首页及纯净度卡按风险值动态变色，六档等级与 Surge 一致。
-# 地区每轮查询：本地百度 → bilibili → ip.sb；出口 ipapi-zh → ipapi → ipinfo。
-# local_geoapi / remote_geoapi 指定首选，失败后尝试剩余来源；出口运营商始终优先 ipinfo。
+# lang 默认 zh-Hans，可选 zh-Hant / en；界面文字与 auto 默认地理来源随语言切换。
+# auto 中文首选 baidu / ipapi-zh，英文首选 ipsb / ipapi；仅 auto 地名在繁体显示时转换。
+# local_geoapi / remote_geoapi 默认 auto，显式指定来源优先，失败后尝试其余来源；运营商优先 ipinfo。
 # 首页补充 DNS 解析器与 rDNS；DNS 查询最多等待 1.5 秒，rDNS 复用运营商查询，打码时隐藏。
 # 免密钥数据源、打码、旗帜参数取 Surge 默认值；Stash 不使用 IPQS/MaxMind，凭据不随源文件同步。
 # risk_api=null 在 Stash 按 IPPure → ProxyCheck → Scamalytics 回退，指定源失败后尝试其余来源。
 # notify 默认值用于定时任务，卡片保持关闭通知；event_delay 和点击切换打码仅适用于 Surge。
-# Stash 可选 risk_api=ippure/proxycheck/scamalytics；local_geoapi=baidu/bilibili/ipsb；remote_geoapi=ipapi-zh/ipapi/ipinfo/ippure。
+# Stash 可选 risk_api=ippure/proxycheck/scamalytics；local_geoapi=auto/baidu/bilibili/ipsb；remote_geoapi=auto/ipapi-zh/ipapi/ipinfo/ippure。
 # 首页聚合卡片需客户端支持首页 Tile；通知独立于卡片。
 # 支持覆写参数的客户端可调整数据源、打码和通知；设备上的选择独立于同步的默认值。
 # 卡片 interval 保持整数，以兼容不会展开覆写参数的客户端，不在参数表单中提供。
@@ -18,11 +19,23 @@
 # API 显示的是出口探测域名的规则预测，不代表其他服务线路；接口不支持或失败则省略相关信息。
 # 卡片与通知日志统一收集到 hotkids-ip-security.log，最多延迟一分钟。
 name: 'IP Security Tiles'
-desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化
+desc: 首页 IP 信息卡与出口、本地、纯净度折叠卡片，支持定时通知 IP 变化；默认简体中文，可选繁体、英文，地区源默认 auto 随语言选择
 category: 'HotKids'
 icon: 'https://ippure.com/logo.png'
 arguments-version: 1
 arguments:
+  lang:
+    type: select
+    title: 显示语言（lang）
+    description: 默认 zh-Hans（简体中文），可选 zh-Hant（繁體中文）或 en（English）。地区来源默认 auto 随语言选择；仅 auto 地名在繁体显示时转换，显式来源的地名与运营商原名保持不变。
+    default: zh-Hans
+    options:
+    - value: zh-Hans
+      label: 简体中文
+    - value: zh-Hant
+      label: 繁體中文
+    - value: en
+      label: English
   risk_api:
     type: select
     title: 风险评分来源（risk_api）
@@ -40,9 +53,11 @@ arguments:
   local_geoapi:
     type: select
     title: 本地地区首选（local_geoapi）
-    description: 默认：百度 → bilibili → ip.sb；指定来源优先，失败后按默认顺序尝试其余来源。百度提供中文省市区，bilibili 为中文，ip.sb 为英文。
-    default: baidu
+    description: 默认 auto：zh-Hans / zh-Hant 首选 baidu，en 首选 ipsb；显式来源优先保留，失败后尝试其余来源。百度与 bilibili 返回中文，ip.sb 保留来源地名；仅 auto 地名在繁体显示时转换。
+    default: auto
     options:
+    - value: auto
+      label: 自动，随语言
     - value: baidu
       label: baidu
     - value: bilibili
@@ -52,9 +67,11 @@ arguments:
   remote_geoapi:
     type: select
     title: 出口地区首选（remote_geoapi）
-    description: 出口默认：ipapi-zh → ipapi → ipinfo；指定来源优先。ipapi-zh/ipapi 为同一接口的中英文，使用 HTTP；ipinfo 为英文，IPPure 为额外可选源。运营商优先 ipinfo，缺失时回退到地区来源。
-    default: ipapi-zh
+    description: 默认 auto：zh-Hans / zh-Hant 首选 ipapi-zh，en 首选 ipapi；显式来源优先保留，失败后尝试其余来源。ipapi-zh/ipapi 为同一接口的简体中文/英文，使用 HTTP；仅 auto 地名在繁体显示时转换。ipinfo 保留来源地名，IPPure 为额外可选源；运营商优先 ipinfo。
+    default: auto
     options:
+    - value: auto
+      label: 自动，随语言
     - value: ipapi-zh
       label: ipapi-zh
     - value: ipapi
@@ -114,7 +131,7 @@ tiles:
     icon: 'https://ippure.com/logo.png'
     backgroundColor: '#9E9E9E'
     collapsed: false
-    argument: 'tile=summary&mode=home&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
+    argument: 'tile=summary&mode=home&notify=false&log=shared&risk_api=null&local_geoapi=auto&remote_geoapi=auto&mask_ip=0&tw_flag=cn&lang=zh-Hans&stash_options={"lang":${args.lang|json},"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
   - name: hotkids-ip-security-outbound
     interval: 600
     title: '出口 IP'
@@ -123,7 +140,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/drasl-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=outbound&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
+    argument: 'tile=outbound&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=auto&remote_geoapi=auto&mask_ip=0&tw_flag=cn&lang=zh-Hans&stash_options={"lang":${args.lang|json},"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-local
     interval: 600
     title: '本地 IP'
@@ -132,7 +149,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons/png/target-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=local&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
+    argument: 'tile=local&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=auto&remote_geoapi=auto&mask_ip=0&tw_flag=cn&lang=zh-Hans&stash_options={"lang":${args.lang|json},"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
   - name: hotkids-ip-security-risk
     interval: 600
     title: 'IP 纯净度'
@@ -141,7 +158,7 @@ tiles:
     icon: 'https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/adguard-home-central-manager-light.png'
     backgroundColor: '#9E9E9E'
     collapsed: true
-    argument: 'tile=risk&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
+    argument: 'tile=risk&mode=collapsed&notify=false&log=shared&risk_api=null&local_geoapi=auto&remote_geoapi=auto&mask_ip=0&tw_flag=cn&lang=zh-Hans&stash_options={"lang":${args.lang|json},"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json}}'
 
 # 通知使用日常分流，不受长按测试节点影响；需要 Stash 保持连接。
 cron:
@@ -153,7 +170,7 @@ cron:
     - name: hotkids-ip-security-notify
       cron: '*/10 * * * *'
       timeout: 25
-      argument: 'task=monitor&notify=true&log=shared&risk_api=null&local_geoapi=baidu&remote_geoapi=ipapi-zh&mask_ip=0&tw_flag=cn&stash_options={"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"notify":${args.notify|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
+      argument: 'task=monitor&notify=true&log=shared&risk_api=null&local_geoapi=auto&remote_geoapi=auto&mask_ip=0&tw_flag=cn&lang=zh-Hans&stash_options={"lang":${args.lang|json},"risk_api":${args.risk_api|json},"local_geoapi":${args.local_geoapi|json},"remote_geoapi":${args.remote_geoapi|json},"mask_ip":${args.mask_ip|json},"tw_flag":${args.tw_flag|json},"notify":${args.notify|json},"stash_api":${args.stash_api|json},"stash_api_url":${args.stash_api_url|json},"stash_api_secret":${args.stash_api_secret|json}}'
 
 script-providers:
   hotkids-ip-security:

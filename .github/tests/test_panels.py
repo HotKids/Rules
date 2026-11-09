@@ -19,6 +19,18 @@ from config_sync import stash
 
 
 class TileConfigurationTests(unittest.TestCase):
+    def test_shared_panel_scripts_keep_dated_versions_and_at_most_three_changelog_versions(self):
+        for name in ('ip-security.js', 'media-check.js'):
+            header = (ROOT / 'Surge/Module/Scripts' / name).read_text().partition('*/')[0]
+            metadata = re.search(r'(?m)^ \* @version (\d+(?:\.\d+)*) \((\d{4}-\d{2}-\d{2})\)\n'
+                                 r' \* @changelog \(latest 3 versions\)\n', header)
+            with self.subTest(script=name):
+                self.assertIsNotNone(metadata)
+                entries = re.findall(r'(?m)^ \* - (\d+(?:\.\d+)*) \((\d{4}-\d{2}-\d{2})\)$', header)
+                self.assertGreaterEqual(len(entries), 1)
+                self.assertLessEqual(len(entries), 3)
+                self.assertEqual(entries[0], metadata.groups())
+
     def test_panel_metadata_tracks_surge_edits_without_changing_tiles(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -63,7 +75,7 @@ class TileConfigurationTests(unittest.TestCase):
 
     def test_panel_defaults_follow_source_without_changing_task_contexts(self):
         defaults = {
-            'ip-security-panel': {'risk_api': 'proxycheck', 'local_geoapi': 'ipsb', 'remote_geoapi': 'ipinfo',
+            'ip-security-panel': {'lang': 'en', 'risk_api': 'proxycheck', 'local_geoapi': 'ipsb', 'remote_geoapi': 'ipinfo',
                                   'ipqs_key': 'null', 'maxmind_key': 'account:key+with&equals=', 'mask_ip': '2',
                                   'tw_flag': 'tw', 'notify': 'false', 'event_delay': '30', 'panel_interval': '20'},
             'media-check-panel': {'nfprice': 'false', 'geminiapikey': 'key+with&equals=', 'notify': 'true', 'viu': 'true'}
@@ -92,7 +104,7 @@ class TileConfigurationTests(unittest.TestCase):
                         if stem == 'ip-security-panel':
                             self.assertNotIn('ipqs_key', args)
                             self.assertNotIn('maxmind_key', args)
-                            for key in ('risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'):
+                            for key in ('lang', 'risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'):
                                 self.assertEqual(args.get(key), params.get(key))
                             self.assertEqual(args.get('notify'), params.get('notify') if args.get('task') == 'monitor' else 'false')
                         else:
@@ -104,6 +116,57 @@ class TileConfigurationTests(unittest.TestCase):
                         for tile in config['tiles']:
                             self.assertIs(type(tile['interval']), int)
                             self.assertEqual(tile['interval'], int(params.get('panel_interval', 600)))
+
+    def test_ip_language_sync_preserves_auto_and_explicit_geography_preferences(self):
+        for lang in ('zh-Hans', 'zh-Hant', 'en'):
+            for local, remote in (('auto', 'auto'), ('baidu', 'ipapi-zh'), ('ipsb', 'ipinfo')):
+                defaults = {'lang': lang, 'local_geoapi': local, 'remote_geoapi': remote, 'notify': 'true'}
+                schema = stash._stash_panel_schema(defaults, 'ip-security-panel')
+                self.assertEqual(schema['lang']['default'], lang)
+                self.assertEqual(schema['local_geoapi']['default'], local)
+                self.assertEqual(schema['remote_geoapi']['default'], remote)
+                for argument in ('tile=summary&mode=home', 'tile=local&mode=collapsed',
+                                 'tile=outbound&mode=collapsed', 'tile=risk&mode=collapsed',
+                                 'task=monitor&notify=true'):
+                    result = stash._stash_panel_argument(argument, defaults, 'ip-security-panel')
+                    prefix, separator, options = result.partition('&stash_options=')
+                    args = parse_qs(prefix)
+                    with self.subTest(lang=lang, local=local, remote=remote, argument=argument):
+                        self.assertEqual(args['lang'], [lang])
+                        self.assertEqual(args['local_geoapi'], [local])
+                        self.assertEqual(args['remote_geoapi'], [remote])
+                        self.assertTrue(separator)
+                        self.assertIn('"lang":${args.lang|json}', options)
+        self.assertEqual(stash._stash_panel_argument('task=logs', defaults, 'ip-security-panel'), 'task=logs')
+
+    def test_ip_language_reaches_surge_and_all_stash_detection_contexts(self):
+        source = (PANELS / 'ip-security-panel.sgmodule').read_text()
+        declaration = next(line.removeprefix('#!arguments=') for line in source.splitlines()
+                           if line.startswith('#!arguments='))
+        defaults = dict(item.split(':', 1) for item in declaration.split(','))
+        self.assertEqual({key: defaults[key] for key in ('lang', 'local_geoapi', 'remote_geoapi')},
+                         {'lang': 'zh-Hans', 'local_geoapi': 'auto', 'remote_geoapi': 'auto'})
+        scripts = [line for line in source.splitlines() if line.startswith('ip-security-') and 'argument=' in line]
+        self.assertEqual(len(scripts), 2)
+        for script in scripts:
+            self.assertEqual(parse_qs(script.partition('argument=')[2])['lang'], ['{{{lang}}}'])
+        config = yaml.safe_load((PANELS / 'ip-security-panel.stoverride').read_text())
+        self.assertEqual([option['value'] for option in config['arguments']['lang']['options']],
+                         ['zh-Hans', 'zh-Hant', 'en'])
+        for key in ('lang', 'local_geoapi', 'remote_geoapi'):
+            self.assertEqual(config['arguments'][key]['default'], defaults[key])
+        for entry in [*config['tiles'], *config['cron']['script']]:
+            prefix, separator, options = entry['argument'].partition('&stash_options=')
+            args = parse_qs(prefix)
+            if args.get('task') == ['logs']:
+                self.assertEqual(args, {'task': ['logs']})
+                self.assertFalse(separator)
+                continue
+            self.assertEqual(args['lang'], ['zh-Hans'])
+            self.assertEqual(args['local_geoapi'], ['auto'])
+            self.assertEqual(args['remote_geoapi'], ['auto'])
+            self.assertTrue(separator)
+            self.assertIn('"lang":${args.lang|json}', options)
 
     def test_ip_stash_sync_removes_credentials_and_replaces_keyed_source_preferences(self):
         for remote in ('maxmind', 'maxmind-zh'):
@@ -248,7 +311,7 @@ class TileConfigurationTests(unittest.TestCase):
         declaration = next(line.removeprefix('#!arguments=')
                            for line in (PANELS / 'ip-security-panel.sgmodule').read_text().splitlines()
                            if line.startswith('#!arguments='))
-        supported = {'notify', 'risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'}
+        supported = {'lang', 'notify', 'risk_api', 'local_geoapi', 'remote_geoapi', 'mask_ip', 'tw_flag'}
         defaults = {key: [value] for key, value in (item.split(':', 1) for item in declaration.split(','))
                     if key in supported}
         self.assertEqual(parse_qs(monitor['argument'].partition('&stash_options=')[0], keep_blank_values=True), {

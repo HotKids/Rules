@@ -1,0 +1,22 @@
+OpenCC geographic display data
+
+This product includes dictionary data from Open Chinese Convert (OpenCC),
+packaged as opencc-data@1.4.2, under the Apache License, Version 2.0.
+Original source: https://github.com/BYVoid/OpenCC
+Pinned packaging source: https://github.com/nk2028/opencc-data/tree/4bcdc1064a298884d673dee8bbe91b2508cac6f5/data
+
+Original dictionary declarations:
+# Open Chinese Convert (OpenCC) Dictionary
+# File: STCharacters.txt / STPhrases.txt
+# License: Apache-2.0 (see LICENSE)
+# Source: https://github.com/BYVoid/OpenCC
+
+Modifications: retained the first candidate of nonidentity single-character
+mappings; selected 63 geographic phrase mappings from STPhrases.txt; embedded
+the data as two Unicode-code-point strings and a geographic-phrase object.
+The conversion code was written for this script and does not contain the
+opencc-js library implementation. Full phrase-conversion dictionaries are not
+included. The original npm package has no NOTICE file.
+
+STCharacters.txt SHA256: 17c1fed3774796425a1fcc5ebac06074f8ef6783594f34b16d306c43d864f930
+STPhrases.txt SHA256: 315f95aae4cd4b4713c99bec3a9443b8254f55bfc8228e11ad817b89f8956bd5

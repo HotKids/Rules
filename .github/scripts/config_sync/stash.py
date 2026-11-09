@@ -67,7 +67,7 @@ def _stash_panel_argument(argument: str, defaults: dict, stem: str) -> str:
     if args.get("task") == "logs" or args.get("service") == "logs":
         return argument
     if stem == "ip-security-panel":
-        keys = ["risk_api", "local_geoapi", "remote_geoapi", "mask_ip", "tw_flag"]
+        keys = ["lang", "risk_api", "local_geoapi", "remote_geoapi", "mask_ip", "tw_flag"]
         # Stash IP 面板仅使用免密钥来源；同步时同时移除旧覆写中的凭据。
         args.pop("ipqs_key", None)
         args.pop("maxmind_key", None)
@@ -116,16 +116,18 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
     if stem != "ip-security-panel":
         return {}
     choices = {
+        "lang": ("显示语言", ["zh-Hans", "zh-Hant", "en"]),
         "risk_api": ("风险评分来源", ["null", "ippure", "proxycheck", "scamalytics"]),
-        "local_geoapi": ("本地地区首选", ["baidu", "bilibili", "ipsb"]),
-        "remote_geoapi": ("出口地区首选", ["ipapi-zh", "ipapi", "ipinfo", "ippure"]),
+        "local_geoapi": ("本地地区首选", ["auto", "baidu", "bilibili", "ipsb"]),
+        "remote_geoapi": ("出口地区首选", ["auto", "ipapi-zh", "ipapi", "ipinfo", "ippure"]),
         "mask_ip": ("IP 打码", ["0", "1", "2"]),
         "tw_flag": ("台湾地区旗帜", ["cn", "tw"]),
     }
     descriptions = {
+        "lang": "默认 zh-Hans（简体中文），可选 zh-Hant（繁體中文）或 en（English）。地区来源默认 auto 随语言选择；仅 auto 地名在繁体显示时转换，显式来源的地名与运营商原名保持不变。",
         "risk_api": "自动：IPPure → ProxyCheck → Scamalytics；指定来源优先，失败后尝试其余来源。Stash 仅使用免密钥服务。",
-        "local_geoapi": "默认：百度 → bilibili → ip.sb；指定来源优先，失败后按默认顺序尝试其余来源。百度提供中文省市区，bilibili 为中文，ip.sb 为英文。",
-        "remote_geoapi": "出口默认：ipapi-zh → ipapi → ipinfo；指定来源优先。ipapi-zh/ipapi 为同一接口的中英文，使用 HTTP；ipinfo 为英文，IPPure 为额外可选源。运营商优先 ipinfo，缺失时回退到地区来源。",
+        "local_geoapi": "默认 auto：zh-Hans / zh-Hant 首选 baidu，en 首选 ipsb；显式来源优先保留，失败后尝试其余来源。百度与 bilibili 返回中文，ip.sb 保留来源地名；仅 auto 地名在繁体显示时转换。",
+        "remote_geoapi": "默认 auto：zh-Hans / zh-Hant 首选 ipapi-zh，en 首选 ipapi；显式来源优先保留，失败后尝试其余来源。ipapi-zh/ipapi 为同一接口的简体中文/英文，使用 HTTP；仅 auto 地名在繁体显示时转换。ipinfo 保留来源地名，IPPure 为额外可选源；运营商优先 ipinfo。",
         "mask_ip": "0 关闭；1 部分打码；2 全部隐藏。用于卡片和通知；Stash 不支持 Surge 的点击切换打码。",
         "tw_flag": "cn 显示 🇨🇳，tw 显示 🇹🇼。",
     }
@@ -137,7 +139,10 @@ def _stash_panel_schema(defaults: dict, stem: str) -> dict:
         if key == "risk_api" and value == "ipqs": value = "ippure"
         if key == "remote_geoapi" and value.startswith("maxmind"): value = "ipapi-zh"
         if value not in options: value = options[0]
-        labels = {"risk_api": {"null": "自动回退"},
+        labels = {"lang": {"zh-Hans": "简体中文", "zh-Hant": "繁體中文", "en": "English"},
+                  "risk_api": {"null": "自动回退"},
+                  "local_geoapi": {"auto": "自动，随语言"},
+                  "remote_geoapi": {"auto": "自动，随语言"},
                   "mask_ip": {"0": "关闭", "1": "部分打码", "2": "全部隐藏"},
                   "tw_flag": {"cn": "🇨🇳", "tw": "🇹🇼"}}.get(key, {})
         schema[key] = {"type": "select", "title": f"{title}（{key}）",
