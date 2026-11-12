@@ -1,0 +1,24 @@
+{
+  "version": 2,
+  "rules": [
+    {
+      "domain": [
+        "accounts.spacex.ai",
+        "anysphere-binaries.s3.us-east-1.amazonaws.com"
+      ]
+    },
+    {
+      "domain_suffix": [
+        "cursor-cdn.com",
+        "cursor.com",
+        "cursor.sh",
+        "cursorapi.com",
+        "cursorvm.com",
+        "grok.com",
+        "grokipedia.com",
+        "grokusercontent.com",
+        "x.ai"
+      ]
+    }
+  ]
+}

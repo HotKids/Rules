@@ -1,0 +1,14 @@
+# xAI by SpaceXSI
+# https://cursor.com/docs/enterprise/network-configuration
+# https://cursor.com/help/troubleshooting/sign-in-domains
+DOMAIN-SUFFIX,cursor-cdn.com,xAI
+DOMAIN-SUFFIX,cursor.com,xAI
+DOMAIN-SUFFIX,cursor.sh,xAI
+DOMAIN-SUFFIX,cursorapi.com,xAI
+DOMAIN-SUFFIX,cursorvm.com,xAI
+DOMAIN-SUFFIX,grok.com,xAI
+DOMAIN-SUFFIX,grokipedia.com,xAI
+DOMAIN-SUFFIX,grokusercontent.com,xAI
+DOMAIN-SUFFIX,x.ai,xAI
+DOMAIN,accounts.spacex.ai,xAI
+DOMAIN,anysphere-binaries.s3.us-east-1.amazonaws.com,xAI
