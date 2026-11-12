@@ -9,3 +9,7 @@ payload:
   # > UPDF
   ### UPDF 国际版域名无法在中国大陆访问
   - DOMAIN-SUFFIX,updf.com
+
+  # > CASETiFY
+  ### 中国官网直连较慢
+  - DOMAIN-SUFFIX,casetify.cn
