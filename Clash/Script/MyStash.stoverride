@@ -1,4 +1,4 @@
-# Date: 2026-10-24 14:24:27
+# Date: 2026-11-14 17:42:39
 
 name: MyStash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译，叠加 myscript.overlay.json），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf，私人差异请修改 myscript.overlay.json。
@@ -254,6 +254,7 @@ proxy-groups: #!replace
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
     proxies:
       - 🇺🇸 America
+      - 🇯🇵 Japan
       - 🇸🇬 Singapore
       - 🔰 Proxy
 

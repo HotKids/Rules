@@ -192,7 +192,7 @@ function main(config) {
     // Telegram
     { name: '📬 Telegram', type: 'select', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png' },
     // AIGC
-    { name: '🤖 AIGC', type: 'select', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png' },
+    { name: '🤖 AIGC', type: 'select', proxies: ['🇺🇸 America', '🇯🇵 Japan', '🇸🇬 Singapore', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png' },
     // Crypto
     { name: '🪙 Crypto', type: 'select', proxies: ['🇩🇪 Germany', '🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png' },
     // Finance

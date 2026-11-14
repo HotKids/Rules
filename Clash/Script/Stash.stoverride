@@ -1,4 +1,4 @@
-# Date: 2026-10-22 16:27:18
+# Date: 2026-11-14 17:42:39
 
 name: Stash
 desc: 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则及强制 HTTP 引擎列表请修改 Surge/Profile.conf。
@@ -260,6 +260,7 @@ proxy-groups: #!replace
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
     proxies:
       - 🇺🇸 America
+      - 🇯🇵 Japan
       - 🇸🇬 Singapore
       - 🔰 Proxy
 

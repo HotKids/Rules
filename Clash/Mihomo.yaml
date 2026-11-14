@@ -1,5 +1,5 @@
 # Clash · 锚点改写版（block + YAML 锚点，功能等价 Sample.yaml）
-# Date: 2026-10-25 02:10:21
+# Date: 2026-11-14 17:42:39
 # Author: @HotKids
 #
 # 自动生成（sync-config.py 从 Clash/Sample.yaml 转译），请勿手动修改；通用设置请修改 Clash/General.yaml，策略/规则请修改 Surge/Profile.conf。
@@ -127,7 +127,7 @@ proxy-groups:
   # Telegram
   - {name: 📬 Telegram, type: select, proxies: [🔰 Proxy, 🇸🇬 Singapore, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Telegram.png}
   # AIGC
-  - {name: 🤖 AIGC, type: select, proxies: [🇺🇸 America, 🇸🇬 Singapore, 🔰 Proxy], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png}
+  - {name: 🤖 AIGC, type: select, proxies: [🇺🇸 America, 🇯🇵 Japan, 🇸🇬 Singapore, 🔰 Proxy], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png}
   # Crypto
   - {name: 🪙 Crypto, type: select, proxies: [🇺🇸 America, 🔰 Proxy, 🔘 DIRECT], icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/Cryptocurrency_3.png}
   # Finance

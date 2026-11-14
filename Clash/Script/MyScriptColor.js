@@ -192,7 +192,7 @@ function main(config) {
     // Telegram
     { name: '📬 Telegram', type: 'select', proxies: ['🔰 Proxy', '🇸🇬 Singapore', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Telegram.png' },
     // AIGC
-    { name: '🤖 AIGC', type: 'select', proxies: ['🇺🇸 America', '🇸🇬 Singapore', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png' },
+    { name: '🤖 AIGC', type: 'select', proxies: ['🇺🇸 America', '🇯🇵 Japan', '🇸🇬 Singapore', '🔰 Proxy'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bot.png' },
     // Crypto
     { name: '🪙 Crypto', type: 'select', proxies: ['🇩🇪 Germany', '🇺🇸 America', '🔰 Proxy', '🔘 DIRECT'], icon: 'https://fastly.jsdelivr.net/gh/HotKids/Rules@master/Quantumult/X/Images/Liquid%20Glass/Bitcoin.png' },
     // Finance

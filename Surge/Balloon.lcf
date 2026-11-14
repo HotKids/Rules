@@ -1,5 +1,5 @@
 # Loon
-# Date: 2026-10-25 02:10:21
+# Date: 2026-11-14 17:42:39
 # Author: @HotKids
 
 [General]
@@ -81,7 +81,7 @@ FilterUS = NameRegex, FilterKey = "^(?=.*(?i)(?:🇺🇸|美国|United States|\b
 # Telegram
 📬 Telegram = select,🔰 Proxy,🇸🇬 Singapore,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Telegram.png
 # AIGC
-🤖 AIGC = select,🇺🇸 America,🇸🇬 Singapore,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
+🤖 AIGC = select,🇺🇸 America,🇯🇵 Japan,🇸🇬 Singapore,🔰 Proxy,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/ChatGPT.png
 # Crypto
 🪙 Crypto = select,🇺🇸 America,🔰 Proxy,🔘 DIRECT,img-url = https://raw.githubusercontent.com/Koolson/Qure/master/IconSet/Color/Cryptocurrency_3.png
 # Finance

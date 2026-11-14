@@ -1,5 +1,5 @@
 # Clash
-# Date: 2026-10-25 02:10:20
+# Date: 2026-11-14 17:42:39
 # Author: @HotKids
 
 # 通用设置
@@ -427,6 +427,7 @@ proxy-groups:
     icon: https://fastly.jsdelivr.net/gh/Koolson/Qure@master/IconSet/Color/ChatGPT.png
     proxies:
       - 🇺🇸 America
+      - 🇯🇵 Japan
       - 🇸🇬 Singapore
       - 🔰 Proxy
 
