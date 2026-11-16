@@ -93,6 +93,7 @@ DOMAIN,frameworks.jetbrains.com,GenAI
 
 # Meta
 # https://muse.ai/
+DOMAIN-WILDCARD,scontent-*.xx.fbcdn.net,GenAI
 DOMAIN-SUFFIX,ecto1usercontent.com,GenAI
 DOMAIN-SUFFIX,metaaiusercontent.com,GenAI
 DOMAIN-SUFFIX,metaaivm.com,GenAI
@@ -100,6 +101,7 @@ DOMAIN-SUFFIX,meta.ai,GenAI
 DOMAIN-SUFFIX,muse.ai,GenAI
 DOMAIN,auth.meta.com,GenAI
 DOMAIN,imagine.meta.com,GenAI
+DOMAIN,graph.facebook.com,GenAI
 
 # Microsoft
 # > Copilot
