@@ -1,11 +1,22 @@
 payload:
   # > Anthropic
   # 核心域名（DOMAIN-SUFFIX 已覆盖所有 *.anthropic.com 子域名）
+  - DOMAIN-SUFFIX,ant.dev
+  - DOMAIN-SUFFIX,antspace.dev
   - DOMAIN-SUFFIX,anthropic.com
+  - DOMAIN-SUFFIX,anthropic.team
   - DOMAIN-SUFFIX,claude.ai
+  - DOMAIN-SUFFIX,claude.app
   - DOMAIN-SUFFIX,claude.com
+  - DOMAIN-SUFFIX,claude.dev
+  - DOMAIN-SUFFIX,claude.new
+  - DOMAIN-SUFFIX,claude.site
   - DOMAIN-SUFFIX,clau.de
+  - DOMAIN-SUFFIX,claudepages.dev
+  - DOMAIN-SUFFIX,claudestudio.com
+  - DOMAIN-SUFFIX,claudeacademy.com
   - DOMAIN-SUFFIX,claudemcpclient.com
+  - DOMAIN-SUFFIX,claudemcpcontent.com
   - DOMAIN-SUFFIX,claudeusercontent.com
 
   # CDN 和静态资源
@@ -40,3 +51,6 @@ payload:
   # keyword:sentry
   # keyword:sift
   # geosite:category-ntp
+
+  - clau.de
+  - claude.ai
