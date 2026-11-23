@@ -56,7 +56,7 @@ run_cmd() {
   local output status
   info "Running: $*"
   set +e
-  output="$($@ 2>&1)"
+  output="$("$@" 2>&1)"
   status=$?
   set -e
   printf '%s\n' "$output"
